@@ -41,6 +41,8 @@ const AssignDataDialog = (props) => {
         ? `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
         : type === "opportunity"
         ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+        : type === "quote-builder"
+        ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
         : `/${type}?limit=100`;
     setLoading(true);
     axiosInstance()
@@ -71,6 +73,16 @@ const AssignDataDialog = (props) => {
     setSelectedData(tempSelectedData);
   };
 
+  const changeType = (type) => {
+    let newType;
+    if(type !== "quote-builder" ){
+      newType=type;
+    }else{
+      newType="quote"
+    }
+    return newType;
+  }
+
   const handleSave = () => {
     if (selectedData.length) {
       setAssigning(true);
@@ -81,7 +93,7 @@ const AssignDataDialog = (props) => {
       };
 
       axiosInstance()
-        .put(`/project-sales/add-${kebabCase(type)}`, dataObj)
+        .put(`/project-sales/add-${kebabCase(changeType(type))}`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
@@ -107,6 +119,8 @@ const AssignDataDialog = (props) => {
         return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
       case "opportunity":
         return `${data.opportunityName}`;
+      case "quote-builder":
+        return `${data.quoteName}`
       case "customer-account":
         return `${data.accountName}`;
       case "customer-contact":
@@ -123,6 +137,8 @@ const AssignDataDialog = (props) => {
       case "lead":
         return "";
       case "opportunity":
+        return "";
+      case "quote-builder":
         return "";
       case "customer-account":
         return "";
@@ -178,6 +194,7 @@ const AssignDataDialog = (props) => {
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
+          size="small" 
         >
           Cancel
         </Button>
@@ -185,6 +202,7 @@ const AssignDataDialog = (props) => {
           disabled={!selectedData.length || isAssigning}
           onClick={handleSave}
           color="primary"
+          size="small"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

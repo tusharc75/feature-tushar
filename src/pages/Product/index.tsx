@@ -1,11 +1,8 @@
-import { useState, useEffect, Fragment, useContext, useCallback } from "react";
-import Box from '@material-ui/core/Box';
+import { useState, useEffect, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid, GridOverlay } from "@material-ui/data-grid";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
@@ -14,56 +11,176 @@ import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CreateProduct from "../../components/Product/CreateProduct";
-import moment from "moment";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { GiAbstract055 } from 'react-icons/gi';
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getSearchQuery } from '../../services/util';
 import routes from "../../components/Helpers/Routes";
+import ImportExportLinks from "../../components/Product/ImportExportLinks";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import { product, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import {
+    CreatedByRenderer,
+    UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+
+function reducer(state, action) {
+    switch (action.type) {
+        case "loading":
+            return {
+                ...state,
+                loading: action.loading
+            }
+        case "initialize":
+            return {
+                ...state,
+                dataRows: action.data,
+                rowCount: action.count,
+                loading: false
+            }
+        case "selection":
+            return {
+                ...state,
+                selectedRecords: action.selectedRecords,
+            }
+        case "update":
+            return {
+                ...state,
+                dataRows: action.data,
+                loading: false
+            }
+        case "filter":
+            return {
+                ...state,
+                loading: true,
+                filters: action.filters,
+                page: 0
+            }
+        case "sort":
+            return {
+                ...state,
+                sorting: action.sorting,
+                loading: true
+            }
+        case "search":
+            return {
+                ...state,
+                search: action.search,
+                loading: true
+            }
+        case "pageChange":
+            return {
+                ...state,
+                page: action.page
+            }
+        case "pageSizeChange":
+            return {
+                ...state,
+                limit: action.limit,
+                page: 0,
+                loading: true
+            }
+        case "complete":
+            return {
+                ...state,
+                loading: false
+            }
+        default:
+            break;
+    }
+    return state;
+}
+
+const intialState = {
+    dataRows: [],
+    rowCount: 0,
+    loading: false,
+    page: 0,
+    limit: 25,
+    pageSizes: gridPageSizes,
+    search: "",
+    filters: {},
+    sorting: [],
+    selectedRecords: []
+}
+
+let termsTimeout
 
 const Product = () => {
+
     const toastConfig = useContext(CustomToastContext)
-    const history = useHistory();
-    const [loading, setLoading] = useState(true);
-    const [product, setProduct] = useState([]);
     const [open, setOpen] = useState(false);
     const [productId, setProductId] = useState(null);
     const [isClone, setIsClone] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedProduct, setSelectedProduct] = useState([]);
-    const [searchVal, setSearchVal] = useState("");
-    const [query, setQuery] = useState({ page: 0, limit: 25 });
-    const [rowCount, setRowCount] = useState(0);
+
+    const [gridApi, setGridApi] = useState(null);
+    const [columnApi, setColumnApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
 
     useEffect(() => {
         fetchProduct()
-    }, [query, searchVal])
+    }, [page, limit, filters, sorting, search]);
 
     const fetchProduct = () => {
-        let searchParams = searchVal
-            ? { ...query, search: searchVal }
-            : { ...query };
-        let api = getSearchQuery("/product", searchParams);
-        setLoading(true)
-        axiosInstance().get(api).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
+
+        if (gridApi) {
+            gridApi.setRowData([]);
+            gridApi.showLoadingOverlay();
+        }
+
+        const queryString = getQueryString();
+        dispatch({ type: "loading", loading: true });
+        axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
+            let rows = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                productCategory: u.productCategory?.optionLabel,
+                productTemplate: u.productTemplate?.optionLabel,
+                createdBy: u.createdBy?.user?.concatedName,
+                createdByDate: u.createdBy?.date,
+                updatedBy: u.updatedBy?.user?.concatedName,
+                updatedByDate: u.updatedBy?.date,
             }));
-            setProduct(data.data);
-            setRowCount(data.count);
-            setLoading(false)
+            dispatch({ type: "initialize", data: rows, count: data.count });
+            dispatch({ type: "loading", loading: false });
         }).catch((error) => {
             toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
         });
+    };
+
+    const getQueryString = () => {
+        let deepFilter = `?page=${page}&limit=${limit}`;
+
+        if (!isObjectEmpty(filters)) {
+            const updatedFilters = [];
+
+            Object.keys(filters).map(field => {
+                updatedFilters.push({
+                    field: field,
+                    term: filters[field].filter
+                })
+            });
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+        }
+
+        if (sorting.length > 0) {
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+        }
+
+        if (search) {
+            deepFilter = `${deepFilter}&search=${search}`;
+        }
+
+        return deepFilter;
     };
 
     const handleDelete = () => {
@@ -72,120 +189,66 @@ const Product = () => {
             ids.push(deleteRecord._id)
         }
         else {
-            ids = selectedProduct;
+            ids = selectedRecords.map(d => d._id);
         }
-        setLoading(true)
         axiosInstance().put(`/product/remove`, { "ids": ids }).then(() => {
             fetchProduct();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            setSelectedProduct([])
             setAnchorEl(null)
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
     }
 
-    const columns = [
-        { field: 'id', headerName: 'id', hide: true },
-        {
-            field: "productName",
-            headerName: "Product Name",
-            width: 300,
-            renderCell: (params) => (
-                <Link className="link" onClick={() => { OpenProduct(params.row.id); setIsClone(false) }}  >
-                    {params.row.productName}
-                </Link>
-            )
-        },
-        {
-            field: "productCategory",
-            headerName: "Product Category",
-            width: 250,
-            renderCell: (params) => (params.row.productCategory?.optionLabel)
-        },
-        {
-            field: "productTemplate",
-            headerName: "Product Template",
-            width: 250,
-            renderCell: (params) => (params.row.productTemplate?.optionLabel)
-        },
-        {
-            field: "createdBy",
-            headerName: "Created By",
-            width: 200,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params: any) =>
-                params?.value && params?.value?.user ? (
-                    <h5 className="createBy">
-                        {params?.value?.user?.firstName}
-                        <span
-                            className="createdAtTime badge-date"
-                            title={`${params?.value?.user?.firstName} • ${moment(
-                                params?.value?.date?.slice(0, 10)
-                            ).format("MMM Do, YYYY")}`}
-                        >
-                            {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-                        </span>
-                    </h5>
-                ) : (
-                    <NoDataCell />
-                ),
-        },
-        {
-            field: "updatedBy",
-            headerName: "Updated By",
-            width: 200,
-            renderCell: (params: any) =>
-                params?.value && params?.value?.user ? (
-                    <h5 className="updateBy">
-                        {params.value.user.firstName}
-                        <span
-                            className="updatedAtTime badge-date"
-                            title={`${params.value.user.firstName} • ${moment(
-                                params.value.date.slice(0, 10)
-                            ).format("MMM Do, YYYY")}`}
-                        >
-                            {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-                        </span>
-                    </h5>
-                ) : (
-                    <NoDataCell />
-                )
-        },
-        {
-            field: "description",
-            headerName: "Description",
-            width: 300,
-            renderCell: (params) => (params.row.description)
-        },
-        {
-            field: "actions", headerName: "Actions ",
-            renderCell: (params) => (
-                <Fragment>
-                    <Tooltip title="Clone">
-                        <IconButton aria-label="Clone" onClick={() => { OpenProduct(params.row._id); setIsClone(true) }}>
-                            <FileCopyIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete" >
-                        <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }} >
-                            <DeleteIcon fontSize="small" color="error" />
-                        </IconButton>
-                    </Tooltip >
-                </Fragment>
-            ),
-            width: 100,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-        }
-    ];
 
-    const OpenProduct = (id) => {
-        setProductId(id)
+    const ProductNameRenderer = params => (
+        <Link className="link"
+            onClick={() => {
+                OpenProduct(params.data._id);
+                setIsClone(false)
+            }}>
+            <CustomRenderCell value={params?.value} />
+        </Link>
+    )
+
+    const ActionsRenderer = params => (
+        <>
+            <Tooltip title="Clone">
+                <IconButton
+                    size="small"
+                    aria-label="Clone"
+                    onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
+                >
+                    <FileCopyIcon color="primary" />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+                <IconButton size="small" aria-label="Delete" onClick={() => {
+                    setDeleteRecord(params.data);
+                    setShowDeleteConfirmBox(true)
+                }} >
+                    <DeleteIcon color="error" />
+                </IconButton>
+            </Tooltip >
+        </>
+    )
+
+    const [columns, setColumns] = useState([
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, cellRenderer: "commonRenderer" },
+        { field: "productTemplate", headerName: "Product Template", show: true, cellRenderer: "commonRenderer" },
+        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+        { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
+    ]);
+
+    const handleSearch = (e) => {
+        dispatch({ type: "search", search: e.target.value });
+    };
+
+    const OpenProduct = (_id) => {
+        setProductId(_id)
         setOpen(true)
     }
 
@@ -203,53 +266,30 @@ const Product = () => {
         setAnchorEl(null);
     };
 
-    const handleSearch = (e) => {
-        if (query.page !== 1) {
-            setQuery((prevState) => ({ ...prevState, page: 0 }));
-        }
-        setSearchVal(e.target.value);
+    const frameworkComponents = {
+        productNameRenderer: ProductNameRenderer,
+        createdByRenderer: CreatedByRenderer,
+        updatedByRenderer: UpdatedByRenderer,
+        actionsRenderer: ActionsRenderer
     };
 
-    const onFilterChange = useCallback((params) => {
-        if (params.filterModel.items[0].value) {
-            setQuery((prevState) => ({
-                ...prevState,
-                [params.filterModel.items[0].columnField]:
-                    params.filterModel.items[0].value,
-            }));
-        } else {
-            setQuery({ page: 0, limit: 25 });
-        }
-    }, []);
-
-    const handlePage = (params) => {
-        if (query.page !== params.page) {
-            setQuery((prevState) => ({ ...prevState, page: params.page }));
-        }
-    };
-
-    const handlePageSize = (params) => {
-        if (params.pageSize !== query.limit) {
-            setQuery({ page: 0, limit: params.pageSize });
-        }
-    };
-
-    const handleSortModelChange = (params) => {
-        if (params?.sortModel && params.sortModel.length > 0) {
-            let temp = { ...params.sortModel[0] };
-            setQuery((prevState) => ({
-                ...prevState,
-                page: 0,
-                sortBy: temp.field,
-                orderBy: temp.sort,
-            }));
-        }
-    }
 
     return (<Layout>
-        <Grid container direction="row">
-            <Grid item xs={12}>
+        <Grid container className="headerbox">
+            <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
+            </Grid>
+            <Grid item md={8} sm={1} xs={2}>
+                <ImportExportLinks
+                    module="product(s)"
+                    api={"product"}
+                    refrenceId={null}
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                        if (isImportedSuccessfully) {
+                            fetchProduct();
+                        }
+                    }}
+                />
             </Grid>
         </Grid>
         <div className="main-container">
@@ -261,9 +301,9 @@ const Product = () => {
                     <Grid md={6} sm={12} xs={12} container justify="flex-end">
                         <SearchBox
                             onSearch={handleSearch}
-                            searchbox="terms_header_search_bar"
+                            searchbox="product_header_search_bar"
                             width="300px"
-                            value={searchVal}
+                            value={search}
                         />
                         <Button className="ml-2 mr-2" onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                         <Button
@@ -271,7 +311,7 @@ const Product = () => {
                             color="default"
                             size="small"
                             onClick={openActions}
-                            disabled={selectedProduct.length ? false : true}
+                            disabled={selectedRecords.length ? false : true}
                             aria-controls="action-menu"
                         >Actions <ExpandMore />
                         </Button>
@@ -293,33 +333,21 @@ const Product = () => {
                 </Grid>
             </div>
             <div className="listing-grid">
-                <DataGrid
-                    checkboxSelection
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    scrollbarSize={20}
-                    loading={loading}
-                    onSelectionModelChange={(e) => setSelectedProduct(e.selectionModel)}
-                    rows={loading ? [] : product}
-                    disableSelectionOnClick
-                    disableMultipleSelection
+                <CustomAgGrid
                     columns={columns}
-                    pageSize={query.limit}
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
                     rowCount={rowCount}
-                    page={query.page}
-                    paginationMode="server"
-                    pagination
-                    onPageChange={handlePage}
-                    onPageSizeChange={handlePageSize}
-                    onSortModelChange={handleSortModelChange}
-                    density="compact"
-                    onFilterModelChange={onFilterChange}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={150}
                 />
             </div>
         </div>
-        {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} />}
+        {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} openFrom="productMaster" />}
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}

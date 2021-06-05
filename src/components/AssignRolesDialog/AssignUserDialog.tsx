@@ -32,7 +32,6 @@ const AssignUserDialog = ({
 
   useEffect(() => {
     setLoadingUsers(true);
-    console.log(JSON.stringify(assignedUsers))
     axiosInstance()
       .get(`/user`)
       .then(({ data: { data } }) => {
@@ -121,6 +120,7 @@ const AssignUserDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
+          size="small" 
         >
           Cancel
         </Button>
@@ -128,6 +128,7 @@ const AssignUserDialog = ({
           disabled={!selectedUsers.length || isAssigning}
           onClick={handleAssignRoles}
           color="primary"
+          size="small" 
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

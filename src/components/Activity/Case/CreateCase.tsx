@@ -35,6 +35,9 @@ import { SubCase } from "./SubCase";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { useData } from "../../../StateProvider/Provider";
+import Loader from "../../Loader";
+import { dateFormat } from "../../../constants/helpers"
 
 const CaseSchema = Yup.object().shape({
   name: Yup.string().required("Please enter case name"),
@@ -45,6 +48,11 @@ const CaseSchema = Yup.object().shape({
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const [id, setId] = useState(caseId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
@@ -61,14 +69,14 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: "",
         description: "",
         status: status || "To Do",
         assignee: "",
-        reporter: "",
+        reporter: user._id,
         startDate: new Date(),
         dueDate: new Date(),
       });
@@ -81,8 +89,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
     if (id) {
       UpdateCase(id, values)
         .then(({ data }) => {
-          handleClose();
           setSubmitting(false);
+          handleClose();
         })
         .catch((err) => {
           setSubmitting(false);
@@ -91,8 +99,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
       values.parentId = null;
       CreateNewCase(values)
         .then(({ data }) => {
-          handleClose();
           setSubmitting(false);
+          handleClose();
         })
         .catch((err) => {
           setSubmitting(false);
@@ -109,247 +117,255 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
   }
 
   return (
-    initialValues && (
-      <Formik
-        initialValues={initialValues}
-        validationSchema={CaseSchema}
-        onSubmit={handleSave}
-        validate={validate}
-      >
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <>
-            <CustomDialogHeader
-              title={`${id ? "Edit" : "New"} Case`}
-              onClose={handleClose}
-            ></CustomDialogHeader>
-
-            <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate>
-                <MuiPickersUtilsProvider utils={MomentUtils}>
-                  <Box padding={1}>
-                    <Box mb={2}>
-                      <Breadcrumbs separator="/" aria-label="breadcrumb">
-                        {initialValues.parent &&
-                          initialValues.parent.map((_p, index) => {
-                            return (
-                              <Button
-                                key={index}
-                                className="cursor-pointer"
-                                onClick={() => setId(_p._id)}
-                                color="primary"
-                              >
-                                {_p.name}
-                              </Button>
-                            );
-                          })}
-                      </Breadcrumbs>
-                    </Box>
-                    <Grid container spacing={3}>
-                      <Grid item xs={7}>
-                        <TextField
-                          variant="outlined"
-                          type="text"
-                          label="Case Name"
-                          required={true}
-                          name="name"
-                          fullWidth
-                          margin="dense"
-                          value={values["name"]}
-                          error={touched["name"] && Boolean(errors["name"])}
-                          helperText={touched["name"] && errors["name"]}
-                          onChange={(e) =>
-                            setFieldValue("name", e.target.value.trimStart())
-                          }
-                        />
-                        <Box pt={1}>
-                          <Field
-                            component={TextFieldFormik}
-                            fullWidth
-                            margin="dense"
-                            type="text"
-                            multiline
-                            rows={3}
-                            label="Description"
-                            name="description"
+    <>
+      <CustomDialogHeader
+        title={`${id ? "Edit" : "New"} Case`}
+        onClose={handleClose}
+      ></CustomDialogHeader>
+      {initialValues ? (
+        <Formik
+          initialValues={initialValues}
+          validationSchema={CaseSchema}
+          onSubmit={handleSave}
+          validate={validate}
+        >
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <>
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <Box padding={1}>
+                      <Box mb={2}>
+                        <Breadcrumbs separator="/" aria-label="breadcrumb">
+                          {initialValues.parent &&
+                            initialValues.parent.map((_p, index) => {
+                              return (
+                                <Button
+                                  key={index}
+                                  size="small"
+                                  className="cursor-pointer"
+                                  onClick={() => setId(_p._id)}
+                                  color="primary"
+                                >
+                                  {_p.name}
+                                </Button>
+                              );
+                            })}
+                        </Breadcrumbs>
+                      </Box>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} md={7} sm={6}>
+                          <TextField
                             variant="outlined"
+                            type="text"
+                            label="Case Name"
+                            required={true}
+                            name="name"
+                            fullWidth
+                            margin="dense"
+                            value={values["name"]}
+                            error={touched["name"] && Boolean(errors["name"])}
+                            helperText={touched["name"] && errors["name"]}
+                            onChange={(e) =>
+                              setFieldValue("name", e.target.value.trimStart())
+                            }
                           />
-                        </Box>
-                        {id && (
-                          <Fragment>
-                            <Box mt={1}>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                disableElevation
-                                onClick={() => setOpenAddSub(true)}
-                                startIcon={<TableChartIcon />}
-                              >
-                                {" "}
-                                Add a child Case
-                              </Button>
-                            </Box>
-                            <Box mt={2}>
-                              <SubCase
-                                openAddSub={openAddSub}
-                                setOpenAddSub={setOpenAddSub}
-                                data={initialValues}
-                                fetchCaseDetail={fetchCaseDetail}
-                                setId={setId}
-                              />
-                            </Box>
-                            <Box mt={2}>
-                              <RelatedToDispay
-                                relatedTo={initialValues.relatedTo}
-                              />
-                            </Box>
-                            <Box mt={2}>
-                              <Divider />
-                              <Box mt={1}>
-                                <Comment referenceId={id} />
-                              </Box>
-                            </Box>
-                          </Fragment>
-                        )}
-                      </Grid>
-                      <Grid item xs={5}>
-                        <Box pt={1}>
-                          <FormControl variant="outlined" fullWidth>
-                            <InputLabel id="demo-simple-select-outlined-label">
-                              Status
-                            </InputLabel>
+                          <Box pt={1}>
                             <Field
-                              component={Select}
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
+                              component={TextFieldFormik}
+                              fullWidth
                               margin="dense"
-                              label="Status"
-                              name="status"
-                            >
-                              {statusList.map((_status, index) => (
-                                <MenuItem key={index} value={_status.status}>
-                                  {_status.status}
-                                </MenuItem>
-                              ))}
-                            </Field>
-                          </FormControl>
-                        </Box>
-                        <Box pt={1}>
-                          <UserDropdown
-                            name="assignee"
-                            label="Assignee"
-                            errors={errors}
-                            touched={touched}
-                            required={true}
-                            setFieldValue={setFieldValue}
-                            multiple={false}
-                            value={values["assignee"]}
-                          />
-                        </Box>
-                        <Box pt={1}>
-                          <UserDropdown
-                            name="reporter"
-                            label="Reporter"
-                            errors={errors}
-                            touched={touched}
-                            required={true}
-                            setFieldValue={setFieldValue}
-                            multiple={false}
-                            value={values["reporter"]}
-                          />
-                        </Box>
-                        <Box pt={1}>
-                          <Field
-                            component={KeyboardDatePicker}
-                            label="Start Date"
-                            name="startDate"
-                            autoOk
-                            variant="inline"
-                            inputVariant="outlined"
-                            fullWidth
-                            margin="dense"
-                            format="yyyy/MM/DD"
-                            minDate={
-                              initialValues.parentData &&
-                              initialValues.parentData.startDate
-                            }
-                            maxDate={
-                              initialValues.parentData &&
-                              initialValues.parentData.dueDate
-                            }
-                          />
-                        </Box>
-                        <Box pt={1}>
-                          <Field
-                            component={KeyboardDatePicker}
-                            label="Due Date"
-                            name="dueDate"
-                            autoOk
-                            variant="inline"
-                            inputVariant="outlined"
-                            fullWidth
-                            margin="dense"
-                            format="yyyy/MM/DD"
-                            minDate={values.startDate}
-                            maxDate={
-                              initialValues.parentData &&
-                              initialValues.parentData.dueDate
-                            }
-                          />
-                        </Box>
-                        {id && (
-                          <Fragment>
-                            {initialValues.createdBy &&
-                              initialValues.createdBy.date && (
-                                <Box mt={1} color="text.secondary">
-                                  <Typography variant="body2">
-                                    Created{" "}
-                                    {moment(
-                                      initialValues.createdBy.date
-                                    ).format("MMM DD YYYY hh:mm A")}
-                                  </Typography>
+                              type="text"
+                              multiline
+                              rows={3}
+                              label="Description"
+                              name="description"
+                              variant="outlined"
+                            />
+                          </Box>
+                          {id && (
+                            <Fragment>
+                              <Box mt={1}>
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  disableElevation
+                                  onClick={() => setOpenAddSub(true)}
+                                  startIcon={<TableChartIcon />}
+                                >
+                                  {" "}
+                                  Add a child Case
+                                </Button>
+                              </Box>
+                              <Box mt={2}>
+                                <SubCase
+                                  openAddSub={openAddSub}
+                                  setOpenAddSub={setOpenAddSub}
+                                  data={initialValues}
+                                  fetchCaseDetail={fetchCaseDetail}
+                                  setId={setId}
+                                />
+                              </Box>
+                              <Box mt={2}>
+                                <RelatedToDispay
+                                  relatedTo={initialValues.relatedTo}
+                                />
+                              </Box>
+                              <Box mt={2}>
+                                <Divider />
+                                <Box mt={1}>
+                                  <Comment referenceId={id} />
                                 </Box>
-                              )}
-                            {initialValues.updatedBy &&
-                              initialValues.updatedBy.date && (
-                                <Box mt={1} color="text.secondary">
-                                  <Typography variant="body2">
-                                    Updated{" "}
-                                    {moment(
-                                      initialValues.updatedBy.date
-                                    ).format("MMM DD YYYY hh:mm A")}
-                                  </Typography>
-                                </Box>
-                              )}
-                          </Fragment>
-                        )}
+                              </Box>
+                            </Fragment>
+                          )}
+                        </Grid>
+                        <Grid item xs={12} md={5} sm={6}>
+                          <Box pt={1}>
+                            <FormControl variant="outlined" fullWidth>
+                              <InputLabel id="demo-simple-select-outlined-label">
+                                Status
+                              </InputLabel>
+                              <Field
+                                component={Select}
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                margin="dense"
+                                label="Status"
+                                name="status"
+                              >
+                                {statusList.map((_status, index) => (
+                                  <MenuItem key={index} value={_status.status}>
+                                    {_status.status}
+                                  </MenuItem>
+                                ))}
+                              </Field>
+                            </FormControl>
+                          </Box>
+                          <Box pt={1}>
+                            <UserDropdown
+                              name="assignee"
+                              label="Assignee"
+                              errors={errors}
+                              touched={touched}
+                              required={true}
+                              setFieldValue={setFieldValue}
+                              multiple={false}
+                              value={values["assignee"]}
+                            />
+                          </Box>
+                          <Box pt={1}>
+                            <UserDropdown
+                              name="reporter"
+                              label="Reporter"
+                              errors={errors}
+                              touched={touched}
+                              required={true}
+                              setFieldValue={setFieldValue}
+                              multiple={false}
+                              value={values["reporter"]}
+                            />
+                          </Box>
+                          <Box pt={1}>
+                            <Field
+                              component={KeyboardDatePicker}
+                              label="Start Date"
+                              name="startDate"
+                              autoOk
+                              variant="inline"
+                              inputVariant="outlined"
+                              fullWidth
+                              margin="dense"
+                              format={dateFormat}
+                              minDate={
+                                initialValues.parentData &&
+                                initialValues.parentData.startDate
+                              }
+                              maxDate={
+                                initialValues.parentData &&
+                                initialValues.parentData.dueDate
+                              }
+                            />
+                          </Box>
+                          <Box pt={1}>
+                            <Field
+                              component={KeyboardDatePicker}
+                              label="Due Date"
+                              name="dueDate"
+                              autoOk
+                              variant="inline"
+                              inputVariant="outlined"
+                              fullWidth
+                              margin="dense"
+                              format={dateFormat}
+                              minDate={values.startDate}
+                              maxDate={
+                                initialValues.parentData &&
+                                initialValues.parentData.dueDate
+                              }
+                            />
+                          </Box>
+                          {id && (
+                            <Fragment>
+                              {initialValues.createdBy &&
+                                initialValues.createdBy.date && (
+                                  <Box mt={1} color="text.secondary">
+                                    <Typography variant="body2">
+                                      Created{" "}
+                                      {moment(
+                                        initialValues.createdBy.date
+                                      ).format("MMM DD YYYY hh:mm A")}
+                                    </Typography>
+                                  </Box>
+                                )}
+                              {initialValues.updatedBy &&
+                                initialValues.updatedBy.date && (
+                                  <Box mt={1} color="text.secondary">
+                                    <Typography variant="body2">
+                                      Updated{" "}
+                                      {moment(
+                                        initialValues.updatedBy.date
+                                      ).format("MMM DD YYYY hh:mm A")}
+                                    </Typography>
+                                  </Box>
+                                )}
+                            </Fragment>
+                          )}
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </Box>
-                </MuiPickersUtilsProvider>
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                disabled={isSubmitting}
-                color="primary"
-                onClick={handleClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={isSubmitting}
-                type="button"
-                color="primary"
-                variant="contained"
-                onClick={submitForm}
-              >
-                {isSubmitting ? <CircularProgress size={22} /> : "Save"}
-              </Button>
-            </CustomDialogFooter>
-          </>
-        )}
-      </Formik>
-    )
+                    </Box>
+                  </MuiPickersUtilsProvider>
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  disabled={isSubmitting}
+                  color="primary"
+                  size="small"
+                  onClick={handleClose}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={isSubmitting}
+                  type="button"
+                  size="small"
+                  color="primary"
+                  variant="contained"
+                  onClick={submitForm}
+                >
+                  {isSubmitting ? <CircularProgress size={22} /> : "Save"}
+                </Button>
+              </CustomDialogFooter>
+            </>
+          )}
+        </Formik>
+      ) : (
+        <CustomDialogContent>
+          <Loader minHeight="500px" text="Loading..." />
+        </CustomDialogContent>
+      )}
+    </>
   );
 };
 

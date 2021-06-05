@@ -1,10 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box, Avatar, Paper, Tooltip } from "@material-ui/core";
+import { Grid, Typography, Box, Paper, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard'
+import { FcApproval } from 'react-icons/fc';
+import routes from "./Helpers/Routes";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
   box: {
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
-    margin: "8px 0px 8px 10px",
     boxShadow: "2px 2px 4px #747474",
     background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
     border: "#03232e"
@@ -34,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
 
 const DetailsPageHeader = (props) => {
   const { mainPoints, heading, children, showHeading, loading, isApproved } = props;
+
   const classes = useStyles();
   return (
     <>
@@ -51,18 +53,16 @@ const DetailsPageHeader = (props) => {
                   component="h2"
                   color="primary"
                 >
-                  <span className="d-flex align-items-center gap-2"><span className="listingHeader">{heading}</span> {
-                    isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
+                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}</span> {
+                    isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
                   }</span>
-
-
                 </Typography>
               </>
             ) : null}
           </Grid>
           <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
-        <Box display="flex">
+        <Box className="detailHeaderDashboard">
           {loading ? (
             <Grid container wrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
@@ -81,27 +81,51 @@ const DetailsPageHeader = (props) => {
             Object.keys(mainPoints).map((key, i) => {
               return (
                 <React.Fragment key={i}>
-                  {mainPoints[key] ? (
+                  {mainPoints[key] ?
+                    (key === "Parent Lead" ?
+                      (
+                        <Box className={classes.box}>
+                          <Typography
+                            align="center"
+                            variant="subtitle1"
+                            style={{ opacity: 0.9 }}
+                            className={`text-capitalize ${classes.labelColor}`}
+                          >
+                            {key}
+                          </Typography>
+                          <Link className="link" title={mainPoints[key].leadName}
+                            to={`${routes.leadDetail.path}/${mainPoints[key].leadId}`}>
+                            {<Typography
+                              align="center"
+                              className={classes.labelColor}
+                              style={{ fontWeight: 500 }}
+                            >
+                              {mainPoints[key].leadName || ""}
+                            </Typography>}
+                          </Link>
 
-                    <Box className={classes.box}>
-                      <Typography
-                        align="center"
-                        variant="subtitle1"
-                        style={{ opacity: 0.9 }}
-                        className={`text-capitalize ${classes.labelColor}`}
-                      >
-                        {key}
-                      </Typography>
-                      <Typography
-                        align="center"
-                        className={classes.labelColor}
-                        style={{ fontWeight: 500 }}
-                      >
-                        {mainPoints[key] || ""}
-                        {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: "white" }} /> : null}
-                      </Typography>
-                    </Box>
-                  ) : null}
+                        </Box>
+                      )
+                      : (
+                        <Box className={classes.box}>
+                          <Typography
+                            align="center"
+                            variant="subtitle1"
+                            style={{ opacity: 0.9 }}
+                            className={`text-capitalize ${classes.labelColor}`}
+                          >
+                            {key}
+                          </Typography>
+                          <Typography
+                            align="center"
+                            className={classes.labelColor}
+                            style={{ fontWeight: 500 }}
+                          >
+                            {mainPoints[key] || ""}
+                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: "white" }} /> : null}
+                          </Typography>
+                        </Box>
+                      )) : null}
                 </React.Fragment>
               );
             })

@@ -1,0 +1,1657 @@
+import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
+import { Box, Button, Grid, Paper } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
+import { useHistory, useParams } from "react-router-dom";
+import TabPanel from "../../components/TabPanel";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import Layout from "../../components/Layout";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
+import DetailsPage from "../../components/Shared/DetailsPage";
+import axiosInstance from "./../../axios/axiosInstance";
+import routes from "../../components/Helpers/Routes";
+import { useData } from "../../StateProvider/Provider";
+import Activity from "../../components/Activity";
+import DeleteButton from "../../components/Helpers/DeleteButton";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
+import { DataGrid, GridOverlay } from "@material-ui/data-grid";
+import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import { Link } from 'react-router-dom'
+import { getSearchQuery } from '../../services/util';
+import { AiFillPlusCircle } from 'react-icons/ai';
+import { BiLayerPlus } from 'react-icons/bi';
+import { AiOutlineEye } from 'react-icons/ai';
+import { BiMailSend } from 'react-icons/bi';
+import { FiDownloadCloud } from 'react-icons/fi';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { termsAndCondition } from '../../constants/helpers';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Checkbox from '@material-ui/core/Checkbox';
+import {
+  EditorState,
+  convertToRaw,
+  convertFromRaw
+} from 'draft-js';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import Chip from '@material-ui/core/Chip';
+import draftToHtml from 'draftjs-to-html';
+import Steps from './Steps'
+import { displayDate } from "../../services/util";
+import AddIcon from "@material-ui/icons/Add";
+import EmailDialog from './EmailDialog'
+
+import _, { isNull } from "lodash";
+import {
+  customerAccount, supplierAccount, yyyyMMDD,
+  stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
+  getObjKeysWithValues, processFieldName, formatAmountWithCurrency
+} from "../../constants/helpers";
+import { quoteBuilder } from '../../constants/helpers'
+import MessageDialog from "../../components/Helpers/MessageDialog";
+import ProductBuilder from "../../components/productBuilder";
+import { DatasetController } from "chart.js";
+import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
+import InfoIcon from "@material-ui/icons/Info";
+import { AnyObject } from "yup/lib/types";
+
+
+const useStyles = makeStyles((theme) => ({
+  formControl: {
+    margin: theme.spacing(1),
+  },
+  chips: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  chip: {
+    margin: 2,
+  },
+  noLabel: {
+    marginTop: theme.spacing(3),
+  },
+}));
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+const recordsPerLine = 3;
+const fixedVisibleColumns = ["productName", "qty", "productCategory", "unit", "salesPricePerUnit", "totalSalesPrice", "description"]
+const gettingVersionStatusText = "Getting Status...";
+
+function QuoteDetail() {
+
+  const DOASteps = ["New", "Price Builder", "Quote Builder", "DOA Process", "Customer Process", "End"]
+  const OtherSteps = ["New", "Price Builder", "Quote Builder", "Customer Process", "End"]
+  const classes = useStyles();
+  const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
+  const {
+    state: { user, selectedEntity, permissions },
+  }: any = useData();
+
+  var defaultSelectColumns = ["Product Name", "Description", "Unit", "Qty"];
+  const [options, setOptions] = useState([]);
+  const [headingLbl, setHeadingLbl] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [quoteData, setquoteData] = useState(null);
+  const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [quoteFields, setquoteFields] = useState([]);
+  const [mainPoints, setMainPoints] = useState(null);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [currentTabIndex] = useState(0);
+
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [steps, setSteps] = useState([]);
+  const [activeStep, setActiveStep] = useState(0)
+  const [versions, setVersions] = useState([])
+  const [productBuilderID, setProductBuilderID] = useState("");
+
+
+  const [supplierContacts, setSupplierContacts] = useState([])
+  const [customerContacts, setCustomerContacts] = useState([])
+  const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false)
+  const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false)
+
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [currentVersion, setcurrentVersion] = useState(0);
+
+  const [messageDialog, setMessageDialog] = useState({ open: false, message: null })
+  const [expanded, setExpanded] = useState({
+    supplierContacts: true,
+    customerContacts: true
+  })
+  const [supplierAccountOptions, setSupplierAccountOptions] = useState([])
+  const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
+  const [contactsEmailsData, setContactsEmailsData] = useState([])
+  const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([])
+  const [PBversionStatus, setPBversionStatus] = useState("")
+  const [loadPB, setLoadPB] = useState(false);
+
+  const [Editable, setEditable] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [query, setQuery] = useState({ page: 0, limit: 5 });
+  const [dataRows, setDataRows] = useState([]);
+  const [RadioIndex, setRadioIndex] = useState(-1);
+  const [TandC, setTNC] = useState([]);
+  const [searchVal, setSearchVal] = useState("");
+  const [totalProfit, setTotalProfit] = useState("");
+  const [totalcost, setTotalCost] = useState("");
+  const [totalsale, setTotalSale] = useState("");
+  const [totalmargin, setTotalMargin] = useState("");
+  const [dynamicTableData, setDynamicTableData] = useState([])
+  const [ColumnName, setColName] = useState([]);
+  const [visibleColumns, setVisibleColumnName] = useState([]);
+  const [versionStatus, setversionStatus] = useState("Building Quote");
+  const [DOAneeded, setDOAneeded] = useState(false);
+
+  const [data, setData] = useState([]);
+
+  const [rowCount, setRowCount] = useState(0);
+  const [checkAllAccounts, setCheckAllAccounts] = useState(false);
+  const [editRecord, setEditRecord] = useState<any>({})
+  const [DOAreq, setDOAreq] = useState(false);
+  const [Customerreq, setCustomerreq] = useState(true);
+  const [sendEmail, setSendEmail] = useState(false)
+  const [buttonMessage, setButtonMessage] = useState("Send to Customer");
+  const [columnView, setColumnView] = useState([])
+  const [PDF, setPdf] = useState("");
+  const theme = useTheme();
+  const [nextStep, setNextStep] = useState(true);
+
+
+  const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+  const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+  const [ProcessStatus, setProcessStatus] = useState("New");
+  let logo = null;
+  let companyName = "";
+  let companyAddress = "";
+  const [DOAlimit, setDOALimit] = useState(0);
+  const [DOAsetup, setDOAsetup] = useState(false);
+  const [lastUser, setLastUser] = useState(true);
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false)
+  const [versionStatusData, setVersionStatusData] = useState({ columns: [], data: [] })
+  const [allVersionStatusButtonText, setAllVersionStatusButtonText] = useState("All Version Status")
+
+  let termsTimeout;
+
+
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  // const closeUpdateDialog = () => {
+  //   setOpenUpdateDialog(false);
+  // };
+
+  let { id } = useParams();
+
+  const [quotePermissions, setquotePermissions] = useState({
+    isCreate: false,
+    isUpdate: false,
+    isRead: false,
+    isDelete: false,
+  });
+  const { qbResource, qbApi } = quoteBuilder;
+
+  useEffect(() => {
+    fetchDoaLimit()
+  }, [])
+
+  useEffect(() => {
+    if (permissions) {
+      setquotePermissions(permissions[qbResource]);
+    }
+  }, [permissions]);
+
+  useEffect(() => {
+    if (id) {
+      console.log(id);
+      fetchquoteData(0);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchTermsAndConditions()
+  }, [query, searchVal, currentVersion])
+
+  useEffect(() => {
+    console.log("TNC is:");
+    console.log("TandC");
+    console.log(data);
+    let rows = data?.map((u) => ({
+      ...u,
+      isChecked: TandC.includes(u._id) ? true : false,
+      id: u._id,
+    }));
+    setDataRows([...rows]);
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].isChecked) {
+        setRadioIndex(i);
+        break;
+      }
+    }
+  }, [data, currentVersion])
+
+  const fetchTermsAndConditions = () => {
+    if (termsTimeout) {
+      clearTimeout(termsTimeout);
+    } termsTimeout = setTimeout(() => {
+      setLoading(true);
+      let searchParams = searchVal
+        ? { ...query, search: searchVal }
+        : { ...query };
+      let api = getSearchQuery(termsAndCondition.api, searchParams);
+      setLoading(true);
+      axiosInstance()
+        .get(api)
+        .then(({ data }) => {
+          setData(data.data);
+          setRowCount(data.count);
+          setCheckAllAccounts(false);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setLoading(false);
+        });
+    }, 600);
+  }
+
+  const refreshProducts = (data) => {
+    console.log("Refresh Product Data");
+    fetchDoaLimit();
+    console.log(data)
+
+    if (ProcessStatus === "New" && data.length === 0) {
+      setNextStep(false);
+    }
+    if (ProcessStatus === "New" && data.length > 0) {
+      setNextStep(true);
+    }
+    if (ProcessStatus === "Price Builder" && data.length === 0) {
+      axiosInstance()
+        .post(`quote-builder/updateprocess/${id}?version=${currentVersion}`, { processStatus: "New" })
+        .then(({ data }) => {
+
+          fetchquoteData(currentVersion);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+    productBuilderdatatoQuoteBuilderdata(data);
+
+
+  }
+
+  const onFilterChange = useCallback((params) => {
+    if (params.filterModel.items[0].value) {
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
+    } else {
+      setQuery({ page: 0, limit: 25 });
+    }
+  }, []);
+
+
+  const createImagePDF = (view, send) => {
+    axiosInstance()
+      .get('/user/brandInfo')
+      .then(({ data }) => {
+        console.log(data);
+        companyName = data.data.name;
+        companyAddress = data.data.address;
+        if (data.data.logo) {
+          fetchImage(data.data.logo, function (dataUri) {
+            logo = dataUri;
+            GeneratePdf(view, send)
+          });
+        }
+        else {
+          GeneratePdf(view, send)
+        }
+
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+      });
+
+  }
+
+  const fetchImage = (Url, cb) => {
+    var image = new Image();
+    image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
+
+    image.onload = function () {
+      var canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      console.log(image.naturalWidth);
+      //next three lines for white background in case png has a transparent background
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';  /// set white fill style
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      canvas.getContext('2d').drawImage(image, 0, 0);
+
+      cb(canvas.toDataURL('image/jpeg'));
+    };
+
+    image.src = Url;
+  }
+
+  const GeneratePdf = (view, send) => {
+    const PdfDoc = new jsPDF('p', 'pt', 'a4');
+    let date = new Date();
+
+    const pagewidth = PdfDoc.internal.pageSize.width;
+    console.log("Page width is");
+    console.log(pagewidth);
+    console.log(logo);
+    if (logo !== null) {
+      PdfDoc.addImage(logo, 'JPEG', pagewidth - 80, 0, 70, 50);
+    }
+    PdfDoc.setFontSize(26);
+    PdfDoc.text(companyName, 20, 30);
+    PdfDoc.setFontSize(14);
+    PdfDoc.text(companyAddress, 20, 45);
+    PdfDoc.setLineWidth(3);
+    PdfDoc.line(10, 70, 260, 70);
+    PdfDoc.line(330, 70, 580, 70);
+    PdfDoc.text("Quotation", 265, 75)
+    var PDFData = [];
+    var PdfCol = ["S. No."];
+    var serialNumber = 1;
+    dynamicTableData.forEach(dataEntry => {
+      var PdfRow = [serialNumber];
+      ColumnName.forEach(ColName => {
+        if (visibleColumns.indexOf(ColName) !== -1) {
+          if (PdfCol.indexOf(ColName) == -1) {
+            PdfCol.push(ColName);
+          }
+          PdfRow.push(dataEntry[ColName]);
+        }
+      })
+      PDFData.push(PdfRow);
+      serialNumber = serialNumber + 1;
+    });
+    PdfDoc.setFontSize(10);
+    PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
+    PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
+    PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
+    PdfDoc.setFontSize(8);
+    PdfDoc.text("Bill To:", 20, 100)
+    PdfDoc.setFontSize(12);
+    PdfDoc.text(quoteData.customerAccountName.optionLabel, 20, 115);
+
+    var text = "Please find the Quoatation Below:"
+    var lineHeight = PdfDoc.getLineHeight();
+    var splittedText = PdfDoc.splitTextToSize(text, 50)
+    PdfDoc.text(text, 20, 180);
+    var lines = splittedText.length
+    var blockHeight = (lines) * lineHeight;
+    PDFData = [...PDFData, [{
+      content: `Quote Total : ${totalsale}`, colSpan: PDFData[0].length,
+      styles: { halign: 'right', valign: 'middle' }
+    }]];
+    autoTable(PdfDoc, {
+      margin: { top: 120 + blockHeight, left: 20, right: 20 },
+      head: [PdfCol],
+      body: PDFData,
+      styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
+      theme: 'grid'
+    });
+    let finalY = (PdfDoc as any).lastAutoTable.finalY;
+    console.log(RadioIndex);
+    if (RadioIndex !== -1) {
+      PdfDoc.setDrawColor(0, 0, 0);
+      PdfDoc.setFontSize(14);
+      PdfDoc.setLineWidth(3);
+      PdfDoc.line(10, finalY + 20, 220, finalY + 20);
+      PdfDoc.line(370, finalY + 20, 580, finalY + 20);
+      PdfDoc.text("Terms and Conditions", 225, finalY + 25)
+      var finalmarkup = ""
+      console.log(TandC);
+      for (var tc = 0; tc < TandC.length; tc++) {
+        var SelectTNC: AnyObject = dataRows.filter((d: { _id: string }) => d._id === TandC[tc]);
+        console.log(SelectTNC);
+        finalmarkup = finalmarkup + `<h1><strong>${SelectTNC[0].TACName}:</strong></h1>`
+        let state = convertFromRaw(JSON.parse(SelectTNC[0].description));
+        let TNC = EditorState.createWithContent(state)
+        var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+        finalmarkup = finalmarkup + markup + '<br>'
+      }
+
+
+      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      PdfDoc.html(finalmarkup, {
+        callback: function (doc) {
+          if (view && !send) {
+            doc.output('dataurlnewwindow');
+          }
+          else if (!view && !send) {
+            doc.save();
+          }
+          if (send) {
+            var PDFtoAPIData = doc.output('blob');
+            console.log("PDF Data is");
+            console.log(PDFtoAPIData);
+            const formdata = new FormData();
+            formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+            axiosInstance().post('/user/upload/', formdata, {
+              headers: {
+                "content-type": "multipart/form-data"
+              }
+            })
+              .then(({ data }) => {
+                console.log("PDF Response is:");
+                console.log(data);
+                if (DOAreq) {
+                  console.log(data);
+                  handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+                  axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+                    .then(({ data }) => {
+                      fetchquoteData(currentVersion)
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                    });
+                }
+                else {
+                  handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
+                }
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+              });
+
+
+          }
+
+        }, x: 20, y: finalY + 50, margin: [20, 10, 20, 10]
+      });
+    }
+    else {
+      console.log("I am here");
+      if (view && !send) {
+        PdfDoc.output('dataurlnewwindow');
+      }
+      else if (!view && !send) {
+        PdfDoc.save('Quation.pdf');
+      }
+      if (send) {
+        var PDFtoAPIData = PdfDoc.output('blob');
+        console.log("PDF Data is");
+        console.log(PDFtoAPIData);
+        const formdata = new FormData();
+        formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+        axiosInstance().post('/user/upload/', formdata, {
+          headers: {
+            "content-type": "multipart/form-data"
+          }
+        })
+          .then(({ data }) => {
+            console.log("PDF Response is:");
+            console.log(data);
+            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+            if (DOAreq) {
+              axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+                .then(({ data }) => {
+
+                  fetchquoteData(currentVersion)
+                })
+                .catch((err) => {
+                  toastConfig.setToastConfig(err);
+                });
+            }
+
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+
+
+      }
+    }
+  };
+
+  const handlePage = (params) => {
+    if (query.page !== params.page) {
+      setQuery((prevState) => ({ ...prevState, page: params.page }));
+    }
+  };
+
+
+
+  const handlePageSize = (params) => {
+    if (params.pageSize !== query.limit) {
+      setQuery({ page: 0, limit: params.pageSize });
+    }
+  };
+
+  const handleCloseCreateDialog = (params) => {
+    setShowCreateDialog(false)
+    setEditRecord({})
+    if (params?.fetchData) fetchTermsAndConditions()
+  }
+
+
+
+
+
+
+  const fetchDoaLimit = () => {
+    axiosInstance()
+      .post('doa-request/limit', {})
+      .then(({ data }) => {
+        console.log("DOA limit is:");
+        console.log(data);
+        setDOAsetup(data.data.doasetup);
+        setDOALimit(data.data.limit ? data.data.limit : 0);
+        setLastUser(data.data.lastUser);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+      });
+
+  }
+
+
+  useEffect(() => {
+    if (quoteData?.staticData?.customerContacts &&
+      quoteData.staticData?.customerContacts.length &&
+      customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
+
+    if (quoteData?.staticData?.supplierContacts &&
+      quoteData.staticData?.supplierContacts.length &&
+      supplierContacts && supplierContacts.length === 0) fetchSupplierContactData(false)
+
+  }, [quoteData])
+
+  useEffect(() => {
+    if (steps.length > 0) {
+      const processSteps = quoteFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+      if (processSteps && processSteps.isRead && quoteData) {
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === quoteData[processFieldName]) + 1;
+        setActiveStep(currentStepToShow);
+      }
+    }
+  }, [steps])
+
+
+
+  const fetchquoteData = (version) => {
+    if (selectedEntity) {
+      console.log("fetching Quote Data");
+      setLoadPB(false);
+      setLoading(true);
+      axiosInstance()
+        .get(`${qbApi}/${id}?entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          console.log(data);
+          handleMainPoints(data);
+          setHeadingLbl(data.quoteName);
+          var keys = Object.keys(data.versions);
+          setVersions(keys);
+          var ps = "";
+          var s = ""
+
+          if (version === 0) {
+            setcurrentVersion(parseInt(keys[keys.length - 1]));
+
+            console.log(data.versions[keys[keys.length - 1]]["processStatus"])
+            setProcessStatus(data.versions[keys[keys.length - 1]]["processStatus"]);
+            ps = data.versions[keys[keys.length - 1]]["processStatus"]
+            s = data.versions[keys[keys.length - 1]]["status"]
+            setProductBuilderID(data.versions[keys[keys.length - 1]]["productBuilderId"]);
+            setversionStatus(data.versions[keys[keys.length - 1]]["status"])
+            if (data.versions[keys[keys.length - 1]]["TNC"]) {
+              setTNC(data.versions[keys[keys.length - 1]]["TNC"])
+            }
+            if (data.versions[keys[keys.length - 1]]["acceptedColumns"]) {
+              setColumnView(data.versions[keys[keys.length - 1]]["acceptedColumns"]);
+            }
+
+            if (data.versions[keys[keys.length - 1]]["status"] === "Building Quote") {
+              console.log(data.versions[keys[keys.length - 1]]["status"])
+              console.log("Editable True")
+              setEditable(true);
+            }
+            else {
+              setEditable(false);
+            }
+          }
+          else {
+            setcurrentVersion(version);
+            console.log(data.versions[version]["processStatus"])
+            setProcessStatus(data.versions[version]["processStatus"]);
+            setProductBuilderID(data.versions[version]["productBuilderId"]);
+            setversionStatus(data.versions[version]["status"])
+            if (data.versions[version]["TNC"]) {
+              setTNC(data.versions[version]["TNC"])
+            }
+            if (data.versions[version]["acceptedColumns"]) {
+              setColumnView(data.versions[version]["acceptedColumns"]);
+            }
+            if (data.versions[version]["status"] === "Building Quote") {
+              setEditable(true);
+            }
+            else {
+              setEditable(false);
+            }
+            ps = data.versions[version]["processStatus"]
+            s = data.versions[version]["status"]
+          }
+          console.log(ps);
+          console.log(s);
+          console.log(s.includes("Accepted"));
+          console.log(ps === "DOA Process");
+          if (ps === "DOA Process" && !s.includes("Accepted")) {
+            setNextStep(false);
+          }
+          if (ps === "DOA Process" && s.includes("Accepted")) {
+            setNextStep(true);
+          }
+          if (ps === "Customer Process") {
+            setNextStep(false);
+          }
+
+          setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
+            (d) => d?.optionValue === user?.user?._id
+          ))
+
+          // handleAllowToEditList(data);
+          setCopyOfquoteDataToUpdate(data);
+          handleContactsEmails(data)
+
+          if (data?.staticData?.notToBeRemoved && typeof data.staticData.notToBeRemoved === 'object') {
+            let ids = []
+            Object.keys(data?.staticData?.notToBeRemoved).map(k =>
+              ids = [...ids, ...data.staticData.notToBeRemoved[k]]
+            )
+            setNotToBeRemovedContacts(ids)
+          }
+
+          let modifiedData = {};
+          Object.assign(modifiedData, data);
+
+          // if (modifiedData["currency"] && modifiedData["amount"]) {
+          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"])
+          // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
+          // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
+          // }
+
+          setquoteData(modifiedData);
+          console.log(modifiedData);
+          console.log(modifiedData);
+
+
+          let tempExpanded = {
+            supplierContacts: true,
+            customerContacts: true
+          }
+          if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length === 0) {
+            tempExpanded.supplierContacts = false
+          }
+          if (data?.staticData?.customerContacts && data.staticData.customerContacts.length === 0) {
+            tempExpanded.customerContacts = false
+          }
+          setExpanded(tempExpanded)
+
+          getquoteFields();
+          setCustomizedRoutes([
+            { title: "Quote Builder", path: "/quote-builder" },
+            { title: `${data.quoteName}` },
+          ]);
+
+
+
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
+  const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
+    let ids = []
+
+    if (quoteData.supplierAccountName.length > 0 || useAccountList) {
+
+      ids = useAccountList ? accountList.map(d => d.optionValue) : quoteData.supplierAccountName.map(d => d.optionValue);
+
+      const filterById = JSON.stringify([{ "field": "accountName", "term": ids.length > 1 ? { $in: ids } : ids[0] }])
+      setLoadingSupplierAccounts(true)
+      axiosInstance()
+        .get(`supplier-contact?filterById=${filterById}`)
+        .then(({ data: { data } }) => {
+
+          let assignedContacts = quoteData.staticData?.supplierContacts ?? []
+          const updatedContacts = [];
+          data.forEach(d => {
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+            updatedContacts.push(d);
+          })
+
+          setSupplierContacts(updatedContacts)
+          setLoadingSupplierAccounts(false)
+          if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
+        }).catch(error => {
+          setLoadingSupplierAccounts(false)
+        })
+    }
+    else {
+      setShowAddSupplierContactsDialog(showDialog);
+    }
+    // else if (supplierAccountOptions && supplierAccountOptions.length) {
+    //   ids = [...supplierAccountOptions.map(option => option.optionValue)]
+    // }
+  }
+  const getContactEmails = (contacts) => {
+    return contacts.reduce((emails, contact) => {
+      if (contact?.email) emails.push(contact.email)
+      return emails
+    }, [])
+  }
+  const handleContactsEmails = (quoteData) => {
+    let data = []
+    if (quoteData && quoteData?.staticData) {
+      const { customerContacts, supplierContacts } = quoteData?.staticData
+      if (customerContacts && customerContacts.length) {
+        data = getContactEmails(customerContacts)
+      }
+      if (supplierContacts && supplierContacts.length) {
+        data = [...data, ...getContactEmails(supplierContacts)]
+      }
+      if (data.length > 0) setContactsEmailsData(data)
+    }
+  }
+
+
+  const columnsTNC = [
+    {
+      field: "isChecked",
+      headerName: "Select",
+      renderCell: (params) => (
+        <Checkbox
+          color="primary"
+          // disabled={!params.canDelete}
+          checked={params.value}
+          onClick={(ev) => {
+            const gridData = dataRows;
+            const indexOfRecord = gridData.findIndex(
+              (d) => d.id === params.row.id
+            );
+            var prevvalue = gridData[indexOfRecord].isChecked;
+            let newTNC = TandC
+            if (prevvalue) {
+              gridData[indexOfRecord].isChecked = false;
+              const index = newTNC.indexOf(gridData[indexOfRecord]._id)
+              newTNC.splice(index, 1);
+            }
+            else {
+              gridData[indexOfRecord].isChecked = true;
+              newTNC.push(gridData[indexOfRecord]._id)
+              setRadioIndex(indexOfRecord);
+            }
+            if (newTNC.length === 0) {
+              setRadioIndex(-1);
+            }
+            setDataRows([...gridData]);
+            setTNC(newTNC);
+            handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
+            console.log(gridData[indexOfRecord]._id);
+            const checkedRecords = gridData.filter((d) => d.isChecked === true);
+          }}
+        />
+      ),
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      width: 75
+    },
+    {
+      field: "TACName", headerName: "Name", width: 500,
+      renderCell: (params) => (
+        <Link
+          onClick={() => {
+            setShowCreateDialog(true);
+          }}>
+          <CustomRenderCell value={params?.value} />
+        </Link>
+      )
+    },
+
+  ];
+
+
+  const fetchCustomerContactData = (showDialog) => {
+    const filterById = JSON.stringify([{ "field": "accountName", "term": quoteData?.customerAccountName?.optionValue }])
+
+    axiosInstance()
+      .get(`customer-contact?filterById=${filterById}`)
+      .then(({ data: { data } }) => {
+        let assignedContacts = quoteData.staticData?.customerContacts ?? []
+        const updatedContacts = data.map(d => {
+          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+          return d
+        })
+        setCustomerContacts(updatedContacts)
+        setShowAddCustomerContactsDialog(showDialog);
+      });
+  }
+
+  const handleMainPoints = (data) => {
+    let mainPoint = {};
+    mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
+    mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
+    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
+    mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
+
+    setMainPoints(mainPoint);
+  };
+
+  const getquoteFields = () => {
+    if (selectedEntity) {
+      axiosInstance()
+        .get(`/field?resource=Quote Builder&entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          setquoteFields(data);
+          setLoading(false);
+          setLoadPB(true);
+
+          if (data && data.length) {
+            let fieldData = data.find(currentField => currentField?.fieldData?.fieldName === "supplierAccountName")?.fieldData
+            if (fieldData?.option && fieldData.option.length) {
+              setSupplierAccountOptions(fieldData.option.map(option => ({ ...option, isSelected: false })))
+            }
+          }
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+          if (processSteps && processSteps.isRead) {
+            setSteps(processSteps.fieldData.option.map(m => {
+              return {
+                text: m.optionLabel,
+                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+              }
+            }));
+          }
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const handleDeleteOpportunity = () => {
+    if (quoteData?._id) {
+      axiosInstance()
+        .put(`${qbApi}/remove?entity=${selectedEntity}`, {
+          ids: [quoteData._id],
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          goBackToListing();
+          setShowConfirmBox(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setShowConfirmBox(false);
+        });
+    } else {
+      setShowConfirmBox(false);
+    }
+  };
+
+  const goBackToListing = () => {
+    history.push({
+      pathname: routes.opportunity.path,
+    });
+  };
+
+
+
+  const handleSortModelChange = (params) => {
+    if (params?.sortModel && params.sortModel.length > 0) {
+      let temp = { ...params.sortModel[0] };
+      setQuery((prevState) => ({
+        ...prevState,
+        page: 0,
+        sortBy: temp.field,
+        orderBy: temp.sort,
+      }));
+    }
+  };
+
+  const handleChangeVersion = (event) => {
+    setLoadPB(false)
+    setcurrentVersion(event.target.value);
+    setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
+    setversionStatus(quoteData["versions"][event.target.value]["status"])
+    console.log("On version Change:");
+    console.log(quoteData["versions"][event.target.value]["status"]);
+    setProcessStatus(quoteData["versions"][event.target.value]["processStatus"]);
+    console.log(quoteData["versions"][event.target.value]["productBuilderId"])
+    //const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
+    //productBuilderdatatoQuoteBuilderdata(productBuilderdata);
+    setLoadPB(true);
+  }
+  // const quickLinks = [
+  //   {
+  //     label: "Call a log",
+  //     count: 0,
+  //   },
+  //   {
+  //     label: "New Task",
+  //     count: 0,
+  //   },
+  //   {
+  //     label: "Email",
+  //     count: 0,
+  //   },
+  //   {
+  //     label: "New Event",
+  //     count: 0,
+  //   },
+  // ];
+
+
+  const handleClone = () => {
+    axiosInstance()
+      .post(`${qbApi}/clone/${quoteData._id}`)
+      .then(({ data }) => {
+        history.push(`${qbApi}/${data.data._id}`);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
+    setOptions([]);
+    var optionstoSet = []
+    console.log(BuilderData);
+    const inventory: { fieldName: string; fieldValue: any; }[][] = [];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+    var totalCost = 0;
+    var totalSellingPrice = 0
+    var totalMargin = 0
+    var totalProfit = 0
+    var CostCurrency = ""
+    var SPCurrency = ""
+    var MarginCurrency = ""
+    var ProfitCurrency = ""
+    BuilderData.map((quoteRows: { [x: string]: any; }) => {
+      console.log(quoteRows);
+      const quoteRowKeys = Object.keys(quoteRows);
+      var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
+      quoteRowKeys.map((key) => {
+        console.log(key);
+        if (ignoredKeys.indexOf(key) === -1) {
+          var indexkey = key;
+          var currency = ""
+          if (key.includes("_")) {
+            var splitKey = key.split("_")
+            key = splitKey[0]
+            currency = splitKey[1]
+          }
+          var fields = quoteRows["fields"]
+          var field = fields.filter((d: { fieldName: string; }) => d.fieldName === key);
+          console.log(field);
+          if (typeof (field[0]) !== "undefined") {
+            if (typeof (quoteRows[key]) === "object") {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[key][key]
+              });
+            }
+            else {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[indexkey]
+              });
+            }
+            if (key === 'totalCost') {
+              totalCost = totalCost + quoteRows[indexkey]
+              CostCurrency = currency.toUpperCase()
+            }
+            else if (key === 'totalSalesPrice') {
+              totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
+              SPCurrency = currency.toUpperCase()
+            }
+            else if (key === "totalProfit") {
+              totalProfit = totalProfit + quoteRows[indexkey]
+              ProfitCurrency = currency.toUpperCase()
+            }
+            else if (key === "totalMargin") {
+              totalMargin = totalMargin + quoteRows[indexkey]
+              MarginCurrency = currency.toUpperCase()
+            }
+          }
+        }
+      })
+      inventory.push(inventorydata);
+    });
+    console.log(inventory);
+    if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
+      setNextStep(false);
+    }
+    if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
+      setNextStep(true);
+    }
+    setTotalProfit(totalProfit.toString() + " " + ProfitCurrency);
+    setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
+    setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
+    setTotalCost(totalCost.toString() + " " + CostCurrency);
+    console.log("Check:");
+    console.log(DOAsetup);
+    console.log(DOAlimit);
+    console.log(versionStatus)
+    console.log(totalSellingPrice)
+    setButtonMessage("Send to Customer");
+    setDOAreq(false);
+    setCustomerreq(true);
+    if ((DOAsetup && totalSellingPrice > DOAlimit) && !lastUser) {
+      setDOAneeded(true);
+    }
+    else {
+      setDOAneeded(false);
+    }
+    if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === "Building Quote" && !lastUser) {
+      setDOAreq(true);
+      setCustomerreq(false);
+      setButtonMessage("Send for DOA");
+    }
+
+    else if (versionStatus.includes("Rejected by DOA")) {
+      setDOAreq(true);
+      setCustomerreq(false);
+      setButtonMessage("Re-Send for DOA");
+    }
+    else if (versionStatus === "Sent for DOA") {
+      setDOAreq(false);
+      setCustomerreq(false);
+    }
+    else if (versionStatus === "Sent to Customer" || versionStatus === "Accepted by Customer" || versionStatus === "Rejected by Customer") {
+      setDOAreq(false);
+      setCustomerreq(false);
+    }
+    var TableData = [];
+    var Col = [];
+    var ColName = [];
+    var columnext = [];
+    var KeyValuePairs = [];
+    type Type = {
+      [key: string]: any;
+    };
+
+    for (var i = 0; i < inventory.length; i++) {
+      var KeyValue: Type = {};
+      for (var j = 0; j < inventory[i].length; j++) {
+        var DataSet = inventory[i][j];
+        if (ColName.indexOf(DataSet.fieldName) === -1) {
+          ColName = [...ColName, DataSet.fieldName];
+          if (DataSet.fieldName.includes("Sales Price"))
+            defaultSelectColumns.push(DataSet.fieldName);
+          Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
+          columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
+        }
+        KeyValue[DataSet.fieldName] = DataSet.fieldValue;
+      }
+      KeyValuePairs = [...KeyValuePairs, KeyValue];
+    }
+    setColName(ColName);
+    setOptions(optionstoSet);
+    if (columnView.length > 0) {
+      setVisibleColumnName(columnView)
+    }
+    else {
+      setVisibleColumnName(defaultSelectColumns);
+    }
+
+
+    for (var j = 0; j < KeyValuePairs.length; j++) {
+      const DataSet = KeyValuePairs[j];
+      var DataRecord: Type = {};
+      for (var i = 0; i < ColName.length; i++) {
+        if (ColName[i] in DataSet) {
+          DataRecord[ColName[i]] = DataSet[ColName[i]];
+        }
+        else {
+          DataRecord[ColName[i]] = '-';
+        }
+      }
+      TableData = [...TableData, DataRecord]
+    }
+    setDynamicTableData(TableData);
+  }
+
+  const handleCases = () => {
+    console.log("HandleCases");
+    if (DOAreq) {
+      if (!PDF) {
+        createImagePDF(false, true);
+      }
+    };
+    if (Customerreq) {
+      if (!PDF) {
+        createImagePDF(false, true);
+      }
+      setSendEmail(true);
+    }
+  }
+  const handleChangeVisible = (event) => {
+    setVisibleColumnName(event.target.value);
+    handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
+  };
+
+  function getStyles(name, personName, theme) {
+    return {
+      fontWeight:
+        personName.indexOf(name) === -1
+          ? theme.typography.fontWeightRegular
+          : theme.typography.fontWeightMedium,
+    };
+  }
+
+  const cloneVersion = () => {
+    axiosInstance().post(`/quote-builder/createVersion/${id}?version=${currentVersion}`, data).then(({ data: { data } }) => {
+      fetchquoteData(0);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
+  const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
+    var body = { PDF: PDFfile, acceptedColumns: Columns, versionStatus: versionStatus, TNC: TC }
+    axiosInstance()
+      .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
+      .then(({ data }) => {
+
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+      });
+  }
+
+  const onSuccess = () => {
+    setSendEmail(false)
+    console.log("Success");
+    handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
+    fetchquoteData(currentVersion);
+  }
+
+
+
+
+
+  const handleUpdateOpportunity = (supplierAccounts) => {
+
+    let newFields = [];
+
+    quoteFields.filter((d) => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
+
+    let values = {
+      ...getObjKeysWithValues(quoteData, newFields),
+      supplierAccountName: supplierAccounts,
+      _id: quoteData._id
+    }
+
+    axiosInstance()
+      .put(`${qbApi}?entity=${selectedEntity}`, values)
+      .then(({ data }) => {
+        fetchquoteData(0)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  let selectedSupplierAccounts = []
+  if (quoteData?.supplierAccountName && quoteData.supplierAccountName.length) {
+    selectedSupplierAccounts = quoteData.supplierAccountName.map(s => s.optionValue)
+  }
+
+  const getVersionStatus = () => {
+    setAllVersionStatusButtonText(gettingVersionStatusText);
+    axiosInstance().get(`/quote-builder/quote-hierarchy/${id}`).then(({ data: { data } }) => {
+      setShowVersionsDialog(true);
+      
+      const newData = data.versions.map((d, index) => {
+        return { ...d, id: index + 1 };
+      })
+
+      setVersionStatusData({
+        columns: [
+          { field: "versionNumber", headerName: "Version #", flex: 0.5 },
+          { field: "status", headerName: "Status", flex: 1 },
+          // { field: "processStatus", headerName: "ProcessStatus" }
+        ], data: newData
+      });
+
+      setAllVersionStatusButtonText("All Version Status");
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setAllVersionStatusButtonText("All Version Status");
+    })
+  }
+
+  return (
+    <>
+      <Layout>
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Paper>
+              {!quoteData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  logo={
+                    quoteData?.leadLogo ? quoteData.leadLogo : undefined
+                  }
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {quotePermissions.isCreate ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleClone}
+                    >
+                      Clone
+                    </Button>
+                  ) : null}
+                  {allowedToEdit ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+
+                  ) : null}
+                  {quotePermissions.isDelete &&
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => setShowConfirmBox(true)}
+                    />
+                  ) : null}
+
+                </DetailsPageHeader>
+              )}
+              {loading ? (
+                <Box padding={2}>
+                  <Grid container spacing={2}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                      <Grid item sm={6} md={6}>
+                        <Skeleton
+                          variant="text"
+                          width="100px"
+                          height="16px"
+                        />
+                        <Box marginY={1} />
+                        <Skeleton width="100%" height="50px" />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              ) : (
+                <>
+                  <TabPanel value={currentTabIndex} index={0}>
+                    <Box>
+                      <DetailsPage
+                        data={quoteData}
+                        fields={quoteFields}
+                      />
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value={currentTabIndex} index={1}>
+                    <Activity />
+                  </TabPanel>
+                  <div className="m-3">
+                    <Grid container className="d-flex align-items-center form-label-style mb-0">
+                      <Grid item xs={12} sm={6} md={6} className="justify-content-start">
+                        <h4>
+                          Product Information
+                      </h4>
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={6} className="d-flex justify-content-end">
+                        <Button variant="outlined" type="button" size="small" disabled={allVersionStatusButtonText === gettingVersionStatusText} startIcon={<InfoIcon />} color="primary" onClick={() => { getVersionStatus() }}>{allVersionStatusButtonText} </Button>
+                        <select className="customSelect mx-1" value={currentVersion}
+                          onChange={handleChangeVersion}>
+                          {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
+                        </select>
+                        <Button variant="outlined" type="button" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { cloneVersion() }}>Clone Version {currentVersion} </Button>
+                      </Grid>
+                    </Grid>
+                    {ProcessStatus != "New" ? <div>
+                      <Grid>
+                        <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
+                          <div className="quoteBox">
+                            <span>Total Profit</span>
+                            <span>{totalProfit}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Cost Price</span>
+                            <span>{totalcost}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Selling Price</span>
+                            <span>{totalsale}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Margin</span>
+                            <span>{totalmargin}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Version Status</span>
+                            <span>{versionStatus}</span>
+                          </div>
+                          <div>
+                          </div>
+                        </Grid>
+                      </Grid>
+                    </div> : null}
+
+                    {DOAneeded ?
+                      (<Steps
+                        steps={DOASteps}
+                        currentStep={DOASteps.indexOf(ProcessStatus)}
+                        id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
+                      />) : (<Steps
+                        steps={OtherSteps}
+                        currentStep={OtherSteps.indexOf(ProcessStatus)}
+                        id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
+                      />)}
+                  </div>
+                </>
+              )}
+
+              <div className="m-3">
+                {loadPB ? (
+                  <Grid container className="position-relative">
+                    <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
+                      {ProcessStatus === "New" ?
+                        (<span className="productStep">
+                          <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                          <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                        </span>) : (null)}
+
+                      {ProcessStatus === "Quote Builder" ? (
+                        <Grid container>
+                          <Grid item xs={12} md={12} sm={12}>
+                            <FormControl className={classes.formControl}>
+                              <InputLabel id="demo-mutiple-chip-label">Visible Columns in Quote</InputLabel>
+                              <Select
+                                labelId="demo-mutiple-chip-label"
+                                id="demo-mutiple-chip"
+                                multiple
+                                value={visibleColumns}
+                                onChange={handleChangeVisible}
+                                input={<Input id="select-multiple-chip" />}
+                                renderValue={(selected: any) => (
+                                  <div className={classes.chips}>
+                                    {selected.map((value) => (
+                                      <Chip key={value} label={value} className={classes.chip} />
+                                    ))}
+                                  </div>
+                                )}
+                                MenuProps={MenuProps}
+                              >
+                                {ColumnName.map((name) => (
+                                  <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
+                                    <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+                      ) : null}
+                      {(ProcessStatus === "DOA Process" && versionStatus === "Building Quote") || (ProcessStatus === "Customer Process" && versionStatus !== "Sent to Customer") ? (<span className="d-flex align-items-center justify-content-end">
+                        <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
+                    </Grid>
+                    {ProcessStatus !== "New" && ProcessStatus !== "Price Builder" ? (<span className="d-flex align-items-center justify-content-end">
+                      <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" className="mr-1" startIcon={<AiOutlineEye />} color="primary">View</Button>
+                      <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
+                    </span>)
+                      : null}
+                    <Grid item xs={12} sm={12} md={12}>
+                      <ProductBuilder
+                        productBuilderId={productBuilderID}
+                        isAddNewProduct={isAddNewProduct}
+                        setIsAddNewProduct={setIsAddNewProduct}
+                        isAddExistingProduct={isAddExistingProduct}
+                        setIsAddExistingProduct={setIsAddExistingProduct}
+                        refreshProducts={refreshProducts}
+                        stage={ProcessStatus === "New" ? "product" : "cost"}
+                        Editable={ProcessStatus === "Price Builder" || ProcessStatus === "New" ? true : false}
+                      />
+                      {ProcessStatus === "Quote Builder" ?
+                        (<Box>
+                          <Grid container>
+                            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                              <Grid container>
+                                <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center p-2 gap-1" container justify="flex-start">
+                                  <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
+                                </Grid>
+                                <Grid item xs={12} className="listing-grid">
+                                  <DataGrid
+                                    components={{
+                                      Toolbar: DataGridCustomToolbar,
+                                      NoRowsOverlay: CustomDataGridNoDataFound,
+                                    }}
+                                    scrollbarSize={20}
+                                    rows={dataRows}
+                                    columns={columnsTNC}
+                                    loading={loading}
+                                    disableSelectionOnClick
+                                    disableMultipleSelection
+                                    paginationMode="server"
+                                    pagination
+                                    onPageChange={handlePage}
+                                    onPageSizeChange={handlePageSize}
+                                    pageSize={query.limit}
+                                    page={query.page}
+                                    rowCount={rowCount}
+                                    rowsPerPageOptions={[25, 50, 75]}
+                                    onSortModelChange={handleSortModelChange}
+                                    onFilterModelChange={onFilterChange}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </Box>) :
+                        (null)}
+                    </Grid>
+                  </Grid>
+                ) : null}
+              </div>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
+            <Paper>
+              {!quoteData ? (
+                <Box>
+                  <Skeleton variant="text" width="100px" height="25px" />
+                  <Box marginY={1} />
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Skeleton width="100%" height="50px" />
+                  ))}
+                </Box>
+              ) : (
+                <div>
+                  <Activity
+                    relatedTo={[
+                      {
+                        type: quoteData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                        referenceId: quoteData?.customerAccountName ? quoteData?.customerAccountName?.optionValue : quoteData?.supplierAccountName?.optionValue,
+                        access: false,
+                      },
+                      {
+                        type: "opportunity",
+                        referenceId: quoteData?._id,
+                        access: true,
+                      },
+                    ]}
+                    handleActivityfetchquoteData={() => { }}
+                    emails={contactsEmailsData}
+                  />
+                </div>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+        {
+          showConfirmBox ? (
+            <ConfirmationDialog
+              open={showConfirmBox}
+              message={`Are you sure you want to delete this opportunity`}
+              onClose={() => setShowConfirmBox(false)}
+              onOk={handleDeleteOpportunity}
+            />
+          ) : null
+        }
+        {/* {openUpdateDialog ? (
+            <ManageOpportunity
+              isNew={false}
+              open={openUpdateDialog}
+              onClose={closeUpdateDialog}     
+              entityData={{ fields: quoteFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(quoteData, quoteFields.map((f) => { return f.fieldData })) }}
+              handleSubmit={handleUpdateOpportunity}
+            />
+          ): null} */}
+
+        {
+          openUpdateDialog && (
+            <ManageQuoteDialog
+              open={openUpdateDialog}
+              onSuccess={() => {
+                setOpenUpdateDialog(false);
+                fetchquoteData(currentVersion);
+              }}
+              onClose={() => {
+                setOpenUpdateDialog(false);
+              }}
+              isNew={false}
+              dataToUpdate={copyOfquoteDataToUpdate}
+              resource={null}
+              isRedirectTodetailPage={false}
+              contactId={null}
+              opportunityId={null}
+              disableOwnerDropDown={true}
+            // qbApi={qbApi}
+            />
+          )
+        }
+
+        {
+          showCreateDialog ? (
+            <ManageTermsAndCondition
+              termsAndCondition={termsAndCondition}
+              open={showCreateDialog}
+              handleClose={handleCloseCreateDialog}
+              fetchData={fetchTermsAndConditions}
+              editRecord={editRecord}
+            />
+          ) : null
+        }
+        {
+          sendEmail && <EmailDialog
+            handleClose={() => setSendEmail(false)}
+            success={onSuccess}
+            id={id}
+            version={currentVersion} />
+        }
+
+
+        {
+          messageDialog.open && <MessageDialog
+            open={messageDialog.open}
+            onClose={() => { setMessageDialog({ open: false, message: null }) }}
+            message={messageDialog.message}
+          />
+        }
+
+        {
+          showVersionsDialog && <CustomDialogComponent
+            title="All Version Status"
+            open={showVersionsDialog}
+            onClose={() => { setShowVersionsDialog(false) }}
+          >
+            <div style={{ maxHeight: 500, width: '100%' }}>
+              <DataGrid
+                components={{
+                  NoRowsOverlay: CustomDataGridNoDataFound,
+                }}
+                autoHeight
+                rows={versionStatusData.data}
+                columns={versionStatusData.columns}
+                disableSelectionOnClick
+                disableMultipleSelection
+                hideFooter
+              />
+            </div>
+          </CustomDialogComponent>
+        }
+      </Layout >
+    </>
+  );
+}
+
+export default QuoteDetail;

@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
-
 import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi"
-;
+  ;
 const EntityHeader = (props) => {
   const {
     onSearch,
     searchVal,
     onCreate,
     entityPermissions,
-    showConfirmBox,
-    canDelete,
     openUserDialog,
     userActionDiabled,
   } = props;
@@ -30,7 +27,7 @@ const EntityHeader = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
-        <BiNetworkChart className="headerLogo"/>
+        <BiNetworkChart className="headerLogo" />
         <span className="listingHeader">Entities</span>
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
@@ -56,7 +53,7 @@ const EntityHeader = (props) => {
             </Button>
           )}
 
-          {entityPermissions.isDelete || entityPermissions.isUpdate ? (
+          {entityPermissions.isUpdate ? (
             <>
               <Button
                 className={styles.action_submit_btn}

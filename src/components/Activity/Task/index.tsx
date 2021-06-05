@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import { CreateTask } from "./CreateTask";
 import { GetTask, DeleteTask } from "../../../axios/activity";
 import Typography from "@material-ui/core/Typography";
-import moment from "moment";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import IconButton from "@material-ui/core/IconButton";
@@ -13,6 +12,8 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -30,8 +31,9 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetTask(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setTask(data);
-        onSetCount("Task", data.length)
-        setLoading(false);
+        onSetCount("Task", data.length);
+
+        setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
         setLoading(false);
@@ -99,7 +101,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       {_task.name}
                     </Typography>
                     <span className="activity-date">
-                      Due On : {moment(_task.dueDate).format("MMM DD YYYY")}
+                      Due On : {displayDate(_task?.dueDate)}
                     </span>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
@@ -145,6 +147,8 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
       <Dialog
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"

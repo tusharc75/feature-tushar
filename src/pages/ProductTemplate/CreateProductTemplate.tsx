@@ -22,16 +22,14 @@ import TextField from '@material-ui/core/TextField';
 import queryString from "query-string";
 import _ from 'lodash';
 import { useLocation } from 'react-router-dom';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
         .min(3, "Too Short!")
         .max(50, "Too Long")
         .required("Template name is required"),
-    productCategory: Yup.string()
-        .required("Product category is required"),
-    unit: Yup.string()
-        .required("Unit is required"),
 });
 
 
@@ -55,10 +53,9 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", unit: "" });
+            setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
             const _data = []
             const _section = _.uniq(_.map(DefaultFields, 'sectionName'));
-
             _section.forEach((element: any, index: number) => {
                 _data.push({
                     sectionId: index,
@@ -102,10 +99,16 @@ const ProductTemplate = () => {
 
     const handleSave = (values) => {
         let data: any = {}
-        data.name = values.name;
-        data.productCategory = values.productCategory;
-        data.unit = values.unit;
-
+        data.name = values.name; 
+        data.isStandard = values.isStandard;
+        if (data.isStandard) {
+            data.productCategory = null;
+            data.unit = null;
+        }
+        else {
+            data.productCategory = values.productCategory;
+            data.unit = values.unit;
+        }
         let fields: any = []
         let order = 0;
         section.forEach(_section => {
@@ -145,16 +148,28 @@ const ProductTemplate = () => {
         }
     }
 
-    return (<Layout>
+    function validate(values) {
+        const errors = {};
+        if (!values.isStandard) {
+            if (!values.productCategory || values.productCategory === "") {
+                errors["productCategory"] = "Product category is required";
+            }
+            if (!values.unit || values.unit === "") {
+                errors["unit"] = "Unit is required";
+            }
+        }
+        return errors;
+    }
 
-        <Grid container direction="row">
+    return (<Layout>
+        <Grid container className="headerbox">
             <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
             </Grid>
         </Grid>
         <CustomContainer>
             {(initialValues && productCategory && productUnit) ?
-                <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave}>
+                <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
                             <Box p={1} bgcolor="white">
@@ -174,8 +189,25 @@ const ProductTemplate = () => {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
+                                    <Grid item xs={12} sm={1}>
+                                        <Box mt={0.5}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        name="isStandard"
+                                                        checked={values["isStandard"]}
+                                                        onChange={(e) => {
+                                                            setFieldValue("isStandard", e.target.checked)
+                                                        }}
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Standard"
+                                            />
+                                        </Box>
+                                    </Grid>
                                     <Grid item xs={12} sm={3}>
-                                        <Autocomplete
+                                        {!values["isStandard"] && <Autocomplete
                                             options={productCategory}
                                             getOptionLabel={(option: any) => (option ? option.name : "")}
                                             getOptionSelected={(option: any, val) => option._id === val}
@@ -197,10 +229,10 @@ const ProductTemplate = () => {
                                                     fullWidth
                                                 />
                                             )}
-                                        />
+                                        />}
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
-                                        <Autocomplete
+                                        {!values["isStandard"] && <Autocomplete
                                             options={productUnit}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
                                             getOptionSelected={(option: any, val) => option.optionLabel === val}
@@ -222,9 +254,9 @@ const ProductTemplate = () => {
                                                     fullWidth
                                                 />
                                             )}
-                                        />
+                                        />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3} container justify="flex-end">
+                                    <Grid item xs={12} sm={2} container justify="flex-end">
                                         <Box>
                                             <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}

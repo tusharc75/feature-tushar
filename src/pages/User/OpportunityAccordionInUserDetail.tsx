@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
@@ -81,7 +79,6 @@ export default function OpportunityAccordionInUserDetail({
     opportunities,
     expanded = true, recordsPerLine = 2, userId, onSuccess
 }) {
-    const history = useHistory();
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
@@ -188,7 +185,7 @@ export default function OpportunityAccordionInUserDetail({
                                                                 </Grid>
                                                                 <Grid item xs={5} sm={4}>
                                                                     <Typography className="amount">
-                                                                        {obj?.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
+                                                                        {obj?.amount ? currencies.find(d => d.currencyCode === obj["currency"])?.symbolNative : ''}
                                                                         &nbsp;{obj?.amount ?? ''}</Typography>
                                                                 </Grid>
                                                             </Grid>
@@ -216,10 +213,9 @@ export default function OpportunityAccordionInUserDetail({
                 </>
             </AccordionDetails>
             {
-                opportunities?.length > 0 && opportunities.length > recordsPerLine &&
+                opportunities?.length > 0 && opportunities.length > maxRecordsToShow &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
-                    setMaxRecordsToShow(opportunities.length)
-                    // history.push(`/opportunity`)
+                    setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaArrowAltCircleDown size={25} />
                 </Box>

@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
+export default function ImportExportLinks({ module, api, afterImportCompleted }) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
   const toastConfig = useContext(CustomToastContext);
@@ -84,7 +84,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
               type: "success",
               message: "All Records Added Successfuly",
             });
-            onSuccessfulImport(true);
+            afterImportCompleted();
           } else {
             const fileName = response.headers["content-disposition"].split(
               "filename="
@@ -95,7 +95,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
               type: "error",
               message: `Found some issue(s) while importing ${module}`,
             });
-            onSuccessfulImport(false);
+            afterImportCompleted();
           }
         })
         .catch((error) => {
@@ -158,7 +158,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
   );
 
   return (
-    <div className={`${classes.root} headerbox`}>
+    <div className={`${classes.root}`}>
       <div className={classes.linksContainer}>
         <label
           htmlFor="importFromExcel"

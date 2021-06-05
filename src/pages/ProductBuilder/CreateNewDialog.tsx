@@ -13,7 +13,9 @@ import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "./../../constants/helpers";
+import FormTypes from "../../components/Helpers/FormTypes";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -42,6 +44,8 @@ const CreateNewDialog = (props) => {
 
     return (<Dialog
         maxWidth="sm"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -76,16 +80,33 @@ const CreateNewDialog = (props) => {
                                     helperText={touched["name"] && errors["name"]}
                                     onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                 />
+                                <Box mt={2}>
+                                    <FormTypes
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={"Currency"}
+                                        name="currency"
+                                        type="currency"
+                                        setFieldValue={setFieldValue}
+                                        required={true}
+                                        fullWidth
+                                        isTooltip={false}
+                                        tooltipMessage={""}
+                                        size="small"
+                                    />
+                                </Box>
                             </Box>
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Button color="primary" onClick={handleClose}>Cancel</Button>
+                        <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
                             loading={loading}
                             variant="contained"
                             color="primary"
                             type="submit"
+                            size="small"
                             onClick={submitForm}
                         > Save</CustomButton>
                     </CustomDialogFooter>

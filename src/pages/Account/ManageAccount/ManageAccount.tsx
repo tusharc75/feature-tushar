@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
+  CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
+  setFieldsInAscendingOrder,
   simplifyValues,
   yupSchema,
 } from "../../../constants/helpers";
@@ -15,12 +17,13 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import Dialog from "@material-ui/core/Dialog";
 import { useData } from "../../../StateProvider/Provider";
 import CustomButton from "../../../components/Helpers/CustomButton";
+import { isMobile, isTablet } from "react-device-detect";
 
 const arr = [...Array(9).keys()];
 
 export default function ManageAccount(props) {
   const {
-    entityData,
+    accountData,
     handleSubmit,
     onClose,
     open,
@@ -36,7 +39,7 @@ export default function ManageAccount(props) {
     state: { user },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== entityData.initialValues.owner
+    !isNew && user.user._id !== accountData.initialValues.owner
   );
 
   //  Owner, Collaborator Code - Start
@@ -49,8 +52,10 @@ export default function ManageAccount(props) {
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
   const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
 
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+
   useEffect(() => {
-    let ownerCollaboratorDropdownData = entityData.fields.filter(
+    let ownerCollaboratorDropdownData = accountData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
     if (ownerCollaboratorDropdownData.length > 0) {
@@ -61,7 +66,7 @@ export default function ManageAccount(props) {
       setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
     }
 
-    const parentAccountDropdownData = entityData.fields.find(
+    const parentAccountDropdownData = accountData.fields.find(
       (d) => d.fieldName === "parentAccount"
     );
     if (parentAccountDropdownData) {
@@ -69,39 +74,19 @@ export default function ManageAccount(props) {
         isNew
           ? parentAccountDropdownData.option
           : parentAccountDropdownData.option.filter(
-              (d) => d.optionValue !== accountId
-            )
+            (d) => d.optionValue !== accountId
+          )
       );
     }
 
-    sortArray();
+    setFormsData(setFieldsInAscendingOrder(accountData.fields));
 
     return () => {
       setOwnerCollaboratorCommonDataSource([]);
       setOwnerDataSource([]);
       setCollaboratorDataSource([]);
     };
-  }, [entityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
+  }, [accountData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerDataSource(
@@ -130,7 +115,10 @@ export default function ManageAccount(props) {
     <>
       <Dialog
         disableBackdropClick={true}
+        fullWidth
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
@@ -140,14 +128,17 @@ export default function ManageAccount(props) {
           title={
             isNew
               ? "Add Account"
-              : `Editing ${entityData.initialValues.accountName}`
+              : `Editing ${accountData.initialValues.accountName
+                ? accountData.initialValues.accountName
+                : ""
+              }`
           }
         />
-        {entityData.fields.length > 0 ? (
+        {accountData.fields.length > 0 ? (
           <>
             <Formik
-              initialValues={entityData.initialValues}
-              validationSchema={yupSchema(entityData.fields)}
+              initialValues={accountData.initialValues}
+              validationSchema={yupSchema(accountData.fields)}
               validateOnMount
               onSubmit={onSubmit}
             >
@@ -206,10 +197,10 @@ export default function ManageAccount(props) {
                                         options={
                                           fromProject
                                             ? collaborators.filter(
-                                                (c) =>
-                                                  c.optionValue !==
-                                                  values["owner"]
-                                              )
+                                              (c) =>
+                                                c.optionValue !==
+                                                values["owner"]
+                                            )
                                             : collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
@@ -340,6 +331,9 @@ export default function ManageAccount(props) {
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
+                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        } : null}
                                       />
                                     )}
                                   </Grid>
@@ -355,6 +349,7 @@ export default function ManageAccount(props) {
                       onClick={onClose}
                       variant="outlined"
                       color="primary"
+                      size="small"
                     >
                       Cancel
                     </Button>
@@ -363,16 +358,16 @@ export default function ManageAccount(props) {
                       color="primary"
                       loading={loading}
                       disabled={
-                        loading ||
+                        loading || uploadingImageOrFileProgress > 0 ||
                         Object.values(
                           simplifyValues(
-                            entityData.initialValues,
-                            entityData.fields
+                            accountData.initialValues,
+                            accountData.fields
                           )
                         ).toString() ===
-                          Object.values(
-                            simplifyValues(values, entityData.fields)
-                          ).toString()
+                        Object.values(
+                          simplifyValues(values, accountData.fields)
+                        ).toString()
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {

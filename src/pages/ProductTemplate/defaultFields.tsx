@@ -6,7 +6,7 @@ const DefaultFields = [
     //     required: true,
     //     type: 'decimal',
     //     decimalPlaces: 2,
-    //     sectionName: 'Product Information',
+    //     sectionName: 'Cost Calculation',
     //     isTooltip: false,
     //     order: 1,
     //     editAble: false,
@@ -205,7 +205,8 @@ const DefaultFields = [
         returnType: "decimal",
         decimalPlaces: 2,
         isDefaultValue: true,
-        defaultValue: "0"
+        defaultValue: "0",
+        isUneditable: true,
     },
     {
         _id: "14",
@@ -225,7 +226,8 @@ const DefaultFields = [
         returnType: "decimal",
         decimalPlaces: 2,
         isDefaultValue: true,
-        defaultValue: "0"
+        defaultValue: "0",
+        isUneditable: true,
     }, {
         _id: "13",
         fieldName: 'totalCommission',
@@ -244,7 +246,8 @@ const DefaultFields = [
         returnType: "decimal",
         decimalPlaces: 2,
         isDefaultValue: true,
-        defaultValue: "0"
+        defaultValue: "0",
+        isUneditable: true,
     },
     {
         _id: "12",
@@ -264,7 +267,8 @@ const DefaultFields = [
         returnType: "decimal",
         decimalPlaces: 2,
         isDefaultValue: true,
-        defaultValue: "0"
+        defaultValue: "0",
+        isUneditable: true,
     },
 ]
 

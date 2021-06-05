@@ -2,34 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Grid, Box, InputAdornment } from "@material-ui/core";
 
 import FormTypes from "./FormTypes";
+import { setFieldsInAscendingOrder } from "../../constants/helpers";
 
 const InputField = (props) => {
-  const { fieldsData, errors, touched, values, setFieldValue, ...rest } = props;
+  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
-    sortArray();
+    setFormsData(setFieldsInAscendingOrder(fieldsData));
     // eslint-disable-next-line
   }, [fieldsData]);
-
-  const sortArray = () => {
-    const sections = [];
-    fieldsData.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = fieldsData.filter((field) => field.sectionName === name);
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   return (
     <React.Fragment>
@@ -46,13 +30,13 @@ const InputField = (props) => {
                     xs={12}
                     sm={
                       field.type === "imageUpload" ||
-                      field.type === "fileUpload"
+                        field.type === "fileUpload"
                         ? 12
                         : 6
                     }
                     md={
                       field.type === "imageUpload" ||
-                      field.type === "fileUpload"
+                        field.type === "fileUpload"
                         ? 12
                         : 6
                     }
@@ -82,19 +66,22 @@ const InputField = (props) => {
                       onChange={
                         field.fieldName === "currency"
                           ? (e, val) => {
-                              if (val && val.currencyCode) {
-                                setFieldValue(
-                                  field.fieldName,
-                                  val.currencyCode
-                                );
-                                setCurrencySymbol(val.symbolNative);
-                              } else {
-                                setFieldValue(field.fieldName, "");
-                                setCurrencySymbol(null);
-                              }
+                            if (val && val.currencyCode) {
+                              setFieldValue(
+                                field.fieldName,
+                                val.currencyCode
+                              );
+                              setCurrencySymbol(val.symbolNative);
+                            } else {
+                              setFieldValue(field.fieldName, "");
+                              setCurrencySymbol(null);
                             }
+                          }
                           : null
                       }
+                      imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                        onImageUploadCompletePercentage(completePercentage);
+                      } : null}
                     />
                   </Grid>
                 ))}

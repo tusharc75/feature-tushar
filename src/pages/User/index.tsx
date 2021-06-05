@@ -1,49 +1,135 @@
-import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
+import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import { DataGrid } from "@material-ui/data-grid";
-import moment from "moment";
 import { Link } from "react-router-dom";
-
+import {
+  CommonRenderer,
+  CommonRendererWithCopy,
+  CreatedByRenderer,
+  UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType } from './../../constants/helpers'
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 let userTimeout: ReturnType<typeof setTimeout>;
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: []
+}
+
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions },
   }: any = useData();
   const history = useHistory();
-  const [searchVal, setSearchVal] = useState("");
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
-  const [dataRows, setDataRows] = useState<any[]>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllUsers, setCheckAllUsers] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -57,276 +143,210 @@ const User: FC = () => {
     type: history.location?.state?.type,
   });
 
-  const fetchUsers = useCallback(() => {
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  const columns = [
+    {
+      field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
+    },
+    { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+  ];
+
+  const NameRenderer = params => (<div className="d-flex align-items-center">
+    <Link
+      title={params.value}
+      className="link"
+      to={`${routes.userDetail.path}/${params.data.id}`}
+    >
+      {params.value}
+    </Link>
+    {params.data.isBrandAdmin ? <Tooltip title="Brand Admin">
+      <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
+    </Tooltip> : ""}
+  </div>
+  );
+
+  const StatusRenderer = params => <div style={{ width: 150 }}>
+    {params.value ? (
+      <Tooltip title="Inactive">
+        <IconButton>
+          <FaUserAltSlash className="text-error" />
+        </IconButton>
+      </Tooltip>
+    ) : (
+      <Tooltip title="Active">
+        <IconButton>
+          <FaUserCheck className="text-success" />
+        </IconButton>
+      </Tooltip>
+    )}{" "}
+  </div>;
+
+  const ActionsRenderer = params =>
+    user?.user._id === params.data.id ? (
+      <p title="There is no action for currently logged in user">
+        No Actions
+      </p>
+    ) : (
+      <>
+        {permissions.user.isDelete ? (
+
+          params.data.isBrandAdmin ? (
+            <Tooltip
+              className="cursor-stop"
+              title="Brand Admin Can not be Deleted"
+            >
+              <IconButton size="small" aria-label="Delete">
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          ) :
+            (<Tooltip
+              title="Delete"
+            >
+              <IconButton
+                aria-label="Delete"
+                onClick={() => showConfirmBox(params.data)}
+              >
+                <DeleteIcon fontSize="small" color='error' />
+              </IconButton>
+            </Tooltip>)
+        ) : (
+          <Tooltip
+            className="cursor-stop"
+            title="You do not have permission to delete user"
+          >
+            <IconButton aria-label="Delete">
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </>
+    );
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    statusRenderer: StatusRenderer,
+    emailRenderer: CommonRendererWithCopy,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    actionsRenderer: ActionsRenderer,
+    commonRenderer: CommonRenderer
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (entityRoleRedirectDetails?.id) {
+      switch (entityRoleRedirectDetails?.type) {
+        case "entity":
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }])}`
+          break;
+
+        case "regionalRole":
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }])}`
+          break;
+
+        case "globalRole":
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }])}`
+          break;
+      }
+    }
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).map(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (userTimeout) {
       clearTimeout(userTimeout);
     }
 
     userTimeout = setTimeout(() => {
-      let searchParams: any = { ...query };
-      searchParams = searchVal
-        ? { ...searchParams, search: searchVal }
-        : { ...searchParams };
-      if (entityRoleRedirectDetails?.id) {
-        switch (entityRoleRedirectDetails?.type) {
-          case "entity":
-            searchParams["filterById"] = JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }]);
-            break;
-          case "regionalRole":
-            searchParams["filterById"] = JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }]);
-            break;
-          case "globalRole":
-            searchParams["filterById"] = JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }]);
-            break;
-        }
-      }
-      let api = getSearchQuery("/user", searchParams);
-      setLoadingUsers(true);
-      axiosInstance()
-        .get(api)
-        .then(({ data: { data, count } }) => {
-          getRows(data);
-          setRowCount(count);
-          setCheckAllUsers(false);
-          setLoadingUsers(false);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setLoadingUsers(false);
-        });
-    }, 600);
+      fetchUsers();
+    }, millisec);
     // eslint-disable-next-line
-  }, [searchVal, query, entityRoleRedirectDetails]);
+  }, [search]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (renderCount > 0) {
+      fetchUsers();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
 
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-        createdBy: user.createdBy,
-        updatedBy: user.updatedBy,
-        status: user.blocked ? user.blocked : false,
-        isBrandAdmin: user.userType === userType.brandAdmin
-      }))
-      : [];
+  const fetchUsers = () => {
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
 
-    setDataRows(rows);
-  };
-
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllUsers}
-          onChange={(ev) => {
-            setCheckAllUsers(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      width: 400,
-      renderCell: (params: any) => (
-        <>
-          <Link
-            title={params.value}
-            className="text-truncate link"
-            to={`${routes.userDetail.path}/${params.row.id}`}
-          >
-            {params.value}
-          </Link>
-          {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
-            <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
-          </Tooltip> : ""}
-        </>
-      ),
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 150,
-      sortable: false,
-      filterable: false,
-      align: "center",
-      headerAlign: "center",
-      disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <div style={{ width: 150 }}>
-          {params.value ? (
-            <Tooltip title="Inactive">
-              <IconButton>
-                <FaUserAltSlash className="text-error" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Active">
-              <IconButton>
-                <FaUserCheck className="text-success" />
-              </IconButton>
-            </Tooltip>
-          )}{" "}
-        </div>
-      ),
-    },
-
-    {
-      field: "email",
-      headerName: "Email",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          <CustomRenderCell isCopyToClipboard={true} value={params.value} />
-        </p>
-      ),
-    },
-    // {
-    //   field: "createdAt",
-    //   headerName: "Created At",
-    //   width: 200,
-    //   renderCell: (params: any) => (
-    //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params.value}
-    //     </p>
-    //   ),
-    // },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params) =>
-        params?.value?.user ? (
-          <h5 className="updateBy">
-            {params?.value?.user?.firstName}
-            <span
-              title={params?.value?.date}
-              className="updatedAtTime badge-date"
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) =>
-        user?.user._id === params.row.id ? (
-          <p title="There is no action for currently logged in user">
-            No Actions
-          </p>
-        ) : (
-          <>
-            {permissions.user.isDelete ? (
-
-              params.row.isBrandAdmin ? (
-                <Tooltip
-                  className="cursor-stop"
-                  title="Brand Admin Can not be Deleted"
-                >
-                  <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              ) :
-                (<Tooltip
-                  title="Delete"
-                >
-                  <IconButton
-                    aria-label="Delete"
-                    onClick={() => showConfirmBox(params.row)}
-                  >
-                    <DeleteIcon fontSize="small" color='error' />
-                  </IconButton>
-                </Tooltip>)
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You do not have permission to delete user"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        ),
-      width: 200,
-    },
-  ] as Array<any>;
-
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-    gridData[indexOfRecord].isChecked = ev.target.checked;
-
-    setDataRows([...gridData]);
-
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllUsers(true);
-    } else {
-      setCheckAllUsers(false);
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
     }
-    handleSelectedUsers(params.row.id, ev.target.checked);
+
+    axiosInstance()
+      .get(`/user${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const { createdBy, updatedBy, ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+            concatedName: u.concatedName,
+            email: u.email,
+            createdByDate: u.createdBy?.date,
+            createdBy: u.createdBy?.user?.concatedName,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+            status: u.blocked ? u.blocked : false,
+            isBrandAdmin: u.userType === userType.brandAdmin
+          };
+          return res;
+        });
+        dispatch({ type: "initialize", data: rows, count: count });
+      })
+      .catch((error) => {
+        dispatch({ type: "loading", loading: false });
+        toastConfig.setToastConfig(error);
+      });
+    // eslint-disable-next-line
   };
 
   const showConfirmBox = (row) => {
@@ -336,7 +356,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.some((d) => d.isChecked && (d.id === user?.user._id || d.isBrandAdmin))) {
+      if (selectedRecords.some((d) => (d.id === user?.user._id || d.isBrandAdmin))) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -350,9 +370,7 @@ const User: FC = () => {
     if (deleteRec?.id) {
       recs.push(deleteRec?.id);
     } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj.id);
-      });
+      recs = selectedRecords.map((o) => o.id)
     }
 
     if (recs && recs.length > 0) {
@@ -378,46 +396,7 @@ const User: FC = () => {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
-  };
-
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
-
-  // Handle entity selection
-  const handleSelectedUsers = (id, isChecked) => {
-    let tempSelectedUsers = [...selectedUsers],
-      curRecIndex = selectedUsers.indexOf(id);
-    if (isChecked && curRecIndex < 0) {
-      tempSelectedUsers = [...selectedUsers, id];
-    } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedUsers.splice(curRecIndex, 1);
-    }
-    setSelectedUsers(tempSelectedUsers);
+    dispatch({ type: "search", search: e.target.value });
   };
 
   const handleCreate = () => {
@@ -436,31 +415,6 @@ const User: FC = () => {
     setRolesDialogOpen(false);
   };
 
-  const onFilterChange = React.useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
-
   return (
     <>
       {
@@ -474,7 +428,7 @@ const User: FC = () => {
         <AssignRolesDialog
           rolesDialogOpen={rolesDialogOpen}
           handleCloseDialog={handleCloseDialog}
-          userIds={selectedUsers}
+          userIds={selectedRecords.map((d) => d._id)}
           assignedRoles={null}
           onSuccess={() => {
             handleCloseDialog();
@@ -483,20 +437,20 @@ const User: FC = () => {
         />
       )}
       <Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[routes.user]} />
         </Grid>
         <CustomContainer>
           <div className="header-panel">
             <Header
               onSearch={handleSearch}
-              searchVal={searchVal}
+              searchVal={search}
               userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openRolesDialog={handleOpenDialog}
-              rolesActionDiabled={Boolean(!selectedUsers.length)}
-              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+              rolesActionDisabled={selectedRecords.length === 0}
+              canDelete={selectedRecords.length === 0}
             />
             {entityRoleRedirectDetails.id && (
               <Chip
@@ -510,31 +464,20 @@ const User: FC = () => {
               />
             )}
           </div>
-          <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              loading={loadingUsers}
-              rows={loadingUsers ? [] : dataRows}
-              columns={columns}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              rowCount={rowCount}
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              onSortModelChange={handleSortModelChange}
-              rowsPerPageOptions={[25, 50, 75]}
-              density="compact"
-              onFilterModelChange={onFilterChange}
-              filterMode="server"
-            />
-          </div>
+
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={110}
+          />
+
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

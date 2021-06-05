@@ -1,25 +1,21 @@
 import React, { useState, useRef, useContext } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
-
 import {
   Slide,
   AppBar,
   Toolbar,
   IconButton,
-  Button,
   Menu,
   MenuItem,
   Box,
   Badge,
-  InputBase,
   Chip,
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover,
+  Popover
 } from "@material-ui/core";
 import {
-  Search,
   Menu as MenuIcon,
   MoreVert as MoreIcon,
   Clear as ClearIcon,
@@ -37,9 +33,10 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../Helpers/Routes"
-import moment from 'moment'
 import { useAccount, useMsal } from "@azure/msal-react";
 import { isEmpty } from "lodash";
+import { FiCheckCircle } from 'react-icons/fi';
+import { displayCardDate } from "../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -52,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       paddingRight: 0,
-    }
+    },
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -143,6 +140,16 @@ const useStyles = makeStyles((theme) => ({
   notificationHeightWithData: {
     minWidth: 300,
     maxHeight: `calc(100vh - 200px)`
+  },
+  markAll: {
+    borderTop: "1px solid lightgrey",
+    background: "#047d1c",
+    textAlign: "center",
+    color: "white",
+    padding: "5px",
+    display: "flex !important",
+    alignItems: "center !important",
+    justifyContent: "center"
   }
 }));
 
@@ -287,7 +294,11 @@ const Header = ({ toggleDrawer }) => {
 
   const logoutUser = async () => {
     try {
-      if (!isEmpty(account)) await instance.logoutPopup();
+      if (!isEmpty(account)) {
+        await instance.logoutPopup({
+          account: account
+        });
+      }
     } catch (e) {
       toastConfig.setToastConfig({ open: true, type: "error", message: "Need to logout from Azure" })
     } finally {
@@ -351,6 +362,7 @@ const Header = ({ toggleDrawer }) => {
         data.map((d, index) => {
           return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
             className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
+            key={index}
             onClick={() => {
               if (d.read == false) {
                 axiosInstance().put("/user/notification/read", {
@@ -361,23 +373,28 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig(error);
                 })
               }
+
+              handleFullScreenNotificationClose();
+
               if (d?.entity) {
                 handleSelectedEnity(d.entity)
               }
-              history.push(`${d.resourcePath}/${d.resourceId}`)
+
+              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath);
+
             }}>
             {
               <>
                 <h4>{d.title}</h4>
                 <h5>{d.description}</h5>
-                <h6 className="pull-right">{moment(d.date).format("MMM DD YYYY")}</h6>
+                <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
               </>
             }
           </div>
         })
       }
 
-      <div className="px-2 py-1" style={{ borderTop: "1px solid lightgrey" }}>
+      <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
         <Typography onClick={() => {
           axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
             let updatedNotificationList = [];
@@ -395,7 +412,7 @@ const Header = ({ toggleDrawer }) => {
             toastConfig.setToastConfig(error)
           })
 
-        }} className="cursor-pointer">Mark all as read</Typography>
+        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16}/><span>Mark all as read</span></Typography>
       </div>
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>

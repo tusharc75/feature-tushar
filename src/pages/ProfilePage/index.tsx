@@ -27,6 +27,11 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.common.white,
     },
     profileSidebar: {
+        position: "fixed",
+        width: "23%",
+        height: "calc(100vh - 142px)",
+        background: "#ececec !important",
+        borderRadius: "6px"
         // borderRight: `2px solid ${theme.palette.primary.light}`
     }
 }));
@@ -91,20 +96,22 @@ export default function ProfilePage(props) {
     };
 
     return <Layout>
-        <Grid container>
+        <Grid container className="headerbox">
             <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
             </Grid>
         </Grid>
         <CustomContainer>
             <Grid container className="p-3">
-                <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
-                    <ProfileSidebar onItemClick={handleItemClick}
-                        activeLink={activeItem}
-                        userData={userData}
-                        onFetchUserData={fetchUserData}
-                        otherDetails={otherDetails}
-                    />
+                <Grid item sm={3} lg={3} md={3}  >
+                    <div>
+                        <ProfileSidebar onItemClick={handleItemClick}
+                            activeLink={activeItem}
+                            userData={userData}
+                            onFetchUserData={fetchUserData}
+                            otherDetails={otherDetails}
+                        />
+                    </div>
                 </Grid>
                 <Grid item sm={9} md={9} lg={9} className="bgbox">
                     {

@@ -1,83 +1,161 @@
-import React, { useState, useEffect, Fragment, useContext, useCallback } from "react";
-import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
-import Button from '@material-ui/core/Button';
-import { useHistory } from "react-router-dom";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid } from "@material-ui/data-grid";
-import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { Link } from 'react-router-dom'
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import {
+    Button,
+    Grid,
+    IconButton,
+    Link as MuiLink,
+    Menu,
+    MenuItem,
+    Tooltip,
+} from "@material-ui/core";
+import { Link, useHistory } from "react-router-dom";
+import { productTemplate, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import moment from "moment";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import { GiAbstract055 } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import Layout from "../../components/Layout";
+import routes from "./../../components/Helpers/Routes";
+import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import AddIcon from "@material-ui/icons/Add";
+import { useData } from "../../StateProvider/Provider";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import {
+    CommonRenderer,
+    CreatedByRenderer,
+    UpdatedByRenderer,
+    CustomLoadingOverlay
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import routes from "../../components/Helpers/Routes";
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ExpandMore } from "@material-ui/icons";
-import { Menu, MenuItem } from "@material-ui/core";
+import DeleteIcon from '@material-ui/icons/Delete';
+import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getSearchQuery } from '../../services/util';
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import { ExpandMore } from "@material-ui/icons";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
-const ProductTemplate = () => {
+let productTemplateTimeout;
 
-    const toastConfig = useContext(CustomToastContext)
+const ProductTemplate: FC = () => {
+
     const history = useHistory();
-    const [loading, setLoading] = useState(true);
-    const [productTemplate, setProductTemplate] = useState([]);
+    const toastConfig = useContext(CustomToastContext);
+
+    const {
+        state: { user, permissions },
+    }: any = useData();
+    const [renderCount, setRenderCount] = useState(0);
+    const [productTemplatePermissions, setProductTemplatePermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
+
+    const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedTemplate, setSelectedTemplate] = useState([]);
-    const [searchVal, setSearchVal] = useState("");
-    const [query, setQuery] = useState({ page: 0, limit: 25 });
-    const [rowCount, setRowCount] = useState(0);
+    //  Grid Variables - Start
+    const [gridApi, setGridApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+    // const [showGridFilters, setShowGridFilters] = useState(true)
+    const columns = [
+        { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+    ];
+    //  Grid Variables - End
+
+
+    const { productTemplateApi } = productTemplate;
 
     useEffect(() => {
-        fetchProductTemplate();
-    }, [query, searchVal])
+        if (permissions && permissions.productTemplate) {
+            setProductTemplatePermissions(permissions.productTemplate);
+        }
+    }, [permissions]);
 
-    const fetchProductTemplate = () => {
-        let searchParams = searchVal
-            ? { ...query, search: searchVal }
-            : { ...query };
-        let api = getSearchQuery("/product-template", searchParams);
-        setLoading(true)
-        axiosInstance().get(api).then(({ data }) => {
-            setProductTemplate(data.data);
-            setRowCount(data.count);
-            setLoading(false)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+    useEffect(() => {
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (productTemplateTimeout) {
+            clearTimeout(productTemplateTimeout);
+        }
+
+        productTemplateTimeout = setTimeout(() => {
+            fetchProductTemplate();
+        }, millisec);
+    }, [search]);
+
+    useEffect(() => {
+        if (renderCount > 0) {
+            fetchProductTemplate();
+        } else setRenderCount((preCount) => preCount + 1);
+    }, [page, limit, filters, sorting]);
+
+
+    const NameRenderer = params => <Link className="link"
+        to={`${routes.productTemplate.path}/${params.data._id}`} title={params.value}>
+        {params.value}
+    </Link>;
+
+    const ActionsRenderer = params => <>
+        {
+            <Tooltip title="Clone">
+                <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
+                    <FileCopyIcon color="primary" />
+                </IconButton>
+            </Tooltip>
+        }
+        {productTemplatePermissions.isUpdate ?
+            <Tooltip title="Delete" >
+                <IconButton aria-label="Delete" onClick={() => {
+                    setDeleteRecord(params.data);
+                    setShowDeleteConfirmBox(true)
+                }}>
+                    <DeleteIcon
+                        fontSize="small" color="error" />
+                </IconButton>
+            </Tooltip> :
+            <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
+                <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                </IconButton>
+            </Tooltip>
+        }
+
+    </>
+
+    const frameworkComponents = {
+        nameRenderer: NameRenderer,
+        commonRenderer: CommonRenderer,
+        createdByRenderer: CreatedByRenderer,
+        updatedByRenderer: UpdatedByRenderer,
+        actionsRenderer: ActionsRenderer,
     };
 
-    const handleDelete = () => {
-        let ids = []
-        if (deleteRecord) {
-            ids.push(deleteRecord._id)
+
+    const replaceFieldName = (field) => {
+        switch (field) {
+            case "createdBy":
+                return "createdBy.user.concatedName";
+
+            case "updatedBy":
+                return "updatedBy.user.concatedName";
+
+            default:
+                return field;
         }
-        else {
-            ids = selectedTemplate;
-        }
-        axiosInstance().put(`/product-template/remove`, { "ids": ids }).then(() => {
-            fetchProductTemplate();
-            setShowDeleteConfirmBox(false)
-            setDeleteRecord(null)
-            setSelectedTemplate([])
-            setAnchorEl(null)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error)
-        });
     }
 
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
 
     const CreateNew = (id, isClone) => {
         if (isClone) {
@@ -88,218 +166,178 @@ const ProductTemplate = () => {
         }
     }
 
-    const columns = [
-        { field: 'id', headerName: 'id', hide: true },
-        {
-            field: "name",
-            headerName: "Product Template",
-            width: 300,
-            renderCell: (params) => (
-                <Link className="link" to={`${routes.productTemplate.path}/${params.row.id}`} >
-                    {params.row.name}
-                </Link>
-            )
-        },
-        {
-            field: "createdBy",
-            headerName: "Created By",
-            width: 300,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
-                {params.row.createdBy.user.firstName}
-                <span
-                    className="createdAtTime badge-date"
-                    title={`${params.row.createdBy.user.firstName} • ${moment(
-                        params.row.createdBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
-                >
-                    {moment(params.row.createdBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
-                </span>
-            </h5>) : <NoDataCell />
-        },
-        {
-            field: "updatedBy",
-            headerName: "Updated By",
-            width: 300,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => params?.row && params?.row?.updatedBy && params?.row?.updatedBy?.user ? (<h5 className="createBy">
-                {params.row.updatedBy.user.firstName}
-                <span
-                    className="updatedAtTime badge-date"
-                    title={`${params.row.updatedBy.user.firstName} • ${moment(
-                        params.row.updatedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
-                >
-                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
-                </span>
-            </h5>) : <NoDataCell />
-        },
-        {
-            field: "actions",
-            headerName: "Actions ",
-            renderCell: (params) => (
-                <Fragment>
-                    <Tooltip title="Clone">
-                        <IconButton aria-label="Clone" onClick={() => CreateNew(params.row.id, true)}>
-                            <FileCopyIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete" >
-                        <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}  >
-                            <DeleteIcon fontSize="small" color="error" />
-                        </IconButton>
-                    </Tooltip >
-                </Fragment >
-            ),
-            width: 200,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
+    const handleDelete = () => {
+        let ids = []
+        if (deleteRecord) {
+            ids.push(deleteRecord._id)
         }
-    ];
-
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
-
-    const handleSearch = (e) => {
-        if (query.page !== 1) {
-            setQuery((prevState) => ({ ...prevState, page: 0 }));
+        else {
+            ids = selectedRecords.map(d => d._id);
         }
-        setSearchVal(e.target.value);
-    };
-
-    const onFilterChange = useCallback((params) => {
-        if (params.filterModel.items[0].value) {
-            setQuery((prevState) => ({
-                ...prevState,
-                [params.filterModel.items[0].columnField]:
-                    params.filterModel.items[0].value,
-            }));
-        } else {
-            setQuery({ page: 0, limit: 25 });
-        }
-    }, []);
-
-    const handlePage = (params) => {
-        if (query.page !== params.page) {
-            setQuery((prevState) => ({ ...prevState, page: params.page }));
-        }
-    };
-
-    const handlePageSize = (params) => {
-        if (params.pageSize !== query.limit) {
-            setQuery({ page: 0, limit: params.pageSize });
-        }
-    };
-
-    const handleSortModelChange = (params) => {
-        if (params?.sortModel && params.sortModel.length > 0) {
-            let temp = { ...params.sortModel[0] };
-            setQuery((prevState) => ({
-                ...prevState,
-                page: 0,
-                sortBy: temp.field,
-                orderBy: temp.sort,
-            }));
-        }
+        axiosInstance().put(`${routes.productTemplate.path}/remove`, { "ids": ids }).then(({ data }) => {
+            fetchProductTemplate();
+            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null)
+            setAnchorEl(null)
+            toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: data.message,
+            });
+        }).catch((error) => {
+            toastConfig.setToastConfig(error)
+        });
     }
 
-    return (<Layout>
-        <Grid container>
-            <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title }]} />
-            </Grid>
-        </Grid>
-        <CustomContainer>
-            <div className="header-panel">
-                <Grid container>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">{routes.productTemplate.title}</span>
-                    </Grid>
-                    <Grid md={6} sm={12} xs={12} container justify="flex-end">
-                        <SearchBox
-                            onSearch={handleSearch}
-                            searchbox="terms_header_search_bar"
-                            width="300px"
-                            value={searchVal}
-                        />
-                        <Button className="ml-2 mr-2" onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                        <Button
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={openActions}
-                            disabled={selectedTemplate.length ? false : true}
-                            aria-controls="action-menu"
-                        >Actions <ExpandMore />
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                        </Menu>
-                    </Grid>
+    const getQueryString = () => {
+        let deepFilter = `?page=${page}&limit=${limit}`;
+
+        if (!isObjectEmpty(filters)) {
+            const updatedFilters = [];
+
+            Object.keys(filters).map(field => {
+                updatedFilters.push({
+                    field: replaceFieldName(field),
+                    term: filters[field].filter
+                })
+            });
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+        }
+
+        if (sorting.length > 0) {
+            deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+        }
+
+        if (search) {
+            deepFilter = `${deepFilter}&search=${search}`;
+        }
+
+        return deepFilter;
+    };
+
+    const fetchProductTemplate = () => {
+        const queryString = getQueryString();
+        dispatch({ type: "loading", loading: true });
+
+        if (gridApi) {
+            gridApi.setRowData([]);
+            gridApi.showLoadingOverlay();
+        }
+
+        axiosInstance()
+            .get(`${productTemplateApi}${queryString}`)
+            .then(({ data: { data, count } }) => {
+
+                let rows = data.map((u) => {
+
+                    const { createdBy, updatedBy, staticData, ...restProperties } = u;
+
+                    let res = {
+                        ...restProperties,
+                        id: u._id,
+                        createdBy: u.createdBy?.user?.concatedName,
+                        createdByDate: u.createdBy?.date,
+                        updatedBy: u.updatedBy?.user?.concatedName,
+                        updatedByDate: u.updatedBy?.date,
+                    };
+                    return res;
+                });
+
+                dispatch({ type: "initialize", data: rows, count: count });
+                // if (gridApi && rows.length > 0) {
+                //   gridApi.hideOverlay();
+                // }
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                dispatch({ type: "loading", loading: false });
+            });
+
+    }
+
+    const handleSearch = (e) => {
+        dispatch({ type: "search", search: e.target.value });
+    };
+
+
+
+
+    return (
+        <Layout>
+            <Grid container className="headerbox">
+                <Grid item md={4} sm={11} xs={10}>
+                    <CustomBreadCrumbs routes={[routes.productTemplate]} />
                 </Grid>
-            </div>
-            <div className="listing-grid">
-                <DataGrid
-                    checkboxSelection
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    scrollbarSize={20}
-                    loading={loading}
-                    onSelectionModelChange={(e) => setSelectedTemplate(e.selectionModel)}
-                    rows={loading ? [] : productTemplate}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={query.limit}
-                    rowCount={rowCount}
-                    page={query.page}
-                    paginationMode="server"
-                    pagination
-                    onPageChange={handlePage}
-                    onPageSizeChange={handlePageSize}
-                    onSortModelChange={handleSortModelChange}
-                    density="compact"
-                    onFilterModelChange={onFilterChange}
-                />
-            </div>
-            {showDeleteConfirmBox &&
-                <ConfirmationDialog
-                    open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
-                    onClose={() => setShowDeleteConfirmBox(false)}
-                    onOk={handleDelete}
-                />
-            }
-        </CustomContainer>
-    </Layout>
+                <Grid
+                    item
+                    md={8}
+                    sm={1}
+                    xs={2}>
+                    <ImportExportLinks
+                        module="productTemplateApi(s)"
+                        api={productTemplateApi}
+                        afterImportCompleted={() => {
+                            fetchProductTemplate();
+                        }}
+                    />
+                </Grid>
+            </Grid>
+
+            <CustomContainer>
+                <div className="header-panel">
+                    <Grid container>
+                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                            <GiAbstract055 /> <span className="listingHeader">{routes.productTemplate.title}</span>
+                        </Grid>
+                        <Grid md={6} sm={12} xs={12} container justify="flex-end">
+                            <SearchBox
+                                onSearch={handleSearch}
+                                searchbox="terms_header_search_bar"
+                                width="300px"
+                                value={search}
+                            />
+                            <Button className="ml-2 mr-2" onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                disabled={selectedRecords.length ? false : true}
+                                aria-controls="action-menu"
+                            >Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                            </Menu>
+                        </Grid>
+                    </Grid>
+                </div>
+
+                <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+
+                {showDeleteConfirmBox &&
+                    <ConfirmationDialog
+                        open={showDeleteConfirmBox}
+                        message={`Are you sure, you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
+                        onClose={() => setShowDeleteConfirmBox(false)}
+                        onOk={handleDelete}
+                    />
+                }
+            </CustomContainer >
+        </Layout >
     );
-}
+
+};
 
 export default ProductTemplate;

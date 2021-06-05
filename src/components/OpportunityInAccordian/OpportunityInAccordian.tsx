@@ -6,22 +6,21 @@ import {
   Typography,
   Card,
   CardContent,
-  Button,
-  Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Tooltip
+  Tooltip,
+  Menu,
+  MenuItem
 } from "@material-ui/core";
-import CommonSkeleton from "../Helpers/CommonSkeleton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from "../../services/util";
 import routes from "./../../components/Helpers/Routes";
 import { Link } from "react-router-dom";
@@ -29,12 +28,13 @@ import ManageOpportunityDialog from "../../pages/Opportunities/ManageOpportunity
 import { useHistory } from "react-router-dom";
 import { IoCalendarOutline } from "react-icons/io5";
 import { BiCustomize } from "react-icons/bi";
-import { FaEye } from "react-icons/fa";
 import currencies from "./../../constants/currency_with_country.json";
-import { LinkOff } from "@material-ui/icons";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
+import { customerAccount, customerContact } from "../../constants/helpers";
+import { MoreVert } from "@material-ui/icons";
+import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
 
 const Accordion = withStyles({
   root: {
@@ -55,8 +55,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "#f5f5f5",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
     "&$expanded": {
       minHeight: 46,
     },
@@ -64,6 +67,7 @@ const AccordionSummary = withStyles({
   content: {
     "&$expanded": {
       margin: "12px 0",
+
     },
   },
   expanded: {},
@@ -82,14 +86,14 @@ const AccordionDetails = withStyles((theme) => ({
 
 function DisplayData({ key, label, value, icon }) {
   return <div style={{ flexGrow: 1 }}>
-      <List>
-          <ListItem key={key}>
-              <ListItemAvatar>
-                  {icon}
-              </ListItemAvatar>
-              <ListItemText primary={value ? value : '-'} secondary={label} />
-          </ListItem>
-      </List>
+    <List>
+      <ListItem key={key}>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value ? value : '-'} secondary={label} />
+      </ListItem>
+    </List>
   </div>
 }
 
@@ -103,6 +107,8 @@ export default function OpportunityInAccordian({
   opportunityPermissions,
   resource,
   isRedirect,
+  contactId = null,
+  contactResource = null,
 }) {
   const history = useHistory();
   const {
@@ -133,6 +139,11 @@ export default function OpportunityInAccordian({
     showCreateOpportunityDialog,
     setShowCreateOpportunityDialog,
   ] = useState(false);
+  const [
+    showAddOpportunityDialog,
+    setShowAddOpportunityDialog,
+  ] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     let isExpanded = expandOpportunity;
@@ -141,6 +152,14 @@ export default function OpportunityInAccordian({
 
     setExpandOpportunity(isExpanded);
   }, [opportunities]);
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
   return (
     <>
       <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
@@ -150,28 +169,64 @@ export default function OpportunityInAccordian({
         >
           <Grid container>
             <Grid item xs={8} alignItems="center">
-              <Box
-                component="div"
-                display="flex"
-                alignItems="center"
-                flexGrow={1}
-              >
-                <IconButton
-                  size="small"
-                  onClick={(event) => setExpandOpportunity(!expandOpportunity)}
-                >
-                  {expandOpportunity === true ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </IconButton>
-                <strong>Opportunity ({opportunities.length})</strong>
+              <Box display="flex">
+                <Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => setExpandOpportunity(!expandOpportunity)}
+                  >
+                    {expandOpportunity === true ? (
+                      <ExpandLessIcon />
+                    ) : (
+                      <ExpandMoreIcon />
+                    )}
+                  </IconButton>
+                </Box>
+                <Box padding="5px">
+                  <Typography variant="subtitle2">
+                    Opportunity ({opportunities?.length || 0})
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               <Typography variant="subtitle2">
-                {opportunityPermissions.isCreate && (
+                {opportunityPermissions.isCreate && contactResource === customerContact.contactResource ?
+                  <>
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenMenu}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu
+                      id="menu"
+                      anchorEl={anchorEl}
+                      keepMounted
+                      open={Boolean(anchorEl)}
+                      onClose={handleCloseMenu}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setShowCreateOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setShowAddOpportunityDialog(true)
+                          handleCloseMenu();
+                        }}
+                      >
+                        Add Exisiting
+                      </MenuItem>
+                    </Menu>
+                  </>
+                  :
                   <IconButton
                     color="primary"
                     size="small"
@@ -181,7 +236,8 @@ export default function OpportunityInAccordian({
                   >
                     <ControlPointIcon />
                   </IconButton>
-                )}
+
+                }
               </Typography>
             </Grid>
           </Grid>
@@ -218,7 +274,7 @@ export default function OpportunityInAccordian({
                               </Grid>
                               <Grid item xs={5} sm={4}>
                                 <Typography className="amount">
-                                  {obj?.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
+                                  {obj?.amount ? currencies.find(d => d.currencyCode === obj["currency"])?.symbolNative : ''}
                                                                         &nbsp;{obj?.amount ?? ''}</Typography>
                               </Grid>
                             </Grid>
@@ -244,17 +300,17 @@ export default function OpportunityInAccordian({
             )}
           </>
         </AccordionDetails>
-           <Box margin={1} className="btn-view gap-1"  onClick={() =>
-              history.push(`/opportunity`, {
-              accountId: accountId,
-              accountName: accountName,
-              resource: `${resource}Name`,
-            })
-          }
-           p={1} display="flex" justifyContent="center" alignItems="center">
-               <HiExternalLink size={25} />
-           </Box>
-        
+        <Box margin={1} className="btn-view gap-1" onClick={() =>
+          history.push(`/opportunity`, {
+            accountId: accountId,
+            accountName: accountName,
+            resource: `${resource}`,
+          })
+        }
+          p={1} display="flex" justifyContent="center" alignItems="center">
+          <HiExternalLink size={25} />
+        </Box>
+
       </Accordion>
 
       {showCreateOpportunityDialog && (
@@ -269,6 +325,22 @@ export default function OpportunityInAccordian({
           accountId={accountId}
           resource={resource}
           isRedirectTodetailPage={isRedirect}
+          contactId={contactId}
+          disableOwnerAndAccount={resource === customerAccount.accountResource}
+          contactResource={contactResource}
+        />
+      )}
+      {showAddOpportunityDialog && (
+        <AssignOpportunityDialog
+          opportunityDialogOpen={showAddOpportunityDialog}
+          onSuccess={(id) => {
+            setShowAddOpportunityDialog(false);
+            onNewOpportunityAdd(id);
+          }}
+          handleCloseDialog={() => setShowAddOpportunityDialog(false)}
+          assignedOpportunity={opportunities}
+          accountId={accountId}
+          contactId={contactId}
         />
       )}
     </>

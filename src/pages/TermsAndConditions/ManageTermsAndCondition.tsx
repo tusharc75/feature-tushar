@@ -17,12 +17,18 @@ import axiosInstance from "../../axios/axiosInstance";
 import FormTypes from '../../components/Helpers/FormTypes'
 import CustomButton from "../../components/Helpers/CustomButton";
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "./../../constants/helpers";
+import htmlToDraft from 'html-to-draftjs';
+
 import {
     EditorState,
+    ContentState,
     convertToRaw,
-    convertFromRaw
+    convertFromRaw,
 } from 'draft-js'
 import { RichTextEditor } from '../../components/RichEditor/RichEditor'
+import { documentUploadMaxSize } from "../../constants/helpers"
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
@@ -40,9 +46,6 @@ const useStyles = makeStyles((theme) => ({
     },
     fileUpload: {
         width: '50%'
-    },
-    link: {
-
     }
 }));
 
@@ -52,6 +55,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
     const [loading, setLoading] = useState(false)
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
@@ -101,10 +105,21 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         }
     };
 
+    const appendData = (htmlData, setFieldValue) => {
+        if (htmlData) {
+            const blocksFromHtml = htmlToDraft(htmlData);
+            const { contentBlocks, entityMap } = blocksFromHtml;
+            const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
+            const editorState = EditorState.createWithContent(contentState);
+            setFieldValue('editorState', editorState)
+        }
+    }
 
     return <Dialog
         disableBackdropClick={true}
         open={open}
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         maxWidth="lg"
         onClose={handleClose}
@@ -146,17 +161,23 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         isTooltip={true}
                                                         required={false}
                                                         type="fileUpload"
-                                                        accept=".doc, .docs, .docx"
+                                                        accept=".docx"
+                                                        uploadFileUrl="/doc-parser"
                                                         values={values}
                                                         errors={errors}
                                                         touched={touched}
                                                         size="small"
                                                         setFieldValue={(name, file) => setFieldValue("file", file)}
+                                                        onAppendData={(data) => appendData(data, setFieldValue)}
+                                                        doNotShowUploadedFile={true}
+                                                        fileUploadMaxSize={documentUploadMaxSize} //size in bytes
+                                                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                        }}
                                                     />
                                                 </Box>
                                                 <Box mt={2} >
                                                     <RichTextEditor
-                                                        style={{ minHeight: '350px' }}
                                                         editorState={values.editorState}
                                                         onChange={setFieldValue}
                                                         onBlur={handleBlur}
@@ -170,11 +191,12 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 variant="contained"
                                 color="primary"
                                 loading={loading}
+                                disabled={uploadingImageOrFileProgress > 0}
                                 onClick={() => {
                                     if (Object.keys(errors).length) {
                                         Object.keys(errors).forEach(key => {

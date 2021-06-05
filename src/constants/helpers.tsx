@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import React, { forwardRef } from "react";
 import {
   AddBox,
   ArrowDownward,
@@ -20,6 +20,9 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 import currencies from "./currency_with_country.json";
+import { TransitionProps } from "@material-ui/core/transitions";
+import { Slide } from "@material-ui/core";
+import { orderBy } from "lodash";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -27,6 +30,10 @@ export const vapidKey =
 export const validations = {
   email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
 };
+
+//  1048576 = 1 MB
+export const imageUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
+export const documentUploadMaxSize = { size: 1048576 * 10, text: "10 MB" };
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -55,10 +62,13 @@ export const userType = {
   brandAdmin: 2,
 };
 
+export const AgGridHeaderHeight = 40;
+export const AgGridRowHeight = 30;
+export const AgGridFloatingFiltersHeight = 38;
+
 export const gridPageSizes = [25, 50, 75];
 
-export const leadProcessFieldName = "leadProcess";
-export const opportunityProcessFieldName = "process";
+export const processFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
@@ -88,6 +98,12 @@ export const sidebarResource = {
   lead: "Lead",
   opportunity: "Opportunity",
   projectSales: "Project Sales",
+  task: "Task",
+  note: "Note",
+  email: "Email",
+  attachment: "Attachment",
+  case: "Case",
+  productTemplate: "Product Template",
 };
 
 export const lead = {
@@ -98,6 +114,21 @@ export const lead = {
 export const opportunity = {
   opportunityResource: "opportunity", //  Key of sidebar object
   opportunityApi: "/opportunity",
+};
+
+export const entity = {
+  entityResource: "entity", //  Key of sidebar object
+  entityApi: "/entity",
+};
+
+export const productTemplate = {
+  productTemplateResource: "productTemplate",
+  productTemplateApi: "/product-template",
+};
+
+export const quoteBuilder = {
+  qbResource: "quoteBuilder",
+  qbApi: "/quote-builder",
 };
 
 export const supplierAccount = {
@@ -138,6 +169,12 @@ export const profilePage = {
   profilePageRoute: "/profile",
 };
 
+export const product = {
+  api: "/product",
+  route: "/product",
+  permission: "product",
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -149,7 +186,7 @@ export const profileMenuItems = {
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {
-    let value = key.isDefaultValue ? key.defaultValue : val
+    let value = key.isDefaultValue ? key.defaultValue : val;
     if (key.type === "dropDown") {
       const option = key.option?.find((data: any) => data.default === true);
       obj[key.fieldName] = value ? value : option ? option.optionValue : "";
@@ -163,25 +200,34 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = value ? value : false;
-    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
+    } else if (
+      key.type !== "currencyAmount" &&
+      (key.type === "converter" || key.isConverter === true)
+    ) {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;
+        obj[key.fieldName + "_" + _unit.toLowerCase()] =
+          value && value !== "" ? parseFloat(value) : value;
       });
     } else if (key.type === "currencyAmount") {
       key.displayCurrency.forEach((_currency) => {
         if (key.isConverter && key.displayUnits.length) {
           key.displayUnits.forEach((_unit) => {
-            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
+            obj[
+              key.fieldName +
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase()
+            ] = value && value !== "" ? parseFloat(value) : value;
           });
-        }
-        else {
-          obj[key.fieldName + "_" + _currency.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
+        } else {
+          obj[key.fieldName + "_" + _currency.toLowerCase()] =
+            value && value !== "" ? parseFloat(value) : value;
         }
       });
     } else if (key.type === "decimal") {
-      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;;
-    }
-    else {
+      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;
+    } else {
       obj[key.fieldName] = value;
     }
   }
@@ -195,8 +241,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -238,30 +284,35 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .url("Enter valid url eg. https://www.hostname.com")
-          .required(`${input.fieldLabel} is required`)
-        : yup.string().url("Enter valid url eg. https://www.hostname.com");
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            )
+            .required(`${input.fieldLabel} is required`)
+        : yup
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
-        ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+        ? yup.array().required(`${input.fieldLabel} is required`)
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -272,7 +323,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
         : yup.boolean();
-    } else if (input.type !== "currencyAmount" && (input.type === "converter" || input.isConverter === true)) {
+    } else if (
+      input.type !== "currencyAmount" &&
+      (input.type === "converter" || input.isConverter === true)
+    ) {
       input.displayUnits.forEach((_unit) => {
         schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
           ? yup.string().required(`${input.fieldLabel} is required`)
@@ -282,15 +336,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.displayCurrency.forEach((_currency) => {
         if (input.isConverter && input.displayUnits.length) {
           input.displayUnits.forEach((_unit) => {
-            schema[input.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = input.required
+            schema[
+              input.fieldName +
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase()
+            ] = input.required
               ? yup.string().required(`${input.fieldLabel} is required`)
               : yup.string();
           });
-        }
-        else {
-          schema[input.fieldName + "_" + _currency.toLowerCase()] = input.required
-            ? yup.string().required(`${input.fieldLabel} is required`)
-            : yup.string();
+        } else {
+          schema[input.fieldName + "_" + _currency.toLowerCase()] =
+            input.required
+              ? yup.string().required(`${input.fieldLabel} is required`)
+              : yup.string();
         }
       });
     } else if (input.type === "date") {
@@ -382,10 +442,26 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
+export const dateFormat = "MM/DD/YYYY";
+export const dateTimeFormat = "MM/DD/YYYY hh:mm A";
+export const cardDateFormat = "MMM,DD YYYY";
+
+export const dateFormatForInputControl = "MM/dd/yyyy";
+// export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
+// export const cardDateFormat = "MMM,dd yyyy"
+
 export const yyyyMMDD = (dateToBeFormatted) => {
   return dateToBeFormatted
-    ? moment(dateToBeFormatted).format("YYYY-MM-DD")
+    ? moment(dateToBeFormatted).format(cardDateFormat)
     : dateToBeFormatted;
+};
+
+export const displayDate = (date) => {
+  return date ? moment(date).format(dateFormat) : date;
+};
+
+export const displayCardDate = (date) => {
+  return date ? moment(date).format(cardDateFormat) : date;
 };
 
 export const materialTableIcons: any = {
@@ -571,7 +647,10 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 
   // Check if that currency's country has multiple language,
   //  And if it has "en", then pick that one, or else take first of the array of languages
-  if (currencyData.languages.length > 0 && currencyData.languages.some(d => d !== language)) {
+  if (
+    currencyData.languages.length > 0 &&
+    currencyData.languages.some((d) => d !== language)
+  ) {
     language = currencyData.languages[0];
   }
 
@@ -641,4 +720,38 @@ export const graphOptions = {
     },
     shadow: true,
   },
+};
+
+export const CustomDialogTransition = React.forwardRef(function Transition(
+  props: TransitionProps & { children?: React.ReactElement<any, any> },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+//  Don't use this for details screen as the model being passed is different
+export const setFieldsInAscendingOrder = (fieldsToOrder) => {
+  const sections = [];
+  const fieldsInAscendingOrder = orderBy(fieldsToOrder, ["order", "asc"]);
+
+  fieldsInAscendingOrder.forEach((field) => {
+    if (!sections.includes(field.sectionName)) {
+      sections.push(field.sectionName);
+    }
+  });
+
+  const customData = sections.map((name) => {
+    let fields = fieldsInAscendingOrder.filter(
+      (field) => field.sectionName === name
+    );
+
+    const sectionFields = fields.map((formData) => formData);
+    return { name, sectionFields };
+  });
+
+  return customData;
+};
+
+export const generateUniqueId = () => {
+  return `id-${new Date().getTime()}`;
 };

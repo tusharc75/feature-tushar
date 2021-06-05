@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from "react-router-dom";
-import { AiOutlineMail } from 'react-icons/ai';
 
 const OrgChart = ({
     positions,
@@ -42,64 +40,64 @@ const OrgChart = ({
         }
     };
 
-    const dragLeave = event => {
-        const element = event.target;
-        setTimeout(() => {
-            element.classList.remove("do-not-drop");
-            element.classList.remove("do-drop");
-        }, 250);
-    };
+    // const dragLeave = event => {
+    //     const element = event.target;
+    //     setTimeout(() => {
+    //         element.classList.remove("do-not-drop");
+    //         element.classList.remove("do-drop");
+    //     }, 250);
+    // };
 
-    const dragStart = event => {
-        const element = event.target;
-        const currentNode = getIds(element);
-        if (currentNode) {
-            draggedNode = currentNode;
-        }
-    };
+    // const dragStart = event => {
+    //     const element = event.target;
+    //     const currentNode = getIds(element);
+    //     if (currentNode) {
+    //         draggedNode = currentNode;
+    //     }
+    // };
 
-    const drop = event => {
+    // const drop = event => {
 
-        let element = event.target;
-        if (element.tagName !== "TD") {
-            while (element.parentElement) {
-                element = element.parentElement;
-                if (element.tagName === "TD") {
-                    break;
-                }
-            }
-        }
-        const dropNode = getIds(element);
-        if (dropNode && draggedNode) {
-            if (
-                draggedNode.id !== dropNode.id &&
-                draggedNode.id !== dropNode.parentId
-            ) {
-                // update(
-                //     draggedNode.id,
-                //     dropNode.id,
-                // );
-            }
-        }
-    };
+    //     let element = event.target;
+    //     if (element.tagName !== "TD") {
+    //         while (element.parentElement) {
+    //             element = element.parentElement;
+    //             if (element.tagName === "TD") {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     const dropNode = getIds(element);
+    //     if (dropNode && draggedNode) {
+    //         if (
+    //             draggedNode.id !== dropNode.id &&
+    //             draggedNode.id !== dropNode.parentId
+    //         ) {
+    //             // update(
+    //             //     draggedNode.id,
+    //             //     dropNode.id,
+    //             // );
+    //         }
+    //     }
+    // };
 
-    const dragEnter = event => {
-        event.preventDefault();
-        const element = event.target;
-        if (element.tagName === "TD") {
-            const dropNode = getIds(element);
-            if (dropNode && draggedNode) {
-                if (
-                    draggedNode.id === dropNode.id ||
-                    draggedNode.id === dropNode.parentId
-                ) {
-                    element.classList.add("do-not-drop");
-                } else {
-                    element.classList.add("do-drop");
-                }
-            }
-        }
-    };
+    // const dragEnter = event => {
+    //     event.preventDefault();
+    //     const element = event.target;
+    //     if (element.tagName === "TD") {
+    //         const dropNode = getIds(element);
+    //         if (dropNode && draggedNode) {
+    //             if (
+    //                 draggedNode.id === dropNode.id ||
+    //                 draggedNode.id === dropNode.parentId
+    //             ) {
+    //                 element.classList.add("do-not-drop");
+    //             } else {
+    //                 element.classList.add("do-drop");
+    //             }
+    //         }
+    //     }
+    // };
 
     // const editNode = event => {
     //     let element = event.target.parentElement;
@@ -136,7 +134,7 @@ const OrgChart = ({
                    </div>
            </div>
         </div> `  : `
-        <div class="card">
+        <div class="card cursor-pointer">
             <div class="p-0" data-id='${p.id}' />
             <div class="p-0" data-parent-id='${p.parentId}' />
            <div class="firstinfo">
@@ -148,6 +146,7 @@ const OrgChart = ({
                    </div>
            </div>
         </div> ` ;
+
         const orgChartDiv = document.getElementById(chartId);
         if (orgChartDiv) {
             chart = new google.visualization.OrgChart(orgChartDiv);
@@ -187,17 +186,21 @@ const OrgChart = ({
                 !p.parentId || p.parentId === "0" ? null : `${p.parentId}`,
                 p.title,
             ]);
+
             data.addRows(orgPositions);
 
             chart.draw(data, {
                 allowHtml: true,
                 nodeClass: "google-visualization-orgchart-node",
+                explorer: {
+                    actions: ['dragToZoom', 'rightClickToReset']
+                }
             });
         }
     };
 
     return (
-        <div id={chartId} className="org-chart" />
+        <div id={chartId} style={{ overflow: "auto" }}></div>
     );
 };
 

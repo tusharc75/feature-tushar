@@ -10,7 +10,7 @@ import { isMobile, isTablet } from "react-device-detect";
 
 import statusList from "../../Helpers/statusList";
 import { GetBoard } from "../../../../axios/activity";
-import Loader from "../../../../components/Loader";
+
 import { BoardList } from "./BoardList";
 import axiosInstance from "../../../../axios/axiosInstance";
 
@@ -27,8 +27,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Board = ({ type, filter, activityId }) => {
-  const [activities, setActivities] = useState(null);
+const Board = ({ type, filter }) => {
+  const [loading, setLoading] = useState(true);
+  const [activities, setActivities] = useState([]);
   const classes = useStyles();
   const [resource, setResource] = useState("");
   const [resourceData, setResourceData] = useState(null);
@@ -37,14 +38,17 @@ const Board = ({ type, filter, activityId }) => {
 
   useEffect(() => {
     fetchBoard();
-  }, [type, filter, activityId]);
+  }, [type, filter]);
 
-  const fetchBoard = async () => {
-    await GetBoard(type, JSON.stringify(filter))
+  const fetchBoard = () => {
+    GetBoard(type, JSON.stringify(filter))
       .then(({ data }) => {
         setActivities(data);
+        setLoading(false);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setLoading(false);
+      });
   };
 
   // Data for Autocomplete
@@ -71,7 +75,17 @@ const Board = ({ type, filter, activityId }) => {
     // eslint-disable-next-line
   }, [resource]);
 
-  const handleChangeStatus = (activityId: string, status: string) => {
+  const handleChangeStatus = (
+    activityId: string,
+    status: string,
+    newIndex: string
+  ) => {
+    const filterdByStatus = activities.filter((a) => a.status === status);
+    const activityIndex = filterdByStatus.findIndex(
+      (a) => a._id === activityId
+    );
+    console.log(activityIndex, newIndex);
+
     const updatedState = activities.map((activity: any) => {
       if (activity._id === activityId && activity.status !== status) {
         return {
@@ -144,7 +158,7 @@ const Board = ({ type, filter, activityId }) => {
     }
   };
 
-  return activities ? (
+  return (
     <>
       <Box display="flex" pb={1}>
         <Autocomplete
@@ -190,17 +204,20 @@ const Board = ({ type, filter, activityId }) => {
           {statusList.map((data, index) => (
             <Grid item md={3} xs={12} sm={4} key={index}>
               <div className={classes.block}>
-                <Box p={1}>
-                  <Typography variant="subtitle2">
-                    {data.status.toUpperCase()}
-                    {" (" +
-                      activities.filter(function (o) {
-                        return o.status === data.status;
-                      }).length +
-                      ")"}
-                  </Typography>
-                </Box>
+                {!loading && (
+                  <Box p={1}>
+                    <Typography variant="subtitle2">
+                      {data.status.toUpperCase()}
+                      {" (" +
+                        activities.filter(function (o) {
+                          return o.status === data.status;
+                        }).length +
+                        ")"}
+                    </Typography>
+                  </Box>
+                )}
                 <BoardList
+                  loading={loading}
                   selectedResource={selectedResourceData}
                   resource={resource}
                   status={data.status}
@@ -217,8 +234,6 @@ const Board = ({ type, filter, activityId }) => {
         </Grid>
       </DndProvider>
     </>
-  ) : (
-    <Loader text="" />
   );
 };
 

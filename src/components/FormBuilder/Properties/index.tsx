@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useRef } from 'react';
+import React, { useState, Fragment, useRef, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
@@ -23,8 +23,8 @@ import { Converter } from "../AddField/converter";
 import { Option } from "../AddField/option";
 import { Currency } from "../AddField/currency";
 import { MultipleFormula } from "../AddField/multipleformula";
-
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string()
@@ -42,13 +42,22 @@ const LookupResource = [
   { name: "Role", value: "Role" },
   { name: "Lead", value: "Lead" },
   { name: "Opportunity", value: "Opportunity" },
-  { name: "Product Category", value: "ProductCategory" },
-  { name: "Product Template", value: "ProductTemplate" },
+  { name: "Product Category", value: "Product Category" },
+  { name: "Product Template", value: "Product Template" },
 ]
 
 export const Properties = ({ handleClose, fieldData, sectionId, section, setSection }) => {
 
   const [initialValues, setInitialValues] = useState(fieldData);
+
+  useEffect(() => {
+    console.log(fieldData)
+    if (fieldData.type === "dropDown" && !fieldData.lookup) {
+      if (fieldData.option && fieldData.option.filter((data) => data.default === true).length) {
+        setInitialValues({ ...initialValues, defaultDropdownOption: fieldData.option.filter((data) => data.default === true)[0].optionValue })
+      }
+    }
+  }, []);
 
   const fields = [];
   section.forEach(_section => {
@@ -81,7 +90,6 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     })
   })
 
-
   const handleSave = (values) => {
     let data = [...section]
     data.forEach((row) => {
@@ -95,13 +103,18 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             ele.isConverter = values.isConverter
             ele.isFormula = values.isFormula
             ele.isMulitFormula = values.isMulitFormula
+            ele.isUneditable = values.isUneditable
 
             if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
               values.option.forEach((ele, index) => {
                 ele.order = index + 1
                 ele.default = false
-                if (index === 0) {
-                  ele.default = true
+                if (fieldData.type === "dropDown" && !values["lookup"]) {
+                  if (values["defaultDropdownOption"] && values["defaultDropdownOption"] !== "") {
+                    if (values["defaultDropdownOption"] === ele.optionLabel) {
+                      ele.default = true
+                    }
+                  }
                 }
               })
               ele.option = values.option
@@ -163,7 +176,10 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     }
   }
 
-  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
+  return (<Dialog
+    fullScreen={isMobile || isTablet}
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
     <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} >
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
@@ -255,7 +271,8 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                       </Select>
                     </FormControl>
                   </Box>}
-              </Fragment>}
+              </Fragment>
+            }
             {values["type"] === "currencyAmount" &&
               <Currency
                 values={values}
@@ -267,7 +284,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                 values={values}
                 setFieldValue={setFieldValue}
               />}
-            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
               <FormControlLabel
                 control={
                   <Checkbox
@@ -311,7 +328,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               values={values}
               setFieldValue={setFieldValue}
             />}
-            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
               <><br></br>
                 <FormControlLabel
                   control={
@@ -378,7 +395,6 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                   onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
                 />
               }
-
               <FormControlLabel
                 control={
                   <Checkbox
@@ -389,6 +405,17 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                   />
                 }
                 label="Default Value"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="Uneditable"
+                    checked={values["isUneditable"]}
+                    onChange={(e) => setFieldValue("isUneditable", e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Uneditable"
               />
               {values["isDefaultValue"] &&
                 <TextField
@@ -408,8 +435,8 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button onClick={handleClose} color="primary">Cancel</Button>
-            <Button type="submit" color="primary" variant="contained">Save</Button>
+            <Button size="small" onClick={handleClose} color="primary">Cancel</Button>
+            <Button size="small" type="submit" color="primary" variant="contained">Save</Button>
           </CustomDialogFooter>
         </Form>)}
     </Formik>

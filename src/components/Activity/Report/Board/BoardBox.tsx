@@ -35,9 +35,10 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
+export const BoardBox = (props) => {
+  const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen } =
+    props;
   const classes = useStyles();
-  const history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const ref = React.useRef(null);
 
@@ -82,13 +83,6 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
       isDragging: monitor.isDragging(),
     }),
   });
-
-  const handleActivityOpen = (event) => {
-    history.push({
-      pathname: "/activity/" + type,
-      search: "?activityType=" + type + "&activityId=" + data._id,
-    });
-  };
 
   const handleOpenMenu = (event) => {
     event.stopPropagation();
@@ -142,7 +136,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
       }`}
     >
       <Box
-        onClick={handleActivityOpen}
+        onClick={() => handleActivityOpen(id)}
         className={classes.activitybox}
         style={{ opacity }}
       >
@@ -168,10 +162,18 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
                       style={{
                         color:
                           new Date(data?.dueDate).getDate() <
-                          new Date().getDate()
+                            new Date().getDate() ||
+                          new Date(data?.dueDate).getMonth() <
+                            new Date().getMonth() ||
+                          new Date(data?.dueDate).getFullYear() <
+                            new Date().getFullYear()
                             ? "#dc3545"
                             : new Date(data?.dueDate).getDate() ===
-                              new Date().getDate()
+                                new Date().getDate() &&
+                              new Date(data?.dueDate).getMonth() ===
+                                new Date().getMonth() &&
+                              new Date(data?.dueDate).getFullYear() ===
+                                new Date().getFullYear()
                             ? "#28a745"
                             : "#838485",
                       }}
@@ -182,10 +184,19 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
                   style={{
                     background: "#eee",
                     color:
-                      new Date(data?.dueDate).getDate() < new Date().getDate()
+                      new Date(data?.dueDate).getDate() <
+                        new Date().getDate() ||
+                      new Date(data?.dueDate).getMonth() <
+                        new Date().getMonth() ||
+                      new Date(data?.dueDate).getFullYear() <
+                        new Date().getFullYear()
                         ? "#dc3545"
                         : new Date(data?.dueDate).getDate() ===
-                          new Date().getDate()
+                            new Date().getDate() &&
+                          new Date(data?.dueDate).getMonth() ===
+                            new Date().getMonth() &&
+                          new Date(data?.dueDate).getFullYear() ===
+                            new Date().getFullYear()
                         ? "#28a745"
                         : "#838485",
                   }}

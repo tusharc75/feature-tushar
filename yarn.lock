@@ -1835,10 +1835,10 @@
     react-is "^16.8.0 || ^17.0.0"
     react-transition-group "^4.4.0"
 
-"@material-ui/data-grid@^4.0.0-alpha.17":
-  version "4.0.0-alpha.29"
-  resolved "https://registry.yarnpkg.com/@material-ui/data-grid/-/data-grid-4.0.0-alpha.29.tgz#226d267b053f43e23ce5f625239237db8b3c941a"
-  integrity sha512-dGL9nmiytpjvlY9vFJKUCtXf9eGMb0zxt5+M9hXEKYK8BOYTi+Po5y4YZp4kQ2PojFu78CDz2/gP3u51GxaF3A==
+"@material-ui/data-grid@^4.0.0-alpha.30":
+  version "4.0.0-alpha.30"
+  resolved "https://registry.yarnpkg.com/@material-ui/data-grid/-/data-grid-4.0.0-alpha.30.tgz#82a9f254b482c6d200a5a6da3712adf591181f1f"
+  integrity sha512-2lf2WjsJNTVgF0DXlekIZAFap0HHNrjhdoF4tCUXNDu6ZP3helenkFY1aedjSwczQT3coLYe5sSPBVQcxJ0olw==
   dependencies:
     "@material-ui/utils" "^5.0.0-alpha.14"
     clsx "^1.0.4"
@@ -3000,6 +3000,18 @@ adler-32@~1.2.0:
   dependencies:
     exit-on-epipe "~1.0.1"
     printj "~1.1.0"
+
+ag-grid-community@^25.3.0:
+  version "25.3.0"
+  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-25.3.0.tgz#9a0acce6d35f0c23313aa559dbd8acd737d5ef19"
+  integrity sha512-Xe4NZG0PP9kvhila1uHU4BeVfLDCWBmcuBYLBZ+49jvK+jYpuwdAjV3AwIlxpZGRR3WTdBUvUkSz9rmi2DRE3Q==
+
+ag-grid-react@^25.3.0:
+  version "25.3.0"
+  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-25.3.0.tgz#7dce91fc7ef1821765357517562ba49299d4fddb"
+  integrity sha512-sRu4Mgxe26GkCKZL9XNMf/jbxLrYOuJo0pumD+LgA3e1x0mKeG8fqMbDLBKfKthIZbTaopIiwn4basThPnVdTg==
+  dependencies:
+    prop-types "^15.6.2"
 
 aggregate-error@^3.0.0:
   version "3.1.0"
@@ -6954,6 +6966,11 @@ html-minifier-terser@^5.0.1:
     param-case "^3.0.3"
     relateurl "^0.2.7"
     terser "^4.6.3"
+
+html-to-draftjs@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/html-to-draftjs/-/html-to-draftjs-1.5.0.tgz#0df0eabf429deaedb63f5c859889e2c983606e86"
+  integrity sha512-kggLXBNciKDwKf+KYsuE+V5gw4dZ7nHyGMX9m0wy7urzWjKGWyNFetmArRLvRV0VrxKN70WylFsJvMTJx02OBQ==
 
 html-webpack-plugin@4.5.0:
   version "4.5.0"

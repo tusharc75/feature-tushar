@@ -7,32 +7,40 @@ import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { MsalProvider } from "@azure/msal-react";
 import AzureInstance from "./AzureInstance";
+import * as Sentry from "@sentry/react";
+import 'ag-grid-community/dist/styles/ag-grid.min.css';
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./styles/index.scss";
 import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
 import "./styles/responsive-styles.scss"
+import "./styles/rbc-calender.scss";
 import "./styles/vis-network/vis-network.min.css"
-import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
+import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 
 Sentry.init({
-    dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
-    integrations: [new Integrations.BrowserTracing()],
+  dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
+  integrations: [new Integrations.BrowserTracing()],
 
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
 });
+
+
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Provider>
         <CustomToastProvider>
-          <MsalProvider instance={AzureInstance}>
-            <App />
-          </MsalProvider>
+          <CustomNotificationCountProvider>
+            <MsalProvider instance={AzureInstance}>
+              <App />
+            </MsalProvider>
+          </CustomNotificationCountProvider>
         </CustomToastProvider>
       </Provider>
     </Router>

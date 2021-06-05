@@ -19,15 +19,17 @@ import _ from "lodash";
 import {
   customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
-  getObjKeysWithValues, opportunityProcessFieldName, formatAmountWithCurrency
+  getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
-import { opportunity } from '../../constants/helpers'
+import { opportunity, sidebarResource, lead } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -53,6 +55,7 @@ function OpportunityDetailsPage() {
 
   const [supplierContacts, setSupplierContacts] = useState([])
   const [customerContacts, setCustomerContacts] = useState([])
+  const [quotes, setQuotes] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false)
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false)
 
@@ -86,6 +89,9 @@ function OpportunityDetailsPage() {
   });
 
   const { opportunityResource, opportunityApi } = opportunity
+  const [projectSales, setProjectSales] = useState([]);
+  const [parentLead, setParentLead] = useState([]);
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
 
   useEffect(() => {
     if (permissions) {
@@ -96,25 +102,26 @@ function OpportunityDetailsPage() {
   useEffect(() => {
     if (id) {
       fetchOpportunityData();
+      fetchRelatedData();
     }
   }, [id]);
 
   useEffect(() => {
-    if (opportunityData?.staticData?.customerContacts &&
-      opportunityData.staticData?.customerContacts.length &&
+    if (opportunityData?.staticData?.customerContact &&
+      opportunityData.staticData?.customerContact.length &&
       customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
 
-    if (opportunityData?.staticData?.supplierContacts &&
-      opportunityData.staticData?.supplierContacts.length &&
+    if (opportunityData?.staticData?.supplierContact &&
+      opportunityData.staticData?.supplierContact.length &&
       supplierContacts && supplierContacts.length === 0) fetchSupplierContactData(false)
 
   }, [opportunityData])
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
+      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && opportunityData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[opportunityProcessFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[processFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -131,6 +138,12 @@ function OpportunityDetailsPage() {
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
+          if (data?.customerAccountName?.optionValue) {
+            setTypeCreateProjectSalesDialog((prevState) => [...prevState, { id: data?.customerAccountName?.optionValue, type: "customerAccount" }])
+          }
+          if (data?.supplierAccountName?.optionValue) {
+            setTypeCreateProjectSalesDialog((prevState) => [...prevState, { id: data?.supplierAccountName?.optionValue, type: "supplierAccount" }])
+          }
           setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue === user?.user?._id
           ))
@@ -162,10 +175,10 @@ function OpportunityDetailsPage() {
             supplierContacts: true,
             customerContacts: true
           }
-          if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length === 0) {
+          if (data?.staticData?.supplierContact && data.staticData.supplierContact.length === 0) {
             tempExpanded.supplierContacts = false
           }
-          if (data?.staticData?.customerContacts && data.staticData.customerContacts.length === 0) {
+          if (data?.staticData?.customerContact && data.staticData.customerContact.length === 0) {
             tempExpanded.customerContacts = false
           }
           setExpanded(tempExpanded)
@@ -179,8 +192,55 @@ function OpportunityDetailsPage() {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
+
+
     }
   }
+
+  const fetchRelatedData = () => {
+    axiosInstance()
+      .get(`${opportunityApi}/related/${id}`)
+      .then(({ data: { data } }) => {
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+
+        if (data[sidebarResource.lead] &&
+          data[sidebarResource.lead][
+          sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+
+          ]) {
+          let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0]
+          setMainPoints(prevState => ({
+            ...prevState,
+            "Parent Lead": { leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id }
+          }));
+        }
+
+        setQuotes(
+          data[sidebarResource.quoteBuilder] &&
+            data[sidebarResource.quoteBuilder][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.quoteBuilder][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            : []
+
+        );
+
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = []
@@ -195,10 +255,10 @@ function OpportunityDetailsPage() {
         .get(`supplier-contact?filterById=${filterById}`)
         .then(({ data: { data } }) => {
 
-          let assignedContacts = opportunityData.staticData?.supplierContacts ?? []
+          let assignedContacts = opportunityData.staticData?.supplierContact ?? []
           const updatedContacts = [];
           data.forEach(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item._id === d?._id) : false;
             updatedContacts.push(d);
           })
 
@@ -207,6 +267,7 @@ function OpportunityDetailsPage() {
           if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
         }).catch(error => {
           setLoadingSupplierAccounts(false)
+          toastConfig.setToastConfig(error);
         })
     }
     else {
@@ -225,12 +286,12 @@ function OpportunityDetailsPage() {
   const handleContactsEmails = (opportunityData) => {
     let data = []
     if (opportunityData && opportunityData?.staticData) {
-      const { customerContacts, supplierContacts } = opportunityData?.staticData
-      if (customerContacts && customerContacts.length) {
-        data = getContactEmails(customerContacts)
+      const { customerContact, supplierContact } = opportunityData?.staticData
+      if (customerContact && customerContact.length) {
+        data = getContactEmails(customerContact)
       }
-      if (supplierContacts && supplierContacts.length) {
-        data = [...data, ...getContactEmails(supplierContacts)]
+      if (supplierContact && supplierContact.length) {
+        data = [...data, ...getContactEmails(supplierContact)]
       }
       if (data.length > 0) setContactsEmailsData(data)
     }
@@ -248,9 +309,9 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`customer-contact?filterById=${filterById}`)
       .then(({ data: { data } }) => {
-        let assignedContacts = opportunityData.staticData?.customerContacts ?? []
+        let assignedContacts = opportunityData.staticData?.customerContact ?? []
         const updatedContacts = data.map(d => {
-          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item._id === d?._id) : false;
           return d
         })
         setCustomerContacts(updatedContacts)
@@ -264,7 +325,6 @@ function OpportunityDetailsPage() {
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
-
     setMainPoints(mainPoint);
   };
 
@@ -282,7 +342,7 @@ function OpportunityDetailsPage() {
               setSupplierAccountOptions(fieldData.option.map(option => ({ ...option, isSelected: false })))
             }
           }
-          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
           if (processSteps && processSteps.isRead) {
             setSteps(processSteps.fieldData.option.map(m => {
               return {
@@ -376,13 +436,14 @@ function OpportunityDetailsPage() {
 
   return (
     <>
+      {console.log(permissions)}
       <Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper className="subContainer">
+            <Paper>
               {!opportunityData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -497,39 +558,61 @@ function OpportunityDetailsPage() {
                     <Box padding="16px">
                       <DetailsPage
                         data={opportunityData}
-                        fields={opportunityFields}
+                        fields={opportunityFields.filter(currentField => currentField.fieldData?.fieldName !== "supplierAccountName")}
                       />
                     </Box>
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                            contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
-                            title="Supplier Contacts"
-                            contactApi={supplierContact.contactApi}
-                            isExpanded={expanded.supplierContacts}
-                            onAddContact={() => {
-                              fetchSupplierContactData(true);
-                            }}
-                            onSetExpanded={() => {
-                              setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
-                            }}
-                            recordsPerLine={recordsPerLine}
-                          />
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
+                          title="Supplier Contacts"
+                          contactApi={supplierContact.contactApi}
+                          isExpanded={expanded.supplierContacts}
+                          onAddContact={() => {
+                            fetchSupplierContactData(true);
+                          }}
+                          onSetExpanded={() => {
+                            setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
+                          }}
+                          recordsPerLine={recordsPerLine}
+                          accounts={_.cloneDeep(opportunityData?.supplierAccountName)}
+                        />
                       }
                       {
                         opportunityData && <OpportunityContacts
-                            contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
-                            title="Customer Contacts"
-                            isExpanded={expanded["customerContacts"]}
-                            contactApi={customerContact.contactApi}
-                            onAddContact={() => {
-                              fetchCustomerContactData(true);
-                            }}
-                            onSetExpanded={() => {
-                              setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
-                            }}
-                            recordsPerLine={recordsPerLine}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
+                          title="Customer Contacts"
+                          isExpanded={expanded["customerContacts"]}
+                          contactApi={customerContact.contactApi}
+                          onAddContact={() => {
+                            fetchCustomerContactData(true);
+                          }}
+                          onSetExpanded={() => {
+                            setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
+                          }}
+                          recordsPerLine={recordsPerLine}
+                        />
+                      }
+                      {permissions?.projectSales?.isRead && (
+                        <ProjectInAccordion
+                          recordsPerLine={3}
+                          projectSales={projectSales}
+                          type={typeCreateProjectSalesDialog}
+                          fetchData={fetchRelatedData}
+                          permissions={permissions}
+                          isAddProjectSale={true}
+                        />
+                      )}
+                      {
+                        permissions?.quoteBuilder?.isRead && (
+                          <QuotesInAccordion
+                            recordsPerLine={3}
+                            quotes={quotes}
+                            fetchData={fetchRelatedData}
+                            quoteBuilderPermission={permissions.quoteBuilder}
+                            opportunityId={id}
                           />
+                        )
                       }
                     </div>
                   </TabPanel>
@@ -541,7 +624,7 @@ function OpportunityDetailsPage() {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="subContainer">
+            <Paper>
               {!opportunityData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -615,7 +698,10 @@ function OpportunityDetailsPage() {
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
-            handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
+            handleCloseDialog={() => {
+              if (selectedSupplierAccounts.length == 0) setSupplierContacts([])
+              setShowAddSupplierContactsDialog(false)
+            }}
             contacts={{
               supplierContacts: supplierContacts, customerContacts: customerContacts,
               notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
@@ -643,7 +729,7 @@ function OpportunityDetailsPage() {
               supplierContacts: supplierContacts, customerContacts: customerContacts,
               notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
             }}
-            assignedContacts={opportunityData.staticData?.customerContacts ?? []}
+            assignedContacts={opportunityData.staticData?.customerContact ?? []}
             contactType="customer"
             notToBeRemovedContacts={notToBeRemovedContacts}
           />

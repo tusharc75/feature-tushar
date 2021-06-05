@@ -1,16 +1,27 @@
-import React, { useState } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import React, { useState, useEffect } from 'react'
+import { useHistory } from "react-router-dom";
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip, MenuItem, Menu } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
-import { FaEye } from 'react-icons/fa';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
+import routes from '../Helpers/Routes';
+import { useData } from '../../StateProvider/Provider';
+import currencies from "./../../constants/currency_with_country.json";
+import { displayDate } from '../../services/util';
+import { HiExternalLink } from 'react-icons/hi';
+import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
+import { MoreVert } from "@material-ui/icons";
+import { customerAccount, customerContact } from '../../constants/helpers';
+import AssignQuoteDialog from './AssignQuoteDialog';
 
 const Accordion = withStyles({
     root: {
@@ -69,8 +80,11 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 }) {
-
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isCreateOwnerDisable = true }) {
+    const history = useHistory();
+    const {
+        state: { selectedEntity },
+    }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -92,6 +106,29 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 
     }
 
     const [expandQuote, setExpandQuote] = useState(expanded);
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [showAddExistingDialog, setShowAddExistingDialog] = useState(false);
+
+    const onSuccess = () => {
+        setShowCreateDialog(false);
+        fetchData();
+    }
+    useEffect(() => {
+        let isExpanded = expandQuote;
+        if (quotes?.length === 0 && isExpanded) isExpanded = false;
+        else if (quotes?.length > 0 && !isExpanded) isExpanded = true;
+
+        setExpandQuote(isExpanded);
+    }, [quotes]);
+
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     return <>
         <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
             <AccordionSummary
@@ -99,34 +136,75 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 
                 id="user-panel-header"
             >
                 <Grid container>
-                    <Grid item xs={8}>
-                        <Box display="flex">
-                            <Box>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => setExpandQuote(!expandQuote)} >
-                                    {
-                                        expandQuote === true ? (
-                                            <ExpandLessIcon />
-                                        ) : (
-                                            <ExpandMoreIcon />
-                                        )
-                                    }
-                                </IconButton>
-                            </Box>
+                    <Grid item xs={8} alignItems='center'>
+                        <Box
+                            component="div"
+                            display="flex"
+                            alignItems="center"
+                            flexGrow={1}
+                        >
+
+                            <IconButton
+                                size="small"
+                                onClick={() => setExpandQuote(!expandQuote)} >
+                                {
+                                    expandQuote === true ? (
+                                        <ExpandLessIcon />
+                                    ) : (
+                                        <ExpandMoreIcon />
+                                    )
+                                }
+                            </IconButton>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    Quotes (1)
+                                    Quotes ({quotes?.length || 0})
                                 </Typography>
                             </Box>
                         </Box>
+
+
                     </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                        {
-                            <IconButton
+                    <Grid item xs={4} container justify="flex-end" alignItems='center'>
+                        {quoteBuilderPermission.isCreate ?
+                            <>
+                                <IconButton
+                                    aria-haspopup="true"
+                                    color="primary"
+                                    size="small"
+                                    onClick={handleOpenMenu}
+                                >
+                                    <MoreVert />
+                                </IconButton>
+                                <Menu
+                                    id="menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleCloseMenu}
+                                >
+                                    <MenuItem
+                                        onClick={() => {
+                                            setShowCreateDialog(true);
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Create New
+                          </MenuItem>
+                                    {isRenderedInCustomerContact && <MenuItem
+
+                                        onClick={() => {
+                                            setShowAddExistingDialog(true)
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Add Exisiting
+                                    </MenuItem>}
+                                </Menu>
+                            </>
+                            : <IconButton
                                 color="primary"
                                 size="small"
-                                onClick={() => { }}
+                                onClick={() => { setShowCreateDialog(true) }}
                             >
                                 <ControlPointIcon />
                             </IconButton>
@@ -134,41 +212,58 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 
                     </Grid>
                 </Grid>
             </AccordionSummary>
+            <Box margin={0.5} />
             <AccordionDetails>
                 <>
                     {
                         expandQuote && <>
                             {
+                                quotes && quotes?.length ? (
+                                    <Grid container spacing={1}>
+                                        {   quotes.map((obj, i) => (
+                                            <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
+                                                <Card className="detailCard">
+                                                    <CardContent className="detailListing">
+                                                        <Grid container className="detailCardHeader">
+                                                            <Grid item xs={7} sm={8}>
 
-                                <Grid container spacing={1}>
-                                    {
-                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
-                                             <Card className="detailCard">
-                                                <CardContent className="detailListing">
-                                                    <Grid container className="detailCardHeader">
-                                                        <Grid item xs={12} sm={12}>
-                                                            <Link className="link">
-                                                                <Typography className="detailName">Quatation 1</Typography>
-                                                            </Link>
+                                                                {obj.entity === selectedEntity ? (
+                                                                    < Link className="link" to={`/quote-builder/${obj._id}`}>
+                                                                        <Typography className="detailName">{obj.quoteName}</Typography>
+                                                                    </Link>) : (<span className="d-flex gap-2 align-items-center">
+                                                                        <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+                                                                            <InfoOutlinedIcon fontSize="small" />
+                                                                        </Tooltip>
+                                                                    </span>)
+                                                                }
+                                                            </Grid>
+                                                            <Grid item xs={5} sm={4}>
+                                                                <Typography className="amount">
+                                                                    {obj.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
+                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
-                                                    <Grid container>
-                                                        <Grid item xs={12} sm={6} md={6}>
-                                                            {
-                                                                <DisplayData key={1} label='Status' value="Active" icon={<BsClockHistory size={15} />} />
-                                                            }
+                                                        <Grid container>
+
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    obj.closeDate ? <DisplayData key={i} label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                                }
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    obj.probability ? <DisplayData key={i} label='Probability' value={`${obj.probability} %`} icon={< TrendingUpOutlinedIcon />} /> : ''
+                                                                }
+                                                            </Grid>
+
                                                         </Grid>
-                                                        <Grid item xs={12} sm={6} md={6}>
-                                                            {
-                                                                <DisplayData key={2} label='Due Date' value="May-20-2021" icon={< IoCalendarOutline size={15} />} />
-                                                            }
-                                                        </Grid>
-                                                    </Grid>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
-                                    }
-                                </Grid>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+
+
+                                    </Grid>) : null
                             }
                         </>
                     }
@@ -178,22 +273,46 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 
                 <FaEye /> View All &#8599;
             </Box>
             <Box margin={1} /> */}
+            <Box margin={1} className="btn-view gap-1" onClick={() =>
+                history.push(`/quote-builder`)}
+
+                p={1} display="flex" justifyContent="center" alignItems="center">
+                <HiExternalLink size={25} />
+            </Box>
         </Accordion>
 
-        {/* {
-            showCreateOpportunityDialog && <ManageOpportunityDialog
+        {
+            showCreateDialog &&
+            <ManageQuoteDialog
+                open={showCreateDialog}
+                onClose={() => { setShowCreateDialog(false) }}
                 isNew={true}
-                open={showCreateOpportunityDialog}
-                onClose={() => setShowCreateOpportunityDialog(false)}
-                onSuccess={() => {
-                    setShowCreateOpportunityDialog(false);
-                    onNewOpportunityAdd();
-                }}
+                isRedirectTodetailPage={false}
+                dataToUpdate={null}
+                resource={null}
+                onSuccess={onSuccess}
                 accountId={accountId}
-                resource={resource}
-                isRedirectTodetailPage={isRedirect}
+                contactId={contactId}
+                opportunityId={opportunityId}
+                accountResource={accountResource}
+                disableOwnerDropDown={isCreateOwnerDisable}
+
             />
-        } */}
+        }
+        {
+            showAddExistingDialog &&
+            <AssignQuoteDialog
+                quoteDialogOpen={showAddExistingDialog}
+                handleCloseDialog={() => setShowAddExistingDialog(false)}
+                onSuccess={() => {
+                    setShowAddExistingDialog(false);
+                    fetchData()
+                }}
+                assignedQuotes={quotes}
+                accountId={accountId}
+                contactId={contactId}
+            />
+        }
     </>
 
 }

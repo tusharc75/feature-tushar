@@ -16,22 +16,28 @@ import AxiosInstance from '../../axios/axiosInstance'
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import routes from "../../components/Helpers/Routes";
 import { stubTrue } from "lodash";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 
 const ProductBuilderSchema = Yup.object().shape({
     subject: Yup.string()
         .required("please enter email subject"),
     body: Yup.string()
-        .required("please enter email body")
+        .required("please enter email body"),
+    account:Yup.object()
+    .required("please select Account"),
+    contact:Yup.object()
+    .required("please select Contact")
 });
 
 
 const EmailDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose,success,id} = props;
+    const { handleClose,success,id,version} = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ subject: "",body:"" });
+    const [initialData, setInitialData] = useState({ subject: "",body:"",cc:"",bcc:"",account:"",contact:"" });
     const [accounts,setAccounts]=useState([]);
     const [contacts,setContacts]=useState([])
     const [validEmail,setValidEmail]=useState(true);
@@ -45,8 +51,11 @@ const EmailDialog = (props) => {
     const handleSubmit = (values) => {
         const body={
             email:email,
+            version:version,
             emailBody:values.body,
             emailSubject:values.subject,
+            cc:values.cc,
+            bcc:values.bcc,
             id:id
         }
         axiosInstance()
@@ -109,6 +118,8 @@ const EmailDialog = (props) => {
 
     return (<Dialog
         maxWidth="sm"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -133,10 +144,21 @@ const EmailDialog = (props) => {
                             <Autocomplete
                                 id="accounts"
                                 options={accounts}
+                                fullWidth
                                 getOptionLabel={(option) => option.accountName}
                                 style={{ width: 300 }}
-                                onChange={fetchContacts}
-                                renderInput={(params) => <TextField {...params} label="Account" variant="outlined" />}
+                                onChange={(e,value)=>{fetchContacts(e,value); setFieldValue("account",value);}}
+                                renderInput={(params) => 
+                                <TextField {...params} 
+                                label="Account" 
+                                variant="outlined" 
+                                name="cc"
+                                fullWidth
+                                required 
+                                margin="dense"
+                                value={values["cc"]}
+                                error={touched["account"] && Boolean(errors["account"])}
+                                helperText={touched["account"] && errors["account"]}/>}
                                 />
                                 </Box>
                                 <Box p={1}>
@@ -145,10 +167,50 @@ const EmailDialog = (props) => {
                                 options={contacts}
                                 getOptionLabel={(option) => option.firstName}
                                 style={{ width: 300 }}
-                                onChange={fetchemailAddress}
-                                renderInput={(params) => <TextField {...params} label="Contact" variant="outlined" />}
+                                onChange={(e,value)=>{fetchemailAddress(e,value); setFieldValue("contact",value);}}
+                                renderInput={(params) => 
+                                <TextField {...params} 
+                                label="Contact" 
+                                variant="outlined"
+                                name="contact"
+                                fullWidth
+                                required 
+                                margin="dense"
+                                value={values["contact"]}
+                                error={touched["contact"] && Boolean(errors["contact"])}
+                                helperText={touched["contact"] && errors["contact"]}
+                                 />}
                                 />
                             </Box>
+                            <Box p={1}>
+                                <TextField
+                                    variant="outlined"
+                                    type="text"
+                                    label="CC"
+                                    name="cc"
+                                    fullWidth
+                                    margin="dense"
+                                    value={values["cc"]}
+                                    error={touched["cc"] && Boolean(errors["cc"])}
+                                    helperText={touched["cc"] && errors["cc"]}
+                                    onChange={(e) => setFieldValue("cc", e.target.value.trimStart())}
+                                />
+                            </Box>
+                            <Box p={1}>
+                                <TextField
+                                    variant="outlined"
+                                    type="text"
+                                    label="BCC"
+                                    name="bcc"
+                                    fullWidth
+                                    margin="dense"
+                                    value={values["bcc"]}
+                                    error={touched["bcc"] && Boolean(errors["bcc"])}
+                                    helperText={touched["bcc"] && errors["bcc"]}
+                                    onChange={(e) => setFieldValue("bcc", e.target.value.trimStart())}
+                                />
+                            </Box>
+                            
                             <Box p={1}>
                                 <TextField
                                     variant="outlined"
@@ -183,7 +245,7 @@ const EmailDialog = (props) => {
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Button color="primary" onClick={handleClose}>Cancel</Button>
+                        <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
                             loading={loading}
                             variant="contained"

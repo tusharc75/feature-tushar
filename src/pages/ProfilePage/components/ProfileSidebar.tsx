@@ -24,25 +24,25 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
             show: true,
             icon: <IoMdNotificationsOutline size={20} />,
             id: profileMenuItems.notification
-        },
-        {
-            label: "Security and Privacy",
-            show: true,
-            icon: <BiCheckShield size={20} />,
-            id: profileMenuItems.securityPrivacy
-        },
-        {
-            label: "Users",
-            show: true,
-            icon: <FiUsers size={20} />,
-            id: profileMenuItems.users
-        },
-        {
-            label: "Setting",
-            show: true,
-            icon: <IoSettingsOutline size={20} />,
-            id: profileMenuItems.setting
-        },
+        }
+        // ,{
+        //     label: "Security and Privacy",
+        //     show: true,
+        //     icon: <BiCheckShield size={20} />,
+        //     id: profileMenuItems.securityPrivacy
+        // },
+        // {
+        //     label: "Users",
+        //     show: true,
+        //     icon: <FiUsers size={20} />,
+        //     id: profileMenuItems.users
+        // },
+        // {
+        //     label: "Settings",
+        //     show: true,
+        //     icon: <IoSettingsOutline size={20} />,
+        //     id: profileMenuItems.setting
+        // },
     ]
     return <Grid container justify="center">
         <Grid item sm={12} lg={12} md={12}>

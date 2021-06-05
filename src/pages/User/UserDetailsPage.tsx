@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Grid,
   Box,
@@ -35,7 +35,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { userType } from "../../constants/helpers";
+import { isObjectEmpty, userType } from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -84,14 +84,13 @@ const UserDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
+  const [doaType, setDoaType] = useState(null);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([])
-  const showRecordsBeforeViewAll = 2;
-  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
 
   useEffect(() => {
@@ -121,10 +120,8 @@ const UserDetailsPage = () => {
 
   const fetchUserData = async () => {
     setLoading(true);
-    try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`/user/${id}`);
+
+    await axiosInstance().get(`/user/${id}`).then(({ data: { data } }) => {
       handleMainPoints(data);
       const name = [data.firstName, data.lastName].filter((d) => d).join(" ");
 
@@ -171,32 +168,39 @@ const UserDetailsPage = () => {
 
       setUserPermissions(data.permissions);
       setLoading(false);
-    } catch (error) {
+    }).catch((error) => {
       toastConfig.setToastConfig(error);
-    }
-  };
+    });
+  }
 
   const fetchDoa = async () => {
-    setDoa([]);
     axiosInstance()
       .get(`/doa/${id}`)
-      .then(({ data: { data, count } }) => {
-        setDoa(
-          data?.doa.map((item) => {
-            return {
+      .then(({ data: { data } }) => {
+        let doaData = [];
+
+        data.doa.forEach((item) => {
+          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+          //  So added this check
+          if (!isObjectEmpty(item)) {
+            doaData.push({
               id: item.user?._id,
-              name: `${item.user.firstName} ${item.user.lastName}`,
-              firstName: item.user.firstName,
-              lastName: item.user.lastName,
+              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+              firstName: item.user?.firstName,
+              lastName: item.user?.lastName,
               amount: item.amount,
-            };
-          })
-        );
-        setDoaCurrency(data?.doaCurrency)
+            });
+          }
+        });
+
+        setDoa(doaData);
+        setDoaCurrency(data.doaCurrency)
+        setDoaType(data.doaType)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setLoading(false);
+        setDoa([]);
       });
   };
 
@@ -245,7 +249,7 @@ const UserDetailsPage = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       name: `${data.firstName} ${data.lastName}`,
-      phone: data.phone || "",
+      phone: data.mobileNo || "",
       email: data.email || "",
     };
     setMainPoints(tempMp);
@@ -440,13 +444,12 @@ const UserDetailsPage = () => {
         />
       )}
       <Layout>
-
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper className="subContainer">
+            <Paper>
               {!userData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -817,7 +820,7 @@ const UserDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="subContainer">
+            <Paper className="fixedRightPanel">
               <Box className="detailHeader">
                 <h2 className="listingHeader single">Approval Process</h2>
               </Box>
@@ -911,6 +914,7 @@ const UserDetailsPage = () => {
           onClose={() => {
             setDoaDialogOpen(false);
           }}
+          doaType={doaType}
         />
       )}
 

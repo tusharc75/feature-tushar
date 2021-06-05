@@ -30,7 +30,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
-import { formatAmountWithCurrency } from "../../constants/helpers";
+import { displayCardDate, formatAmountWithCurrency } from "../../constants/helpers";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,11 +48,13 @@ const ProjectSalesDetails = () => {
   const [customerAccounts, setCustomerAccounts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [quotes, setQuotes] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState("");
   const [headingLbl, setHeadingLbl] = useState("");
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
   const [removeUserRec, setRemoveUserRec] = useState(null);
+  const [isDeleting, setDeleting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -67,17 +69,6 @@ const ProjectSalesDetails = () => {
     nodes: [],
     colorPalette: null,
   });
-
-  useEffect(() => {
-    if (!state) return;
-
-    axiosInstance()
-      .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
 
   useEffect(() => {
     //  When it is nodal structure tab
@@ -131,6 +122,7 @@ const ProjectSalesDetails = () => {
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
+      setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
       setLoading(false);
@@ -158,8 +150,8 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["End Date"]: data.endDate ? new Date(data.endDate).toDateString() : "",
-      ["Value"]: data.value || "",
+      ["Amount"]: data.amount || "",
+      ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
         : "",
@@ -216,13 +208,16 @@ const ProjectSalesDetails = () => {
 
   const DeleteProject = () => {
     if (deleteRec) {
+      setDeleting(true);
       axiosInstance()
         .put(`/project-sales/remove`, { ids: [deleteRec] })
         .then(({ data }) => {
+          setDeleting(false);
           setShowConfirmBox(false);
           history.goBack();
         })
         .catch((err) => {
+          setDeleting(false);
           setShowConfirmBox(false);
         });
     } else {
@@ -246,14 +241,16 @@ const ProjectSalesDetails = () => {
           .map((user) => user._id),
         _id: id,
       };
-
+      setDeleting(true);
       axiosInstance()
         .put(`/project-sales/add-user`, dataObj)
         .then(() => {
           getSalesData();
+          setDeleting(false);
           setShowConfirmBox(false);
         })
         .catch((error) => {
+          setDeleting(false);
           setShowConfirmBox(false);
           toastConfig.setToastConfig(error);
         });
@@ -288,6 +285,8 @@ const ProjectSalesDetails = () => {
           : [];
       case "opportunity":
         return opportunities.length ? opportunities.map((t) => t._id) : [];
+      case "quote-builder":
+        return quotes.length ? quotes.map((t) => t._id) : [];
 
       default:
         return [];
@@ -327,12 +326,13 @@ const ProjectSalesDetails = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={customizedRoutes} />
-
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
         <div className="detail-container">
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper className="subContainer">
+              <Paper>
                 {!projectSalesData ? (
                   <Box padding={1}>
                     <Skeleton variant="text" width="150px" height="30px" />
@@ -358,18 +358,16 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
+                        size="small"
                         onClick={handleOpenUpdateDialog}
                       >
                         Edit
                       </Button>
                     ) : null}
-
-                    <Box component="span" marginX={1} />
-
                     {permissions?.projectSales.isDelete && isManager ? (
                       <DeleteButton
                         text="Delete"
@@ -382,8 +380,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                  !projectSalesFields.length ||
-                  !projectSalesData ? (
+                    !projectSalesFields.length ||
+                    !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -428,9 +426,8 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${
-                                    node.id
-                                  }`,
+                                  pathname: `${routes[node.route].path}/${node.id
+                                    }`,
                                 });
                               }
                             }}
@@ -461,7 +458,7 @@ const ProjectSalesDetails = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper className="subContainer">
+              <Paper>
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"
@@ -473,7 +470,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -534,6 +531,7 @@ const ProjectSalesDetails = () => {
             customerAccounts={customerAccounts}
             customerContacts={customerContacts}
             opportunities={opportunities}
+            quotes={quotes}
             permissions={permissions?.projectSales}
             fetchProjectData={getSalesData}
             projectId={id}
@@ -549,8 +547,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-              : ""
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -558,6 +556,7 @@ const ProjectSalesDetails = () => {
             if (removeUserRec) setRemoveUserRec(null);
           }}
           onOk={deleteRec ? DeleteProject : removeUserRec ? RemoveUser : null}
+          okBtnLoading={isDeleting}
         />
       ) : null}
     </>

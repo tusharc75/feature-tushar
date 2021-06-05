@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import { CreateNote } from "./CreateNote";
 import { GetNote, DeleteNote } from "../../../axios/activity";
 import Typography from "@material-ui/core/Typography";
-import moment from "moment";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import IconButton from "@material-ui/core/IconButton";
@@ -13,6 +12,8 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
 
 export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -30,8 +31,8 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetNote(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setNotes(data);
-        onSetCount("Note", data.length)
-        setLoading(false);
+        onSetCount("Note", data.length);
+        setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
         setLoading(false);
@@ -72,6 +73,9 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     setOpen(false);
     handleActivityRefresh();
   };
+  const handleDialogClose = () => {
+    setOpen(false);
+}
 
   return (
     <Box className="activityDetailBox">
@@ -100,7 +104,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     </Typography>
                     <span className="activity-date">
                       Created :{" "}
-                      {moment(_note.createdBy.date).format("MMM DD YYYY")}
+                      {displayDate(_note.createdBy.date)}
                     </span>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
@@ -148,13 +152,16 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={handleDialogClose}
         fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         <CreateNote
           noteId={noteId}
           handleClose={handleClose}
           relatedTo={relatedTo}
+          handleDialogClose={handleDialogClose}
         />
       </Dialog>
     </Box>

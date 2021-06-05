@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Box, Button, ButtonGroup } from "@material-ui/core";
-import grey from "@material-ui/core/colors/grey";
+import { Map } from "@material-ui/icons";
 import moment from "moment";
 
 import { GetRoadmap } from "../../../../axios/activity";
@@ -12,15 +11,7 @@ import ActivityList from "./ActivityList";
 import CalanderList from "./CalanderList";
 import Loader from "../../../../components/Loader";
 
-const useStyles = makeStyles((theme) => ({
-  hover: {
-    "&:hover": {
-      backgroundColor: grey[100],
-    },
-  },
-}));
-
-export default function Roadmap({ type, filter, activityId }) {
+function Roadmap({ type, filter }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById("dayLiner");
@@ -85,7 +76,6 @@ export default function Roadmap({ type, filter, activityId }) {
     setSelected(nodeIds);
   };
 
-  const classes = useStyles();
   return activity ? (
     <Box bgcolor="white">
       <Box
@@ -99,6 +89,7 @@ export default function Roadmap({ type, filter, activityId }) {
           display="flex"
           width="100%"
           height="100%"
+        
           style={{ position: "absolute" }}
         >
           <Box
@@ -108,19 +99,22 @@ export default function Roadmap({ type, filter, activityId }) {
             style={{ position: "relative", overflow: "hidden" }}
           >
             <Box
-              height={54}
+              height={60}
               bgcolor="grey.200"
-              display="flex"
+              display="flex"            
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
-              <Box p={2}>
-                <Typography variant="body2" display="block">
+              <Box p={2} display="flex" alignItems="center">
+                <Map />
+                <Box mr={1} />
+                <Typography variant="body1" display="block">
                   Roadmap
                 </Typography>
               </Box>
             </Box>
             <div ref={taskScroolRef}>
               <Box
+               
                 style={{
                   position: "absolute",
                   width: "100%",
@@ -129,6 +123,8 @@ export default function Roadmap({ type, filter, activityId }) {
                 }}
               >
                 <ActivityList
+                  fetchRoadmap={fetchRoadmap}
+                  type={type}
                   activity={activity}
                   treeList={treeList}
                   expanded={expanded}
@@ -161,6 +157,8 @@ export default function Roadmap({ type, filter, activityId }) {
             >
               <Box style={{ position: "absolute", width: totalDay * dayPixel }}>
                 <CalanderList
+                  fetchRoadmap={fetchRoadmap}
+                  type={type}
                   activity={activity}
                   expanded={expanded}
                   selected={selected}
@@ -190,9 +188,9 @@ export default function Roadmap({ type, filter, activityId }) {
                 >
                   <Box
                     style={{ margin: "auto" }}
-                    width={3}
-                    border={3}
-                    borderColor="primary.main"
+                    width={2}
+                    border={2}
+                    borderColor="secondary.main"
                     height={"100%"}
                   ></Box>
                 </Box>
@@ -201,29 +199,30 @@ export default function Roadmap({ type, filter, activityId }) {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="flex-end">
-        <Box>
+      <Box display="flex" justifyContent="flex-end" className="mt-2">
           <ButtonGroup disableElevation color="primary">
             <Button
+              size="small"
               variant={calendarType === "week" ? "contained" : "outlined"}
               onClick={() => handelChangeCalendarType("week")}
             >
               Weeks
             </Button>
             <Button
+              size="small"
               variant={calendarType === "month" ? "contained" : "outlined"}
               onClick={() => handelChangeCalendarType("month")}
             >
               Months
             </Button>
             <Button
+              size="small"
               variant={calendarType === "quater" ? "contained" : "outlined"}
               onClick={() => handelChangeCalendarType("quater")}
             >
               Quaters
             </Button>
           </ButtonGroup>
-        </Box>
       </Box>
     </Box>
   ) : (
@@ -236,3 +235,4 @@ Roadmap.propTypes = {
   filter: PropTypes.any,
   activityId: PropTypes.any,
 };
+export default memo(Roadmap);

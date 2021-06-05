@@ -98,7 +98,7 @@ const ProjectStrategyHeader = (props) => {
                 onClose={closeActions}
               >
                 <MenuItem
-                  disabled={Boolean(canDelete)}
+                  disabled={canDelete}
                   onClick={() => {
                     showConfirmBox(null);
                     closeActions();

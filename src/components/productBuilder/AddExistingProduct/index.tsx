@@ -22,9 +22,10 @@ import CustomDataGridNoDataFound from "../../Helpers/DataGridHelpers/CustomDataG
 import CustomDataGridToolbar from "../../Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { getSearchQuery } from '../../../services/util';
 import SearchBox from '../../Helpers/SearchBox'
-
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+const ignoreField = ["qty"]
 
 const AddExistingProduct = (props) => {
 
@@ -57,7 +58,9 @@ const AddExistingProduct = (props) => {
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {
-                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                    if (ignoreField.includes(ele.fieldName)) {
+                    }
+                    else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                             ele.displayUnits.forEach((_unit) => {
                                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
@@ -137,6 +140,7 @@ const AddExistingProduct = (props) => {
         let rows = product.filter((data) => selectedProduct.includes(data._id))
         rows.forEach((_d) => {
             _d.productId = _d._id
+            _d.qty = 0
             delete _d.id
             delete _d.brand
             delete _d.createdBy
@@ -196,9 +200,10 @@ const AddExistingProduct = (props) => {
     }
 
     return (<Dialog
+        fullScreen={true}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
-        fullScreen
     >
         <CustomDialogHeader title={"Add Existing Product"} onClose={handleClose} ></CustomDialogHeader>
         <div className="listing-grid p-3">
@@ -214,7 +219,7 @@ const AddExistingProduct = (props) => {
                             value={searchVal}
                         />
                         <Box ml={1} >
-                            <Button color="primary" onClick={handleAdd} variant="contained" disabled={selectedProduct.length > 0 ? false : true}  >
+                            <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedProduct.length > 0 ? false : true}  >
                                 {selectedProduct.length ? "(" + selectedProduct.length + ")  " : ""}
                                 Add</Button>
                         </Box>

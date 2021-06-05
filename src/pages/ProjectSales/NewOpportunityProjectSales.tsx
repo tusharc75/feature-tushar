@@ -11,6 +11,7 @@ import {
   initializeDropdownById,
   opportunity,
   simplifyValues,
+  setFieldsInAscendingOrder,
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -20,6 +21,8 @@ import CustomButton from "../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../StateProvider/Provider";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 
@@ -48,30 +51,11 @@ export default function NewOpportunityProjectSales({
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
-    sortArray();
+    setFormsData(setFieldsInAscendingOrder(opportunityData.fields));
   }, [opportunityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    opportunityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = opportunityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   useEffect(() => {
     getOpportunityFields();
@@ -147,6 +131,9 @@ export default function NewOpportunityProjectSales({
   return (
     <Dialog
       maxWidth="md"
+      fullWidth
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={onClose}
       open={open}
@@ -164,7 +151,7 @@ export default function NewOpportunityProjectSales({
           initialValues={opportunityData.initialValues}
           validationSchema={yupSchema(opportunityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
@@ -343,6 +330,9 @@ export default function NewOpportunityProjectSales({
                                       fullWidth
                                       isTooltip={true}
                                       size="small"
+                                      imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                        setUploadingImageOrFileProgress(completePercentage);
+                                      } : null}
                                     />
                                   )}
                                 </Grid>
@@ -379,6 +369,7 @@ export default function NewOpportunityProjectSales({
                   type="button"
                   variant="outlined"
                   color="primary"
+                  size="small"
                   onClick={onClose}
                 >
                   Cancel
@@ -389,7 +380,7 @@ export default function NewOpportunityProjectSales({
                   variant="contained"
                   color="primary"
                   disabled={
-                    Object.values(
+                    uploadingImageOrFileProgress > 0 || Object.values(
                       simplifyValues(
                         opportunityData.initialValues,
                         opportunityData.fields

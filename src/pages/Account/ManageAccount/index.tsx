@@ -31,7 +31,7 @@ export default function ManageAccountDialog(props) {
   const {
     state: { user },
   }: any = useData();
-  const [entityData, setEntityData] = useState({
+  const [accountData, setAccountData] = useState({
     fields: [],
     initialValues: {},
   });
@@ -51,20 +51,18 @@ export default function ManageAccountDialog(props) {
 
           axiosInstance()
             .get(`/${accountApi}/clone/${id}`)
-            .then(
-              ({ data: dataToClone }) => {
-                setEntityData({
-                  fields: newFields,
-                  initialValues: dataToClone.data
-                    ? dataToClone.data
-                    : getObjKeys("", newFields),
-                });
-                setLoading(false);
-              },
-              (error) => {
-                setLoading(false);
-              }
-            );
+            .then(({ data: dataToClone }) => {
+              setAccountData({
+                fields: newFields,
+                initialValues: dataToClone.data
+                  ? dataToClone.data
+                  : getObjKeys("", newFields),
+              });
+              setTimeout(() => setLoading(false), 500);
+            })
+            .catch((error) => {
+              setLoading(false);
+            });
         });
     } else {
       getAccountFields();
@@ -72,7 +70,7 @@ export default function ManageAccountDialog(props) {
 
     return () => {
       setLoading(false);
-      setEntityData({
+      setAccountData({
         fields: [],
         initialValues: {},
       });
@@ -95,11 +93,11 @@ export default function ManageAccountDialog(props) {
             newFields.push(_f.fieldData);
           });
 
-        setEntityData({
+        setAccountData({
           fields: newFields,
           initialValues: getObjKeys("", newFields),
         });
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => setLoading(false));
   };
@@ -134,7 +132,7 @@ export default function ManageAccountDialog(props) {
       loading={loading}
       isNew={true}
       onClose={onClose}
-      entityData={entityData}
+      accountData={accountData}
       handleSubmit={handleCreateAccount}
       owners={owners}
       collaborators={collaborators}

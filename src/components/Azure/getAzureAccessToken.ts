@@ -3,6 +3,7 @@ const getAzureAcessToken = async (msalInstance) => {
     const activeAccount = msalInstance.getActiveAccount(); // This will only return a non-null value if you have logic somewhere else that calls the setActiveAccount API
     const accounts = msalInstance.getAllAccounts();
     const ResourceUrl = "https://graph.microsoft.com";
+    let authResult;
     if (!activeAccount && accounts.length === 0) {
         return "" 
     }
@@ -11,8 +12,11 @@ const getAzureAcessToken = async (msalInstance) => {
         account: activeAccount || accounts[0]
     };
 
-
-    const authResult = await msalInstance.acquireTokenSilent(request);
+    try{
+      authResult  = await msalInstance.acquireTokenSilent(request);
+    }catch(e){
+      authResult = await msalInstance.acquireTokenPopup(request)
+    }
 
     return authResult.accessToken
 };

@@ -34,9 +34,9 @@ const CreateUser = ({ open, close, fetchData }) => {
     fields: [],
     values: {},
   });
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const location = useLocation();
   const history = useHistory();
-
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -79,7 +79,7 @@ const CreateUser = ({ open, close, fetchData }) => {
         history.push({
           pathname: `/user/detail/${newId}`,
           state: { location: location }
-        });       
+        });
         close();
       })
       .catch((error) => {
@@ -112,10 +112,10 @@ const CreateUser = ({ open, close, fetchData }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" color="primary" disabled={loading}>
+            <Button variant="outlined" size="small" color="primary" disabled={loading}>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" disabled={loading}>
+            <Button variant="contained" size="small" color="primary" disabled={loading}>
               Submit
             </Button>
           </CustomDialogFooter>
@@ -138,6 +138,7 @@ const CreateUser = ({ open, close, fetchData }) => {
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    onImageUploadCompletePercentage={setUploadingImageOrFileProgress}
                   />
                 </Form>
               </CustomDialogContent>
@@ -145,6 +146,7 @@ const CreateUser = ({ open, close, fetchData }) => {
                 <Button
                   variant="outlined"
                   color="primary"
+                  size="small"
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -153,8 +155,9 @@ const CreateUser = ({ open, close, fetchData }) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading}
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>

@@ -18,7 +18,11 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
-import axios from "axios";
+import { BiArrowBack } from 'react-icons/bi';
+import ImportExportLinks from "../../components/Product/ImportExportLinks";
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import FormTypes from "../../components/Helpers/FormTypes";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -33,104 +37,64 @@ const CreateProductBuilder = () => {
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
-    console.log(id);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
-    const [section, setSection] = useState([]);
-    const [deleteField, setDeleteField] = useState([]);
-    const [newVersion,setNewVersion]=useState(false);
-    const [versionNumber,setVersionNumber]=useState(0);
-
 
     useEffect(() => {
         fetchOneProductBuilder();
-        
     }, [id]);
 
-    useEffect(()=>{
-        fetchVersionDetail();
-    },[initialValues,section]);
-
     const fetchOneProductBuilder = () => {
-        if (id === "0") {
-            setInitialValues({ name: "" });
-        }
-        else {
-            axiosInstance().get(`/productBuilder/` + id).then(({ data: { data } }) => {
-                console.log(data);
-                setInitialValues(data);
-                setSection(data.section);
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-        }
-    };
-
-    const fetchVersionDetail=()=>{
-        console.log("Fetching Version");
-        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + id).then(({ data: { data } }) => {
-            setNewVersion(data.newVersion);
-            setVersionNumber(data.version);
+        axiosInstance().get(`/productBuilder/` + id).then(({ data: { data } }) => {
+            setInitialValues(data);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     };
 
     const handleSave = (values) => {
-        let data: any = {}
-        data.name = values.name;
-
-        let fields: any = []
-        let order = 0;
-        section.forEach(_section => {
-            _section.field.forEach(_field => {
-                let _field_data = _field
-                _field_data._id = _field_data._id.toString();
-                _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field._id)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
-                }
-                _field_data.order = ++order
-                fields.push(_field_data)
-            })
-        })
-        data.fields = fields;
-        setIsUpdating(true)
-        if (id === "0") {
-            axiosInstance().post("/productBuilder", data).then(({ data: { data } }) => {
-                setIsUpdating(false)
-                history.push({ pathname: routes.productBuilder.path });
-            }).catch((error) => {
-                setIsUpdating(false)
-                toastConfig.setToastConfig(error);
-            });
-        }
-        else {
-            data.BuilderId = id;
-            data.deleteField = deleteField;
-            axiosInstance().put("/productBuilder", data).then(({ data: { data } }) => {
-                setIsUpdating(false)
-                history.push({ pathname: routes.productBuilder.path });
-            }).catch((error) => {
-                setIsUpdating(false)
-                toastConfig.setToastConfig(error);
-            });
-        }
     }
 
-    return (<Layout>
+    const refreshProducts = (data) => {
+        console.log(data)
+    }
 
-        <Grid container direction="row">
-            <Grid item xs={12}>
+    const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+    const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+
+    const [tabIndex, setTabIndex] = React.useState(0);
+
+    const handleChange = (event, newValue) => {
+        setTabIndex(newValue);
+    };
+
+    return (<Layout>
+        <Grid container className="headerbox">
+            <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title, path: routes.productBuilder.path },
                 { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
+            </Grid>
+            <Grid item md={8} sm={1} xs={2}>
+                {/* <ImportExportLinks
+                    module="builderheader"
+                    api={"productbuilder"}
+                    refrenceId={id}
+                    afterImportCompleted={() => {
+                        setIsUpdating(true)
+                        setIsUpdating(false)
+                    }}
+                /> */}
             </Grid>
         </Grid>
         <CustomContainer>
             {initialValues ?
                 <Formik initialValues={initialValues} validationSchema={ProductBuilderSchema} onSubmit={handleSave}>
-                    {({ submitForm }) => (
+                    {({ values,
+                        errors,
+                        touched,
+                        setFieldValue,
+                        submitForm, }) => (
                         <Form>
                             <Box p={1} bgcolor="white">
                                 <Grid container spacing={1}>
@@ -143,23 +107,106 @@ const CreateProductBuilder = () => {
                                             label="Name"
                                             name="name"
                                             variant="outlined"
+                                            disabled={true}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={3} >
+                                        <Box mt={1}>
+                                            <FormTypes
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={"Currency"}
+                                                name="currency"
+                                                type="currency"
+                                                setFieldValue={setFieldValue}
+                                                required={true}
+                                                fullWidth
+                                                isTooltip={false}
+                                                tooltipMessage={""}
+                                                size="small"
+                                                disabled={true}
+                                            />
+                                        </Box>
                                     </Grid>
                                     <Grid item xs={12} sm={6} container justify="flex-end">
-                                        {/* <Box>
-                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
-                                                Save{isUpdating && <CircularProgress size={24} />}
-                                            </Button>
-                                        </Box> */}
                                         <Box ml={1} >
-                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} >Close</Button>
+                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} startIcon={<BiArrowBack />}>Back</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
                             </Box>
-                            <ProductBuilder productBuilderId={id} />
+                            <Box p={1}>
+                                <Tabs className="oms-tab" indicatorColor="primary"
+                                    textColor="primary" value={tabIndex} onChange={handleChange}>
+                                    <Tab label="Product" />
+                                    <Tab label="Cost" />
+                                    {/* <Tab label="All" /> */}
+                                </Tabs>
+                            </Box>
+                            {tabIndex === 0 && (
+                                <Fragment>
+                                    <Box p={1}>
+                                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                                            <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                                            <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                                        </Grid>
+                                    </Box>
+                                    <Box mt={1}>
+                                        {isUpdating ? null :
+                                            <ProductBuilder
+                                                productBuilderId={id}
+                                                isAddNewProduct={isAddNewProduct}
+                                                setIsAddNewProduct={setIsAddNewProduct}
+                                                isAddExistingProduct={isAddExistingProduct}
+                                                setIsAddExistingProduct={setIsAddExistingProduct}
+                                                refreshProducts={refreshProducts}
+                                                Editable={true}
+                                                stage="product"
+                                            />}
+                                    </Box>
+                                </Fragment>)}
+
+                            {tabIndex === 1 && (
+                                <Fragment>
+                                    <Box mt={1}>
+                                        {isUpdating ? null :
+                                            <ProductBuilder
+                                                productBuilderId={id}
+                                                isAddNewProduct={isAddNewProduct}
+                                                setIsAddNewProduct={setIsAddNewProduct}
+                                                isAddExistingProduct={isAddExistingProduct}
+                                                setIsAddExistingProduct={setIsAddExistingProduct}
+                                                refreshProducts={refreshProducts}
+                                                Editable={true}
+                                                stage="cost"
+                                            />}
+                                    </Box>
+                                </Fragment>)}
+
+                            {tabIndex === 2 && (
+                                <Fragment>
+                                    <Box p={1}>
+                                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                                            <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                                            <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                                        </Grid>
+                                    </Box>
+                                    <Box mt={1}>
+                                        {isUpdating ? null :
+                                            <ProductBuilder
+                                                productBuilderId={id}
+                                                isAddNewProduct={isAddNewProduct}
+                                                setIsAddNewProduct={setIsAddNewProduct}
+                                                isAddExistingProduct={isAddExistingProduct}
+                                                setIsAddExistingProduct={setIsAddExistingProduct}
+                                                refreshProducts={refreshProducts}
+                                                Editable={true}
+                                            />}
+                                    </Box>
+                                </Fragment>)}
+
+
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

@@ -31,6 +31,7 @@ const UpdateDetailsDialog = (props) => {
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [fieldsData, setFieldsData] = useState([]);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     sortArray();
@@ -149,6 +150,9 @@ const UpdateDetailsDialog = (props) => {
                               required={field.fieldData.required}
                               isTooltip={field.fieldData.isTooltip}
                               tooltipMessage={field.fieldData.tooltipMessage}
+                              imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.fieldData.type) ? (completePercentage) => {
+                                setUploadingImageOrFileProgress(completePercentage);
+                              } : null}
                             />
                           </Grid>
                         ))}
@@ -163,6 +167,7 @@ const UpdateDetailsDialog = (props) => {
               <Button
                 variant="outlined"
                 color="primary"
+                size="small"
                 disabled={isUpdating}
                 onClick={onClose}
               >
@@ -171,11 +176,12 @@ const UpdateDetailsDialog = (props) => {
               <Button
                 variant="contained"
                 color="primary"
+                size="small"
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                    Object.values(simplifyValues(values)).toString() ||
-                  isUpdating
+                  Object.values(simplifyValues(values)).toString() ||
+                  isUpdating || uploadingImageOrFileProgress > 0
                 }
               >
                 {isUpdating ? <CircularProgress size={20} /> : "Save"}

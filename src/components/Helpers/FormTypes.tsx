@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { Fragment, useContext, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -42,6 +42,9 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
+import { imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl } from "../../constants/helpers"
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import CurrencyDialog from '../productBuilder/CurrencyDialog';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -57,7 +60,11 @@ const withValueLimit = (inputObj, limitVal) => {
 const formatDecimal = (value, decimalPlaces) => {
   if (value === "" && isNaN(value)) {
     return 0;
-  } else {
+  }
+  else if (parseFloat(value) < 0) {
+    return 0;
+  }
+  else {
     return parseFloat(value.toFixed(decimalPlaces));
   }
 };
@@ -66,6 +73,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
   const { inputRef, onChange, ...other } = props;
   return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
 };
+
 
 const InfoLabel = ({
   children,
@@ -151,6 +159,12 @@ const FormTypes = (props) => {
     accept,
     usePublicUrlforFileUpload = false,
     doNotShowUploadedFile = false,
+    uploadFileUrl = '',
+    onAppendData = null,
+    fileUploadMaxSize = { ...documentUploadMaxSize },
+    isMultipleUpload = false,
+    imageOrFileUploadCompletePercentage,
+    changeField,
     ...rest
   } = props;
 
@@ -162,6 +176,8 @@ const FormTypes = (props) => {
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const [isCurrencyDialog, setIsCurrencyDialog] = React.useState(false);
 
   const fetch = React.useMemo(
     () =>
@@ -222,11 +238,11 @@ const FormTypes = (props) => {
       const file = event.target.files[0];
 
       //  1048576 = 1 MB
-      if (file.size > 1048576) {
+      if (file.size > imageUploadMaxSize.size) {
         setToastConfig({
           open: true,
           type: "error",
-          message: "Image must be less than 1 MB size",
+          message: `Image must be less than ${imageUploadMaxSize.text} size`,
         });
       } else {
         getImageUrl(file);
@@ -238,8 +254,20 @@ const FormTypes = (props) => {
 
   const handleUploadFile = (ev) => {
     if (ev.target.files && ev.target.files.length) {
-      const file = ev.target.files[0];
-      getFileUrl(file);
+      let files = ev.target.files;
+      // const file = ev.target.files[0];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (file.size > fileUploadMaxSize.size) {
+          setToastConfig({
+            open: true, type: "error",
+            message: `file must be less than ${fileUploadMaxSize.text} size`
+          })
+          break
+        }
+        getFileUrl(file);
+      }
       ev.target.value = "";
     }
   };
@@ -250,16 +278,18 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setImgUploading(true);
+    if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(1); }
     axiosInstance()
       .post("/user/upload-public", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setImageUploadProgress(completedPercent);
-
+          if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(completedPercent); }
           if (completedPercent === 100) {
             setTimeout(() => {
               setImageUploadProgress(0);
+              if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
             }, 4000);
           }
         },
@@ -272,6 +302,7 @@ const FormTypes = (props) => {
         setImgUploading(false);
         setToastConfig(err);
         setImageUploadProgress(0);
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
       });
   };
 
@@ -281,7 +312,8 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setFileUploading(true);
-    let uploadUrl = usePublicUrlforFileUpload ? "/user/upload-public" : "/user/upload"
+    let uploadUrl = usePublicUrlforFileUpload ? "/user/upload-public" : uploadFileUrl ? uploadFileUrl : "/user/upload"
+    if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(1); }
     axiosInstance()
       .post(uploadUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -297,13 +329,20 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
-        setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
+        if (uploadFileUrl) {
+          onAppendData(data)
+        }
+        else {
+          setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
+        }
         setFileUploading(false);
       })
       .catch((err) => {
         setFileUploading(false);
         setToastConfig(err);
         setFileUploadProgress(0);
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
       });
   };
 
@@ -495,12 +534,12 @@ const FormTypes = (props) => {
   };
 
   const handleCurrency = (data, name, _currency, value) => {
-    let indexCurrency = data.currency.indexOf(_currency);
     if (data.isMulitFormula) {
       handleMulitFormula(data, {
         [name + "_" + _currency.toLowerCase()]: value,
       });
     }
+    let indexCurrency = data.currency.indexOf(_currency);
     if (indexCurrency >= 0) {
       for (var x_currency in data.currencyoption[indexCurrency]) {
         if (
@@ -596,6 +635,22 @@ const FormTypes = (props) => {
       }
     }
   };
+
+  const handleCurrencyAdd = (field, currency) => {
+    if (field.isConverter) {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+      field.displayCurrency.push(currency)
+      handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    }
+    else {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+      field.displayCurrency.push(currency)
+      handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
+    }
+
+    changeField(field, currency)
+    setIsCurrencyDialog(false)
+  }
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -694,24 +749,20 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        // InputProps={{
-        //   inputComponent: CustomFormat as any,
-        //   inputProps: {
-        //     decimalScale: decimalPlaces ? decimalPlaces : 2,
-        //     onValueChange: (values: any) =>
-        //       setFieldValue(name, values.formattedValue),
-        //   },
-        // }}
         onChange={
           onChange
             ? onChange
             : (e) => {
               handleChange(
                 name,
-                e.target.value == "" ? 0 : parseFloat(e.target.value)
+                e.target.value == "" ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
               );
             }
         }
+        InputProps={{
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
+        }}
       />
     </InfoLabel>
   ) : type === "percent" ? (
@@ -727,14 +778,9 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         InputProps={{
-          // inputComponent: CustomFormat as any,
-          // inputProps: {
-          //   isAllowed: (props) => withValueLimit(props, 100),
-          //   decimalScale: 2,
-          //   onValueChange: (values: any) =>
-          //     setFieldValue(name, values.formattedValue),
-          // },
           endAdornment: "%",
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
         onChange={
           onChange
@@ -742,7 +788,7 @@ const FormTypes = (props) => {
             : (e) => {
               handleChange(
                 name,
-                e.target.value == "" ? 0 : parseFloat(e.target.value)
+                e.target.value == "" ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
               );
             }
         }
@@ -765,12 +811,16 @@ const FormTypes = (props) => {
             ? onChange
             : (e) => {
               if (fieldData.returnType === "decimal") {
-                handleChange(name, parseFloat(e.target.value));
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
               } else {
                 handleChange(name, e.target.value);
               }
             }
         }
+        InputProps={{
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
+        }}
       />
     </InfoLabel>
   ) : type === "email" ? (
@@ -906,8 +956,12 @@ const FormTypes = (props) => {
             onChange={
               onChange
                 ? onChange
-                : (e) => handleConverterChange(name, _unit, e.target.value)
+                : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))
             }
+            InputProps={{
+              inputProps: { min: 0 },
+              readOnly: (fieldData && fieldData.isUneditable) ? true : false
+            }}
           />
         </InfoLabel>
       </Grid>
@@ -915,143 +969,173 @@ const FormTypes = (props) => {
   ) : type === "currencyAmount" ? (
     fieldData.displayCurrency.map((_currency, i) =>
       fieldData.isConverter && fieldData.displayUnits.length ? (
-        fieldData.displayUnits.map((_unit, i) => (
+        fieldData.displayUnits.map((_unit, j) => (
           <Grid key={_unit} item xs={12} sm={6} md={6}>
-            <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-              <TextField
-                {...rest}
-                variant="outlined"
-                type="number"
-                label={label + " " + _currency + "/" + _unit}
-                name={
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                }
-                required={required}
-                value={
-                  values[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ]
-                }
-                error={
-                  touched[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ] &&
-                  Boolean(
-                    errors[
-                    name +
-                    "_" +
-                    _currency.toLowerCase() +
-                    "_" +
-                    _unit.toLowerCase()
-                    ]
-                  )
-                }
-                helperText={
-                  touched[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ] &&
-                  errors[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ]
-                }
-                onChange={
-                  onChange
-                    ? onChange
-                    : (e) =>
-                      handleCurrencyChangeWithConverter(
-                        name,
-                        _currency,
-                        _unit,
-                        parseFloat(e.target.value)
+            <Box display="flex" >
+              <Box flexGrow={1}  >
+                <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                  <TextField
+                    {...rest}
+                    variant="outlined"
+                    type="number"
+                    label={label + " " + _currency + "/" + _unit}
+                    name={
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                    }
+                    required={required}
+                    value={
+                      values[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ]
+                    }
+                    error={
+                      touched[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ] &&
+                      Boolean(
+                        errors[
+                        name +
+                        "_" +
+                        _currency.toLowerCase() +
+                        "_" +
+                        _unit.toLowerCase()
+                        ]
                       )
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {_.result(
-                        _.find(currencyList, function (obj) {
-                          return obj.currencyCode === _currency;
-                        }),
-                        "symbolNative"
-                      )}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </InfoLabel>
+                    }
+                    helperText={
+                      touched[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ] &&
+                      errors[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ]
+                    }
+                    onChange={
+                      onChange
+                        ? onChange
+                        : (e) =>
+                          handleCurrencyChangeWithConverter(
+                            name,
+                            _currency,
+                            _unit,
+                            parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
+                          )
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          {_.result(
+                            _.find(currencyList, function (obj) {
+                              return obj.currencyCode === _currency;
+                            }),
+                            "symbolNative"
+                          )}
+                        </InputAdornment>
+                      ),
+                      inputProps: { min: 0 },
+                      readOnly: (fieldData && fieldData.isUneditable) ? true : false
+                    }}
+                  />
+                </InfoLabel>
+              </Box>
+              {i === 0 &&
+                <Box>
+                  <Tooltip title="Add Currency" className="mt-1">
+                    <IconButton onClick={() => { setIsCurrencyDialog(true) }} color="primary" size="small"  >
+                      <ControlPointIcon />
+                    </IconButton>
+                  </Tooltip>
+                  {isCurrencyDialog && <CurrencyDialog handleCurrencyAdd={handleCurrencyAdd} fieldData={fieldData} handleClose={() => setIsCurrencyDialog(false)} />}
+                </Box>}
+            </Box>
           </Grid>
         ))
       ) : (
         <Grid key={_currency} item xs={12} sm={6} md={6}>
-          <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-            <TextField
-              {...rest}
-              variant="outlined"
-              type="number"
-              label={label + " " + _currency}
-              name={name + "_" + _currency.toLowerCase()}
-              required={required}
-              value={values[name + "_" + _currency.toLowerCase()]}
-              error={
-                touched[name + "_" + _currency.toLowerCase()] &&
-                Boolean(errors[name + "_" + _currency.toLowerCase()])
-              }
-              helperText={
-                touched[name + "_" + _currency.toLowerCase()] &&
-                errors[name + "_" + _currency.toLowerCase()]
-              }
-              onChange={
-                onChange
-                  ? onChange
-                  : (e) => {
-                    if (fieldData.displayCurrency.length > 1) {
-                      handleCurrencyChange(
-                        name,
-                        _currency,
-                        parseFloat(e.target.value)
-                      );
-                    } else {
-                      handleChange(
-                        name + "_" + _currency.toLowerCase(),
-                        parseFloat(e.target.value)
-                      );
-                    }
+          <Box display="flex" >
+            <Box flexGrow={1}  >
+              <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                <TextField
+                  {...rest}
+                  variant="outlined"
+                  type="number"
+                  label={label + " " + _currency}
+                  name={name + "_" + _currency.toLowerCase()}
+                  required={required}
+                  value={values[name + "_" + _currency.toLowerCase()]}
+                  error={
+                    touched[name + "_" + _currency.toLowerCase()] &&
+                    Boolean(errors[name + "_" + _currency.toLowerCase()])
                   }
-              }
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {_.result(
-                      _.find(currencyList, function (obj) {
-                        return obj.currencyCode === _currency;
-                      }),
-                      "symbolNative"
-                    )}
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </InfoLabel>
+                  helperText={
+                    touched[name + "_" + _currency.toLowerCase()] &&
+                    errors[name + "_" + _currency.toLowerCase()]
+                  }
+                  onChange={
+                    onChange
+                      ? onChange
+                      : (e) => {
+                        if (fieldData.displayCurrency.length > 1) {
+                          handleCurrencyChange(
+                            name,
+                            _currency,
+                            parseFloat(e.target.value)
+                          );
+                        } else {
+                          handleChange(
+                            name + "_" + _currency.toLowerCase(),
+                            parseFloat(e.target.value)
+                          );
+                        }
+                      }
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {_.result(
+                          _.find(currencyList, function (obj) {
+                            return obj.currencyCode === _currency;
+                          }),
+                          "symbolNative"
+                        )}
+                      </InputAdornment>
+                    ),
+                    inputProps: { min: 0 },
+                    readOnly: (fieldData && fieldData.isUneditable) ? true : false
+                  }}
+                />
+              </InfoLabel>
+            </Box>
+            {i === 0 &&
+              <Box>
+                <Tooltip title="Add Currency" className="mt-1">
+                  <IconButton onClick={() => { setIsCurrencyDialog(true) }} color="primary" size="small"  >
+                    <ControlPointIcon />
+                  </IconButton>
+                </Tooltip>
+                {isCurrencyDialog && <CurrencyDialog handleCurrencyAdd={handleCurrencyAdd} fieldData={fieldData} handleClose={() => setIsCurrencyDialog(false)} />}
+              </Box>}
+          </Box>
         </Grid>
       )
     )
@@ -1413,12 +1497,14 @@ const FormTypes = (props) => {
           onClick={(e: any) => (e.target.value = null)}
           type="file"
           accept={accept || ""}
+          multiple={isMultipleUpload}
         />
         <label htmlFor={name}>
           <Button
             disabled={isFileUploading}
             variant="contained"
             color="primary"
+            size="small"
             component="span"
           >
             Upload File
@@ -1444,17 +1530,20 @@ const FormTypes = (props) => {
                       : "No file choosen"}
               </Typography>
             </Box>
-            <IconButton
-              disabled={Boolean(!values[name])}
-              title="Remove File"
-              color="secondary"
-              size="small"
-              aria-label="delete picture"
-              component="span"
-              onClick={() => setFieldValue(name, "")}
-            >
-              <DeleteIcon />
-            </IconButton>
+            {
+              values[name] ?
+                <IconButton
+                  disabled={Boolean(!values[name])}
+                  title="Remove File"
+                  size="small"
+                  aria-label="delete picture"
+                  component="span"
+                  onClick={() => setFieldValue(name, "")}
+                >
+                  <DeleteIcon color="error" />
+                </IconButton> : null
+            }
+
           </>}
       </Box>
     </Fragment>
@@ -1488,7 +1577,7 @@ const FormTypes = (props) => {
           name={name}
           label={label}
           onChange={(date) => setFieldValue(name, date ? date : "")}
-          format="MM/dd/yyyy"
+          format={dateFormatForInputControl}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           InputLabelProps={{

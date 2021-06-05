@@ -1,22 +1,21 @@
 import React, { useState, useContext } from 'react'
-import { Grid, Box, useTheme, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles } from '@material-ui/core'
+import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import UpdateDetailsDialog from "../../../components/Shared/UpdateDetailsDialog";
 import DetailsPage from "../../../components/Shared/DetailsPage";
-import EditIcon from '@material-ui/icons/Edit'
 import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword'
 import _ from 'lodash'
 import { useHistory } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import CopyToClipboard from '../../../components/Helpers/CopyToClipboard';
 import { HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
+import { imageUploadMaxSize } from "../../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -52,7 +51,6 @@ export default function ManageProfile(props) {
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const toastConfig = useContext(CustomToastContext);
-    const theme = useTheme();
     const history = useHistory();
 
     const handleOpenUpdateDialog = () => {
@@ -118,7 +116,15 @@ export default function ManageProfile(props) {
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
-            getImageUrl(file);
+            if (file.size > imageUploadMaxSize.size) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: `Image must be less than ${imageUploadMaxSize.text} size`,
+                });
+            } else {
+                getImageUrl(file);
+            }
         }
     };
 

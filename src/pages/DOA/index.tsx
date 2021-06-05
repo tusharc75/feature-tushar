@@ -20,6 +20,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import EditIcon from '@material-ui/icons/Edit';
+import { dateFormat } from "../../constants/helpers"
 
 const DOARequest = () => {
 
@@ -30,7 +31,7 @@ const DOARequest = () => {
     const [productBuilder, setProductBuilder] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [replied,setReplied]=useState(false);
+    const [replied, setReplied] = useState(false);
 
     useEffect(() => {
         fetchProductBuilder();
@@ -55,22 +56,9 @@ const DOARequest = () => {
             width: 300,
             renderCell: (params) => (
                 <Link className="link" to={`/doa-request/${params.row.id}`} >
-                    {params.row.id}
+                    {params.row.DOAName}
                 </Link>
             )
-        },
-        {
-            field: "amount",
-            headerName: "Quote Amount",
-            width: 200,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => (
-                <>
-                {params.row.amount}
-                </>
-            ) 
         },
         {
             field: "Quoted By",
@@ -81,9 +69,9 @@ const DOARequest = () => {
             filterable: false,
             renderCell: (params) => (
                 <>
-                {params.row.QuotedBy.firstName}
+                    {params.row.QuotedBy.firstName}
                 </>
-            ) 
+            )
         },
         {
             field: "RequestedBy",
@@ -98,10 +86,10 @@ const DOARequest = () => {
                     className="updatedAtTime badge-date"
                     title={`${params.row.RequestedBy.firstName} • ${moment(
                         params.row.RequestedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
+                    ).format(dateFormat)}`}
                 >
                     {moment(params.row.RequestedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
+                        dateFormat
                     )}
                 </span>
             </h5>) : <NoDataCell />
@@ -120,7 +108,7 @@ const DOARequest = () => {
 
 
     return (<Layout>
-        <Grid container>
+        <Grid container className="headerbox">
             <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[{ title: 'DOA Requests' }]} />
             </Grid>

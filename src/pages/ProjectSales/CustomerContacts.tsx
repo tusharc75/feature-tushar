@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import {
   Box,
   Card,
@@ -8,76 +7,101 @@ import {
   ListItemText,
   ListItem,
   ListItemAvatar,
+  IconButton,
 } from "@material-ui/core";
 
 import { Link, useHistory } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 import { BsPerson } from "react-icons/bs";
 import { BiFace } from "react-icons/bi";
+import { Delete } from "@material-ui/icons";
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ key, label, value, icon }) {
   return (
     <div style={{ flexGrow: 1 }}>
       <List>
-        <ListItem>
+        <ListItem key={key}>
           <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value} secondary={label} />
+          <ListItemText primary={value ? value : "-"} secondary={label} />
         </ListItem>
       </List>
     </div>
   );
 }
 
-function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
+function RelatedContacts({
+  contacts,
+  accountId,
+  accountName,
+  contactRoute,
+  handleRemoveContact,
+}) {
   const history = useHistory();
 
   return (
-    <>
+    <div>
       {contacts && contacts.length ? (
         <>
-          {contacts.map((obj, index) => (
-            <Fragment key={index}>
-              <Card>
-                <CardContent className="detailListing">
-                  <Grid container className="detailCardHeader">
-                    <Grid item xs={12} sm={12}>
-                      <Link
-                        className={`f_size`}
-                        to={`/${contactRoute}/detail/${obj._id}`}
-                      >
-                        {`${obj.firstName || ""}  ${obj.lastName || ""}`}
-                      </Link>
-                    </Grid>
-                  </Grid>
-                  <Grid container>
-                    <Grid item xs={12} sm={6}>
-                      {accountName ? (
-                        <DisplayData
-                          label="Account"
-                          value={accountName}
-                          icon={<BsPerson size={20} />}
-                        />
-                      ) : (
-                        ""
-                      )}
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      {obj?.title ? (
-                        <DisplayData
-                          label="Title"
-                          value={obj.title || ""}
-                          icon={<BiFace size={20} />}
-                        />
-                      ) : (
-                        ""
-                      )}
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-              <Box margin={1} />
-            </Fragment>
-          ))}
+          {contacts.map((obj, index) => {
+            return (
+              <>
+                <div className="omsAccordian accordOpportunity">
+                  <Card
+                    key={obj?._id ?? `contact${index}`}
+                    className="detailCard"
+                  >
+                    <CardContent className="detailListing">
+                      <Grid container className="detailCardHeader">
+                        <Grid item xs={11}>
+                          <Link
+                            className="account_name_link f_size"
+                            to={`/${contactRoute}/detail/${obj._id}`}
+                          >
+                            {`${obj.firstName || ""}  ${obj.lastName || ""}`}
+                          </Link>
+                        </Grid>
+                        <Grid item xs={1}>
+                          <IconButton
+                            title={`Remove contact: ${obj?.firstName} ${obj?.lastName}`}
+                            aria-haspopup="true"
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                              handleRemoveContact(obj);
+                            }}
+                          >
+                            <Delete color="error" />
+                          </IconButton>
+                        </Grid>
+                      </Grid>
+                      <Grid container>
+                        <Grid item xs={12} sm={6} md={6}>
+                          {
+                            <DisplayData
+                              key={index}
+                              label="Account"
+                              value={accountName || "-"}
+                              icon={<BsPerson size={15} />}
+                            />
+                          }
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={6}>
+                          {
+                            <DisplayData
+                              key={index}
+                              label="Title"
+                              value={obj.title || "-"}
+                              icon={<BiFace size={15} />}
+                            />
+                          }
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            );
+          })}
           <Box margin={1} />
           <Box
             className="btn-view gap-1"
@@ -92,11 +116,11 @@ function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
               })
             }
           >
-            <FaEye /> View All
+            <FaEye /> View All &#8599;
           </Box>
         </>
       ) : null}
-    </>
+    </div>
   );
 }
 export default RelatedContacts;

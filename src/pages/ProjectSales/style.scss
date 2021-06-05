@@ -1,0 +1,21 @@
+.MuiLink-root {
+  font-size: 14px;
+}
+
+.MuiTableCell-head {
+  font-size: 14px !important;
+  color: "#aaa" !important;
+}
+
+.detail-box {
+  padding: 10px 20px;
+}
+
+.account_name_link {
+  color: var(--link);
+  cursor: pointer;
+}
+
+.account_name_link:hover {
+  text-decoration: underline;
+}

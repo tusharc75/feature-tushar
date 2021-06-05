@@ -10,11 +10,9 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import { useHistory } from 'react-router-dom';
 import { BiCustomize } from 'react-icons/bi';
 import { HiOutlineUser } from 'react-icons/hi';
 import { BiPhone } from 'react-icons/bi';
-import { AiOutlineMail } from 'react-icons/ai';
 import { BsBuilding } from 'react-icons/bs';
 import { useData } from '../../StateProvider/Provider';
 import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
@@ -76,12 +74,10 @@ function DisplayData({ label, value, icon }) {
     </div>
 }
 
-
 export default function LeadAccordionInUserDetailPage({
     leads,
     expanded = true, recordsPerLine = 3, userId, onSuccess
 }) {
-    const history = useHistory();
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
@@ -195,17 +191,17 @@ export default function LeadAccordionInUserDetailPage({
                                                             <Grid container>
                                                                 <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                        obj.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={20} />} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
+                                                                        obj.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={15} />} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                        obj.status ? <DisplayData label='Status' icon={<BiCustomize size={20} />} value={obj?.status ?? ''} /> : ''
+                                                                        obj.status ? <DisplayData label='Status' icon={<BiCustomize size={15} />} value={obj?.status ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                        obj.company ? <DisplayData label='Company' icon={<BsBuilding size={20} />} value={obj.company ?? ''} /> : ''
+                                                                        obj.company ? <DisplayData label='Company' icon={<BsBuilding size={15} />} value={obj.company ?? ''} /> : ''
 
                                                                     }
                                                                 </Grid>
@@ -227,12 +223,10 @@ export default function LeadAccordionInUserDetailPage({
                 </>
             </AccordionDetails>
             {
-                leads?.length > 0 && leads.length > recordsPerLine &&
+                leads?.length > 0 && leads.length > maxRecordsToShow &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
-                    setMaxRecordsToShow(leads.length)
-                    // history.push(`/lead`)
-                }}
-                    p={1} display="flex" justifyContent="center" alignItems="center">
+                    setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))
+                }} p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaArrowAltCircleDown size={25} />
                 </Box>
             }

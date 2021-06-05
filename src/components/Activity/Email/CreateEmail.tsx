@@ -33,9 +33,11 @@ import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ImagePreview from "./ImagePreview"
-import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
+import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
+import ImageAttachments from './ImageAttachments'
+import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -60,7 +62,6 @@ const EmailSchema = Yup.object().shape({
 
 });
 
-
 const useStyles = makeStyles((theme) => ({
     textEditor: {
         fontFamily: "inherit",
@@ -74,19 +75,77 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) => {
+const fileIcons = [
+    {
+        extensions: [".txt", ".rtf"],
+        source: textFileIcon
+    },
+    {
+        extensions: [".doc", ".docx", ".docs"],
+        source: docIcon
+    },
+    {
+        extensions: [".pdf"],
+        source: pdfFileIcon
+    },
+    {
+        extensions: [".xlsx", ".xml", ".xls", ".xlsm", ".xlt", ".xltm", ".xltx", ".xlw"],
+        source: excelSheetIcon
+    },
+    {
+        extensions: [".csv"],
+        source: csvIcon
+    },
+    {
+        extensions: [".pot", ".potm", ".potx", ".ppa", ".ppam", ".pptx", ".pptm", ".ppt", ".ppsx"],
+        source: pptIcon
+    }
+]
+
+export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fetchData = null }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
     const azureAccount = useAccount(accounts[0] || {});
     const [initialValues, setInitialValues] = useState(null);
     const [isUploading, setUploading] = useState(false);
+    const [fileImageAttachments, setFileImageAttachments] = useState([])
     const [imageAttachments, setImageAttachments] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
     const [open, setOpen] = useState(false);
     const [imageSource, setImageSource] = useState(null);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+
+    const toolbarConfig = {
+        display: ['INLINE_STYLE_BUTTONS', 'BLOCK_ALIGNMENT_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
+        INLINE_STYLE_BUTTONS: [
+            { label: 'Bold', style: 'BOLD' },
+            { label: 'Italic', style: 'ITALIC' },
+            { label: 'Underline', style: 'UNDERLINE' },
+            { label: 'Strikethrough', style: 'STRIKETHROUGH' },
+            { label: 'Monospace', style: 'CODE' },
+        ],
+        BLOCK_ALIGNMENT_BUTTONS: [
+            { label: 'Align Left', style: 'ALIGN_LEFT' },
+            { label: 'Align Center', style: 'ALIGN_CENTER' },
+            { label: 'Align Right', style: 'ALIGN_RIGHT' },
+            { label: 'Align Justify', style: 'ALIGN_JUSTIFY' },
+        ],
+        BLOCK_TYPE_DROPDOWN: [
+            { label: 'Normal', style: 'unstyled' },
+            { label: 'Heading Large', style: 'header-one' },
+            { label: 'Heading Medium', style: 'header-two' },
+            { label: 'Heading Small', style: 'header-three' },
+            { label: 'Code Block', style: 'code-block' },
+        ],
+        BLOCK_TYPE_BUTTONS: [
+            { label: 'UL', style: 'unordered-list-item' },
+            { label: 'OL', style: 'ordered-list-item' },
+            { label: 'Blockquote', style: 'blockquote' },
+        ]
+    };
 
     useEffect(() => {
         fetchEmailDetail();
@@ -94,7 +153,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
 
     const checkImageUrl = (url) => {
         let extension = url.substring(url.lastIndexOf("."),).toLowerCase()
-        let imageExtensions = [".tif", "tiff", ".bmp", ".jpg", "jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]
+        let imageExtensions = [".tif", ".tiff", ".bmp", ".jpg", ".jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]
         return imageExtensions.indexOf(extension) >= 0
     }
     const fetchEmailDetail = async () => {
@@ -128,16 +187,19 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     };
 
     const handleSave = async (values) => {
+
         try {
-            const payload = {
+            let payload = {
                 relatedTo: relatedTo,
                 message: values.content.toString('html'),
-                graphToken: await getAzureAcessToken(instance),
                 to: values.to,
                 cc: values.cc,
                 subject: values.name,
-                mailbox: azureAccount.username,
-                attachment: values["file"] ? [...imageAttachments, ...otherAttachments] : [...imageAttachments]
+                attachment: values["file"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
+            }
+            if (azureAccount && azureAccount?.username) {
+                payload["graphToken"] = await getAzureAcessToken(instance)
+                payload["mailbox"] = azureAccount.username
             }
 
             if (emailId) {
@@ -160,6 +222,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                         });
                         setInitialValues(null)
                         setSending(false)
+                        if (fetchData) fetchData()
                         handleClose()
                     })
                     .catch((err) => {
@@ -193,7 +256,15 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
-            getImageUrl(file);
+            if (file.size > imageUploadMaxSize.size) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: `Image must be less than ${imageUploadMaxSize.text} size`,
+                });
+            } else {
+                getImageUrl(file);
+            }
         }
     };
 
@@ -221,30 +292,43 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const handleDeleteImageAttachment = (url) => {
         setImageAttachments(imageAttachments.filter(currentUrl => currentUrl !== url))
     }
+    const handleDeleteFileImageAttachment = url => {
+        setFileImageAttachments(fileImageAttachments.filter(currentUrl => currentUrl !== url))
+    }
+    const getFileIconSrc = file => {
+        let extension = file.substring(file.lastIndexOf("."),).toLowerCase()
+        let data = fileIcons.find(o => (o.extensions.indexOf(extension) >= 0))
+        if (data && data?.source) return data.source
+    }
 
     const classes = useStyles();
-    const renderImageAttachments = (
+
+    const renderFileThumbnails = (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
             {
-                imageAttachments.length ?
+                otherAttachments && otherAttachments.length > 0 ?
                     <>
-                        {imageAttachments.map((attachment, i) => {
+                        {otherAttachments.map((attachment, i) => {
                             return <>
-                                <Grid item sm={8} xs={12} md={6} xl={6}>
-                                    <Paper className={emailStyles.container}>
-                                        <img src={attachment} alt="Avatar"
-                                            onClick={() => {
-                                                setImageSource(attachment)
-                                                setOpen(true)
-                                            }}
-                                            className={emailStyles.image} />
-                                        <div className={emailStyles.overlay}>
-                                            <IconButton>
+                                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                                    <Paper className={emailStyles.fileContainer}>
+                                        <img src={getFileIconSrc(attachment)}
+                                            className={emailStyles.file}
+                                            alt="attchment" />
+                                        <Typography noWrap variant="body2" >
+                                            {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
+                                        </Typography>
+                                        < div className={emailStyles.fileOverlay}>
+                                            <Typography variant="subtitle2" >
+                                                {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
+                                            </Typography>
+                                            <IconButton className={emailStyles.text}>
                                                 {
-                                                    emailId ? <a href={`${attachment}`} download={true} >
-                                                        <GoArrowDown color="white" size={25} />
+                                                    emailId ? <a href={`${attachment}`}
+                                                        download={true}>
+                                                        <GoArrowDown color="white" size={21} />
                                                     </a> : <DeleteIcon className={emailStyles.deleteIcon}
-                                                        onClick={() => handleDeleteImageAttachment(attachment)}
+                                                        onClick={() => handleDeleteAttachment(attachment)}
                                                     />
                                                 }
                                             </IconButton>
@@ -260,57 +344,21 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         </Grid >
     )
 
-    const renderOtherAttachements = (
-        <Box mt={2} alignItems="center">
-            {
-                otherAttachments && otherAttachments.length > 0 ?
-                    otherAttachments.map((attachment, i) => (
-                        <Fragment key={`attachment${i}`}>
-                            <Box alignItems="center" style={{
-                                display: 'flex', justifyContent: 'space-between'
-                            }}>
-                                < AiOutlinePaperClip size={20} />
-                                <Box marginX={1} />
-                                <Box flex="1" >
-                                    <Typography
-                                        variant="body2"
-                                        style={{ overflowWrap: 'break-word', width: "100%" }}
-                                        color="textPrimary">
-                                        {
-                                            emailId ? <a href={`${attachment}`}
-                                                className={emailStyles.emailAttachments} download={emailId ? true : false}>
-                                                {attachment}
-                                            </a> : attachment
-                                        }
-
-                                    </Typography>
-                                </Box>
-                                {
-                                    emailId ? null :
-                                        <IconButton
-                                            title="Remove File"
-                                            color="secondary"
-                                            size="small"
-                                            aria-label="delete picture"
-                                            component="span"
-                                            onClick={() => handleDeleteAttachment(attachment)}
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
-                                }
-                            </Box>
-                        </Fragment>
-                    )) : null
-            }
-        </Box >
-    )
+    const onUploadFile = file => {
+        if (checkImageUrl(file)) {
+            setFileImageAttachments((prevState) => ([...prevState, file]));
+        }
+        else {
+            setOtherAttachments((prevState) => ([...prevState, file]))
+        }
+    }
 
     return <>
         <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
         {loading ?
             <div className={classes.root}>
                 {[...Array(10).keys()].map(i => (
-                    <Typography style={{ marginLeft: '20px' }} key={`skeleton${i}`} variant="h5">
+                    <Typography style={{ marginLeft: '20px' }} key={`skeleton${i}`} variant="subtitle1">
                         <Skeleton animation="wave" />
                     </Typography>)
                 )}
@@ -336,13 +384,21 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                     <Box mt={2}>
                                                         <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                                     </Box>
-                                                    {renderOtherAttachements}
-                                                    {renderImageAttachments}
+                                                    {renderFileThumbnails}
+                                                    <ImageAttachments
+                                                        imageAttachments={imageAttachments}
+                                                        onImageClick={(attachment) => {
+                                                            setImageSource(attachment)
+                                                            setOpen(true)
+                                                        }}
+                                                        onDelete={handleDeleteImageAttachment}
+                                                        emailId={emailId}
+                                                    />
                                                     <Box mt={2}>
                                                         <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                                     </Box>
                                                     <Box mt={1} color="text.secondary">
-                                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
                                                     </Box>
                                                 </Fragment> :
                                                 <Grid container spacing={3}>
@@ -442,17 +498,30 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 errors={errors}
                                                                 touched={touched}
                                                                 size="small"
+                                                                isMultipleUpload={true}
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
-                                                                    setOtherAttachments((prevState) => ([...prevState, file]))
+                                                                    onUploadFile(file)
                                                                 }}
                                                                 usePublicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}
+                                                                imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                                }}
                                                             />
                                                         </Box>
-                                                        {renderOtherAttachements}
+                                                        {renderFileThumbnails}
+                                                        <ImageAttachments
+                                                            imageAttachments={fileImageAttachments}
+                                                            onImageClick={(attachment) => {
+                                                                setImageSource(attachment)
+                                                                setOpen(true)
+                                                            }}
+                                                            onDelete={handleDeleteFileImageAttachment}
+                                                            emailId={emailId}
+                                                        />
 
-                                                        <Box mt={2} style={{ border: '1px solid #999', minHeight: '220px' }}>
+                                                        <Box style={{ border: '1px solid #999', minHeight: '220px' }}>
                                                             <RichTextEditor
                                                                 style={{ border: "none" }}
                                                                 className={classes.textEditor}
@@ -487,8 +556,17 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                         </label>
                                                                     </button>
                                                                 ]}
+                                                                toolbarConfig={toolbarConfig}
                                                             />
-                                                            {renderImageAttachments}
+                                                            <ImageAttachments
+                                                                imageAttachments={imageAttachments}
+                                                                onImageClick={(attachment) => {
+                                                                    setImageSource(attachment)
+                                                                    setOpen(true)
+                                                                }}
+                                                                onDelete={handleDeleteImageAttachment}
+                                                                emailId={emailId}
+                                                            />
                                                         </Box>
                                                     </Grid>
                                                 </Grid>}
@@ -497,11 +575,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                 </Form>
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography>
-                                <Button color="primary" onClick={handleClose}>Cancel</Button>
+                                {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
+                                <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
-                                    <Button type="button" color="primary" variant="contained" disabled={sending}
+                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending || uploadingImageOrFileProgress > 0}
                                         onClick={(e) => {
+
                                             e.preventDefault()
                                             submitForm()
                                         }}>
@@ -528,18 +607,20 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 /> : null
         }
 
-        {!emailId && <UnauthenticatedTemplate>
-            <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
-                backdropFilter: "blur(2px)",
-                color: "#F9FAFB",
-            }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                <Box width="100%" textAlign="center">
-                    <AzureLogin></AzureLogin>
-                    <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
-                    <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+        {/* {
+            (!azureAccount?.username && !emailId) ? <UnauthenticatedTemplate>
+                <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
+                    backdropFilter: "blur(2px)",
+                    color: "#F9FAFB",
+                }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                    <Box width="100%" textAlign="center">
+                        <AzureLogin></AzureLogin>
+                        <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
+                        <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+                    </Box>
                 </Box>
-            </Box>
-        </UnauthenticatedTemplate>}
+            </UnauthenticatedTemplate> : null
+        } */}
     </>
 
 }

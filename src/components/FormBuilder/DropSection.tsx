@@ -43,7 +43,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                 }
                 let insert_object: any = {
                     _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type.toUpperCase()].label + " " + (count + 1), type: type, option: option,
-                    required: true, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
+                    required: false, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
                 }
                 if (type === FieldList.FORMULA.type) {
                     insert_object.formula = "return "
@@ -244,7 +244,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
             <Box bgcolor="white" border={1} p={1} marginBottom={2} borderColor="grey.300" style={isDragging ? { ...dropstyle } : { ...style }} >
                 <div ref={drop_field}>
                     <Grid container spacing={1}>
-                        <Grid item xs={6}>
+                        <Grid item xs={10} md={6} sm={6}>
                             <TextField
                                 id="standard-basic"
                                 variant="outlined"
@@ -253,7 +253,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                                 onChange={(event) => onChangeSectionName(data.sectionId, event.target.value)}
                             />
                         </Grid>
-                        <Grid item xs={6} container justify="flex-end">
+                        <Grid item xs={2} md={6} sm={6} container justify="flex-end">
                             <IconButton aria-label="setting" onClick={handleClick} disabled={data.field.filter((_field) => _field.editAble === false).length > 0 ? true : true}  >
                                 <SettingsIcon fontSize="small" />
                             </IconButton>

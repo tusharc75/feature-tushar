@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Dialog,
   Button,
@@ -16,14 +16,22 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "../../StateProvider/Provider";
 
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const CreateProjectSales = ({ open, close, fetchData }) => {
+const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const theme = useTheme();
+  const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,6 +39,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
     fields: [],
     values: {},
   });
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const history = useHistory();
 
   useEffect(() => {
@@ -47,7 +56,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
           fields: fieldsData,
           values: getObjKeys("", fieldsData),
         });
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => {
         setLoading(false);
@@ -56,18 +65,36 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
 
   const handleSubmit = (values) => {
     setSubmitting(true);
+    var tempStaticData = {};
+    if (type) {
+      type.map((d: any) => {
+        tempStaticData[d.type] = [d.id];
+      });
+    }
+    tempStaticData["user"] = [values?.projectManager, user._id];
+    values.staticData = tempStaticData;
     axiosInstance()
       .post("/project-Sales", values)
-      .then(({ data: { data } }) => {
-        const newId = data._id;
+      .then(({ data }) => {
+        const newId = data.data?._id;
         setSubmitting(false);
         fetchData();
-        history.push(`/project-sales/detail/${newId}`, {
-          managerId: data.projectManager,
+        if (type) {
+          close();
+        } else {
+          history.push(`/project-sales/detail/${newId}`, {
+            managerId: data.data?.projectManager,
+          });
+          close();
+        }
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
         });
-        close();
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setSubmitting(false);
       });
   };
@@ -95,10 +122,10 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" color="primary" disabled>
+            <Button variant="outlined" size="small" color="primary" disabled>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" disabled>
+            <Button variant="contained" size="small" color="primary" disabled>
               Submit
             </Button>
           </CustomDialogFooter>
@@ -121,6 +148,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    onImageUploadCompletePercentage={setUploadingImageOrFileProgress}
                   />
                 </Form>
               </CustomDialogContent>
@@ -128,6 +156,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
                 <Button
                   variant="outlined"
                   color="primary"
+                  size="small"
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -136,8 +165,9 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading}
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>

@@ -1,11 +1,8 @@
 import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import CreateProduct from "../Product/CreateProduct";
 import AddExistingProduct from "./AddExistingProduct";
 import { DataGrid, GridOverlay } from "@material-ui/data-grid";
-import CustomDataGridNoDataFound from "../Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -15,9 +12,14 @@ import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
-import Quote from "./Quote";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
+import { AddField } from '../FormBuilder/AddField';
+import ConfirmationDialog from '../Helpers/ConfirmationDialog'
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import ImportExportLinks from "../Product/ImportExportLinks";
 var _ = require('lodash');
 
 
@@ -25,42 +27,30 @@ var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", 
 
 const ProductBuilder = (props) => {
 
-    const { productBuilderId } = props;
+    const { productBuilderId,
+        isAddNewProduct, setIsAddNewProduct,
+        isAddExistingProduct, setIsAddExistingProduct,
+        refreshProducts, Editable, stage} = props;
 
     const toastConfig = useContext(CustomToastContext)
-    const [isAddNewProduct, setIsAddNewProduct] = useState(false);
-    const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [product, setProduct] = useState([]);
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState([]);
-
-    const [newVersion,setNewVersion] =useState(false);
-    const [versionNumber,setVersionNumber]= useState(0);
+    const [isAddField, setIsAddField] = useState(false);
+    const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [deleteRecord, setDeleteRecord] = useState(null)
 
     useEffect(() => {
-        fetchProduct();
-    }, []);
-
-    useEffect(()=>{
-        fetchVersionDetail();
-    },[]);
-
-    const fetchVersionDetail=()=>{
-        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data}) => {
-            setNewVersion(data.newVersion);
-            setVersionNumber(data.version);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
-    };
-
+        fetchProduct(productBuilderId);
+    }, [productBuilderId]);
 
     let ActionsColoum: any = {
-        field: "actions",
-        headerName: "Actions",
+        field: "actions", headerName: "Actions",
         renderCell: (params) => (
             <Fragment>
                 <Tooltip title="Edit" >
@@ -69,7 +59,7 @@ const ProductBuilder = (props) => {
                     </IconButton>
                 </Tooltip >
                 <Tooltip title="Delete" >
-                    <IconButton aria-label="Delete" onClick={() => { removeProductInBuilder([params.row._id]) }}  >
+                    <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}   >
                         <DeleteIcon fontSize="small" color="error" />
                     </IconButton>
                 </Tooltip >
@@ -81,27 +71,28 @@ const ProductBuilder = (props) => {
         filterable: false,
     }
 
-    let SrNoColoum: any = {
-        field: "srno",
-        headerName: "#",
-        renderCell: (params) => (<span>{params.rowIndex + 1}</span>),
-        width: 15,
-        disableColumnMenu: true,
-        sortable: false,
-        filterable: false,
-    }
-
-    const fetchProduct = () => {
+    const fetchProduct = (id) => {
         setLoading(true)
-        axiosInstance().get(`/productbuilder/getproduct/` + productBuilderId).then(({ data: { data } }) => {
-            data = data.data?.map((u) => ({
+        axiosInstance().get(`/productbuilder/getproduct/` + id).then(({ data: { data } }) => {
+            data = data.data?.map((u, index) => ({
                 ...u,
                 id: u._id,
+                srno: index + 1
             }));
+            refreshProducts(data)
             setColumns(null);
-            let column = [{ field: 'id', headerName: 'id', hide: true }]
+            let column = [{ field: 'id', headerName: 'id', hide: true },
+            { field: 'srno', headerName: 'Sr.', width: 50, sortable: false, filterable: false, disableColumnMenu: true, }]
             data.forEach((row) => {
-                row.fields.forEach((ele) => {
+                let _fields = row.fields;
+                console.log(_fields)
+                if (stage) {
+                    //|| (t.leval === "template" && t.sectionType !== "cost")
+                    if (stage === "product") {
+                        _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
+                    }
+                }
+                _fields.forEach((ele) => {
                     if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                             ele.displayUnits.forEach((_unit) => {
@@ -112,7 +103,7 @@ const ProductBuilder = (props) => {
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
-                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === "0" ? params.row[fieldName] : <NoDataCell />)
+                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
                                     col.order = ele.order
                                     col.leval = ele.leval
                                     column.push(col)
@@ -128,8 +119,8 @@ const ProductBuilder = (props) => {
                                         let col: any = {}
                                         col.field = fieldName
                                         col.headerName = fieldLabel
+                                        col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
                                         col.width = 180
-                                        col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === "0" ? params.row[fieldName] : <NoDataCell />)
                                         col.order = ele.order
                                         col.leval = ele.leval
                                         column.push(col)
@@ -145,8 +136,8 @@ const ProductBuilder = (props) => {
                                     let col: any = {}
                                     col.field = fieldName
                                     col.headerName = fieldLabel
+                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
                                     col.width = 180
-                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === "0" ? params.row[fieldName] : <NoDataCell />)
                                     col.order = ele.order
                                     col.leval = ele.leval
                                     column.push(col)
@@ -162,18 +153,18 @@ const ProductBuilder = (props) => {
                             col.width = 180
                             if (ele.fieldName === "productName") {
                                 col.renderCell = (params) => (
-                                    <Link className="link" onClick={() => { setProductData(params.row) }}   >
-                                        {params.row.productName}
-                                    </Link>
+                                    Editable ?
+                                        (<Link className="link" onClick={() => { setProductData(params.row) }}   >
+                                            {params.row.productName}
+                                        </Link>) : (<>{params.row.productName}</>)
                                 )
                             }
                             else {
-                                col.renderCell = (params) => (params.row[ele.fieldName] ?
+                                col.renderCell = (params) => (params.row[ele.fieldName] || params.row[ele.fieldName] === 0 ?
                                     typeof params.row[ele.fieldName] === 'object' ? params.row[ele.fieldName]["optionLabel"] : params.row[ele.fieldName]
                                     : <NoDataCell />)
                             }
                             col.order = ele.order
-                            //col.editable = true
                             col.leval = ele.leval
                             column.push(col)
                         }
@@ -184,8 +175,9 @@ const ProductBuilder = (props) => {
             column = _.sortBy(column, function (item) {
                 return levalOrderBy.indexOf(item.leval)
             });
-            column.unshift(SrNoColoum)
-            column.push(ActionsColoum)
+            if (Editable) {
+                column.push(ActionsColoum)
+            }
             setColumns(column);
             setProduct(data);
             setLoading(false)
@@ -201,13 +193,10 @@ const ProductBuilder = (props) => {
         setLoading(true)
         axiosInstance().post(`/productbuilder/addproduct`, data).then(({ data: { data } }) => {
             setLoading(false)
-            fetchProduct()
+            fetchProduct(productBuilderId)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
-        // let data = [...product];
-        // rows.map((_r) => data.push({ ..._r, id: (parseInt((Math.random() * 100000).toString())) }));
-        // setProduct(data)
     }
 
     const handleSaveProduct = (row) => {
@@ -218,30 +207,33 @@ const ProductBuilder = (props) => {
         axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
             setLoading(false)
             setProductData(null)
-            fetchProduct();
-            fetchVersionDetail();
+            fetchProduct(productBuilderId);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     }
 
-    const removeProductInBuilder = (ids) => {
-        setLoading(true)
+    const handleDelete = () => {
+        let ids = []
+        if (deleteRecord) {
+            ids.push(deleteRecord._id)
+        }
+        else {
+            ids = selectedProduct;
+        }
         let data: any = {}
         data.productBuilderId = productBuilderId
         data._ids = ids
         axiosInstance().post(`/productbuilder/deleteproduct`, data).then(({ data: { data } }) => {
             setLoading(false)
-            fetchProduct()
+            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null)
+            setSelectedProduct([])
+            setAnchorEl(null)
+            fetchProduct(productBuilderId)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
-    }
-
-    const handelDeleteProducts = () => {
-        removeProductInBuilder(selectedProduct)
-        closeActions()
-        setSelectedProduct([])
     }
 
     const openActions = (event) => {
@@ -252,27 +244,74 @@ const ProductBuilder = (props) => {
         setAnchorEl(null);
     };
 
-    // const onEditCellChangeCommitted = (row) => {
-    //     console.log(row)
-    //     let data = [...product]
-    //     data.forEach((_product) => {
-    //         if (_product.id === row.id) {
-    //             _product[row.field] = row.props.value
-    //             _product["test"] = row.props.value * 5
-    //         }
-    //     })
-    //     setProduct(data)
-    //     console.log(product)
-    // }
+    const handleOpenAddField = () => {
+        const rows: any = product.filter((data) => selectedProduct.includes(data._id))
+        let section: any = []
+        let fields: any = []
+        section = _.uniq(_.map(rows[0].fields, 'sectionName'));
+        rows[0].fields.forEach(_field => {
+            let fid = { ..._field }
+            if (fid.type !== "currencyAmount" && (fid.type === "converter" || fid.isConverter === true)) {
+                fid.displayUnits && fid.displayUnits.forEach(_unit => {
+                    fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _unit.toLowerCase() })
+                })
+            }
+            else if (fid.type === "currencyAmount") {
+                fid.displayCurrency && fid.displayCurrency.forEach(_currency => {
+                    if (fid.isConverter) {
+                        fid.displayUnits && fid.displayUnits.forEach(_unit => {
+                            fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+                        })
+                    }
+                    else {
+                        fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _currency, fieldName: fid.fieldName + "_" + _currency.toLowerCase() })
+                    }
+                })
+            }
+            else {
+                fields.push(fid)
+            }
+        })
+        setaddFieldData({ section: section, fields: fields })
+        setIsAddField(true)
+        setAnchorEl(null);
+    }
 
-    return (<Box p={1}>
-        <Box>
-            <Grid container>
-                <Grid item xs={6} className="d-flex align-items-center gap-1">
-                    <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true); }}>New</Button>
-                    <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true); }}>Add Existing</Button>
-                </Grid>
-                <Grid xs={6} container justify="flex-end">
+    const handleCloseAddField = () => {
+        setIsAddField(false)
+    }
+
+    const handleAddField = (field) => {
+        let data: any = {}
+        data.productBuilderId = productBuilderId
+        data._ids = selectedProduct
+        data.field = field
+        data.field.leval = "builder-custom"
+        axiosInstance().post(`/productbuilder/addField`, data).then(({ data: { data } }) => {
+            setLoading(false)
+            fetchProduct(productBuilderId)
+            setIsAddField(false)
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    }
+
+    return (<Box p={1} pt={0}>
+        <Grid container>
+            <Grid item xs={4} className="d-flex align-items-center gap-1">
+            </Grid>
+            {Editable &&
+                <Grid xs={8} container justify="flex-end">
+                    <ImportExportLinks
+                        module="builder"
+                        api={"productbuilder"}
+                        refrenceId={productBuilderId}
+                        onSuccessfulImport={(isImportedSuccessfully) => {
+                            if (isImportedSuccessfully) {
+                                fetchProduct(productBuilderId)
+                            }
+                        }}
+                    />
                     <Button
                         variant="outlined"
                         color="default"
@@ -295,40 +334,47 @@ const ProductBuilder = (props) => {
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
-                        <MenuItem onClick={handelDeleteProducts}>Delete</MenuItem>
+                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                        <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
                     </Menu>
                 </Grid>
-            </Grid>
-            <Box mt={2} height={500}>
-                {columns &&
-                    <DataGrid
-                        checkboxSelection
-                        components={{
-                            NoRowsOverlay: CustomDataGridNoDataFound,
-                        }}
-                        onSelectionModelChange={(e) => setSelectedProduct(e.selectionModel)}
-                        loading={loading}
-                        rows={product}
-                        disableSelectionOnClick
-                        disableMultipleSelection
-                        //onEditCellChangeCommitted={onEditCellChangeCommitted}
-                        columns={columns}
-                        pageSize={25}
-                        density="compact"
-                    />}
-            </Box>
-        </Box>
-        <Box>
-            <Quote productBuilderId={productBuilderId}
-            newVersion={newVersion}
-            version={versionNumber} />
+            }
+        </Grid>
+        <Box height={500} mt={1}>
+            {columns &&
+                <DataGrid
+                    checkboxSelection={Editable}
+                    components={{
+                        NoRowsOverlay: CustomDataGridNoDataFound,
+                    }}
+                    onSelectionModelChange={(e) => setSelectedProduct(e.selectionModel)}
+                    loading={loading}
+                    rows={product}
+                    disableSelectionOnClick
+                    disableMultipleSelection
+                    columns={columns}
+                    pageSize={25}
+                    density="compact"
+                />
+            }
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
-            isAddInBuilder={true} addProductInBuilder={addProductInBuilder}
+            isAddInBuilder={true} addProductInBuilder={addProductInBuilder} openFrom="builder"
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
-        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} />}
-    </Box>
+        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} stage={stage} />}
+        {isAddField && <AddField refrence="builder" section={addFieldData.section}
+            fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
+        }
+        {showDeleteConfirmBox &&
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure, you want to delete product ?`}
+                onClose={() => setShowDeleteConfirmBox(false)}
+                onOk={handleDelete}
+            />
+        }
+    </Box >
     );
 }
 

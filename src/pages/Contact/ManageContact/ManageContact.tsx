@@ -1,11 +1,13 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, Grid, IconButton, Tooltip } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
+  CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
   simplifyValues,
   yupSchema,
+  setFieldsInAscendingOrder,
 } from "../../../constants/helpers";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
@@ -13,11 +15,11 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import Dialog from "@material-ui/core/Dialog";
-import _ from "lodash";
 import { useData } from "../../../StateProvider/Provider";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import { makeStyles } from "@material-ui/core/styles";
+import { isMobile, isTablet } from "react-device-detect";
 
 const arr = [...Array(9).keys()];
 
@@ -28,7 +30,7 @@ const useStyles = makeStyles(() => ({
 }));
 export default function ManageContact(props) {
   const {
-    entityData,
+    contactData,
     handleSubmit,
     onClose,
     open,
@@ -49,9 +51,9 @@ export default function ManageContact(props) {
   const {
     state: { user, permissions },
   }: any = useData();
-  const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== entityData.initialValues.owner
-  );
+
+  const disableOwnerSelection =
+    !isNew && user.user._id !== contactData.initialValues.owner;
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
@@ -61,11 +63,14 @@ export default function ManageContact(props) {
   ] = useState([]);
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+  const [reportsToMainDataSource, setReportsToMainDataSource] = useState([]);
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
 
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+
   useEffect(() => {
-    if (entityData.fields.length > 0) {
-      const ownerCollaboratorDropdownData = entityData.fields.filter(
+    if (contactData.fields.length > 0) {
+      const ownerCollaboratorDropdownData = contactData.fields.filter(
         (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
       );
       if (ownerCollaboratorDropdownData.length > 0) {
@@ -80,44 +85,24 @@ export default function ManageContact(props) {
         );
       }
 
-      const reportsToDropdownData = entityData.fields.find(
+      const reportsToDropdownData = contactData.fields.find(
         (d) => d.fieldName === "reportsTo"
       );
       if (reportsToDropdownData) {
         if (isNew) {
-          setReportsToDataSource(reportsToDropdownData.option);
+          setReportsToMainDataSource(reportsToDropdownData.option);
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
               (d) => d.optionValue !== contactId
             );
-          setReportsToDataSource(currentContactRemovedDataSource);
+          setReportsToMainDataSource(currentContactRemovedDataSource);
         }
       }
 
-      sortArray();
+      setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
-  }, [entityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
+  }, [contactData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerDataSource(
@@ -138,23 +123,13 @@ export default function ManageContact(props) {
   };
   //  Owner, Collaborator Code - End
 
+  const onReportsToDropdownOpen = (selectedAccount) => {
+    setReportsToDataSource(reportsToMainDataSource.filter(d => d.parentAccount === selectedAccount));
+  };
+
   const onSubmit = (values) => {
     handleSubmit(values, false);
   };
-
-  // const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
-
-  //     if (Object.keys(errors).length) {
-  //         entityData.fields.forEach((input) => {
-  //             if (input.required || values[input.fieldName]) {
-  //                 setTouched(input.fieldName, true);
-  //             }
-  //         });
-  //     } else {
-  //         handleSubmit(values, saveAndNew, setValues)
-  //         setErrors({});
-  //     }
-  // }
 
   const initializeAccountDropdown = (values, accountSource) => {
     if (values && values.hasOwnProperty("accountName")) {
@@ -163,6 +138,7 @@ export default function ManageContact(props) {
       );
       if (getNewAddedAccount) {
         values["accountName"] = getNewAddedAccount.optionValue;
+        values["reportsTo"] = "";
       }
       return values;
     }
@@ -177,22 +153,25 @@ export default function ManageContact(props) {
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
+        fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
           onClose={onClose}
           title={
             isNew
               ? "Add Contact"
-              : `Editing ${entityData.initialValues.firstName}`
+              : `Editing ${contactData.initialValues.firstName}`
           }
         />
 
-        {entityData.fields.length > 0 ? (
+        {contactData.fields.length > 0 ? (
           <>
             <Formik
-              initialValues={entityData.initialValues}
-              validationSchema={yupSchema(entityData.fields)}
-              // validate={(values) => formValidation(values, entityData.fields)}
+              initialValues={contactData.initialValues}
+              validationSchema={yupSchema(contactData.fields)}
+              // validate={(values) => formValidation(values, contactData.fields)}
               validateOnMount
               onSubmit={onSubmit}
             >
@@ -221,7 +200,7 @@ export default function ManageContact(props) {
                                     sm={6}
                                     md={6}
                                   >
-                                    {field.fieldName == "owner" ? (
+                                    {field.fieldName === "owner" ? (
                                       <FormTypes
                                         values={values}
                                         errors={errors}
@@ -245,7 +224,7 @@ export default function ManageContact(props) {
                                           )
                                         }
                                       />
-                                    ) : field.fieldName == "collaborator" ? (
+                                    ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
                                         multiple
                                         values={values}
@@ -257,10 +236,10 @@ export default function ManageContact(props) {
                                         options={
                                           fromProject
                                             ? collaborators.filter(
-                                                (c) =>
-                                                  c.optionValue !==
-                                                  values["owner"]
-                                              )
+                                              (c) =>
+                                                c.optionValue !==
+                                                values["owner"]
+                                            )
                                             : collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
@@ -275,7 +254,7 @@ export default function ManageContact(props) {
                                           )
                                         }
                                       />
-                                    ) : field.fieldName == "accountName" &&
+                                    ) : field.fieldName === "accountName" &&
                                       accountSource !== undefined ? (
                                       <Grid container spacing={1}>
                                         <Grid
@@ -303,9 +282,9 @@ export default function ManageContact(props) {
                                             values={
                                               accountId
                                                 ? initializeAccountDropdown(
-                                                    values,
-                                                    accountSource
-                                                  )
+                                                  values,
+                                                  accountSource
+                                                )
                                                 : values
                                             }
                                             disabled={fromProject}
@@ -315,31 +294,34 @@ export default function ManageContact(props) {
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountSource}
-                                            setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={true}
                                             size="small"
                                             doNotShowInfoTooltip={true}
+                                            onChange={(e, value) => {
+                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                              setFieldValue("reportsTo", "")
+                                            }}
                                           />
                                         </Grid>
                                         {permissions[accountResource]
                                           .isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title="Create Account"
-                                              className={`${classes.createAccountTooltip} mt-1`}
-                                            >
-                                              <IconButton
-                                                onClick={onCreateAccount}
-                                                size="small"
-                                                disabled={fromProject}
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Account"
+                                                className={`${classes.createAccountTooltip} mt-1`}
                                               >
-                                                <AddIcon color="primary" />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
+                                                <IconButton
+                                                  onClick={onCreateAccount}
+                                                  size="small"
+                                                  disabled={fromProject}
+                                                >
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip
@@ -352,7 +334,7 @@ export default function ManageContact(props) {
                                           </Grid>
                                         ) : null}
                                       </Grid>
-                                    ) : field.fieldName == "reportsTo" ? (
+                                    ) : field.fieldName === "reportsTo" ? (
                                       <FormTypes
                                         values={values}
                                         errors={errors}
@@ -366,6 +348,7 @@ export default function ManageContact(props) {
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
+                                        onOpen={() => onReportsToDropdownOpen(values.accountName)}
                                       />
                                     ) : (
                                       <FormTypes
@@ -381,6 +364,9 @@ export default function ManageContact(props) {
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
+                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        } : null}
                                       />
                                     )}
                                   </Grid>
@@ -396,6 +382,7 @@ export default function ManageContact(props) {
                       onClick={onClose}
                       variant="outlined"
                       color="primary"
+                      size="small"
                     >
                       Cancel
                     </Button>
@@ -403,17 +390,18 @@ export default function ManageContact(props) {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       disabled={
-                        loading ||
+                        loading || uploadingImageOrFileProgress > 0 ||
                         Object.values(
                           simplifyValues(
-                            entityData.initialValues,
-                            entityData.fields
+                            contactData.initialValues,
+                            contactData.fields
                           )
                         ).toString() ===
-                          Object.values(
-                            simplifyValues(values, entityData.fields)
-                          ).toString()
+                        Object.values(
+                          simplifyValues(values, contactData.fields)
+                        ).toString()
                       }
                       onClick={(e) => {
                         e.preventDefault();

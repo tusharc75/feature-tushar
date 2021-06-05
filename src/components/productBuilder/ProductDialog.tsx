@@ -18,28 +18,46 @@ import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import TextField from '@material-ui/core/TextField';
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "./../../constants/helpers";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
 const CreateProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productData, handleClose, handleSaveProduct } = props;
+    const { productData, handleClose, handleSaveProduct, stage } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     const [isAddField, setIsAddField] = useState(false);
     const [fields, setFields] = useState([]);
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
 
+    const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
+    const [fieldChanges, setFieldChanges] = useState([]);
+
 
     useEffect(() => {
         let _fields = [];
-        productData.fields.map((_f) => _fields.push(_f));
-
+        productData.fields.forEach((_f) => {
+            if (stage === "product") {
+                if (_f.leval === "product" || _f.leval === "product-custom") {
+                    _fields.push(_f)
+                }
+            }
+            else {
+                _fields.push(_f)
+            }
+        })
+        if (productData.fieldChanges) {
+            setFieldChanges(productData.fieldChanges)
+        }
         _fields = _.orderBy(_fields, 'order', 'asc');
         _fields = _.sortBy(_fields, function (item) {
             return levalOrderBy.indexOf(item.leval)
@@ -79,6 +97,7 @@ const CreateProduct = (props) => {
 
     const handleSubmit = (values) => {
         values.fields = fields;
+        values.fieldChanges = fieldChanges;
         handleSaveProduct(values)
     };
 
@@ -134,8 +153,38 @@ const CreateProduct = (props) => {
     }
 
 
+    const changeField = (field, currency) => {
+        // let newField = initialData.fields;
+        // let displayCurrency = []
+        // newField.forEach(_f => {
+        //     if (_f.fieldName === field.fieldName) {
+        //         _f.displayCurrency.push(currency)
+        //         displayCurrency = _f.displayCurrency;
+        //     }
+        // })
+        // setInitialData({
+        //     fields: newField,
+        //     values: { ...ref.current.values },
+        // });
+        let _fieldChanges = fieldChanges;
+        if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
+            _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: field.displayCurrency })
+        }
+        else {
+            _fieldChanges.forEach(_f => {
+                if (_f.fieldName === field.fieldName) {
+                    _f.displayCurrency = field.displayCurrency;
+                }
+            })
+        }
+        setFieldChanges(_fieldChanges)
+    }
+
+
     return (<Dialog
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -171,27 +220,20 @@ const CreateProduct = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.type === "converter" || field.type === "currencyAmount" ?
-                                                            <FormTypes
-                                                                fields={initialData.fields}
-                                                                values={values}
-                                                                errors={errors}
-                                                                touched={touched}
-                                                                label={field.fieldLabel}
-                                                                name={field.fieldName}
-                                                                type={field.type}
-                                                                options={field.option}
-                                                                setFieldValue={setFieldValue}
-                                                                required={field.required}
-                                                                fullWidth
-                                                                isTooltip={field.isTooltip}
-                                                                tooltipMessage={field.tooltipMessage}
-                                                                decimalPlaces={field.decimalPlaces}
-                                                                isvlookupReverse={field.isvlookupReverse}
-                                                                fieldData={field}
-                                                                size="small"
-                                                            /> :
+                                                        field.fieldName === "productTemplate" && !isShowProductTemplate ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                <FormControlLabel
+                                                                    control={
+                                                                        <Checkbox
+                                                                            checked={isShowProductTemplate}
+                                                                            onChange={() => setIsShowProductTemplate(true)}
+                                                                            name="isShowProductTemplate"
+                                                                            color="primary"
+                                                                        />
+                                                                    }
+                                                                    label="Show Product Template"
+                                                                />
+                                                            </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
                                                                 <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}
@@ -210,9 +252,33 @@ const CreateProduct = (props) => {
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     fieldData={field}
                                                                     size="small"
-                                                                    disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
-                                                                />
-                                                            </Grid>
+                                                                    changeField={changeField}
+                                                                /> :
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        fields={initialData.fields}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        isvlookupReverse={field.isvlookupReverse}
+                                                                        fieldData={field}
+                                                                        size="small"
+                                                                        disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
+                                                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                                        } : null}
+                                                                    />
+                                                                </Grid>
                                                     ))}
                                                 </Grid>
                                             </Box>
@@ -222,13 +288,14 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
+                                disabled={uploadingImageOrFileProgress > 0}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                     </Fragment>
