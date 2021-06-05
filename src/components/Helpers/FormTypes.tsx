@@ -316,9 +316,7 @@ const FormTypes = (props) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setFileUploadProgress(completedPercent);
 
-          if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(completedPercent); }
           if (completedPercent === 100) {
-            if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
             setTimeout(() => {
               setFileUploadProgress(0);
             }, 4000);
@@ -326,6 +324,7 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
         if (uploadFileUrl) {
           onAppendData(data)
         }
