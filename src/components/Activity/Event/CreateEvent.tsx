@@ -40,7 +40,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers"
+import { dateFormat } from "../../../constants/helpers";
 
 const EventSchema = Yup.object().shape({
   name: Yup.string().required("Please enter event name").min(3, "Too Short"),
@@ -77,7 +77,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
         .then(({ data }) => {
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setInitialValues({
         name: "",
@@ -86,10 +86,21 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
         participant: [{ userId: user._id }],
         startDate: new Date(),
         endDate: new Date(),
-        startTime: new Date(),
-        endTime: new Date(),
+        startTime: getTime(),
+        endTime: new Date(getTime().getTime() + 30 * 60000),
       });
     }
+  };
+
+  const getTime = () => {
+    let diff = 60 - new Date().getMinutes();
+    const currentTime = new Date();
+
+    if (diff > 30) {
+      diff = diff - 30;
+    }
+
+    return new Date(currentTime.getTime() + diff * 60000);
   };
 
   // Data for Autocomplete
@@ -378,6 +389,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                           <Grid item xs={5}>
                             <KeyboardTimePicker
                               autoOk
+                              ampm={false}
                               size="small"
                               variant="inline"
                               inputVariant="outlined"
@@ -445,6 +457,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                           <Grid item xs={5}>
                             <KeyboardTimePicker
                               autoOk
+                              ampm={false}
                               size="small"
                               variant="inline"
                               inputVariant="outlined"
@@ -564,7 +577,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                         .then(({ data }) => {
                           handleClose();
                         })
-                        .catch((err) => { })
+                        .catch((err) => {})
                     }
                   >
                     Delete
