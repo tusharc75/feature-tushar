@@ -56,7 +56,7 @@ const DOARequest = () => {
             width: 300,
             renderCell: (params) => (
                 <Link className="link" to={`/doa-request/${params.row.id}`} >
-                    {params.row.id}
+                    {params.row.DOAName}
                 </Link>
             )
         },

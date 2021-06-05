@@ -107,7 +107,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                             </Grid>
                                             {(supplierContact.contactApi === contactApi) && <Grid item xs={12} sm={6} md={6}>
                                                 {<Link className="link" to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}>
-                                                    <DisplayData key="2" label='Supplier Account' showCopyToText={true} icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
+                                                    <DisplayData key="2" label='Supplier Account'  icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
                                                 </Link>
 
                                                 }

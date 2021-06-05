@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { graphOptions } from '../../constants/helpers';
 import Graph from "vis-react";
 

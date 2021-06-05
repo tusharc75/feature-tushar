@@ -102,6 +102,10 @@ export default function ManageQuoteDialog({
     );
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData.option);
+
+      if (!isNew) {
+        setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === dataToUpdate.customerAccountName.optionValue));
+      }
     }
 
     return () => {
@@ -112,7 +116,6 @@ export default function ManageQuoteDialog({
     }
 
   }, [entityData.fields]);
-
 
   const sortArray = () => {
     const sections = [];
@@ -226,6 +229,10 @@ export default function ManageQuoteDialog({
     // values.closeDate = "03/03/2021"
     if (accountId && accountResource !== customerAccount.accountResource) values["supplierAccountName"] = [accountId]
     setLoading(true);
+    console.log(values);
+    if(values.customerContactName===""){
+      values.customerContactName=[]
+    }
     axiosInstance()
       .post(`${qbApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
@@ -369,7 +376,7 @@ export default function ManageQuoteDialog({
                                               doNotShowInfoTooltip={true}
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                                setFieldValue("customerContactName", "")
+                                                setFieldValue("customerContactName", [])
                                               }}
                                             />
                                           </Grid>
