@@ -51,8 +51,8 @@ const ProductBuilder = () => {
 
     const ActionsRenderer = params => <Fragment>
         <Tooltip title="Delete" >
-            <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
-                <DeleteIcon fontSize="small" color="error" />
+            <IconButton size="small" aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
+                <DeleteIcon color="error" />
             </IconButton>
         </Tooltip >
     </Fragment>

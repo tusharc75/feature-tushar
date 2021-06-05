@@ -1489,13 +1489,12 @@ const FormTypes = (props) => {
                 <IconButton
                   disabled={Boolean(!values[name])}
                   title="Remove File"
-                  color="secondary"
                   size="small"
                   aria-label="delete picture"
                   component="span"
                   onClick={() => setFieldValue(name, "")}
                 >
-                  <DeleteIcon />
+                  <DeleteIcon color="error" />
                 </IconButton> : null
             }
 
