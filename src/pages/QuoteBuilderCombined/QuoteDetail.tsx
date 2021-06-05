@@ -175,6 +175,7 @@ function QuoteDetail() {
   const [PDF, setPdf] = useState("");
   const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
+  const [redCard,setRedCard]=useState(false);
 
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
@@ -298,8 +299,6 @@ function QuoteDetail() {
         });
     }
     productBuilderdatatoQuoteBuilderdata(data);
-
-
   }
 
   const onFilterChange = useCallback((params) => {
@@ -401,6 +400,8 @@ function QuoteDetail() {
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
     PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
+    PdfDoc.text(`Quote Expiry Date: ${displayDate(quoteData.expiryDate)}`,285,145);
+    PdfDoc.text(`Inco Terms: ${quoteData.incoTerms}`,285,160);
     PdfDoc.setFontSize(8);
     PdfDoc.text("Bill To:", 20, 100)
     PdfDoc.setFontSize(12);
@@ -409,7 +410,7 @@ function QuoteDetail() {
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50)
-    PdfDoc.text(text, 20, 180);
+    PdfDoc.text(text, 20, 200);
     var lines = splittedText.length
     var blockHeight = (lines) * lineHeight;
     PDFData = [...PDFData, [{
@@ -417,7 +418,7 @@ function QuoteDetail() {
       styles: { halign: 'right', valign: 'middle' }
     }]];
     autoTable(PdfDoc, {
-      margin: { top: 120 + blockHeight, left: 20, right: 20 },
+      margin: { top: 140 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
@@ -466,11 +467,11 @@ function QuoteDetail() {
               }
             })
               .then(({ data }) => {
+                handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
                 console.log("PDF Response is:");
                 console.log(data);
                 if (DOAreq) {
                   console.log(data);
-                  handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
                   axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
                     .then(({ data }) => {
                       fetchquoteData(currentVersion)
@@ -479,15 +480,10 @@ function QuoteDetail() {
                       toastConfig.setToastConfig(err);
                     });
                 }
-                else {
-                  handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
-                }
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
               });
-
-
           }
 
         }, x: 20, y: finalY + 50, margin: [20, 10, 20, 10]
@@ -513,20 +509,18 @@ function QuoteDetail() {
           }
         })
           .then(({ data }) => {
+            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
             console.log("PDF Response is:");
             console.log(data);
-            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
             if (DOAreq) {
               axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
-                .then(({ data }) => {
-
-                  fetchquoteData(currentVersion)
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                });
+              .then(({ data }) => {
+                fetchquoteData(currentVersion)
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+              });
             }
-
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -839,6 +833,12 @@ function QuoteDetail() {
         <Link
           onClick={() => {
             setShowCreateDialog(true);
+            const gridData = dataRows;
+            const indexOfRecord = gridData.findIndex(
+              (d) => d.id === params.row.id
+            );
+
+            setEditRecord(_.cloneDeep(gridData[indexOfRecord]));
           }}>
           <CustomRenderCell value={params?.value} />
         </Link>
@@ -867,7 +867,7 @@ function QuoteDetail() {
   const handleMainPoints = (data) => {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
-    mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
+    mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -995,7 +995,10 @@ function QuoteDetail() {
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     setOptions([]);
-    var optionstoSet = []
+    setRedCard(false);
+    var optionstoSet=[]
+    var invalidqty=false;
+    var invalidPrice=false;
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
     const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
@@ -1009,10 +1012,16 @@ function QuoteDetail() {
     var ProfitCurrency = ""
     BuilderData.map((quoteRows: { [x: string]: any; }) => {
       console.log(quoteRows);
+      var hasTSP=false
       const quoteRowKeys = Object.keys(quoteRows);
       var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
       quoteRowKeys.map((key) => {
         console.log(key);
+        if(key==='qty'){
+          if(quoteRows[key]===0){
+            invalidqty=true;
+          }
+        }
         if (ignoredKeys.indexOf(key) === -1) {
           var indexkey = key;
           var currency = ""
@@ -1044,6 +1053,7 @@ function QuoteDetail() {
             else if (key === 'totalSalesPrice') {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
               SPCurrency = currency.toUpperCase()
+              hasTSP=false;
             }
             else if (key === "totalProfit") {
               totalProfit = totalProfit + quoteRows[indexkey]
@@ -1056,6 +1066,9 @@ function QuoteDetail() {
           }
         }
       })
+      if(!hasTSP){
+        invalidPrice=true
+      }
       inventory.push(inventorydata);
     });
     console.log(inventory);
@@ -1069,11 +1082,24 @@ function QuoteDetail() {
     setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
     setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
     setTotalCost(totalCost.toString() + " " + CostCurrency);
+    if(totalSellingPrice<totalCost){
+      setRedCard(true);
+    }
     console.log("Check:");
     console.log(DOAsetup);
     console.log(DOAlimit);
     console.log(versionStatus)
     console.log(totalSellingPrice)
+
+    if(ProcessStatus==="Price Builder"){
+      if(!invalidqty || !invalidPrice){
+        setNextStep(true);
+      }
+      else{
+        setNextStep(false);
+      }
+    }
+    
     setButtonMessage("Send to Customer");
     setDOAreq(false);
     setCustomerreq(true);
@@ -1387,10 +1413,17 @@ function QuoteDetail() {
                             <span>Total Cost Price</span>
                             <span>{totalcost}</span>
                           </div>
-                          <div className="quoteBox">
+                          {redCard?
+                          (<div className="redQuoteBox">
+                            <span>Total Selling Price</span>
+                            <span>{totalsale}</span>
+                          </div>):(
+                          <div className="quoteBox" >
                             <span>Total Selling Price</span>
                             <span>{totalsale}</span>
                           </div>
+
+                          )}
                           <div className="quoteBox">
                             <span>Total Margin</span>
                             <span>{totalmargin}</span>
@@ -1644,6 +1677,7 @@ function QuoteDetail() {
                 columns={versionStatusData.columns}
                 disableSelectionOnClick
                 disableMultipleSelection
+                disableColumnFilter
                 hideFooter
               />
             </div>
