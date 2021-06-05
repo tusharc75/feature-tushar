@@ -47,15 +47,28 @@ const useStyles = makeStyles((theme) => ({
     },
     currencyStyle: {
         width: 200,
-        position: "absolute",
-        right: theme.spacing(1.5),
-        top: theme.spacing(8.5),
     },
     dialogTitle: {
         fontSize: "1.2rem"
     },
     doaUsersStyle: {
-        marginTop: theme.spacing(2.5),
+        padding: "0"
+    },
+    doaBox: {
+        background: "#eeeeee",
+        borderBottom: "2px solid lightgrey",
+        padding: "10px"
+    },
+    doaHeader: {
+        background: "#f3f3f3",
+        padding: "8px 14px",
+        fontWeight: "bold"
+    },
+    contentBox: {
+        margin: "10px",
+        border: "1px solid #ded8d8",
+        borderRadius: "4px",
+        padding: "4px !important"
     }
 }));
 const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose }) => {
@@ -145,71 +158,76 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             {!loading &&
                 <>
                     <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />
-                    <ToggleButtonGroup size="small" className="ml-2"
-                        value={filter}
-                        exclusive
-                        onChange={handleFilter}>
-                        {DOAType.map((k, index) => {
-                            return (
-                                <ToggleButton value={k.key} key={index}>{k.key}
-                                </ToggleButton>
-                            );
-                        })}
-                    </ToggleButtonGroup>
+                    <Grid container className={classes.doaBox}>
+                        <Grid item xs={6} md={6} sm={6}>
+                            <ToggleButtonGroup size="small"
+                                value={filter}
+                                exclusive
+                                onChange={handleFilter}>
+                                {DOAType.map((k, index) => {
+                                    return (
+                                        <ToggleButton value={k.key} key={index}>{k.key}
+                                        </ToggleButton>
+                                    );
+                                })}
+                            </ToggleButtonGroup>
+                        </Grid>
+                        <Grid item xs={6} md={6} sm={6} className="d-flex justify-content-end">
+                            {(selectedType === 2) &&
+                                <Autocomplete className={classes.currencyStyle}
+                                    fullWidth
+                                    size="small"
+                                    value={
+                                        currencyData.filter((data) => data?.currencyCode === currency)
+                                            .length
+                                            ? currencyData.filter(
+                                                (data) => data?.currencyCode === currency
+                                            )[0]
+                                            : ""
+                                    }
+                                    options={currencyData}
+                                    getOptionLabel={(option: any) =>
+                                        option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+                                    }
+                                    getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                                    onChange={(e, val) => {
+                                        setCurrency(val?.currencyCode ? val?.currencyCode : "")
+                                        setCurrencySymbol(val?.symbolNative)
+                                    }
+                                    }
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            name={"currency"}
+                                            label={"Currency"}
 
-                    {(selectedType === 2) &&
-                        <Autocomplete className={classes.currencyStyle}
-                            fullWidth
-                            size="small"
-                            value={
-                                currencyData.filter((data) => data?.currencyCode === currency)
-                                    .length
-                                    ? currencyData.filter(
-                                        (data) => data?.currencyCode === currency
-                                    )[0]
-                                    : ""
-                            }
-                            options={currencyData}
-                            getOptionLabel={(option: any) =>
-                                option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
-                            }
-                            getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                            onChange={(e, val) => {
-                                setCurrency(val?.currencyCode ? val?.currencyCode : "")
-                                setCurrencySymbol(val?.symbolNative)
-                            }
-                            }
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    name={"currency"}
-                                    label={"Currency"}
-
+                                        />
+                                    )}
+                                    renderOption={(option) => {
+                                        const { currencyCode, name, countryCode, symbolNative } = option;
+                                        return (
+                                            <Grid container alignItems="center">
+                                                <Grid item>
+                                                    <Avatar
+                                                        variant="rounded"
+                                                        src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                                                        style={{ marginRight: 20, width: "40px", height: "30px" }}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs>
+                                                    <Typography>{currencyCode} ({symbolNative})</Typography>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {name}
+                                                    </Typography>
+                                                </Grid>
+                                            </Grid>
+                                        );
+                                    }}
                                 />
-                            )}
-                            renderOption={(option) => {
-                                const { currencyCode, name, countryCode, symbolNative } = option;
-                                return (
-                                    <Grid container alignItems="center">
-                                        <Grid item>
-                                            <Avatar
-                                                variant="rounded"
-                                                src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                                                style={{ marginRight: 20, width: "40px", height: "30px" }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs>
-                                            <Typography>{currencyCode} ({symbolNative})</Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {name}
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-                                );
-                            }}
-                        />
-                    }
+                            }
+                        </Grid>
+                    </Grid>
                     <div className={classes.doaUsersStyle}>
                         <Formik
                             initialValues={{ users: users }}
@@ -217,9 +235,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                             render={({ values,
                                 errors }) => (
                                 <>
-                                    <DialogContent>
+                                    <DialogContent className={classes.contentBox}>
                                         <Form>
-                                            <Container>
+                                            <Container className="p-0">
                                                 <Grid
                                                     container
                                                     direction="row"
@@ -227,7 +245,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                     alignItems="center"
                                                 >
                                                     <Grid item md={12}>
-                                                        <Box>
+                                                        <Box className={classes.doaHeader}>
                                                             <Grid
                                                                 container
                                                                 spacing={2}
@@ -241,7 +259,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                 <Grid item md={2}></Grid>
                                                             </Grid>
                                                         </Box>
-                                                        <Box>
+                                                        <Box className="p-1">
                                                             <FieldArray
                                                                 name="users"
                                                                 render={arrayHelpers => (
@@ -324,7 +342,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                 } >
                                                                                                 <Add />
                                                                                             </IconButton>
-                                                                                            <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(index)} >
+                                                                                            <IconButton size="small" aria-label="delete" style={{ color: "#f44336"}} onClick={() => arrayHelpers.remove(index)} >
                                                                                                 <Delete />
                                                                                             </IconButton>
                                                                                         </ButtonGroup>
