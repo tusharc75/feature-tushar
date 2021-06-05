@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Grid,
@@ -15,8 +15,8 @@ import {
   MenuItem,
   Tooltip,
 } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
-import { RemoveCircleOutline } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -297,8 +297,8 @@ export default function OpportunityAccordianProjectSales({
                                   )}
                                 </Grid>
                                 <Grid item xs={5} sm={4}>
-                                  {obj?.amount ? (
-                                    <Box display="flex" alignItems="center">
+                                  <Box display="flex" alignItems="center">
+                                    {obj?.amount ? (
                                       <Typography className="amount">
                                         {
                                           currencies.find(
@@ -308,26 +308,26 @@ export default function OpportunityAccordianProjectSales({
                                         }
                                         &nbsp;{obj?.amount ?? ""}
                                       </Typography>
-                                      {(permissions.isUpdate && isTeamMember) ||
-                                      isManager ? (
-                                        <>
-                                          <Box ml={1} />
-                                          <IconButton
-                                            title={`Remove opportunity ${obj.opportunityName}`}
-                                            size="small"
-                                            onClick={() => handleRemove(obj)}
-                                          >
-                                            <RemoveCircleOutline
-                                              fontSize="small"
-                                              color="error"
-                                            />
-                                          </IconButton>
-                                        </>
-                                      ) : null}
-                                    </Box>
-                                  ) : (
-                                    ""
-                                  )}
+                                    ) : (
+                                      ""
+                                    )}
+                                    {(permissions.isUpdate && isTeamMember) ||
+                                    isManager ? (
+                                      <>
+                                        <Box ml={1} />
+                                        <IconButton
+                                          title={`Remove opportunity ${obj.opportunityName}`}
+                                          size="small"
+                                          onClick={() => handleRemove(obj)}
+                                        >
+                                          <DeleteIcon
+                                            fontSize="small"
+                                            color="error"
+                                          />
+                                        </IconButton>
+                                      </>
+                                    ) : null}
+                                  </Box>
                                 </Grid>
                               </Grid>
                               <Grid container>
