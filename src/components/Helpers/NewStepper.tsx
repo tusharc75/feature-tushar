@@ -109,12 +109,14 @@ const NewStepper = ({ steps, heading, doaCurrency }) => {
               <Step key={label.id}>
                 <StepLabel StepIconComponent={QontoStepIcon}>
                   <div style={{ color: "#09445A" }}>{label.name}</div>
-                  <div style={{ color: "#09445A" }}>{
+                  {doaCurrency && <div style={{ color: "#09445A" }}>{
                     currencies.filter((data) => data?.currencyCode === doaCurrency).length
                       ? currencies.filter(
                         (data) => data?.currencyCode === doaCurrency
                       )[0].symbolNative
-                      : null}{label.amount}</div>
+                      : null}{label.amount}
+                  </div>}
+
                 </StepLabel>
               </Step>
             ))}

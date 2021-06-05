@@ -1,26 +1,21 @@
 import React, { useState, useRef, useContext } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
-
 import {
   Slide,
   AppBar,
   Toolbar,
   IconButton,
-  Button,
   Menu,
   MenuItem,
   Box,
   Badge,
-  InputBase,
   Chip,
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover,
-  Grid,
+  Popover
 } from "@material-ui/core";
 import {
-  Search,
   Menu as MenuIcon,
   MoreVert as MoreIcon,
   Clear as ClearIcon,

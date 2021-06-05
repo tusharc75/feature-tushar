@@ -376,7 +376,7 @@ export default function ManageQuoteDialog({
                                               doNotShowInfoTooltip={true}
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                                setFieldValue("customerContactName", "")
+                                                setFieldValue("customerContactName", [])
                                               }}
                                             />
                                           </Grid>
