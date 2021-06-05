@@ -149,7 +149,7 @@ function QuoteDetail() {
   const [query, setQuery] = useState({ page: 0, limit: 5 });
   const [dataRows, setDataRows] = useState([]);
   const [RadioIndex, setRadioIndex] = useState(-1);
-  const [TandC, setTNC] = useState("");
+  const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [totalProfit, setTotalProfit] = useState("");
   const [totalcost, setTotalCost] = useState("");
@@ -180,8 +180,8 @@ function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
   let logo = null;
-  var companyName = "";
-  var companyAddress = "";
+  let companyName="";
+  let companyAddress="";
   const[DOAlimit,setDOALimit] = useState(0);
   const[DOAsetup,setDOAsetup] = useState(false);
   const[lastUser,setLastUser]=useState(true);
@@ -233,7 +233,7 @@ function QuoteDetail() {
     console.log(data);
     let rows = data?.map((u) => ({
       ...u,
-      isChecked: u._id === TandC ? true : false,
+      isChecked: TandC.includes(u._id) ? true : false,
       id: u._id,
     }));
     setDataRows([...rows]);
@@ -314,8 +314,8 @@ function QuoteDetail() {
     axiosInstance()
       .get('/user/brandInfo')
       .then(({ data }) => {
-        companyName = data.data.name;
-        companyAddress = data.data.address
+        companyName=data.data.name;
+        companyAddress=data.data.address;
         if (data.data.logo) {
           fetchImage(data.data.logo, function (dataUri) {
             logo = dataUri;
@@ -391,23 +391,20 @@ function QuoteDetail() {
       serialNumber=serialNumber+1;
     });
     PdfDoc.setFontSize(10);
-    PdfDoc.text(`Quote Id: ${productBuilderID}`,20,100);
-    PdfDoc.text(`Currency: ${quoteData.currency}`,20,115);
-    PdfDoc.text(`Date: ${displayDate(date)}`,285,100);
+    PdfDoc.text(`Quote Id: ${productBuilderID}`,285,100);
+    PdfDoc.text(`Currency: ${quoteData.currency}`,285,115);
+    PdfDoc.text(`Date: ${displayDate(date)}`,285,130);
     PdfDoc.setFontSize(8);
-    PdfDoc.text("Bill To:",20,135)
-    PdfDoc.text("Ship To:",285,135)
+    PdfDoc.text("Bill To:",20,100)
     PdfDoc.setFontSize(12);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,150);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,285,150);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,162);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,285,162);
+    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,115);
+    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,127);
     
     
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50)
-    PdfDoc.text(text, 20, 195);
+    PdfDoc.text(text, 20, 180);
     var lines = splittedText.length
     var blockHeight = (lines) * lineHeight;
     PDFData = [...PDFData, [{
@@ -415,7 +412,7 @@ function QuoteDetail() {
       styles: { halign: 'right', valign: 'middle' }
     }]];
     autoTable(PdfDoc, {
-      margin: { top: 135 + blockHeight },
+      margin: { top: 120 + blockHeight,left: 20,right:20},
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
@@ -780,21 +777,23 @@ function QuoteDetail() {
               (d) => d.id === params.row.id
             );
             var prevvalue = gridData[indexOfRecord].isChecked;
-            for (var i = 0; i < gridData.length; i++) {
-              gridData[i].isChecked = false;
-            }
+            let newTNC=TandC
             if (prevvalue) {
               gridData[indexOfRecord].isChecked = false;
-              setRadioIndex(-1);
+              const index= newTNC.indexOf(gridData[indexOfRecord]._id)
+              newTNC.splice(index,1);
             }
             else {
               gridData[indexOfRecord].isChecked = true;
+              newTNC.push(gridData[indexOfRecord]._id)
               setRadioIndex(indexOfRecord);
             }
-
+            if(newTNC.length===0){
+              setRadioIndex(-1);
+            }
             setDataRows([...gridData]);
-            setTNC(gridData[indexOfRecord]._id);
-            handleVersionUpdate(PDF, visibleColumns, versionStatus, gridData[indexOfRecord]._id);
+            setTNC(newTNC);
+            handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
             console.log(gridData[indexOfRecord]._id);
             const checkedRecords = gridData.filter((d) => d.isChecked === true);
           }}
@@ -970,7 +969,7 @@ function QuoteDetail() {
     var optionstoSet=[]
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string','srno'];
     var totalCost = 0;
     var totalSellingPrice = 0
     var totalMargin = 0
@@ -1377,7 +1376,7 @@ function QuoteDetail() {
                   <Grid container className="position-relative">
                     <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
                       {ProcessStatus === "New" ?
-                        (<span className="m-2">
+                        (<span className="productStep">
                           <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
                           <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
                         </span>) : (null)}
@@ -1413,7 +1412,7 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {(ProcessStatus === "DOA Process" && (versionStatus==="Building Quote" || versionStatus.includes("Rejected")) )||(ProcessStatus === "Customer Process" && versionStatus!=="Sent to Customer")? (<span className="d-flex align-items-center justify-content-end">
+                      {(ProcessStatus === "DOA Process" && versionStatus==="Building Quote" )||(ProcessStatus === "Customer Process" && versionStatus!=="Sent to Customer")? (<span className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
                     </Grid>
                     {ProcessStatus === "Quote Builder" ? (<span  className="d-flex align-items-center justify-content-end">

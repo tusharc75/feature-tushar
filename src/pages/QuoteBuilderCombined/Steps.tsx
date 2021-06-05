@@ -216,14 +216,14 @@ const Steps = (props) => {
                   Back
                 </Button>
               ) : null}
-              {(activeStep===4 || (steps.length===6 && activeStep===5)) ?(<Button
+              <Button
                 variant="contained"
                 color="primary"
                 onClick={handleNext}
                 disabled={nextStep ? false : true}
               >
                 {activeStep === steps.length - 1 ? "Finish" : "Next"}
-              </Button>):null}
+              </Button>
             </div>
           </div>
         )}
