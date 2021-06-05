@@ -48,9 +48,6 @@ import Steps from './Steps'
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from './EmailDialog'
-import {
-  Radio
-} from "@material-ui/core";
 
 import _, { isNull } from "lodash";
 import {
@@ -62,6 +59,7 @@ import { quoteBuilder } from '../../constants/helpers'
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import ProductBuilder from "../../components/productBuilder";
 import { DatasetController } from "chart.js";
+import { AnyObject } from "yup/lib/types";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -314,6 +312,7 @@ function QuoteDetail() {
     axiosInstance()
       .get('/user/brandInfo')
       .then(({ data }) => {
+        console.log(data);
         companyName=data.data.name;
         companyAddress=data.data.address;
         if (data.data.logo) {
@@ -362,7 +361,8 @@ function QuoteDetail() {
 
     const pagewidth = PdfDoc.internal.pageSize.width;
     console.log("Page width is");
-    console.log(pagewidth)
+    console.log(pagewidth);
+    console.log(logo);
     if (logo !== null) {
       PdfDoc.addImage(logo, 'JPEG', pagewidth - 80, 0, 70, 50);
     }
@@ -397,9 +397,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(8);
     PdfDoc.text("Bill To:",20,100)
     PdfDoc.setFontSize(12);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,115);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,127);
-    
+    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,115);
     
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
@@ -419,7 +417,7 @@ function QuoteDetail() {
       theme: 'grid'
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
-    
+    console.log(RadioIndex);
     if (RadioIndex !== -1) {
       PdfDoc.setDrawColor(0, 0, 0);
       PdfDoc.setFontSize(14);
@@ -427,11 +425,21 @@ function QuoteDetail() {
       PdfDoc.line(10, finalY+20, 220, finalY+20);
       PdfDoc.line(370, finalY+20, 580, finalY+20);
       PdfDoc.text("Terms and Conditions",225,finalY+25)
-      let state = convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
-      let TNC = EditorState.createWithContent(state)
-      var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
-      markup = markup.replaceAll(" ", "&nbsp");
-      PdfDoc.html(markup, {
+      var finalmarkup=""
+      console.log(TandC);
+      for(var tc=0;tc<TandC.length;tc++){
+        var SelectTNC:AnyObject= dataRows.filter((d: { _id: string}) => d._id ===TandC[tc] );
+        console.log(SelectTNC);
+        finalmarkup=finalmarkup+`<h1><strong>${SelectTNC[0].TACName}:</strong></h1>`
+        let state = convertFromRaw(JSON.parse(SelectTNC[0].description));
+        let TNC = EditorState.createWithContent(state)
+        var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+        finalmarkup=finalmarkup+markup+'<br>'
+      }
+      
+    
+      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      PdfDoc.html(finalmarkup, {
         callback: function (doc) {
           if (view && !send) {
             doc.output('dataurlnewwindow');
@@ -453,12 +461,20 @@ function QuoteDetail() {
               .then(({ data }) => {
                 console.log("PDF Response is:");
                 console.log(data);
-                axiosInstance().post(`/doa-request/create/`)
+                if (DOAreq) {
+                  console.log(data);
+                  handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+                  axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
                   .then(({ data }) => {
+                    fetchquoteData(currentVersion)
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
                   });
+                }
+                else {
+                  handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
+                }
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -471,6 +487,7 @@ function QuoteDetail() {
       });
     }
     else {
+      console.log("I am here");
       if (view && !send) {
         PdfDoc.output('dataurlnewwindow');
       }
@@ -491,11 +508,16 @@ function QuoteDetail() {
           .then(({ data }) => {
             console.log("PDF Response is:");
             console.log(data);
+            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
             if (DOAreq) {
-              handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
-            }
-            else {
-              handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
+              axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+              .then(({ data }) => {
+                
+                fetchquoteData(currentVersion)
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+              });
             }
 
           })
@@ -767,7 +789,7 @@ function QuoteDetail() {
       field: "isChecked",
       headerName: "Select",
       renderCell: (params) => (
-        <Radio
+        <Checkbox
           color="primary"
           // disabled={!params.canDelete}
           checked={params.value}
@@ -994,33 +1016,36 @@ function QuoteDetail() {
           }
           var fields = quoteRows["fields"]
           var field = fields.filter((d: { fieldName: string; }) => d.fieldName === key);
-          if (typeof (quoteRows[key]) === "object") {
-            inventorydata.push({
-              fieldName: field[0].fieldLabel,
-              fieldValue: quoteRows[key][key]
-            });
-          }
-          else {
-            inventorydata.push({
-              fieldName: field[0].fieldLabel,
-              fieldValue: quoteRows[indexkey]
-            });
-          }
-          if (key === 'totalCost') {
-            totalCost = totalCost + quoteRows[indexkey]
-            CostCurrency = currency.toUpperCase()
-          }
-          else if (key === 'totalSalesPrice') {
-            totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
-            SPCurrency = currency.toUpperCase()
-          }
-          else if (key === "totalProfit") {
-            totalProfit = totalProfit + quoteRows[indexkey]
-            ProfitCurrency = currency.toUpperCase()
-          }
-          else if (key === "totalMargin") {
-            totalMargin = totalMargin + quoteRows[indexkey]
-            MarginCurrency = currency.toUpperCase()
+          console.log(field);
+          if(typeof(field[0])!=="undefined"){
+            if (typeof (quoteRows[key]) === "object") {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[key][key]
+              });
+            }
+            else {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[indexkey]
+              });
+            }
+            if (key === 'totalCost') {
+              totalCost = totalCost + quoteRows[indexkey]
+              CostCurrency = currency.toUpperCase()
+            }
+            else if (key === 'totalSalesPrice') {
+              totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
+              SPCurrency = currency.toUpperCase()
+            }
+            else if (key === "totalProfit") {
+              totalProfit = totalProfit + quoteRows[indexkey]
+              ProfitCurrency = currency.toUpperCase()
+            }
+            else if (key === "totalMargin") {
+              totalMargin = totalMargin + quoteRows[indexkey]
+              MarginCurrency = currency.toUpperCase()
+            }
           }
         }
       })
@@ -1124,19 +1149,12 @@ function QuoteDetail() {
     console.log("HandleCases");
     if (DOAreq) {
       if (!PDF) {
-        GeneratePdf(false, true);
+        createImagePDF(false, true);
       }
-      axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
-        .then(({ data }) => {
-          fetchquoteData(currentVersion)
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
     };
     if (Customerreq) {
       if (!PDF) {
-        GeneratePdf(false, true);
+        createImagePDF(false, true);
       }
       setSendEmail(true);
     }
@@ -1167,7 +1185,7 @@ function QuoteDetail() {
     var body = { PDF: PDFfile, acceptedColumns: Columns, versionStatus: versionStatus, TNC: TC }
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {
+      .then(({ data }) => { 
 
       })
       .catch((err) => {
@@ -1415,7 +1433,7 @@ function QuoteDetail() {
                       {(ProcessStatus === "DOA Process" && versionStatus==="Building Quote" )||(ProcessStatus === "Customer Process" && versionStatus!=="Sent to Customer")? (<span className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
                     </Grid>
-                    {ProcessStatus === "Quote Builder" ? (<span  className="d-flex align-items-center justify-content-end">
+                    {ProcessStatus !== "New" && ProcessStatus!=="Price Builder" ? (<span  className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" className="mr-1" startIcon={<AiOutlineEye />} color="primary">View</Button>
                         <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
                       </span>)
