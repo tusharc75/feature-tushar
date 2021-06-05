@@ -245,20 +245,24 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                     alignItems="center"
                                                 >
                                                     <Grid item md={12}>
-                                                        <Box className={classes.doaHeader}>
-                                                            <Grid
-                                                                container
-                                                                spacing={2}
-                                                                direction="row"
-                                                                justify="flex-start"
-                                                                alignItems="center"
-                                                            >
-                                                                <Grid item md={1}> Sr </Grid>
-                                                                <Grid item md={5}> Users </Grid>
-                                                                {(selectedType === 2) && <Grid item md={4}> Amount </Grid>}
-                                                                <Grid item md={2}></Grid>
-                                                            </Grid>
-                                                        </Box>
+                                                        {values.users && values.users.length > 0 && (
+
+                                                            <Box className={classes.doaHeader}>
+                                                                <Grid
+                                                                    container
+                                                                    spacing={2}
+                                                                    direction="row"
+                                                                    justify="flex-start"
+                                                                    alignItems="center"
+                                                                >
+                                                                    <Grid item md={1}> Sr </Grid>
+                                                                    <Grid item md={5}> Users </Grid>
+                                                                    {(selectedType === 2) && <Grid item md={4}> Amount </Grid>}
+                                                                    <Grid item md={2}></Grid>
+
+                                                                </Grid>
+                                                            </Box>
+                                                        )}
                                                         <Box className="p-1">
                                                             <FieldArray
                                                                 name="users"
@@ -350,18 +354,17 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                 </Grid>
                                                                             ))
                                                                         ) : (
-                                                                            <Grid item md={2}>
-                                                                                <ButtonGroup size="small" aria-label="small outlined button group">
-                                                                                    <IconButton size="small" aria-label="add" onClick={() => {
+                                                                            <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                                                                <Button
+                                                                                    variant="contained"
+                                                                                    color="primary"
+                                                                                    size="large"
+                                                                                    onClick={() => {
                                                                                         arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
-                                                                                    }
-                                                                                    } >
-                                                                                        <Add />
-                                                                                    </IconButton>
-                                                                                    <IconButton size="small" aria-label="delete" >
-                                                                                        <Delete />
-                                                                                    </IconButton>
-                                                                                </ButtonGroup>
+                                                                                    }}
+                                                                                >
+                                                                                    Add Users
+                                                                                </Button>
                                                                             </Grid>
                                                                         )}
                                                                     </div>
