@@ -139,6 +139,7 @@ const DOAApproval=()=>{
             responseType:"blob"
         })
             .then(({data})=>{
+                console.log(data);
                 const file = new Blob([data], { type: "application/pdf" });
                 const fileURL = URL.createObjectURL(file);
                 const pdfWindow = window.open();
