@@ -383,10 +383,8 @@ export default function Contact(props) {
           <ImportExportLinks
             module="contact(s)"
             api={contactApi}
-            onSuccessfulImport={(isImportedSuccessfully) => {
-              if (isImportedSuccessfully) {
-                getContacts();
-              }
+            afterImportCompleted={() => {
+              getContacts();
             }}
           />
         </Grid>
