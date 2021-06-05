@@ -415,6 +415,7 @@ export default function QuotesAccordionInProjectSale({
           contactId={contactId}
           opportunityId={opportunityId}
           accountResource={accountResource}
+          disableOwnerDropDown={true}
         />
       )}
     </>

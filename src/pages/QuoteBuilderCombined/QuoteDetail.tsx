@@ -1577,6 +1577,7 @@ function QuoteDetail() {
               isRedirectTodetailPage={false}
               contactId={null}
               opportunityId={null}
+              disableOwnerDropDown={true}
             // qbApi={qbApi}
             />
           )

@@ -550,7 +550,7 @@ const ContactDetailsPage = (props) => {
                       accountId={contactData?.accountName?.optionValue}
                       contactId={id}
                       accountResource={accountResource}
-
+                      isRenderedInCustomerContact={true}
                     />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
