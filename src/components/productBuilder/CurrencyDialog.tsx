@@ -18,32 +18,28 @@ import { CustomDialogTransition } from "./../../constants/helpers";
 import FormTypes from "../../components/Helpers/FormTypes";
 
 const ProductBuilderSchema = Yup.object().shape({
-    name: Yup.string()
-        .required("please enter name"),
+    currency: Yup.string()
+        .required("please select currency"),
 });
 
 
-const CreateNewDialog = (props) => {
+const CurrencyDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose } = props;
-    const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ name: "" });
+    const { handleClose, handleCurrencyAdd, fieldData } = props;
+    const [initialData, setInitialData] = useState({ currency: "" });
     const history = useHistory();
 
     const handleSubmit = (values) => {
-        axiosInstance().post(`/productbuilder`, values).then(({ data: { data } }) => {
-            setLoading(false);
-            handleClose()
-            history.push({ pathname: routes.productBuilder.path + "/" + data._id })
-        }).catch((error) => {
-            setLoading(false);
-            toastConfig.setToastConfig(error);
-        });
+        if (fieldData.displayCurrency.includes(values.currency)) {
+            alert("Currency alreday added")
+            return
+        }
+        handleCurrencyAdd(fieldData, values.currency)
     };
 
     return (<Dialog
-        maxWidth="sm"
+        maxWidth="xs"
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
@@ -63,23 +59,10 @@ const CreateNewDialog = (props) => {
                 submitForm,
             }) => (
                 <Fragment>
-                    <CustomDialogHeader title={"Create New"} onClose={handleClose}></CustomDialogHeader>
+                    <CustomDialogHeader title="Add Currency" onClose={handleClose}></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
                             <Box p={1}>
-                                <TextField
-                                    variant="outlined"
-                                    type="text"
-                                    label="Name"
-                                    required={true}
-                                    name="name"
-                                    fullWidth
-                                    margin="dense"
-                                    value={values["name"]}
-                                    error={touched["name"] && Boolean(errors["name"])}
-                                    helperText={touched["name"] && errors["name"]}
-                                    onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
-                                />
                                 <Box mt={2}>
                                     <FormTypes
                                         values={values}
@@ -102,13 +85,12 @@ const CreateNewDialog = (props) => {
                     <CustomDialogFooter>
                         <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
-                            loading={loading}
                             variant="contained"
                             color="primary"
                             type="submit"
                             size="small"
                             onClick={submitForm}
-                        > Save</CustomButton>
+                        > Add</CustomButton>
                     </CustomDialogFooter>
                 </Fragment>
             )}
@@ -117,4 +99,4 @@ const CreateNewDialog = (props) => {
     );
 }
 
-export default CreateNewDialog;
+export default CurrencyDialog;
