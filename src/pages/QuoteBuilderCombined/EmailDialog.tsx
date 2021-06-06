@@ -25,8 +25,6 @@ const ProductBuilderSchema = Yup.object().shape({
         .required("please enter email subject"),
     body: Yup.string()
         .required("please enter email body"),
-    account:Yup.object()
-    .required("please select Account"),
     contact:Yup.object()
     .required("please select Contact")
 });
@@ -35,7 +33,7 @@ const ProductBuilderSchema = Yup.object().shape({
 const EmailDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose,success,id,version} = props;
+    const { handleClose,success,id,version,account} = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ subject: "",body:"",cc:"",bcc:"",account:"",contact:"" });
     const [accounts,setAccounts]=useState([]);
@@ -45,7 +43,7 @@ const EmailDialog = (props) => {
     const history = useHistory();
 
     useEffect(()=>{
-        fetchAccounts();
+        fetchContacts(account.optionValue);
     },[])
 
     const handleSubmit = (values) => {
@@ -85,11 +83,9 @@ const EmailDialog = (props) => {
 
     }
     
-    const fetchContacts=(event,value)=>{
+    const fetchContacts=(account_id)=>{
         
-        setLoading(stubTrue);
-        console.log(value);
-        if(value!==null){
+        setLoading(true);
         axiosInstance()
         .get(`/customer-contact`)
         .then(({ data: { data } }) => {
@@ -101,7 +97,6 @@ const EmailDialog = (props) => {
             setLoading(false);
         });
         }
-    }
 
     const fetchemailAddress=(event,value)=>{
         console.log(value)
@@ -141,24 +136,13 @@ const EmailDialog = (props) => {
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
                             <Box p={1}>
-                            <Autocomplete
-                                id="accounts"
-                                options={accounts}
-                                fullWidth
-                                getOptionLabel={(option) => option.accountName}
-                                style={{ width: 300 }}
-                                onChange={(e,value)=>{fetchContacts(e,value); setFieldValue("account",value);}}
-                                renderInput={(params) => 
-                                <TextField {...params} 
+                                <TextField  
                                 label="Account" 
-                                variant="outlined" 
-                                name="cc"
+                                variant="outlined"
+                                name="account"
                                 fullWidth
-                                required 
+                                value={account.optionLabel} 
                                 margin="dense"
-                                value={values["cc"]}
-                                error={touched["account"] && Boolean(errors["account"])}
-                                helperText={touched["account"] && errors["account"]}/>}
                                 />
                                 </Box>
                                 <Box p={1}>

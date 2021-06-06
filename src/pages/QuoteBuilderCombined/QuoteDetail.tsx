@@ -4,6 +4,7 @@ import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import { downloadExcel } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -32,6 +33,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
+import excel from 'exceljs';
 import {
   EditorState,
   convertToRaw,
@@ -105,7 +107,7 @@ function QuoteDetail() {
     state: { user, selectedEntity, permissions },
   }: any = useData();
 
-  var defaultSelectColumns = ["Product Name", "Description", "Unit", "Qty"];
+  var defaultSelectColumns = ["Product Name", "Description", "Unit", "Qty","Sales Price Per Unit","Total Sales Price"];
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
@@ -364,6 +366,10 @@ function QuoteDetail() {
   const GeneratePdf = (view, send) => {
     const PdfDoc = new jsPDF('p', 'pt', 'a4');
     let date = new Date();
+    const excelHeader=[]
+    const excelheaderName=[]
+    const excelData=[]
+
 
     const pagewidth = PdfDoc.internal.pageSize.width;
     console.log("Page width is");
@@ -385,17 +391,40 @@ function QuoteDetail() {
     var serialNumber = 1;
     dynamicTableData.forEach(dataEntry => {
       var PdfRow = [serialNumber];
+      var ExcelRow={}
       ColumnName.forEach(ColName => {
-        if (visibleColumns.indexOf(ColName) !== -1) {
+        if (defaultSelectColumns.indexOf(ColName) !== -1) {
           if (PdfCol.indexOf(ColName) == -1) {
             PdfCol.push(ColName);
           }
           PdfRow.push(dataEntry[ColName]);
         }
+
+        if(visibleColumns.indexOf(ColName)!==-1){
+          if(excelheaderName.indexOf(ColName!==-1)){
+            excelheaderName.push(ColName);
+            excelHeader.push({
+              header: ColName,
+              key: ColName.replace(" ","")
+            })
+          }
+          ExcelRow[ColName.replace(" ","")]=dataEntry[ColName]
+        }
       })
       PDFData.push(PdfRow);
+      excelData.push(ExcelRow);
       serialNumber = serialNumber + 1;
     });
+
+    // if(!view && !send){
+    //   console.log(excelHeader);
+    //   console.log(excelData);
+    //   const workbook = new excel.Workbook();
+    //   const worksheet: any = workbook.addWorksheet("Quotation");
+    //   worksheet.columns=excelHeader;
+    //   //worksheet.addRows(2,excelData);
+    //   downloadExcel(workbook.xlsx.writeBuffer(),"Quotation.xlsx");
+    // }
     PdfDoc.setFontSize(10);
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
@@ -467,19 +496,9 @@ function QuoteDetail() {
               }
             })
               .then(({ data }) => {
-                handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+                handleVersionUpdate(data.fileName, visibleColumns,"", TandC);
                 console.log("PDF Response is:");
                 console.log(data);
-                if (DOAreq) {
-                  console.log(data);
-                  axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
-                    .then(({ data }) => {
-                      fetchquoteData(currentVersion)
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                    });
-                }
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -509,18 +528,9 @@ function QuoteDetail() {
           }
         })
           .then(({ data }) => {
-            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+            handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
             console.log("PDF Response is:");
             console.log(data);
-            if (DOAreq) {
-              axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
-              .then(({ data }) => {
-                fetchquoteData(currentVersion)
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-              });
-            }
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -1143,8 +1153,6 @@ function QuoteDetail() {
         var DataSet = inventory[i][j];
         if (ColName.indexOf(DataSet.fieldName) === -1) {
           ColName = [...ColName, DataSet.fieldName];
-          if (DataSet.fieldName.includes("Sales Price"))
-            defaultSelectColumns.push(DataSet.fieldName);
           Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
           columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
         }
@@ -1183,6 +1191,15 @@ function QuoteDetail() {
     if (DOAreq) {
       if (!PDF) {
         createImagePDF(false, true);
+        
+          axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+            .then(({ data }) => {
+              handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+              fetchquoteData(currentVersion)
+            })
+            .catch((err) => {
+              toastConfig.setToastConfig(err);
+            });
       }
     };
     if (Customerreq) {
@@ -1215,7 +1232,7 @@ function QuoteDetail() {
   }
 
   const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
-    var body = { PDF: PDFfile, acceptedColumns: Columns, versionStatus: versionStatus, TNC: TC }
+    var body = { PDF: PDFfile, acceptedColumns: Columns, status: versionStatus, TNC: TC }
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
       .then(({ data }) => {
@@ -1649,7 +1666,8 @@ function QuoteDetail() {
             handleClose={() => setSendEmail(false)}
             success={onSuccess}
             id={id}
-            version={currentVersion} />
+            version={currentVersion}
+            account={quoteData.customerAccountName}/>
         }
 
 
