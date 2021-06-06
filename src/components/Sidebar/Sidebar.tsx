@@ -16,11 +16,7 @@ import { Link, withRouter } from "react-router-dom";
 import Header from "../Header/Header";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.scss";
-import {
-  ChevronRight,
-  ExpandMore,
-  ExpandLess,
-} from "@material-ui/icons";
+import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
 import _ from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
@@ -137,6 +133,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       icon: <SiCivicrm size={15} className="sidebar-icon" />,
     },
   ];
+
+  let toggleTimeout;
+
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
     if (toggleDrawer) {
@@ -201,23 +200,20 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
-  // const activityTabs = [
-  //   "Task",
-  //   "Case",
-  //   "Note",
-  //   "Email",
-  //   "Attachment",
-  //   "Calendar",
-  //   "Reminder",
-  // ];
-
   return (
     <div className={classes.root}>
       <CssBaseline />
       <Header toggleDrawer={handleToggleDrawer} />
       <Drawer
-        onMouseEnter={handleToggleDrawer}
-        onMouseLeave={handleToggleDrawer}
+        onMouseEnter={() => {
+          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        }}
+        onMouseLeave={() => {
+          if (toggleTimeout) {
+            clearTimeout(toggleTimeout);
+          }
+          setToggleDrawer(false);
+        }}
         variant="permanent"
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: toggleDrawer,
@@ -261,62 +257,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </ListItem>
               </Tooltip>
             </Link>
-
-            {/* <Tooltip title={!toggleDrawer ? "Activity" : ""}>
-              <ListItem
-                button
-                className="list-item"
-                onClick={() => {
-                  handleCollapse("Activity");
-                  if (!toggleDrawer) {
-                    handleToggleDrawer();
-                  }
-                }}
-              >
-                <ListItemIcon>
-                  <MdLocalActivity size={15} className="sidebar-icon" />
-                </ListItemIcon>
-                <ListItemText primary="Activities" />
-                {open["Activity"] ? <ExpandLess /> : <ExpandMore />}
-              </ListItem>
-            </Tooltip> */}
-            {/* <Collapse
-              in={open["Activity"] && toggleDrawer}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding className="list-item">
-                {activityTabs.map((item, i) => (
-                  <Link
-                    className="sub-list"
-                    key={i}
-                    to={
-                      item === "Calendar" || item === "Reminder"
-                        ? `/${_.lowerCase(item)}`
-                        : `/activity/${_.lowerCase(item)}`
-                    }
-                  >
-                    <ListItem
-                      button
-                      selected={pathnames.includes(_.lowerCase(item))}
-                      className={classes.nested}
-                      // onClick={() => {
-                      //   if (toggleDrawer) {
-                      //     handleToggleDrawer();
-                      //   }
-                      // }}
-
-                      onClick={() => {
-                        let isCurrentPath = location.pathname === (["Calendar", "Reminder"].indexOf(item) >= 0 ? `/${_.lowerCase(item)}` : `/activity/${_.lowerCase(item)}`)
-                        if (!isCurrentPath && toggleDrawer) handleToggleDrawer();
-                      }}
-                    >
-                      <ListItemText primary={item} />
-                    </ListItem>
-                  </Link>
-                ))}
-              </List>
-            </Collapse> */}
 
             {user &&
               listItems().map((listItem, i) => (
@@ -374,18 +314,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           </List>
         </div>
       </Drawer>
-
-      {/* <main className={classes.content}>
-        <Toolbar />
-        {userLoading ? (
-          <Loader />
-        ) : (
-          <Box>
-            <Box marginY={2} />
-            {children}
-          </Box>
-        )}
-      </main> */}
     </div>
   );
 }

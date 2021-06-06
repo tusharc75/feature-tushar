@@ -26,14 +26,14 @@ import { Note } from "./Note";
 import { CreateNote } from "./Note/CreateNote";
 import { Email } from "./Email";
 import { CreateEmail } from "./Email/CreateEmail";
-import { Chip } from '@material-ui/core'
-import Attachments from './Attachments/index'
+import { Chip } from "@material-ui/core";
+import Attachments from "./Attachments/index";
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAttachment from "./Attachments/ManageAttachment";
 import Chatter from "./Chatter";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
@@ -60,28 +60,28 @@ const Activity = (props) => {
 
   const [type, setType] = useState(null);
   const [open, setOpen] = useState(false);
-  const [emailUsersOptions, setEmailUsersOptions] = useState([])
-  const [countFetched, setCountFetched] = useState(false)
+  const [emailUsersOptions, setEmailUsersOptions] = useState([]);
+  const [countFetched, setCountFetched] = useState(false);
   const [totalCount, setTotalCount] = useState({
     Task: 0,
     Event: 0,
     Case: 0,
     Note: 0,
     Email: 0,
-    Attachment: 0
-  })
+    Attachment: 0,
+  });
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
   useEffect(() => {
-    fetchUsersEmails()
-  }, [])
+    fetchUsersEmails();
+  }, []);
 
   useEffect(() => {
     if (Boolean(relatedTo[0]?.referenceId) && !countFetched) {
-      fetchTotalCounts()
+      fetchTotalCounts();
     }
-  }, [relatedTo[0]?.referenceId])
+  }, [relatedTo[0]?.referenceId]);
 
   useEffect(() => {
     let data = [];
@@ -97,17 +97,16 @@ const Activity = (props) => {
   }, [emails]);
 
   const fetchTotalCounts = () => {
-
     axiosInstance()
       .get(`/activity/resource/count?relatedTo=${JSON.stringify(relatedTo)}`)
       .then(({ data: { data } }) => {
-        setTotalCount(data)
-        setCountFetched(true)
+        setTotalCount(data);
+        setCountFetched(true);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-      })
-  }
+      });
+  };
 
   const getIcon = (tab: string) => {
     switch (tab) {
@@ -170,13 +169,12 @@ const Activity = (props) => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }
+  };
   const handleSetCount = (name, count) => {
     if (name) {
-      setTotalCount((prevState) => ({ ...prevState, [name]: count }))
+      setTotalCount((prevState) => ({ ...prevState, [name]: count }));
     }
-  }
-
+  };
 
   return (
     <Box>
@@ -208,7 +206,7 @@ const Activity = (props) => {
                         color="primary"
                         className="d-flex align-items-center"
                       >
-                        {getIcon(data)} {data}  ({totalCount[data]})
+                        {getIcon(data)} {data} ({totalCount[data]})
                       </Typography>
                     </Box>
                   </Box>
@@ -261,14 +259,13 @@ const Activity = (props) => {
                   onSetCount={handleSetCount}
                 />
               ) : null}
-              {
-                type === "Attachment" && data === "Attachment" ? (
-                  <Attachments
-                    relatedTo={relatedTo}
-                    handleActivityRefresh={handleActivityRefresh}
-                    onSetCount={handleSetCount}
-                  />) : null
-              }
+              {type === "Attachment" && data === "Attachment" ? (
+                <Attachments
+                  relatedTo={relatedTo}
+                  handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
+                />
+              ) : null}
             </Box>
           </Fragment>
         ))}
@@ -297,6 +294,7 @@ const Activity = (props) => {
             eventId={null}
             handleClose={handleClose}
             relatedTo={relatedTo}
+            email={emails}
           />
         ) : null}
         {type === "Case" ? (
