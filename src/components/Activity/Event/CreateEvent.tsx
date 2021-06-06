@@ -302,7 +302,11 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                           setFieldValue={setFieldValue}
                           multiple={true}
                           value={values["participant"]}
-                          email={email.map((e) => ({ userId: e, name: e }))}
+                          email={
+                            email
+                              ? email.map((e) => ({ userId: e, name: e }))
+                              : []
+                          }
                         />
                       </Box>
                       {!eventId && !relatedTo && (
