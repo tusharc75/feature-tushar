@@ -50,7 +50,7 @@ const EventSchema = Yup.object().shape({
   endDate: Yup.string().required("Please enter end date").nullable(),
 });
 
-export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
+export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
   const {
     state: {
       user: { user },
@@ -302,6 +302,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                           setFieldValue={setFieldValue}
                           multiple={true}
                           value={values["participant"]}
+                          email={email.map((e) => ({ userId: e, name: e }))}
                         />
                       </Box>
                       {!eventId && !relatedTo && (
@@ -600,4 +601,5 @@ CreateEvent.propTypes = {
   relatedTo: PropTypes.any,
   taskId: PropTypes.any,
   handleClose: PropTypes.any,
+  email: PropTypes.array,
 };

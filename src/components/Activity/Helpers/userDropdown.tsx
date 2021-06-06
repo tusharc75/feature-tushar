@@ -28,6 +28,7 @@ interface UserOptionType {
 const filter = createFilterOptions<UserOptionType>();
 
 export const UserDropdown = ({
+  email,
   name,
   label,
   value,
@@ -93,7 +94,7 @@ export const UserDropdown = ({
             name: user.userId,
           }));
 
-          setUsers([...userData, ...filteredOptions]);
+          setUsers([...userData, ...filteredOptions, ...email]);
         } else {
           setUsers(userData);
         }
@@ -269,4 +270,6 @@ UserDropdown.propTypes = {
   touched: PropTypes.any,
   errors: PropTypes.any,
   setFieldValue: PropTypes.any,
+  requied: PropTypes.any,
+  email: PropTypes.any,
 };
