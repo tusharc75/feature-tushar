@@ -8,8 +8,9 @@ import {
   ListItemText,
   IconButton,
   Chip,
+  Grid,
 } from "@material-ui/core";
-import { SupervisorAccount, Delete } from "@material-ui/icons";
+import { Delete } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 
 import BoxWithBorder from "../../components/BoxWithBorder";
@@ -39,55 +40,63 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
   return (
     <div className={classes.demo}>
       <List disablePadding>
-        {data && data.length
-          ? data.map((obj) => (
-              <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
-                <ListItem disableGutters className={classes.list}>
-                  <ListItemText
-                    primary={
-                      <Typography className={classes.title}>
-                        <Link className="link" to={`/user/detail/${obj._id}`}>
-                          {`${obj.firstName} ${obj.lastName}` || ""}
-                        </Link>
+        <Grid container>
+          {data && data.length
+            ? data.map((obj) => (
+                <Grid item xs={6}>
+                  <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
+                    <ListItem disableGutters className={classes.list}>
+                      <ListItemText
+                        primary={
+                          <Typography className={classes.title}>
+                            <Link
+                              className="link"
+                              to={`/user/detail/${obj._id}`}
+                            >
+                              {`${obj.firstName} ${obj.lastName}` || ""}
+                            </Link>
 
-                        {managerId === obj._id && (
+                            {managerId === obj._id && (
+                              <>
+                                <Box mr={1} title="Project" />
+                                <Chip
+                                  variant="outlined"
+                                  size="small"
+                                  label="Manager"
+                                  color="secondary"
+                                />
+                              </>
+                            )}
+                          </Typography>
+                        }
+                        secondary={
                           <>
-                            <Box mr={1} title="Project" />
-                            <Chip
-                              variant="outlined"
-                              size="small"
-                              label="Manager"
-                              color="secondary"
-                            />
+                            {obj.email || ""}
+                            <CopyToClipboard textToCopy={obj.email || ""} />
                           </>
-                        )}
-                      </Typography>
-                    }
-                    secondary={
-                      <>
-                        {obj.email || ""}
-                        <CopyToClipboard textToCopy={obj.email || ""} />
-                      </>
-                    }
-                  />
+                        }
+                      />
 
-                  {permissions.projectSales.isUpdate && managerId !== obj._id && (
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        title={`Remove ${obj.firstName}`}
-                        size="small"
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => removeUser(obj)}
-                      >
-                        <Delete color="error" />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
-              </BoxWithBorder>
-            ))
-          : null}
+                      {permissions.projectSales.isUpdate &&
+                        managerId !== obj._id && (
+                          <ListItemSecondaryAction>
+                            <IconButton
+                              title={`Remove ${obj.firstName}`}
+                              size="small"
+                              edge="end"
+                              aria-label="delete"
+                              onClick={() => removeUser(obj)}
+                            >
+                              <Delete color="error" />
+                            </IconButton>
+                          </ListItemSecondaryAction>
+                        )}
+                    </ListItem>
+                  </BoxWithBorder>
+                </Grid>
+              ))
+            : null}
+        </Grid>
       </List>
     </div>
   );

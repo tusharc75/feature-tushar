@@ -26,7 +26,6 @@ const MyCalendar = (props: Props) => {
       style={{ height: "100vh" }}
       popup={true}
       eventPropGetter={(obj) => {
-        console.log(obj.type);
         const newStyles = {
           backgroundColor:
             obj.type === "Event"

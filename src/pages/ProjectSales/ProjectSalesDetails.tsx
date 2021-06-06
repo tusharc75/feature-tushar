@@ -30,7 +30,11 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
-import { displayCardDate, formatAmountWithCurrency } from "../../constants/helpers";
+import {
+  displayCardDate,
+  formatAmountWithCurrency,
+} from "../../constants/helpers";
+import Activity from "../../components/Activity";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -358,7 +362,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -380,8 +384,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                    !projectSalesFields.length ||
-                    !projectSalesData ? (
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -426,8 +430,9 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${node.id
-                                    }`,
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
                                 });
                               }
                             }}
@@ -435,29 +440,10 @@ const ProjectSalesDetails = () => {
                         </Box>
                       )}
                     </>
-
-                    // <Box>
-                    //   <Box
-                    //     width="100%"
-                    //     padding={1}
-                    //     bgcolor="grey.200"
-                    //     display="flex"
-                    //     justifyContent="space-between"
-                    //   >
-                    //     <Typography variant="subtitle2">
-                    //       Project Sales
-                    //     </Typography>
-                    //   </Box>
-                    //   <DetailsPage
-                    //     data={projectSalesData}
-                    //     fields={projectSalesFields}
-                    //   />
-                    // </Box>
                   )}
                 </Box>
               </Paper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4}>
+              <Box my={1} />
               <Paper>
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
@@ -470,7 +456,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -520,6 +506,21 @@ const ProjectSalesDetails = () => {
                 </Box>
               </Paper>
             </Grid>
+            <Grid item xs={12} sm={12} md={4} lg={4}>
+              <div>
+                <Activity
+                  relatedTo={[
+                    {
+                      type: "projectSales",
+                      referenceId: id,
+                      access: true,
+                    },
+                  ]}
+                  handleActivityRefresh={() => {}}
+                  emails={[]}
+                />
+              </div>
+            </Grid>
           </Grid>
           <Box my={1} />
           <CustomerAccounts
@@ -547,8 +548,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-                : ""
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

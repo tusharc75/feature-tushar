@@ -89,8 +89,7 @@ const Steps = (props) => {
           if (props.icon === 5) {
             status = 5;
           }
-        } 
-        else {
+        } else {
           if (props.icon === 4) {
             status = 5;
           }
@@ -99,7 +98,7 @@ const Steps = (props) => {
         status = 2;
       }
     } else if (completed) {
-      status=3
+      status = 3;
       if (versionStatus.includes("Rejected by DOA")) {
         if (props.icon > 3) {
           status = 4;
@@ -120,19 +119,18 @@ const Steps = (props) => {
             completed = false;
           }
         }
-      } 
-    }
-    if(props.icon===steps.length && props.active){
-      if(versionStatus.includes("Rejected")){
-        status=4
-        active=false;
-        completed=false;
-        rejected=true;
       }
-      else{
-        status=3
-        completed=true;
-        active=false
+    }
+    if (props.icon === steps.length && props.active) {
+      if (versionStatus.includes("Rejected")) {
+        status = 4;
+        active = false;
+        completed = false;
+        rejected = true;
+      } else {
+        status = 3;
+        completed = true;
+        active = false;
       }
     }
 
