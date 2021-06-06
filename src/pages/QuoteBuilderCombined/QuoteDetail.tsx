@@ -1476,7 +1476,7 @@ function QuoteDetail() {
                   <Grid container className="position-relative">
                     <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
                       {ProcessStatus === "New" ?
-                        (<span className="productStep">
+                        (<span className="m-2">
                           <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
                           <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
                         </span>) : (null)}

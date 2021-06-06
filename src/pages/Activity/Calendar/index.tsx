@@ -6,7 +6,11 @@ import {
   Grid,
   Menu,
   MenuItem,
-  Typography,
+  Popper,
+  Grow,
+  Paper,
+  ClickAwayListener,
+  MenuList,
 } from "@material-ui/core";
 import { lowerCase, startCase } from "lodash";
 import { useHistory } from "react-router-dom";
@@ -175,27 +179,45 @@ const BigCalendar = () => {
                   </>
                 ))}
               </Box>
-              <Menu
+              <Popper
                 id="simple-menu"
                 anchorEl={anchorEl}
-                keepMounted
                 open={Boolean(anchorEl)}
-                onClose={handleClose}
+                role={undefined}
+                transition
+                disablePortal
+                style={{ zIndex: 10 }}
               >
-                {activityOptions.map((item, i) => (
-                  <MenuItem
-                    key={i}
-                    onClick={() => {
-                      setCreateType(lowerCase(item.title));
-                      handleClose();
+                {({ TransitionProps, placement }) => (
+                  <Grow
+                    {...TransitionProps}
+                    style={{
+                      transformOrigin:
+                        placement === "bottom" ? "center top" : "center bottom",
                     }}
                   >
-                    {item.icon}
-                    <span className="ml-2"></span>
-                    {item.title}
-                  </MenuItem>
-                ))}
-              </Menu>
+                    <Paper>
+                      <ClickAwayListener onClickAway={handleClose}>
+                        <MenuList autoFocusItem={Boolean(anchorEl)}>
+                          {activityOptions.map((item, i) => (
+                            <MenuItem
+                              key={i}
+                              onClick={() => {
+                                setCreateType(lowerCase(item.title));
+                                handleClose();
+                              }}
+                            >
+                              {item.icon}
+                              <span className="ml-2"></span>
+                              {item.title}
+                            </MenuItem>
+                          ))}
+                        </MenuList>
+                      </ClickAwayListener>
+                    </Paper>
+                  </Grow>
+                )}
+              </Popper>
             </Grid>
             <Grid item xs={12} sm={7}>
               <SearchFilter
