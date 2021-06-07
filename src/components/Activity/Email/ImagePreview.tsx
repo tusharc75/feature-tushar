@@ -11,7 +11,7 @@ export default function ImagePreview({ open, close, image, heading = "" }) {
             aria-labelledby="customized-dialog-title"
             heading={heading}
             close={close} >
-            <div className={emailStyle.previewImage}>
+            <div className={emailStyle.previewImageContainer}>
                 <img src={image} />
             </div>
         </FullScreenDialog >
