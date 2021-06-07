@@ -35,6 +35,7 @@ import currencies from "../../../constants/currency_with_country.json";
 import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
+import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -75,10 +76,13 @@ export default function ManageQuoteDialog({
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
+  const [showCreateOpportunity, setShowCreateOpportunity] = useState(false)
   const [accountData, setAccountData] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
+  const [opportunityData, setOpportunityData] = useState([]);
+  const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null)
   const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
 
   useEffect(() => {
@@ -96,6 +100,11 @@ export default function ManageQuoteDialog({
       setAccountData(customerAccountOptions.option);
     }
 
+    let opportunityOptions = entityData.fields.find((d) => d.filedName === "opportunity")
+    if (opportunityOptions) {
+      setOpportunityData(opportunityOptions.option);
+    }
+
     sortArray();
 
     const customerContactDropdownData = entityData.fields.find(
@@ -107,6 +116,10 @@ export default function ManageQuoteDialog({
       if (!isNew) {
         setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === dataToUpdate.customerAccountName.optionValue));
       }
+
+      if (isNew && contactId) {
+        setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === entityData.initialValues["customerAccountName"]));
+      }
     }
 
     return () => {
@@ -114,6 +127,7 @@ export default function ManageQuoteDialog({
       setOwnerData([])
       setCollaboratorData([])
       setAccountData([])
+      setOpportunityData([])
     }
 
   }, [entityData.fields]);
@@ -231,8 +245,8 @@ export default function ManageQuoteDialog({
     if (accountId && accountResource !== customerAccount.accountResource) values["supplierAccountName"] = [accountId]
     setLoading(true);
     console.log(values);
-    if(values.customerContactName===""){
-      values.customerContactName=[]
+    if (values.customerContactName === "") {
+      values.customerContactName = []
     }
     axiosInstance()
       .post(`${qbApi}?entity=${selectedEntity}`, values)
@@ -291,6 +305,25 @@ export default function ManageQuoteDialog({
       ]
 
       setAccountData(entityFields[customerAccountNameFieldIndex].option);
+    }
+  }
+
+  const updateOpportunityDropdown = (data) => {
+    const entityFields = entityData.fields;
+    const opportunityFieldIndex = entityFields.findIndex((d) => d.fieldName === "opportunity");
+
+    if (opportunityFieldIndex > -1) {
+      entityFields[opportunityFieldIndex].option = [
+        ...entityFields[opportunityFieldIndex].option,
+        {
+          optionValue: data._id,
+          optionLabel: data.opportunityName,
+          order: entityFields[opportunityFieldIndex].option.length,
+          default: false
+        }
+      ]
+
+      setOpportunityData(entityFields[opportunityFieldIndex].option);
     }
   }
 
@@ -378,6 +411,7 @@ export default function ManageQuoteDialog({
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
                                                 setFieldValue("customerContactName", [])
+                                                setFieldValue("opportunity", [])
                                               }}
                                             />
                                           </Grid>
@@ -415,6 +449,53 @@ export default function ManageQuoteDialog({
                                           size="small"
                                           onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
                                         />
+                                      ) : field.fieldName === "opportunity" ? (
+                                        <Grid container spacing={1}>
+                                          <Grid item
+                                            xs={permissions.opportunity.isCreate ? 9 : 10}
+                                            sm={permissions.opportunity.isCreate ? 9 : 10}
+                                            md={permissions.opportunity.isCreate ? 9 : 10}
+                                          >
+                                            <FormTypes
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={opportunityData}
+                                              setFieldValue={setFieldValue}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={true}
+                                              size="small"
+                                              onChange={(e, value) => {
+                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+
+                                              }}
+                                            />
+
+
+                                          </Grid>
+                                          {
+                                            permissions.opportunity.isCreate && <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip title="Create Opportunity" className="mt-1">
+                                                <IconButton onClick={() => { setShowCreateOpportunity(true) }} size="small">
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          }
+                                          {
+                                            field?.tooltipMessage ?
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid> : null
+                                          }
+                                        </Grid>
+
                                       ) : field.fieldName === "owner" ? (
                                         <FormTypes
                                           values={values}
@@ -622,6 +703,28 @@ export default function ManageQuoteDialog({
                         setFieldValue("customerContactName", "");
                       }}
                       isRedirectToDetailPage={false}
+                    />
+                  }
+                  {
+                    showCreateOpportunity &&
+                    <ManageOpportunityDialog
+                      isNew={true}
+                      isRedirectTodetailPage={false}
+                      open={showCreateOpportunity}
+                      onClose={() => setShowCreateOpportunity(false)}
+                      onSuccess={({ data }) => {
+                        setShowCreateOpportunity(false)
+                        setNewAddedOpportunityId(data._id)
+                        updateOpportunityDropdown(data)
+                        setFieldValue("opportunity", data._id);
+
+                      }}
+                      accountId={values["customerAccountName"] ? values["customerAccountName"] : accountId}
+                      resource={accountResource}
+                      dataToUpdate={null}
+                      disableOwnerAndAccount={values["customerAccountName"] ? true : false}
+
+
                     />
                   }
 
