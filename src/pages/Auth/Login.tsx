@@ -29,8 +29,8 @@ import { SiMicrosoftoffice } from "react-icons/si";
 import { SVG } from "../../assets";
 const useStyles = makeStyles((theme) => ({
   container: {
-    height: "85vh",
-    width: "80vw",
+    height: "90vh",
+    width: "90vw",
     overflow: "hidden",
   },
   grid: {
@@ -154,28 +154,13 @@ const Login = () => {
     <div className="login-bg">
       <Paper elevation={10} className={classes.container}>
         <Grid container className={classes.grid}>
-          <Grid item sm={5} className="loginSidebar">
-            <Box>
-              <div className="loginHeader">
-                {/* <Typography variant="h3">e-Quipt</Typography>
-                <Typography variant="subtitle1">
-                  Empower Your Bussiness
-              </Typography> */}
-                {/* <Box className="mt-3 font-size-3">
-                  <b>B2B Planning to execution at your fingerprints</b> <br />
-                  <span>e-Platform that integrates &amp; accelerates B2B Sales and Operations to eliminate wasteful time</span>
-                </Box> */}
-              </div>
-
+          <Grid item sm={6} md={5}  className="loginSidebar">
+            <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
               <img className="imgLogin" src={SVG("imgComputer")}></img>
             </Box>
           </Grid>
-
-          <Grid item sm={7} className={classes.formSide}>
+          <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
             <Box textAlign="center">
-              {/* <Typography variant="h5" color="textSecondary">
-                Login
-              </Typography> */}
               <img
                 className={classes.logo}
                 src={SVG("Logo")}
@@ -183,7 +168,6 @@ const Login = () => {
                 title="eQuipt Logo"
               />
               <Box my={4} />
-
               <Formik
                 initialValues={{
                   email: "gagan@test.com",
@@ -201,7 +185,7 @@ const Login = () => {
                     >
                       <Box mb={3}>
                         <TextField
-                          style={{ width: 300 }}
+                          style={{ width: 260 }}
                           variant="outlined"
                           type="email"
                           size="small"
@@ -217,7 +201,7 @@ const Login = () => {
                       </Box>
                       <Box>
                         <TextField
-                          style={{ width: 300 }}
+                          style={{ width: 260 }}
                           variant="outlined"
                           type="password"
                           size="small"
@@ -233,14 +217,14 @@ const Login = () => {
                           }
                         />
                       </Box>
-                      <Box width={300} mt={1}>
+                      <Box width={260} mt={1}>
                         <Box textAlign="right">
                           <MuiLink component={Link} to="/forget-password">
                             Forgot Password?
                           </MuiLink>
                         </Box>
                       </Box>
-                      <Box width={300} className="mt-2">
+                      <Box width={260} className="mt-2">
                         <Button
                           disabled={isSubmitting}
                           fullWidth
