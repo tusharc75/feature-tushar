@@ -4,8 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import { CreateEmail } from "./CreateEmail";
 import { GetEmail, DeleteEmail } from "../../../axios/activity";
 import Typography from '@material-ui/core/Typography';
-import Chip from '@material-ui/core/Chip';
-import moment from "moment";
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
@@ -14,7 +12,7 @@ import Dialog from '@material-ui/core/Dialog';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo'
 import { ViewAll } from '../Helpers/ViewAll'
 import { useData } from "../../../StateProvider/Provider"
-import { isEmpty } from "lodash";
+import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 
@@ -23,6 +21,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [emails, setEmails] = useState(null);
   const [emailId, setEmailId] = useState(null);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [loading, setLoading] = useState(false)
   const {
     state: { user },
   }: any = useData();
@@ -33,6 +32,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const fetchEmail = async () => {
     try {
+      setLoading(true)
       const emails = await GetEmail(JSON.stringify(relatedTo))
       if (emails.data && emails.data.length > 0) {
         emails.data = emails.data.filter(obj => {
@@ -49,9 +49,11 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           return isAllowedToShow
         })
       }
+      setLoading(false)
       setEmails(emails.data)
       onSetCount("Email", emails.data.length)
     } catch (e) {
+      setLoading(false)
       console.log(e);
     }
   };
@@ -92,7 +94,9 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   }
   return (emails &&
     <Box className="activityDetailBox">
-      {emails.length ?
+      {loading ? (
+        <ActivityLoader />
+      ) : emails.length ?
         <Fragment>
           {emails.map((_email, index) => (
             <Box key={_email._id} className="activity">
@@ -158,6 +162,6 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           relatedTo={relatedTo}
         />
       </Dialog>
-    </Box>
+    </Box >
   )
 };
