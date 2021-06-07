@@ -212,7 +212,10 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           if (toggleTimeout) {
             clearTimeout(toggleTimeout);
           }
-          setToggleDrawer(false);
+          if (toggleDrawer)
+            setTimeout(() => {
+              setToggleDrawer(false);
+            }, 500);
         }}
         variant="permanent"
         className={clsx(classes.drawer, {
