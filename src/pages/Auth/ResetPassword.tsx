@@ -191,6 +191,7 @@ const ResetPassword = () => {
                       type='password'
                       label='New Password'
                       name='password'
+                      disabled={!isTokenValid || !tokenChecking}
                       variant='outlined'
                       required
                     />
@@ -200,7 +201,7 @@ const ResetPassword = () => {
                       variant='contained'
                       color='primary'
                       size="small"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !isTokenValid || !tokenChecking}
                       onClick={submitForm}>
                       Submit
                     </Button>
