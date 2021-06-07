@@ -204,7 +204,7 @@ export default function ManageOpportunityDialog({
         });
         if (isRedirectTodetailPage)
           history.push(`${opportunityApi}/detail/${newId}`);
-        onSuccess(newId);
+        onSuccess(data);
         setTimeout(() => setLoading(false), 500);
       })
       .catch((error) => {
