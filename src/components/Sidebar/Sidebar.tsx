@@ -17,7 +17,7 @@ import Header from "../Header/Header";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.scss";
 import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
-import _ from "lodash";
+import { kebabCase, lowerCase } from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdLocalActivity } from "react-icons/md";
@@ -297,12 +297,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         <Link
                           className="sub-list"
                           key={j}
-                          to={`/${_.kebabCase(_.lowerCase(item.name))}`}
+                          to={`/${kebabCase(lowerCase(item.name))}`}
                         >
                           <ListItem
                             button
                             selected={pathnames.includes(
-                              _.lowerCase(item.name)
+                              lowerCase(item.name)
                             )}
                             className={classes.nested}
                           >

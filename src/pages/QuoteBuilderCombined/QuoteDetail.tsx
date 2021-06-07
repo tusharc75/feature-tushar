@@ -51,7 +51,7 @@ import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from './EmailDialog'
 
-import _, { isNull } from "lodash";
+import { cloneDeep, isNull } from "lodash";
 import {
   customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
@@ -848,7 +848,7 @@ function QuoteDetail() {
               (d) => d.id === params.row.id
             );
 
-            setEditRecord(_.cloneDeep(gridData[indexOfRecord]));
+            setEditRecord(cloneDeep(gridData[indexOfRecord]));
           }}>
           <CustomRenderCell value={params?.value} />
         </Link>
