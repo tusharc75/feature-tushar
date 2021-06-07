@@ -1512,15 +1512,15 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {(ProcessStatus === "DOA Process" && versionStatus === "Building Quote") || (ProcessStatus === "Customer Process" && versionStatus !== "Sent to Customer") ? (<span className="d-flex align-items-center justify-content-end">
-                        <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
+                      {(ProcessStatus === "DOA Process" && versionStatus === "Building Quote") || (ProcessStatus === "Customer Process" && versionStatus !== "Sent to Customer") ? (<div className="w-100 d-flex align-items-center justify-content-end">
+                        <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></div>) : null}
                     </Grid>
-                    {ProcessStatus !== "New" && ProcessStatus !== "Price Builder" ? (<span className="d-flex align-items-center justify-content-end">
+                    {ProcessStatus !== "New" && ProcessStatus !== "Price Builder" ? (<span className="d-flex align-items-center justify-content-end ml-2">
                       <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" className="mr-1" startIcon={<AiOutlineEye />} color="primary">View</Button>
                       <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
                     </span>)
                       : null}
-                    <Grid item xs={12} sm={12} md={12}>
+                    <Grid item xs={12} sm={12} md={12} className="mt-2">
                       <ProductBuilder
                         productBuilderId={productBuilderID}
                         isAddNewProduct={isAddNewProduct}

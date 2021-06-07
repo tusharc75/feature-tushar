@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Box,
@@ -8,6 +8,7 @@ import {
     Grid,
     LinearProgress,
     Paper,
+    Link as MuiLink,
     Typography,
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
@@ -17,7 +18,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import demoImg from '../../assets/clip-hardworking-man.png';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-
+import { SVG } from "../../assets";
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -29,30 +30,24 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 0.2,
     },
     container: {
-        marginTop: theme.spacing(5),
-        [theme.breakpoints.up('xs')]: {
-            marginTop: theme.spacing(10),
-        },
+        height: "90vh",
+        width: "90vw",
+        overflow: "hidden",
     },
     formContainer: {
         textAlign: 'center',
         padding: theme.spacing(10, 5),
     },
     form: {
-        marginTop: theme.spacing(5),
         display: 'flex',
         flexDirection: 'column',
     },
-
     image: {
         display: 'none',
         [theme.breakpoints.up('md')]: {
             display: 'grid',
             placeItems: 'center',
         },
-    },
-    fields: {
-        marginBottom: theme.spacing(3),
     },
     button: {
         marginTop: theme.spacing(2),
@@ -72,6 +67,21 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         textAlign: 'center',
         margin: theme.spacing(2),
+    },
+    formSide: {
+        height: "100%",
+        width: "100%",
+        padding: "30px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    grid: {
+        height: "100%",
+    },
+    logo: {
+        width: "150px",
+        height: "100%",
     },
 }));
 
@@ -107,17 +117,23 @@ const ForgetPassword = () => {
     return (
         <>
             <CssBaseline />
-            <Box className={classes.root}>
-                <Container maxWidth='md'>
-                    <Paper elevation={1} className={classes.container}>
-                        <Grid container>
-                            <Grid
-                                item
-                                xs={12}
-                                sm={12}
-                                md={6}
-                                className={classes.formContainer}>
-                                <h2>Enter Your Email</h2>
+            <div className="login-bg">
+                <Paper elevation={10} className={classes.container}>
+                    <Grid container className={classes.grid}>
+                        <Grid item sm={6} md={5} className="loginSidebar">
+                            <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
+                                <img className="imgLogin" src={SVG("imgComputer")}></img>
+                            </Box>
+                        </Grid>
+                        <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
+                            <Box textAlign="center">
+                                <img
+                                    className={classes.logo}
+                                    src={SVG("Logo")}
+                                    alt="equip logo"
+                                    title="eQuipt Logo"
+                                />
+                                <Box my={4} />
                                 <Formik
                                     initialValues={{
                                         email: '',
@@ -127,20 +143,24 @@ const ForgetPassword = () => {
                                     {({ submitForm }) => (
                                         <Form className={classes.form}>
                                             <Field
-                                                className={classes.fields}
                                                 component={TextField}
                                                 name='email'
                                                 type='email'
                                                 label='Email'
                                                 variant='outlined'
+                                                style={{ width: 260 }}
                                             />
 
                                             {isSubmitting && <LinearProgress />}
-
+                                            <Box textAlign="right" className="p-2">
+                                                <MuiLink component={Link} to="/login">
+                                                    Go To Login
+                                                </MuiLink>
+                                            </Box>
                                             <Button
                                                 variant='contained'
-                                                color='primary'
-                                                size="small" 
+                                                color='secondary'
+                                                size="small"
                                                 disabled={isSubmitting}
                                                 onClick={submitForm}>
                                                 Submit
@@ -148,28 +168,12 @@ const ForgetPassword = () => {
                                         </Form>
                                     )}
                                 </Formik>
-                                <Box className={classes.bottomLinks}>
-                                    <Link to='/login'>
-                                        Go To Login
-                                </Link>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={6} className={classes.image}>
-                                <img
-                                    src={demoImg}
-                                    alt='illustration'
-                                    style={{ width: '100%' }}
-                                />
-                            </Grid>
+
+                            </Box>
                         </Grid>
-                    </Paper>
-                </Container>
-                <Box className={classes.footer}>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                        eQuip-T &copy; 2021
-          </Typography>
-                </Box>
-            </Box>
+                    </Grid>
+                </Paper >
+            </div >
         </>
     );
 };
