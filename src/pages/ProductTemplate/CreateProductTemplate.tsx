@@ -20,7 +20,7 @@ import DefaultFields from './defaultFields';
 import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
 import queryString from "query-string";
-import _ from 'lodash';
+import { uniq, map } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -55,7 +55,7 @@ const ProductTemplate = () => {
         if (id === "0") {
             setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
             const _data = []
-            const _section = _.uniq(_.map(DefaultFields, 'sectionName'));
+            const _section = uniq(map(DefaultFields, 'sectionName'));
             _section.forEach((element: any, index: number) => {
                 _data.push({
                     sectionId: index,

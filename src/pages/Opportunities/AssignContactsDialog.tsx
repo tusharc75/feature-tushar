@@ -16,7 +16,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import Loader from "../../components/Loader";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import _ from 'lodash'
+import { cloneDeep } from 'lodash'
 
 export default function AssignContactsDialog({
     opportunityId,
@@ -43,7 +43,7 @@ export default function AssignContactsDialog({
     };
 
     const getFilteredIds = (data) => {
-        return _.cloneDeep(data).filter(f => f.isChecked).map(m => m._id)
+        return cloneDeep(data).filter(f => f.isChecked).map(m => m._id)
     }
     const isDataAvailable = (fieldKey) => {
         return (contacts && contacts?.[fieldKey] && contacts[fieldKey].length)
