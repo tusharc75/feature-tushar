@@ -4,7 +4,9 @@ import Box from '@material-ui/core/Box';
 import {
     Card, IconButton, CardContent, Grid,
     List, ListItem, ListItemAvatar, ListItemText,
-    withStyles
+    withStyles,
+    Menu,
+    MenuItem
 } from '@material-ui/core';
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Link } from 'react-router-dom';
@@ -18,6 +20,7 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import { supplierAccount, supplierContact } from '../../constants/helpers';
+import { MoreVert } from '@material-ui/icons';
 
 const Accordion = withStyles({
     root: {
@@ -81,6 +84,14 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
     contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null }) {
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
+    const [anchorEl, setAnchorEl] = useState(null);
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     function ContactDetails({ contacts, contactApi, }) {
         return <>
             {
@@ -107,7 +118,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                             </Grid>
                                             {(supplierContact.contactApi === contactApi) && <Grid item xs={12} sm={6} md={6}>
                                                 {<Link className="link" to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}>
-                                                    <DisplayData key="2" label='Supplier Account'  icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
+                                                    <DisplayData key="2" label='Supplier Account' icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
                                                 </Link>
 
                                                 }
@@ -155,13 +166,41 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                     </Box>
                 </Grid>
                 <Grid item xs={4} container justify="flex-end" >
-                    <IconButton
+                    {/* <IconButton
                         color="primary"
                         size="small"
                         onClick={onAddContact}
                     >
                         <ControlPointIcon />
-                    </IconButton>
+                    </IconButton> */}
+
+                    <>
+                        <IconButton
+                            aria-haspopup="true"
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenMenu}
+                        >
+                            <MoreVert />
+                        </IconButton>
+                        <Menu
+                            id="menu"
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={handleCloseMenu}
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    onAddContact()
+                                    handleCloseMenu()
+                                }}
+                            >
+                                Add Existing
+                          </MenuItem>
+
+                        </Menu>
+                    </>
                 </Grid>
             </Grid>
         </AccordionSummary>
