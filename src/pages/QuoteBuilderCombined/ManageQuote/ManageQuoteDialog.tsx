@@ -100,7 +100,7 @@ export default function ManageQuoteDialog({
       setAccountData(customerAccountOptions.option);
     }
 
-    let opportunityOptions = entityData.fields.find((d) => d.filedName === "opportunity") 
+    let opportunityOptions = entityData.fields.find((d) => d.filedName === "opportunity")
     if (opportunityOptions) {
       setOpportunityData(opportunityOptions.option);
     }
@@ -312,7 +312,7 @@ export default function ManageQuoteDialog({
     const entityFields = entityData.fields;
     const opportunityFieldIndex = entityFields.findIndex((d) => d.fieldName === "opportunity");
 
-    if(opportunityFieldIndex > -1){
+    if (opportunityFieldIndex > -1) {
       entityFields[opportunityFieldIndex].option = [
         ...entityFields[opportunityFieldIndex].option,
         {
@@ -411,7 +411,7 @@ export default function ManageQuoteDialog({
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
                                                 setFieldValue("customerContactName", [])
-                                                setFieldValue("opportunity",[])
+                                                setFieldValue("opportunity", [])
                                               }}
                                             />
                                           </Grid>
@@ -456,28 +456,28 @@ export default function ManageQuoteDialog({
                                             sm={permissions.opportunity.isCreate ? 9 : 10}
                                             md={permissions.opportunity.isCreate ? 9 : 10}
                                           >
-                                            <FormTypes  
-                                              values = {values}
-                                              errors = {errors}
-                                              touched = {touched}
-                                              label = {field.fieldLabel}
-                                              name = {field.fieldName}
-                                              type = {field.type}
-                                              options = {opportunityData}
-                                              setFieldValue = {setFieldValue}
-                                              required = {field.required}
+                                            <FormTypes
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={opportunityData}
+                                              setFieldValue={setFieldValue}
+                                              required={field.required}
                                               fullWidth
-                                              isTooltip = {true}
-                                              size = "small"
+                                              isTooltip={true}
+                                              size="small"
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                                
+
                                               }}
                                             />
 
-                                          
-                                            </Grid>
-                                            {
+
+                                          </Grid>
+                                          {
                                             permissions.opportunity.isCreate && <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Opportunity" className="mt-1">
                                                 <IconButton onClick={() => { setShowCreateOpportunity(true) }} size="small">
@@ -706,23 +706,23 @@ export default function ManageQuoteDialog({
                     />
                   }
                   {
-                    showCreateOpportunity && 
-                    <ManageOpportunityDialog  
-                      isNew = {true}
-                      isRedirectTodetailPage = {false}
-                      open = {showCreateOpportunity}
-                      onClose = {() => setShowCreateOpportunity(false)}
-                      onSuccess={({data}) => {
+                    showCreateOpportunity &&
+                    <ManageOpportunityDialog
+                      isNew={true}
+                      isRedirectTodetailPage={false}
+                      open={showCreateOpportunity}
+                      onClose={() => setShowCreateOpportunity(false)}
+                      onSuccess={({ data }) => {
                         setShowCreateOpportunity(false)
-                        setNewAddedOpportunityId(data._id) 
-                        updateOpportunityDropdown(data)                       
-                        setFieldValue("opportunity",data._id);
+                        setNewAddedOpportunityId(data._id)
+                        updateOpportunityDropdown(data)
+                        setFieldValue("opportunity", data._id);
 
                       }}
-                      accountId={values["customerAccountName"] ? values["customerAccountName"]:accountId}
+                      accountId={values["customerAccountName"] ? values["customerAccountName"] : accountId}
                       resource={accountResource}
                       dataToUpdate={null}
-                      disableOwnerAndAccount={values["customerAccountName"] ? true:false}
+                      disableOwnerAndAccount={values["customerAccountName"] ? true : false}
 
 
                     />
