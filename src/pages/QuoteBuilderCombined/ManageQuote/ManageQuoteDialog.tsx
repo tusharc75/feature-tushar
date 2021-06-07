@@ -20,6 +20,7 @@ import {
   quoteBuilder,
   simplifyValues,
   customerAccount,
+  customerContact,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -36,6 +37,8 @@ import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
+import ManageContactDialog from "../../Contact/ManageContact";
+import ManageContact from "../../Contact/ManageContact/ManageContact";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -76,8 +79,10 @@ export default function ManageQuoteDialog({
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
+  const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] = useState(false)
   const [showCreateOpportunity, setShowCreateOpportunity] = useState(false)
   const [accountData, setAccountData] = useState([]);
+  const [contactData, setContactData] = useState([])
   const [newAddedAccountId, setNewAddedAccountId] = useState(null)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
@@ -98,6 +103,11 @@ export default function ManageQuoteDialog({
     let customerAccountOptions = entityData.fields.find((d) => d.fieldName === "customerAccountName");
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
+    }
+
+    let customerContactOptions = entityData.fields.find((d) => d.fieldName === "customerContactName");
+    if (customerContactOptions) {
+      setContactData(customerContactOptions.option);
     }
 
     let opportunityOptions = entityData.fields.find((d) => d.filedName === "opportunity")
@@ -128,6 +138,7 @@ export default function ManageQuoteDialog({
       setCollaboratorData([])
       setAccountData([])
       setOpportunityData([])
+      setContactData([])
     }
 
   }, [entityData.fields]);
@@ -327,6 +338,25 @@ export default function ManageQuoteDialog({
     }
   }
 
+  const updateContactDropdown = (data) => {
+    const entityFields = entityData.fields;
+    const customerContactNameFieldIndex = entityFields.findIndex(d => d.fieldName === "customerContactName")
+
+    if (customerContactNameFieldIndex > -1) {
+      entityFields[customerContactNameFieldIndex].option = [
+        ...entityFields[customerContactNameFieldIndex].option,
+        {
+          optionValue: data._id,
+          optionLabel: `${data.firstName} ${data.lastName}`,
+          order: entityFields[customerContactNameFieldIndex].option.length,
+          default: false
+        }
+      ]
+
+      setContactData(entityFields[customerContactNameFieldIndex].option);
+    }
+  }
+
 
   return (
     <>
@@ -411,7 +441,7 @@ export default function ManageQuoteDialog({
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
                                                 setFieldValue("customerContactName", [])
-                                                setFieldValue("opportunity", [])
+                                                setFieldValue("opportunity", "")
                                               }}
                                             />
                                           </Grid>
@@ -434,21 +464,52 @@ export default function ManageQuoteDialog({
                                           }
                                         </Grid>
                                       ) : field.fieldName === "customerContactName" ? (
-                                        <FormTypes
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={customerContactDataSource}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
-                                        />
+                                        <Grid container spacing={1}>
+                                          <Grid item
+                                            xs={permissions.customerContact.isCreate ? 10 : 11}
+                                            sm={permissions.customerContact.isCreate ? 10 : 11}
+                                            md={permissions.customerContact.isCreate ? 10 : 11}
+                                          >
+                                            <FormTypes
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={contactData}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={true}
+                                              size="small"
+                                              // onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
+                                              onChange={(e, value) => {
+                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+
+                                              }}
+                                            />
+
+
+                                          </Grid>
+                                          {
+                                            permissions.customerContact.isCreate && <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip title="Create Contact" className="mt-1">
+                                                <IconButton onClick={() => { setShowAddCustomerContactDialog(true) }} size="small">
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          }
+                                          {
+                                            field?.tooltipMessage ?
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid> : null
+                                          }
+                                        </Grid>
+
                                       ) : field.fieldName === "opportunity" ? (
                                         <Grid container spacing={1}>
                                           <Grid item
@@ -469,10 +530,7 @@ export default function ManageQuoteDialog({
                                               fullWidth
                                               isTooltip={true}
                                               size="small"
-                                              onChange={(e, value) => {
-                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                              }}
                                             />
 
 
@@ -703,6 +761,27 @@ export default function ManageQuoteDialog({
                         setFieldValue("customerContactName", "");
                       }}
                       isRedirectToDetailPage={false}
+                    />
+                  }
+                  {
+                    showAddCustomerContactDialog &&
+                    <ManageContactDialog
+                      open={showAddCustomerContactDialog}
+                      onClose={() => setShowAddCustomerContactDialog(false)}
+                      onSuccess={((obj) => {
+                        if (obj) {
+                          setShowAddCustomerContactDialog(false)
+                          updateContactDropdown(obj.data.data)
+                          setFieldValue("customerContactName", [...values["customerContactName"], obj.id])
+                        }
+                      })}
+                      accountId={values["customerAccountName"] ? values["customerAccountName"] : accountId}
+                      contactResource={customerContact.contactResource}
+                      contactApi={customerContact.contactApi}
+                      isRedirectToDetailPage={false}
+                      collaborators={collaboratorData}
+                      owner={ownerData}
+                      account={customerAccount}
                     />
                   }
                   {
