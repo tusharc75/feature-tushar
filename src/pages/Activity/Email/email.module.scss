@@ -133,3 +133,22 @@
 .emailAttachments:hover {
     color: var(--link);
 }
+
+.previewImage {
+    text-align: center;
+    // min-width: 70%;
+    background: transparent;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+
+    img {
+        border: 1px solid #999;
+        padding: 0;
+        display: block;
+        margin: auto;
+        max-height: 100%;
+        max-width: 90%;
+    }
+}
