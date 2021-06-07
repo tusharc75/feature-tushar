@@ -116,6 +116,10 @@ export default function ManageQuoteDialog({
       if (!isNew) {
         setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === dataToUpdate.customerAccountName.optionValue));
       }
+
+      if (isNew && contactId) {
+        setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === entityData.initialValues["customerAccountName"]));
+      }
     }
 
     return () => {
@@ -241,8 +245,8 @@ export default function ManageQuoteDialog({
     if (accountId && accountResource !== customerAccount.accountResource) values["supplierAccountName"] = [accountId]
     setLoading(true);
     console.log(values);
-    if(values.customerContactName===""){
-      values.customerContactName=[]
+    if (values.customerContactName === "") {
+      values.customerContactName = []
     }
     axiosInstance()
       .post(`${qbApi}?entity=${selectedEntity}`, values)
