@@ -86,15 +86,15 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
         participant: [{ userId: user._id }],
         startDate: new Date(),
         endDate: new Date(),
-        startTime: getTime(),
-        endTime: new Date(getTime().getTime() + 30 * 60000),
+        startTime: getTime(new Date()),
+        endTime: new Date(getTime(new Date()).getTime() + 30 * 60000),
       });
     }
   };
 
-  const getTime = () => {
+  const getTime = (date) => {
     let diff = 60 - new Date().getMinutes();
-    const currentTime = new Date();
+    const currentTime = date;
 
     if (diff > 30) {
       diff = diff - 30;
@@ -371,9 +371,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               value={values.startDate}
                               name="startDate"
                               label="Start Date"
-                              onChange={(date) => {
+                              onChange={(date: any) => {
                                 setFieldValue("startDate", date);
-                                setFieldValue("startTime", date);
+                                setFieldValue("startTime", getTime(date._d));
                               }}
                               format={dateFormat}
                               error={
@@ -441,9 +441,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               value={values.endDate}
                               name="endDate"
                               label="End Date"
-                              onChange={(date) => {
+                              onChange={(date: any) => {
                                 setFieldValue("endDate", date);
-                                setFieldValue("endTime", date);
+                                setFieldValue(
+                                  "endTime",
+                                  new Date(
+                                    getTime(date._d).getTime() + 30 * 60000
+                                  )
+                                );
                               }}
                               format={dateFormat}
                               error={
