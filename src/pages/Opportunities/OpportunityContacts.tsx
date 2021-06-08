@@ -4,7 +4,9 @@ import Box from '@material-ui/core/Box';
 import {
     Card, IconButton, CardContent, Grid,
     List, ListItem, ListItemAvatar, ListItemText,
-    withStyles
+    withStyles,
+    Menu,
+    MenuItem
 } from '@material-ui/core';
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Link } from 'react-router-dom';
@@ -17,7 +19,9 @@ import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import { supplierAccount, supplierContact } from '../../constants/helpers';
+import { customerAccount, customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
+import { MoreVert } from '@material-ui/icons';
+import ManageContactDialog from '../Contact/ManageContact';
 
 const Accordion = withStyles({
     root: {
@@ -78,9 +82,18 @@ function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     </div>
 }
 export default function OpportunityContacts({ contacts, title, onAddContact,
-    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null }) {
+    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null, saveContactToOpportunity = null, accountId = null }) {
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [showCreateDialog, setShowCreateDialog] = useState(false)
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     function ContactDetails({ contacts, contactApi, }) {
         return <>
             {
@@ -107,7 +120,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                             </Grid>
                                             {(supplierContact.contactApi === contactApi) && <Grid item xs={12} sm={6} md={6}>
                                                 {<Link className="link" to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}>
-                                                    <DisplayData key="2" label='Supplier Account'  icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
+                                                    <DisplayData key="2" label='Supplier Account' icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
                                                 </Link>
 
                                                 }
@@ -155,13 +168,49 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                     </Box>
                 </Grid>
                 <Grid item xs={4} container justify="flex-end" >
-                    <IconButton
+                    {/* <IconButton
                         color="primary"
                         size="small"
                         onClick={onAddContact}
                     >
                         <ControlPointIcon />
-                    </IconButton>
+                    </IconButton> */}
+
+                    <>
+                        <IconButton
+                            aria-haspopup="true"
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenMenu}
+                        >
+                            <MoreVert />
+                        </IconButton>
+                        <Menu
+                            id="menu"
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={handleCloseMenu}
+                        >
+                            {contactApi === customerContact.contactApi && <MenuItem
+                                onClick={() => {
+                                    setShowCreateDialog(true);
+                                    handleCloseMenu();
+                                }}
+                            >
+                                Create New
+                            </MenuItem>}
+                            <MenuItem
+                                onClick={() => {
+                                    onAddContact()
+                                    handleCloseMenu()
+                                }}
+                            >
+                                Add Existing
+                          </MenuItem>
+
+                        </Menu>
+                    </>
                 </Grid>
             </Grid>
         </AccordionSummary>
@@ -177,6 +226,25 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                     <FaArrowAltCircleDown size={25} />
                 </Box>
             </> : null
+        }
+        {
+            showCreateDialog &&
+            <ManageContactDialog
+                open={showCreateDialog}
+                onClose={() => setShowCreateDialog(false)}
+                accountId={accountId}
+                contactResource={customerContact.contactResource}
+                contactApi={customerContact.contactApi}
+                account={customerAccount}
+                isRedirectToDetailPage={false}
+                onSuccess={(obj) => {
+                    if (obj) {
+                        setShowCreateDialog(false);
+                        saveContactToOpportunity(obj.id, "customer", contacts)
+                    }
+                }}
+
+            />
         }
     </Accordion>
 

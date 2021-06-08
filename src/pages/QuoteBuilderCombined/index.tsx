@@ -486,6 +486,8 @@ const QuoteBuilders = () => {
           contactId={null}
           opportunityId={null}
           disableOwnerDropDown={true}
+          contacts={null}
+          isRenderedFromOpportunity={false}
         />
       )}
     </>
