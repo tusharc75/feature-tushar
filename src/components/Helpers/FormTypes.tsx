@@ -31,7 +31,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
-import currencies from "../../constants/currency_with_country.json";
+import currencies from "../../constants/new_currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
