@@ -80,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isCreateOwnerDisable = true }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true , contacts=null, isRenderedFromOpportunity = false,opportunityName = null}) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -296,6 +296,12 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 opportunityId={opportunityId}
                 accountResource={accountResource}
                 disableOwnerDropDown={isCreateOwnerDisable}
+                isRenderedFromOpportunity = {isRenderedFromOpportunity}
+                opportunityName = {opportunityName}
+                contacts = {contacts}
+                isRenderedFromCustomerAccount = {isRenderedFromCustomerAccount}
+        
+
 
             />
         }
