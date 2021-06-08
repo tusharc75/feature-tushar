@@ -1505,8 +1505,9 @@ const FormTypes = (props) => {
             color="primary"
             size="small"
             component="span"
+            startIcon={isFileUploading && <CircularProgress size={15} /> }
           >
-            Upload File
+            {isFileUploading ? "Uploading File" : "Upload File"}
           </Button>
         </label>
         {

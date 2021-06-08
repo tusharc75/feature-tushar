@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip, Menu, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -17,6 +17,7 @@ import currencies from './../../constants/currency_with_country.json';
 import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useData } from '../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { MoreVert } from '@material-ui/icons';
 
 const Accordion = withStyles({
     root: {
@@ -104,6 +105,7 @@ export default function OpportunityAccordionInUserDetail({
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
+    const [anchorEl, setAnchorEl] = useState(null);
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
     useEffect(() => {
@@ -114,6 +116,15 @@ export default function OpportunityAccordionInUserDetail({
         setExpandOpportunity(isExpanded)
 
     }, [opportunities])
+
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
+
     return <>
         <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
             <AccordionSummary
@@ -146,13 +157,40 @@ export default function OpportunityAccordionInUserDetail({
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
                             {
-                                permissions?.opportunity?.isCreate && <IconButton
-                                    color="primary"
-                                    size="small"
-                                    onClick={() => { setShowCreateOpportunityDialog(true) }}
-                                >
-                                    <ControlPointIcon />
-                                </IconButton>
+                                // permissions?.opportunity?.isCreate && <IconButton
+                                //     color="primary"
+                                //     size="small"
+                                //     onClick={() => { setShowCreateOpportunityDialog(true) }}
+                                // >
+                                //     <ControlPointIcon />
+                                // </IconButton>
+                                permissions?.opportunity?.isCreate &&
+                                <>
+                                    <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={handleOpenMenu}
+                                    >
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        id="menu"
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowCreateOpportunityDialog(true);
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Create New
+                                        </MenuItem>
+                                    </Menu>
+                                </>
                             }
                         </Typography>
                     </Grid>

@@ -429,6 +429,37 @@ function OpportunityDetailsPage() {
       });
   };
 
+  const handleAssignContacts = async (newAddedContactId,contactType,contacts) => {
+    // allContacts.filter(f => f.isChecked).map(m => m._id)
+    let previousIds = [];
+    if(contacts){
+      contacts.map((obj)=>{
+        previousIds.push(obj._id)
+      })
+    }
+    const dataToSave = {
+        _id: id,
+        supplierContact: contactType === "supplier" && newAddedContactId ? [newAddedContactId,...previousIds]: [],
+        customerContact: contactType === "customer" && newAddedContactId ? [newAddedContactId,...previousIds]: [],
+        notToBeRemoved: null
+    };
+
+    await axiosInstance()
+        .put(`/opportunity/add-contacts`, dataToSave)
+        .then(({ data }) => {
+            toastConfig.setToastConfig({
+                message: data.message,
+                type: "success",
+                open: true,
+            });
+
+            fetchOpportunityData();
+        })
+        .catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+};
+
   let selectedSupplierAccounts = []
   if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
     selectedSupplierAccounts = opportunityData.supplierAccountName.map(s => s.optionValue)
@@ -591,6 +622,9 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
                           }}
                           recordsPerLine={recordsPerLine}
+                          saveContactToOpportunity = {handleAssignContacts}
+                          accountId = {opportunityData?.customerAccountName?.optionValue}
+
                         />
                       }
                       {permissions?.projectSales?.isRead && (
@@ -611,6 +645,9 @@ function OpportunityDetailsPage() {
                             fetchData={fetchRelatedData}
                             quoteBuilderPermission={permissions.quoteBuilder}
                             opportunityId={id}
+                            accountId={opportunityData?.customerAccountName?.optionValue}
+                            opportunityName = {opportunityData?.opportunityName }
+                            isRenderedFromOpportunity ={true}
                           />
                         )
                       }
