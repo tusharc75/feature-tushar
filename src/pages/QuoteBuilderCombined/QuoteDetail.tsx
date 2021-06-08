@@ -560,18 +560,6 @@ function QuoteDetail() {
     }
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
   const handleCloseCreateDialog = (params) => {
     setShowCreateDialog(false)
     setEditRecord({})
@@ -805,69 +793,6 @@ function QuoteDetail() {
       if (data.length > 0) setContactsEmailsData(data)
     }
   }
-
-
-  // const columnsTNC = [
-  //   {
-  //     field: "isChecked",
-  //     headerName: "Select",
-  //     renderCell: (params) => (
-  //       <Checkbox
-  //         color="primary"
-  //         // disabled={!params.canDelete}
-  //         checked={params.value}
-  //         onClick={(ev) => {
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-  //           var prevvalue = gridData[indexOfRecord].isChecked;
-  //           let newTNC = TandC
-  //           if (prevvalue) {
-  //             gridData[indexOfRecord].isChecked = false;
-  //             const index = newTNC.indexOf(gridData[indexOfRecord]._id)
-  //             newTNC.splice(index, 1);
-  //           }
-  //           else {
-  //             gridData[indexOfRecord].isChecked = true;
-  //             newTNC.push(gridData[indexOfRecord]._id)
-  //             setRadioIndex(indexOfRecord);
-  //           }
-  //           if (newTNC.length === 0) {
-  //             setRadioIndex(-1);
-  //           }
-  //           setDataRows([...gridData]);
-  //           setTNC(newTNC);
-  //           handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
-  //           console.log(gridData[indexOfRecord]._id);
-  //           const checkedRecords = gridData.filter((d) => d.isChecked === true);
-  //         }}
-  //       />
-  //     ),
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     width: 75
-  //   },
-  //   {
-  //     field: "TACName", headerName: "Name", width: 500,
-  //     renderCell: (params) => (
-  //       <Link
-  //         onClick={() => {
-  //           setShowCreateDialog(true);
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-
-  //           setEditRecord(cloneDeep(gridData[indexOfRecord]));
-  //         }}>
-  //         <CustomRenderCell value={params?.value} />
-  //       </Link>
-  //     )
-  //   },
-
-  // ];
 
   const TermsConditionNameRenderer = params => (
     <span
@@ -1581,28 +1506,6 @@ function QuoteDetail() {
                                   <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
                                 </Grid>
                                 <Grid item xs={12} className="listing-grid">
-                                  {/* <DataGrid
-                                    components={{
-                                      Toolbar: DataGridCustomToolbar,
-                                      NoRowsOverlay: CustomDataGridNoDataFound,
-                                    }}
-                                    scrollbarSize={20}
-                                    rows={dataRows}
-                                    columns={columnsTNC}
-                                    loading={loading}
-                                    disableSelectionOnClick
-                                    disableMultipleSelection
-                                    paginationMode="server"
-                                    pagination
-                                    onPageChange={handlePage}
-                                    onPageSizeChange={handlePageSize}
-                                    pageSize={query.limit}
-                                    page={query.page}
-                                    rowCount={rowCount}
-                                    rowsPerPageOptions={[25, 50, 75]}
-                                    onSortModelChange={handleSortModelChange}
-                                    onFilterModelChange={onFilterChange}
-                                  /> */}
                                   <CustomAgGrid
                                     columns={columns}
                                     dataRows={dataRows}
