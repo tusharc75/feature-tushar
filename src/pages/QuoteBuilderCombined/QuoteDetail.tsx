@@ -289,6 +289,196 @@ function QuoteDetail() {
     }
   }, [data, currentVersion]);
 
+  const fetchQuoteData = (version: any) => {
+    if (selectedEntity) {
+      setLoading(true);
+      axiosInstance()
+        .get(`${qbApi}/${id}?entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          setCustomizedRoutes([
+            { title: "Quote Builder", path: "/quote-builder" },
+            { title: `${data.quoteName}` },
+          ]);
+
+          data.amount = formatAmountWithCurrency(data.currency, data.amount);
+          setquoteData(data);
+
+          handleMainPoints(data);
+          setHeadingLbl(data.quoteName);
+          var keys = Object.keys(data.versions);
+          setVersions(keys);
+          var ps = "";
+          var s = "";
+
+          if (version === 0) {
+            ps = data.versions[keys[keys.length - 1]].processStatus;
+            s = data.versions[keys[keys.length - 1]].status;
+
+            setcurrentVersion(parseInt(keys[keys.length - 1]));
+
+            setProcessStatus(
+              data.versions[keys[keys.length - 1]].processStatus
+            );
+            setProductBuilderID(
+              data.versions[keys[keys.length - 1]].productBuilderId
+            );
+            setversionStatus(data.versions[keys[keys.length - 1]].status);
+            if (data.versions[keys[keys.length - 1]].TNC) {
+              setTNC(data.versions[keys[keys.length - 1]].TNC);
+            }
+            if (data.versions[keys[keys.length - 1]].acceptedColumns) {
+              setColumnView(
+                data.versions[keys[keys.length - 1]].acceptedColumns
+              );
+            }
+
+            if (
+              data.versions[keys[keys.length - 1]].status === "Building Quote"
+            ) {
+              setEditable(true);
+            } else {
+              setEditable(false);
+            }
+          } else {
+            setcurrentVersion(version);
+            setProcessStatus(data.versions[version].processStatus);
+            setProductBuilderID(data.versions[version].productBuilderId);
+            setversionStatus(data.versions[version].status);
+            if (data.versions[version].TNC) {
+              setTNC(data.versions[version].TNC);
+            }
+            if (data.versions[version].acceptedColumns) {
+              setColumnView(data.versions[version].acceptedColumns);
+            }
+            if (data.versions[version].status === "Building Quote") {
+              setEditable(true);
+            } else {
+              setEditable(false);
+            }
+            ps = data.versions[version].processStatus;
+            s = data.versions[version].status;
+          }
+
+          if (ps === "DOA Process" && !s.includes("Accepted")) {
+            setNextStep(false);
+          }
+          if (ps === "DOA Process" && s.includes("Accepted")) {
+            setNextStep(true);
+          }
+          if (ps === "Customer Process") {
+            setNextStep(false);
+          }
+
+          setAllowedToEdit(
+            [...(data.collaborator ?? []), data.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+          );
+
+          // handleAllowToEditList(data);
+          setCopyOfquoteDataToUpdate(data);
+          handleContactsEmails(data);
+
+          if (
+            data?.staticData?.notToBeRemoved &&
+            typeof data.staticData.notToBeRemoved === "object"
+          ) {
+            let ids = [];
+            Object.keys(data?.staticData?.notToBeRemoved).map(
+              (k) => (ids = [...ids, ...data.staticData.notToBeRemoved[k]])
+            );
+            setNotToBeRemovedContacts(ids);
+          }
+
+          let tempExpanded = {
+            supplierContacts: true,
+            customerContacts: true,
+          };
+          if (
+            data?.staticData?.supplierContacts &&
+            data.staticData.supplierContacts.length === 0
+          ) {
+            tempExpanded.supplierContacts = false;
+          }
+          if (
+            data?.staticData?.customerContacts &&
+            data.staticData.customerContacts.length === 0
+          ) {
+            tempExpanded.customerContacts = false;
+          }
+          setExpanded(tempExpanded);
+
+          setTimeout(() => setLoading(false), 500);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setLoading(false);
+        });
+    }
+  };
+
+  const handleMainPoints = (data) => {
+    let mainPoint = {};
+    mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
+    mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
+    mainPoint["Amount"] = data?.amount
+      ? formatAmountWithCurrency(data?.currency, data?.amount)
+      : "";
+    mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
+
+    setMainPoints(mainPoint);
+  };
+
+  const getQuoteFields = () => {
+    if (selectedEntity) {
+      setLoadingFields(true);
+      axiosInstance()
+        .get(`/field?resource=Quote Builder&entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          setquoteFields(data);
+
+          if (data && data.length) {
+            let fieldData = data.find(
+              (currentField) =>
+                currentField?.fieldData?.fieldName === "supplierAccountName"
+            )?.fieldData;
+            if (fieldData?.option && fieldData.option.length) {
+              setSupplierAccountOptions(
+                fieldData.option.map((option) => ({
+                  ...option,
+                  isSelected: false,
+                }))
+              );
+            }
+          }
+          const processSteps = data.find(
+            (d) =>
+              d.isRead &&
+              d.fieldData.fieldName.toLowerCase() ===
+                processFieldName.toLowerCase()
+          );
+          if (processSteps && processSteps.isRead) {
+            setSteps(
+              processSteps.fieldData.option.map((m) => {
+                return {
+                  text: m.optionLabel,
+                  canCompleteManually:
+                    !stepsToIgnoreManualCompleteForOpportunity.some(
+                      (s) => s === m.optionValue.toLowerCase()
+                    ),
+                };
+              })
+            );
+          }
+          setLoadingFields(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setLoadingFields(false);
+        });
+    }
+  };
+
   const fetchTermsAndConditions = () => {
     if (termsTimeout) {
       clearTimeout(termsTimeout);
@@ -656,207 +846,6 @@ function QuoteDetail() {
       });
       const data = new Blob([excelBuffer], { type: fileType });
       FileSaver.saveAs(data, `Quotation - ${currentVersion}` + fileExtension);
-    }
-  };
-
-  const fetchQuoteData = (version: any) => {
-    if (selectedEntity) {
-      setLoading(true);
-      axiosInstance()
-        .get(`${qbApi}/${id}?entity=${selectedEntity}`)
-        .then(({ data: { data } }) => {
-          handleMainPoints(data);
-          setHeadingLbl(data.quoteName);
-          var keys = Object.keys(data.versions);
-          setVersions(keys);
-          var ps = "";
-          var s = "";
-
-          if (version === 0) {
-            ps = data.versions[keys[keys.length - 1]].processStatus;
-            s = data.versions[keys[keys.length - 1]].status;
-
-            setcurrentVersion(parseInt(keys[keys.length - 1]));
-
-            setProcessStatus(
-              data.versions[keys[keys.length - 1]].processStatus
-            );
-            setProductBuilderID(
-              data.versions[keys[keys.length - 1]].productBuilderId
-            );
-            setversionStatus(data.versions[keys[keys.length - 1]].status);
-            if (data.versions[keys[keys.length - 1]].TNC) {
-              setTNC(data.versions[keys[keys.length - 1]].TNC);
-            }
-            if (data.versions[keys[keys.length - 1]].acceptedColumns) {
-              setColumnView(
-                data.versions[keys[keys.length - 1]].acceptedColumns
-              );
-            }
-
-            if (
-              data.versions[keys[keys.length - 1]].status === "Building Quote"
-            ) {
-              setEditable(true);
-            } else {
-              setEditable(false);
-            }
-          } else {
-            setcurrentVersion(version);
-
-            setProcessStatus(data.versions[version]["processStatus"]);
-            setProductBuilderID(data.versions[version]["productBuilderId"]);
-            setversionStatus(data.versions[version]["status"]);
-            if (data.versions[version]["TNC"]) {
-              setTNC(data.versions[version]["TNC"]);
-            }
-            if (data.versions[version]["acceptedColumns"]) {
-              setColumnView(data.versions[version]["acceptedColumns"]);
-            }
-            if (data.versions[version]["status"] === "Building Quote") {
-              setEditable(true);
-            } else {
-              setEditable(false);
-            }
-            ps = data.versions[version]["processStatus"];
-            s = data.versions[version]["status"];
-          }
-
-          if (ps === "DOA Process" && !s.includes("Accepted")) {
-            setNextStep(false);
-          }
-          if (ps === "DOA Process" && s.includes("Accepted")) {
-            setNextStep(true);
-          }
-          if (ps === "Customer Process") {
-            setNextStep(false);
-          }
-
-          setAllowedToEdit(
-            [...(data.collaborator ?? []), data.owner].some(
-              (d) => d?.optionValue === user?.user?._id
-            )
-          );
-
-          // handleAllowToEditList(data);
-          setCopyOfquoteDataToUpdate(data);
-          handleContactsEmails(data);
-
-          if (
-            data?.staticData?.notToBeRemoved &&
-            typeof data.staticData.notToBeRemoved === "object"
-          ) {
-            let ids = [];
-            Object.keys(data?.staticData?.notToBeRemoved).map(
-              (k) => (ids = [...ids, ...data.staticData.notToBeRemoved[k]])
-            );
-            setNotToBeRemovedContacts(ids);
-          }
-
-          let modifiedData = {};
-          Object.assign(modifiedData, data);
-
-          // if (modifiedData["currency"] && modifiedData["amount"]) {
-          modifiedData["amount"] = formatAmountWithCurrency(
-            modifiedData["currency"],
-            modifiedData["amount"]
-          );
-          // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
-          // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
-          // }
-
-          setquoteData(modifiedData);
-
-          let tempExpanded = {
-            supplierContacts: true,
-            customerContacts: true,
-          };
-          if (
-            data?.staticData?.supplierContacts &&
-            data.staticData.supplierContacts.length === 0
-          ) {
-            tempExpanded.supplierContacts = false;
-          }
-          if (
-            data?.staticData?.customerContacts &&
-            data.staticData.customerContacts.length === 0
-          ) {
-            tempExpanded.customerContacts = false;
-          }
-          setExpanded(tempExpanded);
-
-          setCustomizedRoutes([
-            { title: "Quote Builder", path: "/quote-builder" },
-            { title: `${data.quoteName}` },
-          ]);
-          setLoading(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setLoading(false);
-        });
-    }
-  };
-
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
-    mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data?.amount
-      ? formatAmountWithCurrency(data?.currency, data?.amount)
-      : "";
-    mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
-
-    setMainPoints(mainPoint);
-  };
-
-  const getQuoteFields = () => {
-    if (selectedEntity) {
-      setLoadingFields(true);
-      axiosInstance()
-        .get(`/field?resource=Quote Builder&entity=${selectedEntity}`)
-        .then(({ data: { data } }) => {
-          setquoteFields(data);
-
-          if (data && data.length) {
-            let fieldData = data.find(
-              (currentField) =>
-                currentField?.fieldData?.fieldName === "supplierAccountName"
-            )?.fieldData;
-            if (fieldData?.option && fieldData.option.length) {
-              setSupplierAccountOptions(
-                fieldData.option.map((option) => ({
-                  ...option,
-                  isSelected: false,
-                }))
-              );
-            }
-          }
-          const processSteps = data.find(
-            (d) =>
-              d.isRead &&
-              d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
-          );
-          if (processSteps && processSteps.isRead) {
-            setSteps(
-              processSteps.fieldData.option.map((m) => {
-                return {
-                  text: m.optionLabel,
-                  canCompleteManually:
-                    !stepsToIgnoreManualCompleteForOpportunity.some(
-                      (s) => s === m.optionValue.toLowerCase()
-                    ),
-                };
-              })
-            );
-          }
-          setLoadingFields(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setLoadingFields(false);
-        });
     }
   };
 
@@ -1482,7 +1471,7 @@ function QuoteDetail() {
                 <Box padding={2}>
                   <Grid container spacing={2}>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
+                      <Grid item sm={6} md={6} key={i}>
                         <Skeleton variant="text" width="100px" height="16px" />
                         <Box marginY={1} />
                         <Skeleton width="100%" height="50px" />
@@ -1491,146 +1480,144 @@ function QuoteDetail() {
                   </Grid>
                 </Box>
               ) : (
-                quoteData && (
-                  <>
-                    <Box>
-                      <DetailsPage data={quoteData} fields={quoteFields} />
-                    </Box>
+                <>
+                  {quoteData && (
+                    <DetailsPage data={quoteData} fields={quoteFields} />
+                  )}
 
-                    <div className="m-3">
+                  <div className="m-3">
+                    <Grid
+                      container
+                      className="d-flex align-items-center form-label-style mb-0"
+                    >
                       <Grid
-                        container
-                        className="d-flex align-items-center form-label-style mb-0"
+                        item
+                        xs={12}
+                        sm={6}
+                        md={6}
+                        className="justify-content-start"
                       >
-                        <Grid
-                          item
-                          xs={12}
-                          sm={6}
-                          md={6}
-                          className="justify-content-start"
-                        >
-                          <h4>Product Information</h4>
-                        </Grid>
-                        <Grid
-                          item
-                          xs={12}
-                          sm={6}
-                          md={6}
-                          className="d-flex justify-content-end"
-                        >
-                          <Button
-                            variant="outlined"
-                            type="button"
-                            size="small"
-                            disabled={
-                              allVersionStatusButtonText ===
-                              gettingVersionStatusText
-                            }
-                            startIcon={<InfoIcon />}
-                            color="primary"
-                            onClick={() => {
-                              getVersionStatus();
-                            }}
-                          >
-                            {allVersionStatusButtonText}{" "}
-                          </Button>
-                          <select
-                            className="customSelect mx-1"
-                            value={currentVersion}
-                            onChange={handleChangeVersion}
-                          >
-                            {versions.map((team) => (
-                              <option key={team} value={team}>
-                                {"Version : " + team}
-                              </option>
-                            ))}
-                          </select>
-                          <Button
-                            variant="outlined"
-                            type="button"
-                            size="small"
-                            startIcon={<BiLayerPlus />}
-                            color="primary"
-                            onClick={() => {
-                              cloneVersion();
-                            }}
-                          >
-                            Clone Version {currentVersion}{" "}
-                          </Button>
-                        </Grid>
+                        <h4>Product Information</h4>
                       </Grid>
-                      {ProcessStatus != "New" ? (
-                        <div>
-                          <Grid>
-                            <Grid
-                              item
-                              xs={12}
-                              md={12}
-                              sm={12}
-                              className="d-flex align-items-center gap-1 quotePanel"
-                            >
-                              <div className="quoteBox">
-                                <span>Total Profit</span>
-                                <span>{totalProfit}</span>
+                      <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={6}
+                        className="d-flex justify-content-end"
+                      >
+                        <Button
+                          variant="outlined"
+                          type="button"
+                          size="small"
+                          disabled={
+                            allVersionStatusButtonText ===
+                            gettingVersionStatusText
+                          }
+                          startIcon={<InfoIcon />}
+                          color="primary"
+                          onClick={() => {
+                            getVersionStatus();
+                          }}
+                        >
+                          {allVersionStatusButtonText}{" "}
+                        </Button>
+                        <select
+                          className="customSelect mx-1"
+                          value={currentVersion}
+                          onChange={handleChangeVersion}
+                        >
+                          {versions.map((team) => (
+                            <option key={team} value={team}>
+                              {"Version : " + team}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          variant="outlined"
+                          type="button"
+                          size="small"
+                          startIcon={<BiLayerPlus />}
+                          color="primary"
+                          onClick={() => {
+                            cloneVersion();
+                          }}
+                        >
+                          Clone Version {currentVersion}{" "}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                    {ProcessStatus != "New" ? (
+                      <div className="mt-2">
+                        <Grid>
+                          <Grid
+                            item
+                            xs={12}
+                            md={12}
+                            sm={12}
+                            className="d-flex align-items-center gap-1 quotePanel"
+                          >
+                            <div className="quoteBox">
+                              <span>Total Profit</span>
+                              <span>{totalProfit}</span>
+                            </div>
+                            <div className="quoteBox">
+                              <span>Total Cost Price</span>
+                              <span>{totalcost}</span>
+                            </div>
+                            {redCard ? (
+                              <div className="redQuoteBox">
+                                <span>Total Selling Price</span>
+                                <span>{totalsale}</span>
                               </div>
+                            ) : (
                               <div className="quoteBox">
-                                <span>Total Cost Price</span>
-                                <span>{totalcost}</span>
+                                <span>Total Selling Price</span>
+                                <span>{totalsale}</span>
                               </div>
-                              {redCard ? (
-                                <div className="redQuoteBox">
-                                  <span>Total Selling Price</span>
-                                  <span>{totalsale}</span>
-                                </div>
-                              ) : (
-                                <div className="quoteBox">
-                                  <span>Total Selling Price</span>
-                                  <span>{totalsale}</span>
-                                </div>
-                              )}
-                              <div className="quoteBox">
-                                <span>Total Margin</span>
-                                <span>{totalmargin}</span>
-                              </div>
-                              <div className="quoteBox">
-                                <span>Version Status</span>
-                                <span>{versionStatus}</span>
-                              </div>
-                              <div></div>
-                            </Grid>
+                            )}
+                            <div className="quoteBox">
+                              <span>Total Margin</span>
+                              <span>{totalmargin}</span>
+                            </div>
+                            <div className="quoteBox">
+                              <span>Version Status</span>
+                              <span>{versionStatus}</span>
+                            </div>
+                            <div></div>
                           </Grid>
-                        </div>
-                      ) : null}
+                        </Grid>
+                      </div>
+                    ) : null}
 
-                      {DOAneeded ? (
-                        <Steps
-                          steps={DOASteps}
-                          currentStep={DOASteps.indexOf(ProcessStatus)}
-                          id={id}
-                          version={currentVersion}
-                          Refresh={fetchQuoteData}
-                          nextStep={nextStep}
-                          versionStatus={versionStatus}
-                        />
-                      ) : (
-                        <Steps
-                          steps={OtherSteps}
-                          currentStep={OtherSteps.indexOf(ProcessStatus)}
-                          id={id}
-                          version={currentVersion}
-                          Refresh={fetchQuoteData}
-                          nextStep={nextStep}
-                          versionStatus={versionStatus}
-                        />
-                      )}
-                    </div>
-                  </>
-                )
+                    {DOAneeded ? (
+                      <Steps
+                        steps={DOASteps}
+                        currentStep={DOASteps.indexOf(ProcessStatus)}
+                        id={id}
+                        version={currentVersion}
+                        Refresh={fetchQuoteData}
+                        nextStep={nextStep}
+                        versionStatus={versionStatus}
+                      />
+                    ) : (
+                      <Steps
+                        steps={OtherSteps}
+                        currentStep={OtherSteps.indexOf(ProcessStatus)}
+                        id={id}
+                        version={currentVersion}
+                        Refresh={fetchQuoteData}
+                        nextStep={nextStep}
+                        versionStatus={versionStatus}
+                      />
+                    )}
+                  </div>
+                </>
               )}
 
               <div className="m-3">
                 <Box mt={4} />
-                {quoteData ? (
+                {!loading && quoteData ? (
                   <Grid container className="position-relative">
                     <Grid
                       item
@@ -1670,7 +1657,10 @@ function QuoteDetail() {
                       {ProcessStatus === "Quote Builder" ? (
                         <Grid container>
                           <Grid item xs={12} md={12} sm={12}>
-                            <FormControl className={classes.formControl}>
+                            <FormControl
+                              fullWidth
+                              className={classes.formControl}
+                            >
                               <InputLabel id="demo-mutiple-chip-label">
                                 Visible Columns in Quote
                               </InputLabel>
@@ -1797,8 +1787,6 @@ function QuoteDetail() {
                                   md={12}
                                   sm={12}
                                   className="d-flex align-items-center p-2 gap-1"
-                                  container
-                                  justify="flex-start"
                                 >
                                   <Button
                                     onClick={() => setShowCreateDialog(true)}
@@ -1852,7 +1840,7 @@ function QuoteDetail() {
                   <Skeleton variant="text" width="100px" height="25px" />
                   <Box marginY={1} />
                   {[0, 1, 2, 3, 4].map((i) => (
-                    <Skeleton width="100%" height="50px" />
+                    <Skeleton key={i} width="100%" height="50px" />
                   ))}
                 </Box>
               ) : (
