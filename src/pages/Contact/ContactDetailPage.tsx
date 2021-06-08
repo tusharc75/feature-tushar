@@ -551,6 +551,7 @@ const ContactDetailsPage = (props) => {
                       contactId={id}
                       accountResource={accountResource}
                       isRenderedInCustomerContact={true}
+                      isRenderedFromCustomerAccount={true}
                     />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (

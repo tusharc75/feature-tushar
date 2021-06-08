@@ -55,6 +55,10 @@ export default function ManageQuoteDialog({
   isRedirectTodetailPage,
   userId = null,
   disableOwnerDropDown = false,
+  isRenderedFromOpportunity = false,
+  opportunityName = null,
+  isRenderedFromCustomerAccount = false,
+  contacts = null,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -82,6 +86,7 @@ export default function ManageQuoteDialog({
   const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] = useState(false)
   const [showCreateOpportunity, setShowCreateOpportunity] = useState(false)
   const [accountData, setAccountData] = useState([]);
+  const [accountFieldDisable, setAccountFieldDisable] = useState(false);
   const [contactData, setContactData] = useState([])
   const [newAddedAccountId, setNewAddedAccountId] = useState(null)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
@@ -89,7 +94,7 @@ export default function ManageQuoteDialog({
   const [opportunityData, setOpportunityData] = useState([]);
   const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null)
   const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
-
+  const [opportunityDataSource, setOpportunityDataSource] = useState([]);
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
@@ -115,6 +120,8 @@ export default function ManageQuoteDialog({
       setOpportunityData(opportunityOptions.option);
     }
 
+    setAccountFieldDisable(isRenderedFromCustomerAccount || isRenderedFromOpportunity || contactId);
+
     sortArray();
 
     const customerContactDropdownData = entityData.fields.find(
@@ -139,6 +146,7 @@ export default function ManageQuoteDialog({
       setAccountData([])
       setOpportunityData([])
       setContactData([])
+      setAccountFieldDisable(false)
     }
 
   }, [entityData.fields]);
@@ -179,6 +187,10 @@ export default function ManageQuoteDialog({
     setCustomerContactDataSource(customerContactMainDataSource.filter(d => d.parentAccount === selectedAccount));
   };
 
+  const onOpportunityDropDownOpen = (selectedAccount) => {
+    setOpportunityDataSource(opportunityData.filter((opportunity) => opportunity.parentAccount === selectedAccount))
+  }
+
   useEffect(() => {
     getQuoteFields();
 
@@ -213,7 +225,6 @@ export default function ManageQuoteDialog({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, contactId)
           }
 
-
           if (
             opportunityId && ["opportunity"].some(
               (d) => d === _f.fieldData.fieldName
@@ -233,15 +244,20 @@ export default function ManageQuoteDialog({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
           }
 
+
+
           if (_f.fieldData.fieldName !== "supplierAccountName") {
             newFields.push(_f.fieldData);
           }
         });
-
+        let initialData = getObjKeys("", newFields);
+        if (isRenderedFromOpportunity) {
+          initialData["quoteName"] = opportunityName;
+        }
         setEntityData({
           fields: newFields,
           initialValues: isNew
-            ? getObjKeys("", newFields)
+            ? initialData
             : getObjKeysWithValues(dataToUpdate, newFields),
         });
       });
@@ -253,7 +269,7 @@ export default function ManageQuoteDialog({
 
   const handleCreateQuote = (values) => {
     // values.closeDate = "03/03/2021"
-    if (accountId && accountResource !== customerAccount.accountResource) values["supplierAccountName"] = [accountId]
+    if (accountId && accountResource !== customerAccount.accountResource && !isRenderedFromOpportunity) values["supplierAccountName"] = [accountId]
     setLoading(true);
     console.log(values);
     if (values.customerContactName === "") {
@@ -343,17 +359,21 @@ export default function ManageQuoteDialog({
     const customerContactNameFieldIndex = entityFields.findIndex(d => d.fieldName === "customerContactName")
 
     if (customerContactNameFieldIndex > -1) {
+
+      const newCustomer = {
+        optionValue: data._id,
+        optionLabel: `${data.firstName} ${data.lastName}`,
+        order: entityFields[customerContactNameFieldIndex].option.length,
+        default: false,
+        parentAccount: data.accountName
+      }
       entityFields[customerContactNameFieldIndex].option = [
         ...entityFields[customerContactNameFieldIndex].option,
-        {
-          optionValue: data._id,
-          optionLabel: `${data.firstName} ${data.lastName}`,
-          order: entityFields[customerContactNameFieldIndex].option.length,
-          default: false
-        }
+        newCustomer
       ]
+      setCustomerContactMainDataSource(entityFields[customerContactNameFieldIndex].option);
+      setCustomerContactDataSource((prevState) => ([...prevState, newCustomer]));
 
-      setContactData(entityFields[customerContactNameFieldIndex].option);
     }
   }
 
@@ -416,8 +436,31 @@ export default function ManageQuoteDialog({
                                     sm={6}
                                     md={6}
                                   >
-                                    {
-                                      field.fieldName == "customerAccountName" ? (
+                                    { field.fieldName === "quoteName" ? (
+
+                                      <FormTypes
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        disabled={isRenderedFromOpportunity}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                      // doNotShowInfoTooltip={true}
+                                      // onChange={(e, value) => {
+                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                      //   setFieldValue("customerContactName", [])
+                                      // }}
+                                      />
+
+                                    )
+                                      : field.fieldName == "customerAccountName" ? (
                                         <Grid container spacing={1}>
                                           <Grid item
                                             xs={permissions.customerAccount.isCreate ? 10 : 11}
@@ -432,6 +475,7 @@ export default function ManageQuoteDialog({
                                               name={field.fieldName}
                                               type={field.type}
                                               options={accountData}
+                                              disabled={accountFieldDisable}
                                               // setFieldValue={setFieldValue}
                                               required={field.required}
                                               fullWidth
@@ -441,12 +485,11 @@ export default function ManageQuoteDialog({
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
                                                 setFieldValue("customerContactName", [])
-                                                setFieldValue("opportunity", "")
                                               }}
                                             />
                                           </Grid>
                                           {
-                                            permissions.customerAccount.isCreate && <Grid item xs={1} sm={1} md={1}>
+                                            permissions.customerAccount.isCreate && !accountFieldDisable && <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Account" className="mt-1">
                                                 <IconButton onClick={() => { setShowAddCustomerAccountDialog(true) }} size="small">
                                                   <AddIcon color="primary" />
@@ -477,24 +520,28 @@ export default function ManageQuoteDialog({
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              options={contactData}
+                                              options={customerContactDataSource}
+                                              setFieldValue={setFieldValue}
+                                              disabled={contactId ? true : false}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={true}
                                               size="small"
-                                              // onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
-                                              onChange={(e, value) => {
-                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                              onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                              }}
+                                            // }}
                                             />
 
 
                                           </Grid>
                                           {
-                                            permissions.customerContact.isCreate && <Grid item xs={1} sm={1} md={1}>
+                                            permissions.customerContact.isCreate && contactId === null && <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Contact" className="mt-1">
-                                                <IconButton onClick={() => { setShowAddCustomerContactDialog(true) }} size="small">
+                                                <IconButton onClick={() => {
+                                                  setShowAddCustomerContactDialog(true)
+                                                }} size="small">
                                                   <AddIcon color="primary" />
                                                 </IconButton>
                                               </Tooltip>
@@ -513,9 +560,9 @@ export default function ManageQuoteDialog({
                                       ) : field.fieldName === "opportunity" ? (
                                         <Grid container spacing={1}>
                                           <Grid item
-                                            xs={permissions.opportunity.isCreate ? 9 : 10}
-                                            sm={permissions.opportunity.isCreate ? 9 : 10}
-                                            md={permissions.opportunity.isCreate ? 9 : 10}
+                                            xs={permissions.opportunity.isCreate ? 10 : 11}
+                                            sm={permissions.opportunity.isCreate ? 10 : 11}
+                                            md={permissions.opportunity.isCreate ? 10 : 11}
                                           >
                                             <FormTypes
                                               values={values}
@@ -524,21 +571,28 @@ export default function ManageQuoteDialog({
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              options={opportunityData}
+                                              options={field.option}
+                                              disabled={isRenderedFromOpportunity}
                                               setFieldValue={setFieldValue}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={true}
                                               size="small"
+                                              onChange={(e, value) => {
+                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+
+                                              }}
 
                                             />
 
 
                                           </Grid>
                                           {
-                                            permissions.opportunity.isCreate && <Grid item xs={1} sm={1} md={1}>
+                                            permissions.opportunity.isCreate && !isRenderedFromOpportunity && <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Opportunity" className="mt-1">
-                                                <IconButton onClick={() => { setShowCreateOpportunity(true) }} size="small">
+                                                <IconButton onClick={() => {
+                                                  setShowCreateOpportunity(true)
+                                                }} size="small">
                                                   <AddIcon color="primary" />
                                                 </IconButton>
                                               </Tooltip>
@@ -772,6 +826,7 @@ export default function ManageQuoteDialog({
                         if (obj) {
                           setShowAddCustomerContactDialog(false)
                           updateContactDropdown(obj.data.data)
+
                           setFieldValue("customerContactName", [...values["customerContactName"], obj.id])
                         }
                       })}
@@ -795,7 +850,8 @@ export default function ManageQuoteDialog({
                         setShowCreateOpportunity(false)
                         setNewAddedOpportunityId(data._id)
                         updateOpportunityDropdown(data)
-                        setFieldValue("opportunity", data._id);
+                        setFieldValue("opportunity", data._id)
+
 
                       }}
                       accountId={values["customerAccountName"] ? values["customerAccountName"] : accountId}
@@ -859,4 +915,7 @@ ManageQuoteDialog.propTypes = {
   accountResource: PropTypes.string,
   isRedirectToDetailPage: PropTypes.bool,
   disableOwnerDropDown: PropTypes.bool,
+  isRenderedFromOpportunity: PropTypes.bool,
+  opportunityName: PropTypes.string,
+  contacts: PropTypes.any
 };
