@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Autocomplete } from "@material-ui/lab";
-import { Box, TextField, Typography } from "@material-ui/core";
+import { Avatar, Box, TextField, Typography } from "@material-ui/core";
 import Loader from "../../components/Loader";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -169,6 +169,28 @@ const CurrencyConverter = () => {
                       label="Currency in use"
                       placeholder="Currency in use" />
                   )}
+                  renderOption={(option) => {
+                    const { currencyCode, name, countryCode, symbolNative } = currencyList.find(d => d.currencyCode === option);
+                    return (
+                      <Grid container alignItems="center">
+                        <Grid item>
+                          <Avatar
+                            variant="rounded"
+                            src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                            style={{ marginRight: 20, width: "40px", height: "30px" }}
+                          />
+                        </Grid>
+                        <Grid item xs>
+                          <Typography>
+                            {currencyCode} ({symbolNative})
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {name}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    );
+                  }}
                 />
               </Grid>
               <Grid xs={6} container justify="flex-end">
