@@ -9,7 +9,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import Dialog from '@material-ui/core/Dialog'
 import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
-import _ from 'lodash';
+import { orderBy, sortBy, uniq, map } from 'lodash';
 import { getObjKeys, simplifyValues, yupSchema } from '../../constants/helpers';
 import CustomButton from '../Helpers/CustomButton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -58,8 +58,8 @@ const CreateProduct = (props) => {
         if (productData.fieldChanges) {
             setFieldChanges(productData.fieldChanges)
         }
-        _fields = _.orderBy(_fields, 'order', 'asc');
-        _fields = _.sortBy(_fields, function (item) {
+        _fields = orderBy(_fields, 'order', 'asc');
+        _fields = sortBy(_fields, function (item) {
             return levalOrderBy.indexOf(item.leval)
         });
 
@@ -102,7 +102,7 @@ const CreateProduct = (props) => {
     };
 
     const EvaluteproductFields = (fields) => {
-        const sections = _.uniq(_.map(fields, 'sectionName'));
+        const sections = uniq(map(fields, 'sectionName'));
         const customData = sections.map((name) => {
             let sectionFields = fields.filter((field) => field.sectionName === name);
             return { name, sectionFields };

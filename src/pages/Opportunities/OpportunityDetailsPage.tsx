@@ -15,7 +15,7 @@ import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
 import {
   customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
@@ -564,7 +564,7 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
+                          contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
                           title="Supplier Contacts"
                           contactApi={supplierContact.contactApi}
                           isExpanded={expanded.supplierContacts}
@@ -575,12 +575,12 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
                           }}
                           recordsPerLine={recordsPerLine}
-                          accounts={_.cloneDeep(opportunityData?.supplierAccountName)}
+                          accounts={cloneDeep(opportunityData?.supplierAccountName)}
                         />
                       }
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
+                          contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
                           title="Customer Contacts"
                           isExpanded={expanded["customerContacts"]}
                           contactApi={customerContact.contactApi}

@@ -14,7 +14,7 @@ import {
 import Autocomplete, {
   createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
-import _ from "lodash";
+import { flatMap, map, } from "lodash";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
@@ -178,8 +178,8 @@ export const UserDropdown = ({
         value={
           users && multiple === true
             ? users.filter((data) =>
-                _.flatMap(value, (nameObj) =>
-                  _.map(nameObj, (userId) => {
+                flatMap(value, (nameObj) =>
+                  map(nameObj, (userId) => {
                     return userId;
                   })
                 ).includes(data.userId)

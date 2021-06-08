@@ -18,7 +18,7 @@ import {
   Typography,
   useTheme,
 } from "@material-ui/core";
-import _ from "lodash";
+import { result, find, throttle} from "lodash";
 import DateUtils from "@date-io/date-fns";
 import {
   KeyboardDatePicker,
@@ -31,7 +31,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
-import throttle from "lodash/throttle";
 import currencies from "../../constants/currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
@@ -1044,8 +1043,8 @@ const FormTypes = (props) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          {_.result(
-                            _.find(currencyList, function (obj) {
+                          {result(
+                            find(currencyList, function (obj) {
                               return obj.currencyCode === _currency;
                             }),
                             "symbolNative"
@@ -1112,8 +1111,8 @@ const FormTypes = (props) => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        {_.result(
-                          _.find(currencyList, function (obj) {
+                        {result(
+                          find(currencyList, function (obj) {
                             return obj.currencyCode === _currency;
                           }),
                           "symbolNative"
