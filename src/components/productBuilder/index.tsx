@@ -35,7 +35,6 @@ const ProductBuilder = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
 
-    const [renderCount, setRenderCount] = useState(0);
     const [product, setProduct] = useState([]);
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
