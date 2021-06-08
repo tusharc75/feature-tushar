@@ -152,7 +152,7 @@ const CurrencyConverter = () => {
                 <Autocomplete
                   multiple
                   id="tags-filled"
-                  options={currencyList.map((_c) => { return _c.currencyCode })}
+                  options={[...new Set(currencyList.map((_c) => { return _c.currencyCode }))]}
                   getOptionLabel={(option) => option}
                   value={currency}
                   renderTags={(value: string[], getTagProps) =>
@@ -170,28 +170,32 @@ const CurrencyConverter = () => {
                       placeholder="Currency in use" />
                   )}
                   renderOption={(option) => {
-                    const { currencyCode, name, countryCode, symbolNative } = currencyList.find(d => d.currencyCode === option);
-                    return (
-                      <Grid container alignItems="center">
-                        <Grid item>
-                          <Avatar
-                            variant="rounded"
-                            src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                            style={{ marginRight: 20, width: "40px", height: "30px" }}
-                          />
-                        </Grid>
-                        <Grid item xs>
-                          <Typography>
-                            {currencyCode} ({symbolNative})
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            {name}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    );
+                    const { currencyCode, symbol, name } = currencyList.find(d => d.currencyCode === option);
+                    return `${currencyCode} - ${name} - (${symbol})`
                   }}
-                />
+                  // renderOption={(option) => {
+                  //   const { currencyCode, name, countryCode, symbolNative } = currencyList.find(d => d.currencyCode === option);
+                  //   return (
+                  //     <Grid container alignItems="center">
+                  //       <Grid item>
+                  //         <Avatar
+                  //           variant="rounded"
+                  //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                  //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+                  //         />
+                  //       </Grid>
+                  //       <Grid item xs>
+                  //         <Typography>
+                  //           {currencyCode} ({symbolNative})
+                  //         </Typography>
+                  //         <Typography variant="body2" color="textSecondary">
+                  //           {name}
+                  //         </Typography>
+                  //       </Grid>
+                  //     </Grid>
+                  //   );
+                  // }}
+                  />
               </Grid>
               <Grid xs={6} container justify="flex-end">
                 <FormControlLabel
