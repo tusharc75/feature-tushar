@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Avatar, List, ListItem, ListItemAvatar, ListItemText, MenuItem, Menu } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -17,6 +17,7 @@ import { AiOutlineMail } from 'react-icons/ai';
 import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
+import { MoreVert } from '@material-ui/icons';
 
 const Accordion = withStyles({
     root: {
@@ -90,6 +91,7 @@ export default function ContactAccordionInDetailPage({
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandContact, setExpandContact] = useState(expanded);
+    const [anchorEl, setAnchorEl] = useState(null);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false)
 
     useEffect(() => {
@@ -100,6 +102,14 @@ export default function ContactAccordionInDetailPage({
         setExpandContact(isExpanded)
 
     }, [contacts])
+
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     return <>
         <Accordion expanded={expandContact} className="omsAccordian accordContact">
             <AccordionSummary
@@ -132,13 +142,41 @@ export default function ContactAccordionInDetailPage({
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
                             {
-                                (type === "customer" ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) && <IconButton
-                                    color="primary"
-                                    size="small"
-                                    onClick={() => { setShowCreateContactDialog(true) }}
-                                >
-                                    <ControlPointIcon />
-                                </IconButton>
+                                (type === "customer" ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) &&
+                                // <IconButton
+                                //     color="primary"
+                                //     size="small"
+                                //     onClick={() => { setShowCreateContactDialog(true) }}
+                                // >
+                                //     <ControlPointIcon />
+                                // </IconButton>
+
+                                <>
+                                    <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={handleOpenMenu}
+                                    >
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        id="menu"
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowCreateContactDialog(true);
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Create New
+                                        </MenuItem>
+                                    </Menu>
+                                </>
                             }
                         </Typography>
                     </Grid>
