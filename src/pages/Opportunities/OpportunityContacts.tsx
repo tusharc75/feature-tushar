@@ -19,8 +19,9 @@ import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import { supplierAccount, supplierContact } from '../../constants/helpers';
+import { customerAccount, customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
 import { MoreVert } from '@material-ui/icons';
+import ManageContactDialog from '../Contact/ManageContact';
 
 const Accordion = withStyles({
     root: {
@@ -81,10 +82,11 @@ function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     </div>
 }
 export default function OpportunityContacts({ contacts, title, onAddContact,
-    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null }) {
+    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null, saveContactToOpportunity = null, accountId = null }) {
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [anchorEl, setAnchorEl] = useState(null);
+    const [showCreateDialog, setShowCreateDialog] = useState(false)
     const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -190,6 +192,14 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                             open={Boolean(anchorEl)}
                             onClose={handleCloseMenu}
                         >
+                            {contactApi === customerContact.contactApi && <MenuItem
+                                onClick={() => {
+                                    setShowCreateDialog(true);
+                                    handleCloseMenu();
+                                }}
+                            >
+                                Create New
+                            </MenuItem>}
                             <MenuItem
                                 onClick={() => {
                                     onAddContact()
@@ -216,6 +226,25 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                     <FaArrowAltCircleDown size={25} />
                 </Box>
             </> : null
+        }
+        {
+            showCreateDialog &&
+            <ManageContactDialog
+                open={showCreateDialog}
+                onClose={() => setShowCreateDialog(false)}
+                accountId={accountId}
+                contactResource={customerContact.contactResource}
+                contactApi={customerContact.contactApi}
+                account={customerAccount}
+                isRedirectToDetailPage={false}
+                onSuccess={(obj) => {
+                    if (obj) {
+                        setShowCreateDialog(false);
+                        saveContactToOpportunity(obj.id, "customer", contacts)
+                    }
+                }}
+
+            />
         }
     </Accordion>
 
