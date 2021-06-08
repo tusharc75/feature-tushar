@@ -298,7 +298,6 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 disableOwnerDropDown={isCreateOwnerDisable}
                 isRenderedFromOpportunity = {isRenderedFromOpportunity}
                 opportunityName = {opportunityName}
-                contacts = {contacts}
                 isRenderedFromCustomerAccount = {isRenderedFromCustomerAccount}
         
 

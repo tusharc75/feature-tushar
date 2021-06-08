@@ -612,7 +612,6 @@ function OpportunityDetailsPage() {
                             quoteBuilderPermission={permissions.quoteBuilder}
                             opportunityId={id}
                             accountId={opportunityData?.customerAccountName?.optionValue}
-                            contacts = {_.cloneDeep(opportunityData?.staticData?.customerContact)}
                             opportunityName = {opportunityData?.opportunityName }
                             isRenderedFromOpportunity ={true}
                           />
