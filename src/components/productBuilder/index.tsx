@@ -196,10 +196,10 @@ const ProductBuilder = (props) => {
                                 if (ele.fieldName === "productName") {
                                     col.cellRenderer = "productNameRenderer"
                                 }
-                                if (ele.fieldName === "productCategory" ){
+                                if (ele.fieldName === "productCategory") {
                                     col.cellRenderer = "productCategoryRenderer"
                                 }
-                                if( ele.fieldName === "productTemplate") {
+                                if (ele.fieldName === "productTemplate") {
                                     col.cellRenderer = "productTemplateRenderer"
                                 }
                                 col.show = true
