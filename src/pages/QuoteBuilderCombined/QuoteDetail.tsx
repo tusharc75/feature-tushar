@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { Box, Button, Grid, Paper } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -70,6 +70,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import { AnyObject } from "yup/lib/types";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import ProductGrid from "./ProductGrid";
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -115,14 +116,14 @@ function QuoteDetail() {
     "Price Builder",
     "Quote Builder",
     "DOA Process",
-    "Customer Process",
+    "Send To Customer",
     "End",
   ];
   const OtherSteps = [
     "New",
     "Price Builder",
     "Quote Builder",
-    "Customer Process",
+    "Send To Customer",
     "End",
   ];
   const classes = useStyles();
@@ -145,6 +146,7 @@ function QuoteDetail() {
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
   const [loadingTNC, setLoadingTNC] = useState(false);
+  const [isCloning, setCloning] = useState(false);
   const [quoteData, setquoteData] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -707,11 +709,11 @@ function QuoteDetail() {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
-              title: `Quotation - ${currentVersion}`,
+              title: `Quotation - v${currentVersion}`,
             });
             window.open(URL.createObjectURL(doc.output("blob")));
           } else if (!view && !send) {
-            doc.save(`Quotation - ${currentVersion}`);
+            doc.save(`Quotation - v${currentVersion}`);
           }
           if (send) {
             var PDFtoAPIData = doc.output("blob");
@@ -743,7 +745,7 @@ function QuoteDetail() {
         });
         window.open(URL.createObjectURL(PdfDoc.output("blob")));
       } else if (!view && !send) {
-        PdfDoc.save(`Quotation - ${currentVersion}.pdf`);
+        PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
       if (send) {
         var PDFtoAPIData = PdfDoc.output("blob");
@@ -838,14 +840,24 @@ function QuoteDetail() {
     const fileExtension = ".xlsx";
 
     if (dynamicTableData.length) {
-      const ws = XLSX.utils.json_to_sheet(dynamicTableData);
+      let newTable = [];
+      dynamicTableData.forEach((d, i) => {
+        let obj = {};
+        visibleColumns.forEach((col) => {
+          obj[col] = d[col];
+        });
+
+        newTable.push(obj);
+      });
+
+      const ws = XLSX.utils.json_to_sheet(newTable);
       const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
       const excelBuffer = XLSX.write(wb, {
         bookType: "xlsx",
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(data, `Quotation - ${currentVersion}` + fileExtension);
+      FileSaver.saveAs(data, `Quotation - v${currentVersion}` + fileExtension);
     }
   };
 
@@ -1088,11 +1100,12 @@ function QuoteDetail() {
   };
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
+    console.log(BuilderData);
     setOptions([]);
     setRedCard(false);
-    var optionstoSet = [];
-    var invalidqty = false;
-    var invalidPrice = false;
+    let optionstoSet = [];
+    let invalidQty = false;
+    let invalidPrice = false;
 
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
     const ignoredKeys = [
@@ -1104,34 +1117,34 @@ function QuoteDetail() {
       "string",
       "srno",
     ];
-    var totalCost = 0;
-    var totalSellingPrice = 0;
-    var totalMargin = 0;
-    var totalProfit = 0;
-    var CostCurrency = "";
-    var SPCurrency = "";
-    var MarginCurrency = "";
-    var ProfitCurrency = "";
+    let totalCost = 0;
+    let totalSellingPrice = 0;
+    let totalMargin = 0;
+    let totalProfit = 0;
+    let CostCurrency = "";
+    let SPCurrency = "";
+    let MarginCurrency = "";
+    let ProfitCurrency = "";
     BuilderData.map((quoteRows: { [x: string]: any }) => {
-      var hasTSP = false;
+      let hasTSP = false;
       const quoteRowKeys = Object.keys(quoteRows);
-      var inventorydata: { fieldName: string; fieldValue: any }[] = [];
+      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
         if (key === "qty") {
           if (quoteRows[key] === 0) {
-            invalidqty = true;
+            invalidQty = true;
           }
         }
         if (ignoredKeys.indexOf(key) === -1) {
-          var indexkey = key;
-          var currency = "";
+          let indexkey = key;
+          let currency = "";
           if (key.includes("_")) {
-            var splitKey = key.split("_");
+            let splitKey = key.split("_");
             key = splitKey[0];
             currency = splitKey[1];
           }
-          var fields = quoteRows["fields"];
-          var field = fields.filter(
+          let fields = quoteRows["fields"];
+          let field = fields.filter(
             (d: { fieldName: string }) => d.fieldName === key
           );
 
@@ -1185,7 +1198,7 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
-      if (!invalidqty || !invalidPrice) {
+      if (!invalidQty || !invalidPrice) {
         setNextStep(true);
       } else {
         setNextStep(false);
@@ -1224,19 +1237,19 @@ function QuoteDetail() {
       setDOAreq(false);
       setCustomerreq(false);
     }
-    var TableData = [];
-    var Col = [];
-    var ColName = [];
-    var columnext = [];
-    var KeyValuePairs = [];
+    let TableData = [];
+    let Col = [];
+    let ColName = [];
+    let columnext = [];
+    let KeyValuePairs = [];
     type Type = {
       [key: string]: any;
     };
 
-    for (var i = 0; i < inventory.length; i++) {
-      var KeyValue: Type = {};
-      for (var j = 0; j < inventory[i].length; j++) {
-        var DataSet = inventory[i][j];
+    for (let i = 0; i < inventory.length; i++) {
+      let KeyValue: Type = {};
+      for (let j = 0; j < inventory[i].length; j++) {
+        let DataSet = inventory[i][j];
         if (ColName.indexOf(DataSet.fieldName) === -1) {
           ColName = [...ColName, DataSet.fieldName];
           Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
@@ -1257,10 +1270,10 @@ function QuoteDetail() {
       setVisibleColumnName(defaultSelectColumns);
     }
 
-    for (var j = 0; j < KeyValuePairs.length; j++) {
+    for (let j = 0; j < KeyValuePairs.length; j++) {
       const DataSet = KeyValuePairs[j];
-      var DataRecord: Type = {};
-      for (var i = 0; i < ColName.length; i++) {
+      let DataRecord: Type = {};
+      for (let i = 0; i < ColName.length; i++) {
         if (ColName[i] in DataSet) {
           DataRecord[ColName[i]] = DataSet[ColName[i]];
         } else {
@@ -1310,6 +1323,7 @@ function QuoteDetail() {
   }
 
   const cloneVersion = () => {
+    setCloning(true);
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
@@ -1317,9 +1331,11 @@ function QuoteDetail() {
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
+        setCloning(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setCloning(false);
       });
   };
 
@@ -1534,6 +1550,7 @@ function QuoteDetail() {
                           ))}
                         </select>
                         <Button
+                          disabled={isCloning}
                           variant="outlined"
                           type="button"
                           size="small"
@@ -1543,7 +1560,15 @@ function QuoteDetail() {
                             cloneVersion();
                           }}
                         >
-                          Clone Version {currentVersion}{" "}
+                          {isCloning ? (
+                            <>
+                              <CircularProgress color="inherit" size={16} />
+                              <Box component="span" mx={1} />
+                              Cloning v{currentVersion}
+                            </>
+                          ) : (
+                            `Clone Version ${currentVersion}`
+                          )}
                         </Button>
                       </Grid>
                     </Grid>
@@ -1739,7 +1764,10 @@ function QuoteDetail() {
                           View
                         </Button>
                         <Button
-                          onClick={() => createImagePDF(false, false)}
+                          onClick={() => {
+                            createImagePDF(false, false);
+                            exportToCSV();
+                          }}
                           variant="outlined"
                           size="small"
                           startIcon={<FiDownloadCloud />}
@@ -1750,21 +1778,32 @@ function QuoteDetail() {
                       </span>
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
-                      <ProductBuilder
-                        productBuilderId={productBuilderID}
-                        isAddNewProduct={isAddNewProduct}
-                        setIsAddNewProduct={setIsAddNewProduct}
-                        isAddExistingProduct={isAddExistingProduct}
-                        setIsAddExistingProduct={setIsAddExistingProduct}
-                        refreshProducts={refreshProducts}
-                        stage={ProcessStatus === "New" ? "product" : "cost"}
-                        Editable={
-                          ProcessStatus === "Price Builder" ||
-                          ProcessStatus === "New"
-                            ? true
-                            : false
-                        }
-                      />
+                      {ProcessStatus === "Quote Builder" &&
+                      visibleColumns.length > 0 ? (
+                        <ProductGrid
+                          productBuilderId={productBuilderID}
+                          refreshProducts={refreshProducts}
+                          columnsData={visibleColumns}
+                          currency={quoteData.currency}
+                          isAll={true}
+                        />
+                      ) : (
+                        <ProductBuilder
+                          productBuilderId={productBuilderID}
+                          isAddNewProduct={isAddNewProduct}
+                          setIsAddNewProduct={setIsAddNewProduct}
+                          isAddExistingProduct={isAddExistingProduct}
+                          setIsAddExistingProduct={setIsAddExistingProduct}
+                          refreshProducts={refreshProducts}
+                          stage={ProcessStatus === "New" ? "product" : "cost"}
+                          Editable={
+                            ProcessStatus === "Price Builder" ||
+                            ProcessStatus === "New"
+                              ? true
+                              : false
+                          }
+                        />
+                      )}
                       {ProcessStatus === "Quote Builder" ? (
                         <Box>
                           <Grid container>
@@ -1901,6 +1940,7 @@ function QuoteDetail() {
             contactId={null}
             opportunityId={null}
             disableOwnerDropDown={true}
+            disableCurrency={true}
             // qbApi={qbApi}
           />
         )}
