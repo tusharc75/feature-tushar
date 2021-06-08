@@ -52,13 +52,7 @@ const ProductBuilder = (props) => {
 
     useEffect(() => {
         fetchProduct(productBuilderId);
-    }, []);
-
-    useEffect(() => {
-        if (renderCount > 0) {
-            fetchProduct(productBuilderId);
-        } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [productBuilderId]);
 
     const ActionsRenderer = params => <>
 
