@@ -83,13 +83,18 @@ const ProductBuilder = (props) => {
         }
     </>
 
-    const CustomRenderer = params => <>
+    const ProductCategoryRenderer = params => <>
         {
             params.data.productCategory || params.data.productCategory === 0 ?
                 typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
-                : params.data.productTemplate || params.data.productTemplate === 0 ?
-                    typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
-                    : <NoDataCell />
+                : <NoDataCell />
+        }
+    </>
+    const ProductTemplateRenderer = params => <>
+        {
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
+                : <NoDataCell />
         }
     </>
 
@@ -97,7 +102,8 @@ const ProductBuilder = (props) => {
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
         productNameRenderer: ProductNameRenderer,
-        customRenderer: CustomRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
 
     };
 
@@ -197,9 +203,11 @@ const ProductBuilder = (props) => {
                                 if (ele.fieldName === "productName") {
                                     col.cellRenderer = "productNameRenderer"
                                 }
-                                else if (ele.fieldName === "productCategory" || ele.fieldName === "productTemplate") {
-                                    col.cellRenderer = "customRenderer"
-
+                                if (ele.fieldName === "productCategory" ){
+                                    col.cellRenderer = "productCategoryRenderer"
+                                }
+                                if( ele.fieldName === "productTemplate") {
+                                    col.cellRenderer = "productTemplateRenderer"
                                 }
                                 col.show = true
                                 col.order = ele.order
