@@ -20,7 +20,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import ImportExportLinks from "../Product/ImportExportLinks";
-var _ = require('lodash');
+import { orderBy, sortBy, uniq, map } from "lodash";
 
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
@@ -171,8 +171,8 @@ const ProductBuilder = (props) => {
                     }
                 })
             });
-            column = _.orderBy(column, 'order', 'asc');
-            column = _.sortBy(column, function (item) {
+            column = orderBy(column, 'order', 'asc');
+            column = sortBy(column, (item: any) => {
                 return levalOrderBy.indexOf(item.leval)
             });
             if (Editable) {
@@ -248,7 +248,7 @@ const ProductBuilder = (props) => {
         const rows: any = product.filter((data) => selectedProduct.includes(data._id))
         let section: any = []
         let fields: any = []
-        section = _.uniq(_.map(rows[0].fields, 'sectionName'));
+        section = uniq(map(rows[0].fields, 'sectionName'));
         rows[0].fields.forEach(_field => {
             let fid = { ..._field }
             if (fid.type !== "currencyAmount" && (fid.type === "converter" || fid.isConverter === true)) {

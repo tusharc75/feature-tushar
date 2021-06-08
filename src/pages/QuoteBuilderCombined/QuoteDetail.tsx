@@ -1711,7 +1711,7 @@ function QuoteDetail() {
                         versionStatus === "Building Quote") ||
                       (ProcessStatus === "Customer Process" &&
                         versionStatus !== "Sent to Customer") ? (
-                        <Box mb={4}>
+                        <div className="w-100 d-flex align-items-center justify-content-end">
                           <Button
                             onClick={() => handleCases()}
                             disabled={!DOAreq && !Customerreq}
@@ -1722,12 +1722,12 @@ function QuoteDetail() {
                           >
                             {buttonMessage}
                           </Button>
-                        </Box>
+                        </div>
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
                     ProcessStatus !== "Price Builder" ? (
-                      <span className="d-flex align-items-center justify-content-end">
+                      <span className="d-flex align-items-center justify-content-end ml-2">
                         <Button
                           onClick={() => createImagePDF(true, false)}
                           variant="outlined"
@@ -1739,10 +1739,7 @@ function QuoteDetail() {
                           View
                         </Button>
                         <Button
-                          onClick={() => {
-                            createImagePDF(false, false);
-                            exportToCSV();
-                          }}
+                          onClick={() => createImagePDF(false, false)}
                           variant="outlined"
                           size="small"
                           startIcon={<FiDownloadCloud />}
@@ -1752,8 +1749,7 @@ function QuoteDetail() {
                         </Button>
                       </span>
                     ) : null}
-
-                    <Grid item xs={12} sm={12} md={12}>
+                    <Grid item xs={12} sm={12} md={12} className="mt-2">
                       <ProductBuilder
                         productBuilderId={productBuilderID}
                         isAddNewProduct={isAddNewProduct}

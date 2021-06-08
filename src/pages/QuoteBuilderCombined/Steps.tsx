@@ -205,6 +205,7 @@ const Steps = (props) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  className="mr-1"
                   onClick={handleBack}
                 >
                   Back

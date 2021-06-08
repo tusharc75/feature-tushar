@@ -14,7 +14,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import _ from 'lodash';
+import { sortBy } from 'lodash';
 import moment from "moment";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import { DataGrid, GridOverlay } from "@material-ui/data-grid";
@@ -124,7 +124,7 @@ const AddExistingProduct = (props) => {
                     }
                 })
             });
-            column = _.sortBy(column, function (item: any) {
+            column = sortBy(column, function (item: any) {
                 return levalOrderBy.indexOf(item.leval)
             });
             setColumns(column);

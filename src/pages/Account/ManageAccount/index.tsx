@@ -7,7 +7,6 @@ import {
   initializeDropdownById,
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
-import _ from "lodash";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
