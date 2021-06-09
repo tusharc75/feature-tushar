@@ -115,7 +115,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
               type: "error",
               message: `Found some issue(s) while importing ${module}`,
             });
-            onSuccessfulImport(false);
+            onSuccessfulImport(true);
           }
         })
         .catch((error) => {
@@ -257,7 +257,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
           <IoIosArrowDropdown className={module !== "builder" ? classes.expandIcon : classes.custom_expandIcon} />
         </IconButton>
       )}
-      {isSelection && <SelectionDialog handleClose={() => setIsSelection(false)} api={api} />}
+      {isSelection && <SelectionDialog refrenceId={refrenceId} handleClose={() => setIsSelection(false)} api={api} />}
     </div>
   );
 }

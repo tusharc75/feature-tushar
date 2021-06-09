@@ -20,9 +20,9 @@ import Button from '@material-ui/core/Button';
 import ImportExportLinks from "../Product/ImportExportLinks";
 import { orderBy, sortBy, uniq, map } from "lodash";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import {
-    CommonRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import BulkEditDialog from "./BulkEditDialog";
+import _ from 'lodash';
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -44,6 +44,9 @@ const ProductBuilder = (props) => {
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
 
+    const [isBulkEdit, setIsBulkEdit] = useState(false)
+    const [productDataList, setproductDataList] = useState([]);
+
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -53,8 +56,8 @@ const ProductBuilder = (props) => {
         fetchProduct(productBuilderId);
     }, [productBuilderId]);
 
-    const ActionsRenderer = params => <>
 
+    const ActionsRenderer = params => <>
         <Tooltip title="Edit" >
             <IconButton aria-label="Edit" onClick={() => { setProductData(params.data) }}  >
                 <EditIcon fontSize="small" color="primary" />
@@ -68,7 +71,7 @@ const ProductBuilder = (props) => {
     </>
 
     const ProductNameRenderer = params => <>
-        {        Editable ?
+        {Editable ?
             <Link className="link" onClick={() => { setProductData(params.data) }}   >
                 {params.data.productName}
             </Link> :
@@ -97,12 +100,10 @@ const ProductBuilder = (props) => {
         productNameRenderer: ProductNameRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
         productTemplateRenderer: ProductTemplateRenderer,
-
     };
 
     const fetchProduct = (id) => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
             gridApi.showLoadingOverlay();
@@ -116,16 +117,12 @@ const ProductBuilder = (props) => {
                 }));
                 refreshProducts(data)
                 setColumns(null);
-                let column = [
-                    // { field: 'id', headerName: 'id', show: false, cellRenderer: "commonRenderer" },
-                    { field: 'srno', headerName: 'Sr.', width: 70, show: true, filter: false, cellRenderer: "commonRenderer" }]
+                let column = [{ field: 'srno', headerName: 'Sr.', width: 70, show: true, filter: false, cellRenderer: "commonRenderer" }]
                 data.forEach((row) => {
                     let _fields = row.fields;
-                    console.log(_fields)
                     if (stage) {
-                        //|| (t.leval === "template" && t.sectionType !== "cost")
                         if (stage === "product") {
-                            _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
+                            _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || (t.leval === "template" && t.sectionType !== "cost"))
                         }
                     }
                     _fields.forEach((ele) => {
@@ -214,13 +211,9 @@ const ProductBuilder = (props) => {
                 column = sortBy(column, (item: any) => {
                     return levalOrderBy.indexOf(item.leval)
                 });
-
-                // if (Editable) {
-                //     column.push(ActionsColoum)
-                // }
-
                 setColumns(column);
                 setProduct(data);
+                dispatch({ type: "initialize", data: [], count: 0 });
                 dispatch({ type: "initialize", data: data, count: data.length });
                 dispatch({ type: "loading", loading: false });
             }).catch((error) => {
@@ -239,13 +232,14 @@ const ProductBuilder = (props) => {
         });
     }
 
-    const handleSaveProduct = (row) => {
+    const handleSaveProduct = (rows) => {
         let data: any = {}
-        data.product = row
+        data.product = rows
         data._id = productBuilderId
-
         axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
             setProductData(null)
+            setIsBulkEdit(false)
+            setproductDataList([])
             fetchProduct(productBuilderId);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -264,10 +258,8 @@ const ProductBuilder = (props) => {
         data.productBuilderId = productBuilderId
         data._ids = ids
         axiosInstance().post(`/productbuilder/deleteproduct`, data).then(({ data: { data } }) => {
-
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            // setSelectedProduct([])
             setAnchorEl(null)
             fetchProduct(productBuilderId)
         }).catch((error) => {
@@ -334,12 +326,31 @@ const ProductBuilder = (props) => {
         });
     }
 
+
+    const handelOpenBulkEdit = () => {
+        const rows: any = product.filter((data) => selectedRecords.some(rec => rec._id === data._id))
+        setproductDataList(rows)
+        setIsBulkEdit(true)
+    }
+
+    const checkUniqTemplate = () => {
+        if (selectedRecords.length === 0) {
+            return true;
+        }
+        else if ((_.uniq(_.map(selectedRecords, 'productTemplate.optionValue'))).length === 1) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     return (<Box p={1} pt={0}>
         <Grid container>
-            <Grid item xs={4} className="d-flex align-items-center gap-1">
+            <Grid item xs={2} className="d-flex align-items-center gap-1">
             </Grid>
             {Editable &&
-                <Grid xs={8} container justify="flex-end">
+                <Grid xs={10} container justify="flex-end">
                     <ImportExportLinks
                         module="builder"
                         api={"productbuilder"}
@@ -350,6 +361,16 @@ const ProductBuilder = (props) => {
                             }
                         }}
                     />
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        className="float-right ml-1 mr-2"
+                        onClick={handelOpenBulkEdit}
+                        disabled={checkUniqTemplate()}
+                        aria-controls="action-menu"
+                    >Bulk Edit
+                    </Button>
                     <Button
                         variant="outlined"
                         color="default"
@@ -380,8 +401,20 @@ const ProductBuilder = (props) => {
         </Grid>
         <Box mt={1} className="productAgGrid">
             {columns &&
-                <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={Editable} allowAction={Editable} actionWidth={150} isClientSideGrid={true} />
+                <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    allowSelection={Editable}
+                    allowAction={Editable}
+                    actionWidth={150}
+                    isClientSideGrid={true} />
             }
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
@@ -391,6 +424,9 @@ const ProductBuilder = (props) => {
         {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} stage={stage} />}
         {isAddField && <AddField refrence="builder" section={addFieldData.section}
             fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
+        }
+        {isBulkEdit && <BulkEditDialog productDataList={productDataList} handleSaveProduct={handleSaveProduct}
+            handleClose={() => setIsBulkEdit(null)} loading={loading} stage={stage} />
         }
         {showDeleteConfirmBox &&
             <ConfirmationDialog

@@ -26,7 +26,7 @@ const dropstyle = {
     height: "54px"
 }
 
-export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data, addDeleteField }) => {
+export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data, addDeleteField }) => {
 
     const ref = useRef(null);
 
@@ -207,7 +207,8 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                                 fieldData={field_data}
                                 sectionId={sectionId}
                                 section={section}
-                                setSection={setSection} /> : null}
+                                setSection={setSection}
+                                module={module} /> : null}
                         </Grid>
                     </Grid>
                 </Box>

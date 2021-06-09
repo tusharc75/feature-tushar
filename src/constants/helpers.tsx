@@ -258,6 +258,25 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     } else if (key.type === "dropDown") {
       const value = filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : "";
+    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
+      key.displayUnits.forEach((_unit) => {
+        let fieldName = key.fieldName + "_" + _unit.toLowerCase();
+        obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+      });
+    } else if (key.type === "currencyAmount") {
+      key.displayCurrency.forEach((_currency) => {
+        if (key.isConverter && key.displayUnits.length) {
+          key.displayUnits.forEach((_unit) => {
+            let fieldName = key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
+            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+          });
+        } else {
+          let fieldName = key.fieldName + "_" + _currency.toLowerCase()
+          obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+        }
+      });
+    } else if (key.type === "decimal" || key.type === "percent" || key.type === "formula") {
+      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : "";
     }
