@@ -113,8 +113,8 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
-      data.amount = formatAmountWithCurrency(data.currency, data.amount);
-      data.value = formatAmountWithCurrency(data.currency, data.value);
+      data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
+      data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
 
       setProjectSalesData(data);
       setCurrentTabIndex(0);

@@ -11,7 +11,7 @@ import {
   Paper,
 } from "@material-ui/core";
 import { Check } from "@material-ui/icons";
-import currencies from "../../constants/currency_with_country.json";
+import { getUniqueCurrencies } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -110,8 +110,8 @@ const NewStepper = ({ steps, heading, doaCurrency }) => {
                 <StepLabel StepIconComponent={QontoStepIcon}>
                   <div style={{ color: "#09445A" }}>{label.name}</div>
                   {doaCurrency && <div style={{ color: "#09445A" }}>{
-                    currencies.filter((data) => data?.currencyCode === doaCurrency).length
-                      ? currencies.filter(
+                    getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                      ? getUniqueCurrencies().filter(
                         (data) => data?.currencyCode === doaCurrency
                       )[0].symbolNative
                       : null}{label.amount}
