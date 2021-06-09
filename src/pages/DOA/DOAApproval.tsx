@@ -110,7 +110,6 @@ const DOAApproval = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
-  const [comments, setComments] = useState("");
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -238,7 +237,6 @@ const DOAApproval = () => {
           console.log(err);
         });
     }
-    console.log(comments);
   };
 
   const ViewQuote = () => {
