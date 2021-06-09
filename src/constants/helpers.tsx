@@ -677,13 +677,12 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       notation: "compact",
       compactDisplay: "short",
       ...options
-    }).format(amount).replace(/^(\D+)/, " $1 "),
+    }).format(amount).replace(/^(\D+)/, "$1 "),
     fullFormatAmount: new Intl.NumberFormat(
       `${language}-${currencyData.countryCode}`,
       options
-    )
-      .format(amount)
-      .replace(/^(\D+)/, " $1 ")
+    ).format(amount)
+      .replace(/^(\D+)/, "$1 ")
   }
 };
 
