@@ -684,6 +684,7 @@ export default function ManageQuoteDialog({
                                             required={field.required}
                                             fullWidth
                                             isTooltip={true}
+                                            doNotShowInfoTooltip={true}
                                             size="small"
                                             onChange={(e, value) => {
                                               setFieldValue(
