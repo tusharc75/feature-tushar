@@ -26,13 +26,13 @@ import axiosInstance from "../../axios/axiosInstance";
 import { Link } from "react-router-dom";
 import { IoCalendarOutline } from "react-icons/io5";
 import { useData } from "../../StateProvider/Provider";
-import currencies from "./../../constants/currency_with_country.json";
 import { displayDate } from "../../services/util";
 import ManageQuoteDialog from "../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
 import { MoreVert, Delete } from "@material-ui/icons";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaArrowAltCircleDown } from "react-icons/fa";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import { getUniqueCurrencies } from "../../constants/helpers";
 
 const Accordion = withStyles({
   root: {
@@ -296,7 +296,7 @@ export default function QuotesAccordionInProjectSale({
                                   {obj?.amount ? (
                                     <Typography className="amount">
                                       {
-                                        currencies.find(
+                                        getUniqueCurrencies().find(
                                           (d) =>
                                             d.currencyCode == obj["currency"]
                                         )?.symbolNative

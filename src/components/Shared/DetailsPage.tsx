@@ -16,12 +16,11 @@ import { kebabCase } from "lodash";
 import axios from "axios";
 
 import { getObjKeysWithValues } from "../../constants/helpers";
-import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Skeleton } from "@material-ui/lab";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
-import { displayDate } from "../../constants/helpers"
+import { displayDate, getUniqueCurrencies } from "../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -146,7 +145,7 @@ const Details = (props: DetailProps) => {
       const value = opt && Object.keys(opt).length ? opt.optionLabel : "";
       text = value ? value : "-";
     } else if (input.type === "currency") {
-      const opt = currencies.find(
+      const opt = getUniqueCurrencies().find(
         (c) => c.currencyCode === values[input.fieldName]
       );
       text = opt ? `${opt.currencyCode} - ${opt.name}` : "-";
