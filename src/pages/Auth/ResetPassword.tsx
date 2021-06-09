@@ -146,13 +146,28 @@ const ResetPassword = () => {
 
     if (!values.password) {
       errors.password = 'Required field';
-    } else if (
+    }
+    else if (!values.confirmPassword) {
+      errors.confirmPassword = 'Required field';
+    }
+    else if (
       !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
         values.password,
       )
     ) {
       errors.password =
         'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    }
+    else if (
+      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
+        values.confirmPassword,
+      )
+    ) {
+      errors.confirmPassword =
+        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    }
+    else if (values.confirmPassword !== values.password) {
+      errors.confirmPassword = 'Password and confirm Password does not match';
     }
     return errors;
   };
@@ -191,6 +206,16 @@ const ResetPassword = () => {
                       type='password'
                       label='New Password'
                       name='password'
+                      disabled={!isTokenValid || !tokenChecking}
+                      variant='outlined'
+                      required
+                    />
+                    <br />
+                    <Field
+                      component={TextField}
+                      type='password'
+                      label='Confirm Password'
+                      name='confirmPassword'
                       disabled={!isTokenValid || !tokenChecking}
                       variant='outlined'
                       required

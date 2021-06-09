@@ -629,6 +629,69 @@ const UserDetailsPage = () => {
                   </Grid>
                 </Grid>
               </Box>
+              {
+                user?.user?.permissions?.doaSetup && <>
+                  <Box>
+                    <Box
+                      width="100%"
+                      padding={1}
+                      bgcolor="grey.200"
+                      display="flex"
+                      justifyContent="space-between"
+                    >
+                      <Grid container>
+                        <Grid item xs={8}>
+                          <Box display="flex">
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                {"DOA Details of " +
+                                  userData?.firstName +
+                                  " " +
+                                  userData?.lastName}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                        <Grid item container xs={4} justify="flex-end">
+                          {permissions.user.isUpdate && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => setDoaDialogOpen(true)}
+                            >
+                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
+                            </Button>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Box>
+                  <Grid container style={{ padding: "8px" }} spacing={1}>
+                    <Grid item xs={12} sm={12}>
+                      <BoxWithBorder
+                        style={{
+                          padding: "0px",
+                        }}
+                      >
+                        {doa.length > 0 ? (
+                          <NewStepper
+                            heading={" "}
+                            steps={doa}
+                            doaCurrency={doaCurrency}
+                          />
+                        ) : (
+                          <Box textAlign="center" marginTop={2}>
+                            <Typography variant="body2">
+                              User doesn't have any DOA
+                    </Typography>
+                          </Box>
+                        )}
+                      </BoxWithBorder>
+                    </Grid>
+                  </Grid>
+                </>
+              }
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <Box
@@ -700,63 +763,7 @@ const UserDetailsPage = () => {
                   </Box>
                 </Grid>
               </Grid>
-              {
-                user?.user?.permissions?.doaSetup && <>
-                  <Box style={{ padding: "0px" }}>
-                    <Box display="flex" padding={1}>
-                      <Grid container>
-                        <Grid item xs={8}>
-                          <Box display="flex">
-                            <Box padding="5px">
-                              <Typography variant="subtitle2">
-                                {"DOA Details of " +
-                                  userData?.firstName +
-                                  " " +
-                                  userData?.lastName}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                        <Grid item container xs={4} justify="flex-end">
-                          {permissions.user.isUpdate && (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => setDoaDialogOpen(true)}
-                            >
-                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
-                            </Button>
-                          )}
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Box>
-                  <Grid container style={{ padding: "8px" }} spacing={1}>
-                    <Grid item xs={12} sm={12}>
-                      <BoxWithBorder
-                        style={{
-                          padding: "0px",
-                        }}
-                      >
-                        {doa.length > 0 ? (
-                          <NewStepper
-                            heading={" "}
-                            steps={doa}
-                            doaCurrency={doaCurrency}
-                          />
-                        ) : (
-                          <Box textAlign="center" marginTop={2}>
-                            <Typography variant="body2">
-                              User doesn't have any DOA
-                    </Typography>
-                          </Box>
-                        )}
-                      </BoxWithBorder>
-                    </Grid>
-                  </Grid>
-                </>
-              }
+
               <div className="p-3">
                 <OpportunityAccordionInUserDetail
                   opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
