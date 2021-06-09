@@ -9,7 +9,6 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateIcon from "@material-ui/icons/Create";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import SettingsIcon from "@material-ui/icons/Settings";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import clsx from "clsx";
@@ -65,8 +64,6 @@ const useColorlibStepIconStyles = makeStyles({
 });
 
 const Steps = (props) => {
-  console.log("Stepper Props");
-  console.log(props);
   const { steps, currentStep, id, version, Refresh, nextStep, versionStatus } =
     props;
   const classes = useStyles();
@@ -74,7 +71,6 @@ const Steps = (props) => {
   const toastConfig = useContext(CustomToastContext);
 
   const ColorlibStepIcon = (props: StepIconProps) => {
-    console.log(props);
     const classes = useColorlibStepIconStyles();
     var { active, completed } = props;
     var rejected = false;
@@ -162,7 +158,7 @@ const Steps = (props) => {
       })
       .then(({ data }) => {
         const nextStep = activeStep + 1;
-        console.log(nextStep);
+
         activeStep = activeStep + 1;
         Refresh(version);
       })
@@ -178,7 +174,7 @@ const Steps = (props) => {
       })
       .then(({ data }) => {
         const nextStep = activeStep - 1;
-        console.log(nextStep);
+
         activeStep = activeStep - 1;
         Refresh(version);
       })
@@ -209,6 +205,7 @@ const Steps = (props) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  className="mr-1"
                   onClick={handleBack}
                 >
                   Back

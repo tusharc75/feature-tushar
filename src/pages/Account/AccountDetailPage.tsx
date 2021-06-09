@@ -61,7 +61,7 @@ import { BsPerson } from "react-icons/bs";
 import ListItem from "@material-ui/core/ListItem/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import { ListItemText } from "@material-ui/core";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
 import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 
@@ -665,6 +665,7 @@ export default function AccountDetailPage(props) {
                       quoteBuilderPermission={permissions.quoteBuilder}
                       accountId={id}
                       accountResource={accountResource}
+                      isRenderedFromCustomerAccount = {true}
                     />
                   )
                 }
@@ -695,7 +696,7 @@ export default function AccountDetailPage(props) {
                         handleActivityRefresh={() => { }}
                         emails={
                           relatedContacts && relatedContacts.length > 0
-                            ? _.cloneDeep(relatedContacts).reduce(
+                            ? cloneDeep(relatedContacts).reduce(
                               (emails, contact) => {
                                 if (contact?.email)
                                   emails.push(contact.email);

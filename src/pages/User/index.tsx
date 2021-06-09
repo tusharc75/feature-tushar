@@ -26,6 +26,7 @@ import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -127,7 +128,6 @@ const User: FC = () => {
   }: any = useData();
   const history = useHistory();
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -432,13 +432,27 @@ const User: FC = () => {
           assignedRoles={null}
           onSuccess={() => {
             handleCloseDialog();
-            setSelectedUsers([]);
           }}
         />
       )}
       <Layout>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[routes.user]} />
+          <Grid item md={4} sm={11} xs={10}>
+            <CustomBreadCrumbs routes={[routes.user]} />
+          </Grid>
+          <Grid
+            item
+            md={8}
+            sm={1}
+            xs={2}>
+            <ImportExportLinks
+              module="user(s)"
+              api={"/user"}
+              afterImportCompleted={() => {
+                fetchUsers();
+              }}
+            />
+          </Grid>
         </Grid>
         <CustomContainer>
           <div className="header-panel">

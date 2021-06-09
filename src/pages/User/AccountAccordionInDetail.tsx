@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, MenuItem, Menu } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -16,6 +16,7 @@ import ManageAccountDialog from "./../Account/ManageAccount/index";
 import { FaIndustry } from 'react-icons/fa';
 import { AiOutlinePhone } from 'react-icons/ai';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
+import { MoreVert } from '@material-ui/icons';
 
 const Accordion = withStyles({
     root: {
@@ -110,6 +111,7 @@ export default function AccountAccordionDetail({
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandAccount, setExpandAccount] = useState(expanded);
+    const [anchorEl, setAnchorEl] = useState(null);
     const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
 
     useEffect(() => {
@@ -120,6 +122,13 @@ export default function AccountAccordionDetail({
         setExpandAccount(isExpanded)
 
     }, [accounts])
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     return <>
         <Accordion expanded={expandAccount} className="omsAccordian accordAccount">
             <AccordionSummary
@@ -152,13 +161,41 @@ export default function AccountAccordionDetail({
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
                             {
-                                (type === "customer" ? permissions?.customerAccount?.isCreate : permissions?.supplierAccount?.isCreate) && <IconButton
-                                    color="primary"
-                                    size="small"
-                                    onClick={() => { setShowCreateAccountDialog(true) }}
-                                >
-                                    <ControlPointIcon />
-                                </IconButton>
+                                (type === "customer" ? permissions?.customerAccount?.isCreate : permissions?.supplierAccount?.isCreate) &&
+                                // <IconButton
+                                //     color="primary"
+                                //     size="small"
+                                //     onClick={() => { setShowCreateAccountDialog(true) }}
+                                // >
+                                //     <ControlPointIcon />
+                                // </IconButton>
+
+                                <>
+                                    <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={handleOpenMenu}
+                                    >
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        id="menu"
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowCreateAccountDialog(true);
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Create New
+                                        </MenuItem>
+                                    </Menu>
+                                </>
                             }
                         </Typography>
                     </Grid>

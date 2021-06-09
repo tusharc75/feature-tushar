@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Autocomplete } from "@material-ui/lab";
-import { Box, TextField, Typography } from "@material-ui/core";
+import { Avatar, Box, TextField, Typography } from "@material-ui/core";
 import Loader from "../../components/Loader";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -19,8 +19,8 @@ import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import currencyList from "../../constants/currency_with_country.json";
 import CustomButton from '../../components/Helpers/CustomButton'
+import { getUniqueCurrencies } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   tdWidth: {
@@ -28,8 +28,6 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 120
   },
 }));
-
-
 
 const CurrencyConverter = () => {
 
@@ -166,7 +164,7 @@ const CurrencyConverter = () => {
                 <Autocomplete
                   multiple
                   id="tags-filled"
-                  options={currencyList.map((_c) => { return _c.currencyCode })}
+                  options={getUniqueCurrencies().map((_c) => { return _c.currencyCode })}
                   getOptionLabel={(option) => option}
                   value={currency}
                   renderTags={(value: string[], getTagProps) =>
@@ -183,7 +181,33 @@ const CurrencyConverter = () => {
                       label="Currency in use"
                       placeholder="Currency in use" />
                   )}
-                />
+                  renderOption={(option) => {
+                    const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                    return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                  }}
+                  // renderOption={(option) => {
+                  //   const { currencyCode, name, countryCode, symbolNative } = currencyList.find(d => d.currencyCode === option);
+                  //   return (
+                  //     <Grid container alignItems="center">
+                  //       <Grid item>
+                  //         <Avatar
+                  //           variant="rounded"
+                  //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                  //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+                  //         />
+                  //       </Grid>
+                  //       <Grid item xs>
+                  //         <Typography>
+                  //           {currencyCode} ({symbolNative})
+                  //         </Typography>
+                  //         <Typography variant="body2" color="textSecondary">
+                  //           {name}
+                  //         </Typography>
+                  //       </Grid>
+                  //     </Grid>
+                  //   );
+                  // }}
+                  />
               </Grid>
               <Grid xs={6} container justify="flex-end">
                 <FormControlLabel

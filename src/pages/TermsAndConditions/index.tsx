@@ -23,7 +23,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
-import _ from 'lodash'
+import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 
@@ -58,7 +58,7 @@ export default function TermsAndCondition(props) {
         <span className={`${actionsPermissions.isUpdate ? "link" : ""} cursor-pointer`}
             onClick={() => {
                 setShowCreateDialog(true);
-                setEditRecord(_.cloneDeep(params.data))
+                setEditRecord(cloneDeep(params.data))
             }}>
             <CustomRenderCell value={params?.value} />
         </span>

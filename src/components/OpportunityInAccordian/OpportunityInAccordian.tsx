@@ -19,7 +19,6 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from "../../services/util";
 import routes from "./../../components/Helpers/Routes";
@@ -28,11 +27,10 @@ import ManageOpportunityDialog from "../../pages/Opportunities/ManageOpportunity
 import { useHistory } from "react-router-dom";
 import { IoCalendarOutline } from "react-icons/io5";
 import { BiCustomize } from "react-icons/bi";
-import currencies from "./../../constants/currency_with_country.json";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
-import { customerAccount, customerContact } from "../../constants/helpers";
+import { customerAccount, customerContact, formatAmountWithCurrency } from "../../constants/helpers";
 import { MoreVert } from "@material-ui/icons";
 import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
 
@@ -226,17 +224,32 @@ export default function OpportunityInAccordian({
                       </MenuItem>
                     </Menu>
                   </>
-                  :
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      setShowCreateOpportunityDialog(true);
-                    }}
-                  >
-                    <ControlPointIcon />
-                  </IconButton>
-
+                  : <>
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenMenu}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu
+                      id="menu"
+                      anchorEl={anchorEl}
+                      keepMounted
+                      open={Boolean(anchorEl)}
+                      onClose={handleCloseMenu}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setShowCreateOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                 </MenuItem>
+                    </Menu>
+                  </>
                 }
               </Typography>
             </Grid>
@@ -273,9 +286,9 @@ export default function OpportunityInAccordian({
 
                               </Grid>
                               <Grid item xs={5} sm={4}>
-                                <Typography className="amount">
-                                  {obj?.amount ? currencies.find(d => d.currencyCode === obj["currency"])?.symbolNative : ''}
-                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj["amount"]).fullFormatAmount}>
+                                  {formatAmountWithCurrency(obj["currency"], obj["amount"]).shortFormatAmount}
+                                </Typography>
                               </Grid>
                             </Grid>
                             <Grid container>
