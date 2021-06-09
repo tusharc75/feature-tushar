@@ -903,13 +903,22 @@ function QuoteDetail() {
       });
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+
       PdfDoc.html(finalmarkup, {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
               title: `Quotation - v${currentVersion}`,
             });
-            window.open(URL.createObjectURL(doc.output("blob")));
+            const pdfBlobFile = doc.output("blob");
+            var reader = new FileReader();
+            reader.readAsDataURL(pdfBlobFile);
+            reader.onloadend = function () {
+              var base64data = reader.result;
+              console.log(base64data);
+            };
+
+            window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
             doc.save(`Quotation - v${currentVersion}`);
           }
@@ -941,7 +950,14 @@ function QuoteDetail() {
         PdfDoc.setProperties({
           title: `Quotation - ${currentVersion}`,
         });
-        window.open(URL.createObjectURL(PdfDoc.output("blob")));
+        const pdfBlobFile = PdfDoc.output("blob");
+        var reader = new FileReader();
+        reader.readAsDataURL(pdfBlobFile);
+        reader.onloadend = function () {
+          var base64data = reader.result;
+          console.log(base64data);
+        };
+        window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
@@ -1048,6 +1064,11 @@ function QuoteDetail() {
         newTable.push(obj);
       });
 
+      newTable.push({
+        "Product Name": "Total",
+        "Total Sales Price": totalcost,
+      });
+
       const ws = XLSX.utils.json_to_sheet(newTable);
       const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
       const excelBuffer = XLSX.write(wb, {
@@ -1146,7 +1167,7 @@ function QuoteDetail() {
       });
   };
 
-  const handleDeleteOpportunity = () => {
+  const handleDeleteQuote = () => {
     if (quoteData?._id) {
       axiosInstance()
         .put(`${qbApi}/remove?entity=${selectedEntity}`, {
@@ -1172,7 +1193,7 @@ function QuoteDetail() {
 
   const goBackToListing = () => {
     history.push({
-      pathname: routes.opportunity.path,
+      pathname: "/quote-builder",
     });
   };
 
@@ -1443,6 +1464,11 @@ function QuoteDetail() {
       setSendEmail(true);
     }
   };
+
+  const sendEmailOnNext = () => {
+    setSendEmail(true);
+  }
+  
   const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
     handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
@@ -1761,6 +1787,7 @@ function QuoteDetail() {
                         Refresh={fetchQuoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
+                        openSendEmailDialog={sendEmailOnNext}
                       />
                     ) : (
                       <Steps
@@ -1771,6 +1798,7 @@ function QuoteDetail() {
                         Refresh={fetchQuoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
+                        openSendEmailDialog={sendEmailOnNext}
                       />
                     )}
                   </div>
@@ -1869,10 +1897,8 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {(ProcessStatus === "DOA Process" &&
-                        versionStatus === "Building Quote") ||
-                      (ProcessStatus === "Customer Process" &&
-                        versionStatus !== "Sent to Customer") ? (
+                      {ProcessStatus === "DOA Process" &&
+                      versionStatus === "Building Quote" ? (
                         <div className="w-100 d-flex align-items-center justify-content-end">
                           <Button
                             onClick={() => handleCases()}
@@ -2026,7 +2052,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityfetchQuoteData={() => {}}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2037,9 +2063,9 @@ function QuoteDetail() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this opportunity`}
+            message={`Are you sure you want to delete this Quote?`}
             onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteOpportunity}
+            onOk={handleDeleteQuote}
           />
         ) : null}
         {/* {openUpdateDialog ? (
