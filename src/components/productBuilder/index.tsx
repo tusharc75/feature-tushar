@@ -20,6 +20,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import ImportExportLinks from "../Product/ImportExportLinks";
+import BulkEditDialog from "./BulkEditDialog";
 var _ = require('lodash');
 
 
@@ -30,7 +31,7 @@ const ProductBuilder = (props) => {
     const { productBuilderId,
         isAddNewProduct, setIsAddNewProduct,
         isAddExistingProduct, setIsAddExistingProduct,
-        refreshProducts, Editable, stage} = props;
+        refreshProducts, Editable, stage } = props;
 
     const toastConfig = useContext(CustomToastContext)
 
@@ -39,11 +40,14 @@ const ProductBuilder = (props) => {
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedProduct, setSelectedProduct] = useState([]);
+    const [selectedRecords, setSelectedRecords] = useState([]);
     const [isAddField, setIsAddField] = useState(false);
     const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
+
+    const [isBulkEdit, setIsBulkEdit] = useState(false)
+    const [productDataList, setproductDataList] = useState([]);
 
     useEffect(() => {
         fetchProduct(productBuilderId);
@@ -87,9 +91,8 @@ const ProductBuilder = (props) => {
                 let _fields = row.fields;
                 console.log(_fields)
                 if (stage) {
-                    //|| (t.leval === "template" && t.sectionType !== "cost")
                     if (stage === "product") {
-                        _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
+                        _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || (t.leval === "template" && t.sectionType !== "cost"))
                     }
                 }
                 _fields.forEach((ele) => {
@@ -199,14 +202,17 @@ const ProductBuilder = (props) => {
         });
     }
 
-    const handleSaveProduct = (row) => {
+    const handleSaveProduct = (rows) => {
         let data: any = {}
-        data.product = row
+        data.product = rows
         data._id = productBuilderId
         setLoading(true)
         axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
             setLoading(false)
             setProductData(null)
+            setIsBulkEdit(false)
+            setproductDataList([])
+            setSelectedRecords([])
             fetchProduct(productBuilderId);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -219,7 +225,7 @@ const ProductBuilder = (props) => {
             ids.push(deleteRecord._id)
         }
         else {
-            ids = selectedProduct;
+            ids = selectedRecords;
         }
         let data: any = {}
         data.productBuilderId = productBuilderId
@@ -228,7 +234,7 @@ const ProductBuilder = (props) => {
             setLoading(false)
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            setSelectedProduct([])
+            setSelectedRecords([])
             setAnchorEl(null)
             fetchProduct(productBuilderId)
         }).catch((error) => {
@@ -245,7 +251,7 @@ const ProductBuilder = (props) => {
     };
 
     const handleOpenAddField = () => {
-        const rows: any = product.filter((data) => selectedProduct.includes(data._id))
+        const rows: any = product.filter((data) => selectedRecords.includes(data._id))
         let section: any = []
         let fields: any = []
         section = _.uniq(_.map(rows[0].fields, 'sectionName'));
@@ -284,7 +290,7 @@ const ProductBuilder = (props) => {
     const handleAddField = (field) => {
         let data: any = {}
         data.productBuilderId = productBuilderId
-        data._ids = selectedProduct
+        data._ids = selectedRecords
         data.field = field
         data.field.leval = "builder-custom"
         axiosInstance().post(`/productbuilder/addField`, data).then(({ data: { data } }) => {
@@ -296,12 +302,32 @@ const ProductBuilder = (props) => {
         });
     }
 
+
+    const handelOpenBulkEdit = () => {
+        const rows: any = product.filter((data) => selectedRecords.includes(data._id))
+        setproductDataList(rows)
+        setIsBulkEdit(true)
+    }
+
+    const checkUniqTemplate = () => {
+        const rows = product.filter((data) => selectedRecords.includes(data._id));
+        if (rows.length === 0) {
+            return true;
+        }
+        else if ((_.uniq(_.map(rows, 'productTemplate.optionValue'))).length === 1) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     return (<Box p={1} pt={0}>
         <Grid container>
-            <Grid item xs={4} className="d-flex align-items-center gap-1">
+            <Grid item xs={2} className="d-flex align-items-center gap-1">
             </Grid>
             {Editable &&
-                <Grid xs={8} container justify="flex-end">
+                <Grid xs={10} container justify="flex-end">
                     <ImportExportLinks
                         module="builder"
                         api={"productbuilder"}
@@ -316,9 +342,19 @@ const ProductBuilder = (props) => {
                         variant="outlined"
                         color="default"
                         size="small"
+                        className="float-right ml-1 mr-2"
+                        onClick={handelOpenBulkEdit}
+                        disabled={checkUniqTemplate()}
+                        aria-controls="action-menu"
+                    >Bulk Edit
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
                         className="float-right"
                         onClick={openActions}
-                        disabled={selectedProduct.length ? false : true}
+                        disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                     >Actions <ExpandMore />
                     </Button>
@@ -347,7 +383,7 @@ const ProductBuilder = (props) => {
                     components={{
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
-                    onSelectionModelChange={(e) => setSelectedProduct(e.selectionModel)}
+                    onSelectionModelChange={(e) => setSelectedRecords(e.selectionModel)}
                     loading={loading}
                     rows={product}
                     disableSelectionOnClick
@@ -365,6 +401,9 @@ const ProductBuilder = (props) => {
         {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} stage={stage} />}
         {isAddField && <AddField refrence="builder" section={addFieldData.section}
             fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
+        }
+        {isBulkEdit && <BulkEditDialog productDataList={productDataList} handleSaveProduct={handleSaveProduct}
+            handleClose={() => setIsBulkEdit(null)} loading={loading} stage={stage} />
         }
         {showDeleteConfirmBox &&
             <ConfirmationDialog

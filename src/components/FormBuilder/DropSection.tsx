@@ -24,7 +24,7 @@ const dropstyle = {
     cursor: 'move',
 }
 
-export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverIndex, sectionHoverIndex, section, setSection, sectionId, id, index, moveSection, data, addDeleteField }) => {
+export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionHoverIndex, sectionHoverIndex, section, setSection, sectionId, id, index, moveSection, data, addDeleteField }) => {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -272,9 +272,16 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                         {data.field.length > 0 ?
                             data.field.map((ele, i) => (
                                 <DropField key={ele._id} index={i} id={ele._id}
-                                    sectionId={sectionId} section={section} setSection={setSection} fieldId={ele._id} data={ele}
+                                    sectionId={sectionId}
+                                    section={section}
+                                    setSection={setSection}
+                                    fieldId={ele._id}
+                                    data={ele}
                                     movefield={movefield}
-                                    fieldHoverId={fieldHoverId} setFieldHoverId={setFieldHoverId} addDeleteField={addDeleteField}
+                                    fieldHoverId={fieldHoverId}
+                                    setFieldHoverId={setFieldHoverId}
+                                    addDeleteField={addDeleteField}
+                                    module={module}
                                 />
                             )) : <Box m={5} width="100%">
                                 <Typography variant="body2" align="center">Drag and drop your fields here</Typography>

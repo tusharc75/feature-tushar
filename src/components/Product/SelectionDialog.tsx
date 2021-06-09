@@ -16,7 +16,7 @@ import routes from "../../components/Helpers/Routes";
 import FormTypes from "../Helpers/FormTypes";
 import { downloadExcel } from "../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 
 const ProductBuilderSchema = Yup.object().shape({
@@ -30,7 +30,7 @@ const ProductBuilderSchema = Yup.object().shape({
 const SelectionDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, api } = props;
+    const { handleClose, api, refrenceId } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
@@ -50,12 +50,16 @@ const SelectionDialog = (props) => {
         if (value && value !== "") {
             axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
                 setProductTemplate(data.data)
+                if (data.data.length) {
+                    setInitialData({ productCategory: value, productTemplate: data.data[0].optionValue })
+                }
             });
         }
     }
 
     const handleSubmit = (values) => {
-        axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&productTemplate=" + values.productTemplate,
+        axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&productTemplate=" + values.productTemplate
+            + "&refrenceId=" + refrenceId,
             { responseType: "arraybuffer" }).then((response) => {
                 const fileName = response.headers["content-disposition"].split("filename=")[1];
                 downloadExcel(response.data, fileName);
@@ -104,7 +108,7 @@ const SelectionDialog = (props) => {
                                     onChange={(e, val) => {
                                         setFieldValue("productCategory", val && val.optionValue ? val.optionValue : "")
                                         handleChangeCategory(val && val.optionValue ? val.optionValue : "")
-                                        setFieldValue("productTemplate", "")
+                                        setFieldValue("productTemplate", productTemplate.length ? productTemplate[0].optionValue : "")
                                     }}
                                     size="small"
                                 />

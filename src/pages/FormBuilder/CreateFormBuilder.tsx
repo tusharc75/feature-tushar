@@ -127,6 +127,7 @@ const CreateFormBuilder = (props) => {
                             deleteField={deleteField}
                             setDeleteField={setDeleteField}
                             isCustomField={false}
+                            module="formbuilder"
                         />
                     </Box>
                 </Fragment>

@@ -10,7 +10,7 @@ import Dialog from '@material-ui/core/Dialog'
 import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import _ from 'lodash';
-import { getObjKeys, simplifyValues, yupSchema } from '../../constants/helpers';
+import { getObjKeys, getObjKeysWithValues, simplifyValues, yupSchema } from '../../constants/helpers';
 import CustomButton from '../Helpers/CustomButton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -22,15 +22,14 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
-const CreateProduct = (props) => {
+const BulkEditDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productData, handleClose, handleSaveProduct, stage } = props;
-    const [masterFields, setMasterFields] = useState([]);
+    const { productDataList, handleClose, handleSaveProduct, stage, loading } = props;
     const [productFields, setProductFields] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
@@ -44,17 +43,23 @@ const CreateProduct = (props) => {
 
 
     useEffect(() => {
+
+        const productData = productDataList[0]
+
         let _fields = [];
         productData.fields.forEach((_f) => {
             if (stage === "product") {
-                if (_f.leval === "product" || _f.leval === "product-custom" || (_f.leval === "template" && _f.sectionType !== "cost")) {
+                if (_f.fieldName === "qty") {
                     _fields.push(_f)
                 }
             }
             else {
-                _fields.push(_f)
+                if (_f.leval === "template" || _f.fieldName === "qty") {
+                    _fields.push(_f)
+                }
             }
         })
+
         if (productData.fieldChanges) {
             setFieldChanges(productData.fieldChanges)
         }
@@ -63,42 +68,29 @@ const CreateProduct = (props) => {
             return levalOrderBy.indexOf(item.leval)
         });
 
-        setMasterFields(_fields.filter((_f) => _f.leval !== "cost"))
         setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
 
         let values = { ...productData }
-        values.productCategory = values.productCategory.optionValue
-        values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue
         delete values.fields
 
         setInitialData({
             fields: _fields,
-            values: { ...getObjKeys('', _fields), ...values },
+            values: { ...getObjKeysWithValues(values, _fields) },
         });
         EvaluteproductFields(_fields)
-        // axiosInstance().get(`/field?resource=Product Builder`).then(({ data: { data } }) => {
-        //     const _fields = [];
-        //     productData.fields.map((_f) => _fields.push(_f));
-        //     console.log(productData)
-        //     let values = { ...productData }
-        //     values.productCategory = values.productCategory._id
-        //     delete values.fields
-        //     data.map((_f) => _fields.push(_f.fieldData));
-        //     setMasterFields(_fields)
-        //     setInitialData({
-        //         fields: _fields,
-        //         values: values,
-        //     });
-        //     EvaluteproductFields(_fields)
-        // }).catch((error) => {
-        //     toastConfig.setToastConfig(error);
-        // });
     }, []);
 
     const handleSubmit = (values) => {
-        values.fields = fields;
-        values.fieldChanges = fieldChanges;
-        handleSaveProduct([values])
+        let products = [...productDataList];
+        products.forEach((_product: any) => {
+            _product = Object.assign(_product, values);
+            _product.productCategory = _product.productCategory.optionValue
+            _product.productTemplate = _product.productTemplate && _product.productTemplate.optionValue && _product.productTemplate.optionValue
+            _product.fields = fields;
+            _product.fieldChanges = fieldChanges;
+            delete _product.srno
+        })
+        handleSaveProduct(products)
     };
 
     const EvaluteproductFields = (fields) => {
@@ -110,21 +102,6 @@ const CreateProduct = (props) => {
         setProductFields(customData)
     }
 
-    const handleChangeProductCost = (value) => {
-        if (value && value !== "") {
-            axiosInstance().get(`/productcost/fields/` + value).then(({ data: { data } }) => {
-                let newField = [...masterFields];
-                data.forEach(_f => {
-                    newField.push(_f)
-                })
-                setInitialData({
-                    fields: newField,
-                    values: { ...getObjKeys('', newField), ...ref.current.values },
-                });
-                EvaluteproductFields(newField)
-            });
-        }
-    }
 
     const handleOpenAddField = (name) => {
         setSectionName(name)
@@ -152,7 +129,6 @@ const CreateProduct = (props) => {
         setIsAddField(false)
     }
 
-
     const addDisplayType = (displayType, field, displayValue) => {
         let _fieldChanges = fieldChanges;
         if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
@@ -176,20 +152,7 @@ const CreateProduct = (props) => {
             })
         }
         setFieldChanges(_fieldChanges)
-        // let newField = initialData.fields;
-        // let displayCurrency = []
-        // newField.forEach(_f => {
-        //     if (_f.fieldName === field.fieldName) {
-        //         _f.displayCurrency.push(currency)
-        //         displayCurrency = _f.displayCurrency;
-        //     }
-        // })
-        // setInitialData({
-        //     fields: newField,
-        //     values: { ...ref.current.values },
-        // });
     }
-
 
     return (<Dialog
         maxWidth="md"
@@ -214,7 +177,7 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`Edit Product`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={`Bulk Edit`} onClose={handleClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
@@ -259,6 +222,8 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    decimalPlaces={field.decimalPlaces}
+                                                                    isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
                                                                     addDisplayType={addDisplayType}
                                                                 /> :
@@ -299,11 +264,11 @@ const CreateProduct = (props) => {
                             <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
+                                disabled={loading}
                                 variant="contained"
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
-                                disabled={uploadingImageOrFileProgress > 0}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                     </Fragment>
@@ -317,4 +282,4 @@ const CreateProduct = (props) => {
     );
 }
 
-export default CreateProduct;
+export default BulkEditDialog;
