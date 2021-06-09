@@ -79,7 +79,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title="Create New Entity" onClose={close} />
+      <CustomDialogHeader title="Create New Entities" onClose={close} />
 
       {loading || !initialData.fields.length ? (
         <>
