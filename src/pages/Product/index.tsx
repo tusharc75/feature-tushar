@@ -332,7 +332,6 @@ const Product = () => {
                     </Grid>
                 </Grid>
             </div>
-            <div className="listing-grid">
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
@@ -345,7 +344,6 @@ const Product = () => {
                     page={page}
                     actionWidth={150}
                 />
-            </div>
         </div>
         {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} openFrom="productMaster" />}
         {showDeleteConfirmBox &&

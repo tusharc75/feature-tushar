@@ -399,7 +399,7 @@ const ProductBuilder = (props) => {
                 </Grid>
             }
         </Grid>
-        <Box height={500} mt={1}>
+        <Box mt={1} className="productAgGrid">
             {columns &&
                 <CustomAgGrid
                     columns={columns}
