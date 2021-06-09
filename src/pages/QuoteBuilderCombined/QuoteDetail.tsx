@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef, useReducer } from "react";
 import { Box, Button, Grid, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -28,7 +28,7 @@ import { BiMailSend } from 'react-icons/bi';
 import { FiDownloadCloud } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { termsAndCondition } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty } from '../../constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -64,6 +64,7 @@ import { DatasetController } from "chart.js";
 import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
 import InfoIcon from "@material-ui/icons/Info";
 import { AnyObject } from "yup/lib/types";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -107,10 +108,10 @@ function QuoteDetail() {
     state: { user, selectedEntity, permissions },
   }: any = useData();
 
-  var defaultSelectColumns = ["Product Name", "Description", "Unit", "Qty","Sales Price Per Unit","Total Sales Price"];
+  var defaultSelectColumns = ["Product Name", "Description", "Unit", "Qty", "Sales Price Per Unit", "Total Sales Price"];
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setLoading] = useState(true);
   const [quoteData, setquoteData] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -150,7 +151,7 @@ function QuoteDetail() {
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [query, setQuery] = useState({ page: 0, limit: 5 });
-  const [dataRows, setDataRows] = useState([]);
+  // const [dataRows, setDataRows] = useState([]);
   const [RadioIndex, setRadioIndex] = useState(-1);
   const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
@@ -166,7 +167,7 @@ function QuoteDetail() {
 
   const [data, setData] = useState([]);
 
-  const [rowCount, setRowCount] = useState(0);
+  // const [rowCount, setRowCount] = useState(0);
   const [checkAllAccounts, setCheckAllAccounts] = useState(false);
   const [editRecord, setEditRecord] = useState<any>({})
   const [DOAreq, setDOAreq] = useState(false);
@@ -177,7 +178,7 @@ function QuoteDetail() {
   const [PDF, setPdf] = useState("");
   const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
-  const [redCard,setRedCard]=useState(false);
+  const [redCard, setRedCard] = useState(false);
 
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
@@ -192,6 +193,9 @@ function QuoteDetail() {
   const [showVersionsDialog, setShowVersionsDialog] = useState(false)
   const [versionStatusData, setVersionStatusData] = useState({ columns: [], data: [] })
   const [allVersionStatusButtonText, setAllVersionStatusButtonText] = useState("All Version Status")
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   let termsTimeout;
 
@@ -236,44 +240,74 @@ function QuoteDetail() {
   }, [query, searchVal, currentVersion])
 
   useEffect(() => {
-    console.log("TNC is:");
-    console.log("TandC");
-    console.log(data);
-    let rows = data?.map((u) => ({
-      ...u,
-      isChecked: TandC.includes(u._id) ? true : false,
-      id: u._id,
-    }));
-    setDataRows([...rows]);
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].isChecked) {
-        setRadioIndex(i);
-        break;
-      }
+    let radioIndex = -1, selectedTnc = [...TandC]
+    if (selectedRecords && selectedRecords.length > 0) {
+      radioIndex = 0
+      selectedTnc = selectedRecords.map(o => o._id)
     }
-  }, [data, currentVersion])
+    setTNC(selectedTnc)
+    setRadioIndex(radioIndex)
+    handleVersionUpdate(PDF, visibleColumns, versionStatus, selectedTnc);
+
+    // let rows = data?.map((u) => ({
+    //   ...u,
+    //   isChecked: TandC.includes(u._id) ? true : false,
+    //   id: u._id,
+    // }));
+    // // setDataRows([...rows]);
+    // dispatch({ type: "initialize", data: rows, count: rows.length });
+    // for (var i = 0; i < rows.length; i++) {
+    //   if (rows[i].isChecked) {
+    //     setRadioIndex(i);
+    //     break;
+    //   }
+    // }
+  }, [selectedRecords, currentVersion])
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
 
   const fetchTermsAndConditions = () => {
     if (termsTimeout) {
       clearTimeout(termsTimeout);
     } termsTimeout = setTimeout(() => {
-      setLoading(true);
-      let searchParams = searchVal
-        ? { ...query, search: searchVal }
-        : { ...query };
-      let api = getSearchQuery(termsAndCondition.api, searchParams);
-      setLoading(true);
+      if (gridApi) {
+        gridApi.setRowData([]);
+        gridApi.showLoadingOverlay();
+      }
+      const queryString = getQueryString();
+      dispatch({ type: "loading", loading: true });
       axiosInstance()
-        .get(api)
-        .then(({ data }) => {
-          setData(data.data);
-          setRowCount(data.count);
-          setCheckAllAccounts(false);
-          setLoading(false);
+        .get(`${termsAndCondition.api}${queryString}`)
+        .then(({ data: { data, count } }) => {
+          dispatch({ type: "initialize", data: data, count: count });
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
-          setLoading(false);
+          dispatch({ type: "loading", loading: false });
         });
     }, 600);
   }
@@ -302,18 +336,6 @@ function QuoteDetail() {
     }
     productBuilderdatatoQuoteBuilderdata(data);
   }
-
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      setQuery((prevState) => ({
-        ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
 
 
   const createImagePDF = (view, send) => {
@@ -366,10 +388,9 @@ function QuoteDetail() {
   const GeneratePdf = (view, send) => {
     const PdfDoc = new jsPDF('p', 'pt', 'a4');
     let date = new Date();
-    const excelHeader=[]
-    const excelheaderName=[]
-    const excelData=[]
-
+    const excelHeader = []
+    const excelheaderName = []
+    const excelData = []
 
     const pagewidth = PdfDoc.internal.pageSize.width;
     console.log("Page width is");
@@ -391,7 +412,7 @@ function QuoteDetail() {
     var serialNumber = 1;
     dynamicTableData.forEach(dataEntry => {
       var PdfRow = [serialNumber];
-      var ExcelRow={}
+      var ExcelRow = {}
       ColumnName.forEach(ColName => {
         if (defaultSelectColumns.indexOf(ColName) !== -1) {
           if (PdfCol.indexOf(ColName) == -1) {
@@ -400,15 +421,15 @@ function QuoteDetail() {
           PdfRow.push(dataEntry[ColName]);
         }
 
-        if(visibleColumns.indexOf(ColName)!==-1){
-          if(excelheaderName.indexOf(ColName!==-1)){
+        if (visibleColumns.indexOf(ColName) !== -1) {
+          if (excelheaderName.indexOf(ColName !== -1)) {
             excelheaderName.push(ColName);
             excelHeader.push({
               header: ColName,
-              key: ColName.replace(" ","")
+              key: ColName.replace(" ", "")
             })
           }
-          ExcelRow[ColName.replace(" ","")]=dataEntry[ColName]
+          ExcelRow[ColName.replace(" ", "")] = dataEntry[ColName]
         }
       })
       PDFData.push(PdfRow);
@@ -429,8 +450,8 @@ function QuoteDetail() {
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
     PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
-    PdfDoc.text(`Quote Expiry Date: ${displayDate(quoteData.expiryDate)}`,285,145);
-    PdfDoc.text(`Inco Terms: ${quoteData.incoTerms}`,285,160);
+    PdfDoc.text(`Quote Expiry Date: ${displayDate(quoteData.expiryDate)}`, 285, 145);
+    PdfDoc.text(`Inco Terms: ${quoteData.incoTerms}`, 285, 160);
     PdfDoc.setFontSize(8);
     PdfDoc.text("Bill To:", 20, 100)
     PdfDoc.setFontSize(12);
@@ -463,7 +484,6 @@ function QuoteDetail() {
       PdfDoc.line(370, finalY + 20, 580, finalY + 20);
       PdfDoc.text("Terms and Conditions", 225, finalY + 25)
       var finalmarkup = ""
-      console.log(TandC);
       for (var tc = 0; tc < TandC.length; tc++) {
         var SelectTNC: AnyObject = dataRows.filter((d: { _id: string }) => d._id === TandC[tc]);
         console.log(SelectTNC);
@@ -473,7 +493,6 @@ function QuoteDetail() {
         var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
         finalmarkup = finalmarkup + markup + '<br>'
       }
-
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
       PdfDoc.html(finalmarkup, {
@@ -496,7 +515,7 @@ function QuoteDetail() {
               }
             })
               .then(({ data }) => {
-                handleVersionUpdate(data.fileName, visibleColumns,"", TandC);
+                handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
                 console.log("PDF Response is:");
                 console.log(data);
               })
@@ -541,30 +560,11 @@ function QuoteDetail() {
     }
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
   const handleCloseCreateDialog = (params) => {
     setShowCreateDialog(false)
     setEditRecord({})
     if (params?.fetchData) fetchTermsAndConditions()
   }
-
-
-
-
-
 
   const fetchDoaLimit = () => {
     axiosInstance()
@@ -794,68 +794,28 @@ function QuoteDetail() {
     }
   }
 
+  const TermsConditionNameRenderer = params => (
+    <span
+      className="link cursor-pointer"
+      onClick={() => {
+        setShowCreateDialog(true);
+        const gridData = dataRows;
+        const indexOfRecord = gridData.findIndex(
+          (d) => d.id === params.data.id
+        );
+        setEditRecord(cloneDeep(gridData[indexOfRecord]));
+      }}>
+      <CustomRenderCell value={params?.value} />
+    </span>
+  )
 
-  const columnsTNC = [
-    {
-      field: "isChecked",
-      headerName: "Select",
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          // disabled={!params.canDelete}
-          checked={params.value}
-          onClick={(ev) => {
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
-            var prevvalue = gridData[indexOfRecord].isChecked;
-            let newTNC = TandC
-            if (prevvalue) {
-              gridData[indexOfRecord].isChecked = false;
-              const index = newTNC.indexOf(gridData[indexOfRecord]._id)
-              newTNC.splice(index, 1);
-            }
-            else {
-              gridData[indexOfRecord].isChecked = true;
-              newTNC.push(gridData[indexOfRecord]._id)
-              setRadioIndex(indexOfRecord);
-            }
-            if (newTNC.length === 0) {
-              setRadioIndex(-1);
-            }
-            setDataRows([...gridData]);
-            setTNC(newTNC);
-            handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
-            console.log(gridData[indexOfRecord]._id);
-            const checkedRecords = gridData.filter((d) => d.isChecked === true);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75
-    },
-    {
-      field: "TACName", headerName: "Name", width: 500,
-      renderCell: (params) => (
-        <Link
-          onClick={() => {
-            setShowCreateDialog(true);
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
+  const frameworkComponents = {
+    termsConditionNameRenderer: TermsConditionNameRenderer,
+  };
 
-            setEditRecord(cloneDeep(gridData[indexOfRecord]));
-          }}>
-          <CustomRenderCell value={params?.value} />
-        </Link>
-      )
-    },
-
-  ];
+  const [columns] = useState([
+    { field: "TACName", headerName: "Name", show: true, disabled: true, cellRenderer: "termsConditionNameRenderer" },
+  ]);
 
 
   const fetchCustomerContactData = (showDialog) => {
@@ -1006,9 +966,9 @@ function QuoteDetail() {
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     setOptions([]);
     setRedCard(false);
-    var optionstoSet=[]
-    var invalidqty=false;
-    var invalidPrice=false;
+    var optionstoSet = []
+    var invalidqty = false;
+    var invalidPrice = false;
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
     const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
@@ -1022,14 +982,14 @@ function QuoteDetail() {
     var ProfitCurrency = ""
     BuilderData.map((quoteRows: { [x: string]: any; }) => {
       console.log(quoteRows);
-      var hasTSP=false
+      var hasTSP = false
       const quoteRowKeys = Object.keys(quoteRows);
       var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
       quoteRowKeys.map((key) => {
         console.log(key);
-        if(key==='qty'){
-          if(quoteRows[key]===0){
-            invalidqty=true;
+        if (key === 'qty') {
+          if (quoteRows[key] === 0) {
+            invalidqty = true;
           }
         }
         if (ignoredKeys.indexOf(key) === -1) {
@@ -1063,7 +1023,7 @@ function QuoteDetail() {
             else if (key === 'totalSalesPrice') {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
               SPCurrency = currency.toUpperCase()
-              hasTSP=false;
+              hasTSP = false;
             }
             else if (key === "totalProfit") {
               totalProfit = totalProfit + quoteRows[indexkey]
@@ -1076,8 +1036,8 @@ function QuoteDetail() {
           }
         }
       })
-      if(!hasTSP){
-        invalidPrice=true
+      if (!hasTSP) {
+        invalidPrice = true
       }
       inventory.push(inventorydata);
     });
@@ -1092,7 +1052,7 @@ function QuoteDetail() {
     setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
     setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
     setTotalCost(totalCost.toString() + " " + CostCurrency);
-    if(totalSellingPrice<totalCost){
+    if (totalSellingPrice < totalCost) {
       setRedCard(true);
     }
     console.log("Check:");
@@ -1101,15 +1061,15 @@ function QuoteDetail() {
     console.log(versionStatus)
     console.log(totalSellingPrice)
 
-    if(ProcessStatus==="Price Builder"){
-      if(!invalidqty || !invalidPrice){
+    if (ProcessStatus === "Price Builder") {
+      if (!invalidqty || !invalidPrice) {
         setNextStep(true);
       }
-      else{
+      else {
         setNextStep(false);
       }
     }
-    
+
     setButtonMessage("Send to Customer");
     setDOAreq(false);
     setCustomerreq(true);
@@ -1191,15 +1151,15 @@ function QuoteDetail() {
     if (DOAreq) {
       if (!PDF) {
         createImagePDF(false, true);
-        
-          axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
-            .then(({ data }) => {
-              handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
-              fetchquoteData(currentVersion)
-            })
-            .catch((err) => {
-              toastConfig.setToastConfig(err);
-            });
+
+        axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+          .then(({ data }) => {
+            handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+            fetchquoteData(currentVersion)
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
       }
     };
     if (Customerreq) {
@@ -1286,7 +1246,7 @@ function QuoteDetail() {
     setAllVersionStatusButtonText(gettingVersionStatusText);
     axiosInstance().get(`/quote-builder/quote-hierarchy/${id}`).then(({ data: { data } }) => {
       setShowVersionsDialog(true);
-      
+
       const newData = data.versions.map((d, index) => {
         return { ...d, id: index + 1 };
       })
@@ -1304,6 +1264,12 @@ function QuoteDetail() {
       toastConfig.setToastConfig(error);
       setAllVersionStatusButtonText("All Version Status");
     })
+  }
+
+  const handleGridReady = (params) => {
+    params.api.forEachNode(node => {
+      if (TandC.indexOf(node?.data?._id) >= 0) node.setSelected(true);
+    });
   }
 
   return (
@@ -1374,7 +1340,7 @@ function QuoteDetail() {
 
                 </DetailsPageHeader>
               )}
-              {loading ? (
+              {dataLoading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
@@ -1430,17 +1396,17 @@ function QuoteDetail() {
                             <span>Total Cost Price</span>
                             <span>{totalcost}</span>
                           </div>
-                          {redCard?
-                          (<div className="redQuoteBox">
-                            <span>Total Selling Price</span>
-                            <span>{totalsale}</span>
-                          </div>):(
-                          <div className="quoteBox" >
-                            <span>Total Selling Price</span>
-                            <span>{totalsale}</span>
-                          </div>
+                          {redCard ?
+                            (<div className="redQuoteBox">
+                              <span>Total Selling Price</span>
+                              <span>{totalsale}</span>
+                            </div>) : (
+                              <div className="quoteBox" >
+                                <span>Total Selling Price</span>
+                                <span>{totalsale}</span>
+                              </div>
 
-                          )}
+                            )}
                           <div className="quoteBox">
                             <span>Total Margin</span>
                             <span>{totalmargin}</span>
@@ -1540,27 +1506,17 @@ function QuoteDetail() {
                                   <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
                                 </Grid>
                                 <Grid item xs={12} className="listing-grid">
-                                  <DataGrid
-                                    components={{
-                                      Toolbar: DataGridCustomToolbar,
-                                      NoRowsOverlay: CustomDataGridNoDataFound,
-                                    }}
-                                    scrollbarSize={20}
-                                    rows={dataRows}
-                                    columns={columnsTNC}
-                                    loading={loading}
-                                    disableSelectionOnClick
-                                    disableMultipleSelection
-                                    paginationMode="server"
-                                    pagination
-                                    onPageChange={handlePage}
-                                    onPageSizeChange={handlePageSize}
-                                    pageSize={query.limit}
-                                    page={query.page}
+                                  <CustomAgGrid
+                                    columns={columns}
+                                    dataRows={dataRows}
+                                    frameworkComponents={frameworkComponents}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
                                     rowCount={rowCount}
-                                    rowsPerPageOptions={[25, 50, 75]}
-                                    onSortModelChange={handleSortModelChange}
-                                    onFilterModelChange={onFilterChange}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    handleGridReady={handleGridReady}
                                   />
                                 </Grid>
                               </Grid>
@@ -1667,7 +1623,7 @@ function QuoteDetail() {
             success={onSuccess}
             id={id}
             version={currentVersion}
-            account={quoteData.customerAccountName}/>
+            account={quoteData.customerAccountName} />
         }
 
 
