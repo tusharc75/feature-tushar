@@ -20,6 +20,8 @@ import {
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import { Menu, MenuItem } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
 
 const ProductBuilder = () => {
 
@@ -27,6 +29,9 @@ const ProductBuilder = () => {
     const [isCreate, setIsCreate] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
+    // const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [okButtonLoading, setOkButtonLoading] = useState(false);
 
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
@@ -94,13 +99,24 @@ const ProductBuilder = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().delete(`/productbuilder/` + deleteRecord._id).then(() => {
-            fetchProductBuilder();
-            setShowDeleteConfirmBox(false)
-            setDeleteRecord(null)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error)
-        });
+        if (deleteRecord) {
+            axiosInstance().delete(`/productbuilder/` + deleteRecord._id).then(() => {
+                fetchProductBuilder();
+                setShowDeleteConfirmBox(false)
+                setDeleteRecord(null)
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+        } else {
+            axiosInstance().put(`/productbuilder/remove`, selectedRecords.map(d => d._id)).then(() => {
+                fetchProductBuilder();
+                setShowDeleteConfirmBox(false)
+                setDeleteRecord(null)
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+        }
+
     }
 
     const frameworkComponents = {
@@ -108,6 +124,26 @@ const ProductBuilder = () => {
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
+    };
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+        console.log(selectedRecords)
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
+    const showConfirmBox = (row) => {
+        if (row) {
+            setShowDeleteConfirmBox(true);
+            if (row) {
+                setDeleteRecord({ id: row.id, name: row.name });
+            }
+        } else {
+            setShowDeleteConfirmBox(true);
+        }
     };
 
     return (<Layout>
@@ -124,20 +160,54 @@ const ProductBuilder = () => {
                     </Grid>
                     <Grid xs={6} container justify="flex-end">
                         <Button onClick={() => setIsCreate(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button
+                            className="ml-2"
+                            // className={styles.action_submit_btn}
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            aria-controls="action-menu"
+                            disabled={selectedRecords.length > 0 ? false : true}
+                        >
+                            Actions <ExpandMore />
+                        </Button>
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "left",
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}>
+                            <MenuItem
+                                onClick={() => {
+                                    showConfirmBox(null);
+                                    closeActions();
+                                }}
+                            >
+                                Delete
+                                    </MenuItem>
+                        </Menu>
+
                     </Grid>
                 </Grid>
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} actionWidth={100}
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={true} actionWidth={100}
                 isClientSideGrid={true} />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
+                    message={`Are you sure, you want to delete ${deleteRecord ? deleteRecord.name : "selected product(s)"} ?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
+                    okBtnLoading={okButtonLoading}
                 />
             }
             {isCreate && <CreateNewDialog handleClose={() => setIsCreate(false)} />}
