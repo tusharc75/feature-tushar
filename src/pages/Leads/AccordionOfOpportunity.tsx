@@ -11,9 +11,9 @@ import routes from '../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import currencies from '../../constants/currency_with_country.json';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { useData } from '../../StateProvider/Provider';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const Accordion = withStyles({
     root: {
@@ -160,9 +160,9 @@ export default function AccordionOfOpportunity({
                                                                 {
                                                                     opportunity?.amount &&
                                                                     <Grid item xs={12} sm={4}>
-                                                                        <Typography className="amount">
-                                                                            {currencies.find(d => d.currencyCode === opportunity["currency"])?.symbolNative}
-                                                                        &nbsp;{opportunity?.amount ?? ''}</Typography>
+                                                                        <Typography className="amount" title={formatAmountWithCurrency(opportunity["currency"], opportunity?.amount).fullFormatAmount}>
+                                                                            {formatAmountWithCurrency(opportunity["currency"], opportunity?.amount).shortFormatAmount}
+                                                                        </Typography>
                                                                     </Grid>
                                                                 }
                                                                 <Grid container>

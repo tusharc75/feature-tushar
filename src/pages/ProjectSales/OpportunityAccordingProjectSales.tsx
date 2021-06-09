@@ -30,12 +30,12 @@ import { FaArrowAltCircleDown } from "react-icons/fa";
 
 import { displayDate } from "../../services/util";
 import routes from "./../../components/Helpers/Routes";
-import currencies from "./../../constants/currency_with_country.json";
 import NewOpportunityProjectSales from "./NewOpportunityProjectSales";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
+import { getUniqueCurrencies } from "../../constants/helpers";
 
 const Accordion = withStyles({
   root: {
@@ -301,7 +301,7 @@ export default function OpportunityAccordianProjectSales({
                                     {obj?.amount ? (
                                       <Typography className="amount">
                                         {
-                                          currencies.find(
+                                          getUniqueCurrencies().find(
                                             (d) =>
                                               d.currencyCode == obj["currency"]
                                           )?.symbolNative

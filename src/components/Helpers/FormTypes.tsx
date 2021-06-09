@@ -18,7 +18,7 @@ import {
   Typography,
   useTheme,
 } from "@material-ui/core";
-import { result, find, throttle} from "lodash";
+import { result, find, throttle } from "lodash";
 import DateUtils from "@date-io/date-fns";
 import {
   KeyboardDatePicker,
@@ -31,7 +31,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
-import currencies from "../../constants/currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
@@ -40,8 +39,10 @@ import NumberFormat from "react-number-format";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import currencyList from "../../constants/currency_with_country.json";
-import { imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl } from "../../constants/helpers"
+import {
+  imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl,
+  getUniqueCurrencies
+} from "../../constants/helpers"
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import CurrencyDialog from '../productBuilder/CurrencyDialog';
 
@@ -187,7 +188,7 @@ const FormTypes = (props) => {
   );
 
   React.useEffect(() => {
-    const sortedArr = currencies.sort((a, b) =>
+    const sortedArr = getUniqueCurrencies().sort((a, b) =>
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
@@ -1044,7 +1045,7 @@ const FormTypes = (props) => {
                       startAdornment: (
                         <InputAdornment position="start">
                           {result(
-                            find(currencyList, function (obj) {
+                            find(getUniqueCurrencies(), function (obj) {
                               return obj.currencyCode === _currency;
                             }),
                             "symbolNative"
@@ -1112,7 +1113,7 @@ const FormTypes = (props) => {
                     startAdornment: (
                       <InputAdornment position="start">
                         {result(
-                          find(currencyList, function (obj) {
+                          find(getUniqueCurrencies(), function (obj) {
                             return obj.currencyCode === _currency;
                           }),
                           "symbolNative"
@@ -1154,7 +1155,7 @@ const FormTypes = (props) => {
         options={currencyData}
         getOptionLabel={(option: any) =>
           option
-            ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}`
+            ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})`
             : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
@@ -1179,27 +1180,31 @@ const FormTypes = (props) => {
           />
         )}
         renderOption={(option) => {
-          const { currencyCode, name, countryCode, symbolNative } = option;
-          return (
-            <Grid container alignItems="center">
-              <Grid item>
-                <Avatar
-                  variant="rounded"
-                  src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                  style={{ marginRight: 20, width: "40px", height: "30px" }}
-                />
-              </Grid>
-              <Grid item xs>
-                <Typography>
-                  {currencyCode} ({symbolNative})
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {name}
-                </Typography>
-              </Grid>
-            </Grid>
-          );
+          const { currencyCode, currencyName, symbolNative } = option;
+          return `${currencyCode} - ${currencyName} - (${symbolNative})`
         }}
+      // renderOption={(option) => {
+      //   const { currencyCode, name, countryCode, symbolNative } = option;
+      //   return (
+      //     <Grid container alignItems="center">
+      //       <Grid item>
+      //         <Avatar
+      //           variant="rounded"
+      //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+      //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+      //         />
+      //       </Grid>
+      //       <Grid item xs>
+      //         <Typography>
+      //           {currencyCode} ({symbolNative})
+      //         </Typography>
+      //         <Typography variant="body2" color="textSecondary">
+      //           {name}
+      //         </Typography>
+      //       </Grid>
+      //     </Grid>
+      //   );
+      // }}
       />
     </InfoLabel>
   ) : type === "multiSelect" ? (
@@ -1505,7 +1510,7 @@ const FormTypes = (props) => {
             color="primary"
             size="small"
             component="span"
-            startIcon={isFileUploading && <CircularProgress size={15} /> }
+            startIcon={isFileUploading && <CircularProgress size={15} />}
           >
             {isFileUploading ? "Uploading File" : "Upload File"}
           </Button>
