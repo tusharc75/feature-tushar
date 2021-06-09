@@ -247,7 +247,6 @@ const DOARequest = () => {
             </Grid>
           </Grid>
         </div>
-        <div className="listing-grid">
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -262,7 +261,6 @@ const DOARequest = () => {
             allowSelection={false}
             allowAction={false}
           />
-        </div>
       </CustomContainer>
     </Layout>
   );

@@ -378,7 +378,7 @@ const ProductBuilder = (props) => {
                 </Grid>
             }
         </Grid>
-        <Box height={500} mt={1}>
+        <Box mt={1} className="productAgGrid">
             {columns &&
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={Editable} allowAction={Editable} actionWidth={150} isClientSideGrid={true} />

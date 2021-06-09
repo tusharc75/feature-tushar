@@ -5,3 +5,30 @@
 .nameLink:hover {
   text-decoration: underline;
 }
+.MuiStep-horizontal {
+  padding-left: 8px;
+  padding-right: 8px;
+  background: #ebebeb;
+  padding: 5px 8px;
+  width: 20%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1px;
+  border-radius: 4px;
+}
+.MuiStepper-horizontal {
+  border-radius: 2px;
+  border: 1px solid #d2cfcf;
+  border-left: none !important;
+}
+.MuiStep-completed {
+  background: #43aea7;
+}
+
+.productPos{
+  position: absolute;
+  top: 1px;
+  left: 6px;
+}

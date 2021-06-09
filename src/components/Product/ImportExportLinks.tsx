@@ -21,8 +21,9 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end",
   },
   custom_root: {
-    paddingTop: 5,
-    paddingRight: 5
+    paddingRight: 10,
+    display: "flex",
+    alignItems: "center",
   },
   linksContainer: {
     display: "flex",
@@ -37,11 +38,12 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
   },
   custom_links: {
-    color: theme.palette.primary.main, //  textDark
-    fontSize: 15,
+    color: "#484848",
+    fontSize: "12px",
+    fontWeight: "bold"
   },
   linkDivider: {
-    backgroundColor: "#ffffff42", //  darkBg
+    backgroundColor: "#9582822e", //  darkBg
     margin: "0 10px",
   },
   delBtn: {

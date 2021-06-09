@@ -271,6 +271,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 component="div"
                 count={rowCount}
                 page={page}
+                className="agPagination"
                 onChangePage={(event, newPage) => {
                     dispatch({ type: "pageChange", page: newPage });
 
