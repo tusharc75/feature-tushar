@@ -4,13 +4,14 @@ import React, {
   useContext,
   useCallback,
   useRef,
+  useReducer,
 } from "react";
 import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { downloadExcel } from "../../constants/helpers";
+import { downloadExcel, gridPageSizes } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -71,6 +72,98 @@ import { AnyObject } from "yup/lib/types";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loadingTNC: action.loading,
+      };
+
+    case "initialize":
+      return {
+        ...state,
+        dataRowsTNC: action.data,
+        rowCountTNC: action.count,
+        loadingTNC: false,
+      };
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      };
+
+    case "update":
+      return {
+        ...state,
+        dataRowsTNC: action.data,
+        loadingTNC: false,
+      };
+
+    case "filter":
+      return {
+        ...state,
+        loadingTNC: true,
+        filters: action.filters,
+        page: 0,
+      };
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loadingTNC: true,
+      };
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loadingTNC: true,
+      };
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page,
+      };
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loadingTNC: true,
+      };
+
+    case "complete":
+      return {
+        ...state,
+        loadingTNC: false,
+      };
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRowsTNC: [],
+  rowCountTNC: 0,
+  loadingTNC: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: [],
+};
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -141,11 +234,35 @@ function QuoteDetail() {
     "Sales Price Per Unit",
     "Total Sales Price",
   ];
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const {
+    dataRowsTNC,
+    rowCountTNC,
+    loadingTNC,
+    page,
+    limit,
+    pageSizes,
+    search,
+    filters,
+    sorting,
+    selectedRecords,
+  } = state;
+  const [gridApi, setGridApi] = useState(null);
+
+  const [columnsTNC, setColumnsTNC] = useState([
+    {
+      field: "name",
+      headerName: "Name",
+      show: true,
+      disabled: true,
+      cellRenderer: "nameRenderer",
+    },
+  ]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
-  const [loadingTNC, setLoadingTNC] = useState(false);
+  // const [loadingTNC, setLoadingTNC] = useState(false);
   const [isCloning, setCloning] = useState(false);
   const [quoteData, setquoteData] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
@@ -168,7 +285,6 @@ function QuoteDetail() {
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] =
     useState(false);
 
-  const [isProcessing, setIsProcessing] = useState(false);
   const [currentVersion, setcurrentVersion] = useState(0);
 
   const [messageDialog, setMessageDialog] = useState({
@@ -481,30 +597,115 @@ function QuoteDetail() {
     }
   };
 
-  const fetchTermsAndConditions = () => {
-    if (termsTimeout) {
-      clearTimeout(termsTimeout);
-    }
-    termsTimeout = setTimeout(() => {
-      let searchParams = searchVal
-        ? { ...query, search: searchVal }
-        : { ...query };
-      let api = getSearchQuery(termsAndCondition.api, searchParams);
-      setLoadingTNC(true);
-      axiosInstance()
-        .get(api)
-        .then(({ data }) => {
-          setData(data.data);
-          setRowCount(data.count);
-          setCheckAllAccounts(false);
-          setLoadingTNC(false);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setLoadingTNC(false);
-        });
-    }, 600);
+  const NameRenderer = (params) => (
+    <p
+      className="cursor-pointer"
+      title={params.value}
+      onClick={() => {
+        setShowCreateDialog(true);
+        const data = dataRowsTNC.find((d) => d.id === params.data.id);
+
+        setEditRecord(data);
+      }}
+    >
+      {params.value}
+    </p>
+  );
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
   };
+
+  const fetchTermsAndConditions = () => {
+    dispatch({ type: "loading", loadingTNC: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+    axiosInstance()
+      .get(termsAndCondition.api)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((tnc) => ({
+          ...tnc,
+          id: tnc._id,
+          name: tnc.TACName,
+        }));
+        dispatch({
+          type: "initialize",
+          data: rows,
+          count: count,
+        });
+        dispatch({ type: "loading", loadingTNC: false });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: "loading", loadingTNC: false });
+      });
+  };
+
+  // const columnsTNC = [
+  //   {
+  //     field: "isChecked",
+  //     headerName: "Select",
+  //     renderCell: (params) => (
+  //       <Checkbox
+  //         color="primary"
+  //         // disabled={!params.canDelete}
+  //         checked={params.value}
+  //         onClick={(ev) => {
+  //           const gridData = dataRows;
+  //           const indexOfRecord = gridData.findIndex(
+  //             (d) => d.id === params.row.id
+  //           );
+  //           var prevvalue = gridData[indexOfRecord].isChecked;
+  //           let newTNC = TandC;
+  //           if (prevvalue) {
+  //             gridData[indexOfRecord].isChecked = false;
+  //             const index = newTNC.indexOf(gridData[indexOfRecord]._id);
+  //             newTNC.splice(index, 1);
+  //           } else {
+  //             gridData[indexOfRecord].isChecked = true;
+  //             newTNC.push(gridData[indexOfRecord]._id);
+  //             setRadioIndex(indexOfRecord);
+  //           }
+  //           if (newTNC.length === 0) {
+  //             setRadioIndex(-1);
+  //           }
+  //           setDataRows([...gridData]);
+  //           setTNC(newTNC);
+  //           handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
+
+  //           const checkedRecords = gridData.filter((d) => d.isChecked === true);
+  //         }}
+  //       />
+  //     ),
+  //     disableColumnMenu: true,
+  //     sortable: false,
+  //     filterable: false,
+  //     width: 75,
+  //   },
+  //   {
+  //     field: "TACName",
+  //     headerName: "Name",
+  //     width: 500,
+  //     renderCell: (params) => (
+  //       <Link
+  //         onClick={() => {
+  //           setShowCreateDialog(true);
+  //           const gridData = dataRows;
+  //           const indexOfRecord = gridData.findIndex(
+  //             (d) => d.id === params.row.id
+  //           );
+
+  //           setEditRecord(cloneDeep(gridData[indexOfRecord]));
+  //         }}
+  //       >
+  //         <CustomRenderCell value={params?.value} />
+  //       </Link>
+  //     ),
+  //   },
+  // ];
 
   const refreshProducts = (data) => {
     fetchDoaLimit();
@@ -683,26 +884,23 @@ function QuoteDetail() {
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
 
-    if (RadioIndex !== -1) {
+    if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
       PdfDoc.setFontSize(14);
       PdfDoc.setLineWidth(3);
       PdfDoc.line(15, finalY + 20, 580, finalY + 20);
 
-      var finalmarkup = "";
+      let finalmarkup = "";
 
-      for (var tc = 0; tc < TandC.length; tc++) {
-        var SelectTNC: AnyObject = dataRows.filter(
-          (d: { _id: string }) => d._id === TandC[tc]
-        );
-
+      selectedRecords.forEach((selectTNC) => {
+        console.log(selectTNC);
         finalmarkup =
-          finalmarkup + `<h3><strong>${SelectTNC[0].TACName}:</strong></h3>`;
-        let state = convertFromRaw(JSON.parse(SelectTNC[0].description));
+          finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
+        let state = convertFromRaw(JSON.parse(selectTNC.description));
         let TNC = EditorState.createWithContent(state);
-        var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+        let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
         finalmarkup = finalmarkup + markup + "<br>";
-      }
+      });
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
       PdfDoc.html(finalmarkup, {
@@ -716,7 +914,7 @@ function QuoteDetail() {
             doc.save(`Quotation - v${currentVersion}`);
           }
           if (send) {
-            var PDFtoAPIData = doc.output("blob");
+            let PDFtoAPIData = doc.output("blob");
 
             const formdata = new FormData();
             formdata.append("file", PDFtoAPIData, "Quotation.pdf");
@@ -748,7 +946,7 @@ function QuoteDetail() {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
       if (send) {
-        var PDFtoAPIData = PdfDoc.output("blob");
+        let PDFtoAPIData = PdfDoc.output("blob");
 
         const formdata = new FormData();
         formdata.append("file", PDFtoAPIData, "Quotation.pdf");
@@ -923,69 +1121,6 @@ function QuoteDetail() {
       if (data.length > 0) setContactsEmailsData(data);
     }
   };
-
-  const columnsTNC = [
-    {
-      field: "isChecked",
-      headerName: "Select",
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          // disabled={!params.canDelete}
-          checked={params.value}
-          onClick={(ev) => {
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
-            var prevvalue = gridData[indexOfRecord].isChecked;
-            let newTNC = TandC;
-            if (prevvalue) {
-              gridData[indexOfRecord].isChecked = false;
-              const index = newTNC.indexOf(gridData[indexOfRecord]._id);
-              newTNC.splice(index, 1);
-            } else {
-              gridData[indexOfRecord].isChecked = true;
-              newTNC.push(gridData[indexOfRecord]._id);
-              setRadioIndex(indexOfRecord);
-            }
-            if (newTNC.length === 0) {
-              setRadioIndex(-1);
-            }
-            setDataRows([...gridData]);
-            setTNC(newTNC);
-            handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
-
-            const checkedRecords = gridData.filter((d) => d.isChecked === true);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "TACName",
-      headerName: "Name",
-      width: 500,
-      renderCell: (params) => (
-        <Link
-          onClick={() => {
-            setShowCreateDialog(true);
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
-
-            setEditRecord(cloneDeep(gridData[indexOfRecord]));
-          }}
-        >
-          <CustomRenderCell value={params?.value} />
-        </Link>
-      ),
-    },
-  ];
 
   const fetchCustomerContactData = (showDialog) => {
     const filterById = JSON.stringify([
@@ -1340,7 +1475,7 @@ function QuoteDetail() {
   };
 
   const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
-    var body = {
+    let body = {
       PDF: PDFfile,
       acceptedColumns: Columns,
       status: versionStatus,
@@ -1554,18 +1689,20 @@ function QuoteDetail() {
                           variant="outlined"
                           type="button"
                           size="small"
-                          startIcon={<BiLayerPlus />}
+                          startIcon={
+                            isCloning ? (
+                              <CircularProgress color="inherit" size={16} />
+                            ) : (
+                              <BiLayerPlus />
+                            )
+                          }
                           color="primary"
                           onClick={() => {
                             cloneVersion();
                           }}
                         >
                           {isCloning ? (
-                            <>
-                              <CircularProgress color="inherit" size={16} />
-                              <Box component="span" mx={1} />
-                              Cloning v{currentVersion}
-                            </>
+                            <>Cloning v{currentVersion}</>
                           ) : (
                             `Clone Version ${currentVersion}`
                           )}
@@ -1785,7 +1922,7 @@ function QuoteDetail() {
                           refreshProducts={refreshProducts}
                           columnsData={visibleColumns}
                           currency={quoteData.currency}
-                          isAll={true}
+                          isAll={false}
                         />
                       ) : (
                         <ProductBuilder
@@ -1834,27 +1971,19 @@ function QuoteDetail() {
                                   </Button>
                                 </Grid>
                                 <Grid item xs={12} className="listing-grid">
-                                  <DataGrid
-                                    components={{
-                                      Toolbar: DataGridCustomToolbar,
-                                      NoRowsOverlay: CustomDataGridNoDataFound,
-                                    }}
-                                    scrollbarSize={20}
-                                    rows={dataRows}
+                                  <CustomAgGrid
                                     columns={columnsTNC}
-                                    loading={loadingTNC}
-                                    disableSelectionOnClick
-                                    disableMultipleSelection
-                                    paginationMode="server"
-                                    pagination
-                                    onPageChange={handlePage}
-                                    onPageSizeChange={handlePageSize}
-                                    pageSize={query.limit}
-                                    page={query.page}
-                                    rowCount={rowCount}
-                                    rowsPerPageOptions={[25, 50, 75]}
-                                    onSortModelChange={handleSortModelChange}
-                                    onFilterModelChange={onFilterChange}
+                                    dataRows={dataRowsTNC}
+                                    frameworkComponents={frameworkComponents}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
+                                    rowCount={rowCountTNC}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    actionWidth={150}
+                                    allowSelection={true}
+                                    allowAction={false}
                                   />
                                 </Grid>
                               </Grid>
