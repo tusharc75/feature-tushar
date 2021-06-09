@@ -703,7 +703,7 @@ function QuoteDetail() {
           Object.assign(modifiedData, data);
 
           // if (modifiedData["currency"] && modifiedData["amount"]) {
-          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"])
+          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"]).fullFormatAmount
           // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
           // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
           // }
@@ -838,7 +838,7 @@ function QuoteDetail() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
+    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount).fullFormatAmount : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
     setMainPoints(mainPoint);

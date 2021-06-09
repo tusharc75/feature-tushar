@@ -3,6 +3,7 @@
         "country": "Afghanistan",
         "countryCode": "AF",
         "currencyCode": "AFN",
+        "currencyName": "Afghan Afghani",
         "languages": [
             "ps",
             "uz",
@@ -16,6 +17,7 @@
         "country": "Albania",
         "countryCode": "AL",
         "currencyCode": "ALL",
+        "currencyName": "Albanian Lek",
         "languages": [
             "sq"
         ],
@@ -27,6 +29,7 @@
         "country": "Algeria",
         "countryCode": "DZ",
         "currencyCode": "DZD",
+        "currencyName": "Algerian Dinar",
         "languages": [
             "ar"
         ],
@@ -38,6 +41,7 @@
         "country": "American Samoa",
         "countryCode": "AS",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en",
             "sm"
@@ -50,6 +54,7 @@
         "country": "Andorra",
         "countryCode": "AD",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "ca"
         ],
@@ -61,6 +66,7 @@
         "country": "Angola",
         "countryCode": "AO",
         "currencyCode": "AOA",
+        "currencyName": "Angolan Kwanza",
         "languages": [
             "pt"
         ],
@@ -72,6 +78,7 @@
         "country": "Anguilla",
         "countryCode": "AI",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -83,6 +90,7 @@
         "country": "Antigua and Barbuda",
         "countryCode": "AG",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -94,6 +102,7 @@
         "country": "Argentina",
         "countryCode": "AR",
         "currencyCode": "ARS",
+        "currencyName": "Argentine Peso",
         "languages": [
             "es",
             "gn"
@@ -106,6 +115,7 @@
         "country": "Armenia",
         "countryCode": "AM",
         "currencyCode": "AMD",
+        "currencyName": "Armenian Dram",
         "languages": [
             "hy",
             "ru"
@@ -118,6 +128,7 @@
         "country": "Aruba",
         "countryCode": "AW",
         "currencyCode": "AWG",
+        "currencyName": "Aruban Florin",
         "languages": [
             "nl",
             "pa"
@@ -130,6 +141,7 @@
         "country": "Australia",
         "countryCode": "AU",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -141,6 +153,7 @@
         "country": "Austria",
         "countryCode": "AT",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "de"
         ],
@@ -152,6 +165,7 @@
         "country": "Azerbaijan",
         "countryCode": "AZ",
         "currencyCode": "AZN",
+        "currencyName": "Azerbaijani Manat",
         "languages": [
             "az"
         ],
@@ -163,6 +177,7 @@
         "country": "Bahamas",
         "countryCode": "BS",
         "currencyCode": "BSD",
+        "currencyName": "Bahamian Dollar",
         "languages": [
             "en"
         ],
@@ -174,6 +189,7 @@
         "country": "Bahrain",
         "countryCode": "BH",
         "currencyCode": "BHD",
+        "currencyName": "Bahraini Dinar",
         "languages": [
             "ar"
         ],
@@ -185,6 +201,7 @@
         "country": "Bangladesh",
         "countryCode": "BD",
         "currencyCode": "BDT",
+        "currencyName": "Bangladeshi Taka",
         "languages": [
             "bn"
         ],
@@ -196,6 +213,7 @@
         "country": "Barbados",
         "countryCode": "BB",
         "currencyCode": "BBD",
+        "currencyName": "Barbadian Dollar",
         "languages": [
             "en"
         ],
@@ -207,6 +225,7 @@
         "country": "Belarus",
         "countryCode": "BY",
         "currencyCode": "BYN",
+        "currencyName": "Belarusian Ruble",
         "languages": [
             "be",
             "ru"
@@ -219,6 +238,7 @@
         "country": "Belgium",
         "countryCode": "BE",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "nl",
             "fr",
@@ -232,6 +252,7 @@
         "country": "Belize",
         "countryCode": "BZ",
         "currencyCode": "BZD",
+        "currencyName": "Belize Dollar",
         "languages": [
             "en",
             "es"
@@ -244,6 +265,7 @@
         "country": "Benin",
         "countryCode": "BJ",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr"
         ],
@@ -255,6 +277,7 @@
         "country": "Bermuda",
         "countryCode": "BM",
         "currencyCode": "BMD",
+        "currencyName": "Bermudan Dollar",
         "languages": [
             "en"
         ],
@@ -266,6 +289,7 @@
         "country": "Bhutan",
         "countryCode": "BT",
         "currencyCode": "BTN",
+        "currencyName": "Bhutanese Ngultrum",
         "languages": [
             "dz"
         ],
@@ -277,6 +301,7 @@
         "country": "Bolivia",
         "countryCode": "BO",
         "currencyCode": "BOB",
+        "currencyName": "Bolivian Boliviano",
         "languages": [
             "es",
             "ay",
@@ -290,6 +315,7 @@
         "country": "Bonaire",
         "countryCode": "BQ",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "nl"
         ],
@@ -301,6 +327,7 @@
         "country": "Bosnia and Herzegovina",
         "countryCode": "BA",
         "currencyCode": "BAM",
+        "currencyName": "Bosnia-Herzegovina Convertible Mark",
         "languages": [
             "bs",
             "hr",
@@ -314,6 +341,7 @@
         "country": "Botswana",
         "countryCode": "BW",
         "currencyCode": "BWP",
+        "currencyName": "Botswanan Pula",
         "languages": [
             "en",
             "tn"
@@ -326,6 +354,7 @@
         "country": "Bouvet Island",
         "countryCode": "BV",
         "currencyCode": "NOK",
+        "currencyName": "Norwegian Krone",
         "languages": [
             "no",
             "nb",
@@ -339,6 +368,7 @@
         "country": "Brazil",
         "countryCode": "BR",
         "currencyCode": "BRL",
+        "currencyName": "Brazilian Real",
         "languages": [
             "de",
             "pt"
@@ -351,6 +381,7 @@
         "country": "British Indian Ocean Territory",
         "countryCode": "IO",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -362,6 +393,7 @@
         "country": "British Virgin Islands",
         "countryCode": "VG",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -373,6 +405,7 @@
         "country": "Brunei",
         "countryCode": "BN",
         "currencyCode": "BND",
+        "currencyName": "Brunei Dollar",
         "languages": [
             "ms"
         ],
@@ -384,6 +417,7 @@
         "country": "Bulgaria",
         "countryCode": "BG",
         "currencyCode": "BGN",
+        "currencyName": "Bulgarian Lev",
         "languages": [
             "bg"
         ],
@@ -395,6 +429,7 @@
         "country": "Burkina Faso",
         "countryCode": "BF",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr",
             "ff"
@@ -407,6 +442,7 @@
         "country": "Burundi",
         "countryCode": "BI",
         "currencyCode": "BIF",
+        "currencyName": "Burundian Franc",
         "languages": [
             "fr",
             "rn"
@@ -419,6 +455,7 @@
         "country": "Cambodia",
         "countryCode": "KH",
         "currencyCode": "KHR",
+        "currencyName": "Cambodian Riel",
         "languages": [
             "km"
         ],
@@ -430,6 +467,7 @@
         "country": "Cameroon",
         "countryCode": "CM",
         "currencyCode": "XAF",
+        "currencyName": "CFA Franc BEAC",
         "languages": [
             "en",
             "fr"
@@ -442,6 +480,7 @@
         "country": "Canada",
         "countryCode": "CA",
         "currencyCode": "CAD",
+        "currencyName": "Canadian Dollar",
         "languages": [
             "en",
             "fr"
@@ -454,6 +493,7 @@
         "country": "Cape Verde",
         "countryCode": "CV",
         "currencyCode": "CVE",
+        "currencyName": "Cape Verdean Escudo",
         "languages": [
             "pt"
         ],
@@ -465,6 +505,7 @@
         "country": "Cayman Islands",
         "countryCode": "KY",
         "currencyCode": "KYD",
+        "currencyName": "Cayman Islands Dollar",
         "languages": [
             "en"
         ],
@@ -476,6 +517,7 @@
         "country": "Central African Republic",
         "countryCode": "CF",
         "currencyCode": "XAF",
+        "currencyName": "CFA Franc BEAC",
         "languages": [
             "fr",
             "sg"
@@ -488,6 +530,7 @@
         "country": "Chad",
         "countryCode": "TD",
         "currencyCode": "XAF",
+        "currencyName": "CFA Franc BEAC",
         "languages": [
             "fr",
             "ar"
@@ -500,6 +543,7 @@
         "country": "Chile",
         "countryCode": "CL",
         "currencyCode": "CLP",
+        "currencyName": "Chilean Peso",
         "languages": [
             "es"
         ],
@@ -511,6 +555,7 @@
         "country": "China",
         "countryCode": "CN",
         "currencyCode": "CNY",
+        "currencyName": "Chinese Yuan",
         "languages": [
             "zh"
         ],
@@ -522,6 +567,7 @@
         "country": "Christmas Island",
         "countryCode": "CX",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -533,6 +579,7 @@
         "country": "Cocos [Keeling] Islands",
         "countryCode": "CC",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -544,6 +591,7 @@
         "country": "Colombia",
         "countryCode": "CO",
         "currencyCode": "COP",
+        "currencyName": "Colombian Peso",
         "languages": [
             "es"
         ],
@@ -555,6 +603,7 @@
         "country": "Comoros",
         "countryCode": "KM",
         "currencyCode": "KMF",
+        "currencyName": "Comorian Franc",
         "languages": [
             "ar",
             "fr"
@@ -567,6 +616,7 @@
         "country": "Cook Islands",
         "countryCode": "CK",
         "currencyCode": "NZD",
+        "currencyName": "New Zealand Dollar",
         "languages": [
             "en"
         ],
@@ -578,6 +628,7 @@
         "country": "Costa Rica",
         "countryCode": "CR",
         "currencyCode": "CRC",
+        "currencyName": "Costa Rican Colón",
         "languages": [
             "es"
         ],
@@ -589,6 +640,7 @@
         "country": "Croatia",
         "countryCode": "HR",
         "currencyCode": "HRK",
+        "currencyName": "Croatian Kuna",
         "languages": [
             "hr",
             "it"
@@ -601,6 +653,7 @@
         "country": "Cuba",
         "countryCode": "CU",
         "currencyCode": "CUP",
+        "currencyName": "Cuban Peso",
         "languages": [
             "es"
         ],
@@ -612,6 +665,7 @@
         "country": "Curacao",
         "countryCode": "CW",
         "currencyCode": "ANG",
+        "currencyName": "Netherlands Antillean Guilder",
         "languages": [
             "nl",
             "pa",
@@ -625,6 +679,7 @@
         "country": "Cyprus",
         "countryCode": "CY",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "el",
             "tr",
@@ -638,6 +693,7 @@
         "country": "Czech Republic",
         "countryCode": "CZ",
         "currencyCode": "CZK",
+        "currencyName": "Czech Republic Koruna",
         "languages": [
             "cs",
             "sk"
@@ -650,6 +706,7 @@
         "country": "Democratic Republic of the Congo",
         "countryCode": "CD",
         "currencyCode": "CDF",
+        "currencyName": "Congolese Franc",
         "languages": [
             "fr",
             "ln",
@@ -665,6 +722,7 @@
         "country": "Denmark",
         "countryCode": "DK",
         "currencyCode": "DKK",
+        "currencyName": "Danish Krone",
         "languages": [
             "da",
             "de"
@@ -677,6 +735,7 @@
         "country": "Djibouti",
         "countryCode": "DJ",
         "currencyCode": "DJF",
+        "currencyName": "Djiboutian Franc",
         "languages": [
             "fr",
             "ar"
@@ -689,6 +748,7 @@
         "country": "Dominica",
         "countryCode": "DM",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -700,6 +760,7 @@
         "country": "Dominican Republic",
         "countryCode": "DO",
         "currencyCode": "DOP",
+        "currencyName": "Dominican Peso",
         "languages": [
             "es"
         ],
@@ -711,6 +772,7 @@
         "country": "East Timor",
         "countryCode": "TL",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "pt"
         ],
@@ -722,6 +784,7 @@
         "country": "Ecuador",
         "countryCode": "EC",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "es"
         ],
@@ -733,6 +796,7 @@
         "country": "Egypt",
         "countryCode": "EG",
         "currencyCode": "EGP",
+        "currencyName": "Egyptian Pound",
         "languages": [
             "ar"
         ],
@@ -744,6 +808,7 @@
         "country": "El Salvador",
         "countryCode": "SV",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "es"
         ],
@@ -755,6 +820,7 @@
         "country": "Equatorial Guinea",
         "countryCode": "GQ",
         "currencyCode": "XAF",
+        "currencyName": "CFA Franc BEAC",
         "languages": [
             "es",
             "fr"
@@ -767,6 +833,7 @@
         "country": "Eritrea",
         "countryCode": "ER",
         "currencyCode": "ERN",
+        "currencyName": "Eritrean Nakfa",
         "languages": [
             "ti",
             "ar",
@@ -780,6 +847,7 @@
         "country": "Estonia",
         "countryCode": "EE",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "et"
         ],
@@ -791,6 +859,7 @@
         "country": "Ethiopia",
         "countryCode": "ET",
         "currencyCode": "ETB",
+        "currencyName": "Ethiopian Birr",
         "languages": [
             "am"
         ],
@@ -802,6 +871,7 @@
         "country": "Falkland Islands",
         "countryCode": "FK",
         "currencyCode": "FKP",
+        "currencyName": "Falkland Islands Pound",
         "languages": [
             "en"
         ],
@@ -813,6 +883,7 @@
         "country": "Faroe Islands",
         "countryCode": "FO",
         "currencyCode": "DKK",
+        "currencyName": "Danish Krone",
         "languages": [
             "fo"
         ],
@@ -824,6 +895,7 @@
         "country": "Fiji",
         "countryCode": "FJ",
         "currencyCode": "FJD",
+        "currencyName": "Fijian Dollar",
         "languages": [
             "en",
             "fj",
@@ -838,6 +910,7 @@
         "country": "Finland",
         "countryCode": "FI",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fi",
             "sv"
@@ -850,6 +923,7 @@
         "country": "France",
         "countryCode": "FR",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -861,6 +935,7 @@
         "country": "French Guiana",
         "countryCode": "GF",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -872,6 +947,7 @@
         "country": "French Polynesia",
         "countryCode": "PF",
         "currencyCode": "XPF",
+        "currencyName": "CFP Franc",
         "languages": [
             "fr"
         ],
@@ -883,6 +959,7 @@
         "country": "French Southern Territories",
         "countryCode": "TF",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -894,6 +971,7 @@
         "country": "Gabon",
         "countryCode": "GA",
         "currencyCode": "XAF",
+        "currencyName": "CFA Franc BEAC",
         "languages": [
             "fr"
         ],
@@ -905,6 +983,7 @@
         "country": "Gambia",
         "countryCode": "GM",
         "currencyCode": "GMD",
+        "currencyName": "Gambian Dalasi",
         "languages": [
             "en"
         ],
@@ -916,6 +995,7 @@
         "country": "Georgia",
         "countryCode": "GE",
         "currencyCode": "GEL",
+        "currencyName": "Georgian Lari",
         "languages": [
             "ka"
         ],
@@ -927,6 +1007,7 @@
         "country": "Germany",
         "countryCode": "DE",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "de"
         ],
@@ -938,6 +1019,7 @@
         "country": "Ghana",
         "countryCode": "GH",
         "currencyCode": "GHS",
+        "currencyName": "Ghanaian Cedi",
         "languages": [
             "en"
         ],
@@ -949,6 +1031,7 @@
         "country": "Gibraltar",
         "countryCode": "GI",
         "currencyCode": "GIP",
+        "currencyName": "Gibraltar Pound",
         "languages": [
             "en"
         ],
@@ -960,6 +1043,7 @@
         "country": "Greece",
         "countryCode": "GR",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "el"
         ],
@@ -971,6 +1055,7 @@
         "country": "Greenland",
         "countryCode": "GL",
         "currencyCode": "DKK",
+        "currencyName": "Danish Krone",
         "languages": [
             "kl"
         ],
@@ -982,6 +1067,7 @@
         "country": "Grenada",
         "countryCode": "GD",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -993,6 +1079,7 @@
         "country": "Guadeloupe",
         "countryCode": "GP",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -1004,6 +1091,7 @@
         "country": "Guam",
         "countryCode": "GU",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en",
             "ch",
@@ -1017,6 +1105,7 @@
         "country": "Guatemala",
         "countryCode": "GT",
         "currencyCode": "GTQ",
+        "currencyName": "Guatemalan Quetzal",
         "languages": [
             "es"
         ],
@@ -1028,6 +1117,7 @@
         "country": "Guernsey",
         "countryCode": "GG",
         "currencyCode": "GBP",
+        "currencyName": "British Pound Sterling",
         "languages": [
             "en",
             "fr"
@@ -1040,6 +1130,7 @@
         "country": "Guinea",
         "countryCode": "GN",
         "currencyCode": "GNF",
+        "currencyName": "Guinean Franc",
         "languages": [
             "fr",
             "ff"
@@ -1052,6 +1143,7 @@
         "country": "Guinea-Bissau",
         "countryCode": "GW",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "pt"
         ],
@@ -1063,6 +1155,7 @@
         "country": "Guyana",
         "countryCode": "GY",
         "currencyCode": "GYD",
+        "currencyName": "Guyanaese Dollar",
         "languages": [
             "en"
         ],
@@ -1074,6 +1167,7 @@
         "country": "Haiti",
         "countryCode": "HT",
         "currencyCode": "HTG",
+        "currencyName": "Haitian Gourde",
         "languages": [
             "fr",
             "ht"
@@ -1086,6 +1180,7 @@
         "country": "Heard Island and McDonald Islands",
         "countryCode": "HM",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -1097,6 +1192,7 @@
         "country": "Honduras",
         "countryCode": "HN",
         "currencyCode": "HNL",
+        "currencyName": "Honduran Lempira",
         "languages": [
             "es"
         ],
@@ -1108,6 +1204,7 @@
         "country": "Hong Kong",
         "countryCode": "HK",
         "currencyCode": "HKD",
+        "currencyName": "Hong Kong Dollar",
         "languages": [],
         "name": "Hong Kong Dollar",
         "symbol": "HK$",
@@ -1117,6 +1214,7 @@
         "country": "Hungary",
         "countryCode": "HU",
         "currencyCode": "HUF",
+        "currencyName": "Hungarian Forint",
         "languages": [
             "hu"
         ],
@@ -1128,6 +1226,7 @@
         "country": "Iceland",
         "countryCode": "IS",
         "currencyCode": "ISK",
+        "currencyName": "Icelandic Króna",
         "languages": [
             "is"
         ],
@@ -1139,6 +1238,7 @@
         "country": "India",
         "countryCode": "IN",
         "currencyCode": "INR",
+        "currencyName": "Indian Rupee",
         "languages": [
             "en",
             "bn",
@@ -1157,6 +1257,7 @@
         "country": "Indonesia",
         "countryCode": "ID",
         "currencyCode": "IDR",
+        "currencyName": "Indonesian Rupiah",
         "languages": [
             "id",
             "ms"
@@ -1169,6 +1270,7 @@
         "country": "Iran",
         "countryCode": "IR",
         "currencyCode": "IRR",
+        "currencyName": "Iranian Rial",
         "languages": [
             "fa"
         ],
@@ -1180,6 +1282,7 @@
         "country": "Iraq",
         "countryCode": "IQ",
         "currencyCode": "IQD",
+        "currencyName": "Iraqi Dinar",
         "languages": [
             "ar",
             "ku"
@@ -1192,6 +1295,7 @@
         "country": "Ireland",
         "countryCode": "IE",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "ga",
             "en"
@@ -1204,6 +1308,7 @@
         "country": "Isle of Man",
         "countryCode": "IM",
         "currencyCode": "GBP",
+        "currencyName": "British Pound Sterling",
         "languages": [
             "en",
             "gv"
@@ -1216,6 +1321,7 @@
         "country": "Israel",
         "countryCode": "IL",
         "currencyCode": "ILS",
+        "currencyName": "Israeli New Sheqel",
         "languages": [
             "ar",
             "he"
@@ -1228,6 +1334,7 @@
         "country": "Italy",
         "countryCode": "IT",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "it"
         ],
@@ -1239,6 +1346,7 @@
         "country": "Ivory Coast",
         "countryCode": "CI",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr"
         ],
@@ -1250,6 +1358,7 @@
         "country": "Jamaica",
         "countryCode": "JM",
         "currencyCode": "JMD",
+        "currencyName": "Jamaican Dollar",
         "languages": [
             "en"
         ],
@@ -1261,6 +1370,7 @@
         "country": "Japan",
         "countryCode": "JP",
         "currencyCode": "JPY",
+        "currencyName": "Japanese Yen",
         "languages": [
             "ja"
         ],
@@ -1272,6 +1382,7 @@
         "country": "Jersey",
         "countryCode": "JE",
         "currencyCode": "GBP",
+        "currencyName": "British Pound Sterling",
         "languages": [
             "en",
             "fr"
@@ -1284,6 +1395,7 @@
         "country": "Jordan",
         "countryCode": "JO",
         "currencyCode": "JOD",
+        "currencyName": "Jordanian Dinar",
         "languages": [
             "ar"
         ],
@@ -1295,6 +1407,7 @@
         "country": "Kazakhstan",
         "countryCode": "KZ",
         "currencyCode": "KZT",
+        "currencyName": "Kazakhstani Tenge",
         "languages": [
             "kk",
             "ru"
@@ -1307,6 +1420,7 @@
         "country": "Kenya",
         "countryCode": "KE",
         "currencyCode": "KES",
+        "currencyName": "Kenyan Shilling",
         "languages": [
             "en",
             "sw"
@@ -1319,6 +1433,7 @@
         "country": "Kiribati",
         "countryCode": "KI",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -1330,6 +1445,7 @@
         "country": "Korea, Republic of",
         "countryCode": "KR",
         "currencyCode": "KRW",
+        "currencyName": "South Korean Won",
         "languages": [
             "ko"
         ],
@@ -1341,6 +1457,7 @@
         "country": "Kosovo",
         "countryCode": "XK",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "sq",
             "sr"
@@ -1353,6 +1470,7 @@
         "country": "Kuwait",
         "countryCode": "KW",
         "currencyCode": "KWD",
+        "currencyName": "Kuwaiti Dinar",
         "languages": [
             "ar"
         ],
@@ -1364,6 +1482,7 @@
         "country": "Kyrgyzstan",
         "countryCode": "KG",
         "currencyCode": "KGS",
+        "currencyName": "Kyrgystani Som",
         "languages": [
             "ky",
             "ru"
@@ -1376,6 +1495,7 @@
         "country": "Laos",
         "countryCode": "LA",
         "currencyCode": "LAK",
+        "currencyName": "Laotian Kip",
         "languages": [
             "lo"
         ],
@@ -1387,6 +1507,7 @@
         "country": "Latvia",
         "countryCode": "LV",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "lv"
         ],
@@ -1398,6 +1519,7 @@
         "country": "Lebanon",
         "countryCode": "LB",
         "currencyCode": "LBP",
+        "currencyName": "Lebanese Pound",
         "languages": [
             "ar",
             "fr"
@@ -1410,6 +1532,7 @@
         "country": "Lesotho",
         "countryCode": "LS",
         "currencyCode": "LSL",
+        "currencyName": "Lesotho Loti",
         "languages": [
             "en",
             "st"
@@ -1422,6 +1545,7 @@
         "country": "Liberia",
         "countryCode": "LR",
         "currencyCode": "LRD",
+        "currencyName": "Liberian Dollar",
         "languages": [
             "en"
         ],
@@ -1433,6 +1557,7 @@
         "country": "Libya",
         "countryCode": "LY",
         "currencyCode": "LYD",
+        "currencyName": "Libyan Dinar",
         "languages": [
             "ar"
         ],
@@ -1444,6 +1569,7 @@
         "country": "Liechtenstein",
         "countryCode": "LI",
         "currencyCode": "CHF",
+        "currencyName": "Swiss Franc",
         "languages": [
             "de"
         ],
@@ -1455,6 +1581,7 @@
         "country": "Lithuania",
         "countryCode": "LT",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "lt"
         ],
@@ -1466,6 +1593,7 @@
         "country": "Luxembourg",
         "countryCode": "LU",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr",
             "de",
@@ -1479,6 +1607,7 @@
         "country": "Macao",
         "countryCode": "MO",
         "currencyCode": "MOP",
+        "currencyName": "Macanese Pataca",
         "languages": [
             "zh",
             "pt"
@@ -1491,6 +1620,7 @@
         "country": "Madagascar",
         "countryCode": "MG",
         "currencyCode": "MGA",
+        "currencyName": "Malagasy Ariary",
         "languages": [
             "fr",
             "mg"
@@ -1503,6 +1633,7 @@
         "country": "Malawi",
         "countryCode": "MW",
         "currencyCode": "MWK",
+        "currencyName": "Malawian Kwacha",
         "languages": [
             "en",
             "ny"
@@ -1515,6 +1646,7 @@
         "country": "Malaysia",
         "countryCode": "MY",
         "currencyCode": "MYR",
+        "currencyName": "Malaysian Ringgit",
         "languages": [
             "en",
             "ms"
@@ -1527,6 +1659,7 @@
         "country": "Maldives",
         "countryCode": "MV",
         "currencyCode": "MVR",
+        "currencyName": "Maldivian Rufiyaa",
         "languages": [
             "dv"
         ],
@@ -1538,6 +1671,7 @@
         "country": "Mali",
         "countryCode": "ML",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr"
         ],
@@ -1549,6 +1683,7 @@
         "country": "Malta",
         "countryCode": "MT",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "mt",
             "en"
@@ -1561,6 +1696,7 @@
         "country": "Marshall Islands",
         "countryCode": "MH",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en",
             "mh"
@@ -1573,6 +1709,7 @@
         "country": "Martinique",
         "countryCode": "MQ",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -1584,6 +1721,7 @@
         "country": "Mauritania",
         "countryCode": "MR",
         "currencyCode": "MRO",
+        "currencyName": "Mauritanian Ouguiya (pre-2018)",
         "languages": [
             "ar"
         ],
@@ -1595,6 +1733,7 @@
         "country": "Mauritius",
         "countryCode": "MU",
         "currencyCode": "MUR",
+        "currencyName": "Mauritian Rupee",
         "languages": [
             "en"
         ],
@@ -1606,6 +1745,7 @@
         "country": "Mayotte",
         "countryCode": "YT",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -1617,6 +1757,7 @@
         "country": "Mexico",
         "countryCode": "MX",
         "currencyCode": "MXN",
+        "currencyName": "Mexican Peso",
         "languages": [
             "es"
         ],
@@ -1628,6 +1769,7 @@
         "country": "Micronesia",
         "countryCode": "FM",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -1639,6 +1781,7 @@
         "country": "Moldova",
         "countryCode": "MD",
         "currencyCode": "MDL",
+        "currencyName": "Moldovan Leu",
         "languages": [
             "ro"
         ],
@@ -1650,6 +1793,7 @@
         "country": "Monaco",
         "countryCode": "MC",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -1661,6 +1805,7 @@
         "country": "Mongolia",
         "countryCode": "MN",
         "currencyCode": "MNT",
+        "currencyName": "Mongolian Tugrik",
         "languages": [
             "mn"
         ],
@@ -1672,6 +1817,7 @@
         "country": "Montenegro",
         "countryCode": "ME",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "sr",
             "bs",
@@ -1686,6 +1832,7 @@
         "country": "Montserrat",
         "countryCode": "MS",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -1697,6 +1844,7 @@
         "country": "Morocco",
         "countryCode": "MA",
         "currencyCode": "MAD",
+        "currencyName": "Moroccan Dirham",
         "languages": [
             "ar"
         ],
@@ -1708,6 +1856,7 @@
         "country": "Mozambique",
         "countryCode": "MZ",
         "currencyCode": "MZN",
+        "currencyName": "Mozambican Metical",
         "languages": [
             "pt"
         ],
@@ -1719,6 +1868,7 @@
         "country": "Myanmar [Burma]",
         "countryCode": "MM",
         "currencyCode": "MMK",
+        "currencyName": "Myanma Kyat",
         "languages": [
             "my"
         ],
@@ -1730,6 +1880,7 @@
         "country": "Namibia",
         "countryCode": "NA",
         "currencyCode": "NAD",
+        "currencyName": "Namibian Dollar",
         "languages": [
             "en",
             "af"
@@ -1742,6 +1893,7 @@
         "country": "Nauru",
         "countryCode": "NR",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en",
             "na"
@@ -1754,6 +1906,7 @@
         "country": "Nepal",
         "countryCode": "NP",
         "currencyCode": "NPR",
+        "currencyName": "Nepalese Rupee",
         "languages": [
             "ne"
         ],
@@ -1765,6 +1918,7 @@
         "country": "Netherlands",
         "countryCode": "NL",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "nl"
         ],
@@ -1776,6 +1930,7 @@
         "country": "New Caledonia",
         "countryCode": "NC",
         "currencyCode": "XPF",
+        "currencyName": "CFP Franc",
         "languages": [
             "fr"
         ],
@@ -1787,6 +1942,7 @@
         "country": "New Zealand",
         "countryCode": "NZ",
         "currencyCode": "NZD",
+        "currencyName": "New Zealand Dollar",
         "languages": [
             "en"
         ],
@@ -1798,6 +1954,7 @@
         "country": "Nicaragua",
         "countryCode": "NI",
         "currencyCode": "NIO",
+        "currencyName": "Nicaraguan Córdoba",
         "languages": [
             "es"
         ],
@@ -1809,6 +1966,7 @@
         "country": "Niger",
         "countryCode": "NE",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr"
         ],
@@ -1820,6 +1978,7 @@
         "country": "Nigeria",
         "countryCode": "NG",
         "currencyCode": "NGN",
+        "currencyName": "Nigerian Naira",
         "languages": [
             "en"
         ],
@@ -1831,6 +1990,7 @@
         "country": "Niue",
         "countryCode": "NU",
         "currencyCode": "NZD",
+        "currencyName": "New Zealand Dollar",
         "languages": [
             "en"
         ],
@@ -1842,6 +2002,7 @@
         "country": "Norfolk Island",
         "countryCode": "NF",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -1853,6 +2014,7 @@
         "country": "North Korea",
         "countryCode": "KP",
         "currencyCode": "KPW",
+        "currencyName": "North Korean Won",
         "languages": [
             "ko"
         ],
@@ -1864,6 +2026,7 @@
         "country": "North Macedonia",
         "countryCode": "MK",
         "currencyCode": "MKD",
+        "currencyName": "Macedonian Denar",
         "languages": [
             "mk"
         ],
@@ -1875,6 +2038,7 @@
         "country": "Northern Mariana Islands",
         "countryCode": "MP",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en",
             "ch"
@@ -1887,6 +2051,7 @@
         "country": "Norway",
         "countryCode": "NO",
         "currencyCode": "NOK",
+        "currencyName": "Norwegian Krone",
         "languages": [
             "no",
             "ro"
@@ -1899,6 +2064,7 @@
         "country": "Oman",
         "countryCode": "OM",
         "currencyCode": "OMR",
+        "currencyName": "Omani Rial",
         "languages": [
             "ar"
         ],
@@ -1910,6 +2076,7 @@
         "country": "Pakistan",
         "countryCode": "PK",
         "currencyCode": "PKR",
+        "currencyName": "Pakistani Rupee",
         "languages": [
             "en",
             "ur"
@@ -1922,6 +2089,7 @@
         "country": "Palau",
         "countryCode": "PW",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -1933,6 +2101,7 @@
         "country": "Palestine",
         "countryCode": "PS",
         "currencyCode": "ILS",
+        "currencyName": "Israeli New Sheqel",
         "languages": [
             "ar"
         ],
@@ -1944,6 +2113,7 @@
         "country": "Panama",
         "countryCode": "PA",
         "currencyCode": "PAB",
+        "currencyName": "Panamanian Balboa",
         "languages": [
             "es"
         ],
@@ -1955,6 +2125,7 @@
         "country": "Papua New Guinea",
         "countryCode": "PG",
         "currencyCode": "PGK",
+        "currencyName": "Papua New Guinean Kina",
         "languages": [
             "en"
         ],
@@ -1966,6 +2137,7 @@
         "country": "Paraguay",
         "countryCode": "PY",
         "currencyCode": "PYG",
+        "currencyName": "Paraguayan Guarani",
         "languages": [
             "es",
             "gn"
@@ -1978,6 +2150,7 @@
         "country": "Peru",
         "countryCode": "PE",
         "currencyCode": "PEN",
+        "currencyName": "Peruvian Nuevo Sol",
         "languages": [
             "es"
         ],
@@ -1989,6 +2162,7 @@
         "country": "Philippines",
         "countryCode": "PH",
         "currencyCode": "PHP",
+        "currencyName": "Philippine Peso",
         "languages": [
             "en",
             "ar",
@@ -2002,6 +2176,7 @@
         "country": "Pitcairn Islands",
         "countryCode": "PN",
         "currencyCode": "NZD",
+        "currencyName": "New Zealand Dollar",
         "languages": [
             "en"
         ],
@@ -2013,6 +2188,7 @@
         "country": "Poland",
         "countryCode": "PL",
         "currencyCode": "PLN",
+        "currencyName": "Polish Zloty",
         "languages": [
             "de",
             "lt",
@@ -2026,6 +2202,7 @@
         "country": "Portugal",
         "countryCode": "PT",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "pt"
         ],
@@ -2037,6 +2214,7 @@
         "country": "Puerto Rico",
         "countryCode": "PR",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "es",
             "en"
@@ -2049,6 +2227,7 @@
         "country": "Qatar",
         "countryCode": "QA",
         "currencyCode": "QAR",
+        "currencyName": "Qatari Rial",
         "languages": [
             "ar"
         ],
@@ -2060,6 +2239,7 @@
         "country": "Republic of the Congo",
         "countryCode": "CG",
         "currencyCode": "XAF",
+        "currencyName": "CFA Franc BEAC",
         "languages": [
             "fr",
             "ln"
@@ -2072,6 +2252,7 @@
         "country": "Romania",
         "countryCode": "RO",
         "currencyCode": "RON",
+        "currencyName": "Romanian Leu",
         "languages": [
             "ro"
         ],
@@ -2083,6 +2264,7 @@
         "country": "Russia",
         "countryCode": "RU",
         "currencyCode": "RUB",
+        "currencyName": "Russian Ruble",
         "languages": [
             "ru"
         ],
@@ -2094,6 +2276,7 @@
         "country": "Rwanda",
         "countryCode": "RW",
         "currencyCode": "RWF",
+        "currencyName": "Rwandan Franc",
         "languages": [
             "rw",
             "en",
@@ -2107,6 +2290,7 @@
         "country": "Réunion",
         "countryCode": "RE",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -2118,6 +2302,7 @@
         "country": "Saint Barthélemy",
         "countryCode": "BL",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -2129,6 +2314,7 @@
         "country": "Saint Helena",
         "countryCode": "SH",
         "currencyCode": "SHP",
+        "currencyName": "Saint Helena Pound",
         "languages": [
             "en"
         ],
@@ -2140,6 +2326,7 @@
         "country": "Saint Kitts and Nevis",
         "countryCode": "KN",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -2151,6 +2338,7 @@
         "country": "Saint Lucia",
         "countryCode": "LC",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -2162,6 +2350,7 @@
         "country": "Saint Martin",
         "countryCode": "MF",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "en",
             "fr",
@@ -2175,6 +2364,7 @@
         "country": "Saint Pierre and Miquelon",
         "countryCode": "PM",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "fr"
         ],
@@ -2186,6 +2376,7 @@
         "country": "Saint Vincent and the Grenadines",
         "countryCode": "VC",
         "currencyCode": "XCD",
+        "currencyName": "East Caribbean Dollar",
         "languages": [
             "en"
         ],
@@ -2197,6 +2388,7 @@
         "country": "Samoa",
         "countryCode": "WS",
         "currencyCode": "WST",
+        "currencyName": "Samoan Tala",
         "languages": [
             "sm",
             "en"
@@ -2209,6 +2401,7 @@
         "country": "San Marino",
         "countryCode": "SM",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "it"
         ],
@@ -2220,6 +2413,7 @@
         "country": "Saudi Arabia",
         "countryCode": "SA",
         "currencyCode": "SAR",
+        "currencyName": "Saudi Riyal",
         "languages": [
             "ar"
         ],
@@ -2231,6 +2425,7 @@
         "country": "Senegal",
         "countryCode": "SN",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr"
         ],
@@ -2242,6 +2437,7 @@
         "country": "Serbia",
         "countryCode": "RS",
         "currencyCode": "RSD",
+        "currencyName": "Serbian Dinar",
         "languages": [
             "sr"
         ],
@@ -2253,6 +2449,7 @@
         "country": "Seychelles",
         "countryCode": "SC",
         "currencyCode": "SCR",
+        "currencyName": "Seychellois Rupee",
         "languages": [
             "fr",
             "en"
@@ -2265,6 +2462,7 @@
         "country": "Sierra Leone",
         "countryCode": "SL",
         "currencyCode": "SLL",
+        "currencyName": "Sierra Leonean Leone",
         "languages": [
             "en"
         ],
@@ -2276,6 +2474,7 @@
         "country": "Singapore",
         "countryCode": "SG",
         "currencyCode": "SGD",
+        "currencyName": "Singapore Dollar",
         "languages": [
             "en",
             "ms",
@@ -2290,6 +2489,7 @@
         "country": "Sint Maarten",
         "countryCode": "SX",
         "currencyCode": "ANG",
+        "currencyName": "Netherlands Antillean Guilder",
         "languages": [
             "nl",
             "en"
@@ -2302,6 +2502,7 @@
         "country": "Slovakia",
         "countryCode": "SK",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "sk"
         ],
@@ -2313,6 +2514,7 @@
         "country": "Slovenia",
         "countryCode": "SI",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "sl"
         ],
@@ -2324,6 +2526,7 @@
         "country": "Solomon Islands",
         "countryCode": "SB",
         "currencyCode": "SBD",
+        "currencyName": "Solomon Islands Dollar",
         "languages": [
             "en"
         ],
@@ -2335,6 +2538,7 @@
         "country": "Somalia",
         "countryCode": "SO",
         "currencyCode": "SOS",
+        "currencyName": "Somali Shilling",
         "languages": [
             "so",
             "ar"
@@ -2347,6 +2551,7 @@
         "country": "South Africa",
         "countryCode": "ZA",
         "currencyCode": "ZAR",
+        "currencyName": "South African Rand",
         "languages": [
             "en",
             "af"
@@ -2359,6 +2564,7 @@
         "country": "South Georgia and the South Sandwich Islands",
         "countryCode": "GS",
         "currencyCode": "GBP",
+        "currencyName": "British Pound Sterling",
         "languages": [
             "en"
         ],
@@ -2370,6 +2576,7 @@
         "country": "South Sudan",
         "countryCode": "SS",
         "currencyCode": "SSP",
+        "currencyName": "South Sudanese Pound",
         "languages": [
             "en"
         ],
@@ -2381,6 +2588,7 @@
         "country": "Spain",
         "countryCode": "ES",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "es",
             "eu",
@@ -2396,6 +2604,7 @@
         "country": "Sri Lanka",
         "countryCode": "LK",
         "currencyCode": "LKR",
+        "currencyName": "Sri Lankan Rupee",
         "languages": [
             "si",
             "ta"
@@ -2408,6 +2617,7 @@
         "country": "Sudan",
         "countryCode": "SD",
         "currencyCode": "SDG",
+        "currencyName": "Sudanese Pound",
         "languages": [
             "ar",
             "en"
@@ -2420,6 +2630,7 @@
         "country": "Suriname",
         "countryCode": "SR",
         "currencyCode": "SRD",
+        "currencyName": "Surinamese Dollar",
         "languages": [
             "nl"
         ],
@@ -2431,6 +2642,7 @@
         "country": "Svalbard and Jan Mayen",
         "countryCode": "SJ",
         "currencyCode": "NOK",
+        "currencyName": "Norwegian Krone",
         "languages": [
             "no"
         ],
@@ -2442,6 +2654,7 @@
         "country": "Swaziland",
         "countryCode": "SZ",
         "currencyCode": "SZL",
+        "currencyName": "Swazi Lilangeni",
         "languages": [
             "en",
             "ss"
@@ -2454,6 +2667,7 @@
         "country": "Sweden",
         "countryCode": "SE",
         "currencyCode": "SEK",
+        "currencyName": "Swedish Krona",
         "languages": [
             "fi",
             "ro",
@@ -2467,6 +2681,7 @@
         "country": "Switzerland",
         "countryCode": "CH",
         "currencyCode": "CHF",
+        "currencyName": "Swiss Franc",
         "languages": [
             "de",
             "fr",
@@ -2480,6 +2695,7 @@
         "country": "Syria",
         "countryCode": "SY",
         "currencyCode": "SYP",
+        "currencyName": "Syrian Pound",
         "languages": [
             "ar"
         ],
@@ -2491,6 +2707,7 @@
         "country": "São Tomé and Príncipe",
         "countryCode": "ST",
         "currencyCode": "STD",
+        "currencyName": "São Tomé and Príncipe Dobra (pre-2018)",
         "languages": [
             "pt"
         ],
@@ -2502,6 +2719,7 @@
         "country": "Taiwan",
         "countryCode": "TW",
         "currencyCode": "TWD",
+        "currencyName": "New Taiwan Dollar",
         "languages": [
             "zh"
         ],
@@ -2513,6 +2731,7 @@
         "country": "Tajikistan",
         "countryCode": "TJ",
         "currencyCode": "TJS",
+        "currencyName": "Tajikistani Somoni",
         "languages": [
             "tg",
             "ru"
@@ -2525,6 +2744,7 @@
         "country": "Tanzania",
         "countryCode": "TZ",
         "currencyCode": "TZS",
+        "currencyName": "Tanzanian Shilling",
         "languages": [
             "sw",
             "en"
@@ -2537,6 +2757,7 @@
         "country": "Thailand",
         "countryCode": "TH",
         "currencyCode": "THB",
+        "currencyName": "Thai Baht",
         "languages": [
             "th"
         ],
@@ -2548,6 +2769,7 @@
         "country": "Togo",
         "countryCode": "TG",
         "currencyCode": "XOF",
+        "currencyName": "CFA Franc BCEAO",
         "languages": [
             "fr"
         ],
@@ -2559,6 +2781,7 @@
         "country": "Tokelau",
         "countryCode": "TK",
         "currencyCode": "NZD",
+        "currencyName": "New Zealand Dollar",
         "languages": [
             "en"
         ],
@@ -2570,6 +2793,7 @@
         "country": "Tonga",
         "countryCode": "TO",
         "currencyCode": "TOP",
+        "currencyName": "Tongan Pa'anga",
         "languages": [
             "en",
             "to"
@@ -2582,6 +2806,7 @@
         "country": "Trinidad and Tobago",
         "countryCode": "TT",
         "currencyCode": "TTD",
+        "currencyName": "Trinidad and Tobago Dollar",
         "languages": [
             "en"
         ],
@@ -2593,6 +2818,7 @@
         "country": "Tunisia",
         "countryCode": "TN",
         "currencyCode": "TND",
+        "currencyName": "Tunisian Dinar",
         "languages": [
             "ar"
         ],
@@ -2604,6 +2830,7 @@
         "country": "Turkey",
         "countryCode": "TR",
         "currencyCode": "TRY",
+        "currencyName": "Turkish Lira",
         "languages": [
             "tr"
         ],
@@ -2615,6 +2842,7 @@
         "country": "Turkmenistan",
         "countryCode": "TM",
         "currencyCode": "TMT",
+        "currencyName": "Turkmenistani Manat",
         "languages": [
             "tk",
             "ru"
@@ -2627,6 +2855,7 @@
         "country": "Turks and Caicos Islands",
         "countryCode": "TC",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -2638,6 +2867,7 @@
         "country": "Tuvalu",
         "countryCode": "TV",
         "currencyCode": "AUD",
+        "currencyName": "Australian Dollar",
         "languages": [
             "en"
         ],
@@ -2649,6 +2879,7 @@
         "country": "U.S. Minor Outlying Islands",
         "countryCode": "UM",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -2660,6 +2891,7 @@
         "country": "U.S. Virgin Islands",
         "countryCode": "VI",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en"
         ],
@@ -2671,6 +2903,7 @@
         "country": "Uganda",
         "countryCode": "UG",
         "currencyCode": "UGX",
+        "currencyName": "Ugandan Shilling",
         "languages": [
             "en",
             "sw"
@@ -2683,6 +2916,7 @@
         "country": "Ukraine",
         "countryCode": "UA",
         "currencyCode": "UAH",
+        "currencyName": "Ukrainian Hryvnia",
         "languages": [
             "uk"
         ],
@@ -2694,6 +2928,7 @@
         "country": "United Arab Emirates",
         "countryCode": "AE",
         "currencyCode": "AED",
+        "currencyName": "United Arab Emirates Dirham",
         "languages": [
             "ar"
         ],
@@ -2705,6 +2940,7 @@
         "country": "United Kingdom",
         "countryCode": "GB",
         "currencyCode": "GBP",
+        "currencyName": "British Pound Sterling",
         "languages": [
             "en"
         ],
@@ -2716,6 +2952,7 @@
         "country": "United States",
         "countryCode": "US",
         "currencyCode": "USD",
+        "currencyName": "United States Dollar",
         "languages": [
             "en",
             "es",
@@ -2729,6 +2966,7 @@
         "country": "Uruguay",
         "countryCode": "UY",
         "currencyCode": "UYU",
+        "currencyName": "Uruguayan Peso",
         "languages": [
             "es"
         ],
@@ -2740,6 +2978,7 @@
         "country": "Uzbekistan",
         "countryCode": "UZ",
         "currencyCode": "UZS",
+        "currencyName": "Uzbekistan Som",
         "languages": [
             "uz",
             "ru"
@@ -2752,6 +2991,7 @@
         "country": "Vanuatu",
         "countryCode": "VU",
         "currencyCode": "VUV",
+        "currencyName": "Vanuatu Vatu",
         "languages": [
             "bi",
             "en",
@@ -2765,6 +3005,7 @@
         "country": "Vatican City",
         "countryCode": "VA",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "it",
             "la"
@@ -2777,6 +3018,7 @@
         "country": "Venezuela",
         "countryCode": "VE",
         "currencyCode": "VEF",
+        "currencyName": "Venezuelan Bolívar Fuerte (Old)",
         "languages": [
             "es"
         ],
@@ -2788,6 +3030,7 @@
         "country": "Vietnam",
         "countryCode": "VN",
         "currencyCode": "VND",
+        "currencyName": "Vietnamese Dong",
         "languages": [
             "vi"
         ],
@@ -2799,6 +3042,7 @@
         "country": "Wallis and Futuna",
         "countryCode": "WF",
         "currencyCode": "XPF",
+        "currencyName": "CFP Franc",
         "languages": [
             "fr"
         ],
@@ -2810,6 +3054,7 @@
         "country": "Western Sahara",
         "countryCode": "EH",
         "currencyCode": "MAD",
+        "currencyName": "Moroccan Dirham",
         "languages": [
             "es"
         ],
@@ -2821,6 +3066,7 @@
         "country": "Yemen",
         "countryCode": "YE",
         "currencyCode": "YER",
+        "currencyName": "Yemeni Rial",
         "languages": [
             "ar"
         ],
@@ -2832,6 +3078,7 @@
         "country": "Zambia",
         "countryCode": "ZM",
         "currencyCode": "ZMW",
+        "currencyName": "Zambian Kwacha",
         "languages": [
             "en"
         ],
@@ -2843,6 +3090,7 @@
         "country": "Zimbabwe",
         "countryCode": "ZW",
         "currencyCode": "ZWL",
+        "currencyName": "Zimbabwean Dollar",
         "languages": [
             "en",
             "sn",
@@ -2856,6 +3104,7 @@
         "country": "Åland",
         "countryCode": "AX",
         "currencyCode": "EUR",
+        "currencyName": "Euro",
         "languages": [
             "sv"
         ],

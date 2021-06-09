@@ -21,6 +21,7 @@ import {
   simplifyValues,
   customerAccount,
   customerContact,
+  getUniqueCurrencies
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -32,13 +33,11 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import currencies from "../../../constants/currency_with_country.json";
 import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ManageContactDialog from "../../Contact/ManageContact";
-import ManageContact from "../../Contact/ManageContact/ManageContact";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -236,7 +235,7 @@ export default function ManageQuoteDialog({
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
             setCurrencySymbol(
-              currencies.find((d) => d.currencyCode === dataToUpdate["currency"])
+              getUniqueCurrencies().find((d) => d.currencyCode === dataToUpdate["currency"])
                 ?.symbolNative
             );
           }
