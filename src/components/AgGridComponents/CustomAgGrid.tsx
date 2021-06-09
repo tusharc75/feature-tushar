@@ -106,7 +106,8 @@ export const intialState = {
 }
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
-    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200, isClientSideGrid = false }) {
+    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200,
+    isClientSideGrid = false, handleGridReady = null }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
@@ -117,8 +118,8 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
     const onGridReady = (params) => {
         setGridApi(params.api);
         setColumnApi(params.columnApi);
-
         setClientSideGridApi(params.api);
+        if (handleGridReady) handleGridReady(params)
     }
 
     var customFilterParams = {

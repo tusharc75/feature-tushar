@@ -127,7 +127,6 @@ const User: FC = () => {
   }: any = useData();
   const history = useHistory();
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -432,7 +431,6 @@ const User: FC = () => {
           assignedRoles={null}
           onSuccess={() => {
             handleCloseDialog();
-            setSelectedUsers([]);
           }}
         />
       )}

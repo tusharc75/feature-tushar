@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip, MenuItem, Menu } from '@material-ui/core'
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -17,6 +17,7 @@ import { BsBuilding } from 'react-icons/bs';
 import { useData } from '../../StateProvider/Provider';
 import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { MoreVert } from '@material-ui/icons';
 
 const Accordion = withStyles({
     root: {
@@ -104,6 +105,7 @@ export default function LeadAccordionInUserDetailPage({
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandLead, setExpandLead] = useState(expanded);
+    const [anchorEl, setAnchorEl] = useState(null);
     const [showCreateLeadDialog, setShowCreateLeadDialog] = useState(false)
 
     useEffect(() => {
@@ -114,6 +116,14 @@ export default function LeadAccordionInUserDetailPage({
         setExpandLead(isExpanded)
 
     }, [leads])
+
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     return <>
         <Accordion expanded={expandLead} className="omsAccordian accordLead">
             <AccordionSummary
@@ -146,13 +156,40 @@ export default function LeadAccordionInUserDetailPage({
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
                             {
-                                permissions?.lead?.isCreate && <IconButton
-                                    color="primary"
-                                    size="small"
-                                    onClick={() => { setShowCreateLeadDialog(true) }}
-                                >
-                                    <ControlPointIcon />
-                                </IconButton>
+                                permissions?.lead?.isCreate &&
+                                // <IconButton
+                                //     color="primary"
+                                //     size="small"
+                                //     onClick={() => { setShowCreateLeadDialog(true) }}
+                                // >
+                                //     <ControlPointIcon />
+                                // </IconButton> 
+                                <>
+                                    <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={handleOpenMenu}
+                                    >
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        id="menu"
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowCreateLeadDialog(true);
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Create New
+                                        </MenuItem>
+                                    </Menu>
+                                </>
                             }
                         </Typography>
                     </Grid>

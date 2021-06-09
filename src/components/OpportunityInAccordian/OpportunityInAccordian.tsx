@@ -226,17 +226,32 @@ export default function OpportunityInAccordian({
                       </MenuItem>
                     </Menu>
                   </>
-                  :
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      setShowCreateOpportunityDialog(true);
-                    }}
-                  >
-                    <ControlPointIcon />
-                  </IconButton>
-
+                  : <>
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenMenu}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu
+                      id="menu"
+                      anchorEl={anchorEl}
+                      keepMounted
+                      open={Boolean(anchorEl)}
+                      onClose={handleCloseMenu}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setShowCreateOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                 </MenuItem>
+                    </Menu>
+                  </>
                 }
               </Typography>
             </Grid>

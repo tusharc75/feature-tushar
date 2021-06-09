@@ -665,6 +665,7 @@ export default function AccountDetailPage(props) {
                       quoteBuilderPermission={permissions.quoteBuilder}
                       accountId={id}
                       accountResource={accountResource}
+                      isRenderedFromCustomerAccount = {true}
                     />
                   )
                 }
