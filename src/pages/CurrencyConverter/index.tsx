@@ -19,8 +19,8 @@ import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import currencyList from "../../constants/currency_with_country.json";
 import CustomButton from '../../components/Helpers/CustomButton'
+import { getUniqueCurrencies } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   tdWidth: {
@@ -28,8 +28,6 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 120
   },
 }));
-
-
 
 const CurrencyConverter = () => {
 
@@ -101,8 +99,22 @@ const CurrencyConverter = () => {
   };
 
   const handleChange = (value) => {
+
     setCurrency(value)
     let data = [...option]
+
+    if (data.length > value.length) {
+      let index = 0;
+      let deleteindex = 0;
+      for (var x in data[0]) {
+        if (!value.includes(x)) {
+          deleteindex = index;
+        }
+        index = index + 1
+      }
+      data.splice(deleteindex, 1);
+    }
+
     let newOptions = []
     value.forEach((_unit, index) => {
       let row = {}
@@ -152,7 +164,7 @@ const CurrencyConverter = () => {
                 <Autocomplete
                   multiple
                   id="tags-filled"
-                  options={[...new Set(currencyList.map((_c) => { return _c.currencyCode }))]}
+                  options={getUniqueCurrencies().map((_c) => { return _c.currencyCode })}
                   getOptionLabel={(option) => option}
                   value={currency}
                   renderTags={(value: string[], getTagProps) =>
@@ -170,8 +182,8 @@ const CurrencyConverter = () => {
                       placeholder="Currency in use" />
                   )}
                   renderOption={(option) => {
-                    const { currencyCode, symbol, name } = currencyList.find(d => d.currencyCode === option);
-                    return `${currencyCode} - ${name} - (${symbol})`
+                    const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                    return `${currencyCode} - ${currencyName} - (${symbolNative})`
                   }}
                   // renderOption={(option) => {
                   //   const { currencyCode, name, countryCode, symbolNative } = currencyList.find(d => d.currencyCode === option);
@@ -219,6 +231,7 @@ const CurrencyConverter = () => {
                   <Grid xs={12} container justify="flex-end">
                     <CustomButton
                       loading={loading}
+                      disabled={loading}
                       variant="contained"
                       color="primary"
                       onClick={getcurrencyrates}

@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField }) => {
+export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module }) => {
 
     const addSection = (sectionHoverIndex) => {
         let data = [...section];
@@ -91,6 +91,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
                             section={section}
                             addDeleteField={addDeleteField}
                             screenHeight={classes.screenHeight}
+                            module={module}
                         />
                     </Box>
                 </Grid>

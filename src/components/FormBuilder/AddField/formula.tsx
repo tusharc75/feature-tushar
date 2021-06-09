@@ -12,6 +12,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { checkFormula } from "../../../constants/formulaUtility";
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import Grid from '@material-ui/core/Grid';
 
 const MenuProps = {
     PaperProps: {
@@ -46,6 +47,7 @@ export const Formula = ({ fields, values, setFieldValue }) => {
         let pushPosition = inputRef.current.selectionStart
         var new_formula = [values["formula"].slice(0, pushPosition), field, values["formula"].slice(pushPosition)].join('');
         setFieldValue("formula", new_formula)
+        inputRef.current.focus();
     }
 
     return (<Box>
@@ -111,13 +113,38 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 fullWidth
                 multiline
                 rows={4}
+                type="text"
                 placeholder="Formula (return field1 + field2)"
                 inputRef={inputRef}
                 value={values["formula"]}
-                onChange={(e) => setFieldValue("formula", e.target.value)}
+                onKeyPress={(event) => { event.stopPropagation(); }}
+                onChange={(e) => { setFieldValue("formula", e.target.value) }}
             />
-            {formulaError && <Typography variant="caption" display="block">{formulaError} </Typography>}
-            <Button size="small"  onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
+            <Grid container>
+                <Grid item xs={6}>
+                    {formulaError && <Typography variant="caption" display="block">{formulaError} </Typography>}
+                    <Button size="small" onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
+                </Grid>
+                <Grid item xs={6}>
+                    {values["type"] === "currencyAmount" &&
+                        <FormControl fullWidth margin="dense" variant="outlined">
+                            <InputLabel id="demo-simple-select-outlined-label">Formula applied on Currency</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values["formulaOnCurrency"]}
+                                onChange={(e) => setFieldValue("formulaOnCurrency", e.target.value)}
+                                label="Formula applied on Currency"
+                                name="formulaOnCurrency"
+                            >
+                                {values["displayCurrency"] && values["displayCurrency"].map((_currency) => (
+                                    <MenuItem value={_currency}>{_currency}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    }
+                </Grid>
+            </Grid>
         </Box>
     </Box>
     );

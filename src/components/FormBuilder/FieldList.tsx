@@ -49,14 +49,34 @@ const FieldList = {
     type: "decimal",
     icon: "far fa-calendar-check",
   },
+  CURRENCY: {
+    label: "Currency",
+    type: "currency",
+    icon: "far fa-calendar-check",
+  },
+  CURRENCYAMOUNT: {
+    label: "Currency Amount",
+    type: "currencyAmount",
+    icon: "far fa-calendar-check",
+  },
   PERCENT: {
     label: "Percent",
     type: "percent",
     icon: "far fa-calendar-check",
   },
-  CURRENCY: {
-    label: "Currency",
-    type: "currency",
+  FORMULA: {
+    label: "Formula",
+    type: "formula",
+    icon: "far fa-calendar-check",
+  },
+  VLOOKUPDROPDOWN: {
+    label: "Vlookup Dropdown",
+    type: "vlookupDropdown",
+    icon: "far fa-calendar-check",
+  },
+  CONVERTER: {
+    label: "Converter",
+    type: "converter",
     icon: "far fa-calendar-check",
   },
   RADIO: {
@@ -99,29 +119,9 @@ const FieldList = {
     type: "location",
     icon: "far fa-calendar-check",
   },
-  FORMULA: {
-    label: "Formula",
-    type: "formula",
-    icon: "far fa-calendar-check",
-  },
-  VLOOKUPDROPDOWN: {
-    label: "Vlookup Dropdown",
-    type: "vlookupDropdown",
-    icon: "far fa-calendar-check",
-  },
-  CONVERTER: {
-    label: "Converter",
-    type: "converter",
-    icon: "far fa-calendar-check",
-  },
   PROCESS: {
     label: "Process",
     type: "process",
-    icon: "far fa-calendar-check",
-  },
-  CURRENCYAMOUNT: {
-    label: "Currency Amount",
-    type: "currencyAmount",
     icon: "far fa-calendar-check",
   },
 };

@@ -20,12 +20,8 @@ import { Add, Delete } from "@material-ui/icons";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { removeEmptyKeys } from "../../../constants/helpers";
+import { getUniqueCurrencies, removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import currencies from "../../../constants/currency_with_country.json";
-
-
 
 const DOAType = [
     {
@@ -35,8 +31,7 @@ const DOAType = [
     {
         key: "Amount",
         value: 2,
-    },
-
+    }
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -79,10 +74,10 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
     const [currencyData, setCurrencyData] = useState<any[]>([]);
     const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "");
     const [currencySymbol, setCurrencySymbol] = useState(
-        currencies.filter((data) => data?.currencyCode === currency).length
-            ? currencies.filter(
+        getUniqueCurrencies().some((data) => data?.currencyCode === currency)
+            ? getUniqueCurrencies().find(
                 (data) => data?.currencyCode === currency
-            )[0].symbolNative
+            ).symbolNative
             : null);
 
     const fetchDoa = useCallback(() => {
@@ -137,7 +132,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
     };
 
     useEffect(() => {
-        const sortedArr = currencies.sort((a, b) =>
+        const sortedArr = getUniqueCurrencies().sort((a, b) =>
             a.name.toUpperCase() < b.name.toUpperCase()
                 ? -1
                 : a.name.toUpperCase() > b.name.toUpperCase()

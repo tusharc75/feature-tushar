@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 export const Converter = ({ fields, values, setFieldValue, }) => {
 
     const onChangeValue = (index, fieldName, value) => {
-        let data = [...values["option"]]
+        let data = values["option"] ? [...values["option"]] : []
         data[index][fieldName] = value
         setFieldValue("option", data)
     };
@@ -49,7 +49,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
 
     const handleChangeUnit = (value) => {
         setFieldValue("units", value)
-        let data = [...values["option"]]
+        let data = values["option"] ? [...values["option"]] : []
         let newOptions = []
         value.forEach((_unit, index) => {
             let row = {}

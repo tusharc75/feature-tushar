@@ -21,7 +21,8 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import CreateProductCategory from "../../pages/ProductCategory/CreateProductCategory";
-
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const ignoreField = ["qty"]
 
@@ -46,6 +47,10 @@ const CreateProduct = (props) => {
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+
+    const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
+
+
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
@@ -301,6 +306,7 @@ const CreateProduct = (props) => {
                                                                     >
                                                                         <FormTypes
                                                                             fields={initialData.fields}
+                                                                            fieldData={field}
                                                                             errors={errors}
                                                                             touched={touched}
                                                                             label={field.fieldLabel}
@@ -311,7 +317,6 @@ const CreateProduct = (props) => {
                                                                             fullWidth
                                                                             isTooltip={field.isTooltip}
                                                                             tooltipMessage={field.tooltipMessage}
-                                                                            decimalPlaces={field.decimalPlaces}
                                                                             disableClearable
                                                                             onChange={(e, val) => {
                                                                                 setNewProductCategoryId(null);
@@ -361,56 +366,48 @@ const CreateProduct = (props) => {
                                                                         </Grid>
                                                                     ) : null}
                                                                 </Grid>
-                                                                {/* <FormTypes
-                                                                    fields={initialData.fields}
-                                                                    values={values}
-                                                                    errors={errors}
-                                                                    touched={touched}
-                                                                    label={field.fieldLabel}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    options={field.option}
-                                                                    setFieldValue={setFieldValue}
-                                                                    required={field.required}
-                                                                    fullWidth
-                                                                    isTooltip={field.isTooltip}
-                                                                    tooltipMessage={field.tooltipMessage}
-                                                                    decimalPlaces={field.decimalPlaces}
-                                                                    disableClearable
-                                                                    onChange={(e, val) => {
-                                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                        handleChangeCategory(val && val.optionValue ? val.optionValue : "", true)
-                                                                    }}
-                                                                    size="small"
-                                                                /> */}
                                                             </Grid> :
                                                             field.fieldName === "productTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    <FormTypes
-                                                                        fields={initialData.fields}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={productTemplate}
-                                                                        setFieldValue={setFieldValue}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field.isTooltip}
-                                                                        tooltipMessage={field.tooltipMessage}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        disableClearable
-                                                                        onChange={(e, val) => {
-                                                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                            handleChangeTemplate(val && val.optionValue ? val.optionValue : "")
-                                                                        }}
-                                                                        size="small"
-                                                                    />  </Grid> :
+                                                                    {!isShowProductTemplate ?
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={isShowProductTemplate}
+                                                                                    onChange={() => setIsShowProductTemplate(true)}
+                                                                                    name="isShowProductTemplate"
+                                                                                    color="primary"
+                                                                                />
+                                                                            }
+                                                                            label="Show Product Template"
+                                                                        /> :
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            fieldData={field}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={productTemplate}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            disableClearable
+                                                                            onChange={(e, val) => {
+                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                handleChangeTemplate(val && val.optionValue ? val.optionValue : "")
+                                                                            }}
+                                                                            size="small"
+                                                                        />}
+                                                                </Grid> :
                                                                 field.type === "converter" || field.type === "currencyAmount" ?
                                                                     <FormTypes
                                                                         fields={initialData.fields}
+                                                                        fieldData={field}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
@@ -423,14 +420,12 @@ const CreateProduct = (props) => {
                                                                         fullWidth
                                                                         isTooltip={field.isTooltip}
                                                                         tooltipMessage={field.tooltipMessage}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        isvlookupReverse={field.isvlookupReverse}
-                                                                        fieldData={field}
                                                                         size="small"
                                                                     /> :
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                         <FormTypes
                                                                             fields={initialData.fields}
+                                                                            fieldData={field}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
@@ -443,9 +438,6 @@ const CreateProduct = (props) => {
                                                                             fullWidth
                                                                             isTooltip={field.isTooltip}
                                                                             tooltipMessage={field.tooltipMessage}
-                                                                            decimalPlaces={field.decimalPlaces}
-                                                                            isvlookupReverse={field.isvlookupReverse}
-                                                                            fieldData={field}
                                                                             size="small"
                                                                             disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
                                                                             imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {

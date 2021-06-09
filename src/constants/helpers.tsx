@@ -22,7 +22,7 @@ import moment from "moment";
 import currencies from "./currency_with_country.json";
 import { TransitionProps } from "@material-ui/core/transitions";
 import { Slide } from "@material-ui/core";
-import { orderBy } from "lodash";
+import { orderBy, uniqBy } from "lodash";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -214,10 +214,10 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
           key.displayUnits.forEach((_unit) => {
             obj[
               key.fieldName +
-                "_" +
-                _currency.toLowerCase() +
-                "_" +
-                _unit.toLowerCase()
+              "_" +
+              _currency.toLowerCase() +
+              "_" +
+              _unit.toLowerCase()
             ] = value && value !== "" ? parseFloat(value) : value;
           });
         } else {
@@ -241,8 +241,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -258,6 +258,25 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     } else if (key.type === "dropDown") {
       const value = filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : "";
+    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
+      key.displayUnits.forEach((_unit) => {
+        let fieldName = key.fieldName + "_" + _unit.toLowerCase();
+        obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+      });
+    } else if (key.type === "currencyAmount") {
+      key.displayCurrency.forEach((_currency) => {
+        if (key.isConverter && key.displayUnits.length) {
+          key.displayUnits.forEach((_unit) => {
+            let fieldName = key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
+            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+          });
+        } else {
+          let fieldName = key.fieldName + "_" + _currency.toLowerCase()
+          obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+        }
+      });
+    } else if (key.type === "decimal" || key.type === "percent" || key.type === "formula") {
+      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : "";
     }
@@ -284,31 +303,31 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              "Enter valid URL"
-            )
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(
+            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+            "Enter valid URL"
+          )
+          .required(`${input.fieldLabel} is required`)
         : yup
-            .string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              "Enter valid URL"
-            );
+          .string()
+          .matches(
+            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+            "Enter valid URL"
+          );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
@@ -338,13 +357,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           input.displayUnits.forEach((_unit) => {
             schema[
               input.fieldName +
-                "_" +
-                _currency.toLowerCase() +
-                "_" +
-                _unit.toLowerCase()
+              "_" +
+              _currency.toLowerCase() +
+              "_" +
+              _unit.toLowerCase()
             ] = input.required
-              ? yup.string().required(`${input.fieldLabel} is required`)
-              : yup.string();
+                ? yup.string().required(`${input.fieldLabel} is required`)
+                : yup.string();
           });
         } else {
           schema[input.fieldName + "_" + _currency.toLowerCase()] =
@@ -631,6 +650,10 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
+export const getUniqueCurrencies = () => {
+  return uniqBy(currencies, "currencyCode");
+}
+
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if (!currencyCode && !amount) return null;
 
@@ -639,7 +662,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   );
 
   if (!currencyData) {
-    return amount;
+    return { shortFormatAmount: amount, fullFormatAmount: amount };
   }
 
   //  Make default language "en"
@@ -663,13 +686,26 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     options["maximumFractionDigits"] = 0;
   }
 
-  return new Intl.NumberFormat(
-    `${language}-${currencyData.countryCode}`,
-    options
-  )
-    .format(amount)
-    .replace(/^(\D+)/, "$1 ");
+  //  For example I am formatting this value - 9876543210 then
+  //  shortFormatAmount will be like this - 9.9 billion
+  //  fullFormatAmount will be like this - 9,876,543,210
+
+  return {
+    shortFormatAmount: new Intl.NumberFormat(
+      `${language}-${currencyData.countryCode}`, {
+      notation: "compact",
+      compactDisplay: "short",
+      ...options
+    }).format(amount).replace(/^(\D+)/, "$1 "),
+    fullFormatAmount: new Intl.NumberFormat(
+      `${language}-${currencyData.countryCode}`,
+      options
+    ).format(amount)
+      .replace(/^(\D+)/, "$1 ")
+  }
 };
+
+
 
 export const graphOptions = {
   layout: {

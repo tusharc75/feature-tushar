@@ -21,8 +21,9 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end",
   },
   custom_root: {
-    paddingTop: 5,
-    paddingRight: 5
+    paddingRight: 10,
+    display: "flex",
+    alignItems: "center",
   },
   linksContainer: {
     display: "flex",
@@ -37,11 +38,12 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
   },
   custom_links: {
-    color: theme.palette.primary.main, //  textDark
-    fontSize: 15,
+    color: "#484848",
+    fontSize: "12px",
+    fontWeight: "bold"
   },
   linkDivider: {
-    backgroundColor: "#ffffff42", //  darkBg
+    backgroundColor: "#9582822e", //  darkBg
     margin: "0 10px",
   },
   delBtn: {
@@ -113,7 +115,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
               type: "error",
               message: `Found some issue(s) while importing ${module}`,
             });
-            onSuccessfulImport(false);
+            onSuccessfulImport(true);
           }
         })
         .catch((error) => {
@@ -255,7 +257,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
           <IoIosArrowDropdown className={module !== "builder" ? classes.expandIcon : classes.custom_expandIcon} />
         </IconButton>
       )}
-      {isSelection && <SelectionDialog handleClose={() => setIsSelection(false)} api={api} />}
+      {isSelection && <SelectionDialog refrenceId={refrenceId} handleClose={() => setIsSelection(false)} api={api} />}
     </div>
   );
 }
