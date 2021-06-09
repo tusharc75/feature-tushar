@@ -143,13 +143,13 @@ const ResetPassword = () => {
 
   const validateForm = (values) => {
     const errors: any = {};
-    
+
     if (!values.password) {
       errors.password = 'Required field';
-    } 
+    }
     else if (!values.confirmPassword) {
       errors.confirmPassword = 'Required field';
-    } 
+    }
     else if (
       !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
         values.password,
@@ -168,7 +168,7 @@ const ResetPassword = () => {
     }
     else if (values.confirmPassword !== values.password) {
       errors.confirmPassword = 'Password and confirm Password does not match';
-    } 
+    }
     return errors;
   };
 
