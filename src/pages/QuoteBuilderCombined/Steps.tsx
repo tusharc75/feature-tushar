@@ -50,6 +50,32 @@ const useStyles = makeStyles((theme) => ({
     // margin: "5px 8px",
     borderRadius: "4px"
   },
+  step: {
+    paddingLeft: "8px",
+    paddingRight: "8px",
+    padding: "5px 8px",
+    width: "20%",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "1px",
+    borderRadius: "4px"
+  },
+  inActive: {
+    background: "#ebebeb"
+  },
+  currentStep: {
+    background: "#ffffff",
+    boxShadow: "2px 2px 6px #a7a3a3",
+  },
+  currentStepColor: {
+    color: "#0e7723 !important",
+    fontWeight: 600,
+  },
+  active: {
+    background: "#53ac65",
+  },
   sent: {
     color: "#00acc1",
     fontWeight: "bold"
@@ -213,18 +239,18 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {activeStep === steps.length - 1 ? (<>
-          {/* <div className="d-flex align-items-center justify-content-center flex-column m-3">
+          <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <FcClock size={30} />
             <Typography className={classes.sent}>
               DOA Sent
             </Typography>
-          </div> */}
-          <div className="d-flex align-items-center justify-content-center flex-column m-3">
+          </div>
+          {/* <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <FcApproval size={30} />
             <Typography className={classes.approved}>
               Approved by DOA
             </Typography>
-          </div>
+          </div> */}
           {/* <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <FcCancel size={30} />
             <Typography className={classes.rejected}>
@@ -260,10 +286,16 @@ const Steps = (props) => {
           </div>
           <div className={classes.pStepper}>
             <Stepper activeStep={activeStep} >
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
+              {steps.map((label, i) => (<>
+                <Step key={label}
+                  className={clsx(classes.step, {
+                    [classes.active]: currentStep > i,
+                    [classes.currentStep]: currentStep == i,
+                    [classes.inActive]: currentStep !== i,
+                  })}>
+                  <StepLabel StepIconComponent={ColorlibStepIcon} className={ currentStep == i ? classes.currentStepColor : null }>{label}</StepLabel>
                 </Step>
+              </>
               ))}
             </Stepper>
           </div></>

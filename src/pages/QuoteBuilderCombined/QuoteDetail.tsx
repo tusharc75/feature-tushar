@@ -189,6 +189,11 @@ const useStyles = makeStyles((theme) => ({
     margin: "9px",
     borderRadius: "3px",
     border: "1px solid #d2cbcb"
+  },
+  termsBtn:{
+    position: "absolute",
+    top: "-16px",
+    right: "0"
   }
 }));
 const ITEM_HEIGHT = 48;
@@ -320,10 +325,10 @@ function QuoteDetail() {
   const [RadioIndex, setRadioIndex] = useState(-1);
   const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
-  const [totalProfit, setTotalProfit] = useState("");
-  const [totalcost, setTotalCost] = useState("");
-  const [totalsale, setTotalSale] = useState("");
-  const [totalmargin, setTotalMargin] = useState("");
+  const [totalProfit, setTotalProfit] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
+  const [totalcost, setTotalCost] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
+  const [totalsale, setTotalSale] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
+  const [totalmargin, setTotalMargin] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [ColumnName, setColName] = useState([]);
   const [visibleColumns, setVisibleColumnName] = useState([]);
@@ -1338,10 +1343,10 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
-    setTotalProfit(totalProfit.toString() + " " + ProfitCurrency);
-    setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
-    setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
-    setTotalCost(totalCost.toString() + " " + CostCurrency);
+    setTotalProfit(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalProfit))
+    setTotalMargin(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalMargin))
+    setTotalSale(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalSellingPrice))
+    setTotalCost(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalCost))
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
     }
@@ -1767,26 +1772,26 @@ function QuoteDetail() {
                       className="d-flex align-items-center gap-1 quotePanel"
                     >
                       <div className="quoteBox">
-                        <span className="quoteAmount">{totalProfit}</span>
+                        <span className="quoteAmount" title={totalProfit.fullFormatAmount}>{totalProfit.shortFormatAmount}</span>
                         <span>Total Profit</span>
                       </div>
                       <div className="quoteBox">
-                        <span className="quoteAmount">{totalcost}</span>
+                        <span className="quoteAmount" title={totalcost.fullFormatAmount}>{totalcost.shortFormatAmount}</span>
                         <span>Total Cost Price</span>
                       </div>
                       {redCard ? (
                         <div className="redQuoteBox">
-                          <span className="quoteAmount">{totalsale}</span>
+                          <span className="quoteAmount" title={totalsale.fullFormatAmount}>{totalsale.shortFormatAmount}</span>
                           <span>Total Selling Price</span>
                         </div>
                       ) : (
                         <div className="quoteBox">
-                          <span className="quoteAmount">{totalsale}</span>
+                          <span className="quoteAmount" title={totalsale.fullFormatAmount}>{totalsale.shortFormatAmount}</span>
                           <span>Total Selling Price</span>
                         </div>
                       )}
                       <div className="quoteBox">
-                        <span className="quoteAmount">{totalmargin}</span>
+                        <span className="quoteAmount" title={totalmargin.fullFormatAmount}>{totalmargin.shortFormatAmount}</span>
                         <span>Total Margin</span>
                       </div>
                       {/* <div className="quoteBox">
@@ -1960,11 +1965,18 @@ function QuoteDetail() {
                         />
                       )}
                       {ProcessStatus === "Quote Builder" ? (
-                        <Box>
-                          <div>
-                            <h3 className="form-label-style" title="Add Terms & Conditions">Add Terms & Conditions</h3>
-                            <BsPlusCircle onClick={() => setShowCreateDialog(true)} />
-                          </div>
+                        <Box className="m-3 position-relative">
+                           <h4 className="form-label-style" title="Add Terms & Conditions">Terms & Conditions</h4>
+                          <Button
+                            onClick={() => setShowCreateDialog(true)}
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            className={classes.termsBtn}
+                            startIcon={<AddIcon />}
+                          >
+                            Add Terms & Conditions
+                                  </Button>
                           <CustomAgGrid
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
