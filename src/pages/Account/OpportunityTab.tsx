@@ -1,19 +1,15 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardContent, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
-import { Delete } from '@material-ui/icons'
+import { Card, CardContent, Grid, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom'
-import accountClass from "./account.module.scss"
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import { FaArrowAltCircleDown } from 'react-icons/fa';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import currencies from './../../constants/currency_with_country.json';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
     },
@@ -89,9 +85,9 @@ export default function OpportunityTab({ data }) {
 
                                                 </Grid>
                                                 <Grid item xs={5} sm={4}>
-                                                    <Typography className="amount">
-                                                        {obj?.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
-                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.amount).fullFormatAmount}>
+                                                    {formatAmountWithCurrency(obj["currency"], obj?.amount).shortFormatAmount}
+                                                </Typography>
                                                 </Grid>
                                             </Grid>
                                             <Grid container>
