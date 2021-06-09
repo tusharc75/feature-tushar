@@ -28,7 +28,7 @@ const EntityHeader = (props) => {
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <BiNetworkChart className="headerLogo" />
-        <span className="listingHeader">Entity/Entities</span>
+        <span className="listingHeader">Entities</span>
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box component="div" className={styles.filter_side_header}>
