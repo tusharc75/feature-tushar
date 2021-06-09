@@ -1,13 +1,14 @@
-import { useState, useEffect, Fragment, useContext, useCallback } from "react";
+import { useState, useEffect, Fragment, useContext, useCallback, useReducer } from "react";
 import Box from "@material-ui/core/Box";
-import { DataGrid } from "@material-ui/data-grid";
 import { orderBy, sortBy } from "lodash";
 
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import {
+  CommonRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import Loader from "../../components/Loader";
 
 var levalOrderBy = [
@@ -31,10 +32,13 @@ const ProductGrid = (props) => {
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState([]);
-  const [columns, setColumns] = useState(null);
+  const [columns, setColumns] = useState([]);
   const [customColumns, setCustomColumns] = useState(null);
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   useEffect(() => {
     fetchProduct(productBuilderId);
@@ -64,8 +68,36 @@ const ProductGrid = (props) => {
     }
   }, [columnsData]);
 
+  const ProductCategoryRenderer = params => <>
+    {
+      params.data.productCategory || params.data.productCategory === 0 ?
+        typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
+        : <NoDataCell />
+    }
+  </>
+  const ProductTemplateRenderer = params => <>
+    {
+      params.data.productTemplate || params.data.productTemplate === 0 ?
+        typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
+        : <NoDataCell />
+    }
+  </>
+
+  const frameworkComponents = {
+    commonRenderer: CommonRenderer,
+    productCategoryRenderer: ProductCategoryRenderer,
+    productTemplateRenderer: ProductTemplateRenderer,
+
+  };
+
+
   const fetchProduct = (id) => {
-    setLoading(true);
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
     axiosInstance()
       .get(`/productbuilder/getproduct/` + id)
       .then(({ data: { data } }) => {
@@ -75,16 +107,16 @@ const ProductGrid = (props) => {
           srno: index + 1,
         }));
         refreshProducts(data);
-        setColumns(null);
+        setColumns([]);
         let column = [
-          { field: "id", headerName: "id", hide: true },
+          // { field: "id", headerName: "id", hide: true },
           {
             field: "srno",
             headerName: "Sr.",
-            width: 50,
-            sortable: false,
-            filterable: false,
-            disableColumnMenu: true,
+            width: 70,
+            filter: false,
+            show: true,
+            cellRenderer: "commonRenderer"
           },
         ];
         data.forEach((row) => {
@@ -121,12 +153,8 @@ const ProductGrid = (props) => {
                     col.field = fieldName;
                     col.headerName = fieldLabel;
                     col.width = 180;
-                    col.renderCell = (params) =>
-                      params.row[fieldName] || params.row[fieldName] === 0 ? (
-                        params.row[fieldName]
-                      ) : (
-                        <NoDataCell />
-                      );
+                    col.show = true
+                    col.cellRenderer = "commonRenderer"
                     col.order = ele.order;
                     col.leval = ele.leval;
                     column.push(col);
@@ -155,12 +183,8 @@ const ProductGrid = (props) => {
                       let col: any = {};
                       col.field = fieldName;
                       col.headerName = fieldLabel;
-                      col.renderCell = (params) =>
-                        params.row[fieldName] || params.row[fieldName] === 0 ? (
-                          params.row[fieldName]
-                        ) : (
-                          <NoDataCell />
-                        );
+                      col.show = true
+                      col.cellRenderer = "commonRenderer"
                       col.width = 180;
                       col.order = ele.order;
                       col.leval = ele.leval;
@@ -181,12 +205,8 @@ const ProductGrid = (props) => {
                     let col: any = {};
                     col.field = fieldName;
                     col.headerName = fieldLabel;
-                    col.renderCell = (params) =>
-                      params.row[fieldName] || params.row[fieldName] === 0 ? (
-                        params.row[fieldName]
-                      ) : (
-                        <NoDataCell />
-                      );
+                    col.show = true
+                    col.cellRenderer = "commonRenderer"
                     col.width = 180;
                     col.order = ele.order;
                     col.leval = ele.leval;
@@ -206,20 +226,15 @@ const ProductGrid = (props) => {
                 col.field = ele.fieldName;
                 col.headerName = ele.fieldLabel;
                 col.width = 180;
+                col.show = true
                 if (ele.fieldName === "productName") {
-                  col.renderCell = (params) => <>{params.row.productName}</>;
-                } else {
-                  col.renderCell = (params) =>
-                    params.row[ele.fieldName] ||
-                    params.row[ele.fieldName] === 0 ? (
-                      typeof params.row[ele.fieldName] === "object" ? (
-                        params.row[ele.fieldName]["optionLabel"]
-                      ) : (
-                        params.row[ele.fieldName]
-                      )
-                    ) : (
-                      <NoDataCell />
-                    );
+                  col.cellRenderer = "commonRenderer"
+                }
+                if (ele.fieldName === "productCategory") {
+                  col.cellRenderer = "productCategoryRenderer"
+                }
+                if (ele.fieldName === "productTemplate") {
+                  col.cellRenderer = "productTemplateRenderer"
                 }
                 col.order = ele.order;
                 col.leval = ele.leval;
@@ -236,7 +251,9 @@ const ProductGrid = (props) => {
         mapNewColumns(column);
         setColumns(column);
         setProduct(data);
-        setLoading(false);
+
+        dispatch({ type: "initialize", data: data, count: data.length });
+        dispatch({ type: "loading", loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -247,19 +264,9 @@ const ProductGrid = (props) => {
     <Box p={1} pt={0}>
       <Box height={500} mt={1}>
         {(isAll && columns) || customColumns ? (
-          <DataGrid
-            checkboxSelection={false}
-            components={{
-              NoRowsOverlay: CustomDataGridNoDataFound,
-            }}
-            loading={loading}
-            rows={product}
-            disableSelectionOnClick
-            disableMultipleSelection
-            columns={isAll ? columns : customColumns}
-            pageSize={25}
-            density="compact"
-          />
+          <CustomAgGrid columns={isAll ? columns : customColumns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} />
+
         ) : (
           <Loader style={{ height: 500 }} text="Loading..." />
         )}

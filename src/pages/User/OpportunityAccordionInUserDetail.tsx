@@ -13,11 +13,11 @@ import { Link } from 'react-router-dom'
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import currencies from './../../constants/currency_with_country.json';
 import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useData } from '../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { MoreVert } from '@material-ui/icons';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const Accordion = withStyles({
     root: {
@@ -222,9 +222,9 @@ export default function OpportunityAccordionInUserDetail({
 
                                                                 </Grid>
                                                                 <Grid item xs={5} sm={4}>
-                                                                    <Typography className="amount">
-                                                                        {obj?.amount ? currencies.find(d => d.currencyCode === obj["currency"])?.symbolNative : ''}
-                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                                                    <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.amount).fullFormatAmount}>
+                                                                        {formatAmountWithCurrency(obj["currency"], obj?.amount).shortFormatAmount}
+                                                                    </Typography>
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>

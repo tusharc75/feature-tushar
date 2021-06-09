@@ -429,7 +429,7 @@ function QuoteDetail() {
             { title: `${data.quoteName}` },
           ]);
 
-          data.amount = formatAmountWithCurrency(data.currency, data.amount);
+          data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
           setquoteData(data);
 
           handleMainPoints(data);
@@ -551,7 +551,7 @@ function QuoteDetail() {
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Amount"] = data?.amount
-      ? formatAmountWithCurrency(data?.currency, data?.amount)
+      ? formatAmountWithCurrency(data?.currency, data?.amount).fullFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
