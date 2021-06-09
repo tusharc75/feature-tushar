@@ -349,8 +349,6 @@ export default function Account(props) {
 
   const menuOptionSelection = (selectedOption) => {
     switch (selectedOption) {
-      case 0:
-        return setType("all")
       case 1:
         return setType("approved")
       case 2:
@@ -358,7 +356,7 @@ export default function Account(props) {
 
 
       default:
-        return "all";
+        return setType("all");
     }
   }
 
