@@ -33,7 +33,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import currencies from "../../../constants/currency_with_country.json";
-import AddIcon from '@material-ui/icons/AddCircle'
+import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
@@ -59,6 +59,7 @@ export default function ManageQuoteDialog({
   opportunityName = null,
   isRenderedFromCustomerAccount = false,
   contacts = null,
+  disableCurrency = false,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -82,18 +83,24 @@ export default function ManageQuoteDialog({
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
-  const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] = useState(false)
-  const [showCreateOpportunity, setShowCreateOpportunity] = useState(false)
+  const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] =
+    useState(false);
+  const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] =
+    useState(false);
+  const [showCreateOpportunity, setShowCreateOpportunity] = useState(false);
   const [accountData, setAccountData] = useState([]);
   const [accountFieldDisable, setAccountFieldDisable] = useState(false);
-  const [contactData, setContactData] = useState([])
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null)
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-  const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
+  const [contactData, setContactData] = useState([]);
+  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
+    useState(0);
+  const [customerContactMainDataSource, setCustomerContactMainDataSource] =
+    useState([]);
   const [opportunityData, setOpportunityData] = useState([]);
-  const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null)
-  const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
+  const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null);
+  const [customerContactDataSource, setCustomerContactDataSource] = useState(
+    []
+  );
   const [opportunityDataSource, setOpportunityDataSource] = useState([]);
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -105,22 +112,30 @@ export default function ManageQuoteDialog({
       setCollaboratorData(ownerCollaboratorOptions[0].option);
     }
 
-    let customerAccountOptions = entityData.fields.find((d) => d.fieldName === "customerAccountName");
+    let customerAccountOptions = entityData.fields.find(
+      (d) => d.fieldName === "customerAccountName"
+    );
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
     }
 
-    let customerContactOptions = entityData.fields.find((d) => d.fieldName === "customerContactName");
+    let customerContactOptions = entityData.fields.find(
+      (d) => d.fieldName === "customerContactName"
+    );
     if (customerContactOptions) {
       setContactData(customerContactOptions.option);
     }
 
-    let opportunityOptions = entityData.fields.find((d) => d.filedName === "opportunity")
+    let opportunityOptions = entityData.fields.find(
+      (d) => d.filedName === "opportunity"
+    );
     if (opportunityOptions) {
       setOpportunityData(opportunityOptions.option);
     }
 
-    setAccountFieldDisable(isRenderedFromCustomerAccount || isRenderedFromOpportunity || contactId);
+    setAccountFieldDisable(
+      isRenderedFromCustomerAccount || isRenderedFromOpportunity || contactId
+    );
 
     sortArray();
 
@@ -131,24 +146,34 @@ export default function ManageQuoteDialog({
       setCustomerContactMainDataSource(customerContactDropdownData.option);
 
       if (!isNew) {
-        setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === dataToUpdate.customerAccountName.optionValue));
+        setCustomerContactDataSource(
+          customerContactDropdownData.option.filter(
+            (d) =>
+              d.parentAccount === dataToUpdate.customerAccountName.optionValue
+          )
+        );
       }
 
       if (isNew && contactId) {
-        setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === entityData.initialValues["customerAccountName"]));
+        setCustomerContactDataSource(
+          customerContactDropdownData.option.filter(
+            (d) =>
+              d.parentAccount ===
+              entityData.initialValues["customerAccountName"]
+          )
+        );
       }
     }
 
     return () => {
-      setOwnerCollaboratorData([])
-      setOwnerData([])
-      setCollaboratorData([])
-      setAccountData([])
-      setOpportunityData([])
-      setContactData([])
-      setAccountFieldDisable(false)
-    }
-
+      setOwnerCollaboratorData([]);
+      setOwnerData([]);
+      setCollaboratorData([]);
+      setAccountData([]);
+      setOpportunityData([]);
+      setContactData([]);
+      setAccountFieldDisable(false);
+    };
   }, [entityData.fields]);
 
   const sortArray = () => {
@@ -184,23 +209,31 @@ export default function ManageQuoteDialog({
   };
 
   const onCustomerContactDropdownOpen = (selectedAccount) => {
-    setCustomerContactDataSource(customerContactMainDataSource.filter(d => d.parentAccount === selectedAccount));
+    setCustomerContactDataSource(
+      customerContactMainDataSource.filter(
+        (d) => d.parentAccount === selectedAccount
+      )
+    );
   };
 
   const onOpportunityDropDownOpen = (selectedAccount) => {
-    setOpportunityDataSource(opportunityData.filter((opportunity) => opportunity.parentAccount === selectedAccount))
-  }
+    setOpportunityDataSource(
+      opportunityData.filter(
+        (opportunity) => opportunity.parentAccount === selectedAccount
+      )
+    );
+  };
 
   useEffect(() => {
     getQuoteFields();
 
     return () => {
-      setCurrencySymbol(null)
+      setCurrencySymbol(null);
       setEntityData({
         fields: [],
         initialValues: {},
       });
-    }
+    };
   }, []);
 
   const getQuoteFields = () => {
@@ -216,35 +249,35 @@ export default function ManageQuoteDialog({
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
-          if (
-            accountId && _f.fieldData.fieldName === "customerAccountName") {
+          if (accountId && _f.fieldData.fieldName === "customerAccountName") {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
           if (contactId && _f.fieldData.fieldName === "customerContactName") {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName, contactId)
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, contactId);
           }
 
           if (
-            opportunityId && ["opportunity"].some(
-              (d) => d === _f.fieldData.fieldName
-            )
+            opportunityId &&
+            ["opportunity"].some((d) => d === _f.fieldData.fieldName)
           ) {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName, opportunityId)
+            _f = initializeDropdownById(
+              _f,
+              _f.fieldData.fieldName,
+              opportunityId
+            );
           }
-
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
             setCurrencySymbol(
-              currencies.find((d) => d.currencyCode === dataToUpdate["currency"])
-                ?.symbolNative
+              currencies.find(
+                (d) => d.currencyCode === dataToUpdate["currency"]
+              )?.symbolNative
             );
           }
           if (isNew && userId && _f.fieldData.fieldName === "owner") {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
           }
-
-
 
           if (_f.fieldData.fieldName !== "supplierAccountName") {
             newFields.push(_f.fieldData);
@@ -265,15 +298,20 @@ export default function ManageQuoteDialog({
 
   const onSubmit = (values) => {
     isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
-  }
+  };
 
   const handleCreateQuote = (values) => {
     // values.closeDate = "03/03/2021"
-    if (accountId && accountResource !== customerAccount.accountResource && !isRenderedFromOpportunity) values["supplierAccountName"] = [accountId]
+    if (
+      accountId &&
+      accountResource !== customerAccount.accountResource &&
+      !isRenderedFromOpportunity
+    )
+      values["supplierAccountName"] = [accountId];
     setLoading(true);
     console.log(values);
     if (values.customerContactName === "") {
-      values.customerContactName = []
+      values.customerContactName = [];
     }
     axiosInstance()
       .post(`${qbApi}?entity=${selectedEntity}`, values)
@@ -284,8 +322,7 @@ export default function ManageQuoteDialog({
           type: "success",
           message: data.message,
         });
-        if (isRedirectTodetailPage)
-          history.push(`${qbApi}/${newId}`);
+        if (isRedirectTodetailPage) history.push(`${qbApi}/${newId}`);
         setLoading(false);
         onSuccess(newId);
       })
@@ -318,7 +355,9 @@ export default function ManageQuoteDialog({
 
   const updateAccountDropdown = (data) => {
     const entityFields = entityData.fields;
-    const customerAccountNameFieldIndex = entityFields.findIndex(d => d.fieldName === "customerAccountName")
+    const customerAccountNameFieldIndex = entityFields.findIndex(
+      (d) => d.fieldName === "customerAccountName"
+    );
 
     if (customerAccountNameFieldIndex > -1) {
       entityFields[customerAccountNameFieldIndex].option = [
@@ -327,17 +366,19 @@ export default function ManageQuoteDialog({
           optionValue: data._id,
           optionLabel: data.accountName,
           order: entityFields[customerAccountNameFieldIndex].option.length,
-          default: false
-        }
-      ]
+          default: false,
+        },
+      ];
 
       setAccountData(entityFields[customerAccountNameFieldIndex].option);
     }
-  }
+  };
 
   const updateOpportunityDropdown = (data) => {
     const entityFields = entityData.fields;
-    const opportunityFieldIndex = entityFields.findIndex((d) => d.fieldName === "opportunity");
+    const opportunityFieldIndex = entityFields.findIndex(
+      (d) => d.fieldName === "opportunity"
+    );
 
     if (opportunityFieldIndex > -1) {
       entityFields[opportunityFieldIndex].option = [
@@ -346,37 +387,38 @@ export default function ManageQuoteDialog({
           optionValue: data._id,
           optionLabel: data.opportunityName,
           order: entityFields[opportunityFieldIndex].option.length,
-          default: false
-        }
-      ]
+          default: false,
+        },
+      ];
 
       setOpportunityData(entityFields[opportunityFieldIndex].option);
     }
-  }
+  };
 
   const updateContactDropdown = (data) => {
     const entityFields = entityData.fields;
-    const customerContactNameFieldIndex = entityFields.findIndex(d => d.fieldName === "customerContactName")
+    const customerContactNameFieldIndex = entityFields.findIndex(
+      (d) => d.fieldName === "customerContactName"
+    );
 
     if (customerContactNameFieldIndex > -1) {
-
       const newCustomer = {
         optionValue: data._id,
         optionLabel: `${data.firstName} ${data.lastName}`,
         order: entityFields[customerContactNameFieldIndex].option.length,
         default: false,
-        parentAccount: data.accountName
-      }
+        parentAccount: data.accountName,
+      };
       entityFields[customerContactNameFieldIndex].option = [
         ...entityFields[customerContactNameFieldIndex].option,
-        newCustomer
-      ]
-      setCustomerContactMainDataSource(entityFields[customerContactNameFieldIndex].option);
-      setCustomerContactDataSource((prevState) => ([...prevState, newCustomer]));
-
+        newCustomer,
+      ];
+      setCustomerContactMainDataSource(
+        entityFields[customerContactNameFieldIndex].option
+      );
+      setCustomerContactDataSource((prevState) => [...prevState, newCustomer]);
     }
-  }
-
+  };
 
   return (
     <>
@@ -389,9 +431,7 @@ export default function ManageQuoteDialog({
       >
         <CustomDialogHeader
           title={
-            isNew
-              ? "Create Quote Builder"
-              : `Editing ${dataToUpdate.quoteName}`
+            isNew ? "Create Quote Builder" : `Editing ${dataToUpdate.quoteName}`
           }
           onClose={onClose}
         />
@@ -429,15 +469,8 @@ export default function ManageQuoteDialog({
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
-                                  <Grid
-                                    key={index2}
-                                    item
-                                    xs={12}
-                                    sm={6}
-                                    md={6}
-                                  >
-                                    { field.fieldName === "quoteName" ? (
-
+                                  <Grid key={index2} item xs={12} sm={6} md={6}>
+                                    {field.fieldName === "quoteName" ? (
                                       <FormTypes
                                         values={values}
                                         errors={errors}
@@ -452,236 +485,193 @@ export default function ManageQuoteDialog({
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
-                                      // doNotShowInfoTooltip={true}
-                                      // onChange={(e, value) => {
-                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                      //   setFieldValue("customerContactName", [])
-                                      // }}
+                                        // doNotShowInfoTooltip={true}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        //   setFieldValue("customerContactName", [])
+                                        // }}
                                       />
-
-                                    )
-                                      : field.fieldName == "customerAccountName" ? (
-                                        <Grid container spacing={1}>
-                                          <Grid item
-                                            xs={permissions.customerAccount.isCreate ? 10 : 11}
-                                            sm={permissions.customerAccount.isCreate ? 10 : 11}
-                                            md={permissions.customerAccount.isCreate ? 10 : 11}
-                                          >
-                                            <FormTypes
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={accountData}
-                                              disabled={accountFieldDisable}
-                                              // setFieldValue={setFieldValue}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={true}
-                                              size="small"
-                                              doNotShowInfoTooltip={true}
-                                              onChange={(e, value) => {
-                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                                setFieldValue("customerContactName", [])
-                                              }}
-                                            />
-                                          </Grid>
-                                          {
-                                            permissions.customerAccount.isCreate && !accountFieldDisable && <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Account" className="mt-1">
-                                                <IconButton onClick={() => { setShowAddCustomerAccountDialog(true) }} size="small">
+                                    ) : field.fieldName ==
+                                      "customerAccountName" ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={
+                                            permissions.customerAccount.isCreate
+                                              ? 10
+                                              : 11
+                                          }
+                                          sm={
+                                            permissions.customerAccount.isCreate
+                                              ? 10
+                                              : 11
+                                          }
+                                          md={
+                                            permissions.customerAccount.isCreate
+                                              ? 10
+                                              : 11
+                                          }
+                                        >
+                                          <FormTypes
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={accountData}
+                                            disabled={accountFieldDisable}
+                                            // setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={true}
+                                            size="small"
+                                            doNotShowInfoTooltip={true}
+                                            onChange={(e, value) => {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                value && value.optionValue
+                                                  ? value.optionValue
+                                                  : ""
+                                              );
+                                              setFieldValue(
+                                                "customerContactName",
+                                                []
+                                              );
+                                            }}
+                                          />
+                                        </Grid>
+                                        {permissions.customerAccount.isCreate &&
+                                          !accountFieldDisable && (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Account"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddCustomerAccountDialog(
+                                                      true
+                                                    );
+                                                  }}
+                                                  size="small"
+                                                >
                                                   <AddIcon color="primary" />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
+                                          )}
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip
+                                              title={
+                                                field?.tooltipMessage ?? ""
+                                              }
+                                            >
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
+                                    ) : field.fieldName ===
+                                      "customerContactName" ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={
+                                            permissions.customerContact.isCreate
+                                              ? 10
+                                              : 11
                                           }
-                                          {
-                                            field?.tooltipMessage ?
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid> : null
+                                          sm={
+                                            permissions.customerContact.isCreate
+                                              ? 10
+                                              : 11
                                           }
-                                        </Grid>
-                                      ) : field.fieldName === "customerContactName" ? (
-                                        <Grid container spacing={1}>
-                                          <Grid item
-                                            xs={permissions.customerContact.isCreate ? 10 : 11}
-                                            sm={permissions.customerContact.isCreate ? 10 : 11}
-                                            md={permissions.customerContact.isCreate ? 10 : 11}
-                                          >
-                                            <FormTypes
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={customerContactDataSource}
-                                              setFieldValue={setFieldValue}
-                                              disabled={contactId ? true : false}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={true}
-                                              size="small"
-                                              onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
+                                          md={
+                                            permissions.customerContact.isCreate
+                                              ? 10
+                                              : 11
+                                          }
+                                        >
+                                          <FormTypes
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={customerContactDataSource}
+                                            setFieldValue={setFieldValue}
+                                            disabled={contactId ? true : false}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={true}
+                                            size="small"
+                                            onOpen={() =>
+                                              onCustomerContactDropdownOpen(
+                                                values.customerAccountName
+                                              )
+                                            }
                                             // onChange={(e, value) => {
                                             //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
                                             // }}
-                                            />
-
-
-                                          </Grid>
-                                          {
-                                            permissions.customerContact.isCreate && contactId === null && <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Contact" className="mt-1">
-                                                <IconButton onClick={() => {
-                                                  setShowAddCustomerContactDialog(true)
-                                                }} size="small">
+                                          />
+                                        </Grid>
+                                        {permissions.customerContact.isCreate &&
+                                          contactId === null && (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Contact"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddCustomerContactDialog(
+                                                      true
+                                                    );
+                                                  }}
+                                                  size="small"
+                                                >
                                                   <AddIcon color="primary" />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
-                                          }
-                                          {
-                                            field?.tooltipMessage ?
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid> : null
-                                          }
-                                        </Grid>
-
-                                      ) : field.fieldName === "opportunity" ? (
-                                        <Grid container spacing={1}>
-                                          <Grid item
-                                            xs={permissions.opportunity.isCreate ? 10 : 11}
-                                            sm={permissions.opportunity.isCreate ? 10 : 11}
-                                            md={permissions.opportunity.isCreate ? 10 : 11}
-                                          >
-                                            <FormTypes
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={field.option}
-                                              disabled={isRenderedFromOpportunity}
-                                              setFieldValue={setFieldValue}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={true}
-                                              size="small"
-                                              onChange={(e, value) => {
-                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                              }}
-
-                                            />
-
-
+                                          )}
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip
+                                              title={
+                                                field?.tooltipMessage ?? ""
+                                              }
+                                            >
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
                                           </Grid>
-                                          {
-                                            permissions.opportunity.isCreate && !isRenderedFromOpportunity && <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Opportunity" className="mt-1">
-                                                <IconButton onClick={() => {
-                                                  setShowCreateOpportunity(true)
-                                                }} size="small">
-                                                  <AddIcon color="primary" />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
+                                        ) : null}
+                                      </Grid>
+                                    ) : field.fieldName === "opportunity" ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={
+                                            permissions.opportunity.isCreate
+                                              ? 10
+                                              : 11
                                           }
-                                          {
-                                            field?.tooltipMessage ?
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid> : null
+                                          sm={
+                                            permissions.opportunity.isCreate
+                                              ? 10
+                                              : 11
                                           }
-                                        </Grid>
-
-                                      ) : field.fieldName === "owner" ? (
-                                        <FormTypes
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={ownerData}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          disabled={disableOwnerDropDown}
-                                          onOpen={() => {
-                                            onOwnerDropdownOpen(
-                                              values["collaborator"]
-                                            );
-                                          }}
-                                        />
-                                      ) : field.fieldName === "collaborator" ? (
-                                        <FormTypes
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={collaboratorData}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          onOpen={() => {
-                                            onCollabOwnerMultiselectOpen(
-                                              values["owner"]
-                                            );
-                                          }}
-                                        />
-                                      ) : field.fieldName === "probability" ? (
-                                        <FormTypes
-                                          // {...rest}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          onChange={(e) => {
-                                            if (
-                                              e.target.value &&
-                                              parseFloat(e.target.value) > 100
-                                            ) {
-                                              setFieldValue("probability", "100");
-                                            } else {
-                                              setFieldValue(
-                                                "probability",
-                                                e.target.value
-                                              );
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName === "lostReason" ? (
-                                        values["stage"] === "Closed Lost" ? (
+                                          md={
+                                            permissions.opportunity.isCreate
+                                              ? 10
+                                              : 11
+                                          }
+                                        >
                                           <FormTypes
-                                            // {...rest}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -689,67 +679,126 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
+                                            disabled={isRenderedFromOpportunity}
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={true}
                                             size="small"
-                                          />
-                                        ) : null
-                                      ) : field.fieldName === "currency" ? (
-                                        <FormTypes
-                                          // {...rest}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          onChange={(e, val) => {
-                                            if (val && val.currencyCode) {
+                                            onChange={(e, value) => {
                                               setFieldValue(
                                                 field.fieldName,
-                                                val.currencyCode
+                                                value && value.optionValue
+                                                  ? value.optionValue
+                                                  : ""
                                               );
-                                              setCurrencySymbol(val.symbolNative);
-                                            } else {
-                                              setFieldValue(field.fieldName, "");
-                                              setCurrencySymbol(null);
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName === "amount" ? (
-                                        <FormTypes
-                                          // {...rest}
-                                          startAdornment={
-                                            currencySymbol ? (
-                                              <InputAdornment position="start">
-                                                {currencySymbol}
-                                              </InputAdornment>
-                                            ) : (
-                                              ""
-                                            )
+                                            }}
+                                          />
+                                        </Grid>
+                                        {permissions.opportunity.isCreate &&
+                                          !isRenderedFromOpportunity && (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Opportunity"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowCreateOpportunity(
+                                                      true
+                                                    );
+                                                  }}
+                                                  size="small"
+                                                >
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip
+                                              title={
+                                                field?.tooltipMessage ?? ""
+                                              }
+                                            >
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
+                                    ) : field.fieldName === "owner" ? (
+                                      <FormTypes
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={ownerData}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        disabled={disableOwnerDropDown}
+                                        onOpen={() => {
+                                          onOwnerDropdownOpen(
+                                            values["collaborator"]
+                                          );
+                                        }}
+                                      />
+                                    ) : field.fieldName === "collaborator" ? (
+                                      <FormTypes
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={collaboratorData}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        onOpen={() => {
+                                          onCollabOwnerMultiselectOpen(
+                                            values["owner"]
+                                          );
+                                        }}
+                                      />
+                                    ) : field.fieldName === "probability" ? (
+                                      <FormTypes
+                                        // {...rest}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        onChange={(e) => {
+                                          if (
+                                            e.target.value &&
+                                            parseFloat(e.target.value) > 100
+                                          ) {
+                                            setFieldValue("probability", "100");
+                                          } else {
+                                            setFieldValue(
+                                              "probability",
+                                              e.target.value
+                                            );
                                           }
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                        />
-                                      ) : (
+                                        }}
+                                      />
+                                    ) : field.fieldName === "lostReason" ? (
+                                      values["stage"] === "Closed Lost" ? (
                                         <FormTypes
                                           // {...rest}
                                           values={values}
@@ -764,11 +813,89 @@ export default function ManageQuoteDialog({
                                           fullWidth
                                           isTooltip={true}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          } : null}
                                         />
-                                      )}
+                                      ) : null
+                                    ) : field.fieldName === "currency" ? (
+                                      <FormTypes
+                                        disabled={disableCurrency}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        onChange={(e, val) => {
+                                          if (val && val.currencyCode) {
+                                            setFieldValue(
+                                              field.fieldName,
+                                              val.currencyCode
+                                            );
+                                            setCurrencySymbol(val.symbolNative);
+                                          } else {
+                                            setFieldValue(field.fieldName, "");
+                                            setCurrencySymbol(null);
+                                          }
+                                        }}
+                                      />
+                                    ) : field.fieldName === "amount" ? (
+                                      <FormTypes
+                                        // {...rest}
+                                        startAdornment={
+                                          currencySymbol ? (
+                                            <InputAdornment position="start">
+                                              {currencySymbol}
+                                            </InputAdornment>
+                                          ) : (
+                                            ""
+                                          )
+                                        }
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                      />
+                                    ) : (
+                                      <FormTypes
+                                        // {...rest}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                            : null
+                                        }
+                                      />
+                                    )}
                                   </Grid>
                                 ))}
                               </Grid>
@@ -797,11 +924,11 @@ export default function ManageQuoteDialog({
                       })}
                   </Form>
 
-                  {
-                    showAddCustomerAccountDialog && <ManageAccountDialog
+                  {showAddCustomerAccountDialog && (
+                    <ManageAccountDialog
                       open={showAddCustomerAccountDialog}
                       onClose={() => {
-                        setShowAddCustomerAccountDialog(false)
+                        setShowAddCustomerAccountDialog(false);
                       }}
                       id={null}
                       accountResource={customerAccount.accountResource}
@@ -816,21 +943,27 @@ export default function ManageQuoteDialog({
                       }}
                       isRedirectToDetailPage={false}
                     />
-                  }
-                  {
-                    showAddCustomerContactDialog &&
+                  )}
+                  {showAddCustomerContactDialog && (
                     <ManageContactDialog
                       open={showAddCustomerContactDialog}
                       onClose={() => setShowAddCustomerContactDialog(false)}
-                      onSuccess={((obj) => {
+                      onSuccess={(obj) => {
                         if (obj) {
-                          setShowAddCustomerContactDialog(false)
-                          updateContactDropdown(obj.data.data)
+                          setShowAddCustomerContactDialog(false);
+                          updateContactDropdown(obj.data.data);
 
-                          setFieldValue("customerContactName", [...values["customerContactName"], obj.id])
+                          setFieldValue("customerContactName", [
+                            ...values["customerContactName"],
+                            obj.id,
+                          ]);
                         }
-                      })}
-                      accountId={values["customerAccountName"] ? values["customerAccountName"] : accountId}
+                      }}
+                      accountId={
+                        values["customerAccountName"]
+                          ? values["customerAccountName"]
+                          : accountId
+                      }
                       contactResource={customerContact.contactResource}
                       contactApi={customerContact.contactApi}
                       isRedirectToDetailPage={false}
@@ -838,31 +971,31 @@ export default function ManageQuoteDialog({
                       owner={ownerData}
                       account={customerAccount}
                     />
-                  }
-                  {
-                    showCreateOpportunity &&
+                  )}
+                  {showCreateOpportunity && (
                     <ManageOpportunityDialog
                       isNew={true}
                       isRedirectTodetailPage={false}
                       open={showCreateOpportunity}
                       onClose={() => setShowCreateOpportunity(false)}
                       onSuccess={({ data }) => {
-                        setShowCreateOpportunity(false)
-                        setNewAddedOpportunityId(data._id)
-                        updateOpportunityDropdown(data)
-                        setFieldValue("opportunity", data._id)
-
-
+                        setShowCreateOpportunity(false);
+                        setNewAddedOpportunityId(data._id);
+                        updateOpportunityDropdown(data);
+                        setFieldValue("opportunity", data._id);
                       }}
-                      accountId={values["customerAccountName"] ? values["customerAccountName"] : accountId}
+                      accountId={
+                        values["customerAccountName"]
+                          ? values["customerAccountName"]
+                          : accountId
+                      }
                       resource={accountResource}
                       dataToUpdate={null}
-                      disableOwnerAndAccount={values["customerAccountName"] ? true : false}
-
-
+                      disableOwnerAndAccount={
+                        values["customerAccountName"] ? true : false
+                      }
                     />
-                  }
-
+                  )}
                 </CustomDialogContent>
 
                 <CustomDialogFooter>
@@ -874,7 +1007,7 @@ export default function ManageQuoteDialog({
                     onClick={onClose}
                   >
                     Cancel
-                </Button>
+                  </Button>
 
                   <CustomButton
                     loading={loading}
@@ -882,8 +1015,16 @@ export default function ManageQuoteDialog({
                     color="primary"
                     size="small"
                     disabled={
-                      uploadingImageOrFileProgress > 0 || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
-                      Object.values(simplifyValues(values, entityData.fields)).toString()
+                      uploadingImageOrFileProgress > 0 ||
+                      Object.values(
+                        simplifyValues(
+                          entityData.initialValues,
+                          entityData.fields
+                        )
+                      ).toString() ===
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                     }
                     onClick={(e) => {
                       e.preventDefault();
@@ -891,15 +1032,13 @@ export default function ManageQuoteDialog({
                     }}
                   >
                     Save
-                </CustomButton>
+                  </CustomButton>
                 </CustomDialogFooter>
               </>
             )}
-
           </Formik>
         )}
       </Dialog>
-
     </>
   );
 }
@@ -917,5 +1056,5 @@ ManageQuoteDialog.propTypes = {
   disableOwnerDropDown: PropTypes.bool,
   isRenderedFromOpportunity: PropTypes.bool,
   opportunityName: PropTypes.string,
-  contacts: PropTypes.any
+  contacts: PropTypes.any,
 };

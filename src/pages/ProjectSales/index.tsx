@@ -1,8 +1,6 @@
 import { useState, FC, useReducer, useEffect, useContext } from "react";
 import { Grid } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import { AgGridColumn } from "ag-grid-react";
-
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
@@ -19,7 +17,7 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import {
   CommonRenderer,
   CreatedByRenderer,
-  UpdatedByRenderer
+  UpdatedByRenderer,
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
@@ -131,7 +129,7 @@ const ProjectSales: FC = () => {
   const [renderCount, setRenderCount] = useState(0);
 
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
+
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
     dataRows,
@@ -238,30 +236,8 @@ const ProjectSales: FC = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
+    actionsRenderer: ActionsRenderer,
   };
-
-  //  If you want to do something once grid binding done
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi);
-  };
-
-  const generateColumns = columns.map((column: any, index) => {
-    return (
-      <AgGridColumn
-        key={index}
-        field={column.field}
-        headerName={column.headerName}
-        filter={column.filter ?? "agTextColumnFilter"}
-        cellRenderer={column.cellRenderer ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
-      ></AgGridColumn>
-    );
-  });
 
   const replaceFieldName = (field) => {
     switch (field) {
