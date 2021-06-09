@@ -275,7 +275,7 @@ function QuoteDetail() {
   const [loadingFields, setLoadingFields] = useState(false);
   // const [loadingTNC, setLoadingTNC] = useState(false);
   const [isCloning, setCloning] = useState(false);
-  const [quoteData, setquoteData] = useState(null);
+  const [quoteData, setQuoteData] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [quoteFields, setquoteFields] = useState([]);
@@ -429,8 +429,15 @@ function QuoteDetail() {
             { title: `${data.quoteName}` },
           ]);
 
-          data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
-          setquoteData(data);
+          // handleAllowToEditList(data);
+          setCopyOfquoteDataToUpdate(data);
+
+          let modifiedData = {};
+          Object.assign(modifiedData, data);
+          modifiedData["amount"] = formatAmountWithCurrency(data["currency"], data["amount"]).fullFormatAmount
+          setQuoteData(modifiedData);
+
+          handleContactsEmails(data);
 
           handleMainPoints(data);
           setHeadingLbl(data.quoteName);
@@ -503,10 +510,6 @@ function QuoteDetail() {
               (d) => d?.optionValue === user?.user?._id
             )
           );
-
-          // handleAllowToEditList(data);
-          setCopyOfquoteDataToUpdate(data);
-          handleContactsEmails(data);
 
           if (
             data?.staticData?.notToBeRemoved &&
