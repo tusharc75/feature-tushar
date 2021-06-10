@@ -139,8 +139,8 @@ const QuoteBuilders = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    if (permissions && permissions[qbResource]) {
-      setQuotePermissions(permissions[qbResource]);
+    if (permissions && permissions.quoteBuilder) {
+      setQuotePermissions(permissions.quoteBuilder);
     }
 
     return () => {

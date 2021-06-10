@@ -1718,18 +1718,6 @@
         "symbolNative": "€"
     },
     {
-        "country": "Mauritania",
-        "countryCode": "MR",
-        "currencyCode": "MRO",
-        "currencyName": "Mauritanian Ouguiya (pre-2018)",
-        "languages": [
-            "ar"
-        ],
-        "name": "Mauritania",
-        "symbol": null,
-        "symbolNative": null
-    },
-    {
         "country": "Mauritius",
         "countryCode": "MU",
         "currencyCode": "MUR",
@@ -2702,18 +2690,6 @@
         "name": "Syria",
         "symbol": "SY£",
         "symbolNative": "ل.س.‏"
-    },
-    {
-        "country": "São Tomé and Príncipe",
-        "countryCode": "ST",
-        "currencyCode": "STD",
-        "currencyName": "São Tomé and Príncipe Dobra (pre-2018)",
-        "languages": [
-            "pt"
-        ],
-        "name": "São Tomé and Príncipe",
-        "symbol": null,
-        "symbolNative": null
     },
     {
         "country": "Taiwan",

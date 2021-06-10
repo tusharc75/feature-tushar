@@ -478,7 +478,7 @@ function QuoteDetail() {
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setCustomizedRoutes([
-            { title: "Quote", path: "/quote-builder" },
+            { title: "Quote", path: routes.quoteBuilder.path },
             { title: `${data.quoteName}` },
           ]);
 
@@ -622,7 +622,7 @@ function QuoteDetail() {
     if (selectedEntity) {
       setLoadingFields(true);
       axiosInstance()
-        .get(`/field?resource=Quote Builder&entity=${selectedEntity}`)
+        .get(`/field?resource=Quotes&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setquoteFields(data);
 
@@ -1314,7 +1314,7 @@ function QuoteDetail() {
 
   const goBackToListing = () => {
     history.push({
-      pathname: "/quote-builder",
+      pathname: routes.quoteBuilder.path,
     });
   };
 
@@ -1369,7 +1369,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(`${qbApi}/clone/${quoteData._id}`)
       .then(({ data }) => {
-        history.push(`${qbApi}/${data.data._id}`);
+        history.push(`${routes.quoteBuilder.path}/${data.data._id}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

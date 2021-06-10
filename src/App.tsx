@@ -405,7 +405,7 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-          <PrivateRoute exact path={"/quote-builder/:id"}>
+          <PrivateRoute exact path={`${routes.quoteBuilder.path}/:id`}>
             <QuoteDetail />
           </PrivateRoute>
           <Route exact path={"/dashboards"}>
@@ -427,7 +427,7 @@ function App() {
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
-          <PrivateRoute exact path={"/quote-builder"}>
+          <PrivateRoute exact path={routes.quoteBuilder.path}>
             <QuoteBuilderCombined />
           </PrivateRoute>
           <Route path="*" component={NotFound} />

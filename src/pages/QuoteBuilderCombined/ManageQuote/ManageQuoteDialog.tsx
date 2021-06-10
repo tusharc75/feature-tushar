@@ -39,6 +39,7 @@ import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ManageContactDialog from "../../Contact/ManageContact";
 import { isMobile, isTablet } from "react-device-detect";
+import routes from "../../../components/Helpers/Routes";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -238,7 +239,7 @@ export default function ManageQuoteDialog({
 
   const getQuoteFields = () => {
     axiosInstance()
-      .get(`/field?resource=Quote Builder&entity=${selectedEntity}`)
+      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         const newFields = [];
 
@@ -322,7 +323,7 @@ export default function ManageQuoteDialog({
           type: "success",
           message: data.message,
         });
-        if (isRedirectTodetailPage) history.push(`${qbApi}/${newId}`);
+        if (isRedirectTodetailPage) history.push(`${routes.quoteBuilder.path}/${newId}`);
         setLoading(false);
         onSuccess(newId);
       })
@@ -851,7 +852,7 @@ export default function ManageQuoteDialog({
                                           }
                                         }}
                                       />
-                                    ) : field.fieldName === "amount" ? (
+                                    ) : field.fieldName === "estimatedAmount" ? (
                                       <FormTypes
                                         // {...rest}
                                         startAdornment={

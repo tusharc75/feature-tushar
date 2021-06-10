@@ -92,7 +92,7 @@ export const sidebarResource = {
   pricing: "Pricing",
   currencyConvertor: "Currency Convertor",
   priceBuilder: "Price Builder",
-  quoteBuilder: "Quote Builder",
+  quoteBuilder: "Quotes",
   reminder: "Reminder",
   calendar: "Calendar",
   flags: "Flags",
