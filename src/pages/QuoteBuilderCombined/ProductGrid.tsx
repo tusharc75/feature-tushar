@@ -262,7 +262,7 @@ const ProductGrid = (props) => {
 
   return (
     <Box p={1} pt={0}>
-      <Box height={500} mt={1}>
+       <Box mt={1} className="productAgGrid">
         {(isAll && columns) || customColumns ? (
           <CustomAgGrid columns={isAll ? columns : customColumns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
             dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} />
