@@ -1505,10 +1505,6 @@ function QuoteDetail() {
   const handleCases = () => {
     if (DOAreq) {
       if (!PDF) {
-        createImagePDF(false, true);
-
-        exportToCSV(true);
-
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
           .then(({ data }) => {
@@ -1521,15 +1517,14 @@ function QuoteDetail() {
       }
     }
     if (Customerreq) {
+      createImagePDF(false, true);
+
+      exportToCSV(true);
       if (!PDF) {
         createImagePDF(false, true);
       }
       setSendEmail(true);
     }
-  };
-
-  const sendEmailOnNext = () => {
-    setSendEmail(true);
   };
 
   const handleChangeVisible = (event) => {
@@ -2189,11 +2184,14 @@ function QuoteDetail() {
             attachments={[
               {
                 base64: pdfFileBase64,
-                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+                contentType:
+                  pdfFileBase64 && pdfFileBase64.split(";")[0].split(":")[1],
               },
               {
                 base64: excelFileBase64,
-                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+                contentType:
+                  excelFileBase64 &&
+                  excelFileBase64.split(".")[0].split(":")[1],
               },
             ]}
           />
