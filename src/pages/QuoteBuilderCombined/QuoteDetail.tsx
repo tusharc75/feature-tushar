@@ -638,8 +638,11 @@ function QuoteDetail() {
       onClick={() => {
         setShowCreateDialog(true);
         const data = dataRowsTNC.find((d) => d.id === params.data.id);
-
-        setEditRecord(data);
+        console.log(dataRowsTNC);
+        console.log(data);
+        if (data) {
+          setEditRecord(data);
+        }
       }}
     >
       {params.value}
