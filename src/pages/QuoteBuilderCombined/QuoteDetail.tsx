@@ -2106,23 +2106,25 @@ function QuoteDetail() {
                         />
                       )}
                       {ProcessStatus === "Quote Builder" ? (
-                        <Box className="m-3 position-relative">
-                          <h4
-                            className="form-label-style"
-                            title="Add Terms & Conditions"
-                          >
-                            Terms & Conditions
+                        <Box className="m-3">
+                          <div className="position-relative">
+                            <h4
+                              className="form-label-style"
+                              title="Add Terms & Conditions"
+                            >
+                              Terms & Conditions
                           </h4>
-                          <Button
-                            onClick={() => setShowCreateDialog(true)}
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                            className={classes.termsBtn}
-                            startIcon={<AddIcon />}
-                          >
-                            Add Terms & Conditions
+                            <Button
+                              onClick={() => setShowCreateDialog(true)}
+                              variant="contained"
+                              size="small"
+                              color="primary"
+                              className={classes.termsBtn}
+                              startIcon={<AddIcon />}
+                            >
+                              Add Terms & Conditions
                           </Button>
+                          </div>
                           <CustomAgGrid
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
