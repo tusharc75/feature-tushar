@@ -33,6 +33,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { FaArrowAltCircleDown } from "react-icons/fa";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { getUniqueCurrencies } from "../../constants/helpers";
+import routes from "../../components/Helpers/Routes";
 
 const Accordion = withStyles({
   root: {
@@ -272,7 +273,7 @@ export default function QuotesAccordionInProjectSale({
                                 {obj.entity === selectedEntity ? (
                                   <Link
                                     className="link"
-                                    to={`/quote-builder/${obj._id}`}
+                                    to={`${routes.quoteBuilder.path}/${obj._id}`}
                                   >
                                     <Typography className="detailName text-truncate">
                                       {obj.quoteName}

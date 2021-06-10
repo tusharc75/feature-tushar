@@ -173,8 +173,8 @@ const routes = {
     path: "/product-template"
   },
   quoteBuilder: {
-    title: "Quote Builder",
-    path: "/quote-builder"
+    title: "Quotes",
+    path: "/quotes"
   },
 };
 
