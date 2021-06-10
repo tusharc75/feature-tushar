@@ -104,7 +104,7 @@ const useColorlibStepIconStyles = makeStyles({
     color: "#047d1c !important"  
   },
   completed: {
-    color: "3f3f02 !important"
+    color: "#3f3f02 !important"
   },
   rejected: {
     color: "#b3a6a6 !important"
