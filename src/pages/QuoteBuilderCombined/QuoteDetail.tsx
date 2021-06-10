@@ -13,6 +13,8 @@ import {
   Grid,
   IconButton,
   Paper,
+  Tab,
+  Tabs,
   Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
@@ -345,7 +347,7 @@ function QuoteDetail() {
   const [activeStep, setActiveStep] = useState(0);
   const [versions, setVersions] = useState([]);
   const [productBuilderID, setProductBuilderID] = useState("");
-
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] =
@@ -1727,6 +1729,7 @@ function QuoteDetail() {
 
   return (
     <>
+    {console.log(ProcessStatus)}
       <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -2004,10 +2007,39 @@ function QuoteDetail() {
                           <span className="quoteAmount">{versionStatus}</span>
                         </div> */}
                       <div></div>
+                      
                     </Grid>
+                    <div></div>
+                   
                   </Grid>
+                  
                 ) : null}
-
+                <>
+                    <Tabs
+                      className="oms-tab"
+                    
+                      value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Quotes"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        disabled={ProcessStatus !== "Quote Builder"}
+                        label="Terms & Conditions"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                      
+                    </Tabs>
+                    </>
                 {!loading && quoteData ? (
                   <Grid container className="position-relative">
                     <Grid
@@ -2045,7 +2077,7 @@ function QuoteDetail() {
                         </span>
                       ) : null}
 
-                      {ProcessStatus === "Quote Builder" ? (
+                      {ProcessStatus === "Quote Builder"  ? (
                         <Grid container>
                           <Grid item xs={11} md={11} sm={11}>
                             <FormControl
@@ -2144,7 +2176,9 @@ function QuoteDetail() {
                       </span>
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
-                      {ProcessStatus === "Quote Builder" &&
+                      {
+                      ProcessStatus === "Quote Builder" && 
+                      currentTabIndex === 0 &&
                       visibleColumns.length > 0 ? (
                         <ProductGrid
                           productBuilderId={productBuilderID}
@@ -2153,7 +2187,7 @@ function QuoteDetail() {
                           currency={quoteData.currency}
                           isAll={false}
                         />
-                      ) : (
+                      ) : currentTabIndex === 0 ? (
                         <ProductBuilder
                           productBuilderId={productBuilderID}
                           isAddNewProduct={isAddNewProduct}
@@ -2169,8 +2203,8 @@ function QuoteDetail() {
                               : false
                           }
                         />
-                      )}
-                      {ProcessStatus === "Quote Builder" ? (
+                      ):null}
+                      {ProcessStatus === "Quote Builder" && currentTabIndex === 1 ? (
                         <Box className="m-3">
                           <div className="position-relative">
                             <h4
