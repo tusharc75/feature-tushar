@@ -862,11 +862,12 @@ function QuoteDetail() {
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
-    PdfDoc.setFontSize(14);
-    PdfDoc.text(companyAddress, 20, 45);
+    PdfDoc.setFontSize(12);
+    PdfDoc.text(companyAddress, 20, 50);
     PdfDoc.setLineWidth(3);
     PdfDoc.line(15, 70, 260, 70);
     PdfDoc.line(330, 70, 580, 70);
+    PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     var PDFData = [];
     var PdfCol = ["S. No."];
@@ -938,6 +939,7 @@ function QuoteDetail() {
         },
       ],
     ];
+
     autoTable(PdfDoc, {
       margin: { top: 140 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -946,6 +948,19 @@ function QuoteDetail() {
       theme: "grid",
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
+
+    finalY = finalY + 40;
+    PdfDoc.setFontSize(10);
+    PdfDoc.text("Note:", 20, finalY);
+
+    finalY = finalY + 15;
+    PdfDoc.text("Thanks for your business", 20, finalY);
+
+    finalY = finalY + 50;
+    PdfDoc.text("Customer Signature", 20, finalY);
+
+    finalY = finalY + 75;
+    PdfDoc.line(15, finalY, 260, finalY);
 
     if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
