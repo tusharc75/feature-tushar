@@ -6,7 +6,7 @@ import React, {
   useRef,
   useReducer,
 } from "react";
-import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid, IconButton, Paper, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -29,13 +29,18 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { Link } from "react-router-dom";
 import { getSearchQuery } from "../../services/util";
 import { AiFillPlusCircle } from "react-icons/ai";
+import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -52,6 +57,7 @@ import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from "./EmailDialog";
+
 import { BsPlusCircle } from "react-icons/bs";
 
 import { cloneDeep } from "lodash";
@@ -74,7 +80,42 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import CustomDetailPage from "./CustomDetailPage";
+
+const Accordion = withStyles({
+  root: {
+    border: "1px solid rgba(0, 0, 0, .125)",
+    "&:not(:last-child)": {
+      borderBottom: 0,
+    },
+    "&:before": {
+      display: "none",
+    },
+    "&$expanded": {
+      margin: "auto",
+    },
+  },
+  expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
+    "&$expanded": {
+      minHeight: 46,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -273,6 +314,7 @@ function QuoteDetail() {
       cellRenderer: "nameRenderer",
     },
   ]);
+  const [expandQuote, setExpandQuote] = useState(false);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1701,8 +1743,39 @@ function QuoteDetail() {
               ) : (
                 <>
                   {quoteData && (
-
-                    <CustomDetailPage data={quoteData} fields={quoteFields} />
+                    <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
+                      <AccordionSummary
+                        aria-controls="user-panel-content"
+                        id="user-panel-header"
+                      >
+                        <Grid container>
+                          <Box
+                            component="div"
+                            display="flex"
+                            alignItems="center"
+                            flexGrow={1}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={() => setExpandQuote(!expandQuote)} >
+                              {
+                                expandQuote === true ? (
+                                  <ExpandLessIcon />
+                                ) : (
+                                  <ExpandMoreIcon />
+                                )
+                              }
+                            </IconButton>
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                Quotes Information
+                            </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </AccordionSummary>
+                      <DetailsPage data={quoteData} fields={quoteFields} />
+                    </Accordion>
                   )}
                 </>
               )}
