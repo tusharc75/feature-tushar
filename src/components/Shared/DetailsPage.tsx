@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase } from "lodash";
 import axios from "axios";
-
+import { FcApproval } from "react-icons/fc";
 import { getObjKeysWithValues } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -47,6 +47,11 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "normal",
     color: "#656464",
   },
+  approvalIcon: {
+    position: 'relative',
+    marginLeft: '2px',
+    top: '4px'
+  }
 }));
 
 interface DetailProps {
@@ -268,6 +273,10 @@ const Details = (props: DetailProps) => {
               >
                 <span className={classes.dataValue}>
                   {data[fieldData.fieldName].optionLabel}
+                  {
+                    data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ?
+                      <FcApproval className={classes.approvalIcon} title="Approved" size={20} /> : null
+                  }
                 </span>
               </Link>
             ) : (
