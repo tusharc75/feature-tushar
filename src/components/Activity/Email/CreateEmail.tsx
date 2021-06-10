@@ -39,6 +39,7 @@ import ImageAttachments from './ImageAttachments'
 import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers"
 import { fileIcons } from "./FileIcons"
 import { toolbarConfig } from "./TextEditorToolbar"
+import { useData } from "../../../StateProvider/Provider"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -76,7 +77,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fetchData = null }) => {
+export const CreateEmail = ({ relatedTo, emailId, handleClose,
+    isQuoteBuilder = false, options = [], fetchData = null, id = null, version = null,
+    qouteBuilderAttachments = [] }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
@@ -91,6 +94,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    const {
+        state: { user },
+    }: any = useData();
 
     useEffect(() => {
         fetchEmailDetail();
@@ -180,6 +186,31 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
 
         }
     };
+
+    const handleSendQuoteEmail = (values) => {
+        setSending(true)
+        const body = {
+            email: [user?.user?.email],
+            version: version,
+            emailBody: values.content.toString('html'),
+            emailSubject: values.name,
+            cc: values.cc,
+            bcc: values.to,
+            id: id,
+            attachments: [...qouteBuilderAttachments]
+        }
+        axiosInstance()
+            .post(`/quote-builder/sendQuoteEmail`, body)
+            .then(({ data: { data } }) => {
+                setSending(false);
+                if (fetchData) fetchData()
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                setSending(false);
+                handleClose();
+            });
+    }
 
     const onKeyPress = (event) => {
         if (event.which === 13) {
@@ -308,7 +339,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                     </Typography>)
                 )}
             </div>
-            : initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema} onSubmit={handleSave} onKeyPress={onKeyPress}>
+            : initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema}
+                onSubmit={isQuoteBuilder ? handleSendQuoteEmail : handleSave} onKeyPress={onKeyPress}>
                 {
                     ({ submitForm, touched, errors, setFieldValue, values }) => (
                         <>
@@ -432,29 +464,32 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                                 setFieldValue("cc", val)
                                                             }}
                                                         />
-                                                        <Box mt={2}>
-                                                            <FormTypes
-                                                                label="File"
-                                                                name="file"
-                                                                isTooltip={true}
-                                                                required={false}
-                                                                type="fileUpload"
-                                                                values={values}
-                                                                errors={errors}
-                                                                touched={touched}
-                                                                size="small"
-                                                                isMultipleUpload={true}
-                                                                setFieldValue={(name, file) => {
-                                                                    setFieldValue("file", file);
-                                                                    onUploadFile(file)
-                                                                }}
-                                                                usePublicUrlforFileUpload={true}
-                                                                doNotShowUploadedFile={true}
-                                                                imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                                }}
-                                                            />
-                                                        </Box>
+                                                        {
+                                                            isQuoteBuilder ? null :
+                                                                <Box mt={2}>
+                                                                    <FormTypes
+                                                                        label="File"
+                                                                        name="file"
+                                                                        isTooltip={true}
+                                                                        required={false}
+                                                                        type="fileUpload"
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        size="small"
+                                                                        isMultipleUpload={true}
+                                                                        setFieldValue={(name, file) => {
+                                                                            setFieldValue("file", file);
+                                                                            onUploadFile(file)
+                                                                        }}
+                                                                        usePublicUrlforFileUpload={true}
+                                                                        doNotShowUploadedFile={true}
+                                                                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                                        }}
+                                                                    />
+                                                                </Box>
+                                                        }
                                                         {renderFileThumbnails}
                                                         <ImageAttachments
                                                             imageAttachments={fileImageAttachments}
@@ -472,35 +507,37 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                                 className={classes.textEditor}
                                                                 value={values["content"]}
                                                                 onChange={(value) => setFieldValue("content", value)}
-                                                                customControls={[
-                                                                    <button type="button"
-                                                                        className={emailStyles.emailRichTextEditorCustomControls}
-                                                                    >
-                                                                        <label htmlFor="avatar">
-                                                                            <IconButton
-                                                                                title="Add picture"
-                                                                                size="small"
-                                                                                aria-label="upload picture"
-                                                                                component="span">
-                                                                                <BsFillImageFill size={18} color="black" />
-                                                                                <input
-                                                                                    disabled={isUploading}
-                                                                                    id="avatar"
-                                                                                    name="avatar"
-                                                                                    onChange={handleUploadImage}
-                                                                                    accept="image/x-png,image/gif,image/jpeg"
-                                                                                    style={{
-                                                                                        opacity: "0",
-                                                                                        position: "absolute",
-                                                                                        zIndex: -1
-                                                                                    }}
-                                                                                    onClick={(e: any) => (e.target.value = null)}
-                                                                                    type="file"
-                                                                                />
-                                                                            </IconButton>
-                                                                        </label>
-                                                                    </button>
-                                                                ]}
+                                                                customControls={
+                                                                    isQuoteBuilder ? null :
+                                                                        [
+                                                                            <button type="button"
+                                                                                className={emailStyles.emailRichTextEditorCustomControls}
+                                                                            >
+                                                                                <label htmlFor="avatar">
+                                                                                    <IconButton
+                                                                                        title="Add picture"
+                                                                                        size="small"
+                                                                                        aria-label="upload picture"
+                                                                                        component="span">
+                                                                                        <BsFillImageFill size={18} color="black" />
+                                                                                        <input
+                                                                                            disabled={isUploading}
+                                                                                            id="avatar"
+                                                                                            name="avatar"
+                                                                                            onChange={handleUploadImage}
+                                                                                            accept="image/x-png,image/gif,image/jpeg"
+                                                                                            style={{
+                                                                                                opacity: "0",
+                                                                                                position: "absolute",
+                                                                                                zIndex: -1
+                                                                                            }}
+                                                                                            onClick={(e: any) => (e.target.value = null)}
+                                                                                            type="file"
+                                                                                        />
+                                                                                    </IconButton>
+                                                                                </label>
+                                                                            </button>
+                                                                        ]}
                                                                 toolbarConfig={toolbarConfig}
                                                             />
                                                             <ImageAttachments
@@ -526,7 +563,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                 {!emailId &&
                                     <Button type="button" size="small" color="primary" variant="contained" disabled={sending || uploadingImageOrFileProgress > 0}
                                         onClick={(e) => {
-
                                             e.preventDefault()
                                             submitForm()
                                         }}>
