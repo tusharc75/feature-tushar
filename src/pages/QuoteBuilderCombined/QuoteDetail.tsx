@@ -305,14 +305,12 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
-  const [gridApi, setGridApi] = useState(null);
+  const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
       headerName: "Name",
-      show: true,
-      disabled: true,
       cellRenderer: "nameRenderer",
     },
   ]);
@@ -392,7 +390,7 @@ function QuoteDetail() {
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
 
-  const [data, setData] = useState([]);
+  const [dataTNC, setDataTNC] = useState([]);
 
   const [editRecord, setEditRecord] = useState<any>({});
   const [DOAreq, setDOAreq] = useState(false);
@@ -462,21 +460,6 @@ function QuoteDetail() {
   useEffect(() => {
     fetchTermsAndConditions();
   }, [query, searchVal, currentVersion]);
-
-  useEffect(() => {
-    let rows = data?.map((u) => ({
-      ...u,
-      isChecked: TandC.includes(u._id) ? true : false,
-      id: u._id,
-    }));
-    setDataRows([...rows]);
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].isChecked) {
-        setRadioIndex(i);
-        break;
-      }
-    }
-  }, [data, currentVersion]);
 
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
@@ -680,7 +663,7 @@ function QuoteDetail() {
       title={params.value}
       onClick={() => {
         setShowCreateDialog(true);
-        const data = dataRowsTNC.find((d) => d.id === params.data.id);
+        const data = dataTNC.find((d) => d._id === params.data.id);
         console.log(dataRowsTNC);
         console.log(data);
         if (data) {
@@ -706,8 +689,8 @@ function QuoteDetail() {
     axiosInstance()
       .get(termsAndCondition.api)
       .then(({ data: { data, count } }) => {
+        setDataTNC(data);
         let rows = data.map((tnc) => ({
-          ...tnc,
           id: tnc._id,
           name: tnc.TACName,
         }));
@@ -1548,10 +1531,6 @@ function QuoteDetail() {
   const handleCases = () => {
     if (DOAreq) {
       if (!PDF) {
-        createImagePDF(false, true);
-
-        exportToCSV(true);
-
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
           .then(({ data }) => {
@@ -1564,15 +1543,14 @@ function QuoteDetail() {
       }
     }
     if (Customerreq) {
+      createImagePDF(false, true);
+
+      exportToCSV(true);
       if (!PDF) {
         createImagePDF(false, true);
       }
       setSendEmail(true);
     }
-  };
-
-  const sendEmailOnNext = () => {
-    setSendEmail(true);
   };
 
   const handleChangeVisible = (event) => {
@@ -1594,7 +1572,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        data
+        dataTNC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -2149,7 +2127,7 @@ function QuoteDetail() {
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
                             frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
+                            setGridApi={setTNCGridApi}
                             dispatch={dispatch}
                             rowCount={rowCountTNC}
                             limit={limit}
@@ -2158,6 +2136,7 @@ function QuoteDetail() {
                             actionWidth={150}
                             allowSelection={true}
                             allowAction={false}
+                            isClientSideGrid={true}
                           />
                         </Box>
                       ) : null}
@@ -2264,11 +2243,14 @@ function QuoteDetail() {
             attachments={[
               {
                 base64: pdfFileBase64,
-                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+                contentType:
+                  pdfFileBase64 && pdfFileBase64.split(";")[0].split(":")[1],
               },
               {
                 base64: excelFileBase64,
-                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+                contentType:
+                  excelFileBase64 &&
+                  excelFileBase64.split(";")[0].split(":")[1],
               },
             ]}
           />
