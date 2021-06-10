@@ -6,7 +6,15 @@ import React, {
   useRef,
   useReducer,
 } from "react";
-import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Typography,
+} from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -29,13 +37,18 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { Link } from "react-router-dom";
 import { getSearchQuery } from "../../services/util";
 import { AiFillPlusCircle } from "react-icons/ai";
+import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -51,9 +64,9 @@ import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
-import EmailDialog from "./EmailDialog";
+// import EmailDialog from "./EmailDialog";
+import { CreateEmail } from "../../components/Activity/Email/CreateEmail"
 import { BsPlusCircle } from "react-icons/bs";
-
 import { cloneDeep } from "lodash";
 import {
   customerAccount,
@@ -74,7 +87,44 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import CustomDetailPage from "./CustomDetailPage";
+import Dialog from '@material-ui/core/Dialog';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "../../constants/helpers";
+
+const Accordion = withStyles({
+  root: {
+    border: "1px solid rgba(0, 0, 0, .125)",
+    "&:not(:last-child)": {
+      borderBottom: 0,
+    },
+    "&:before": {
+      display: "none",
+    },
+    "&$expanded": {
+      margin: "auto",
+    },
+  },
+  expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
+    "&$expanded": {
+      minHeight: 46,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -273,6 +323,7 @@ function QuoteDetail() {
       cellRenderer: "nameRenderer",
     },
   ]);
+  const [expandQuote, setExpandQuote] = useState(false);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -350,7 +401,7 @@ function QuoteDetail() {
 
   const [dataTNC, setDataTNC] = useState([]);
 
-  const [editRecord, setEditRecord] = useState<any>({});
+  const [editRecord, setEditRecord] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [sendEmail, setSendEmail] = useState(false);
@@ -377,6 +428,7 @@ function QuoteDetail() {
   });
   const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
     useState("All Version Status");
+  const [userEmails, setUserEmails] = useState([])
 
   let termsTimeout;
 
@@ -440,6 +492,7 @@ function QuoteDetail() {
             data["amount"]
           ).fullFormatAmount;
           setQuoteData(modifiedData);
+          fetchUserEmails(modifiedData)
 
           handleContactsEmails(data);
 
@@ -622,11 +675,8 @@ function QuoteDetail() {
       onClick={() => {
         setShowCreateDialog(true);
         const data = dataTNC.find((d) => d._id === params.data.id);
-        console.log(dataRowsTNC);
-        console.log(data);
-        if (data) {
-          setEditRecord(data);
-        }
+
+        setEditRecord(data);
       }}
     >
       {params.value}
@@ -649,6 +699,7 @@ function QuoteDetail() {
       .then(({ data: { data, count } }) => {
         setDataTNC(data);
         let rows = data.map((tnc) => ({
+          ...tnc,
           id: tnc._id,
           name: tnc.TACName,
         }));
@@ -664,6 +715,26 @@ function QuoteDetail() {
         dispatch({ type: "loading", loadingTNC: false });
       });
   };
+
+  const fetchUserEmails = (quoteData) => {
+    if (quoteData?.collaborator && quoteData.collaborator.length) {
+      let collaboratorIds = quoteData.collaborator.map(o => o.optionValue)
+      axiosInstance()
+        .get("/user")
+        .then(({ data: { data, count } }) => {
+          data = data.reduce((emails, obj) => {
+            if (obj?.email && collaboratorIds.indexOf(obj._id) >= 0) {
+              emails.push(obj.email);
+            }
+            return emails;
+          }, []);
+          setUserEmails([...data])
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }
 
   // const columnsTNC = [
   //   {
@@ -820,11 +891,12 @@ function QuoteDetail() {
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
-    PdfDoc.setFontSize(14);
-    PdfDoc.text(companyAddress, 20, 45);
+    PdfDoc.setFontSize(12);
+    PdfDoc.text(companyAddress, 20, 50);
     PdfDoc.setLineWidth(3);
     PdfDoc.line(15, 70, 260, 70);
     PdfDoc.line(330, 70, 580, 70);
+    PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     var PDFData = [];
     var PdfCol = ["S. No."];
@@ -896,6 +968,7 @@ function QuoteDetail() {
         },
       ],
     ];
+
     autoTable(PdfDoc, {
       margin: { top: 140 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -904,6 +977,19 @@ function QuoteDetail() {
       theme: "grid",
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
+
+    finalY = finalY + 40;
+    PdfDoc.setFontSize(10);
+    PdfDoc.text("Note:", 20, finalY);
+
+    finalY = finalY + 15;
+    PdfDoc.text("Thanks for your business", 20, finalY);
+
+    finalY = finalY + 50;
+    PdfDoc.text("Customer Signature", 20, finalY);
+
+    finalY = finalY + 75;
+    PdfDoc.line(15, finalY, 260, finalY);
 
     if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
@@ -1022,7 +1108,7 @@ function QuoteDetail() {
 
   const handleCloseCreateDialog = (params) => {
     setShowCreateDialog(false);
-    setEditRecord({});
+    setEditRecord(null);
     if (params?.fetchData) fetchTermsAndConditions();
   };
 
@@ -1622,6 +1708,20 @@ function QuoteDetail() {
       });
   };
 
+  let attachments = []
+  if (pdfFileBase64) {
+    attachments.push({
+      base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1),),
+      contentType: pdfFileBase64.split(";")[0].split(":")[1],
+    })
+  }
+  if (excelFileBase64) {
+    attachments.push({
+      base64: excelFileBase64.substring(parseInt(excelFileBase64.indexOf(",") + 1),),
+      contentType: excelFileBase64.split(";")[0].split(":")[1],
+    })
+  }
+
   return (
     <>
       <Layout>
@@ -1701,8 +1801,41 @@ function QuoteDetail() {
               ) : (
                 <>
                   {quoteData && (
-
-                    <CustomDetailPage data={quoteData} fields={quoteFields} />
+                    <Accordion
+                      expanded={expandQuote}
+                      className="omsAccordian accordQuotes"
+                    >
+                      <AccordionSummary
+                        aria-controls="user-panel-content"
+                        id="user-panel-header"
+                      >
+                        <Grid container>
+                          <Box
+                            component="div"
+                            display="flex"
+                            alignItems="center"
+                            flexGrow={1}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={() => setExpandQuote(!expandQuote)}
+                            >
+                              {expandQuote === true ? (
+                                <ExpandLessIcon />
+                              ) : (
+                                <ExpandMoreIcon />
+                              )}
+                            </IconButton>
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                Quotes Information
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </AccordionSummary>
+                      <DetailsPage data={quoteData} fields={quoteFields} />
+                    </Accordion>
                   )}
                 </>
               )}
@@ -2040,7 +2173,7 @@ function QuoteDetail() {
                               title="Add Terms & Conditions"
                             >
                               Terms & Conditions
-                          </h4>
+                            </h4>
                             <Button
                               onClick={() => setShowCreateDialog(true)}
                               variant="contained"
@@ -2050,7 +2183,7 @@ function QuoteDetail() {
                               startIcon={<AddIcon />}
                             >
                               Add Terms & Conditions
-                          </Button>
+                            </Button>
                           </div>
                           <CustomAgGrid
                             columns={columnsTNC}
@@ -2153,7 +2286,7 @@ function QuoteDetail() {
           />
         )}
 
-        {showCreateDialog ? (
+        {showCreateDialog && editRecord ? (
           <ManageTermsAndCondition
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
@@ -2163,26 +2296,28 @@ function QuoteDetail() {
           />
         ) : null}
         {sendEmail && (
-          <EmailDialog
-            handleClose={() => setSendEmail(false)}
-            success={onSuccess}
-            id={id}
-            version={currentVersion}
-            account={quoteData.customerAccountName}
-            attachments={[
-              {
-                base64: pdfFileBase64,
-                contentType:
-                  pdfFileBase64 && pdfFileBase64.split(";")[0].split(":")[1],
-              },
-              {
-                base64: excelFileBase64,
-                contentType:
-                  excelFileBase64 &&
-                  excelFileBase64.split(";")[0].split(":")[1],
-              },
-            ]}
-          />
+          <Dialog
+            open={sendEmail}
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="md"
+            onClose={() => setSendEmail(false)}
+            fullWidth
+          >
+            <CreateEmail
+              handleClose={() => setSendEmail(false)}
+              fetchData={onSuccess}
+              id={id}
+              version={currentVersion}
+              // account={quoteData.customerAccountName}
+              isQuoteBuilder={true}
+              // users={quoteData.collaborator}
+              options={userEmails}
+              emailId={null}
+              qouteBuilderAttachments={attachments}
+            />
+          </Dialog>
         )}
 
         {messageDialog.open && (
