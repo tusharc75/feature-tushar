@@ -25,6 +25,8 @@ import { ImHourGlass } from "react-icons/im";
 import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
+import { FaHourglassHalf } from 'react-icons/fa';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,10 +73,7 @@ const useStyles = makeStyles((theme) => ({
     background: "#ffffff",
     boxShadow: "2px 2px 6px #a7a3a3",
   },
-  currentStepColor: {
-    color: "#0e7723 !important",
-    fontWeight: 600,
-  },
+
   active: {
     background: "#53ac65",
   },
@@ -94,27 +93,21 @@ const useStyles = makeStyles((theme) => ({
 
 const useColorlibStepIconStyles = makeStyles({
   root: {
+    color: "#d1c4c4",
     width: 30,
     height: 30,
     display: "flex",
-    color: "#000000",
-    opacity: "0.2",
     justifyContent: "center",
     alignItems: "center",
   },
   active: {
-    // backgroundImage:
-    //   "linear-gradient( 136deg, rgb(30,118,130) 0%, rgb(30,118,130) 50%, rgb(30,118,130) 100%)",
-    // boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
+    color: "#047d1c !important"  
   },
   completed: {
-    // backgroundImage:
-    //   "linear-gradient( 136deg, rgb(4,125,28) 0%, rgb(4,125,28) 50%, rgb(4,125,28) 100%)",
+    color: "3f3f02 !important"
   },
   rejected: {
-    // background: "black",
-    // backgroundImage:
-    //   "linear-gradient( 136deg, rgb(178, 0, 0) 0%, rgb(178, 0, 0) 50%, rgb(178, 0, 0) 100%)",
+    color: "#b3a6a6 !important"
   },
 });
 
@@ -190,8 +183,8 @@ const Steps = (props) => {
       2: <GoPencil size={20} />,
       3: <BsCheckCircle size={20} />,
       4: <AiOutlineCloseCircle size={20} />,
-      5: <MoreHorizIcon />,
-    };
+      5: <FaHourglassHalf size={20} />,
+        };
 
     return (
       <div
@@ -296,7 +289,7 @@ const Steps = (props) => {
                   >
                     {activeStep === steps.length - 1 ? "Finish" : "Next"}
                   </Button> : null
-                } 
+                }
               </div>
             </div>
           </>
@@ -304,7 +297,6 @@ const Steps = (props) => {
         <div className={classes.pStepper}>
           <Stepper activeStep={activeStep}>
             {steps.map((label, i) => (
-              <>
                 <Step
                   key={label}
                   className={clsx(classes.step, {
@@ -316,13 +308,11 @@ const Steps = (props) => {
                   <StepLabel
                     StepIconComponent={ColorlibStepIcon}
                     className={
-                      currentStep == i ? classes.currentStepColor : null
-                    }
-                  >
+                      currentStep == i ? "currentStepColor" : null
+                    }>
                     {label}
                   </StepLabel>
                 </Step>
-              </>
             ))}
           </Stepper>
         </div>
