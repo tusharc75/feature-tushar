@@ -28,7 +28,7 @@ import AssignedUsers from "./AssignedUsers";
 import { FaEye } from 'react-icons/fa';
 import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
-import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
 import {
   SET_USER,
   USER_LOADING,
@@ -56,7 +56,6 @@ const RoleDetailsPage = () => {
   const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
-  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [roleUsers, setRoleUsers] = useState([]);
@@ -220,9 +219,6 @@ const RoleDetailsPage = () => {
     setShowAssignUserDialog(false);
   };
 
-  const entityDialogClose = () => {
-    setShowAssignEntityDialog(false);
-  };
 
   const fetchUserData = () => {
     dispatch({ type: USER_LOADING, payload: true });
@@ -277,32 +273,29 @@ const RoleDetailsPage = () => {
   return (
     <>
       {showAssignUserDialog && (
-        <AssignUserDialog
-          usersDialogOpen={showAssignUserDialog}
-          handleCloseDialog={userDialogClose}
-          roleIds={[id]}
-          assignedUsers={roleUsers}
-          onSuccess={() => {
-            fetchRoleData();
-            userDialogClose();
-          }}
-        />
-      )}
-      {showAssignEntityDialog && (
-        <AssignEntityDialog
-          entitiesDialogOpen={showAssignEntityDialog}
-          handleCloseDialog={entityDialogClose}
-          type="entity"
-          ids={[id]}
-          assignedEntity={roleData?.entity}
-          regionalRole={false}
+        roleData?.type === roleTypes.find((d) => d.key === "Global")?.value ?
+          <AssignUserDialog
+            usersDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            roleIds={[id]}
+            assignedUsers={roleUsers}
+            onSuccess={() => {
+              fetchRoleData();
+              userDialogClose();
+            }}
+          />
+          :
+          <AssignRegionalRolesUserDialog
+            entitiesDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            ids={[id]}
+            assignedUsers={roleUsers}
+            onSuccess={() => {
+              fetchRoleData();
+              userDialogClose();
+            }}
+          />
 
-          onSuccess={() => {
-            fetchRoleData();
-            fetchUserData();
-            entityDialogClose();
-          }}
-        />
       )}
 
       <Layout>
@@ -336,7 +329,7 @@ const RoleDetailsPage = () => {
                       disabled={currentData === updatedData || isUpdating || checkError()}
                       variant="contained"
                       color="primary"
-                      size="small" 
+                      size="small"
                       onClick={handleUpdateRole}
                     >
                       {isUpdating ? <CircularProgress size={22} /> : "Update"}
@@ -513,7 +506,7 @@ const RoleDetailsPage = () => {
                   Assigned Users ({(roleUsers.length) || 0})
                 </Typography>
 
-                {permissions.role.isUpdate && (roleData?.type === roleTypes.find((d) => d.key === "Global")?.value) && (
+                {permissions.role.isUpdate && (
                   <IconButton
                     title="Assign users"
                     color="primary"
