@@ -17,8 +17,8 @@ const Entities = ({ brand }) => {
   return (
     <div>
       <Box marginBottom={2} display="flex" justifyContent="flex-end">
-        <Button size="small"  variant="outlined">
-          <Add /> Create Entity
+        <Button size="small" variant="outlined">
+          <Add /> Create Entities
         </Button>
         <Box marginX={2} />
         <TextField
