@@ -339,7 +339,8 @@ const Steps = (props) => {
               <Step
                 key={label}
                 className={clsx(classes.step, {
-                  [classes.active]: currentStep > i,
+                  [classes.active]:
+                    currentStep > i || steps[currentStep] === "End",
                   [classes.currentStep]: currentStep == i,
                   [classes.inActive]: currentStep !== i,
                 })}
