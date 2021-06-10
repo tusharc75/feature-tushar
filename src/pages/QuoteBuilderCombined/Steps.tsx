@@ -285,16 +285,18 @@ const Steps = (props) => {
                 ) : null}
 
                 {/* <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} /> */}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleNext}
-                  size="small"
-                  disabled={nextStep ? false : true}
-                  endIcon={<IoIosArrowDroprightCircle />}
-                >
-                  {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                </Button>
+                {versionStatus.split(" ")[0] != "Rejected" ?
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleNext}
+                    size="small"
+                    disabled={nextStep ? false : true}
+                    endIcon={<IoIosArrowDroprightCircle />}
+                  >
+                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  </Button> : null
+                } 
               </div>
             </div>
           </>
