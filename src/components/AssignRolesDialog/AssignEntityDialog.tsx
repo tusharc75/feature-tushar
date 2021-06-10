@@ -73,10 +73,10 @@ const AssignEntityDialog = ({
       .get(`/${type}`)
       .then(({ data: { data } }) => {
         if (type == "user") {
-          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)));
+          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
         }
         else {
-          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)));
+          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
         }
         setLoadingData(false);
       })
@@ -92,7 +92,6 @@ const AssignEntityDialog = ({
         regionalRole ?
           setRole(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
           : setRole(data.map(obj => ({ ...obj, isChecked: false })))
-
         setLoadingData(false);
       })
       .catch((error) => {
@@ -104,53 +103,19 @@ const AssignEntityDialog = ({
 
 
   const handleAssignEntity = async () => {
-
     if (selectedData.length) {
       setAssigning(true);
       let dataObj: any;
       let entityArray = []
       if (type === "entity") {
+        dataObj = {
+          user: ids[0],
+          entities: selectedData,
+          roles: selectedRole
+        };
+      }
 
-        if (assignedEntity.length !== 0) {
-          assignedEntity.map(d => {
-            if (d.entity?._id !== selectedData[0]) {
-              entityArray.push({
-                entity: d.entity?._id,
-                role: d.role?.map(r => r._id)
-              })
-            }
-            else {
-              entityArray.push({
-                entity: selectedData[0],
-                role: regionalRole ? selectedRole.concat(d.role?.map(r => r._id)) : selectedRole
-              })
-            }
-          })
-          if (!assignedEntity.some(item => item?.entity._id === selectedData[0])) {
-            entityArray.push({
-              entity: selectedData[0],
-              role: selectedRole
-            })
-          }
-          dataObj = {
-            user: ids[0],
-            entities: entityArray
-          };
-        }
-        else {
-          dataObj = {
-            user: ids[0],
-            entities: [
-              {
-                entity: selectedData[0],
-                role: selectedRole
-              }
-            ]
-          };
-        }
-
-
-      } else {
+      else {
         const selectedUser = data.find(user => user._id === selectedData[0])
         if (selectedUser) {
           const selectedUserEntityArray = selectedUser.entities.filter(e => e.role.length !== 0 || e.entity !== undefined)
@@ -165,19 +130,15 @@ const AssignEntityDialog = ({
         }
         else {
           dataObj = {
-            user: selectedData[0],
-            entities: [
-              {
-                entity: ids[0],
-                role: selectedRole
-              }
-            ]
+            users: selectedData,
+            entity: ids[0],
+            roles: selectedRole
           };
         }
-      }
 
+      }
       await axiosInstance()
-        .put(`/user/assign-entity`, dataObj)
+        .put(type === "entity" ? `/user/assign-entities` : `/user/assign-users`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
@@ -205,10 +166,11 @@ const AssignEntityDialog = ({
                 <Checkbox
                   edge="start"
                   onChange={(e) => {
-                    setSelectedData(selectedData.some(item => item === d._id) ? [] : [d._id])
+                    d.isChecked = e.target.checked
+                    setSelectedData(data.filter(d => d.isChecked).map(obj => obj._id))
                   }
                   }
-                  checked={selectedData.some(item => item === d._id)}
+                  checked={d.isChecked}
                   inputProps={{
                     "aria-labelledby": `checkbox-list-label-${d._id}`,
                   }}
@@ -274,7 +236,7 @@ const AssignEntityDialog = ({
                   <div className={classes.actionsContainer}>
                     <div>
                       <Button
-                        size="small" 
+                        size="small"
                         disabled={activeStep === 0}
                         onClick={handleBack}
                         className={classes.button}
@@ -285,9 +247,9 @@ const AssignEntityDialog = ({
                         <Button
                           variant="contained"
                           color="primary"
-                          size="small" 
+                          size="small"
                           onClick={handleNext}
-                          disabled={selectedData?.length === 0}
+                          disabled={selectedData.some(item => item?.isChecked)}
                           className={classes.button}
                         >
                           Next
@@ -333,7 +295,7 @@ const AssignEntityDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
-          size="small" 
+          size="small"
         >
           Cancel
         </Button>
@@ -341,7 +303,7 @@ const AssignEntityDialog = ({
           disabled={!selectedData?.length || !selectedRole?.length}
           onClick={handleAssignEntity}
           color="primary"
-          size="small" 
+          size="small"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>
