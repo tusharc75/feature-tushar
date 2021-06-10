@@ -5,3 +5,13 @@
 .nameLink:hover {
   text-decoration: underline;
 }
+.MuiStepper-horizontal {
+  border-radius: 2px;
+  border: 1px solid #d2cfcf;
+  border-left: none !important;
+}
+.productPos{
+  position: absolute;
+  top: 1px;
+  left: 6px;
+}

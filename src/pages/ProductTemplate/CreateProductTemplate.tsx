@@ -99,7 +99,7 @@ const ProductTemplate = () => {
 
     const handleSave = (values) => {
         let data: any = {}
-        data.name = values.name; 
+        data.name = values.name;
         data.isStandard = values.isStandard;
         if (data.isStandard) {
             data.productCategory = null;
@@ -275,6 +275,7 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
+                                    module="producttemplate"
                                 />
                             </Box>
                         </Form>)}

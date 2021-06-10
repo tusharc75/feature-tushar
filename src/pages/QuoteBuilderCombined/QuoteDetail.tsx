@@ -52,6 +52,7 @@ import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from "./EmailDialog";
+import { BsPlusCircle } from "react-icons/bs";
 
 import { cloneDeep } from "lodash";
 import {
@@ -179,6 +180,21 @@ const useStyles = makeStyles((theme) => ({
   noLabel: {
     marginTop: theme.spacing(3),
   },
+  bgProduct: {
+    background: "#ececec !important",
+    paddingBottom: "2px",
+  },
+  productInformation: {
+    background: "white",
+    margin: "9px",
+    borderRadius: "3px",
+    border: "1px solid #d2cbcb",
+  },
+  termsBtn: {
+    position: "absolute",
+    top: "-16px",
+    right: "0",
+  },
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -264,7 +280,7 @@ function QuoteDetail() {
   const [loadingFields, setLoadingFields] = useState(false);
   // const [loadingTNC, setLoadingTNC] = useState(false);
   const [isCloning, setCloning] = useState(false);
-  const [quoteData, setquoteData] = useState(null);
+  const [quoteData, setQuoteData] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [quoteFields, setquoteFields] = useState([]);
@@ -309,10 +325,22 @@ function QuoteDetail() {
   const [RadioIndex, setRadioIndex] = useState(-1);
   const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
-  const [totalProfit, setTotalProfit] = useState("");
-  const [totalcost, setTotalCost] = useState("");
-  const [totalsale, setTotalSale] = useState("");
-  const [totalmargin, setTotalMargin] = useState("");
+  const [totalProfit, setTotalProfit] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
+  const [totalcost, setTotalCost] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
+  const [totalsale, setTotalSale] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
+  const [totalmargin, setTotalMargin] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [ColumnName, setColName] = useState([]);
   const [visibleColumns, setVisibleColumnName] = useState([]);
@@ -418,8 +446,18 @@ function QuoteDetail() {
             { title: `${data.quoteName}` },
           ]);
 
-          data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
-          setquoteData(data);
+          // handleAllowToEditList(data);
+          setCopyOfquoteDataToUpdate(data);
+
+          let modifiedData = {};
+          Object.assign(modifiedData, data);
+          modifiedData["amount"] = formatAmountWithCurrency(
+            data["currency"],
+            data["amount"]
+          ).fullFormatAmount;
+          setQuoteData(modifiedData);
+
+          handleContactsEmails(data);
 
           handleMainPoints(data);
           setHeadingLbl(data.quoteName);
@@ -492,10 +530,6 @@ function QuoteDetail() {
               (d) => d?.optionValue === user?.user?._id
             )
           );
-
-          // handleAllowToEditList(data);
-          setCopyOfquoteDataToUpdate(data);
-          handleContactsEmails(data);
 
           if (
             data?.staticData?.notToBeRemoved &&
@@ -1345,10 +1379,21 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
-    setTotalProfit(totalProfit.toString() + " " + ProfitCurrency);
-    setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
-    setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
-    setTotalCost(totalCost.toString() + " " + CostCurrency);
+    setTotalProfit(
+      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalProfit)
+    );
+    setTotalMargin(
+      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalMargin)
+    );
+    setTotalSale(
+      formatAmountWithCurrency(
+        copyOfquoteDataToUpdate.currency,
+        totalSellingPrice
+      )
+    );
+    setTotalCost(
+      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalCost)
+    );
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
     }
@@ -1467,8 +1512,8 @@ function QuoteDetail() {
 
   const sendEmailOnNext = () => {
     setSendEmail(true);
-  }
-  
+  };
+
   const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
     handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
@@ -1661,152 +1706,172 @@ function QuoteDetail() {
                   {quoteData && (
                     <DetailsPage data={quoteData} fields={quoteFields} />
                   )}
-
-                  <div className="m-3">
-                    <Grid
-                      container
-                      className="d-flex align-items-center form-label-style mb-0"
-                    >
-                      <Grid
-                        item
-                        xs={12}
-                        sm={6}
-                        md={6}
-                        className="justify-content-start"
-                      >
-                        <h4>Product Information</h4>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={6}
-                        md={6}
-                        className="d-flex justify-content-end"
-                      >
-                        <Button
-                          variant="outlined"
-                          type="button"
-                          size="small"
-                          disabled={
-                            allVersionStatusButtonText ===
-                            gettingVersionStatusText
-                          }
-                          startIcon={<InfoIcon />}
-                          color="primary"
-                          onClick={() => {
-                            getVersionStatus();
-                          }}
-                        >
-                          {allVersionStatusButtonText}{" "}
-                        </Button>
-                        <select
-                          className="customSelect mx-1"
-                          value={currentVersion}
-                          onChange={handleChangeVersion}
-                        >
-                          {versions.map((team) => (
-                            <option key={team} value={team}>
-                              {"Version : " + team}
-                            </option>
-                          ))}
-                        </select>
-                        <Button
-                          disabled={isCloning}
-                          variant="outlined"
-                          type="button"
-                          size="small"
-                          startIcon={
-                            isCloning ? (
-                              <CircularProgress color="inherit" size={16} />
-                            ) : (
-                              <BiLayerPlus />
-                            )
-                          }
-                          color="primary"
-                          onClick={() => {
-                            cloneVersion();
-                          }}
-                        >
-                          {isCloning ? (
-                            <>Cloning v{currentVersion}</>
-                          ) : (
-                            `Clone Version ${currentVersion}`
-                          )}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                    {ProcessStatus != "New" ? (
-                      <div className="mt-2">
-                        <Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            md={12}
-                            sm={12}
-                            className="d-flex align-items-center gap-1 quotePanel"
-                          >
-                            <div className="quoteBox">
-                              <span>Total Profit</span>
-                              <span>{totalProfit}</span>
-                            </div>
-                            <div className="quoteBox">
-                              <span>Total Cost Price</span>
-                              <span>{totalcost}</span>
-                            </div>
-                            {redCard ? (
-                              <div className="redQuoteBox">
-                                <span>Total Selling Price</span>
-                                <span>{totalsale}</span>
-                              </div>
-                            ) : (
-                              <div className="quoteBox">
-                                <span>Total Selling Price</span>
-                                <span>{totalsale}</span>
-                              </div>
-                            )}
-                            <div className="quoteBox">
-                              <span>Total Margin</span>
-                              <span>{totalmargin}</span>
-                            </div>
-                            <div className="quoteBox">
-                              <span>Version Status</span>
-                              <span>{versionStatus}</span>
-                            </div>
-                            <div></div>
-                          </Grid>
-                        </Grid>
-                      </div>
-                    ) : null}
-
-                    {DOAneeded ? (
-                      <Steps
-                        steps={DOASteps}
-                        currentStep={DOASteps.indexOf(ProcessStatus)}
-                        id={id}
-                        version={currentVersion}
-                        Refresh={fetchQuoteData}
-                        nextStep={nextStep}
-                        versionStatus={versionStatus}
-                        openSendEmailDialog={sendEmailOnNext}
-                      />
-                    ) : (
-                      <Steps
-                        steps={OtherSteps}
-                        currentStep={OtherSteps.indexOf(ProcessStatus)}
-                        id={id}
-                        version={currentVersion}
-                        Refresh={fetchQuoteData}
-                        nextStep={nextStep}
-                        versionStatus={versionStatus}
-                        openSendEmailDialog={sendEmailOnNext}
-                      />
-                    )}
-                  </div>
                 </>
               )}
+            </Paper>
 
-              <div className="m-3">
-                <Box mt={4} />
+            <Paper className={classes.bgProduct}>
+              <Grid
+                container
+                className="detailHeader d-flex align-items-center form-label-style mb-0"
+              >
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={6}
+                  className="justify-content-start"
+                >
+                  <h2>Product Information</h2>
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={6}
+                  className="d-flex justify-content-end"
+                >
+                  <select
+                    className="customSelect mx-1"
+                    value={currentVersion}
+                    onChange={handleChangeVersion}
+                  >
+                    {versions.map((team) => (
+                      <option key={team} value={team}>
+                        {"Version : " + team}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    disabled={isCloning}
+                    variant="contained"
+                    type="button"
+                    size="small"
+                    startIcon={
+                      isCloning ? (
+                        <CircularProgress color="inherit" size={16} />
+                      ) : (
+                        <BiLayerPlus />
+                      )
+                    }
+                    className="mx-1"
+                    color="primary"
+                    onClick={() => {
+                      cloneVersion();
+                    }}
+                  >
+                    {isCloning ? (
+                      <>Cloning v{currentVersion}</>
+                    ) : (
+                      `Clone Version ${currentVersion}`
+                    )}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    type="button"
+                    size="small"
+                    disabled={
+                      allVersionStatusButtonText === gettingVersionStatusText
+                    }
+                    startIcon={<InfoIcon />}
+                    color="primary"
+                    onClick={() => {
+                      getVersionStatus();
+                    }}
+                  >
+                    {allVersionStatusButtonText}{" "}
+                  </Button>
+                </Grid>
+              </Grid>
+              <div>
+                {DOAneeded ? (
+                  <Steps
+                    steps={DOASteps}
+                    currentStep={DOASteps.indexOf(ProcessStatus)}
+                    id={id}
+                    version={currentVersion}
+                    Refresh={fetchQuoteData}
+                    nextStep={nextStep}
+                    versionStatus={versionStatus}
+                  />
+                ) : (
+                  <Steps
+                    steps={OtherSteps}
+                    currentStep={OtherSteps.indexOf(ProcessStatus)}
+                    id={id}
+                    version={currentVersion}
+                    Refresh={fetchQuoteData}
+                    nextStep={nextStep}
+                    versionStatus={versionStatus}
+                  />
+                )}
+              </div>
+              <div className={classes.productInformation}>
+                {ProcessStatus != "New" ? (
+                  <Grid>
+                    <Grid
+                      item
+                      xs={12}
+                      md={12}
+                      sm={12}
+                      className="d-flex align-items-center gap-1 quotePanel"
+                    >
+                      <div className="quoteBox">
+                        <span
+                          className="quoteAmount"
+                          title={totalProfit.fullFormatAmount}
+                        >
+                          {totalProfit.shortFormatAmount}
+                        </span>
+                        <span>Total Profit</span>
+                      </div>
+                      <div className="quoteBox">
+                        <span
+                          className="quoteAmount"
+                          title={totalcost.fullFormatAmount}
+                        >
+                          {totalcost.shortFormatAmount}
+                        </span>
+                        <span>Total Cost Price</span>
+                      </div>
+                      {redCard ? (
+                        <div className="redQuoteBox">
+                          <span
+                            className="quoteAmount"
+                            title={totalsale.fullFormatAmount}
+                          >
+                            {totalsale.shortFormatAmount}
+                          </span>
+                          <span>Total Selling Price</span>
+                        </div>
+                      ) : (
+                        <div className="quoteBox">
+                          <span
+                            className="quoteAmount"
+                            title={totalsale.fullFormatAmount}
+                          >
+                            {totalsale.shortFormatAmount}
+                          </span>
+                          <span>Total Selling Price</span>
+                        </div>
+                      )}
+                      <div className="quoteBox">
+                        <span
+                          className="quoteAmount"
+                          title={totalmargin.fullFormatAmount}
+                        >
+                          {totalmargin.shortFormatAmount}
+                        </span>
+                        <span>Total Margin</span>
+                      </div>
+                      {/* <div className="quoteBox">
+                          <span className="quoteAmount">{versionStatus}</span>
+                        </div> */}
+                      <div></div>
+                    </Grid>
+                  </Grid>
+                ) : null}
+
                 {!loading && quoteData ? (
                   <Grid container className="position-relative">
                     <Grid
@@ -1817,7 +1882,7 @@ function QuoteDetail() {
                       className="d-flex align-items-center gap-1"
                     >
                       {ProcessStatus === "New" ? (
-                        <span className="m-2">
+                        <span className="productPos m-2">
                           <Button
                             variant="outlined"
                             size="small"
@@ -1846,7 +1911,7 @@ function QuoteDetail() {
 
                       {ProcessStatus === "Quote Builder" ? (
                         <Grid container>
-                          <Grid item xs={12} md={12} sm={12}>
+                          <Grid item xs={11} md={11} sm={11}>
                             <FormControl
                               fullWidth
                               className={classes.formControl}
@@ -1897,8 +1962,10 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {ProcessStatus === "DOA Process" &&
-                      versionStatus === "Building Quote" ? (
+                      {(ProcessStatus === "DOA Process" &&
+                        versionStatus === "Building Quote") ||
+                      (ProcessStatus === "Customer Process" &&
+                        versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end">
                           <Button
                             onClick={() => handleCases()}
@@ -1915,7 +1982,7 @@ function QuoteDetail() {
                     </Grid>
                     {ProcessStatus !== "New" &&
                     ProcessStatus !== "Price Builder" ? (
-                      <span className="d-flex align-items-center justify-content-end ml-2">
+                      <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
                           variant="outlined"
@@ -1968,53 +2035,37 @@ function QuoteDetail() {
                         />
                       )}
                       {ProcessStatus === "Quote Builder" ? (
-                        <Box>
-                          <Grid container>
-                            <Grid
-                              item
-                              xs={12}
-                              sm={12}
-                              md={12}
-                              lg={12}
-                              spacing={2}
-                            >
-                              <Grid container>
-                                <Grid
-                                  item
-                                  xs={12}
-                                  md={12}
-                                  sm={12}
-                                  className="d-flex align-items-center p-2 gap-1"
-                                >
-                                  <Button
-                                    onClick={() => setShowCreateDialog(true)}
-                                    variant="contained"
-                                    size="small"
-                                    color="primary"
-                                    startIcon={<AddIcon />}
-                                  >
-                                    Add Terms & Conditions
-                                  </Button>
-                                </Grid>
-                                <Grid item xs={12} className="listing-grid">
-                                  <CustomAgGrid
-                                    columns={columnsTNC}
-                                    dataRows={dataRowsTNC}
-                                    frameworkComponents={frameworkComponents}
-                                    setGridApi={setGridApi}
-                                    dispatch={dispatch}
-                                    rowCount={rowCountTNC}
-                                    limit={limit}
-                                    pageSizes={pageSizes}
-                                    page={page}
-                                    actionWidth={150}
-                                    allowSelection={true}
-                                    allowAction={false}
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Grid>
+                        <Box className="m-3 position-relative">
+                          <h4
+                            className="form-label-style"
+                            title="Add Terms & Conditions"
+                          >
+                            Terms & Conditions
+                          </h4>
+                          <Button
+                            onClick={() => setShowCreateDialog(true)}
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            className={classes.termsBtn}
+                            startIcon={<AddIcon />}
+                          >
+                            Add Terms & Conditions
+                          </Button>
+                          <CustomAgGrid
+                            columns={columnsTNC}
+                            dataRows={dataRowsTNC}
+                            frameworkComponents={frameworkComponents}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCountTNC}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            actionWidth={150}
+                            allowSelection={true}
+                            allowAction={false}
+                          />
                         </Box>
                       ) : null}
                     </Grid>
@@ -2060,6 +2111,7 @@ function QuoteDetail() {
             </Paper>
           </Grid>
         </Grid>
+
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}

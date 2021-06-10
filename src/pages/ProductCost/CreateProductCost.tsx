@@ -167,6 +167,7 @@ const ProductCost = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
+                                    module="productcost"
                                 />
                             </Box>
                         </Form>)}
