@@ -2168,6 +2168,7 @@ function QuoteDetail() {
             id={id}
             version={currentVersion}
             account={quoteData.customerAccountName}
+            users={quoteData.collaborator}
           />
         )}
 
