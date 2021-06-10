@@ -77,7 +77,7 @@ export default function Account(props) {
   }: any = useData();
   const [cloneId, setCloneId] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [type, setType] = useState("")
+  const [type, setType] = useState(options[0])
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [
@@ -308,8 +308,8 @@ export default function Account(props) {
     let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
 
     const updatedFilters = [];
-    if (type === "approved" || type === "disApproved") {
-      updatedFilters.push({ "field": "staticData.approved", "term": termValue(type) })
+    if (type !== options[0]) {
+      updatedFilters.push({ "field": "staticData.approved", "term": type === "Approved" })
     }
 
     if (!isObjectEmpty(filters)) {
@@ -334,29 +334,8 @@ export default function Account(props) {
     return deepFilter;
   };
 
-  const termValue = (type) => {
-    switch (type) {
-      case "approved":
-        return true
-      case "disApproved":
-        return false
-
-      default:
-        return null;
-    }
-  }
-
   const menuOptionSelection = (selectedOption) => {
-    switch (selectedOption) {
-      case 1:
-        return setType("approved")
-      case 2:
-        return setType("disApproved")
-
-
-      default:
-        return setType("all");
-    }
+    setType(options[selectedOption])
   }
 
   const handleMenuItemClick = (
@@ -606,7 +585,7 @@ export default function Account(props) {
               secondHeading="Account"
               icon={<MdAccountCircle className="headerLogo" />}
             >
-              <div style={{ marginRight: '330px' }}>
+              <div>
                 <ButtonGroup size="small" variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
                   <Button >{options[selectedIndex]}</Button>
                   <Button
