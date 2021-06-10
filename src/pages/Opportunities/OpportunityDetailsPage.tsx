@@ -15,7 +15,7 @@ import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
 import {
   customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
@@ -164,7 +164,7 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
 
           // if (modifiedData["currency"] && modifiedData["amount"]) {
-          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"])
+          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"]).fullFormatAmount
           // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
           // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
           // }
@@ -323,7 +323,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
+    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount).fullFormatAmount : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
     setMainPoints(mainPoint);
   };
@@ -428,6 +428,37 @@ function OpportunityDetailsPage() {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const handleAssignContacts = async (newAddedContactId,contactType,contacts) => {
+    // allContacts.filter(f => f.isChecked).map(m => m._id)
+    let previousIds = [];
+    if(contacts){
+      contacts.map((obj)=>{
+        previousIds.push(obj._id)
+      })
+    }
+    const dataToSave = {
+        _id: id,
+        supplierContact: contactType === "supplier" && newAddedContactId ? [newAddedContactId,...previousIds]: [],
+        customerContact: contactType === "customer" && newAddedContactId ? [newAddedContactId,...previousIds]: [],
+        notToBeRemoved: null
+    };
+
+    await axiosInstance()
+        .put(`/opportunity/add-contacts`, dataToSave)
+        .then(({ data }) => {
+            toastConfig.setToastConfig({
+                message: data.message,
+                type: "success",
+                open: true,
+            });
+
+            fetchOpportunityData();
+        })
+        .catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+};
 
   let selectedSupplierAccounts = []
   if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
@@ -564,7 +595,7 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
+                          contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
                           title="Supplier Contacts"
                           contactApi={supplierContact.contactApi}
                           isExpanded={expanded.supplierContacts}
@@ -575,12 +606,12 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
                           }}
                           recordsPerLine={recordsPerLine}
-                          accounts={_.cloneDeep(opportunityData?.supplierAccountName)}
+                          accounts={cloneDeep(opportunityData?.supplierAccountName)}
                         />
                       }
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
+                          contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
                           title="Customer Contacts"
                           isExpanded={expanded["customerContacts"]}
                           contactApi={customerContact.contactApi}
@@ -591,6 +622,9 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
                           }}
                           recordsPerLine={recordsPerLine}
+                          saveContactToOpportunity = {handleAssignContacts}
+                          accountId = {opportunityData?.customerAccountName?.optionValue}
+
                         />
                       }
                       {permissions?.projectSales?.isRead && (
@@ -611,6 +645,9 @@ function OpportunityDetailsPage() {
                             fetchData={fetchRelatedData}
                             quoteBuilderPermission={permissions.quoteBuilder}
                             opportunityId={id}
+                            accountId={opportunityData?.customerAccountName?.optionValue}
+                            opportunityName = {opportunityData?.opportunityName }
+                            isRenderedFromOpportunity ={true}
                           />
                         )
                       }

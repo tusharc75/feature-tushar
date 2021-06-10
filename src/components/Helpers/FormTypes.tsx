@@ -18,7 +18,7 @@ import {
   Typography,
   useTheme,
 } from "@material-ui/core";
-import _ from "lodash";
+import { result, find, throttle } from "lodash";
 import DateUtils from "@date-io/date-fns";
 import {
   KeyboardDatePicker,
@@ -31,8 +31,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
-import throttle from "lodash/throttle";
-import currencies from "../../constants/currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
@@ -41,10 +39,12 @@ import NumberFormat from "react-number-format";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import currencyList from "../../constants/currency_with_country.json";
-import { imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl } from "../../constants/helpers"
+import {
+  imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl,
+  getUniqueCurrencies
+} from "../../constants/helpers"
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import CurrencyDialog from '../productBuilder/CurrencyDialog';
+import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -151,10 +151,8 @@ const FormTypes = (props) => {
     isTooltip,
     tooltipMessage,
     fields,
-    decimalPlaces,
-    isvlookupReverse,
-    doNotShowInfoTooltip,
     fieldData,
+    doNotShowInfoTooltip,
     startAdornment,
     accept,
     usePublicUrlforFileUpload = false,
@@ -164,7 +162,7 @@ const FormTypes = (props) => {
     fileUploadMaxSize = { ...documentUploadMaxSize },
     isMultipleUpload = false,
     imageOrFileUploadCompletePercentage,
-    changeField,
+    addDisplayType,
     ...rest
   } = props;
 
@@ -177,7 +175,7 @@ const FormTypes = (props) => {
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
   const { setToastConfig } = useContext(CustomToastContext);
 
-  const [isCurrencyDialog, setIsCurrencyDialog] = React.useState(false);
+  const [isExtraDispayType, setIsExtraDispayType] = React.useState(false);
 
   const fetch = React.useMemo(
     () =>
@@ -188,7 +186,7 @@ const FormTypes = (props) => {
   );
 
   React.useEffect(() => {
-    const sortedArr = currencies.sort((a, b) =>
+    const sortedArr = getUniqueCurrencies().sort((a, b) =>
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
@@ -374,7 +372,6 @@ const FormTypes = (props) => {
         "decimal",
         2
       );
-      console.log(calValue)
       setFieldValue(_field, calValue);
       alredyDone[_field] = calValue;
       handleFormula(_field, calValue, alredyDone);
@@ -414,7 +411,7 @@ const FormTypes = (props) => {
             let _fieldName = _data.fieldName;
             if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
               if (_data.displayCurrency && _data.displayCurrency.length) {
-                _fieldName = _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
+                _fieldName = _fieldName + "_" + (_data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency.toLowerCase() : _data.displayCurrency[0].toLowerCase())
               }
               if (_data.displayUnits && _data.displayUnits.length) {
                 _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
@@ -423,15 +420,24 @@ const FormTypes = (props) => {
                 setFieldValue(_fieldName, calValue);
                 alredyDone[_fieldName] = calValue;
                 handleFormula(_fieldName, calValue, alredyDone);
-                if (_data.displayCurrency && _data.displayCurrency.length) {
+                if (_data.displayCurrency && _data.displayCurrency.length && _data.displayUnits && _data.displayUnits.length) {
+                  handleCurrencyConverter(
+                    _data,
+                    _data.fieldName,
+                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
+                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
+                    calValue
+                  )
+                }
+                else if (_data.displayCurrency && _data.displayCurrency.length) {
                   handleCurrency(
                     _data,
                     _data.fieldName,
-                    _data.displayCurrency[0],
+                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
                     calValue
                   );
                 }
-                if (_data.displayUnits && _data.displayUnits.length) {
+                else if (_data.displayUnits && _data.displayUnits.length) {
                   handleConverter(
                     _data,
                     _data.fieldName,
@@ -465,6 +471,7 @@ const FormTypes = (props) => {
         for (var x in result[0]) {
           if (x !== "optionLabel" && x !== "optionValue") {
             setFieldValue(x, result[0][x]);
+            handleFormula(x, result[0][x], {})
           }
         }
       }
@@ -472,36 +479,21 @@ const FormTypes = (props) => {
   };
 
   const handleCheckVlookupReverse = (name, value) => {
-    if (
-      fields &&
-      fields.filter(
-        (_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true
-      ).length
-    ) {
-      fields
-        .filter(
-          (_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true
-        )
-        .forEach((_data) => {
-          if (_data.inputFields.includes(name)) {
-            let result =
-              _data.option &&
-              _data.option.filter(function (val) {
-                for (var i = 0; i < _data.inputFields.length; i++)
-                  if (
-                    (_data.inputFields[i] === name
-                      ? value.toString()
-                      : values[_data.inputFields[i]].toString()) !==
-                    val[_data.inputFields[i].toString()]
-                  )
-                    return false;
-                return true;
-              });
-            if (result.length) {
-              setFieldValue(_data.fieldName, result[0].optionLabel);
-            }
+    if (fields && fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).length) {
+      fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).forEach((_data) => {
+        if (_data.inputFields.includes(name)) {
+          let result = _data.option && _data.option.filter(function (val) {
+            for (var i = 0; i < _data.inputFields.length; i++)
+              if ((_data.inputFields[i] === name ? value.toString() : values[_data.inputFields[i]].toString()) !== val[_data.inputFields[i].toString()])
+                return false;
+            return true;
+          });
+          if (result.length) {
+            setFieldValue(_data.fieldName, result[0].optionLabel);
+            handleFormula(_data.fieldName, result[0].optionLabel, {})
           }
-        });
+        }
+      });
     }
   };
 
@@ -636,20 +628,29 @@ const FormTypes = (props) => {
     }
   };
 
-  const handleCurrencyAdd = (field, currency) => {
-    if (field.isConverter) {
-      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
-      field.displayCurrency.push(currency)
-      handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+  const handleAddDisplayType = (displayType, field, displayValue) => {
+    if (displayType === "currency") {
+      if (field.isConverter) {
+        let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+        field.displayCurrency.push(displayValue)
+        handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+      }
+      else {
+        let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+        field.displayCurrency.push(displayValue)
+        handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
+      }
     }
-    else {
-      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
-      field.displayCurrency.push(currency)
-      handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
+    else if (displayType === "converter") {
+      let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
+      field.displayUnits.push(displayValue)
+      handleConverter(field, field.fieldName, field.displayUnits[0], values[_fieldName])
     }
 
-    changeField(field, currency)
-    setIsCurrencyDialog(false)
+    if (addDisplayType) {
+      addDisplayType(displayType, field, displayValue)
+    }
+    setIsExtraDispayType(false)
   }
 
   return type === "singleLine" ? (
@@ -874,9 +875,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : type === "dropDown" ||
-    type === "lookup" ||
-    (type === "vlookupDropdown" && !isvlookupReverse) ? (
+  ) : type === "dropDown" || type === "lookup" || (type === "vlookupDropdown" && fieldData && fieldData.isvlookupReverse) ? (
     <InfoLabel
       info={tooltipMessage}
       isTooltip={isTooltip}
@@ -914,7 +913,7 @@ const FormTypes = (props) => {
         )}
       />
     </InfoLabel>
-  ) : type === "vlookupDropdown" && isvlookupReverse ? (
+  ) : type === "vlookupDropdown" && fieldData && !fieldData.isvlookupReverse ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
@@ -936,34 +935,51 @@ const FormTypes = (props) => {
   ) : type === "converter" ? (
     fieldData.displayUnits.map((_unit, i) => (
       <Grid key={_unit} item xs={12} sm={6} md={6}>
-        <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-          <TextField
-            {...rest}
-            variant="outlined"
-            type="number"
-            label={label + " " + _unit}
-            name={name + "_" + _unit.toLowerCase()}
-            required={required}
-            value={values[name + "_" + _unit.toLowerCase()]}
-            error={
-              touched[name + "_" + _unit.toLowerCase()] &&
-              Boolean(errors[name + "_" + _unit.toLowerCase()])
-            }
-            helperText={
-              touched[name + "_" + _unit.toLowerCase()] &&
-              errors[name + "_" + _unit.toLowerCase()]
-            }
-            onChange={
-              onChange
-                ? onChange
-                : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))
-            }
-            InputProps={{
-              inputProps: { min: 0 },
-              readOnly: (fieldData && fieldData.isUneditable) ? true : false
-            }}
-          />
-        </InfoLabel>
+        <Box display="flex" >
+          <Box flexGrow={1}  >
+            <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+              <TextField
+                {...rest}
+                variant="outlined"
+                type="number"
+                label={label + " " + _unit}
+                name={name + "_" + _unit.toLowerCase()}
+                required={required}
+                value={values[name + "_" + _unit.toLowerCase()]}
+                error={
+                  touched[name + "_" + _unit.toLowerCase()] &&
+                  Boolean(errors[name + "_" + _unit.toLowerCase()])
+                }
+                helperText={
+                  touched[name + "_" + _unit.toLowerCase()] &&
+                  errors[name + "_" + _unit.toLowerCase()]
+                }
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))
+                }
+                InputProps={{
+                  inputProps: { min: 0 },
+                  readOnly: (fieldData && fieldData.isUneditable) ? true : false
+                }}
+              />
+            </InfoLabel>
+          </Box>
+          {(i === 0 && fieldData.displayUnits.length !== fieldData.units.length) &&
+            <Box>
+              <Tooltip title="Add Converter" className="mt-1">
+                <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
+                  <ControlPointIcon />
+                </IconButton>
+              </Tooltip>
+              {isExtraDispayType && <AddDisplayTypeDialog
+                handleAddDisplayType={handleAddDisplayType}
+                displayType="converter"
+                fieldData={fieldData}
+                handleClose={() => setIsExtraDispayType(false)} />}
+            </Box>}
+        </Box>
       </Grid>
     ))
   ) : type === "currencyAmount" ? (
@@ -1044,8 +1060,8 @@ const FormTypes = (props) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          {_.result(
-                            _.find(currencyList, function (obj) {
+                          {result(
+                            find(getUniqueCurrencies(), function (obj) {
                               return obj.currencyCode === _currency;
                             }),
                             "symbolNative"
@@ -1061,11 +1077,16 @@ const FormTypes = (props) => {
               {i === 0 &&
                 <Box>
                   <Tooltip title="Add Currency" className="mt-1">
-                    <IconButton onClick={() => { setIsCurrencyDialog(true) }} color="primary" size="small"  >
+                    <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                       <ControlPointIcon />
                     </IconButton>
                   </Tooltip>
-                  {isCurrencyDialog && <CurrencyDialog handleCurrencyAdd={handleCurrencyAdd} fieldData={fieldData} handleClose={() => setIsCurrencyDialog(false)} />}
+                  {isExtraDispayType &&
+                    <AddDisplayTypeDialog
+                      handleAddDisplayType={handleAddDisplayType}
+                      displayType="currency"
+                      fieldData={fieldData}
+                      handleClose={() => setIsExtraDispayType(false)} />}
                 </Box>}
             </Box>
           </Grid>
@@ -1112,8 +1133,8 @@ const FormTypes = (props) => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        {_.result(
-                          _.find(currencyList, function (obj) {
+                        {result(
+                          find(getUniqueCurrencies(), function (obj) {
                             return obj.currencyCode === _currency;
                           }),
                           "symbolNative"
@@ -1129,11 +1150,16 @@ const FormTypes = (props) => {
             {i === 0 &&
               <Box>
                 <Tooltip title="Add Currency" className="mt-1">
-                  <IconButton onClick={() => { setIsCurrencyDialog(true) }} color="primary" size="small"  >
+                  <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                     <ControlPointIcon />
                   </IconButton>
                 </Tooltip>
-                {isCurrencyDialog && <CurrencyDialog handleCurrencyAdd={handleCurrencyAdd} fieldData={fieldData} handleClose={() => setIsCurrencyDialog(false)} />}
+                {isExtraDispayType &&
+                  <AddDisplayTypeDialog
+                    handleAddDisplayType={handleAddDisplayType}
+                    displayType="currency"
+                    fieldData={fieldData}
+                    handleClose={() => setIsExtraDispayType(false)} />}
               </Box>}
           </Box>
         </Grid>
@@ -1155,7 +1181,7 @@ const FormTypes = (props) => {
         options={currencyData}
         getOptionLabel={(option: any) =>
           option
-            ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}`
+            ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})`
             : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
@@ -1180,27 +1206,31 @@ const FormTypes = (props) => {
           />
         )}
         renderOption={(option) => {
-          const { currencyCode, name, countryCode, symbolNative } = option;
-          return (
-            <Grid container alignItems="center">
-              <Grid item>
-                <Avatar
-                  variant="rounded"
-                  src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                  style={{ marginRight: 20, width: "40px", height: "30px" }}
-                />
-              </Grid>
-              <Grid item xs>
-                <Typography>
-                  {currencyCode} ({symbolNative})
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {name}
-                </Typography>
-              </Grid>
-            </Grid>
-          );
+          const { currencyCode, currencyName, symbolNative } = option;
+          return `${currencyCode} - ${currencyName} - (${symbolNative})`
         }}
+      // renderOption={(option) => {
+      //   const { currencyCode, name, countryCode, symbolNative } = option;
+      //   return (
+      //     <Grid container alignItems="center">
+      //       <Grid item>
+      //         <Avatar
+      //           variant="rounded"
+      //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+      //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+      //         />
+      //       </Grid>
+      //       <Grid item xs>
+      //         <Typography>
+      //           {currencyCode} ({symbolNative})
+      //         </Typography>
+      //         <Typography variant="body2" color="textSecondary">
+      //           {name}
+      //         </Typography>
+      //       </Grid>
+      //     </Grid>
+      //   );
+      // }}
       />
     </InfoLabel>
   ) : type === "multiSelect" ? (
@@ -1506,8 +1536,9 @@ const FormTypes = (props) => {
             color="primary"
             size="small"
             component="span"
+            startIcon={isFileUploading && <CircularProgress size={15} />}
           >
-            Upload File
+            {isFileUploading ? "Uploading File" : "Upload File"}
           </Button>
         </label>
         {

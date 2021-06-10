@@ -106,7 +106,8 @@ export const intialState = {
 }
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
-    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200, isClientSideGrid = false }) {
+    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200,
+    isClientSideGrid = false, handleGridReady = null }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
@@ -117,8 +118,8 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
     const onGridReady = (params) => {
         setGridApi(params.api);
         setColumnApi(params.columnApi);
-
         setClientSideGridApi(params.api);
+        if (handleGridReady) handleGridReady(params)
     }
 
     var customFilterParams = {
@@ -169,7 +170,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         <>
             <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
-            <div className="ag-theme-material ag-grid-listing-grid">
+            <div className="ag-theme-material ag-grid-listing-grid" style={{zIndex:-500,position:'inherit'}}>
                 <AgGridReact
                     rowData={dataRows}
                     onGridReady={onGridReady}
@@ -270,6 +271,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 component="div"
                 count={rowCount}
                 page={page}
+                className="agPagination"
                 onChangePage={(event, newPage) => {
                     dispatch({ type: "pageChange", page: newPage });
 

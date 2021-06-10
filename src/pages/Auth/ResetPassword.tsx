@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Container,
@@ -17,6 +17,8 @@ import { useHistory, Redirect, Link } from 'react-router-dom';
 import demoImg from '../../assets/clip-hardworking-man.png';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
+import { useData } from '../../StateProvider/Provider';
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(5),
@@ -65,7 +67,36 @@ const ResetPassword = () => {
   const history = useHistory();
   const classes = useStyles();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  const [tokenChecking, setTokenChecking] = useState(false);
   const { email, token } = queryString.parse(window.location.search);
+  const { dispatch }: any = useData();
+
+  useEffect(() => {
+    checkToken()
+    // eslint-disable-next-line
+  }, []);
+
+  const checkToken = async () => {
+    setTokenChecking(true)
+    axiosInstance(null, { Authorization: `Bearer ${token}` })
+      .get(
+        `/user/check-token`)
+      .then(({ data }) => {
+        data.data ?
+          setIsTokenValid(data.data)
+          : toastConfig.setToastConfig({
+            message: 'Token is invalid',
+            type: 'error',
+            open: true,
+          });
+
+      })
+      .catch((error) => {
+        console.error(error);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleSubmit = async (values) => {
     setIsSubmitting(true);
@@ -79,17 +110,30 @@ const ResetPassword = () => {
       )
       .then(({ data }) => {
         setIsSubmitting(false);
+        setIsSubmitting(false);
+        localStorage.setItem("token", data.data.token);
+        dispatch({ type: USER_LOADING, payload: true });
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.data,
-          });
-        history.push({
-          pathname: '/login',
-          state: {
-            msg: 'Your password has been reset, login with new password',
-          },
+          open: true,
+          type: "success",
+          message: data.message,
         });
+        axiosInstance()
+          .get(`/user/me`)
+          .then(({ data }) => {
+            dispatch({ type: SET_USER, payload: data.data });
+            dispatch({ type: USER_LOADING, payload: false });
+            toastConfig.setToastConfig({
+              open: true,
+              type: "success",
+              message: data.message,
+            });
+          })
+          .catch((error) => {
+            localStorage.setItem('token', '');
+            dispatch({ type: USER_LOADING, payload: false });
+            toastConfig.setToastConfig(error);
+          });
       })
       .catch((err) => {
         setIsSubmitting(false);
@@ -102,13 +146,28 @@ const ResetPassword = () => {
 
     if (!values.password) {
       errors.password = 'Required field';
-    } else if (
+    }
+    else if (!values.confirmPassword) {
+      errors.confirmPassword = 'Required field';
+    }
+    else if (
       !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
         values.password,
       )
     ) {
       errors.password =
         'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    }
+    else if (
+      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
+        values.confirmPassword,
+      )
+    ) {
+      errors.confirmPassword =
+        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    }
+    else if (values.confirmPassword !== values.password) {
+      errors.confirmPassword = 'Password and confirm Password does not match';
     }
     return errors;
   };
@@ -147,6 +206,17 @@ const ResetPassword = () => {
                       type='password'
                       label='New Password'
                       name='password'
+                      disabled={!isTokenValid || !tokenChecking}
+                      variant='outlined'
+                      required
+                    />
+                    <br />
+                    <Field
+                      component={TextField}
+                      type='password'
+                      label='Confirm Password'
+                      name='confirmPassword'
+                      disabled={!isTokenValid || !tokenChecking}
                       variant='outlined'
                       required
                     />
@@ -155,8 +225,8 @@ const ResetPassword = () => {
                     <Button
                       variant='contained'
                       color='primary'
-                      size="small" 
-                      disabled={isSubmitting}
+                      size="small"
+                      disabled={isSubmitting || !isTokenValid || !tokenChecking}
                       onClick={submitForm}>
                       Submit
                     </Button>

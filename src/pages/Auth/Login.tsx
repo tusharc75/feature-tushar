@@ -6,17 +6,15 @@ import {
   Paper,
   Button,
   Box,
-  Typography,
   TextField,
   CircularProgress,
   Link as MuiLink,
 } from "@material-ui/core";
-import { Formik } from "formik";
+import { Formik, Form } from "formik";
 import { useData } from "../../StateProvider/Provider";
 import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { vapidKey } from "../../constants/helpers";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import {
   AuthenticatedTemplate,
@@ -31,8 +29,8 @@ import { SiMicrosoftoffice } from "react-icons/si";
 import { SVG } from "../../assets";
 const useStyles = makeStyles((theme) => ({
   container: {
-    height: "85vh",
-    width: "80vw",
+    height: "90vh",
+    width: "90vw",
     overflow: "hidden",
   },
   grid: {
@@ -44,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "30px",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   logo: {
     width: "150px",
@@ -156,28 +154,13 @@ const Login = () => {
     <div className="login-bg">
       <Paper elevation={10} className={classes.container}>
         <Grid container className={classes.grid}>
-          <Grid item sm={5} className="loginSidebar">
-            <Box>
-              <div className="loginHeader">
-                {/* <Typography variant="h3">e-Quipt</Typography>
-                <Typography variant="subtitle1">
-                  Empower Your Bussiness
-              </Typography> */}
-                {/* <Box className="mt-3 font-size-3">
-                  <b>B2B Planning to execution at your fingerprints</b> <br />
-                  <span>e-Platform that integrates &amp; accelerates B2B Sales and Operations to eliminate wasteful time</span>
-                </Box> */}
-              </div>
-
+          <Grid item sm={6} md={5}  className="loginSidebar">
+            <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
               <img className="imgLogin" src={SVG("imgComputer")}></img>
             </Box>
           </Grid>
-
-          <Grid item sm={7} className={classes.formSide}>
+          <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
             <Box textAlign="center">
-              {/* <Typography variant="h5" color="textSecondary">
-                Login
-              </Typography> */}
               <img
                 className={classes.logo}
                 src={SVG("Logo")}
@@ -185,7 +168,6 @@ const Login = () => {
                 title="eQuipt Logo"
               />
               <Box my={4} />
-
               <Formik
                 initialValues={{
                   email: "",
@@ -195,95 +177,102 @@ const Login = () => {
                 onSubmit={handleSubmit}
               >
                 {({ submitForm, values, errors, touched, setFieldValue }) => (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                  >
-                    <Box mb={3}>
-                      <TextField
-                        style={{ width: 300 }}
-                        variant="outlined"
-                        type="email"
-                        size="small"
-                        label="Email"
-                        name="email"
-                        value={values["email"]}
-                        error={touched["email"] && Boolean(errors["email"])}
-                        helperText={touched["email"] && errors["email"]}
-                        onChange={(e) => setFieldValue("email", e.target.value)}
-                      />
-                    </Box>
-                    <Box>
-                      <TextField
-                        style={{ width: 300 }}
-                        variant="outlined"
-                        type="password"
-                        size="small"
-                        label="Password"
-                        name="password"
-                        value={values["password"]}
-                        error={
-                          touched["password"] && Boolean(errors["password"])
-                        }
-                        helperText={touched["password"] && errors["password"]}
-                        onChange={(e) =>
-                          setFieldValue("password", e.target.value)
-                        }
-                      />
-                    </Box>
-                    <Box width={300} mt={1}>
-                      <Box textAlign="right">
-                        <MuiLink component={Link} to="/forget-password">
-                          Forgot Password?
-                        </MuiLink>
+                  <Form>
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                    >
+                      <Box mb={3}>
+                        <TextField
+                          style={{ width: 260 }}
+                          variant="outlined"
+                          type="email"
+                          size="small"
+                          label="Email"
+                          name="email"
+                          value={values["email"]}
+                          error={touched["email"] && Boolean(errors["email"])}
+                          helperText={touched["email"] && errors["email"]}
+                          onChange={(e) =>
+                            setFieldValue("email", e.target.value)
+                          }
+                        />
                       </Box>
-                    </Box>
-                    <Box width={300} className="mt-2">
-                      <Button
-                        disabled={isSubmitting}
-                        fullWidth
-                        variant="contained"
-                        color="secondary"
-                        onClick={submitForm}
-                      >
-                        {isSubmitting ? (
-                          <CircularProgress size={22} />
-                        ) : (
-                          "Login"
-                        )}
-                      </Button>
-
-                      <Box className="mt-2">
-                        <AuthenticatedTemplate>
-                          {invalidAzureLogin ? (
-                            <span>Not authorized loging out in {counter}</span>
+                      <Box>
+                        <TextField
+                          style={{ width: 260 }}
+                          variant="outlined"
+                          type="password"
+                          size="small"
+                          label="Password"
+                          name="password"
+                          value={values["password"]}
+                          error={
+                            touched["password"] && Boolean(errors["password"])
+                          }
+                          helperText={touched["password"] && errors["password"]}
+                          onChange={(e) =>
+                            setFieldValue("password", e.target.value)
+                          }
+                        />
+                      </Box>
+                      <Box width={260} mt={1}>
+                        <Box textAlign="right">
+                          <MuiLink component={Link} to="/forget-password">
+                            Forgot Password?
+                          </MuiLink>
+                        </Box>
+                      </Box>
+                      <Box width={260} className="mt-2">
+                        <Button
+                          disabled={isSubmitting}
+                          fullWidth
+                          variant="contained"
+                          color="secondary"
+                          type="submit"
+                          onClick={submitForm}
+                        >
+                          {isSubmitting ? (
+                            <CircularProgress size={22} />
                           ) : (
-                            <Button
-                              variant="contained"
-                              fullWidth
-                              color="secondary"
-                              startIcon={<SiMicrosoftoffice />}
-                              disabled={isSubmitting}
-                              onClick={() => instance.logoutPopup()}
-                            >
-                              Office 365 Log Out
-                            </Button>
+                            "Login"
                           )}
-                        </AuthenticatedTemplate>
-                        <UnauthenticatedTemplate>
-                          <AzureLogin></AzureLogin>
-                        </UnauthenticatedTemplate>
+                        </Button>
+
+                        <Box className="mt-2">
+                          <AuthenticatedTemplate>
+                            {invalidAzureLogin ? (
+                              <span>
+                                Not authorized loging out in {counter}
+                              </span>
+                            ) : (
+                              <Button
+                                variant="contained"
+                                fullWidth
+                                color="secondary"
+                                startIcon={<SiMicrosoftoffice />}
+                                disabled={isSubmitting}
+                                onClick={() => instance.logoutPopup()}
+                              >
+                                Office 365 Log Out
+                              </Button>
+                            )}
+                          </AuthenticatedTemplate>
+                          <UnauthenticatedTemplate>
+                            <AzureLogin></AzureLogin>
+                          </UnauthenticatedTemplate>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
+                  </Form>
                 )}
               </Formik>
             </Box>
           </Grid>
         </Grid>
-      </Paper >
-    </div >
+      </Paper>
+    </div>
   );
 };
 

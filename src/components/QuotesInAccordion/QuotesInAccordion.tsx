@@ -11,16 +11,13 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
-import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
-import routes from '../Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
-import currencies from "./../../constants/currency_with_country.json";
 import { displayDate } from '../../services/util';
 import { HiExternalLink } from 'react-icons/hi';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { MoreVert } from "@material-ui/icons";
-import { customerAccount, customerContact } from '../../constants/helpers';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
 
 const Accordion = withStyles({
@@ -80,7 +77,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isCreateOwnerDisable = true }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -238,9 +235,9 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={5} sm={4}>
-                                                                <Typography className="amount">
-                                                                    {obj.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
-                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.amount).fullFormatAmount}>
+                                                                    {formatAmountWithCurrency(obj["currency"], obj?.amount).shortFormatAmount}
+                                                                </Typography>
                                                             </Grid>
                                                         </Grid>
                                                         <Grid container>
@@ -296,6 +293,11 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 opportunityId={opportunityId}
                 accountResource={accountResource}
                 disableOwnerDropDown={isCreateOwnerDisable}
+                isRenderedFromOpportunity={isRenderedFromOpportunity}
+                opportunityName={opportunityName}
+                isRenderedFromCustomerAccount={isRenderedFromCustomerAccount}
+
+
 
             />
         }

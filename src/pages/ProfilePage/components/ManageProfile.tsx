@@ -9,7 +9,7 @@ import DetailsPage from "../../../components/Shared/DetailsPage";
 import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword'
-import _ from 'lodash'
+import { cloneDeep } from 'lodash'
 import { useHistory } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { HiPencil } from 'react-icons/hi';
@@ -64,7 +64,7 @@ export default function ManageProfile(props) {
     const handleUpdateUser = (values) => {
         if (userData?._id) {
             setUpdating(true);
-            let clonedValues = _.cloneDeep(values)
+            let clonedValues = cloneDeep(values)
             axiosInstance()
                 .put(`/user/me`, { ...clonedValues })
                 .then(({ data }) => {

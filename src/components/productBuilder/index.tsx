@@ -1,8 +1,7 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import Box from '@material-ui/core/Box';
 import CreateProduct from "../Product/CreateProduct";
 import AddExistingProduct from "./AddExistingProduct";
-import { DataGrid, GridOverlay } from "@material-ui/data-grid";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -16,12 +15,14 @@ import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
 import { AddField } from '../FormBuilder/AddField';
 import ConfirmationDialog from '../Helpers/ConfirmationDialog'
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import ImportExportLinks from "../Product/ImportExportLinks";
-var _ = require('lodash');
-
+import { orderBy, sortBy, uniq, map } from "lodash";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import BulkEditDialog from "./BulkEditDialog";
+import _ from 'lodash';
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -30,183 +31,215 @@ const ProductBuilder = (props) => {
     const { productBuilderId,
         isAddNewProduct, setIsAddNewProduct,
         isAddExistingProduct, setIsAddExistingProduct,
-        refreshProducts, Editable, stage} = props;
+        refreshProducts, Editable, stage } = props;
 
     const toastConfig = useContext(CustomToastContext)
 
-    const [loading, setLoading] = useState(false);
     const [product, setProduct] = useState([]);
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedProduct, setSelectedProduct] = useState([]);
     const [isAddField, setIsAddField] = useState(false);
     const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
 
+    const [isBulkEdit, setIsBulkEdit] = useState(false)
+    const [productDataList, setproductDataList] = useState([]);
+
+    //  Grid Variables - Start
+    const [gridApi, setGridApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
     useEffect(() => {
         fetchProduct(productBuilderId);
     }, [productBuilderId]);
 
-    let ActionsColoum: any = {
-        field: "actions", headerName: "Actions",
-        renderCell: (params) => (
-            <Fragment>
-                <Tooltip title="Edit" >
-                    <IconButton aria-label="Edit" onClick={() => { setProductData(params.row) }}  >
-                        <EditIcon fontSize="small" color="primary" />
-                    </IconButton>
-                </Tooltip >
-                <Tooltip title="Delete" >
-                    <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}   >
-                        <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                </Tooltip >
-            </Fragment>
-        ),
-        width: 200,
-        disableColumnMenu: true,
-        sortable: false,
-        filterable: false,
-    }
+
+    const ActionsRenderer = params => <>
+        <Tooltip title="Edit" >
+            <IconButton aria-label="Edit" onClick={() => { setProductData(params.data) }}  >
+                <EditIcon fontSize="small" color="primary" />
+            </IconButton>
+        </Tooltip >
+        <Tooltip title="Delete" >
+            <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}   >
+                <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+        </Tooltip >
+    </>
+
+    const ProductNameRenderer = params => <>
+        {Editable ?
+            <Link className="link" onClick={() => { setProductData(params.data) }}   >
+                {params.data.productName}
+            </Link> :
+            <>{params.data.productName}</>
+        }
+    </>
+
+    const ProductCategoryRenderer = params => <>
+        {
+            params.data.productCategory || params.data.productCategory === 0 ?
+                typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
+                : <NoDataCell />
+        }
+    </>
+    const ProductTemplateRenderer = params => <>
+        {
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
+                : <NoDataCell />
+        }
+    </>
+
+    const frameworkComponents = {
+        actionsRenderer: ActionsRenderer,
+        commonRenderer: CommonRenderer,
+        productNameRenderer: ProductNameRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
+    };
 
     const fetchProduct = (id) => {
-        setLoading(true)
-        axiosInstance().get(`/productbuilder/getproduct/` + id).then(({ data: { data } }) => {
-            data = data.data?.map((u, index) => ({
-                ...u,
-                id: u._id,
-                srno: index + 1
-            }));
-            refreshProducts(data)
-            setColumns(null);
-            let column = [{ field: 'id', headerName: 'id', hide: true },
-            { field: 'srno', headerName: 'Sr.', width: 50, sortable: false, filterable: false, disableColumnMenu: true, }]
-            data.forEach((row) => {
-                let _fields = row.fields;
-                console.log(_fields)
-                if (stage) {
-                    //|| (t.leval === "template" && t.sectionType !== "cost")
-                    if (stage === "product") {
-                        _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
-                    }
-                }
-                _fields.forEach((ele) => {
-                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
-                        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                            ele.displayUnits.forEach((_unit) => {
-                                let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
-                                let fieldLabel = ele.fieldLabel + " " + _unit
-                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
-                                    col.field = fieldName
-                                    col.headerName = fieldLabel
-                                    col.width = 180
-                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
-                                    col.order = ele.order
-                                    col.leval = ele.leval
-                                    column.push(col)
-                                }
-                            })
+        dispatch({ type: "loading", loading: true });
+        if (gridApi) {
+            gridApi.setRowData([]);
+            gridApi.showLoadingOverlay();
+        }
+        axiosInstance().get(`/productbuilder/getproduct/${id}`)
+            .then(({ data: { data } }) => {
+                data = data.data?.map((u, index) => ({
+                    ...u,
+                    id: u._id,
+                    srno: index + 1
+                }));
+                refreshProducts(data)
+                setColumns(null);
+                let column = [{ field: 'srno', headerName: 'Sr.', width: 70, show: true, filter: false, cellRenderer: "commonRenderer" }]
+                data.forEach((row) => {
+                    let _fields = row.fields;
+                    if (stage) {
+                        if (stage === "product") {
+                            _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || (t.leval === "template" && t.sectionType !== "cost"))
                         }
-                        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                            ele.displayUnits.forEach((_unit) => {
-                                ele.displayCurrency.forEach((_currency) => {
-                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
-                                    let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                    }
+                    _fields.forEach((ele) => {
+                        if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                            if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                                ele.displayUnits.forEach((_unit) => {
+                                    let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                                    let fieldLabel = ele.fieldLabel + " " + _unit
                                     if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
                                         let col: any = {}
                                         col.field = fieldName
                                         col.headerName = fieldLabel
-                                        col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
+                                        col.width = 180
+                                        // col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
+                                        col.show = true
+                                        col.cellRenderer = "commonRenderer"
+                                        col.order = ele.order
+                                        col.leval = ele.leval
+                                        column.push(col)
+                                    }
+                                })
+                            }
+                            else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                                ele.displayUnits.forEach((_unit) => {
+                                    ele.displayCurrency.forEach((_currency) => {
+                                        let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                                        let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                            let col: any = {}
+                                            col.field = fieldName
+                                            col.headerName = fieldLabel
+                                            // col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
+                                            col.show = true
+                                            col.cellRenderer = "commonRenderer"
+                                            col.width = 180
+                                            col.order = ele.order
+                                            col.leval = ele.leval
+                                            column.push(col)
+                                        }
+                                    })
+                                })
+                            }
+                            else if (ele.type === "currencyAmount") {
+                                ele.displayCurrency.forEach((_currency) => {
+                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                                    let fieldLabel = ele.fieldLabel + " " + _currency
+                                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                        let col: any = {}
+                                        col.field = fieldName
+                                        col.headerName = fieldLabel
+                                        // col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
+                                        col.show = true
+                                        col.cellRenderer = "commonRenderer"
                                         col.width = 180
                                         col.order = ele.order
                                         col.leval = ele.leval
                                         column.push(col)
                                     }
                                 })
-                            })
+                            }
                         }
-                        else if (ele.type === "currencyAmount") {
-                            ele.displayCurrency.forEach((_currency) => {
-                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
-                                let fieldLabel = ele.fieldLabel + " " + _currency
-                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
-                                    col.field = fieldName
-                                    col.headerName = fieldLabel
-                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
-                                    col.width = 180
-                                    col.order = ele.order
-                                    col.leval = ele.leval
-                                    column.push(col)
+                        else {
+                            if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+                                let col: any = {}
+                                col.field = ele.fieldName
+                                col.headerName = ele.fieldLabel
+                                col.width = 180
+                                if (ele.fieldName === "productName") {
+                                    col.cellRenderer = "productNameRenderer"
                                 }
-                            })
-                        }
-                    }
-                    else {
-                        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = {}
-                            col.field = ele.fieldName
-                            col.headerName = ele.fieldLabel
-                            col.width = 180
-                            if (ele.fieldName === "productName") {
-                                col.renderCell = (params) => (
-                                    Editable ?
-                                        (<Link className="link" onClick={() => { setProductData(params.row) }}   >
-                                            {params.row.productName}
-                                        </Link>) : (<>{params.row.productName}</>)
-                                )
+                                if (ele.fieldName === "productCategory") {
+                                    col.cellRenderer = "productCategoryRenderer"
+                                }
+                                if (ele.fieldName === "productTemplate") {
+                                    col.cellRenderer = "productTemplateRenderer"
+                                }
+                                col.show = true
+                                col.order = ele.order
+                                col.leval = ele.leval
+                                column.push(col)
                             }
-                            else {
-                                col.renderCell = (params) => (params.row[ele.fieldName] || params.row[ele.fieldName] === 0 ?
-                                    typeof params.row[ele.fieldName] === 'object' ? params.row[ele.fieldName]["optionLabel"] : params.row[ele.fieldName]
-                                    : <NoDataCell />)
-                            }
-                            col.order = ele.order
-                            col.leval = ele.leval
-                            column.push(col)
                         }
-                    }
-                })
+                    })
+                });
+                column = orderBy(column, 'order', 'asc');
+                column = sortBy(column, (item: any) => {
+                    return levalOrderBy.indexOf(item.leval)
+                });
+                setColumns(column);
+                setProduct(data);
+                dispatch({ type: "initialize", data: [], count: 0 });
+                dispatch({ type: "initialize", data: data, count: data.length });
+                dispatch({ type: "loading", loading: false });
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
-            column = _.orderBy(column, 'order', 'asc');
-            column = _.sortBy(column, function (item) {
-                return levalOrderBy.indexOf(item.leval)
-            });
-            if (Editable) {
-                column.push(ActionsColoum)
-            }
-            setColumns(column);
-            setProduct(data);
-            setLoading(false)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
     };
 
     const addProductInBuilder = (rows) => {
         let data: any = {}
         data.product = rows
         data._id = productBuilderId
-        setLoading(true)
         axiosInstance().post(`/productbuilder/addproduct`, data).then(({ data: { data } }) => {
-            setLoading(false)
             fetchProduct(productBuilderId)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     }
 
-    const handleSaveProduct = (row) => {
+    const handleSaveProduct = (rows) => {
         let data: any = {}
-        data.product = row
+        data.product = rows
         data._id = productBuilderId
-        setLoading(true)
         axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
-            setLoading(false)
             setProductData(null)
+            setIsBulkEdit(false)
+            setproductDataList([])
             fetchProduct(productBuilderId);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -219,16 +252,14 @@ const ProductBuilder = (props) => {
             ids.push(deleteRecord._id)
         }
         else {
-            ids = selectedProduct;
+            ids = selectedRecords.map(d => d.id);
         }
         let data: any = {}
         data.productBuilderId = productBuilderId
         data._ids = ids
         axiosInstance().post(`/productbuilder/deleteproduct`, data).then(({ data: { data } }) => {
-            setLoading(false)
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            setSelectedProduct([])
             setAnchorEl(null)
             fetchProduct(productBuilderId)
         }).catch((error) => {
@@ -245,10 +276,10 @@ const ProductBuilder = (props) => {
     };
 
     const handleOpenAddField = () => {
-        const rows: any = product.filter((data) => selectedProduct.includes(data._id))
+        const rows: any = product.filter((data) => selectedRecords.some(rec => rec._id === data._id))
         let section: any = []
         let fields: any = []
-        section = _.uniq(_.map(rows[0].fields, 'sectionName'));
+        section = uniq(map(rows[0].fields, 'sectionName'));
         rows[0].fields.forEach(_field => {
             let fid = { ..._field }
             if (fid.type !== "currencyAmount" && (fid.type === "converter" || fid.isConverter === true)) {
@@ -284,11 +315,10 @@ const ProductBuilder = (props) => {
     const handleAddField = (field) => {
         let data: any = {}
         data.productBuilderId = productBuilderId
-        data._ids = selectedProduct
+        data._ids = selectedRecords.map(d => d.id)
         data.field = field
         data.field.leval = "builder-custom"
         axiosInstance().post(`/productbuilder/addField`, data).then(({ data: { data } }) => {
-            setLoading(false)
             fetchProduct(productBuilderId)
             setIsAddField(false)
         }).catch((error) => {
@@ -296,12 +326,31 @@ const ProductBuilder = (props) => {
         });
     }
 
+
+    const handelOpenBulkEdit = () => {
+        const rows: any = product.filter((data) => selectedRecords.some(rec => rec._id === data._id))
+        setproductDataList(rows)
+        setIsBulkEdit(true)
+    }
+
+    const checkUniqTemplate = () => {
+        if (selectedRecords.length === 0) {
+            return true;
+        }
+        else if ((_.uniq(_.map(selectedRecords, 'productTemplate.optionValue'))).length === 1) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     return (<Box p={1} pt={0}>
         <Grid container>
-            <Grid item xs={4} className="d-flex align-items-center gap-1">
+            <Grid item xs={2} className="d-flex align-items-center gap-1">
             </Grid>
             {Editable &&
-                <Grid xs={8} container justify="flex-end">
+                <Grid xs={10} container justify="flex-end">
                     <ImportExportLinks
                         module="builder"
                         api={"productbuilder"}
@@ -316,9 +365,19 @@ const ProductBuilder = (props) => {
                         variant="outlined"
                         color="default"
                         size="small"
+                        className="float-right ml-1 mr-2"
+                        onClick={handelOpenBulkEdit}
+                        disabled={checkUniqTemplate()}
+                        aria-controls="action-menu"
+                    >Bulk Edit
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
                         className="float-right"
                         onClick={openActions}
-                        disabled={selectedProduct.length ? false : true}
+                        disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                     >Actions <ExpandMore />
                     </Button>
@@ -340,22 +399,22 @@ const ProductBuilder = (props) => {
                 </Grid>
             }
         </Grid>
-        <Box height={500} mt={1}>
+        <Box mt={1} className="productAgGrid">
             {columns &&
-                <DataGrid
-                    checkboxSelection={Editable}
-                    components={{
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    onSelectionModelChange={(e) => setSelectedProduct(e.selectionModel)}
-                    loading={loading}
-                    rows={product}
-                    disableSelectionOnClick
-                    disableMultipleSelection
+                <CustomAgGrid
                     columns={columns}
-                    pageSize={25}
-                    density="compact"
-                />
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    allowSelection={Editable}
+                    allowAction={Editable}
+                    actionWidth={150}
+                    isClientSideGrid={true} />
             }
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
@@ -365,6 +424,9 @@ const ProductBuilder = (props) => {
         {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} stage={stage} />}
         {isAddField && <AddField refrence="builder" section={addFieldData.section}
             fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
+        }
+        {isBulkEdit && <BulkEditDialog productDataList={productDataList} handleSaveProduct={handleSaveProduct}
+            handleClose={() => setIsBulkEdit(null)} loading={loading} stage={stage} />
         }
         {showDeleteConfirmBox &&
             <ConfirmationDialog

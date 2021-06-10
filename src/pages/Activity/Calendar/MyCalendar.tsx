@@ -25,6 +25,7 @@ const MyCalendar = (props: Props) => {
       formats={formats}
       style={{ height: "100vh" }}
       popup={true}
+      views={{ month: true, week: true, day: true }}
       eventPropGetter={(obj) => {
         const newStyles = {
           backgroundColor:
