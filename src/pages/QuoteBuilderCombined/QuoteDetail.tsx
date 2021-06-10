@@ -6,7 +6,15 @@ import React, {
   useRef,
   useReducer,
 } from "react";
-import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Typography,
+} from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -29,13 +37,18 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { Link } from "react-router-dom";
 import { getSearchQuery } from "../../services/util";
 import { AiFillPlusCircle } from "react-icons/ai";
+import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -51,9 +64,9 @@ import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
-import EmailDialog from "./EmailDialog";
+// import EmailDialog from "./EmailDialog";
+import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import { BsPlusCircle } from "react-icons/bs";
-
 import { cloneDeep } from "lodash";
 import {
   customerAccount,
@@ -74,6 +87,44 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import Dialog from "@material-ui/core/Dialog";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "../../constants/helpers";
+
+const Accordion = withStyles({
+  root: {
+    border: "1px solid rgba(0, 0, 0, .125)",
+    "&:not(:last-child)": {
+      borderBottom: 0,
+    },
+    "&:before": {
+      display: "none",
+    },
+    "&$expanded": {
+      margin: "auto",
+    },
+  },
+  expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
+    "&$expanded": {
+      minHeight: 46,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -263,24 +314,25 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
-  const [gridApi, setGridApi] = useState(null);
+  const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
       headerName: "Name",
-      show: true,
-      disabled: true,
       cellRenderer: "nameRenderer",
     },
   ]);
+  const [expandQuote, setExpandQuote] = useState(false);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
-  // const [loadingTNC, setLoadingTNC] = useState(false);
+
   const [isCloning, setCloning] = useState(false);
   const [quoteData, setQuoteData] = useState(null);
+  const [pdfFileBase64, setPdfFileBase64] = useState(null);
+  const [excelFileBase64, setExcelFileBase64] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [quoteFields, setquoteFields] = useState([]);
@@ -347,11 +399,9 @@ function QuoteDetail() {
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
 
-  const [data, setData] = useState([]);
+  const [dataTNC, setDataTNC] = useState([]);
 
-  const [rowCount, setRowCount] = useState(0);
-  const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-  const [editRecord, setEditRecord] = useState<any>({});
+  const [editRecord, setEditRecord] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [sendEmail, setSendEmail] = useState(false);
@@ -378,6 +428,7 @@ function QuoteDetail() {
   });
   const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
     useState("All Version Status");
+  const [userEmails, setUserEmails] = useState([]);
 
   let termsTimeout;
 
@@ -420,21 +471,6 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, [query, searchVal, currentVersion]);
 
-  useEffect(() => {
-    let rows = data?.map((u) => ({
-      ...u,
-      isChecked: TandC.includes(u._id) ? true : false,
-      id: u._id,
-    }));
-    setDataRows([...rows]);
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].isChecked) {
-        setRadioIndex(i);
-        break;
-      }
-    }
-  }, [data, currentVersion]);
-
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
       setLoading(true);
@@ -456,6 +492,7 @@ function QuoteDetail() {
             data["amount"]
           ).fullFormatAmount;
           setQuoteData(modifiedData);
+          fetchUserEmails(modifiedData);
 
           handleContactsEmails(data);
 
@@ -637,7 +674,7 @@ function QuoteDetail() {
       title={params.value}
       onClick={() => {
         setShowCreateDialog(true);
-        const data = dataRowsTNC.find((d) => d.id === params.data.id);
+        const data = dataTNC.find((d) => d._id === params.data.id);
 
         setEditRecord(data);
       }}
@@ -660,6 +697,7 @@ function QuoteDetail() {
     axiosInstance()
       .get(termsAndCondition.api)
       .then(({ data: { data, count } }) => {
+        setDataTNC(data);
         let rows = data.map((tnc) => ({
           ...tnc,
           id: tnc._id,
@@ -676,6 +714,26 @@ function QuoteDetail() {
         toastConfig.setToastConfig(err);
         dispatch({ type: "loading", loadingTNC: false });
       });
+  };
+
+  const fetchUserEmails = (quoteData) => {
+    if (quoteData?.collaborator && quoteData.collaborator.length) {
+      let collaboratorIds = quoteData.collaborator.map((o) => o.optionValue);
+      axiosInstance()
+        .get("/user")
+        .then(({ data: { data, count } }) => {
+          data = data.reduce((emails, obj) => {
+            if (obj?.email && collaboratorIds.indexOf(obj._id) >= 0) {
+              emails.push(obj.email);
+            }
+            return emails;
+          }, []);
+          setUserEmails([...data]);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   // const columnsTNC = [
@@ -833,11 +891,12 @@ function QuoteDetail() {
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
-    PdfDoc.setFontSize(14);
-    PdfDoc.text(companyAddress, 20, 45);
+    PdfDoc.setFontSize(12);
+    PdfDoc.text(companyAddress, 20, 50);
     PdfDoc.setLineWidth(3);
     PdfDoc.line(15, 70, 260, 70);
     PdfDoc.line(330, 70, 580, 70);
+    PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     var PDFData = [];
     var PdfCol = ["S. No."];
@@ -903,12 +962,13 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale}`,
+          content: `Quote Total : ${totalsale.fullFormatAmount}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
       ],
     ];
+
     autoTable(PdfDoc, {
       margin: { top: 140 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -917,6 +977,19 @@ function QuoteDetail() {
       theme: "grid",
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
+
+    finalY = finalY + 40;
+    PdfDoc.setFontSize(10);
+    PdfDoc.text("Note:", 20, finalY);
+
+    finalY = finalY + 15;
+    PdfDoc.text("Thanks for your business", 20, finalY);
+
+    finalY = finalY + 50;
+    PdfDoc.text("Customer Signature", 20, finalY);
+
+    finalY = finalY + 75;
+    PdfDoc.line(15, finalY, 260, finalY);
 
     if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
@@ -927,12 +1000,12 @@ function QuoteDetail() {
       let finalmarkup = "";
 
       selectedRecords.forEach((selectTNC) => {
-        console.log(selectTNC);
         finalmarkup =
           finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
         let state = convertFromRaw(JSON.parse(selectTNC.description));
         let TNC = EditorState.createWithContent(state);
         let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+
         finalmarkup = finalmarkup + markup + "<br>";
       });
 
@@ -945,12 +1018,7 @@ function QuoteDetail() {
               title: `Quotation - v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
-            var reader = new FileReader();
-            reader.readAsDataURL(pdfBlobFile);
-            reader.onloadend = function () {
-              var base64data = reader.result;
-              console.log(base64data);
-            };
+            generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
@@ -985,19 +1053,15 @@ function QuoteDetail() {
           title: `Quotation - ${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
-        var reader = new FileReader();
-        reader.readAsDataURL(pdfBlobFile);
-        reader.onloadend = function () {
-          var base64data = reader.result;
-          console.log(base64data);
-        };
+        generateBase64forFile(pdfBlobFile, "pdf");
+
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
-
+        generateBase64forFile(PDFtoAPIData, "pdf");
         const formdata = new FormData();
         formdata.append("file", PDFtoAPIData, "Quotation.pdf");
         axiosInstance()
@@ -1016,6 +1080,21 @@ function QuoteDetail() {
     }
   };
 
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data = reader.result;
+      if (type === "pdf") {
+        setPdfFileBase64(base64data);
+      }
+
+      if (type === "excel") {
+        setExcelFileBase64(base64data);
+      }
+    };
+  };
+
   const handlePage = (params) => {
     if (query.page !== params.page) {
       setQuery((prevState) => ({ ...prevState, page: params.page }));
@@ -1030,7 +1109,7 @@ function QuoteDetail() {
 
   const handleCloseCreateDialog = (params) => {
     setShowCreateDialog(false);
-    setEditRecord({});
+    setEditRecord(null);
     if (params?.fetchData) fetchTermsAndConditions();
   };
 
@@ -1082,7 +1161,7 @@ function QuoteDetail() {
     }
   }, [steps]);
 
-  const exportToCSV = () => {
+  const exportToCSV = (send = false) => {
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
@@ -1100,7 +1179,7 @@ function QuoteDetail() {
 
       newTable.push({
         "Product Name": "Total",
-        "Total Sales Price": totalcost,
+        "Total Sales Price": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1110,7 +1189,15 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(data, `Quotation - v${currentVersion}` + fileExtension);
+
+      if (send) {
+        generateBase64forFile(data, "excel");
+      } else {
+        FileSaver.saveAs(
+          data,
+          `Quotation - v${currentVersion}` + fileExtension
+        );
+      }
     }
   };
 
@@ -1489,8 +1576,6 @@ function QuoteDetail() {
   const handleCases = () => {
     if (DOAreq) {
       if (!PDF) {
-        createImagePDF(false, true);
-
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
           .then(({ data }) => {
@@ -1503,15 +1588,14 @@ function QuoteDetail() {
       }
     }
     if (Customerreq) {
+      createImagePDF(false, true);
+
+      exportToCSV(true);
       if (!PDF) {
         createImagePDF(false, true);
       }
       setSendEmail(true);
     }
-  };
-
-  const sendEmailOnNext = () => {
-    setSendEmail(true);
   };
 
   const handleChangeVisible = (event) => {
@@ -1533,7 +1617,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        data
+        dataTNC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1625,6 +1709,22 @@ function QuoteDetail() {
       });
   };
 
+  let attachments = [];
+  if (pdfFileBase64) {
+    attachments.push({
+      base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
+      contentType: pdfFileBase64.split(";")[0].split(":")[1],
+    });
+  }
+  if (excelFileBase64) {
+    attachments.push({
+      base64: excelFileBase64.substring(
+        parseInt(excelFileBase64.indexOf(",") + 1)
+      ),
+      contentType: excelFileBase64.split(";")[0].split(":")[1],
+    });
+  }
+
   return (
     <>
       <Layout>
@@ -1704,7 +1804,41 @@ function QuoteDetail() {
               ) : (
                 <>
                   {quoteData && (
-                    <DetailsPage data={quoteData} fields={quoteFields} />
+                    <Accordion
+                      expanded={expandQuote}
+                      className="omsAccordian accordQuotes"
+                    >
+                      <AccordionSummary
+                        aria-controls="user-panel-content"
+                        id="user-panel-header"
+                      >
+                        <Grid container>
+                          <Box
+                            component="div"
+                            display="flex"
+                            alignItems="center"
+                            flexGrow={1}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={() => setExpandQuote(!expandQuote)}
+                            >
+                              {expandQuote === true ? (
+                                <ExpandLessIcon />
+                              ) : (
+                                <ExpandMoreIcon />
+                              )}
+                            </IconButton>
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                Quotes Information
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </AccordionSummary>
+                      <DetailsPage data={quoteData} fields={quoteFields} />
+                    </Accordion>
                   )}
                 </>
               )}
@@ -1793,6 +1927,7 @@ function QuoteDetail() {
                     Refresh={fetchQuoteData}
                     nextStep={nextStep}
                     versionStatus={versionStatus}
+                    loading={loading}
                   />
                 ) : (
                   <Steps
@@ -1803,6 +1938,7 @@ function QuoteDetail() {
                     Refresh={fetchQuoteData}
                     nextStep={nextStep}
                     versionStatus={versionStatus}
+                    loading={loading}
                   />
                 )}
               </div>
@@ -1966,7 +2102,7 @@ function QuoteDetail() {
                         versionStatus === "Building Quote") ||
                       (ProcessStatus === "Send To Customer" &&
                         versionStatus !== "Sent to Customer") ? (
-                        <div className="w-100 d-flex align-items-center justify-content-end">
+                        <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
                             disabled={!DOAreq && !Customerreq}
@@ -2035,28 +2171,30 @@ function QuoteDetail() {
                         />
                       )}
                       {ProcessStatus === "Quote Builder" ? (
-                        <Box className="m-3 position-relative">
-                          <h4
-                            className="form-label-style"
-                            title="Add Terms & Conditions"
-                          >
-                            Terms & Conditions
-                          </h4>
-                          <Button
-                            onClick={() => setShowCreateDialog(true)}
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                            className={classes.termsBtn}
-                            startIcon={<AddIcon />}
-                          >
-                            Add Terms & Conditions
-                          </Button>
+                        <Box className="m-3">
+                          <div className="position-relative">
+                            <h4
+                              className="form-label-style"
+                              title="Add Terms & Conditions"
+                            >
+                              Terms & Conditions
+                            </h4>
+                            <Button
+                              onClick={() => setShowCreateDialog(true)}
+                              variant="contained"
+                              size="small"
+                              color="primary"
+                              className={classes.termsBtn}
+                              startIcon={<AddIcon />}
+                            >
+                              Add Terms & Conditions
+                            </Button>
+                          </div>
                           <CustomAgGrid
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
                             frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
+                            setGridApi={setTNCGridApi}
                             dispatch={dispatch}
                             rowCount={rowCountTNC}
                             limit={limit}
@@ -2065,6 +2203,7 @@ function QuoteDetail() {
                             actionWidth={150}
                             allowSelection={true}
                             allowAction={false}
+                            isClientSideGrid={true}
                           />
                         </Box>
                       ) : null}
@@ -2152,7 +2291,7 @@ function QuoteDetail() {
           />
         )}
 
-        {showCreateDialog ? (
+        {showCreateDialog && editRecord ? (
           <ManageTermsAndCondition
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
@@ -2162,13 +2301,28 @@ function QuoteDetail() {
           />
         ) : null}
         {sendEmail && (
-          <EmailDialog
-            handleClose={() => setSendEmail(false)}
-            success={onSuccess}
-            id={id}
-            version={currentVersion}
-            account={quoteData.customerAccountName}
-          />
+          <Dialog
+            open={sendEmail}
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="md"
+            onClose={() => setSendEmail(false)}
+            fullWidth
+          >
+            <CreateEmail
+              handleClose={() => setSendEmail(false)}
+              fetchData={onSuccess}
+              id={id}
+              version={currentVersion}
+              // account={quoteData.customerAccountName}
+              isQuoteBuilder={true}
+              // users={quoteData.collaborator}
+              options={userEmails}
+              emailId={null}
+              qouteBuilderAttachments={attachments}
+            />
+          </Dialog>
         )}
 
         {messageDialog.open && (

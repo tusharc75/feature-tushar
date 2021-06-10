@@ -14,15 +14,18 @@ import CloseIcon from "@material-ui/icons/Close";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
 import { StepIconProps } from "@material-ui/core";
-import { IoIosArrowDroprightCircle, IoIosArrowDropleftCircle } from 'react-icons/io';
-import { GoPencil } from 'react-icons/go';
-import { BsCheckCircle } from 'react-icons/bs';
-import { AiOutlineCloseCircle } from 'react-icons/ai';
-import { ImHourGlass } from 'react-icons/im';
-import { FcCancel } from 'react-icons/fc';
-import { FcClock } from 'react-icons/fc';
-import { FcApproval } from 'react-icons/fc';
-
+import {
+  IoIosArrowDroprightCircle,
+  IoIosArrowDropleftCircle,
+} from "react-icons/io";
+import { GoPencil } from "react-icons/go";
+import { BsCheckCircle } from "react-icons/bs";
+import { AiOutlineCloseCircle } from "react-icons/ai";
+import { ImHourGlass } from "react-icons/im";
+import { FcCancel } from "react-icons/fc";
+import { FcClock } from "react-icons/fc";
+import { FcApproval } from "react-icons/fc";
+import { FaHourglassHalf } from "react-icons/fa";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,20 +38,20 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
   },
   instructions: {
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   stepperNext: {
     marginTop: "8px",
     position: "absolute",
     right: "22px",
-    color: theme.palette.primary.main
+    color: theme.palette.primary.main,
   },
   pStepper: {
     padding: "45px 7px 10px 7px !important",
     // border: "1px solid #ece4e4",
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
-    borderRadius: "4px"
+    borderRadius: "4px",
   },
   step: {
     paddingLeft: "8px",
@@ -60,65 +63,64 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     margin: "1px",
-    borderRadius: "4px"
+    borderRadius: "4px",
   },
   inActive: {
-    background: "#ebebeb"
+    background: "#ebebeb",
   },
   currentStep: {
     background: "#ffffff",
     boxShadow: "2px 2px 6px #a7a3a3",
   },
-  currentStepColor: {
-    color: "#0e7723 !important",
-    fontWeight: 600,
-  },
+
   active: {
     background: "#53ac65",
   },
   sent: {
     color: "#00acc1",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   approved: {
     color: "#6ca826",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   rejected: {
     color: "#d60f0f",
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 }));
 
 const useColorlibStepIconStyles = makeStyles({
   root: {
+    color: "#d1c4c4",
     width: 30,
     height: 30,
     display: "flex",
-    color: "#000000",
-    opacity: "0.2",
     justifyContent: "center",
     alignItems: "center",
   },
   active: {
-    // backgroundImage:
-    //   "linear-gradient( 136deg, rgb(30,118,130) 0%, rgb(30,118,130) 50%, rgb(30,118,130) 100%)",
-    // boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
+    color: "#047d1c !important",
   },
   completed: {
-    // backgroundImage:
-    //   "linear-gradient( 136deg, rgb(4,125,28) 0%, rgb(4,125,28) 50%, rgb(4,125,28) 100%)",
+    color: "#3f3f02 !important",
   },
   rejected: {
-    // background: "black",
-    // backgroundImage:
-    //   "linear-gradient( 136deg, rgb(178, 0, 0) 0%, rgb(178, 0, 0) 50%, rgb(178, 0, 0) 100%)",
-  }
+    color: "#b3a6a6 !important",
+  },
 });
 
 const Steps = (props) => {
-  const { steps, currentStep, id, version, Refresh, nextStep, versionStatus } =
-    props;
+  const {
+    steps,
+    currentStep,
+    id,
+    version,
+    Refresh,
+    nextStep,
+    versionStatus,
+    loading,
+  } = props;
   const classes = useStyles();
   var activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
@@ -188,7 +190,7 @@ const Steps = (props) => {
       2: <GoPencil size={20} />,
       3: <BsCheckCircle size={20} />,
       4: <AiOutlineCloseCircle size={20} />,
-      5: <MoreHorizIcon />,
+      5: <FaHourglassHalf size={20} />,
     };
 
     return (
@@ -238,70 +240,122 @@ const Steps = (props) => {
   return (
     <div className={classes.root}>
       <div className="position-relative">
-        {activeStep === steps.length - 1 ? (<>
-          <div className="d-flex align-items-center justify-content-center flex-column m-3">
-            <FcClock size={30} />
-            <Typography className={classes.sent}>
-              DOA Sent
-            </Typography>
-          </div>
-          {/* <div className="d-flex align-items-center justify-content-center flex-column m-3">
-            <FcApproval size={30} />
-            <Typography className={classes.approved}>
-              Approved by DOA
-            </Typography>
-          </div> */}
-          {/* <div className="d-flex align-items-center justify-content-center flex-column m-3">
-            <FcCancel size={30} />
-            <Typography className={classes.rejected}>
-              Rejected by DOA
-            </Typography>
-          </div> */}
-        </>
-        ) : (<>
-          <div>
-            <div className={classes.stepperNext}>
-              {activeStep === 1 || activeStep === 2 ? (
-                <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
-                // <Button
-                //   variant="contained"
-                //   color="primary"
-                //   className="mr-1"
-                //   onClick={handleBack}
-                // >
-                //   Back
-                // </Button>
-              ) : null}
-
-              <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} />
-              {/* <Button
-                variant="contained"
-                color="primary"
-                onClick={handleNext}
-                disabled={nextStep ? false : true}
-              >
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
-              </Button> */}
+        <>
+          {versionStatus === "Sent for DOA" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcClock size={30} />
+              <Typography className={classes.sent}>DOA Sent</Typography>
             </div>
-          </div>
-          <div className={classes.pStepper}>
-            <Stepper activeStep={activeStep} >
-              {steps.map((label, i) => (<>
-                <Step key={label}
-                  className={clsx(classes.step, {
-                    [classes.active]: currentStep > i,
-                    [classes.currentStep]: currentStep == i,
-                    [classes.inActive]: currentStep !== i,
-                  })}>
-                  <StepLabel StepIconComponent={ColorlibStepIcon} className={ currentStep == i ? classes.currentStepColor : null }>{label}</StepLabel>
-                </Step>
-              </>
-              ))}
-            </Stepper>
-          </div></>
-        )}
-      </div>
+          )}
+          {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcApproval size={30} />
+              <Typography className={classes.approved}>
+                Approved by DOA
+              </Typography>
+            </div>
+          )}
+          {versionStatus.split(" (")[0] === "Rejected by DOA" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcCancel size={30} />
+              <Typography className={classes.rejected}>
+                Rejected by DOA
+              </Typography>
+            </div>
+          )}
+          {versionStatus === "Sent to Customer" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcClock size={30} />
+              <Typography className={classes.sent}>
+                Quote Sent To Customer
+              </Typography>
+            </div>
+          )}
+          {versionStatus.includes("Accepted by Customer") && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcApproval size={30} />
+              <Typography className={classes.approved}>
+                Approved by Customer
+              </Typography>
+            </div>
+          )}
+          {versionStatus.includes("Rejected by Customer") && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcCancel size={30} />
+              <Typography className={classes.rejected}>
+                Rejected by Customer
+              </Typography>
+            </div>
+          )}
+        </>
+        {activeStep === steps.length - 1 ? (
+          <></>
+        ) : (
+          <>
+            <div>
+              <div className={classes.stepperNext}>
+                {activeStep === 1 || activeStep === 2 ? (
+                  // <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className="mr-1"
+                    onClick={handleBack}
+                    disabled={loading}
+                    size="small"
+                    startIcon={<IoIosArrowDropleftCircle />}
+                  >
+                    Back
+                  </Button>
+                ) : null}
 
+                {/* <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} /> */}
+                {versionStatus.split(" ")[0] != "Rejected" ? (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleNext}
+                    size="small"
+                    disabled={
+                      loading ||
+                      !nextStep ||
+                      versionStatus.includes("Accepted  by DOA") ||
+                      versionStatus.includes("Sent to Customer")
+                    }
+                    endIcon={<IoIosArrowDroprightCircle />}
+                  >
+                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  </Button>
+                ) : (
+                  <p>{versionStatus}</p>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+        <div className={classes.pStepper}>
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, i) => (
+              <Step
+                key={label}
+                className={clsx(classes.step, {
+                  [classes.active]:
+                    currentStep > i || steps[currentStep] === "End",
+                  [classes.currentStep]: currentStep == i,
+                  [classes.inActive]: currentStep !== i,
+                })}
+              >
+                <StepLabel
+                  StepIconComponent={ColorlibStepIcon}
+                  className={currentStep === i ? "currentStepColor" : null}
+                >
+                  {label}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </div>
+      </div>
     </div>
   );
 };

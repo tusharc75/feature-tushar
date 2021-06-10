@@ -333,6 +333,7 @@ const CreateProduct = (props) => {
                                                                                     : values
                                                                             }
                                                                             options={productCategoryDataSource}
+                                                                            doNotShowInfoTooltip={true}
                                                                         />
                                                                     </Grid>
                                                                     {
