@@ -262,46 +262,50 @@ const Steps = (props) => {
           <div>
             <div className={classes.stepperNext}>
               {activeStep === 1 || activeStep === 2 ? (
-                <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
-                // <Button
-                //   variant="contained"
-                //   color="primary"
-                //   className="mr-1"
-                //   onClick={handleBack}
-                // >
-                //   Back
-                // </Button>
+                // <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="mr-1"
+                  onClick={handleBack}
+                  size="small"
+                  startIcon={<IoIosArrowDropleftCircle/>}
+                >
+                 Back
+                </Button>
               ) : null}
 
-              <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} />
-              {/* <Button
+              {/* <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} /> */}
+              <Button
                 variant="contained"
                 color="primary"
                 onClick={handleNext}
+                size="small"
                 disabled={nextStep ? false : true}
+                endIcon={<IoIosArrowDroprightCircle/>}
               >
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
-              </Button> */}
+                {activeStep === steps.length - 1 ? "Finish" : "Next" }
+              </Button>
             </div>
           </div>
-          <div className={classes.pStepper}>
-            <Stepper activeStep={activeStep} >
-              {steps.map((label, i) => (<>
-                <Step key={label}
-                  className={clsx(classes.step, {
-                    [classes.active]: currentStep > i,
-                    [classes.currentStep]: currentStep == i,
-                    [classes.inActive]: currentStep !== i,
-                  })}>
-                  <StepLabel StepIconComponent={ColorlibStepIcon} className={ currentStep == i ? classes.currentStepColor : null }>{label}</StepLabel>
-                </Step>
-              </>
-              ))}
-            </Stepper>
-          </div></>
+        </>
         )}
+        <div className={classes.pStepper}>
+          <Stepper activeStep={activeStep} >
+            {steps.map((label, i) => (<>
+              <Step key={label}
+                className={clsx(classes.step, {
+                  [classes.active]: currentStep > i,
+                  [classes.currentStep]: currentStep == i,
+                  [classes.inActive]: currentStep !== i,
+                })}>
+                <StepLabel StepIconComponent={ColorlibStepIcon} className={currentStep == i ? classes.currentStepColor : null}>{label}</StepLabel>
+              </Step>
+            </>
+            ))}
+          </Stepper>
+        </div>
       </div>
-
     </div>
   );
 };
