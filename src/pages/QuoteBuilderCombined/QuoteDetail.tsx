@@ -646,7 +646,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -1640,7 +1640,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1726,10 +1726,9 @@ function QuoteDetail() {
       contentType: excelFileBase64.split(";")[0].split(":")[1],
     });
   }
-  if(ProcessStatus !== "Quote Builder" && currentTabIndex === 1) setCurrentTabIndex(0);
+  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1) setCurrentTabIndex(0);
   return (
     <>
-    {console.log(ProcessStatus)}
       <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -1782,9 +1781,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2007,38 +2006,38 @@ function QuoteDetail() {
                           <span className="quoteAmount">{versionStatus}</span>
                         </div> */}
                       <div></div>
-                      
+
                     </Grid>
                     <div></div>
-                   
+
                   </Grid>
-                  
+
                 ) : null}
                 <>
-                    <Tabs
-                      className="oms-tab"
-                    
-                      value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab
-                        label="Quotes"
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      {ProcessStatus === "Quote Builder" && <Tab
-                        label="Terms & Conditions"
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />}
-                      
-                    </Tabs>
-                    </>
+                  <Tabs
+                    className="oms-tab"
+
+                    value={currentTabIndex}
+                    onChange={(index, newValue) => {
+                      setCurrentTabIndex(newValue);
+                    }}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    aria-label="icon tabs example"
+                  >
+                    <Tab
+                      label="Quotes"
+                      aria-controls="a11y-tabpanel-0"
+                      id="a11y-tab-0"
+                    />
+                    {ProcessStatus === "Quote Builder" && <Tab
+                      label="Terms & Conditions"
+                      aria-controls="a11y-tabpanel-1"
+                      id="a11y-tab-1"
+                    />}
+
+                  </Tabs>
+                </>
                 {!loading && quoteData ? (
                   <Grid container className="position-relative">
                     <Grid
@@ -2076,7 +2075,7 @@ function QuoteDetail() {
                         </span>
                       ) : null}
 
-                      {ProcessStatus === "Quote Builder"  ? (
+                      {ProcessStatus === "Quote Builder" ? (
                         <Grid container>
                           <Grid item xs={11} md={11} sm={11}>
                             <FormControl
@@ -2131,8 +2130,8 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                      (ProcessStatus === "Send To Customer" &&
-                        versionStatus !== "Sent to Customer") ? (
+                        (ProcessStatus === "Send To Customer" &&
+                          versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
@@ -2148,7 +2147,7 @@ function QuoteDetail() {
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
-                    ProcessStatus !== "Price Builder" ? (
+                      ProcessStatus !== "Price Builder" ? (
                       <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
@@ -2176,33 +2175,33 @@ function QuoteDetail() {
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
                       {
-                      ProcessStatus === "Quote Builder" && 
-                      currentTabIndex === 0 &&
-                      visibleColumns.length > 0 ? (
-                        <ProductGrid
-                          productBuilderId={productBuilderID}
-                          refreshProducts={refreshProducts}
-                          columnsData={visibleColumns}
-                          currency={quoteData.currency}
-                          isAll={false}
-                        />
-                      ) : currentTabIndex === 0 ? (
-                        <ProductBuilder
-                          productBuilderId={productBuilderID}
-                          isAddNewProduct={isAddNewProduct}
-                          setIsAddNewProduct={setIsAddNewProduct}
-                          isAddExistingProduct={isAddExistingProduct}
-                          setIsAddExistingProduct={setIsAddExistingProduct}
-                          refreshProducts={refreshProducts}
-                          stage={ProcessStatus === "New" ? "product" : "cost"}
-                          Editable={
-                            ProcessStatus === "Price Builder" ||
-                            ProcessStatus === "New"
-                              ? true
-                              : false
-                          }
-                        />
-                      ):null}
+                        ProcessStatus === "Quote Builder" &&
+                          currentTabIndex === 0 &&
+                          visibleColumns.length > 0 ? (
+                          <ProductGrid
+                            productBuilderId={productBuilderID}
+                            refreshProducts={refreshProducts}
+                            columnsData={visibleColumns}
+                            currency={quoteData.currency}
+                            isAll={false}
+                          />
+                        ) : currentTabIndex === 0 ? (
+                          <ProductBuilder
+                            productBuilderId={productBuilderID}
+                            isAddNewProduct={isAddNewProduct}
+                            setIsAddNewProduct={setIsAddNewProduct}
+                            isAddExistingProduct={isAddExistingProduct}
+                            setIsAddExistingProduct={setIsAddExistingProduct}
+                            refreshProducts={refreshProducts}
+                            stage={ProcessStatus === "New" ? "product" : "cost"}
+                            Editable={
+                              ProcessStatus === "Price Builder" ||
+                                ProcessStatus === "New"
+                                ? true
+                                : false
+                            }
+                          />
+                        ) : null}
                       {ProcessStatus === "Quote Builder" && currentTabIndex === 1 ? (
                         <Box className="m-3">
                           <div className="position-relative">
@@ -2275,7 +2274,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2320,7 +2319,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            // qbApi={qbApi}
+          // qbApi={qbApi}
           />
         )}
 
