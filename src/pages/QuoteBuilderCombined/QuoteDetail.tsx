@@ -52,7 +52,7 @@ import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 // import EmailDialog from "./EmailDialog";
-import EmailDialog from "../../components/Activity/Email/CreateEmail"
+import { CreateEmail } from "../../components/Activity/Email/CreateEmail"
 import { BsPlusCircle } from "react-icons/bs";
 import { cloneDeep } from "lodash";
 import {
@@ -74,6 +74,9 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import Dialog from '@material-ui/core/Dialog';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "../../constants/helpers";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -378,6 +381,7 @@ function QuoteDetail() {
   });
   const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
     useState("All Version Status");
+  const [userEmails, setUserEmails] = useState([])
 
   let termsTimeout;
 
@@ -456,6 +460,7 @@ function QuoteDetail() {
             data["amount"]
           ).fullFormatAmount;
           setQuoteData(modifiedData);
+          fetchUserEmails(modifiedData)
 
           handleContactsEmails(data);
 
@@ -680,6 +685,26 @@ function QuoteDetail() {
         dispatch({ type: "loading", loadingTNC: false });
       });
   };
+
+  const fetchUserEmails = (quoteData) => {
+    if (quoteData?.collaborator && quoteData.collaborator.length) {
+      let collaboratorIds = quoteData.collaborator.map(o => o.optionValue)
+      axiosInstance()
+        .get("/user")
+        .then(({ data: { data, count } }) => {
+          data = data.reduce((emails, obj) => {
+            if (obj?.email && collaboratorIds.indexOf(obj._id) >= 0) {
+              emails.push(obj.email);
+            }
+            return emails;
+          }, []);
+          setUserEmails([...data])
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }
 
   // const columnsTNC = [
   //   {
@@ -1643,6 +1668,20 @@ function QuoteDetail() {
       });
   };
 
+  let attachments = []
+  if (pdfFileBase64) {
+    attachments.push({
+      base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1),),
+      contentType: pdfFileBase64.split(";")[0].split(":")[1],
+    })
+  }
+  if (excelFileBase64) {
+    attachments.push({
+      base64: excelFileBase64.substring(parseInt(excelFileBase64.indexOf(",") + 1),),
+      contentType: excelFileBase64.split(";")[0].split(":")[1],
+    })
+  }
+
   return (
     <>
       <Layout>
@@ -2180,24 +2219,28 @@ function QuoteDetail() {
           />
         ) : null}
         {sendEmail && (
-          <EmailDialog
-            handleClose={() => setSendEmail(false)}
-            fetchData={onSuccess}
-            id={id}
-            version={currentVersion}
-            account={quoteData.customerAccountName}
-            users={quoteData.collaborator}
-            attachments={[
-              {
-                base64: pdfFileBase64,
-                contentType: pdfFileBase64.split(";")[0].split(":")[1],
-              },
-              {
-                base64: excelFileBase64,
-                contentType: pdfFileBase64.split(";")[0].split(":")[1],
-              },
-            ]}
-          />
+          <Dialog
+            open={sendEmail}
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="md"
+            onClose={() => setSendEmail(false)}
+            fullWidth
+          >
+            <CreateEmail
+              handleClose={() => setSendEmail(false)}
+              fetchData={onSuccess}
+              id={id}
+              version={currentVersion}
+              // account={quoteData.customerAccountName}
+              isQuoteBuilder={true}
+              // users={quoteData.collaborator}
+              options={userEmails}
+              emailId={null}
+              qouteBuilderAttachments={attachments}
+            />
+          </Dialog>
         )}
 
         {messageDialog.open && (

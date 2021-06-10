@@ -39,6 +39,7 @@ import ImageAttachments from './ImageAttachments'
 import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers"
 import { fileIcons } from "./FileIcons"
 import { toolbarConfig } from "./TextEditorToolbar"
+import { useData } from "../../../StateProvider/Provider"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -77,7 +78,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const CreateEmail = ({ relatedTo, emailId, handleClose,
-    isQuoteBuilder = false, options = [], fetchData = null, id = null, version = null }) => {
+    isQuoteBuilder = false, options = [], fetchData = null, id = null, version = null,
+    qouteBuilderAttachments = [] }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
@@ -92,6 +94,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    const {
+        state: { user },
+    }: any = useData();
 
     useEffect(() => {
         fetchEmailDetail();
@@ -183,26 +188,26 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
     };
 
     const handleSendQuoteEmail = (values) => {
-        setLoading(true)
+        setSending(true)
         const body = {
-            email: "",
+            email: [user?.user?.email],
             version: version,
             emailBody: values.content.toString('html'),
             emailSubject: values.name,
             cc: values.cc,
-            to: values.to,
+            bcc: values.to,
             id: id,
-            attachment: []
+            attachments: [...qouteBuilderAttachments]
         }
         axiosInstance()
             .post(`/quote-builder/sendQuoteEmail`, body)
             .then(({ data: { data } }) => {
-                setLoading(false);
+                setSending(false);
                 if (fetchData) fetchData()
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
-                setLoading(false);
+                setSending(false);
                 handleClose();
             });
     }
@@ -335,7 +340,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                 )}
             </div>
             : initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema}
-                onSubmit={isQuoteBuilder ? handleSendQuoteEmail ? handleSave} onKeyPress={onKeyPress}>
+                onSubmit={isQuoteBuilder ? handleSendQuoteEmail : handleSave} onKeyPress={onKeyPress}>
                 {
                     ({ submitForm, touched, errors, setFieldValue, values }) => (
                         <>
