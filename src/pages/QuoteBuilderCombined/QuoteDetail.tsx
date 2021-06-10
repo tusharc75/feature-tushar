@@ -6,7 +6,15 @@ import React, {
   useRef,
   useReducer,
 } from "react";
-import { Box, Button, CircularProgress, Grid, IconButton, Paper, Typography } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Typography,
+} from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -34,8 +42,8 @@ import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
@@ -111,7 +119,6 @@ const AccordionSummary = withStyles({
   content: {
     "&$expanded": {
       margin: "12px 0",
-
     },
   },
   expanded: {},
@@ -392,7 +399,7 @@ function QuoteDetail() {
 
   const [dataTNC, setDataTNC] = useState([]);
 
-  const [editRecord, setEditRecord] = useState<any>({});
+  const [editRecord, setEditRecord] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [sendEmail, setSendEmail] = useState(false);
@@ -633,7 +640,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -664,11 +671,8 @@ function QuoteDetail() {
       onClick={() => {
         setShowCreateDialog(true);
         const data = dataTNC.find((d) => d._id === params.data.id);
-        console.log(dataRowsTNC);
-        console.log(data);
-        if (data) {
-          setEditRecord(data);
-        }
+
+        setEditRecord(data);
       }}
     >
       {params.value}
@@ -1079,7 +1083,7 @@ function QuoteDetail() {
 
   const handleCloseCreateDialog = (params) => {
     setShowCreateDialog(false);
-    setEditRecord({});
+    setEditRecord(null);
     if (params?.fetchData) fetchTermsAndConditions();
   };
 
@@ -1608,7 +1612,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1733,9 +1737,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1758,7 +1762,10 @@ function QuoteDetail() {
               ) : (
                 <>
                   {quoteData && (
-                    <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
+                    <Accordion
+                      expanded={expandQuote}
+                      className="omsAccordian accordQuotes"
+                    >
                       <AccordionSummary
                         aria-controls="user-panel-content"
                         id="user-panel-header"
@@ -1772,19 +1779,18 @@ function QuoteDetail() {
                           >
                             <IconButton
                               size="small"
-                              onClick={() => setExpandQuote(!expandQuote)} >
-                              {
-                                expandQuote === true ? (
-                                  <ExpandLessIcon />
-                                ) : (
-                                  <ExpandMoreIcon />
-                                )
-                              }
+                              onClick={() => setExpandQuote(!expandQuote)}
+                            >
+                              {expandQuote === true ? (
+                                <ExpandLessIcon />
+                              ) : (
+                                <ExpandMoreIcon />
+                              )}
                             </IconButton>
                             <Box padding="5px">
                               <Typography variant="subtitle2">
                                 Quotes Information
-                            </Typography>
+                              </Typography>
                             </Box>
                           </Box>
                         </Grid>
@@ -2050,8 +2056,8 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                        (ProcessStatus === "Send To Customer" &&
-                          versionStatus !== "Sent to Customer") ? (
+                      (ProcessStatus === "Send To Customer" &&
+                        versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
@@ -2067,7 +2073,7 @@ function QuoteDetail() {
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
-                      ProcessStatus !== "Price Builder" ? (
+                    ProcessStatus !== "Price Builder" ? (
                       <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
@@ -2095,7 +2101,7 @@ function QuoteDetail() {
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
                       {ProcessStatus === "Quote Builder" &&
-                        visibleColumns.length > 0 ? (
+                      visibleColumns.length > 0 ? (
                         <ProductGrid
                           productBuilderId={productBuilderID}
                           refreshProducts={refreshProducts}
@@ -2114,7 +2120,7 @@ function QuoteDetail() {
                           stage={ProcessStatus === "New" ? "product" : "cost"}
                           Editable={
                             ProcessStatus === "Price Builder" ||
-                              ProcessStatus === "New"
+                            ProcessStatus === "New"
                               ? true
                               : false
                           }
@@ -2128,7 +2134,7 @@ function QuoteDetail() {
                               title="Add Terms & Conditions"
                             >
                               Terms & Conditions
-                          </h4>
+                            </h4>
                             <Button
                               onClick={() => setShowCreateDialog(true)}
                               variant="contained"
@@ -2138,7 +2144,7 @@ function QuoteDetail() {
                               startIcon={<AddIcon />}
                             >
                               Add Terms & Conditions
-                          </Button>
+                            </Button>
                           </div>
                           <CustomAgGrid
                             columns={columnsTNC}
@@ -2192,7 +2198,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2237,11 +2243,11 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-          // qbApi={qbApi}
+            // qbApi={qbApi}
           />
         )}
 
-        {showCreateDialog ? (
+        {showCreateDialog && editRecord ? (
           <ManageTermsAndCondition
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
