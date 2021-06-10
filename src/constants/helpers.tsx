@@ -658,16 +658,28 @@ export const getUniqueCurrencies = () => {
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if (!currencyCode && !amount) return null;
 
+  if (amount && isNaN(amount)) {
+    amount = 0
+  }
   const currencyData = currencies.find(
     (data) => data?.currencyCode === currencyCode
   );
 
-  if (!currencyData) {
-    return { shortFormatAmount: amount, fullFormatAmount: amount };
-  }
-
   //  Make default language "en"
   let language = "en";
+
+  if (!currencyData) {
+    return {
+      shortFormatAmount: new Intl.NumberFormat(language, {
+        notation: "compact",
+        compactDisplay: "short",
+      }).format(amount).replace(/^(\D+)/, "$1 "),
+      fullFormatAmount: new Intl.NumberFormat(language, {
+        notation: "compact",
+        compactDisplay: "short",
+      }).format(amount).replace(/^(\D+)/, "$1 "),
+    };
+  }
 
   // Check if that currency's country has multiple language,
   //  And if it has "en", then pick that one, or else take first of the array of languages

@@ -298,7 +298,7 @@ export default function OpportunityAccordianProjectSales({
                                 </Grid>
                                 <Grid item xs={5} sm={4}>
                                   <Box display="flex" alignItems="center">
-                                    {obj?.amount ? (
+                                    {obj?.estimatedAmount ? (
                                       <Typography className="amount">
                                         {
                                           getUniqueCurrencies().find(
@@ -306,7 +306,7 @@ export default function OpportunityAccordianProjectSales({
                                               d.currencyCode == obj["currency"]
                                           )?.symbolNative
                                         }
-                                        &nbsp;{obj?.amount ?? ""}
+                                        &nbsp;{obj?.estimatedAmount ?? ""}
                                       </Typography>
                                     ) : (
                                       ""
