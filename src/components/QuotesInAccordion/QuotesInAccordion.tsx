@@ -19,6 +19,7 @@ import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/Mana
 import { MoreVert } from "@material-ui/icons";
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
+import routes from '../Helpers/Routes';
 
 const Accordion = withStyles({
     root: {
@@ -225,7 +226,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                                             <Grid item xs={7} sm={8}>
 
                                                                 {obj.entity === selectedEntity ? (
-                                                                    < Link className="link" to={`/quote-builder/${obj._id}`}>
+                                                                    < Link className="link" to={`${routes.quoteBuilder.path}/${obj._id}`}>
                                                                         <Typography className="detailName">{obj.quoteName}</Typography>
                                                                     </Link>) : (<span className="d-flex gap-2 align-items-center">
                                                                         <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
@@ -271,7 +272,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
             </Box>
             <Box margin={1} /> */}
             <Box margin={1} className="btn-view gap-1" onClick={() =>
-                history.push(`/quote-builder`)}
+                history.push(routes.quoteBuilder.path)}
 
                 p={1} display="flex" justifyContent="center" alignItems="center">
                 <HiExternalLink size={25} />

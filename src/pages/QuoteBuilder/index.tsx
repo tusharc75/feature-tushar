@@ -593,14 +593,14 @@ const CreatePriceBuilder = (props) => {
         <Layout>
             <Grid container className="headerbox">
                 <Grid item xs={12}>
-                    <CustomBreadCrumbs routes={[{ title: "Quote Builder" }]} />
+                    <CustomBreadCrumbs routes={[{ title: "Quotes" }]} />
                 </Grid>
             </Grid>
             <CustomContainer>
                 <div className="header-panel">
                     <Grid>
                         <Grid item xs={6} className="d-flex align-items-center gap-1">
-                            <GiAbstract055 /> <span className="listingHeader">Quote Builder</span>
+                            <GiAbstract055 /> <span className="listingHeader">Quotes</span>
                         </Grid>
                         <Grid item xs={6} container justify="flex-end">
                             <Button onClick={() => GeneratePdf(true, false)} variant="contained" size="small" color="primary">View</Button>
