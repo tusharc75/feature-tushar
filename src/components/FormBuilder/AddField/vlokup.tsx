@@ -50,7 +50,7 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
     };
 
 
-    const handleUpload = (e) => {
+    const handleImportExcel = (e) => {
         e.preventDefault();
         var files = e.target.files, f = files[0];
         var reader = new FileReader();
@@ -74,6 +74,17 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
             }
         };
         reader.readAsBinaryString(f)
+    }
+
+    const handleExportExcel = () => {
+        var export_json = [...values["option"]];
+        export_json.forEach((_d) => {
+            delete _d.optionValue
+        })
+        var ws = XLSX.utils.json_to_sheet(export_json);
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "vlookup dropdown options.xlsx");
     }
 
     return (
@@ -109,12 +120,13 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                             <Typography variant="body2">Options</Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={6} container justify="flex-end">
+                            <label className={`cursor-pointer mr-3`} onClick={handleExportExcel} >Export to Excel</label>
                             <label htmlFor="importFromExcel" className={`cursor-pointer`}>Import from Excel</label>
                             <input
                                 onClick={(e: any) => (e.target.value = null)}
                                 id="importFromExcel"
                                 name="importFromExcel"
-                                onChange={handleUpload}
+                                onChange={handleImportExcel}
                                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                 style={{
                                     opacity: "0",

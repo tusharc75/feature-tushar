@@ -14,52 +14,100 @@ import CloseIcon from "@material-ui/icons/Close";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
 import { StepIconProps } from "@material-ui/core";
+import {
+  IoIosArrowDroprightCircle,
+  IoIosArrowDropleftCircle,
+} from "react-icons/io";
+import { GoPencil } from "react-icons/go";
+import { BsCheckCircle } from "react-icons/bs";
+import { AiOutlineCloseCircle } from "react-icons/ai";
+import { ImHourGlass } from "react-icons/im";
+import { FcCancel } from "react-icons/fc";
+import { FcClock } from "react-icons/fc";
+import { FcApproval } from "react-icons/fc";
+import { FaHourglassHalf } from 'react-icons/fa';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%",
-    padding: "26px 10px !important",
-    background: "#fefefe",
-    boxShadow: "3px 4px 8px #cfcdcd",
+    // width: "100%",
+    // padding: "26px 10px !important",
+    // background: "#fefefe",
+    // boxShadow: "3px 4px 8px #cfcdcd",
   },
   backButton: {
     marginRight: theme.spacing(1),
   },
   instructions: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
+    fontWeight: "bold",
   },
   stepperNext: {
-    marginTop: "10px",
+    marginTop: "8px",
     position: "absolute",
-    left: "32%",
+    right: "22px",
+    color: theme.palette.primary.main,
+  },
+  pStepper: {
+    padding: "45px 7px 10px 7px !important",
+    // border: "1px solid #ece4e4",
+    // background: "#f5f5f5 !important",
+    // margin: "5px 8px",
+    borderRadius: "4px",
+  },
+  step: {
+    paddingLeft: "8px",
+    paddingRight: "8px",
+    padding: "5px 8px",
+    width: "20%",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "1px",
+    borderRadius: "4px",
+  },
+  inActive: {
+    background: "#ebebeb",
+  },
+  currentStep: {
+    background: "#ffffff",
+    boxShadow: "2px 2px 6px #a7a3a3",
+  },
+
+  active: {
+    background: "#53ac65",
+  },
+  sent: {
+    color: "#00acc1",
+    fontWeight: "bold",
+  },
+  approved: {
+    color: "#6ca826",
+    fontWeight: "bold",
+  },
+  rejected: {
+    color: "#d60f0f",
+    fontWeight: "bold",
   },
 }));
 
 const useColorlibStepIconStyles = makeStyles({
   root: {
-    backgroundColor: "#ccc",
-    zIndex: 1,
-    color: "#fff",
+    color: "#d1c4c4",
     width: 30,
     height: 30,
     display: "flex",
-    borderRadius: "50%",
     justifyContent: "center",
     alignItems: "center",
   },
   active: {
-    backgroundImage:
-      "linear-gradient( 136deg, rgb(30,118,130) 0%, rgb(30,118,130) 50%, rgb(30,118,130) 100%)",
-    boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
+    color: "#047d1c !important"  
   },
   completed: {
-    backgroundImage:
-      "linear-gradient( 136deg, rgb(4,125,28) 0%, rgb(4,125,28) 50%, rgb(4,125,28) 100%)",
+    color: "#3f3f02 !important"
   },
   rejected: {
-    backgroundImage:
-      "linear-gradient( 136deg, rgb(178, 0, 0) 0%, rgb(178, 0, 0) 50%, rgb(178, 0, 0) 100%)",
+    color: "#b3a6a6 !important"
   },
 });
 
@@ -131,12 +179,12 @@ const Steps = (props) => {
     }
 
     const icons: { [index: string]: React.ReactElement } = {
-      1: <GiBackwardTime />,
-      2: <CreateIcon />,
-      3: <CheckIcon />,
-      4: <CloseIcon />,
-      5: <MoreHorizIcon />,
-    };
+      1: <GiBackwardTime size={20} />,
+      2: <GoPencil size={20} />,
+      3: <BsCheckCircle size={20} />,
+      4: <AiOutlineCloseCircle size={20} />,
+      5: <FaHourglassHalf size={20} />,
+        };
 
     return (
       <div
@@ -184,44 +232,90 @@ const Steps = (props) => {
   };
   return (
     <div className={classes.root}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <div>
-        {activeStep === steps.length - 1 ? (
-          <div className="d-flex align-items-center justify-content-center">
-            <Typography className={classes.instructions}>
-              All steps completed
-            </Typography>
-          </div>
-        ) : (
-          <div>
-            <div className={classes.stepperNext}>
-              {activeStep === 1 || activeStep === 2 ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className="mr-1"
-                  onClick={handleBack}
-                >
-                  Back
-                </Button>
-              ) : null}
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleNext}
-                disabled={nextStep ? false : true}
-              >
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
-              </Button>
+      <div className="position-relative">
+        <>
+          {versionStatus === "Sent for DOA" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcClock size={30} />
+              <Typography className={classes.sent}>DOA Sent</Typography>
             </div>
-          </div>
+          )}
+          {versionStatus.split(" ")[0] === "Accepted" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcApproval size={30} />
+              <Typography className={classes.approved}>
+                Approved by DOA
+              </Typography>
+            </div>
+          )}
+          {versionStatus.split(" ")[0] === "Rejected" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcCancel size={30} />
+              <Typography className={classes.rejected}>
+                Rejected by DOA
+              </Typography>
+            </div>
+          )}
+        </>
+        {activeStep === steps.length - 1 ? (
+          <></>
+        ) : (
+          <>
+            <div>
+              <div className={classes.stepperNext}>
+                {activeStep === 1 || activeStep === 2 ? (
+                  // <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className="mr-1"
+                    onClick={handleBack}
+                    size="small"
+                    startIcon={<IoIosArrowDropleftCircle />}
+                  >
+                    Back
+                  </Button>
+                ) : null}
+
+                {/* <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} /> */}
+                {versionStatus.split(" ")[0] != "Rejected" ?
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleNext}
+                    size="small"
+                    disabled={nextStep ? false : true}
+                    endIcon={<IoIosArrowDroprightCircle />}
+                  >
+                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  </Button> : null
+                }
+              </div>
+            </div>
+          </>
         )}
+        <div className={classes.pStepper}>
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, i) => (
+                <Step
+                  key={label}
+                  className={clsx(classes.step, {
+                    [classes.active]: currentStep > i,
+                    [classes.currentStep]: currentStep == i,
+                    [classes.inActive]: currentStep !== i,
+                  })}
+                >
+                  <StepLabel
+                    StepIconComponent={ColorlibStepIcon}
+                    className={
+                      currentStep == i ? "currentStepColor" : null
+                    }>
+                    {label}
+                  </StepLabel>
+                </Step>
+            ))}
+          </Stepper>
+        </div>
       </div>
     </div>
   );

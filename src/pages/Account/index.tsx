@@ -8,7 +8,8 @@ import {
   Tooltip,
   IconButton,
   Grid,
-  Chip
+  Chip,
+  MenuList
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
@@ -26,6 +27,12 @@ import CustomHeader from "../../components/Helpers/CustomHeader";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FcApproval } from "react-icons/fc";
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Grow from '@material-ui/core/Grow';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from "react-icons/md";
 import { sidebarResource } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -54,6 +61,9 @@ const AccTypes = [
   },
 ];
 
+const options = ['All', 'Approved', 'Disapproved'];
+
+
 let accountTimeout;
 export default function Account(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -67,6 +77,7 @@ export default function Account(props) {
   }: any = useData();
   const [cloneId, setCloneId] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
+  const [type, setType] = useState(options[0])
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [
@@ -102,6 +113,9 @@ export default function Account(props) {
     isDelete: false,
     approveAccount: false,
   });
+  const [open, setOpen] = React.useState(false);
+  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -144,7 +158,7 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting]);
+  }, [page, limit, selectedType, type, filters, sorting]);
 
   const AccountNameRenderer = params => <span className="d-flex gap-2 align-items-center">
     <Link className="link" to={`/${accountRoute}/detail/${params.data._id}`}>
@@ -293,8 +307,12 @@ export default function Account(props) {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
 
+    const updatedFilters = [];
+    if (type !== options[0]) {
+      updatedFilters.push({ "field": "staticData.approved", "term": type === "Approved" })
+    }
+
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
 
       Object.keys(filters).forEach(field => {
         updatedFilters.push({
@@ -302,8 +320,9 @@ export default function Account(props) {
           term: filters[field].filter
         })
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
     }
+    deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
@@ -312,12 +331,37 @@ export default function Account(props) {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
     return deepFilter;
+  };
+
+  const menuOptionSelection = (selectedOption) => {
+    setType(options[selectedOption])
+  }
+
+  const handleMenuItemClick = (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    index: number,
+  ) => {
+    setSelectedIndex(index);
+    menuOptionSelection(index)
+    setOpen(false);
+  };
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
+      return;
+    }
+
+    setOpen(false);
   };
 
   const fetchAccounts = async () => {
     const queryString = getQueryString();
+
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -531,7 +575,7 @@ export default function Account(props) {
           </Grid>
         </Grid>
         <CustomContainer>
-          <div className={`${accountClass["account_header_inner_container"]}`}>
+          <div className={`${accountClass["account_header_inner_container"]}`} >
             <CustomHeader
               total={rowCount}
               heading={sidebarResource[accountResource]}
@@ -541,6 +585,52 @@ export default function Account(props) {
               secondHeading="Account"
               icon={<MdAccountCircle className="headerLogo" />}
             >
+              <div>
+                <ButtonGroup size="small" variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
+                  <Button >{options[selectedIndex]}</Button>
+                  <Button
+                    color="primary"
+                    size="small"
+                    aria-controls={open ? 'split-button-menu' : undefined}
+                    aria-expanded={open ? 'true' : undefined}
+                    aria-label="select merge strategy"
+                    aria-haspopup="menu"
+                    onClick={handleToggle}
+                  >
+                    <ArrowDropDownIcon />
+                  </Button>
+                </ButtonGroup>
+                <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
+                  {({ TransitionProps, placement }) => (
+                    <Grow
+                      {...TransitionProps}
+                      style={{
+                        transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                      }}
+                    >
+                      <Paper>
+                        <ClickAwayListener onClickAway={handleClose}>
+                          <MenuList
+                            id="menu"
+                            style={{ backgroundColor: 'transparent', fontSize: '10px' }}
+                          >
+                            {options.map((option, index) => (
+                              <MenuItem
+                                key={option}
+                                selected={index === selectedIndex}
+                                onClick={(event) => handleMenuItemClick(event, index)}
+                                style={{ color: 'black' }}
+                              >
+                                {option}
+                              </MenuItem>
+                            ))}
+                          </MenuList>
+                        </ClickAwayListener>
+                      </Paper>
+                    </Grow>
+                  )}
+                </Popper>
+              </div>
               <div
                 className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`}
               >
@@ -550,6 +640,8 @@ export default function Account(props) {
                   width="300px"
                   value={search}
                 />
+
+
                 <div
                   className={`${accountClass.account_header_add_btn_action_btn_group}`}
                 >

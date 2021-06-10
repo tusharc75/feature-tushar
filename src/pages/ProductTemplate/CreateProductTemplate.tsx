@@ -99,7 +99,7 @@ const ProductTemplate = () => {
 
     const handleSave = (values) => {
         let data: any = {}
-        data.name = values.name; 
+        data.name = values.name;
         data.isStandard = values.isStandard;
         if (data.isStandard) {
             data.productCategory = null;
@@ -161,10 +161,52 @@ const ProductTemplate = () => {
         return errors;
     }
 
+
+    const handleExportFields = () => {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(section));
+        var dlAnchorElem = document.getElementById('downloadAnchorElem');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "template_field.json");
+        dlAnchorElem.click();
+    }
+
+    const handleImportFields = (e) => {
+        e.preventDefault();
+        var files = e.target.files, f = files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var data: any = e.target.result;
+            setSection(JSON.parse(data));
+        };
+        reader.readAsBinaryString(f)
+    }
+
+
     return (<Layout>
         <Grid container className="headerbox">
-            <Grid item xs={12}>
+            <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
+            </Grid>
+            <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
+                <label htmlFor="importFromExcel" style={{ color: "white" }} className="cursor-pointer mr-3">
+                    Import Fields
+                    <input
+                        onClick={(e: any) => (e.target.value = null)}
+                        id="importFromExcel"
+                        name="importFromExcel"
+                        onChange={handleImportFields}
+                        style={{
+                            opacity: "0",
+                            position: "absolute",
+                            zIndex: -1,
+                        }}
+                        type="file"
+                    />
+                </label>
+                <label style={{ color: "white" }} className="cursor-pointer" onClick={handleExportFields}>
+                    Export Fields
+                </label>
+                <a id="downloadAnchorElem" style={{ display: "none" }}></a>
             </Grid>
         </Grid>
         <CustomContainer>
@@ -275,6 +317,7 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
+                                    module="producttemplate"
                                 />
                             </Box>
                         </Form>)}

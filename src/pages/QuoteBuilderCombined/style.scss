@@ -5,3 +5,29 @@
 .nameLink:hover {
   text-decoration: underline;
 }
+.MuiStepper-horizontal {
+  border-radius: 2px;
+  border: 1px solid #d2cfcf;
+  border-left: none !important;
+}
+.productPos{
+  position: absolute;
+  top: 1px;
+  left: 6px;
+}
+
+.doaAction{
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+.currentStepColor {
+  & .MuiStepLabel-iconContainer{
+    color: #0e7723 !important;
+    opacity: 1;
+  }
+  & .MuiStepLabel-label{
+    color: #0e7723 !important;
+    font-weight: 600 !important;
+  }
+}

@@ -111,6 +111,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue }) => {
                                         rows={2}
                                         placeholder="Formula (return field1 + field2)"
                                         style={{ margin: 0 }}
+                                        onKeyPress={(event) => { event.stopPropagation(); }}
                                         value={values["formulaoption"] && values["formulaoption"][_field] && values["formulaoption"][_field]}
                                         onChange={(event) => onChangeValue(i, _field, event.target.value)}
                                     />

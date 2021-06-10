@@ -46,7 +46,7 @@ const LookupResource = [
   { name: "Product Template", value: "Product Template" },
 ]
 
-export const Properties = ({ handleClose, fieldData, sectionId, section, setSection }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection }) => {
 
   const [initialValues, setInitialValues] = useState(fieldData);
 
@@ -60,6 +60,9 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
   }, []);
 
   const fields = [];
+  if (module === "producttemplate") {
+    fields.push({ fieldName: "qty", fieldLabel: "Qty" })
+  }
   section.forEach(_section => {
     _section.field.forEach(_field => {
       let fid = { ..._field }
@@ -90,7 +93,9 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     })
   })
 
+
   const handleSave = (values) => {
+
     let data = [...section]
     data.forEach((row) => {
       if (row.sectionId.toString() === sectionId.toString()) {
@@ -151,6 +156,9 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             if (fieldData.type === "currencyAmount") {
               delete ele.currency
               ele.displayCurrency = values.displayCurrency
+              if (fieldData.type === "formula" || values.isFormula === true) {
+                ele.formulaOnCurrency = values.formulaOnCurrency
+              }
             }
             if (fieldData.isMulitFormula) {
               ele.formulaFields = values.formulaFields
@@ -361,6 +369,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                 control={
                   <Checkbox
                     name="required"
+                    disabled={!values["editAble"] && values["required"] ? true : false}
                     checked={values["required"]}
                     onChange={(e) => setFieldValue("required", e.target.checked)}
                     color="primary"
