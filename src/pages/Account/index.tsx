@@ -77,7 +77,6 @@ export default function Account(props) {
   }: any = useData();
   const [cloneId, setCloneId] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorElForFilter, setAnchorElForFilter] = useState(null);
   const [type, setType] = useState("")
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -309,7 +308,7 @@ export default function Account(props) {
     let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
 
     const updatedFilters = [];
-    if (type == "approved" || type === "disApproved") {
+    if (type === "approved" || type === "disApproved") {
       updatedFilters.push({ "field": "staticData.approved", "term": termValue(type) })
     }
 
