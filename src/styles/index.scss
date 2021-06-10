@@ -46,6 +46,7 @@
   border: 1px solid #eeeaea;
   @include ag-theme-material(
     (
+      font-family:(Nunito,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"),
       material-primary-color: var(--primary),
       material-accent-color: var(--primary-light),
       input-focus-border-color: red,
