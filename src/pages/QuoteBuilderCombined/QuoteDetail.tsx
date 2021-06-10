@@ -80,7 +80,6 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import CustomDetailPage from "./CustomDetailPage";
 
 const Accordion = withStyles({
   root: {
