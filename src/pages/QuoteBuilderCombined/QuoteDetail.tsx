@@ -6,7 +6,7 @@ import React, {
   useRef,
   useReducer,
 } from "react";
-import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid, IconButton, Paper, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -29,13 +29,18 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { Link } from "react-router-dom";
 import { getSearchQuery } from "../../services/util";
 import { AiFillPlusCircle } from "react-icons/ai";
+import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -52,6 +57,7 @@ import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from "./EmailDialog";
+
 import { BsPlusCircle } from "react-icons/bs";
 
 import { cloneDeep } from "lodash";
@@ -74,6 +80,42 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+
+const Accordion = withStyles({
+  root: {
+    border: "1px solid rgba(0, 0, 0, .125)",
+    "&:not(:last-child)": {
+      borderBottom: 0,
+    },
+    "&:before": {
+      display: "none",
+    },
+    "&$expanded": {
+      margin: "auto",
+    },
+  },
+  expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
+    "&$expanded": {
+      minHeight: 46,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -263,24 +305,25 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
-  const [gridApi, setGridApi] = useState(null);
+  const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
       headerName: "Name",
-      show: true,
-      disabled: true,
       cellRenderer: "nameRenderer",
     },
   ]);
+  const [expandQuote, setExpandQuote] = useState(false);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
-  // const [loadingTNC, setLoadingTNC] = useState(false);
+
   const [isCloning, setCloning] = useState(false);
   const [quoteData, setQuoteData] = useState(null);
+  const [pdfFileBase64, setPdfFileBase64] = useState(null);
+  const [excelFileBase64, setExcelFileBase64] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [quoteFields, setquoteFields] = useState([]);
@@ -347,10 +390,8 @@ function QuoteDetail() {
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
 
-  const [data, setData] = useState([]);
+  const [dataTNC, setDataTNC] = useState([]);
 
-  const [rowCount, setRowCount] = useState(0);
-  const [checkAllAccounts, setCheckAllAccounts] = useState(false);
   const [editRecord, setEditRecord] = useState<any>({});
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
@@ -419,21 +460,6 @@ function QuoteDetail() {
   useEffect(() => {
     fetchTermsAndConditions();
   }, [query, searchVal, currentVersion]);
-
-  useEffect(() => {
-    let rows = data?.map((u) => ({
-      ...u,
-      isChecked: TandC.includes(u._id) ? true : false,
-      id: u._id,
-    }));
-    setDataRows([...rows]);
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].isChecked) {
-        setRadioIndex(i);
-        break;
-      }
-    }
-  }, [data, currentVersion]);
 
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
@@ -607,7 +633,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -637,9 +663,12 @@ function QuoteDetail() {
       title={params.value}
       onClick={() => {
         setShowCreateDialog(true);
-        const data = dataRowsTNC.find((d) => d.id === params.data.id);
-
-        setEditRecord(data);
+        const data = dataTNC.find((d) => d._id === params.data.id);
+        console.log(dataRowsTNC);
+        console.log(data);
+        if (data) {
+          setEditRecord(data);
+        }
       }}
     >
       {params.value}
@@ -660,8 +689,8 @@ function QuoteDetail() {
     axiosInstance()
       .get(termsAndCondition.api)
       .then(({ data: { data, count } }) => {
+        setDataTNC(data);
         let rows = data.map((tnc) => ({
-          ...tnc,
           id: tnc._id,
           name: tnc.TACName,
         }));
@@ -903,7 +932,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale}`,
+          content: `Quote Total : ${totalsale.fullFormatAmount}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
@@ -927,7 +956,6 @@ function QuoteDetail() {
       let finalmarkup = "";
 
       selectedRecords.forEach((selectTNC) => {
-        console.log(selectTNC);
         finalmarkup =
           finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
         let state = convertFromRaw(JSON.parse(selectTNC.description));
@@ -945,12 +973,7 @@ function QuoteDetail() {
               title: `Quotation - v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
-            var reader = new FileReader();
-            reader.readAsDataURL(pdfBlobFile);
-            reader.onloadend = function () {
-              var base64data = reader.result;
-              console.log(base64data);
-            };
+            generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
@@ -985,19 +1008,15 @@ function QuoteDetail() {
           title: `Quotation - ${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
-        var reader = new FileReader();
-        reader.readAsDataURL(pdfBlobFile);
-        reader.onloadend = function () {
-          var base64data = reader.result;
-          console.log(base64data);
-        };
+        generateBase64forFile(pdfBlobFile, "pdf");
+
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
-
+        generateBase64forFile(PDFtoAPIData, "pdf");
         const formdata = new FormData();
         formdata.append("file", PDFtoAPIData, "Quotation.pdf");
         axiosInstance()
@@ -1014,6 +1033,21 @@ function QuoteDetail() {
           });
       }
     }
+  };
+
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data = reader.result;
+      if (type === "pdf") {
+        setPdfFileBase64(base64data);
+      }
+
+      if (type === "excel") {
+        setExcelFileBase64(base64data);
+      }
+    };
   };
 
   const handlePage = (params) => {
@@ -1082,7 +1116,7 @@ function QuoteDetail() {
     }
   }, [steps]);
 
-  const exportToCSV = () => {
+  const exportToCSV = (send = false) => {
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
@@ -1100,7 +1134,7 @@ function QuoteDetail() {
 
       newTable.push({
         "Product Name": "Total",
-        "Total Sales Price": totalcost,
+        "Total Sales Price": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1110,7 +1144,15 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(data, `Quotation - v${currentVersion}` + fileExtension);
+
+      if (send) {
+        generateBase64forFile(data, "excel");
+      } else {
+        FileSaver.saveAs(
+          data,
+          `Quotation - v${currentVersion}` + fileExtension
+        );
+      }
     }
   };
 
@@ -1489,8 +1531,6 @@ function QuoteDetail() {
   const handleCases = () => {
     if (DOAreq) {
       if (!PDF) {
-        createImagePDF(false, true);
-
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
           .then(({ data }) => {
@@ -1503,15 +1543,14 @@ function QuoteDetail() {
       }
     }
     if (Customerreq) {
+      createImagePDF(false, true);
+
+      exportToCSV(true);
       if (!PDF) {
         createImagePDF(false, true);
       }
       setSendEmail(true);
     }
-  };
-
-  const sendEmailOnNext = () => {
-    setSendEmail(true);
   };
 
   const handleChangeVisible = (event) => {
@@ -1533,7 +1572,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        data
+        dataTNC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1554,7 +1593,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1679,9 +1718,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1704,7 +1743,39 @@ function QuoteDetail() {
               ) : (
                 <>
                   {quoteData && (
-                    <DetailsPage data={quoteData} fields={quoteFields} />
+                    <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
+                      <AccordionSummary
+                        aria-controls="user-panel-content"
+                        id="user-panel-header"
+                      >
+                        <Grid container>
+                          <Box
+                            component="div"
+                            display="flex"
+                            alignItems="center"
+                            flexGrow={1}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={() => setExpandQuote(!expandQuote)} >
+                              {
+                                expandQuote === true ? (
+                                  <ExpandLessIcon />
+                                ) : (
+                                  <ExpandMoreIcon />
+                                )
+                              }
+                            </IconButton>
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                Quotes Information
+                            </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </AccordionSummary>
+                      <DetailsPage data={quoteData} fields={quoteFields} />
+                    </Accordion>
                   )}
                 </>
               )}
@@ -1964,9 +2035,9 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                      (ProcessStatus === "Send To Customer" &&
-                        versionStatus !== "Sent to Customer") ? (
-                        <div className="w-100 d-flex align-items-center justify-content-end">
+                        (ProcessStatus === "Send To Customer" &&
+                          versionStatus !== "Sent to Customer") ? (
+                        <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
                             disabled={!DOAreq && !Customerreq}
@@ -1981,7 +2052,7 @@ function QuoteDetail() {
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
-                    ProcessStatus !== "Price Builder" ? (
+                      ProcessStatus !== "Price Builder" ? (
                       <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
@@ -2009,7 +2080,7 @@ function QuoteDetail() {
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
                       {ProcessStatus === "Quote Builder" &&
-                      visibleColumns.length > 0 ? (
+                        visibleColumns.length > 0 ? (
                         <ProductGrid
                           productBuilderId={productBuilderID}
                           refreshProducts={refreshProducts}
@@ -2028,35 +2099,37 @@ function QuoteDetail() {
                           stage={ProcessStatus === "New" ? "product" : "cost"}
                           Editable={
                             ProcessStatus === "Price Builder" ||
-                            ProcessStatus === "New"
+                              ProcessStatus === "New"
                               ? true
                               : false
                           }
                         />
                       )}
                       {ProcessStatus === "Quote Builder" ? (
-                        <Box className="m-3 position-relative">
-                          <h4
-                            className="form-label-style"
-                            title="Add Terms & Conditions"
-                          >
-                            Terms & Conditions
+                        <Box className="m-3">
+                          <div className="position-relative">
+                            <h4
+                              className="form-label-style"
+                              title="Add Terms & Conditions"
+                            >
+                              Terms & Conditions
                           </h4>
-                          <Button
-                            onClick={() => setShowCreateDialog(true)}
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                            className={classes.termsBtn}
-                            startIcon={<AddIcon />}
-                          >
-                            Add Terms & Conditions
+                            <Button
+                              onClick={() => setShowCreateDialog(true)}
+                              variant="contained"
+                              size="small"
+                              color="primary"
+                              className={classes.termsBtn}
+                              startIcon={<AddIcon />}
+                            >
+                              Add Terms & Conditions
                           </Button>
+                          </div>
                           <CustomAgGrid
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
                             frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
+                            setGridApi={setTNCGridApi}
                             dispatch={dispatch}
                             rowCount={rowCountTNC}
                             limit={limit}
@@ -2065,6 +2138,7 @@ function QuoteDetail() {
                             actionWidth={150}
                             allowSelection={true}
                             allowAction={false}
+                            isClientSideGrid={true}
                           />
                         </Box>
                       ) : null}
@@ -2103,7 +2177,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2148,7 +2222,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            // qbApi={qbApi}
+          // qbApi={qbApi}
           />
         )}
 
@@ -2168,6 +2242,19 @@ function QuoteDetail() {
             id={id}
             version={currentVersion}
             account={quoteData.customerAccountName}
+            attachments={[
+              {
+                base64: pdfFileBase64,
+                contentType:
+                  pdfFileBase64 && pdfFileBase64.split(";")[0].split(":")[1],
+              },
+              {
+                base64: excelFileBase64,
+                contentType:
+                  excelFileBase64 &&
+                  excelFileBase64.split(";")[0].split(":")[1],
+              },
+            ]}
           />
         )}
 
