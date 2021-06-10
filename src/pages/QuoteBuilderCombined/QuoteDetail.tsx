@@ -2191,7 +2191,7 @@ function QuoteDetail() {
                 base64: excelFileBase64,
                 contentType:
                   excelFileBase64 &&
-                  excelFileBase64.split(".")[0].split(":")[1],
+                  excelFileBase64.split(";")[0].split(":")[1],
               },
             ]}
           />
