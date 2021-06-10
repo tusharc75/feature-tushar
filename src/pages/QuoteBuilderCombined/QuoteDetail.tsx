@@ -52,7 +52,7 @@ import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from "./EmailDialog";
-import { BsPlusCircle } from 'react-icons/bs';
+import { BsPlusCircle } from "react-icons/bs";
 
 import { cloneDeep } from "lodash";
 import {
@@ -182,19 +182,19 @@ const useStyles = makeStyles((theme) => ({
   },
   bgProduct: {
     background: "#ececec !important",
-    paddingBottom: "2px"
+    paddingBottom: "2px",
   },
   productInformation: {
     background: "white",
     margin: "9px",
     borderRadius: "3px",
-    border: "1px solid #d2cbcb"
+    border: "1px solid #d2cbcb",
   },
-  termsBtn:{
+  termsBtn: {
     position: "absolute",
     top: "-16px",
-    right: "0"
-  }
+    right: "0",
+  },
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -325,10 +325,22 @@ function QuoteDetail() {
   const [RadioIndex, setRadioIndex] = useState(-1);
   const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
-  const [totalProfit, setTotalProfit] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
-  const [totalcost, setTotalCost] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
-  const [totalsale, setTotalSale] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
-  const [totalmargin, setTotalMargin] = useState({ shortFormatAmount: "", fullFormatAmount: "" })
+  const [totalProfit, setTotalProfit] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
+  const [totalcost, setTotalCost] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
+  const [totalsale, setTotalSale] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
+  const [totalmargin, setTotalMargin] = useState({
+    shortFormatAmount: "",
+    fullFormatAmount: "",
+  });
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [ColumnName, setColName] = useState([]);
   const [visibleColumns, setVisibleColumnName] = useState([]);
@@ -430,7 +442,7 @@ function QuoteDetail() {
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setCustomizedRoutes([
-            { title: "Quote Builder", path: "/quote-builder" },
+            { title: "Quote", path: "/quote-builder" },
             { title: `${data.quoteName}` },
           ]);
 
@@ -439,7 +451,10 @@ function QuoteDetail() {
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
-          modifiedData["amount"] = formatAmountWithCurrency(data["currency"], data["amount"]).fullFormatAmount
+          modifiedData["amount"] = formatAmountWithCurrency(
+            data["currency"],
+            data["amount"]
+          ).fullFormatAmount;
           setQuoteData(modifiedData);
 
           handleContactsEmails(data);
@@ -592,7 +607,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -922,13 +937,22 @@ function QuoteDetail() {
       });
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+
       PdfDoc.html(finalmarkup, {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
               title: `Quotation - v${currentVersion}`,
             });
-            window.open(URL.createObjectURL(doc.output("blob")));
+            const pdfBlobFile = doc.output("blob");
+            var reader = new FileReader();
+            reader.readAsDataURL(pdfBlobFile);
+            reader.onloadend = function () {
+              var base64data = reader.result;
+              console.log(base64data);
+            };
+
+            window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
             doc.save(`Quotation - v${currentVersion}`);
           }
@@ -960,7 +984,14 @@ function QuoteDetail() {
         PdfDoc.setProperties({
           title: `Quotation - ${currentVersion}`,
         });
-        window.open(URL.createObjectURL(PdfDoc.output("blob")));
+        const pdfBlobFile = PdfDoc.output("blob");
+        var reader = new FileReader();
+        reader.readAsDataURL(pdfBlobFile);
+        reader.onloadend = function () {
+          var base64data = reader.result;
+          console.log(base64data);
+        };
+        window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
@@ -1067,6 +1098,11 @@ function QuoteDetail() {
         newTable.push(obj);
       });
 
+      newTable.push({
+        "Product Name": "Total",
+        "Total Sales Price": totalcost,
+      });
+
       const ws = XLSX.utils.json_to_sheet(newTable);
       const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
       const excelBuffer = XLSX.write(wb, {
@@ -1165,7 +1201,7 @@ function QuoteDetail() {
       });
   };
 
-  const handleDeleteOpportunity = () => {
+  const handleDeleteQuote = () => {
     if (quoteData?._id) {
       axiosInstance()
         .put(`${qbApi}/remove?entity=${selectedEntity}`, {
@@ -1191,7 +1227,7 @@ function QuoteDetail() {
 
   const goBackToListing = () => {
     history.push({
-      pathname: routes.opportunity.path,
+      pathname: "/quote-builder",
     });
   };
 
@@ -1343,10 +1379,21 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
-    setTotalProfit(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalProfit))
-    setTotalMargin(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalMargin))
-    setTotalSale(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalSellingPrice))
-    setTotalCost(formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalCost))
+    setTotalProfit(
+      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalProfit)
+    );
+    setTotalMargin(
+      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalMargin)
+    );
+    setTotalSale(
+      formatAmountWithCurrency(
+        copyOfquoteDataToUpdate.currency,
+        totalSellingPrice
+      )
+    );
+    setTotalCost(
+      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalCost)
+    );
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
     }
@@ -1462,6 +1509,11 @@ function QuoteDetail() {
       setSendEmail(true);
     }
   };
+
+  const sendEmailOnNext = () => {
+    setSendEmail(true);
+  };
+
   const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
     handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
@@ -1502,7 +1554,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1627,9 +1679,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1654,12 +1706,8 @@ function QuoteDetail() {
                   {quoteData && (
                     <DetailsPage data={quoteData} fields={quoteFields} />
                   )}
-
-
                 </>
               )}
-
-
             </Paper>
 
             <Paper className={classes.bgProduct}>
@@ -1683,7 +1731,6 @@ function QuoteDetail() {
                   md={6}
                   className="d-flex justify-content-end"
                 >
-
                   <select
                     className="customSelect mx-1"
                     value={currentVersion}
@@ -1724,8 +1771,7 @@ function QuoteDetail() {
                     type="button"
                     size="small"
                     disabled={
-                      allVersionStatusButtonText ===
-                      gettingVersionStatusText
+                      allVersionStatusButtonText === gettingVersionStatusText
                     }
                     startIcon={<InfoIcon />}
                     color="primary"
@@ -1761,7 +1807,6 @@ function QuoteDetail() {
                 )}
               </div>
               <div className={classes.productInformation}>
-
                 {ProcessStatus != "New" ? (
                   <Grid>
                     <Grid
@@ -1772,26 +1817,51 @@ function QuoteDetail() {
                       className="d-flex align-items-center gap-1 quotePanel"
                     >
                       <div className="quoteBox">
-                        <span className="quoteAmount" title={totalProfit.fullFormatAmount}>{totalProfit.shortFormatAmount}</span>
+                        <span
+                          className="quoteAmount"
+                          title={totalProfit.fullFormatAmount}
+                        >
+                          {totalProfit.shortFormatAmount}
+                        </span>
                         <span>Total Profit</span>
                       </div>
                       <div className="quoteBox">
-                        <span className="quoteAmount" title={totalcost.fullFormatAmount}>{totalcost.shortFormatAmount}</span>
+                        <span
+                          className="quoteAmount"
+                          title={totalcost.fullFormatAmount}
+                        >
+                          {totalcost.shortFormatAmount}
+                        </span>
                         <span>Total Cost Price</span>
                       </div>
                       {redCard ? (
                         <div className="redQuoteBox">
-                          <span className="quoteAmount" title={totalsale.fullFormatAmount}>{totalsale.shortFormatAmount}</span>
+                          <span
+                            className="quoteAmount"
+                            title={totalsale.fullFormatAmount}
+                          >
+                            {totalsale.shortFormatAmount}
+                          </span>
                           <span>Total Selling Price</span>
                         </div>
                       ) : (
                         <div className="quoteBox">
-                          <span className="quoteAmount" title={totalsale.fullFormatAmount}>{totalsale.shortFormatAmount}</span>
+                          <span
+                            className="quoteAmount"
+                            title={totalsale.fullFormatAmount}
+                          >
+                            {totalsale.shortFormatAmount}
+                          </span>
                           <span>Total Selling Price</span>
                         </div>
                       )}
                       <div className="quoteBox">
-                        <span className="quoteAmount" title={totalmargin.fullFormatAmount}>{totalmargin.shortFormatAmount}</span>
+                        <span
+                          className="quoteAmount"
+                          title={totalmargin.fullFormatAmount}
+                        >
+                          {totalmargin.shortFormatAmount}
+                        </span>
                         <span>Total Margin</span>
                       </div>
                       {/* <div className="quoteBox">
@@ -1894,8 +1964,8 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                        (ProcessStatus === "Customer Process" &&
-                          versionStatus !== "Sent to Customer") ? (
+                      (ProcessStatus === "Send To Customer" &&
+                        versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end">
                           <Button
                             onClick={() => handleCases()}
@@ -1911,7 +1981,7 @@ function QuoteDetail() {
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
-                      ProcessStatus !== "Price Builder" ? (
+                    ProcessStatus !== "Price Builder" ? (
                       <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
@@ -1939,7 +2009,7 @@ function QuoteDetail() {
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
                       {ProcessStatus === "Quote Builder" &&
-                        visibleColumns.length > 0 ? (
+                      visibleColumns.length > 0 ? (
                         <ProductGrid
                           productBuilderId={productBuilderID}
                           refreshProducts={refreshProducts}
@@ -1958,7 +2028,7 @@ function QuoteDetail() {
                           stage={ProcessStatus === "New" ? "product" : "cost"}
                           Editable={
                             ProcessStatus === "Price Builder" ||
-                              ProcessStatus === "New"
+                            ProcessStatus === "New"
                               ? true
                               : false
                           }
@@ -1966,7 +2036,12 @@ function QuoteDetail() {
                       )}
                       {ProcessStatus === "Quote Builder" ? (
                         <Box className="m-3 position-relative">
-                           <h4 className="form-label-style" title="Add Terms & Conditions">Terms & Conditions</h4>
+                          <h4
+                            className="form-label-style"
+                            title="Add Terms & Conditions"
+                          >
+                            Terms & Conditions
+                          </h4>
                           <Button
                             onClick={() => setShowCreateDialog(true)}
                             variant="contained"
@@ -1976,7 +2051,7 @@ function QuoteDetail() {
                             startIcon={<AddIcon />}
                           >
                             Add Terms & Conditions
-                                  </Button>
+                          </Button>
                           <CustomAgGrid
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
@@ -2028,7 +2103,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityfetchQuoteData={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2037,13 +2112,12 @@ function QuoteDetail() {
           </Grid>
         </Grid>
 
-
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this opportunity`}
+            message={`Are you sure you want to delete this Quote?`}
             onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteOpportunity}
+            onOk={handleDeleteQuote}
           />
         ) : null}
         {/* {openUpdateDialog ? (
@@ -2074,7 +2148,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-          // qbApi={qbApi}
+            // qbApi={qbApi}
           />
         )}
 
