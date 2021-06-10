@@ -65,7 +65,7 @@ const TermsAndCondition = ({
     useState(0);
 
   useEffect(() => {
-    if (editRecord && editRecord?.id) {
+    if (editRecord && editRecord?._id) {
       let state = convertFromRaw(JSON.parse(editRecord.description));
       setInitialValues({
         editorState: EditorState.createWithContent(state),
@@ -83,9 +83,9 @@ const TermsAndCondition = ({
       file: values?.file ?? "",
     };
     setLoading(true);
-    if (editRecord?.id) {
+    if (editRecord?._id) {
       axiosInstance()
-        .put(termsAndCondition.api, { ...request, _id: editRecord?.id })
+        .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -148,7 +148,7 @@ const TermsAndCondition = ({
       <CustomDialogHeader
         onClose={handleClose}
         title={`${
-          editRecord?.id
+          editRecord?._id
             ? `Edit ${editRecord?.TACName ?? ""}`
             : "Create Terms and Condition"
         }`}

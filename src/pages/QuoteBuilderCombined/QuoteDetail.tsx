@@ -6,7 +6,15 @@ import React, {
   useRef,
   useReducer,
 } from "react";
-import { Box, Button, CircularProgress, Grid, Paper } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Typography,
+} from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
@@ -29,13 +37,18 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { Link } from "react-router-dom";
 import { getSearchQuery } from "../../services/util";
 import { AiFillPlusCircle } from "react-icons/ai";
+import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -77,6 +90,41 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import Dialog from '@material-ui/core/Dialog';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
+
+const Accordion = withStyles({
+  root: {
+    border: "1px solid rgba(0, 0, 0, .125)",
+    "&:not(:last-child)": {
+      borderBottom: 0,
+    },
+    "&:before": {
+      display: "none",
+    },
+    "&$expanded": {
+      margin: "auto",
+    },
+  },
+  expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
+    "&$expanded": {
+      minHeight: 46,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -266,17 +314,16 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
-  const [gridApi, setGridApi] = useState(null);
+  const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
       headerName: "Name",
-      show: true,
-      disabled: true,
       cellRenderer: "nameRenderer",
     },
   ]);
+  const [expandQuote, setExpandQuote] = useState(false);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -352,9 +399,9 @@ function QuoteDetail() {
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
 
-  const [data, setData] = useState([]);
+  const [dataTNC, setDataTNC] = useState([]);
 
-  const [editRecord, setEditRecord] = useState<any>({});
+  const [editRecord, setEditRecord] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [sendEmail, setSendEmail] = useState(false);
@@ -423,21 +470,6 @@ function QuoteDetail() {
   useEffect(() => {
     fetchTermsAndConditions();
   }, [query, searchVal, currentVersion]);
-
-  useEffect(() => {
-    let rows = data?.map((u) => ({
-      ...u,
-      isChecked: TandC.includes(u._id) ? true : false,
-      id: u._id,
-    }));
-    setDataRows([...rows]);
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].isChecked) {
-        setRadioIndex(i);
-        break;
-      }
-    }
-  }, [data, currentVersion]);
 
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
@@ -642,12 +674,9 @@ function QuoteDetail() {
       title={params.value}
       onClick={() => {
         setShowCreateDialog(true);
-        const data = dataRowsTNC.find((d) => d.id === params.data.id);
-        console.log(dataRowsTNC);
-        console.log(data);
-        if (data) {
-          setEditRecord(data);
-        }
+        const data = dataTNC.find((d) => d._id === params.data.id);
+
+        setEditRecord(data);
       }}
     >
       {params.value}
@@ -668,6 +697,7 @@ function QuoteDetail() {
     axiosInstance()
       .get(termsAndCondition.api)
       .then(({ data: { data, count } }) => {
+        setDataTNC(data);
         let rows = data.map((tnc) => ({
           ...tnc,
           id: tnc._id,
@@ -861,11 +891,12 @@ function QuoteDetail() {
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
-    PdfDoc.setFontSize(14);
-    PdfDoc.text(companyAddress, 20, 45);
+    PdfDoc.setFontSize(12);
+    PdfDoc.text(companyAddress, 20, 50);
     PdfDoc.setLineWidth(3);
     PdfDoc.line(15, 70, 260, 70);
     PdfDoc.line(330, 70, 580, 70);
+    PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     var PDFData = [];
     var PdfCol = ["S. No."];
@@ -937,6 +968,7 @@ function QuoteDetail() {
         },
       ],
     ];
+
     autoTable(PdfDoc, {
       margin: { top: 140 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -945,6 +977,19 @@ function QuoteDetail() {
       theme: "grid",
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
+
+    finalY = finalY + 40;
+    PdfDoc.setFontSize(10);
+    PdfDoc.text("Note:", 20, finalY);
+
+    finalY = finalY + 15;
+    PdfDoc.text("Thanks for your business", 20, finalY);
+
+    finalY = finalY + 50;
+    PdfDoc.text("Customer Signature", 20, finalY);
+
+    finalY = finalY + 75;
+    PdfDoc.line(15, finalY, 260, finalY);
 
     if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
@@ -1063,7 +1108,7 @@ function QuoteDetail() {
 
   const handleCloseCreateDialog = (params) => {
     setShowCreateDialog(false);
-    setEditRecord({});
+    setEditRecord(null);
     if (params?.fetchData) fetchTermsAndConditions();
   };
 
@@ -1530,10 +1575,6 @@ function QuoteDetail() {
   const handleCases = () => {
     if (DOAreq) {
       if (!PDF) {
-        createImagePDF(false, true);
-
-        exportToCSV(true);
-
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
           .then(({ data }) => {
@@ -1546,15 +1587,14 @@ function QuoteDetail() {
       }
     }
     if (Customerreq) {
+      createImagePDF(false, true);
+
+      exportToCSV(true);
       if (!PDF) {
         createImagePDF(false, true);
       }
       setSendEmail(true);
     }
-  };
-
-  const sendEmailOnNext = () => {
-    setSendEmail(true);
   };
 
   const handleChangeVisible = (event) => {
@@ -1576,7 +1616,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        data
+        dataTNC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1761,7 +1801,41 @@ function QuoteDetail() {
               ) : (
                 <>
                   {quoteData && (
-                    <DetailsPage data={quoteData} fields={quoteFields} />
+                    <Accordion
+                      expanded={expandQuote}
+                      className="omsAccordian accordQuotes"
+                    >
+                      <AccordionSummary
+                        aria-controls="user-panel-content"
+                        id="user-panel-header"
+                      >
+                        <Grid container>
+                          <Box
+                            component="div"
+                            display="flex"
+                            alignItems="center"
+                            flexGrow={1}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={() => setExpandQuote(!expandQuote)}
+                            >
+                              {expandQuote === true ? (
+                                <ExpandLessIcon />
+                              ) : (
+                                <ExpandMoreIcon />
+                              )}
+                            </IconButton>
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                Quotes Information
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </AccordionSummary>
+                      <DetailsPage data={quoteData} fields={quoteFields} />
+                    </Accordion>
                   )}
                 </>
               )}
@@ -2092,28 +2166,30 @@ function QuoteDetail() {
                         />
                       )}
                       {ProcessStatus === "Quote Builder" ? (
-                        <Box className="m-3 position-relative">
-                          <h4
-                            className="form-label-style"
-                            title="Add Terms & Conditions"
-                          >
-                            Terms & Conditions
-                          </h4>
-                          <Button
-                            onClick={() => setShowCreateDialog(true)}
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                            className={classes.termsBtn}
-                            startIcon={<AddIcon />}
-                          >
-                            Add Terms & Conditions
-                          </Button>
+                        <Box className="m-3">
+                          <div className="position-relative">
+                            <h4
+                              className="form-label-style"
+                              title="Add Terms & Conditions"
+                            >
+                              Terms & Conditions
+                            </h4>
+                            <Button
+                              onClick={() => setShowCreateDialog(true)}
+                              variant="contained"
+                              size="small"
+                              color="primary"
+                              className={classes.termsBtn}
+                              startIcon={<AddIcon />}
+                            >
+                              Add Terms & Conditions
+                            </Button>
+                          </div>
                           <CustomAgGrid
                             columns={columnsTNC}
                             dataRows={dataRowsTNC}
                             frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
+                            setGridApi={setTNCGridApi}
                             dispatch={dispatch}
                             rowCount={rowCountTNC}
                             limit={limit}
@@ -2122,6 +2198,7 @@ function QuoteDetail() {
                             actionWidth={150}
                             allowSelection={true}
                             allowAction={false}
+                            isClientSideGrid={true}
                           />
                         </Box>
                       ) : null}
@@ -2209,7 +2286,7 @@ function QuoteDetail() {
           />
         )}
 
-        {showCreateDialog ? (
+        {showCreateDialog && editRecord ? (
           <ManageTermsAndCondition
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}

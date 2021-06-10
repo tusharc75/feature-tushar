@@ -38,6 +38,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ManageContactDialog from "../../Contact/ManageContact";
+import { isMobile, isTablet } from "react-device-detect";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -427,6 +428,8 @@ export default function ManageQuoteDialog({
         onClose={onClose}
         open={open}
         disableBackdropClick={true}
+        fullWidth
+        fullScreen={isMobile || isTablet}
       >
         <CustomDialogHeader
           title={isNew ? "Create Quote" : `Editing ${dataToUpdate.quoteName}`}
@@ -602,11 +605,12 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={customerContactDataSource}
+                                            doNotShowInfoTooltip={true}
                                             setFieldValue={setFieldValue}
                                             disabled={contactId ? true : false}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={true}
+                                            isTooltip={false}
                                             size="small"
                                             onOpen={() =>
                                               onCustomerContactDropdownOpen(

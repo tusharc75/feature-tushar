@@ -420,7 +420,16 @@ const FormTypes = (props) => {
                 setFieldValue(_fieldName, calValue);
                 alredyDone[_fieldName] = calValue;
                 handleFormula(_fieldName, calValue, alredyDone);
-                if (_data.displayCurrency && _data.displayCurrency.length) {
+                if (_data.displayCurrency && _data.displayCurrency.length && _data.displayUnits && _data.displayUnits.length) {
+                  handleCurrencyConverter(
+                    _data,
+                    _data.fieldName,
+                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
+                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
+                    calValue
+                  )
+                }
+                else if (_data.displayCurrency && _data.displayCurrency.length) {
                   handleCurrency(
                     _data,
                     _data.fieldName,
@@ -428,7 +437,7 @@ const FormTypes = (props) => {
                     calValue
                   );
                 }
-                if (_data.displayUnits && _data.displayUnits.length) {
+                else if (_data.displayUnits && _data.displayUnits.length) {
                   handleConverter(
                     _data,
                     _data.fieldName,
