@@ -981,6 +981,7 @@ function QuoteDetail() {
         let state = convertFromRaw(JSON.parse(selectTNC.description));
         let TNC = EditorState.createWithContent(state);
         let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+
         finalmarkup = finalmarkup + markup + "<br>";
       });
 
