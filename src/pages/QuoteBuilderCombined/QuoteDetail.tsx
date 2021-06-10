@@ -1090,7 +1090,7 @@ function QuoteDetail() {
     }
   }, [steps]);
 
-  const exportToCSV = () => {
+  const exportToCSV = (send = false) => {
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
@@ -1118,8 +1118,15 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-      generateBase64forFile(data, "excel");
-      FileSaver.saveAs(data, `Quotation - v${currentVersion}` + fileExtension);
+
+      if (send) {
+        generateBase64forFile(data, "excel");
+      } else {
+        FileSaver.saveAs(
+          data,
+          `Quotation - v${currentVersion}` + fileExtension
+        );
+      }
     }
   };
 
@@ -1499,6 +1506,8 @@ function QuoteDetail() {
     if (DOAreq) {
       if (!PDF) {
         createImagePDF(false, true);
+
+        exportToCSV(true);
 
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
@@ -2177,6 +2186,16 @@ function QuoteDetail() {
             id={id}
             version={currentVersion}
             account={quoteData.customerAccountName}
+            attachments={[
+              {
+                base64: pdfFileBase64,
+                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+              },
+              {
+                base64: excelFileBase64,
+                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+              },
+            ]}
           />
         )}
 
