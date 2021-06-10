@@ -278,9 +278,11 @@ function QuoteDetail() {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
-  // const [loadingTNC, setLoadingTNC] = useState(false);
+
   const [isCloning, setCloning] = useState(false);
   const [quoteData, setQuoteData] = useState(null);
+  const [pdfFileBase64, setPdfFileBase64] = useState(null);
+  const [excelFileBase64, setExcelFileBase64] = useState(null);
   const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [quoteFields, setquoteFields] = useState([]);
@@ -349,8 +351,6 @@ function QuoteDetail() {
 
   const [data, setData] = useState([]);
 
-  const [rowCount, setRowCount] = useState(0);
-  const [checkAllAccounts, setCheckAllAccounts] = useState(false);
   const [editRecord, setEditRecord] = useState<any>({});
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
@@ -638,8 +638,11 @@ function QuoteDetail() {
       onClick={() => {
         setShowCreateDialog(true);
         const data = dataRowsTNC.find((d) => d.id === params.data.id);
-
-        setEditRecord(data);
+        console.log(dataRowsTNC);
+        console.log(data);
+        if (data) {
+          setEditRecord(data);
+        }
       }}
     >
       {params.value}
@@ -903,7 +906,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale}`,
+          content: `Quote Total : ${totalsale.fullFormatAmount}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
@@ -927,7 +930,6 @@ function QuoteDetail() {
       let finalmarkup = "";
 
       selectedRecords.forEach((selectTNC) => {
-        console.log(selectTNC);
         finalmarkup =
           finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
         let state = convertFromRaw(JSON.parse(selectTNC.description));
@@ -945,12 +947,7 @@ function QuoteDetail() {
               title: `Quotation - v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
-            var reader = new FileReader();
-            reader.readAsDataURL(pdfBlobFile);
-            reader.onloadend = function () {
-              var base64data = reader.result;
-              console.log(base64data);
-            };
+            generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
@@ -985,19 +982,15 @@ function QuoteDetail() {
           title: `Quotation - ${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
-        var reader = new FileReader();
-        reader.readAsDataURL(pdfBlobFile);
-        reader.onloadend = function () {
-          var base64data = reader.result;
-          console.log(base64data);
-        };
+        generateBase64forFile(pdfBlobFile, "pdf");
+
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
-
+        generateBase64forFile(PDFtoAPIData, "pdf");
         const formdata = new FormData();
         formdata.append("file", PDFtoAPIData, "Quotation.pdf");
         axiosInstance()
@@ -1014,6 +1007,21 @@ function QuoteDetail() {
           });
       }
     }
+  };
+
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data = reader.result;
+      if (type === "pdf") {
+        setPdfFileBase64(base64data);
+      }
+
+      if (type === "excel") {
+        setExcelFileBase64(base64data);
+      }
+    };
   };
 
   const handlePage = (params) => {
@@ -1082,7 +1090,7 @@ function QuoteDetail() {
     }
   }, [steps]);
 
-  const exportToCSV = () => {
+  const exportToCSV = (send = false) => {
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
@@ -1100,7 +1108,7 @@ function QuoteDetail() {
 
       newTable.push({
         "Product Name": "Total",
-        "Total Sales Price": totalcost,
+        "Total Sales Price": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1110,7 +1118,15 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(data, `Quotation - v${currentVersion}` + fileExtension);
+
+      if (send) {
+        generateBase64forFile(data, "excel");
+      } else {
+        FileSaver.saveAs(
+          data,
+          `Quotation - v${currentVersion}` + fileExtension
+        );
+      }
     }
   };
 
@@ -1490,6 +1506,8 @@ function QuoteDetail() {
     if (DOAreq) {
       if (!PDF) {
         createImagePDF(false, true);
+
+        exportToCSV(true);
 
         axiosInstance()
           .post(`/doa-request/create/${id}?version=${currentVersion}`)
@@ -1966,7 +1984,7 @@ function QuoteDetail() {
                         versionStatus === "Building Quote") ||
                       (ProcessStatus === "Send To Customer" &&
                         versionStatus !== "Sent to Customer") ? (
-                        <div className="w-100 d-flex align-items-center justify-content-end">
+                        <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
                             disabled={!DOAreq && !Customerreq}
@@ -2168,6 +2186,16 @@ function QuoteDetail() {
             id={id}
             version={currentVersion}
             account={quoteData.customerAccountName}
+            attachments={[
+              {
+                base64: pdfFileBase64,
+                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+              },
+              {
+                base64: excelFileBase64,
+                contentType: pdfFileBase64.split(";")[0].split(":")[1],
+              },
+            ]}
           />
         )}
 
