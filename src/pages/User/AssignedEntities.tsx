@@ -109,7 +109,7 @@ export default function AssignedEntities({
   };
   const getRoleUnion = () => {
     axiosInstance()
-      .get(`/user/entity-union-role/?userId=${userId}&entityId=${currentEntity?.entity._id}`)
+      .get(`/user/entity-union-role/?userId=${userId}&entityId=${currentEntity?.entity?._id}`)
       .then(({ data: { data } }) => {
         setUnionRoleData(data);
       })
