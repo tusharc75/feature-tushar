@@ -34,6 +34,7 @@ export const validations = {
 //  1048576 = 1 MB
 export const imageUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
 export const documentUploadMaxSize = { size: 1048576 * 10, text: "10 MB" };
+export const termsAndConditionDocumentUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";

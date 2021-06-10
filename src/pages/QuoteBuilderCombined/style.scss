@@ -21,3 +21,13 @@
   top: 14px;
   right: 14px;
 }
+.currentStepColor {
+  & .MuiStepLabel-iconContainer{
+    color: #0e7723 !important;
+    opacity: 1;
+  }
+  & .MuiStepLabel-label{
+    color: #0e7723 !important;
+    font-weight: 600 !important;
+  }
+}
