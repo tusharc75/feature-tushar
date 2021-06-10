@@ -25,8 +25,7 @@ import { ImHourGlass } from "react-icons/im";
 import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
-import { FaHourglassHalf } from 'react-icons/fa';
-
+import { FaHourglassHalf } from "react-icons/fa";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -101,19 +100,27 @@ const useColorlibStepIconStyles = makeStyles({
     alignItems: "center",
   },
   active: {
-    color: "#047d1c !important"  
+    color: "#047d1c !important",
   },
   completed: {
-    color: "#3f3f02 !important"
+    color: "#3f3f02 !important",
   },
   rejected: {
-    color: "#b3a6a6 !important"
+    color: "#b3a6a6 !important",
   },
 });
 
 const Steps = (props) => {
-  const { steps, currentStep, id, version, Refresh, nextStep, versionStatus } =
-    props;
+  const {
+    steps,
+    currentStep,
+    id,
+    version,
+    Refresh,
+    nextStep,
+    versionStatus,
+    loading,
+  } = props;
   const classes = useStyles();
   var activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
@@ -184,7 +191,7 @@ const Steps = (props) => {
       3: <BsCheckCircle size={20} />,
       4: <AiOutlineCloseCircle size={20} />,
       5: <FaHourglassHalf size={20} />,
-        };
+    };
 
     return (
       <div
@@ -240,7 +247,7 @@ const Steps = (props) => {
               <Typography className={classes.sent}>DOA Sent</Typography>
             </div>
           )}
-          {versionStatus.split(" ")[0] === "Accepted" && (
+          {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
             <div className="d-flex align-items-center justify-content-center flex-column m-3">
               <FcApproval size={30} />
               <Typography className={classes.approved}>
@@ -248,11 +255,35 @@ const Steps = (props) => {
               </Typography>
             </div>
           )}
-          {versionStatus.split(" ")[0] === "Rejected" && (
+          {versionStatus.split(" (")[0] === "Rejected by DOA" && (
             <div className="d-flex align-items-center justify-content-center flex-column m-3">
               <FcCancel size={30} />
               <Typography className={classes.rejected}>
                 Rejected by DOA
+              </Typography>
+            </div>
+          )}
+          {versionStatus === "Sent to Customer" && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcClock size={30} />
+              <Typography className={classes.sent}>
+                Quote Sent To Customer
+              </Typography>
+            </div>
+          )}
+          {versionStatus.includes("Accepted by Customer") && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcApproval size={30} />
+              <Typography className={classes.approved}>
+                Approved by Customer
+              </Typography>
+            </div>
+          )}
+          {versionStatus.includes("Rejected by Customer") && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcCancel size={30} />
+              <Typography className={classes.rejected}>
+                Rejected by Customer
               </Typography>
             </div>
           )}
@@ -270,6 +301,7 @@ const Steps = (props) => {
                     color="primary"
                     className="mr-1"
                     onClick={handleBack}
+                    disabled={loading}
                     size="small"
                     startIcon={<IoIosArrowDropleftCircle />}
                   >
@@ -278,18 +310,25 @@ const Steps = (props) => {
                 ) : null}
 
                 {/* <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} /> */}
-                {versionStatus.split(" ")[0] != "Rejected" ?
+                {versionStatus.split(" ")[0] != "Rejected" ? (
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={handleNext}
                     size="small"
-                    disabled={nextStep ? false : true}
+                    disabled={
+                      loading ||
+                      !nextStep ||
+                      versionStatus.includes("Accepted  by DOA") ||
+                      versionStatus.includes("Sent to Customer")
+                    }
                     endIcon={<IoIosArrowDroprightCircle />}
                   >
                     {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                  </Button> : null
-                }
+                  </Button>
+                ) : (
+                  <p>{versionStatus}</p>
+                )}
               </div>
             </div>
           </>
@@ -297,22 +336,22 @@ const Steps = (props) => {
         <div className={classes.pStepper}>
           <Stepper activeStep={activeStep}>
             {steps.map((label, i) => (
-                <Step
-                  key={label}
-                  className={clsx(classes.step, {
-                    [classes.active]: currentStep > i,
-                    [classes.currentStep]: currentStep == i,
-                    [classes.inActive]: currentStep !== i,
-                  })}
+              <Step
+                key={label}
+                className={clsx(classes.step, {
+                  [classes.active]:
+                    currentStep > i || steps[currentStep] === "End",
+                  [classes.currentStep]: currentStep == i,
+                  [classes.inActive]: currentStep !== i,
+                })}
+              >
+                <StepLabel
+                  StepIconComponent={ColorlibStepIcon}
+                  className={currentStep === i ? "currentStepColor" : null}
                 >
-                  <StepLabel
-                    StepIconComponent={ColorlibStepIcon}
-                    className={
-                      currentStep == i ? "currentStepColor" : null
-                    }>
-                    {label}
-                  </StepLabel>
-                </Step>
+                  {label}
+                </StepLabel>
+              </Step>
             ))}
           </Stepper>
         </div>
