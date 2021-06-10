@@ -189,7 +189,7 @@ const Steps = (props) => {
       1: <GiBackwardTime size={20} />,
       2: <GoPencil size={20} />,
       3: <BsCheckCircle size={20} />,
-      4: <AiOutlineCloseCircle size={20} />,
+      4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
       5: <FaHourglassHalf size={20} />,
     };
 
