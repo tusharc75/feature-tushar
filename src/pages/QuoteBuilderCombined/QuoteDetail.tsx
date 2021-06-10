@@ -695,6 +695,7 @@ function QuoteDetail() {
       .then(({ data: { data, count } }) => {
         setDataTNC(data);
         let rows = data.map((tnc) => ({
+          ...tnc,
           id: tnc._id,
           name: tnc.TACName,
         }));
