@@ -1726,7 +1726,7 @@ function QuoteDetail() {
       contentType: excelFileBase64.split(";")[0].split(":")[1],
     });
   }
-
+  if(ProcessStatus !== "Quote Builder" && currentTabIndex === 1) setCurrentTabIndex(0);
   return (
     <>
     {console.log(ProcessStatus)}
@@ -2031,12 +2031,11 @@ function QuoteDetail() {
                         aria-controls="a11y-tabpanel-0"
                         id="a11y-tab-0"
                       />
-                      <Tab
-                        disabled={ProcessStatus !== "Quote Builder"}
+                      {ProcessStatus === "Quote Builder" && <Tab
                         label="Terms & Conditions"
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
-                      />
+                      />}
                       
                     </Tabs>
                     </>
