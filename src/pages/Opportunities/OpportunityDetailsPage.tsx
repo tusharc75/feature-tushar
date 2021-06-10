@@ -323,7 +323,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount).fullFormatAmount : "";
+    mainPoint["Estimated Amount"] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
     setMainPoints(mainPoint);
   };

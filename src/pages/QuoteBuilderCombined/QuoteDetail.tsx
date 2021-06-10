@@ -489,9 +489,9 @@ function QuoteDetail() {
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
-          modifiedData["amount"] = formatAmountWithCurrency(
+          modifiedData["estimatedAmount"] = formatAmountWithCurrency(
             data["currency"],
-            data["amount"]
+            data["estimatedAmount"]
           ).fullFormatAmount;
           setQuoteData(modifiedData);
           fetchUserEmails(modifiedData);
@@ -612,8 +612,8 @@ function QuoteDetail() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data?.amount
-      ? formatAmountWithCurrency(data?.currency, data?.amount).fullFormatAmount
+    mainPoint["Estimated Amount"] = data?.estimatedAmount
+      ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
