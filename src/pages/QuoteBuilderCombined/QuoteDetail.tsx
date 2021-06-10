@@ -1966,7 +1966,7 @@ function QuoteDetail() {
                         versionStatus === "Building Quote") ||
                       (ProcessStatus === "Send To Customer" &&
                         versionStatus !== "Sent to Customer") ? (
-                        <div className="w-100 d-flex align-items-center justify-content-end">
+                        <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
                             disabled={!DOAreq && !Customerreq}
