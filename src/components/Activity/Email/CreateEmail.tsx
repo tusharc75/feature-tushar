@@ -395,7 +395,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         />
                                                         <Autocomplete
                                                             multiple
-                                                            options={options}
+                                                            options={options.filter(option => values.cc.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>
                                                                 value.map((option, index) => (
@@ -431,7 +431,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         />
                                                         <Autocomplete
                                                             multiple
-                                                            options={options}
+                                                            options={options.filter(option => values.to.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>
                                                                 value.map((option, index) => (
