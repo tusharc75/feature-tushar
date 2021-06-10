@@ -21,7 +21,7 @@ import {
   simplifyValues,
   customerAccount,
   customerContact,
-  getUniqueCurrencies
+  getUniqueCurrencies,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -33,7 +33,7 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import AddIcon from '@material-ui/icons/AddCircle'
+import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
@@ -269,8 +269,9 @@ export default function ManageQuoteDialog({
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
             setCurrencySymbol(
-              getUniqueCurrencies().find((d) => d.currencyCode === dataToUpdate["currency"])
-                ?.symbolNative
+              getUniqueCurrencies().find(
+                (d) => d.currencyCode === dataToUpdate["currency"]
+              )?.symbolNative
             );
           }
           if (isNew && userId && _f.fieldData.fieldName === "owner") {
@@ -428,9 +429,7 @@ export default function ManageQuoteDialog({
         disableBackdropClick={true}
       >
         <CustomDialogHeader
-          title={
-            isNew ? "Create Quote Builder" : `Editing ${dataToUpdate.quoteName}`
-          }
+          title={isNew ? "Create Quote" : `Editing ${dataToUpdate.quoteName}`}
           onClose={onClose}
         />
 
@@ -483,11 +482,11 @@ export default function ManageQuoteDialog({
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
-                                      // doNotShowInfoTooltip={true}
-                                      // onChange={(e, value) => {
-                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                      //   setFieldValue("customerContactName", [])
-                                      // }}
+                                        // doNotShowInfoTooltip={true}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        //   setFieldValue("customerContactName", [])
+                                        // }}
                                       />
                                     ) : field.fieldName ==
                                       "customerAccountName" ? (
@@ -495,17 +494,20 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.customerAccount.isCreate && !accountFieldDisable
+                                            permissions.customerAccount
+                                              .isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.customerAccount.isCreate && !accountFieldDisable
+                                            permissions.customerAccount
+                                              .isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.customerAccount.isCreate && !accountFieldDisable
+                                            permissions.customerAccount
+                                              .isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
@@ -611,10 +613,10 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                          // }}
+                                            // }}
                                           />
                                         </Grid>
                                         {permissions.customerContact.isCreate &&
@@ -654,17 +656,20 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.opportunity.isCreate && !isRenderedFromOpportunity
+                                            permissions.opportunity.isCreate &&
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.opportunity.isCreate && !isRenderedFromOpportunity
+                                            permissions.opportunity.isCreate &&
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.opportunity.isCreate && !isRenderedFromOpportunity
+                                            permissions.opportunity.isCreate &&
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
@@ -887,10 +892,10 @@ export default function ManageQuoteDialog({
                                             (s) => s === field.type
                                           )
                                             ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(
-                                                completePercentage
-                                              );
-                                            }
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
                                             : null
                                         }
                                       />
@@ -1021,9 +1026,9 @@ export default function ManageQuoteDialog({
                           entityData.fields
                         )
                       ).toString() ===
-                      Object.values(
-                        simplifyValues(values, entityData.fields)
-                      ).toString()
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                     }
                     onClick={(e) => {
                       e.preventDefault();
