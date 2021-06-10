@@ -442,7 +442,7 @@ function QuoteDetail() {
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setCustomizedRoutes([
-            { title: "Quote Builder", path: "/quote-builder" },
+            { title: "Quote", path: "/quote-builder" },
             { title: `${data.quoteName}` },
           ]);
 
@@ -1964,7 +1964,7 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                      (ProcessStatus === "Customer Process" &&
+                      (ProcessStatus === "Send To Customer" &&
                         versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end">
                           <Button
