@@ -170,7 +170,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         <>
             <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
-            <div className="ag-theme-material ag-grid-listing-grid">
+            <div className="ag-theme-material ag-grid-listing-grid" style={{zIndex:-500,position:'inherit'}}>
                 <AgGridReact
                     rowData={dataRows}
                     onGridReady={onGridReady}
@@ -271,6 +271,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 component="div"
                 count={rowCount}
                 page={page}
+                className="agPagination"
                 onChangePage={(event, newPage) => {
                     dispatch({ type: "pageChange", page: newPage });
 

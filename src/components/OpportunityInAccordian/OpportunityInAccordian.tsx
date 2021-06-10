@@ -286,8 +286,8 @@ export default function OpportunityInAccordian({
 
                               </Grid>
                               <Grid item xs={5} sm={4}>
-                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj["amount"]).fullFormatAmount}>
-                                  {formatAmountWithCurrency(obj["currency"], obj["amount"]).shortFormatAmount}
+                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj["amount"])?.fullFormatAmount}>
+                                  {formatAmountWithCurrency(obj["currency"], obj["amount"])?.shortFormatAmount}
                                 </Typography>
                               </Grid>
                             </Grid>
