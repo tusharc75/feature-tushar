@@ -142,6 +142,7 @@ const SelectionDialog = (props) => {
                                             options={productCategory}
                                             setFieldValue={setFieldValue}
                                             required={true}
+                                            doNotShowInfoTooltip={true}
                                             fullWidth
                                             onChange={(e, val) => {
                                                 setFieldValue("productCategory", val && val.optionValue ? val.optionValue : "")
