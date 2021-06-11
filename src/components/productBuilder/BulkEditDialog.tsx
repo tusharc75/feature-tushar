@@ -222,6 +222,7 @@ const BulkEditDialog = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    doNotShowInfoTooltip={true}
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
@@ -243,6 +244,7 @@ const BulkEditDialog = (props) => {
                                                                         fullWidth
                                                                         isTooltip={field.isTooltip}
                                                                         tooltipMessage={field.tooltipMessage}
+                                                                        doNotShowInfoTooltip={true}
                                                                         decimalPlaces={field.decimalPlaces}
                                                                         isvlookupReverse={field.isvlookupReverse}
                                                                         size="small"

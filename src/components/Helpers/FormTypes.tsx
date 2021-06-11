@@ -165,6 +165,8 @@ const FormTypes = (props) => {
     addDisplayType,
     ...rest
   } = props;
+  
+
 
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
@@ -989,7 +991,7 @@ const FormTypes = (props) => {
           <Grid key={_unit} item xs={12} sm={6} md={6}>
             <Box display="flex" >
               <Box flexGrow={1}  >
-                <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
                   <TextField
                     {...rest}
                     variant="outlined"
@@ -1077,9 +1079,10 @@ const FormTypes = (props) => {
               {i === 0 &&
                 <Box>
                   <Tooltip title="Add Currency" className="mt-1">
-                    <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
+                    {/* <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                       <ControlPointIcon />
-                    </IconButton>
+                    </IconButton> */}
+                    <></>
                   </Tooltip>
                   {isExtraDispayType &&
                     <AddDisplayTypeDialog
@@ -1095,7 +1098,7 @@ const FormTypes = (props) => {
         <Grid key={_currency} item xs={12} sm={6} md={6}>
           <Box display="flex" >
             <Box flexGrow={1}  >
-              <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
                 <TextField
                   {...rest}
                   variant="outlined"
@@ -1153,6 +1156,7 @@ const FormTypes = (props) => {
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                     <ControlPointIcon />
                   </IconButton>
+                  
                 </Tooltip>
                 {isExtraDispayType &&
                   <AddDisplayTypeDialog
