@@ -475,7 +475,7 @@ function QuoteDetail() {
           modifiedData["estimatedAmount"] = formatAmountWithCurrency(
             data["currency"],
             data["estimatedAmount"]
-          ).fullFormatAmount;
+          ).shortFormatAmount;
           setQuoteData(modifiedData);
           fetchUserEmails(modifiedData);
 
@@ -597,7 +597,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .fullFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
