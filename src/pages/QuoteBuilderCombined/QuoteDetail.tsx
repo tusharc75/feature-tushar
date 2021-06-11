@@ -315,6 +315,7 @@ function QuoteDetail() {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
+  const [deletingDOA, setDeletingDOA] = useState(false);
 
   const [isCloning, setCloning] = useState(false);
   const [quoteData, setQuoteData] = useState(null);
@@ -354,14 +355,12 @@ function QuoteDetail() {
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
   const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([]);
-  const [PBversionStatus, setPBversionStatus] = useState("");
   const [loadPB, setLoadPB] = useState(false);
 
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [query, setQuery] = useState({ page: 0, limit: 5 });
   const [TandC, setTNC] = useState([]);
-  const [searchVal, setSearchVal] = useState("");
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
@@ -456,6 +455,12 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, []);
 
+  /**
+   *
+   * @param version
+   * Fetch quote data with versions
+   *
+   */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
       setLoading(true);
@@ -672,6 +677,10 @@ function QuoteDetail() {
     nameRenderer: NameRenderer,
   };
 
+  /**
+   * @TNC HANDLER
+   */
+
   const fetchTermsAndConditions = () => {
     dispatch({ type: "loading", loadingTNC: true });
 
@@ -721,69 +730,6 @@ function QuoteDetail() {
     }
   };
 
-  // const columnsTNC = [
-  //   {
-  //     field: "isChecked",
-  //     headerName: "Select",
-  //     renderCell: (params) => (
-  //       <Checkbox
-  //         color="primary"
-  //         // disabled={!params.canDelete}
-  //         checked={params.value}
-  //         onClick={(ev) => {
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-  //           var prevvalue = gridData[indexOfRecord].isChecked;
-  //           let newTNC = TandC;
-  //           if (prevvalue) {
-  //             gridData[indexOfRecord].isChecked = false;
-  //             const index = newTNC.indexOf(gridData[indexOfRecord]._id);
-  //             newTNC.splice(index, 1);
-  //           } else {
-  //             gridData[indexOfRecord].isChecked = true;
-  //             newTNC.push(gridData[indexOfRecord]._id);
-  //             setRadioIndex(indexOfRecord);
-  //           }
-  //           if (newTNC.length === 0) {
-  //             setRadioIndex(-1);
-  //           }
-  //           setDataRows([...gridData]);
-  //           setTNC(newTNC);
-  //           handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
-
-  //           const checkedRecords = gridData.filter((d) => d.isChecked === true);
-  //         }}
-  //       />
-  //     ),
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     width: 75,
-  //   },
-  //   {
-  //     field: "TACName",
-  //     headerName: "Name",
-  //     width: 500,
-  //     renderCell: (params) => (
-  //       <Link
-  //         onClick={() => {
-  //           setShowCreateDialog(true);
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-
-  //           setEditRecordTNC(cloneDeep(gridData[indexOfRecord]));
-  //         }}
-  //       >
-  //         <CustomRenderCell value={params?.value} />
-  //       </Link>
-  //     ),
-  //   },
-  // ];
-
   const refreshProducts = (data) => {
     fetchDoaLimit();
 
@@ -807,18 +753,6 @@ function QuoteDetail() {
     }
     productBuilderdatatoQuoteBuilderdata(data);
   };
-
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      setQuery((prevState) => ({
-        ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
 
   const createImagePDF = (view, send) => {
     axiosInstance()
@@ -1319,7 +1253,6 @@ function QuoteDetail() {
   };
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
-    console.log(BuilderData);
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
@@ -1405,6 +1338,7 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
       setNextStep(false);
     }
+    console.log(totalSellingPrice);
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
@@ -1523,6 +1457,7 @@ function QuoteDetail() {
           .then(({ data }) => {
             handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
             fetchQuoteData(currentVersion);
+            console.log(data);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -1636,8 +1571,30 @@ function QuoteDetail() {
       contentType: excelFileBase64.split(";")[0].split(":")[1],
     });
   }
-  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1)
+
+  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1) {
     setCurrentTabIndex(0);
+  }
+
+  const deleteVersion = () => {
+    let versions = quoteData?.versions;
+
+    delete versions[currentVersion];
+
+    setDeletingDOA(true);
+    axiosInstance()
+      .delete(`${qbApi}/${id}/${currentVersion}`)
+      .then(() => {
+        console.log("Succfully Deleted.");
+        fetchQuoteData(0);
+        setDeletingDOA(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDeletingDOA(false);
+      });
+  };
+
   return (
     <>
       <Layout>
@@ -1762,20 +1719,13 @@ function QuoteDetail() {
                 container
                 className="detailHeader d-flex align-items-center form-label-style mb-0"
               >
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={6}
-                  className="justify-content-start"
-                >
-                  <h2>Product Information</h2>
+                <Grid item xs={12} sm={4} className="justify-content-start">
+                  <h2 className="mr-2">Product Information</h2>
                 </Grid>
                 <Grid
                   item
                   xs={12}
-                  sm={6}
-                  md={6}
+                  sm={8}
                   className="d-flex justify-content-end"
                 >
                   <select
@@ -1789,30 +1739,42 @@ function QuoteDetail() {
                       </option>
                     ))}
                   </select>
-                  <Button
-                    disabled={isCloning}
-                    variant="contained"
-                    type="button"
-                    size="small"
-                    startIcon={
-                      isCloning ? (
-                        <CircularProgress color="inherit" size={16} />
-                      ) : (
-                        <BiLayerPlus />
-                      )
-                    }
-                    className="mx-1"
-                    color="primary"
-                    onClick={() => {
-                      cloneVersion();
-                    }}
-                  >
-                    {isCloning ? (
-                      <>Cloning v{currentVersion}</>
-                    ) : (
-                      `Clone Version ${currentVersion}`
-                    )}
-                  </Button>
+                  {!versionStatus.includes("Accepted by Customer") && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        disabled={deletingDOA}
+                        onClick={deleteVersion}
+                      >
+                        Delete Version
+                      </Button>
+                      <Button
+                        disabled={isCloning}
+                        variant="contained"
+                        type="button"
+                        size="small"
+                        startIcon={
+                          isCloning ? (
+                            <CircularProgress color="inherit" size={16} />
+                          ) : (
+                            <BiLayerPlus />
+                          )
+                        }
+                        className="mx-1"
+                        color="primary"
+                        onClick={() => {
+                          cloneVersion();
+                        }}
+                      >
+                        {isCloning ? (
+                          <>Cloning v{currentVersion}</>
+                        ) : (
+                          `Clone Version ${currentVersion}`
+                        )}
+                      </Button>{" "}
+                    </>
+                  )}
                   <Button
                     variant="contained"
                     type="button"
@@ -1913,9 +1875,7 @@ function QuoteDetail() {
                         </span>
                         <span>Total Margin</span>
                       </div>
-                      {/* <div className="quoteBox">
-                          <span className="quoteAmount">{versionStatus}</span>
-                        </div> */}
+
                       <div></div>
                     </Grid>
                     <div></div>
@@ -2043,7 +2003,7 @@ function QuoteDetail() {
                         <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
-                            disabled={!DOAreq && !Customerreq}
+                            disabled={(!DOAreq && !Customerreq) || loading}
                             startIcon={<BiMailSend />}
                             variant="contained"
                             size="small"
