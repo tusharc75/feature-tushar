@@ -348,7 +348,7 @@ export default function ManageOpportunityDialog({
                                           />
                                         </Grid>
                                         {permissions.customerAccount
-                                          .isCreate && accountId === null && (
+                                          .isCreate && !accountId && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
                                                 title="Create Account"

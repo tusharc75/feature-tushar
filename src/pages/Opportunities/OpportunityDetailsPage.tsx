@@ -164,7 +164,7 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
 
           // if (modifiedData["currency"] && modifiedData["amount"]) {
-          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"]).fullFormatAmount
+          modifiedData["estimatedAmount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["estimatedAmount"]).shortFormatAmount
           // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
           // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
           // }
@@ -323,7 +323,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Estimated Amount"] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount : "";
+    mainPoint["Estimated Amount"] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).shortFormatAmount : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
     setMainPoints(mainPoint);
   };

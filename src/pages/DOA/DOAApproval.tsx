@@ -132,6 +132,7 @@ const DOAApproval = () => {
   const [PDFName, setPDFName] = useState("");
   const [buttontext, setButton] = useState("Accept");
   const [QStatus, setQStatus] = useState(true);
+  const [doaName, setDoaName] = useState("");
   var DOALimit = 0;
   var DOAsetup = false;
 
@@ -151,6 +152,7 @@ const DOAApproval = () => {
           setneedDOA(true);
           setButton("Send for DOA");
         }
+        setDoaName(data.data.doaName);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -262,7 +264,7 @@ const DOAApproval = () => {
         <CustomBreadCrumbs
           routes={[
             { title: "DOA Requests", path: "/doa-request" },
-            { title: id },
+            { title: doaName ?? id },
           ]}
         />
       </div>
