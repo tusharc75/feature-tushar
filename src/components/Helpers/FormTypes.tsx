@@ -1234,7 +1234,8 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "multiSelect" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}
+      isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         multiple
