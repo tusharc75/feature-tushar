@@ -360,8 +360,6 @@ function QuoteDetail() {
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [query, setQuery] = useState({ page: 0, limit: 5 });
-  const [dataRows, setDataRows] = useState([]);
-  const [RadioIndex, setRadioIndex] = useState(-1);
   const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [totalProfit, setTotalProfit] = useState({
@@ -456,7 +454,7 @@ function QuoteDetail() {
 
   useEffect(() => {
     fetchTermsAndConditions();
-  }, [query, searchVal, currentVersion]);
+  }, []);
 
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
@@ -661,7 +659,7 @@ function QuoteDetail() {
       className="cursor-pointer"
       title={params.value}
       onClick={() => {
-        const data = dataTNC.find((d) => d._id === params.data.id);
+        const data = dataRowsTNC.find((d) => d._id === params.data.id);
         setEditRecordTNC(data);
         setShowCreateDialog(true);
       }}
@@ -2230,7 +2228,7 @@ function QuoteDetail() {
             open={showCreateDialog}
             handleClose={handleCloseCreateDialog}
             fetchData={fetchTermsAndConditions}
-            editRecord={editRecordTNC ? editRecordTNC : null}
+            editRecord={editRecordTNC}
           />
         )}
 
