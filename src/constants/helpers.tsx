@@ -765,13 +765,13 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 
   return {
     shortFormatAmount: new Intl.NumberFormat(
-      `${language}`, {
+      `${language}-${currencyData.countryCode}`, {
       notation: "compact",
       compactDisplay: "short",
       ...options
     }).format(amount).replace(/^(\D+)/, "$1 "),
     fullFormatAmount: new Intl.NumberFormat(
-      `${language}`,
+      `${language}-${currencyData.countryCode}`,
       options
     ).format(amount)
       .replace(/^(\D+)/, "$1 ")
