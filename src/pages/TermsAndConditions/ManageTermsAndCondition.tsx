@@ -73,7 +73,7 @@ const TermsAndCondition = ({
         file: editRecord?.file ?? "",
       });
     }
-  }, []);
+  }, [editRecord]);
 
   const handleSubmit = (values) => {
     const description = convertToRaw(values.editorState.getCurrentContent());
