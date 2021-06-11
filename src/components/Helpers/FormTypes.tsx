@@ -165,7 +165,7 @@ const FormTypes = (props) => {
     addDisplayType,
     ...rest
   } = props;
-  
+
 
 
   const [optionsList, setOptions] = React.useState([]);
@@ -1079,10 +1079,9 @@ const FormTypes = (props) => {
               {i === 0 &&
                 <Box>
                   <Tooltip title="Add Currency" className="mt-1">
-                    {/* <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
+                    <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                       <ControlPointIcon />
-                    </IconButton> */}
-                    <></>
+                    </IconButton>
                   </Tooltip>
                   {isExtraDispayType &&
                     <AddDisplayTypeDialog
@@ -1156,7 +1155,7 @@ const FormTypes = (props) => {
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                     <ControlPointIcon />
                   </IconButton>
-                  
+
                 </Tooltip>
                 {isExtraDispayType &&
                   <AddDisplayTypeDialog
