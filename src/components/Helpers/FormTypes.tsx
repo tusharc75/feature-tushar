@@ -1068,7 +1068,7 @@ const FormTypes = (props) => {
                           )}
                         </InputAdornment>
                       ),
-                      inputProps: { min: 0 },
+                      inputProps: { min: 0, max: 9999999999 },
                       readOnly: (fieldData && fieldData.isUneditable) ? true : false
                     }}
                   />
