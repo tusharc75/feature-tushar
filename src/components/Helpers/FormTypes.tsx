@@ -166,6 +166,8 @@ const FormTypes = (props) => {
     ...rest
   } = props;
 
+
+
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
@@ -989,7 +991,7 @@ const FormTypes = (props) => {
           <Grid key={_unit} item xs={12} sm={6} md={6}>
             <Box display="flex" >
               <Box flexGrow={1}  >
-                <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
                   <TextField
                     {...rest}
                     variant="outlined"
@@ -1095,7 +1097,7 @@ const FormTypes = (props) => {
         <Grid key={_currency} item xs={12} sm={6} md={6}>
           <Box display="flex" >
             <Box flexGrow={1}  >
-              <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
                 <TextField
                   {...rest}
                   variant="outlined"
@@ -1153,6 +1155,7 @@ const FormTypes = (props) => {
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                     <ControlPointIcon />
                   </IconButton>
+
                 </Tooltip>
                 {isExtraDispayType &&
                   <AddDisplayTypeDialog
@@ -1234,7 +1237,8 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "multiSelect" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}
+      isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         multiple
