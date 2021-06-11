@@ -495,7 +495,7 @@ export default function ManageOpportunityDialog({
                                           }
                                         }}
                                       />
-                                    ) : field.fieldName === "amount" ? (
+                                    ) : field.fieldName.trim() === "estimatedAmount" ? (
                                       <FormTypes
                                         // {...rest}
                                         startAdornment={
