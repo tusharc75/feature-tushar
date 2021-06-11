@@ -302,7 +302,7 @@ const Note = () => {
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true} allowSelection={true}
-                isClientSideGrid={true} />
+                actionWidth={100} isClientSideGrid={true} />
 
             {noteId !== undefined && <ActivityModelHandler
                 activityType="note"
