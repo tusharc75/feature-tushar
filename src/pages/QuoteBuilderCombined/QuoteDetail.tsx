@@ -19,9 +19,9 @@ import {
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
-import TabPanel from "../../components/TabPanel";
+
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { downloadExcel, gridPageSizes } from "../../constants/helpers";
+import { gridPageSizes } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -33,11 +33,10 @@ import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
-import { DataGrid, GridOverlay } from "@material-ui/data-grid";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import { DataGrid } from "@material-ui/data-grid";
+
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import { Link } from "react-router-dom";
-import { getSearchQuery } from "../../services/util";
+
 import { AiFillPlusCircle } from "react-icons/ai";
 import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
@@ -51,7 +50,6 @@ import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -68,8 +66,6 @@ import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 // import EmailDialog from "./EmailDialog";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
-import { BsPlusCircle } from "react-icons/bs";
-import { cloneDeep } from "lodash";
 import {
   customerAccount,
   supplierAccount,
@@ -84,7 +80,6 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import ProductBuilder from "../../components/productBuilder";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import InfoIcon from "@material-ui/icons/Info";
-import { AnyObject } from "yup/lib/types";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import ProductGrid from "./ProductGrid";
@@ -260,16 +255,6 @@ const MenuProps = {
   },
 };
 
-const recordsPerLine = 3;
-const fixedVisibleColumns = [
-  "productName",
-  "qty",
-  "productCategory",
-  "unit",
-  "salesPricePerUnit",
-  "totalSalesPrice",
-  "description",
-];
 const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
@@ -347,7 +332,7 @@ function QuoteDetail() {
   const [activeStep, setActiveStep] = useState(0);
   const [versions, setVersions] = useState([]);
   const [productBuilderID, setProductBuilderID] = useState("");
-  const [currentTabIndex, setCurrentTabIndex] = useState(0)
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] =
@@ -403,7 +388,7 @@ function QuoteDetail() {
 
   const [dataTNC, setDataTNC] = useState([]);
 
-  const [editRecord, setEditRecord] = useState(null);
+  const [editRecordTNC, setEditRecordTNC] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [sendEmail, setSendEmail] = useState(false);
@@ -613,7 +598,8 @@ function QuoteDetail() {
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
-      ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount
+      ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
+          .fullFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -646,7 +632,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -675,10 +661,9 @@ function QuoteDetail() {
       className="cursor-pointer"
       title={params.value}
       onClick={() => {
-        setShowCreateDialog(true);
         const data = dataTNC.find((d) => d._id === params.data.id);
-
-        setEditRecord(data);
+        setEditRecordTNC(data);
+        setShowCreateDialog(true);
       }}
     >
       {params.value}
@@ -792,7 +777,7 @@ function QuoteDetail() {
   //             (d) => d.id === params.row.id
   //           );
 
-  //           setEditRecord(cloneDeep(gridData[indexOfRecord]));
+  //           setEditRecordTNC(cloneDeep(gridData[indexOfRecord]));
   //         }}
   //       >
   //         <CustomRenderCell value={params?.value} />
@@ -1097,22 +1082,11 @@ function QuoteDetail() {
     };
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleCloseCreateDialog = (params) => {
+  const handleCloseCreateDialog = () => {
     setShowCreateDialog(false);
-    setEditRecord(null);
-    if (params?.fetchData) fetchTermsAndConditions();
+    if (editRecordTNC) {
+      setEditRecordTNC(null);
+    }
   };
 
   const fetchDoaLimit = () => {
@@ -1320,18 +1294,6 @@ function QuoteDetail() {
     });
   };
 
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
-
   const handleChangeVersion = (event) => {
     setLoadPB(false);
     setcurrentVersion(event.target.value);
@@ -1344,28 +1306,8 @@ function QuoteDetail() {
       quoteData["versions"][event.target.value]["processStatus"]
     );
 
-    //const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
-    //productBuilderdatatoQuoteBuilderdata(productBuilderdata);
     setLoadPB(true);
   };
-  // const quickLinks = [
-  //   {
-  //     label: "Call a log",
-  //     count: 0,
-  //   },
-  //   {
-  //     label: "New Task",
-  //     count: 0,
-  //   },
-  //   {
-  //     label: "Email",
-  //     count: 0,
-  //   },
-  //   {
-  //     label: "New Event",
-  //     count: 0,
-  //   },
-  // ];
 
   const handleClone = () => {
     axiosInstance()
@@ -1640,7 +1582,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1652,36 +1594,6 @@ function QuoteDetail() {
     handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
     fetchQuoteData(currentVersion);
   };
-
-  const handleUpdateOpportunity = (supplierAccounts) => {
-    let newFields = [];
-
-    quoteFields
-      .filter((d) => d.isUpdate)
-      .map((_f) => newFields.push(_f.fieldData));
-
-    let values = {
-      ...getObjKeysWithValues(quoteData, newFields),
-      supplierAccountName: supplierAccounts,
-      _id: quoteData._id,
-    };
-
-    axiosInstance()
-      .put(`${qbApi}?entity=${selectedEntity}`, values)
-      .then(({ data }) => {
-        fetchQuoteData(0);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  let selectedSupplierAccounts = [];
-  if (quoteData?.supplierAccountName && quoteData.supplierAccountName.length) {
-    selectedSupplierAccounts = quoteData.supplierAccountName.map(
-      (s) => s.optionValue
-    );
-  }
 
   const getVersionStatus = () => {
     setAllVersionStatusButtonText(gettingVersionStatusText);
@@ -1726,7 +1638,8 @@ function QuoteDetail() {
       contentType: excelFileBase64.split(";")[0].split(":")[1],
     });
   }
-  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1) setCurrentTabIndex(0);
+  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1)
+    setCurrentTabIndex(0);
   return (
     <>
       <Layout>
@@ -1781,9 +1694,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2006,17 +1919,13 @@ function QuoteDetail() {
                           <span className="quoteAmount">{versionStatus}</span>
                         </div> */}
                       <div></div>
-
                     </Grid>
                     <div></div>
-
                   </Grid>
-
                 ) : null}
                 <>
                   <Tabs
                     className="oms-tab"
-
                     value={currentTabIndex}
                     onChange={(index, newValue) => {
                       setCurrentTabIndex(newValue);
@@ -2030,12 +1939,13 @@ function QuoteDetail() {
                       aria-controls="a11y-tabpanel-0"
                       id="a11y-tab-0"
                     />
-                    {ProcessStatus === "Quote Builder" && <Tab
-                      label="Terms & Conditions"
-                      aria-controls="a11y-tabpanel-1"
-                      id="a11y-tab-1"
-                    />}
-
+                    {ProcessStatus === "Quote Builder" && (
+                      <Tab
+                        label="Terms & Conditions"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    )}
                   </Tabs>
                 </>
                 {!loading && quoteData ? (
@@ -2130,8 +2040,8 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                        (ProcessStatus === "Send To Customer" &&
-                          versionStatus !== "Sent to Customer") ? (
+                      (ProcessStatus === "Send To Customer" &&
+                        versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           <Button
                             onClick={() => handleCases()}
@@ -2147,7 +2057,7 @@ function QuoteDetail() {
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
-                      ProcessStatus !== "Price Builder" ? (
+                    ProcessStatus !== "Price Builder" ? (
                       <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
@@ -2174,35 +2084,35 @@ function QuoteDetail() {
                       </span>
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
-                      {
-                        ProcessStatus === "Quote Builder" &&
-                          currentTabIndex === 0 &&
-                          visibleColumns.length > 0 ? (
-                          <ProductGrid
-                            productBuilderId={productBuilderID}
-                            refreshProducts={refreshProducts}
-                            columnsData={visibleColumns}
-                            currency={quoteData.currency}
-                            isAll={false}
-                          />
-                        ) : currentTabIndex === 0 ? (
-                          <ProductBuilder
-                            productBuilderId={productBuilderID}
-                            isAddNewProduct={isAddNewProduct}
-                            setIsAddNewProduct={setIsAddNewProduct}
-                            isAddExistingProduct={isAddExistingProduct}
-                            setIsAddExistingProduct={setIsAddExistingProduct}
-                            refreshProducts={refreshProducts}
-                            stage={ProcessStatus === "New" ? "product" : "cost"}
-                            Editable={
-                              ProcessStatus === "Price Builder" ||
-                                ProcessStatus === "New"
-                                ? true
-                                : false
-                            }
-                          />
-                        ) : null}
-                      {ProcessStatus === "Quote Builder" && currentTabIndex === 1 ? (
+                      {ProcessStatus === "Quote Builder" &&
+                      currentTabIndex === 0 &&
+                      visibleColumns.length > 0 ? (
+                        <ProductGrid
+                          productBuilderId={productBuilderID}
+                          refreshProducts={refreshProducts}
+                          columnsData={visibleColumns}
+                          currency={quoteData.currency}
+                          isAll={false}
+                        />
+                      ) : currentTabIndex === 0 ? (
+                        <ProductBuilder
+                          productBuilderId={productBuilderID}
+                          isAddNewProduct={isAddNewProduct}
+                          setIsAddNewProduct={setIsAddNewProduct}
+                          isAddExistingProduct={isAddExistingProduct}
+                          setIsAddExistingProduct={setIsAddExistingProduct}
+                          refreshProducts={refreshProducts}
+                          stage={ProcessStatus === "New" ? "product" : "cost"}
+                          Editable={
+                            ProcessStatus === "Price Builder" ||
+                            ProcessStatus === "New"
+                              ? true
+                              : false
+                          }
+                        />
+                      ) : null}
+                      {ProcessStatus === "Quote Builder" &&
+                      currentTabIndex === 1 ? (
                         <Box className="m-3">
                           <div className="position-relative">
                             <h4
@@ -2274,7 +2184,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2291,15 +2201,6 @@ function QuoteDetail() {
             onOk={handleDeleteQuote}
           />
         ) : null}
-        {/* {openUpdateDialog ? (
-            <ManageOpportunity
-              isNew={false}
-              open={openUpdateDialog}
-              onClose={closeUpdateDialog}     
-              entityData={{ fields: quoteFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(quoteData, quoteFields.map((f) => { return f.fieldData })) }}
-              handleSubmit={handleUpdateOpportunity}
-            />
-          ): null} */}
 
         {openUpdateDialog && (
           <ManageQuoteDialog
@@ -2319,19 +2220,20 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-          // qbApi={qbApi}
+            // qbApi={qbApi}
           />
         )}
 
-        {showCreateDialog && editRecord ? (
+        {showCreateDialog && (
           <ManageTermsAndCondition
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
             handleClose={handleCloseCreateDialog}
             fetchData={fetchTermsAndConditions}
-            editRecord={editRecord}
+            editRecord={editRecordTNC ? editRecordTNC : null}
           />
-        ) : null}
+        )}
+
         {sendEmail && (
           <Dialog
             open={sendEmail}
