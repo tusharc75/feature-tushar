@@ -9,7 +9,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import ProductDialog from "./ProductDialog";
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
+import FileCopyIcon from "@material-ui/icons/FileCopy";
 import { Link } from 'react-router-dom'
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
@@ -43,7 +43,8 @@ const ProductBuilder = (props) => {
     const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-
+    const [productId, setProductId] = useState(null);
+    const [isClone, setIsClone] = useState(false);
     const [isBulkEdit, setIsBulkEdit] = useState(false)
     const [productDataList, setproductDataList] = useState([]);
 
@@ -58,6 +59,19 @@ const ProductBuilder = (props) => {
 
 
     const ActionsRenderer = params => <>
+        <Tooltip title="Clone">
+            <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                    setProductId(params.data._id);
+                    setIsClone(true)
+                    setIsAddNewProduct(true)
+                }}
+            >
+                <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+        </Tooltip>
         <Tooltip title="Edit" >
             <IconButton aria-label="Edit" onClick={() => { setProductData(params.data) }}  >
                 <EditIcon fontSize="small" color="primary" />
@@ -430,7 +444,7 @@ const ProductBuilder = (props) => {
                     isClientSideGrid={true} />
             }
         </Box>
-        {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
+        {isAddNewProduct && <CreateProduct isClone={isClone} productId={productId} handleClose={() => setIsAddNewProduct(false)}
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder} openFrom="builder"
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
