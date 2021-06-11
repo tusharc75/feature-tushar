@@ -59,7 +59,7 @@ const RoleHeader = (props) => {
             {options.map((k, index) => {
               return (
                 <ToggleButton value={k.key} key={index}>
-                  {k.key}
+                  {k.key === "Global" ? "Comapny wide role" : "Region wide functional role"}
                 </ToggleButton>
               );
             })}
