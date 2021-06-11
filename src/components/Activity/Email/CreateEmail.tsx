@@ -200,7 +200,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
             emailBody: values.content.toString('html'),
             emailSubject: values.name,
             cc: values.cc,
-            bcc: values.to,
+            bcc: [values.to],
             id: id,
             attachments: [...qouteBuilderAttachments]
         }
@@ -449,13 +449,21 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                                 }
                                                             }}
                                                             onChange={(e, value) => {
-                                                                let val = []
-                                                                for (var email of value) {
-                                                                    if (validations.email.test(email)) {
-                                                                        val.push(email)
+                                                                let emails
+                                                                if (isQuoteBuilder) {
+                                                                    if (value && validations.email.test(value)) {
+                                                                        emails = value
                                                                     }
                                                                 }
-                                                                setFieldValue("to", val)
+                                                                else {
+                                                                    emails = []
+                                                                    for (var email of value) {
+                                                                        if (validations.email.test(email)) {
+                                                                            emails.push(email)
+                                                                        }
+                                                                    }
+                                                                }
+                                                                setFieldValue("to", emails)
                                                             }}
                                                         />
                                                         <Autocomplete

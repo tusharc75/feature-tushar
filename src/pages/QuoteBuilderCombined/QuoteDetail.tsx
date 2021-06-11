@@ -281,7 +281,6 @@ function QuoteDetail() {
     state: { user, selectedEntity, permissions },
   }: any = useData();
 
-
   var defaultSelectColumns = [
     "Product Name",
     "Description",
@@ -2268,7 +2267,7 @@ function QuoteDetail() {
               cc={userEmails?.cc}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`Brand Name Offer - ${quoteData?.quoteName ?? ''}`}
+              subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
             />
           </Dialog>
         )}
