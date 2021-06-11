@@ -97,8 +97,8 @@ const ProductBuilder = (props) => {
                     ...u,
                     id: u._id,
                     srno: index + 1,
-                    productTemplateDisplayValue: u.productTemplate.optionLabel,
-                    productCategoryDisplayValue: u.productCategory.optionLabel,
+                    productTemplateDisplayValue: u.productTemplate?.optionLabel,
+                    productCategoryDisplayValue: u.productCategory?.optionLabel,
                 }));
                 refreshProducts(data)
                 setColumns(null);
