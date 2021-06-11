@@ -79,27 +79,10 @@ const ProductBuilder = (props) => {
         }
     </>
 
-    const ProductCategoryRenderer = params => <>
-        {
-            params.data.productCategory || params.data.productCategory === 0 ?
-                typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
-                : <NoDataCell />
-        }
-    </>
-    const ProductTemplateRenderer = params => <>
-        {
-            params.data.productTemplate || params.data.productTemplate === 0 ?
-                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
-                : <NoDataCell />
-        }
-    </>
-
     const frameworkComponents = {
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
         productNameRenderer: ProductNameRenderer,
-        productCategoryRenderer: ProductCategoryRenderer,
-        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const fetchProduct = (id) => {
@@ -113,11 +96,15 @@ const ProductBuilder = (props) => {
                 data = data.data?.map((u, index) => ({
                     ...u,
                     id: u._id,
-                    srno: index + 1
+                    srno: index + 1,
+                    productTemplateDisplayValue: u.productTemplate?.optionLabel,
+                    productCategoryDisplayValue: u.productCategory?.optionLabel,
                 }));
                 refreshProducts(data)
                 setColumns(null);
-                let column = [{ field: 'srno', headerName: 'Sr.', width: 70, show: true, filter: false, cellRenderer: "commonRenderer" }]
+                let column = [
+                    { field: 'srno', headerName: 'Sr.', width: 70, show: true, cellRenderer: "commonRenderer" }
+                ]
                 data.forEach((row) => {
                     let _fields = row.fields;
                     if (stage) {
@@ -187,22 +174,48 @@ const ProductBuilder = (props) => {
                         else {
                             if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
                                 let col: any = {}
-                                col.field = ele.fieldName
-                                col.headerName = ele.fieldLabel
-                                col.width = 180
                                 if (ele.fieldName === "productName") {
+                                    col.field = ele.fieldName
+                                    col.headerName = ele.fieldLabel
+                                    col.width = 180
+                                    col.show = true
                                     col.cellRenderer = "productNameRenderer"
+                                    col.order = ele.order
+                                    col.leval = ele.leval
+                                    column.push(col)
                                 }
-                                if (ele.fieldName === "productCategory") {
-                                    col.cellRenderer = "productCategoryRenderer"
+                                else if (ele.fieldName === "productCategory") {
+                                    col.headerName = ele.fieldLabel
+                                    col.width = 180
+                                    col.show = true
+                                    col.field = "productCategoryDisplayValue"
+                                    col.order = ele.order
+                                    col.leval = ele.leval
+                                    if (!column.some(c => c.field === "productCategoryDisplayValue")) {
+                                        column.push(col)
+                                    }
                                 }
-                                if (ele.fieldName === "productTemplate") {
-                                    col.cellRenderer = "productTemplateRenderer"
+                                else if (ele.fieldName === "productTemplate") {
+                                    col.headerName = ele.fieldLabel
+                                    col.width = 180
+                                    col.show = true
+                                    col.field = "productTemplateDisplayValue"
+                                    col.order = ele.order
+                                    col.leval = ele.leval
+                                    if (!column.some(c => c.field === "productTemplateDisplayValue")) {
+                                        column.push(col)
+                                    }
                                 }
-                                col.show = true
-                                col.order = ele.order
-                                col.leval = ele.leval
-                                column.push(col)
+                                else {
+                                    col.field = ele.fieldName
+                                    col.headerName = ele.fieldLabel
+                                    col.width = 180
+                                    col.show = true
+                                    col.order = ele.order
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+
                             }
                         }
                     })

@@ -12,7 +12,7 @@ import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Activity from "../../components/Activity";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import { gridPageSizes } from "../../constants/helpers";
+import { formatAmountWithCurrency, gridPageSizes } from "../../constants/helpers";
 import { camelCase } from "lodash";
 
 function reducer(state, action) {
@@ -333,28 +333,26 @@ const DOAApproval = () => {
                 >
                   <div className="quoteBox">
                     <span>Total Profit</span>
-                    <span>
-                      {QData["TotalProfitamount"]} {QData["TotalProfitcurr"]}
+                    <span title={formatAmountWithCurrency(QData["TotalProfitcurr"], QData["TotalProfitamount"]).fullFormatAmount}>
+                      {formatAmountWithCurrency(QData["TotalProfitcurr"], QData["TotalProfitamount"]).shortFormatAmount}
                     </span>
                   </div>
                   <div className="quoteBox">
                     <span>Total Cost Price</span>
-                    <span>
-                      {QData["TotalCostamount"]} {QData["TotalCostcurr"]}
+                    <span title={formatAmountWithCurrency(QData["TotalCostcurr"], QData["TotalCostamount"]).fullFormatAmount}>
+                      {formatAmountWithCurrency(QData["TotalCostcurr"], QData["TotalCostamount"]).shortFormatAmount}
                     </span>
                   </div>
                   <div className="quoteBox">
                     <span>Total Selling Price</span>
-                    <span>
-                      {QData["TotalSellingPriceamount"]}{" "}
-                      {QData["TotalSellingPricecurr"]}
+                    <span title={formatAmountWithCurrency(QData["TotalSellingPricecurr"], QData["TotalSellingPriceamount"]).fullFormatAmount}>
+                      {formatAmountWithCurrency(QData["TotalSellingPricecurr"], QData["TotalSellingPriceamount"]).shortFormatAmount}
                     </span>
                   </div>
                   <div className="quoteBox">
                     <span>Total Margin</span>
-                    <span>
-                      {" "}
-                      {QData["TotalMarginamount"]} {QData["TotalMargincurr"]}
+                    <span title={formatAmountWithCurrency(QData["TotalMargincurr"], QData["TotalMarginamount"]).fullFormatAmount}>
+                      {formatAmountWithCurrency(QData["TotalMargincurr"], QData["TotalMarginamount"]).shortFormatAmount}
                     </span>
                   </div>
                   <div></div>

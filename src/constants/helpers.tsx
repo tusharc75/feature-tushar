@@ -656,19 +656,23 @@ export const getUniqueCurrencies = () => {
 }
 
 export const formatAmountWithCurrency = (currencyCode, amount) => {
-  if (!currencyCode && !amount) return null;
+  if (!currencyCode && !amount) {
+    return {
+      shortFormatAmount: "0", fullFormatAmount: "0"
+    }
+  }
 
   if (amount && isNaN(amount)) {
     amount = 0
   }
-  const currencyData = currencies.find(
+  const filterCountries = currencies.filter(
     (data) => data?.currencyCode === currencyCode
   );
 
   //  Make default language "en"
   let language = "en";
 
-  if (!currencyData) {
+  if (filterCountries.length === 0) {
     return {
       shortFormatAmount: new Intl.NumberFormat(language, {
         notation: "compact",
@@ -679,6 +683,62 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         compactDisplay: "short",
       }).format(amount).replace(/^(\D+)/, "$1 "),
     };
+  }
+
+  let currencyData = filterCountries[0];
+  let combinedAllLanguages = filterCountries[0].languages;
+
+  if (filterCountries.length > 1) {
+    combinedAllLanguages = [...new Set(filterCountries.map(m => m.languages).flat())];
+
+    switch (currencyCode) {
+      case "AUD":
+        currencyData = filterCountries.find(f => f.country === "Australia");
+        break;
+
+      case "CHF":
+        currencyData = filterCountries.find(f => f.country === "Switzerland");
+        break;
+
+      case "EUR":
+        currencyData = filterCountries.find(f => f.country === "France");
+        break;
+
+      case "GBP":
+        currencyData = filterCountries.find(f => f.country === "United Kingdom");
+        break;
+
+      case "NOK":
+        currencyData = filterCountries.find(f => f.country === "Norway");
+        break;
+
+      case "NZD":
+        currencyData = filterCountries.find(f => f.country === "New Zeland");
+        break;
+
+      case "XAF":
+        currencyData = filterCountries.find(f => f.country === "Cameroon");
+        break;
+
+      case "XCD":
+        currencyData = filterCountries.find(f => f.country === "Dominica");
+        break;
+
+      case "XOF":
+        currencyData = filterCountries.find(f => f.country === "Benin");
+        break;
+
+      case "XPF":
+        currencyData = filterCountries.find(f => f.country === "French Polynesia");
+        break;
+    }
+
+    //  just for safe side, if no record found, change the value to initial state;
+    if (!currencyData) {
+      currencyData = filterCountries[0];
+    }
+
+    currencyData.languages = [...new Set(filterCountries.map(m => m.languages).flat())];
   }
 
   // Check if that currency's country has multiple language,
@@ -717,8 +777,6 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       .replace(/^(\D+)/, "$1 ")
   }
 };
-
-
 
 export const graphOptions = {
   layout: {
