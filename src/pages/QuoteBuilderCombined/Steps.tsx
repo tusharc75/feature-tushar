@@ -320,7 +320,8 @@ const Steps = (props) => {
                       loading ||
                       !nextStep ||
                       versionStatus.includes("Accepted  by DOA") ||
-                      versionStatus.includes("Sent to Customer")
+                      versionStatus.includes("Sent to Customer") ||
+                      steps[currentStep] === "Send To Customer"
                     }
                     endIcon={<IoIosArrowDroprightCircle />}
                   >
