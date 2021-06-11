@@ -23,5 +23,16 @@ export const fileIcons = [
     {
         extensions: [".pot", ".potm", ".potx", ".ppa", ".ppam", ".pptx", ".pptm", ".ppt", ".ppsx"],
         source: pptIcon
+    },
+    {
+        extensions: ["application/pdf"],
+        source: pdfFileIcon
+    },
+    {
+        extensions: ["application/vnd.oasis.opendocument.spreadsheet",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel"
+        ],
+        source: excelSheetIcon
     }
 ]
