@@ -540,7 +540,7 @@ const UserDetailsPage = () => {
                       <Box display="flex">
                         <Box padding="5px">
                           <Typography variant="subtitle2">
-                            Assigned Global Roles ({globalRoles.length || "0"})
+                            Assigned Company Wide Roles ({globalRoles.length || "0"})
                       </Typography>
                         </Box>
                       </Box>
