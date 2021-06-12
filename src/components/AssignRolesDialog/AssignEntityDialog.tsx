@@ -55,7 +55,7 @@ const AssignEntityDialog = ({
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const steps = [`Select ${type}`, 'Select Regional Role']
+  const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
   const classes = useStyles();
 
   const handleNext = () => {
@@ -208,7 +208,7 @@ const AssignEntityDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={regionalRole ? `Assign  Regional Role` : `Assign  ${startCase(type)}`} />
+      <CustomDialogHeader title={regionalRole ? `Assign  Region wide functional role` : `Assign  ${startCase(type)}`} />
       <CustomDialogContent>
         {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
@@ -273,7 +273,7 @@ const AssignEntityDialog = ({
             </ListItem>
           ))}
         </List>) : (
-          <Typography>{`All Regional Role has been assigned`}</Typography>
+          <Typography>{`All Region wide functional role has been assigned`}</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
