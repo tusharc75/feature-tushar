@@ -50,6 +50,19 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
     const handleChangeUnit = (value) => {
         setFieldValue("units", value)
         let data = values["option"] ? [...values["option"]] : []
+
+        if (data.length > value.length) {
+            let index = 0;
+            let deleteindex = 0;
+            for (var x in data[0]) {
+                if (!value.includes(x)) {
+                    deleteindex = index;
+                }
+                index = index + 1
+            }
+            data.splice(deleteindex, 1);
+        }
+
         let newOptions = []
         value.forEach((_unit, index) => {
             let row = {}

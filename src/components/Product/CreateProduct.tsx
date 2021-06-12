@@ -23,6 +23,7 @@ import { useData } from "../../StateProvider/Provider";
 import CreateProductCategory from "../../pages/ProductCategory/CreateProductCategory";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 const ignoreField = ["qty"]
 
@@ -229,6 +230,16 @@ const CreateProduct = (props) => {
         setIsAddField(false)
     }
 
+    const handleRemoveField = (field) => {
+        let newField = initialData.fields.filter((_f) => _f._id !== field._id);
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        setFields(fields.filter((_f) => _f._id !== field._id))
+        EvaluteproductFields(newField)
+    }
+
     const initializeProductCategoryDropdown = (values, productCategorySource) => {
         if (values && values.hasOwnProperty("productCategory")) {
             const getNewAddedProductCategory = productCategorySource.find(
@@ -424,28 +435,41 @@ const CreateProduct = (props) => {
                                                                         size="small"
                                                                     /> :
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                        <FormTypes
-                                                                            fields={initialData.fields}
-                                                                            fieldData={field}
-                                                                            values={values}
-                                                                            errors={errors}
-                                                                            touched={touched}
-                                                                            label={field.fieldLabel}
-                                                                            name={field.fieldName}
-                                                                            type={field.type}
-                                                                            options={field.option}
-                                                                            setFieldValue={setFieldValue}
-                                                                            required={field.required}
-                                                                            fullWidth
-                                                                            isTooltip={field.isTooltip}
-                                                                            tooltipMessage={field.tooltipMessage}
-                                                                            size="small"
-                                                                            disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
-                                                                            imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                                                                setUploadingImageOrFileProgress(completePercentage);
-                                                                            } : null}
-                                                                        />
+                                                                        <Box display="flex" >
+                                                                            <Box flexGrow={1}  >
+                                                                                <FormTypes
+                                                                                    fields={initialData.fields}
+                                                                                    fieldData={field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={setFieldValue}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field.isTooltip}
+                                                                                    tooltipMessage={field.tooltipMessage}
+                                                                                    size="small"
+                                                                                    disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
+                                                                                    imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                        setUploadingImageOrFileProgress(completePercentage);
+                                                                                    } : null}
+                                                                                />
+                                                                            </Box>
+                                                                            {field.leval === "product-custom" &&
+                                                                                <Box>
+                                                                                    <Tooltip title="Remove" className="mt-1">
+                                                                                        <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
+                                                                                            <HighlightOffIcon color="error" />
+                                                                                        </IconButton>
+                                                                                    </Tooltip>
+                                                                                </Box>}
+                                                                        </Box>
                                                                     </Grid>
+
                                                     ))}
                                                 </Grid>
                                             </Box>
