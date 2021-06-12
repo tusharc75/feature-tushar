@@ -163,7 +163,7 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["Amount"]: formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount || "",
+      ["Amount"]: formatAmountWithCurrency(data.currency, data.amount).shortFormatAmount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
