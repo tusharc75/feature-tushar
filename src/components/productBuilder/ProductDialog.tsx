@@ -242,7 +242,6 @@ const CreateProduct = (props) => {
                 }
             }
         })
-        console.log(_fieldChanges)
         let newField = initialData.fields
         newField.forEach((_e) => {
             if (_e.fieldName === field.fieldName) {
@@ -325,6 +324,7 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    doNotShowInfoTooltip={true}
                                                                     size="small"
                                                                     leval="builder-custom"
                                                                     addDisplayType={addDisplayType}

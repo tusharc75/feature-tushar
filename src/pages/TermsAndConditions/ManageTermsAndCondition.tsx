@@ -73,7 +73,7 @@ const TermsAndCondition = ({
         file: editRecord?.file ?? "",
       });
     }
-  }, []);
+  }, [editRecord]);
 
   const handleSubmit = (values) => {
     const description = convertToRaw(values.editorState.getCurrentContent());
@@ -87,14 +87,14 @@ const TermsAndCondition = ({
       axiosInstance()
         .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
         .then(({ data }) => {
+          fetchData();
           toastConfig.setToastConfig({
             open: true,
             type: "success",
             message: data.message,
           });
-          handleClose();
-          fetchData();
           setLoading(false);
+          handleClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -104,14 +104,14 @@ const TermsAndCondition = ({
       axiosInstance()
         .post(termsAndCondition.api, request)
         .then(({ data }) => {
+          fetchData();
           toastConfig.setToastConfig({
             open: true,
             type: "success",
             message: data.message,
           });
-          handleClose();
-          fetchData();
           setLoading(false);
+          handleClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -140,13 +140,12 @@ const TermsAndCondition = ({
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      maxWidth="lg"
+      maxWidth="md"
       onClose={handleClose}
       fullWidth
       className={classes.termAndConditionDialog}
     >
       <CustomDialogHeader
-        onClose={handleClose}
         title={`${
           editRecord?._id
             ? `Edit ${editRecord?.TACName ?? ""}`
@@ -212,7 +211,9 @@ const TermsAndCondition = ({
                                 appendData(data, setFieldValue)
                               }
                               doNotShowUploadedFile={true}
-                              fileUploadMaxSize={termsAndConditionDocumentUploadMaxSize} //size in bytes
+                              fileUploadMaxSize={
+                                termsAndConditionDocumentUploadMaxSize
+                              } //size in bytes
                               imageOrFileUploadCompletePercentage={(
                                 completePercentage
                               ) => {

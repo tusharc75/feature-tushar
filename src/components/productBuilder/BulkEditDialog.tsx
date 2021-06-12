@@ -211,7 +211,6 @@ const BulkEditDialog = (props) => {
                 }
             }
         })
-        console.log(_fieldChanges)
         let newField = initialData.fields
         newField.forEach((_e) => {
             if (_e.fieldName === field.fieldName) {
@@ -294,6 +293,7 @@ const BulkEditDialog = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    doNotShowInfoTooltip={true}
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"

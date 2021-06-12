@@ -294,7 +294,7 @@ export default function QuotesAccordionInProjectSale({
                               </Grid>
                               <Grid item xs={6}>
                                 <Box display="flex" alignItems="center">
-                                  {obj?.amount ? (
+                                  {obj?.estimatedAmount ? (
                                     <Typography className="amount">
                                       {
                                         getUniqueCurrencies().find(
@@ -302,7 +302,7 @@ export default function QuotesAccordionInProjectSale({
                                             d.currencyCode == obj["currency"]
                                         )?.symbolNative
                                       }
-                                      &nbsp;{obj?.amount ?? ""}
+                                      &nbsp;{obj?.estimatedAmount ?? ""}
                                     </Typography>
                                   ) : (
                                     ""
