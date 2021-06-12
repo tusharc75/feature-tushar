@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
         // borderBottom: `1px solid #daf5ff`
     },
     currencyStyle: {
-        width: 200,
+        width: 400,
     },
     dialogTitle: {
         fontSize: "1.2rem"
@@ -182,7 +182,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                     }
                                     options={currencyData}
                                     getOptionLabel={(option: any) =>
-                                        option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+                                        option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ""
                                     }
                                     getOptionSelected={(option: any, val) => option?.currencyCode === val}
                                     onChange={(e, val) => {
@@ -200,24 +200,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                         />
                                     )}
                                     renderOption={(option) => {
-                                        const { currencyCode, name, countryCode, symbolNative } = option;
-                                        return (
-                                            <Grid container alignItems="center">
-                                                <Grid item>
-                                                    <Avatar
-                                                        variant="rounded"
-                                                        src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                                                        style={{ marginRight: 20, width: "40px", height: "30px" }}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs>
-                                                    <Typography>{currencyCode} ({symbolNative})</Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {name}
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                        );
+                                        const { currencyCode, currencyName, symbolNative } = option;
+                                        return `${currencyCode} - ${currencyName} - (${symbolNative})`
                                     }}
                                 />
                             }
