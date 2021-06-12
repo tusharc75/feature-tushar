@@ -1098,6 +1098,8 @@ function QuoteDetail() {
       });
       const data = new Blob([excelBuffer], { type: fileType });
 
+      console.log(data);
+
       if (send) {
         generateBase64forFile(data, "excel");
       } else {

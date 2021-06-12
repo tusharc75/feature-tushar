@@ -267,7 +267,7 @@ const Steps = (props) => {
             <div className="d-flex align-items-center justify-content-center flex-column m-3">
               <FcClock size={30} />
               <Typography className={classes.sent}>
-                Quote Sent To Customer
+                Quote has been sent to customer
               </Typography>
             </div>
           )}
