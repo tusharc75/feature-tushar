@@ -46,6 +46,7 @@ const ProjectSalesDetails = () => {
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
   const [projectSalesData, setProjectSalesData] = useState(null);
   const [projectSalesFields, setProjectSalesFields] = useState([]);
   const [teamUsers, setTeamUsers] = useState([]);
@@ -113,8 +114,8 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
-      data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
-      data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
+      // data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
+      // data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
 
       setProjectSalesData(data);
       setCurrentTabIndex(0);
@@ -129,6 +130,14 @@ const ProjectSalesDetails = () => {
       setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
+
+      let modifiedData: any = {};
+      Object.assign(modifiedData, data);
+
+      modifiedData["amount"] = formatAmountWithCurrency(modifiedData.currency, modifiedData.amount).shortFormatAmount
+
+      setCopyOfProjectSalesData(modifiedData);
+
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -154,7 +163,7 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["Amount"]: formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount || "",
+      ["Amount"]: formatAmountWithCurrency(data.currency, data.amount).shortFormatAmount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
@@ -362,7 +371,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -384,8 +393,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                  !projectSalesFields.length ||
-                  !projectSalesData ? (
+                    !projectSalesFields.length ||
+                    !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -415,7 +424,7 @@ const ProjectSalesDetails = () => {
                       {currentTabIndex === 0 && (
                         <Box>
                           <DetailsPage
-                            data={projectSalesData}
+                            data={copyOfProjectSalesData}
                             fields={projectSalesFields}
                           />
                         </Box>
@@ -430,9 +439,8 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${
-                                    node.id
-                                  }`,
+                                  pathname: `${routes[node.route].path}/${node.id
+                                    }`,
                                 });
                               }
                             }}
@@ -456,7 +464,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -516,7 +524,7 @@ const ProjectSalesDetails = () => {
                       access: true,
                     },
                   ]}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               </div>
@@ -548,8 +556,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-              : ""
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
