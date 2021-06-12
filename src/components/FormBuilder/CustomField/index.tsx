@@ -34,7 +34,8 @@ export const CustomField = ({ }) => {
     }
 
     const handleAddField = (values) => {
-        if (values._id) {
+        console.log(values)
+        if (values._id && !Number.isInteger(values._id)) {
             axiosInstance().put(`/sa-formbuilder/custom-field`, values).then(({ data: { data } }) => {
                 setIsAddField(false)
                 setFieldData(null)
@@ -85,7 +86,7 @@ export const CustomField = ({ }) => {
                     ))}
                 </Grid>
             </Box>
-            {isAddField && <AddField fieldData={fieldData} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={fields} />}
+            {isAddField && <AddField refrence="custom" fieldData={fieldData} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={fields} />}
         </Fragment>
     );
 };

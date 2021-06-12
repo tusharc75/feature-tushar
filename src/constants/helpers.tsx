@@ -205,14 +205,14 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       key.type !== "currencyAmount" &&
       (key.type === "converter" || key.isConverter === true)
     ) {
-      key.displayUnits.forEach((_unit) => {
+      key.displayUnits && key.displayUnits.forEach((_unit) => {
         obj[key.fieldName + "_" + _unit.toLowerCase()] =
           value && value !== "" ? parseFloat(value) : value;
       });
     } else if (key.type === "currencyAmount") {
-      key.displayCurrency.forEach((_currency) => {
+      key.displayCurrency && key.displayCurrency.forEach((_currency) => {
         if (key.isConverter && key.displayUnits.length) {
-          key.displayUnits.forEach((_unit) => {
+          key.displayUnits && key.displayUnits.forEach((_unit) => {
             obj[
               key.fieldName +
               "_" +
@@ -260,12 +260,12 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       const value = filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : "";
     } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
-      key.displayUnits.forEach((_unit) => {
+      key.displayUnits && key.displayUnits.forEach((_unit) => {
         let fieldName = key.fieldName + "_" + _unit.toLowerCase();
         obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
       });
     } else if (key.type === "currencyAmount") {
-      key.displayCurrency.forEach((_currency) => {
+      key.displayCurrency && key.displayCurrency.forEach((_currency) => {
         if (key.isConverter && key.displayUnits.length) {
           key.displayUnits.forEach((_unit) => {
             let fieldName = key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
@@ -347,13 +347,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.type !== "currencyAmount" &&
       (input.type === "converter" || input.isConverter === true)
     ) {
-      input.displayUnits.forEach((_unit) => {
+      input.displayUnits && input.displayUnits.forEach((_unit) => {
         schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
           ? yup.string().required(`${input.fieldLabel} is required`)
           : yup.string();
       });
     } else if (input.type === "currencyAmount") {
-      input.displayCurrency.forEach((_currency) => {
+      input.displayCurrency && input.displayCurrency.forEach((_currency) => {
         if (input.isConverter && input.displayUnits.length) {
           input.displayUnits.forEach((_unit) => {
             schema[

@@ -65,7 +65,7 @@
     "typescript": "^4.2.3",
     "vis-react": "^0.5.1",
     "web-vitals": "^0.2.4",
-    "xlsx": "^0.16.9",
+    "xlsx": "^0.17.0",
     "yup": "^0.32.9"
   },
   "scripts": {

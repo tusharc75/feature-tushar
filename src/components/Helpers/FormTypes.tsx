@@ -45,6 +45,7 @@ import {
 } from "../../constants/helpers"
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -163,6 +164,7 @@ const FormTypes = (props) => {
     isMultipleUpload = false,
     imageOrFileUploadCompletePercentage,
     addDisplayType,
+    removeDisplayType,
     ...rest
   } = props;
 
@@ -646,11 +648,42 @@ const FormTypes = (props) => {
       field.displayUnits.push(displayValue)
       handleConverter(field, field.fieldName, field.displayUnits[0], values[_fieldName])
     }
-
+    else if (displayType === "currencyConverter") {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+      if (displayValue.currency) {
+        field.displayCurrency.push(displayValue.currency)
+      }
+      if (displayValue.unit) {
+        field.displayUnits.push(displayValue.unit)
+      }
+      handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    }
     if (addDisplayType) {
       addDisplayType(displayType, field, displayValue)
     }
     setIsExtraDispayType(false)
+  }
+
+  const handleRemoveDisplayType = (displayType, field, displayValue) => {
+    if (removeDisplayType) {
+      if (displayType === "currency") {
+        field.displayCurrency = field.displayCurrency.filter(e => e !== displayValue)
+        if (field.isConverter) {
+          let _fieldName = field.fieldName + "_" + displayValue.toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+          setFieldValue(_fieldName, 0);
+        }
+        else {
+          let _fieldName = field.fieldName + "_" + displayValue.toLowerCase();
+          setFieldValue(_fieldName, 0);
+        }
+      }
+      else if (displayType === "converter") {
+        field.displayUnits = field.displayUnits.filter(e => e !== displayValue)
+        let _fieldName = field.fieldName + "_" + displayValue.toLowerCase();
+        setFieldValue(_fieldName, 0);
+      }
+      removeDisplayType(displayType, field, displayValue)
+    }
   }
 
   return type === "singleLine" ? (
@@ -933,7 +966,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "converter" ? (
-    fieldData.displayUnits.map((_unit, i) => (
+    fieldData.displayUnits && Array.isArray(fieldData.displayUnits) && fieldData.displayUnits.map((_unit, i) => (
       <Grid key={_unit} item xs={12} sm={6} md={6}>
         <Box display="flex" >
           <Box flexGrow={1}  >
@@ -979,11 +1012,20 @@ const FormTypes = (props) => {
                 fieldData={fieldData}
                 handleClose={() => setIsExtraDispayType(false)} />}
             </Box>}
+          {(fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
+            && <Box>
+              <Tooltip title="Remove" className="mt-1">
+                <IconButton onClick={() => handleRemoveDisplayType("converter", fieldData, _unit)} color="primary" size="small"  >
+                  <HighlightOffIcon color="error" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          }
         </Box>
       </Grid>
     ))
   ) : type === "currencyAmount" ? (
-    fieldData.displayCurrency.map((_currency, i) =>
+    fieldData.displayCurrency && Array.isArray(fieldData.displayCurrency) && fieldData.displayCurrency.map((_currency, i) =>
       fieldData.isConverter && fieldData.displayUnits.length ? (
         fieldData.displayUnits.map((_unit, j) => (
           <Grid key={_unit} item xs={12} sm={6} md={6}>
@@ -1074,9 +1116,9 @@ const FormTypes = (props) => {
                   />
                 </InfoLabel>
               </Box>
-              {i === 0 &&
+              {(i === 0 && j === 0) &&
                 <Box>
-                  <Tooltip title="Add Currency" className="mt-1">
+                  <Tooltip title="Add Currency / Converter" className="mt-1">
                     <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                       <ControlPointIcon />
                     </IconButton>
@@ -1084,10 +1126,29 @@ const FormTypes = (props) => {
                   {isExtraDispayType &&
                     <AddDisplayTypeDialog
                       handleAddDisplayType={handleAddDisplayType}
-                      displayType="currency"
+                      displayType="currencyConverter"
                       fieldData={fieldData}
                       handleClose={() => setIsExtraDispayType(false)} />}
-                </Box>}
+                </Box>
+              }
+              {(i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
+                && <Box>
+                  <Tooltip title="Remove" className="mt-1">
+                    <IconButton onClick={() => handleRemoveDisplayType("converter", fieldData, _unit)} color="primary" size="small"  >
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              }
+              {(j === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency))
+                && <Box>
+                  <Tooltip title="Remove" className="mt-1">
+                    <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              }
             </Box>
           </Grid>
         ))
@@ -1160,6 +1221,14 @@ const FormTypes = (props) => {
                     displayType="currency"
                     fieldData={fieldData}
                     handleClose={() => setIsExtraDispayType(false)} />}
+              </Box>}
+            {(fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency))
+              && <Box>
+                <Tooltip title="Remove" className="mt-1">
+                  <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
+                    <HighlightOffIcon color="error"/>
+                  </IconButton>
+                </Tooltip>
               </Box>}
           </Box>
         </Grid>
