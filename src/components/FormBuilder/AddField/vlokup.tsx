@@ -120,12 +120,11 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                             <Typography variant="body2">Options</Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={6} container justify="flex-end">
-                            <label className={`cursor-pointer mr-3`} onClick={handleExportExcel} >Export to Excel</label>
-                            <label htmlFor="importFromExcel" className={`cursor-pointer`}>Import from Excel</label>
+                            <label htmlFor="vlookupimportFromExcel" className={`cursor-pointer mr-3`}>Import from Excel</label>
                             <input
                                 onClick={(e: any) => (e.target.value = null)}
-                                id="importFromExcel"
-                                name="importFromExcel"
+                                id="vlookupimportFromExcel"
+                                name="vlookupimportFromExcel"
                                 onChange={handleImportExcel}
                                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                 style={{
@@ -135,6 +134,7 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                                 }}
                                 type="file"
                             />
+                            <label className={`cursor-pointer`} onClick={handleExportExcel} >Export to Excel</label>
                         </Grid>
                     </Grid>
                 </Box>

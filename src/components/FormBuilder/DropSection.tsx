@@ -70,7 +70,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
         setSection(data);
     };
 
-    const addCustomField = (sectionId, fieldData) => {
+    const addCustomField = (sectionId, fieldData, index) => {
         let data = [...section];
         data.forEach((row) => {
             row.field = row.field.filter(i => i._id)
@@ -79,7 +79,12 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                 delete fieldData.createdBy
                 delete fieldData.updatedBy
                 delete fieldData._id
-                row.field.push({ _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 })
+                if (index !== null) {
+                    row.field.splice(index, 0, { _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 });
+                }
+                else {
+                    row.field.push({ _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 })
+                }
             }
         })
         setSection(data);
@@ -146,7 +151,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
         accept: ["field", "fieldmove"],
         drop: (data: any) => {
             if (data.data) {
-                addCustomField(sectionId, data.data)
+                addCustomField(sectionId, data.data, data.index)
             }
             else if (data.type === "field") {
                 addField(sectionId, data.name, data.index)

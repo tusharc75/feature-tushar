@@ -22,6 +22,8 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import Tooltip from '@material-ui/core/Tooltip';
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -49,7 +51,7 @@ const BulkEditDialog = (props) => {
         let _fields = [];
         productData.fields.forEach((_f) => {
             if (stage === "product") {
-                if (_f.fieldName === "qty") {
+                if (_f.fieldName === "qty" || (_f.leval === "template" && _f.sectionType !== "cost")) {
                     _fields.push(_f)
                 }
             }
@@ -129,28 +131,97 @@ const BulkEditDialog = (props) => {
         setIsAddField(false)
     }
 
+
+    const handleRemoveField = (field) => {
+        let newField = initialData.fields.filter((_f) => _f._id !== field._id);
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        setFields(fields.filter((_f) => _f._id !== field._id))
+        EvaluteproductFields(newField)
+    }
+
     const addDisplayType = (displayType, field, displayValue) => {
         let _fieldChanges = fieldChanges;
         if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
             if (displayType === "currency") {
-                _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: field.displayCurrency })
+                _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: [displayValue] })
             }
             else if (displayType === "converter") {
-                _fieldChanges.push({ fieldName: field.fieldName, displayUnits: field.displayUnits })
+                _fieldChanges.push({ fieldName: field.fieldName, displayUnits: [displayValue] })
+            }
+            else if (displayType === "currencyConverter") {
+                let insertData: any = {}
+                insertData.fieldName = field.fieldName;
+                insertData.displayCurrency = []
+                insertData.displayUnits = []
+                if (displayValue.currency) {
+                    insertData.displayCurrency.push(displayValue.currency);
+                }
+                if (displayValue.unit) {
+                    insertData.displayUnits.push(displayValue.unit);
+                }
+                _fieldChanges.push(insertData)
             }
         }
         else {
             _fieldChanges.forEach(_f => {
                 if (_f.fieldName === field.fieldName) {
                     if (displayType === "currency") {
-                        _f.displayCurrency = field.displayCurrency;
+                        _f.displayCurrency.push(displayValue);
                     }
                     else if (displayType === "converter") {
-                        _f.displayUnits = field.displayUnits;
+                        _f.displayUnits.push(displayValue);
+                    }
+                    else if (displayType === "currencyConverter") {
+                        if (displayValue.currency) {
+                            _f.displayCurrency.push(displayValue.currency);
+                        }
+                        if (displayValue.unit) {
+                            _f.displayUnits.push(displayValue.unit);
+                        }
                     }
                 }
             })
         }
+        let newField = initialData.fields
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter((_f) => _f.fieldName === field.fieldName)[0]
+            }
+        })
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
+        setFieldChanges(_fieldChanges)
+    }
+
+    const removeDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        _fieldChanges.forEach(_f => {
+            if (_f.fieldName === field.fieldName) {
+                if (displayType === "currency") {
+                    _f.displayCurrency = _f.displayCurrency.filter(e => e !== displayValue)
+                }
+                else if (displayType === "converter") {
+                    _f.displayUnits = _f.displayUnits.filter(e => e !== displayValue)
+                }
+            }
+        })
+        let newField = initialData.fields
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter((_f) => _f.fieldName === field.fieldName)[0]
+            }
+        })
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
         setFieldChanges(_fieldChanges)
     }
 
@@ -226,33 +297,46 @@ const BulkEditDialog = (props) => {
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
+                                                                    leval="builder-custom"
                                                                     addDisplayType={addDisplayType}
+                                                                    removeDisplayType={removeDisplayType}
                                                                 /> :
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    <FormTypes
-                                                                        fields={initialData.fields}
-                                                                        fieldData={field}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={setFieldValue}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field.isTooltip}
-                                                                        tooltipMessage={field.tooltipMessage}
-                                                                        doNotShowInfoTooltip={true}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        isvlookupReverse={field.isvlookupReverse}
-                                                                        size="small"
-                                                                        disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
-                                                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                                                            setUploadingImageOrFileProgress(completePercentage);
-                                                                        } : null}
-                                                                    />
+                                                                    <Box display="flex" >
+                                                                        <Box flexGrow={1}  >
+                                                                            <FormTypes
+                                                                                fields={initialData.fields}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={setFieldValue}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field.isTooltip}
+                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                decimalPlaces={field.decimalPlaces}
+                                                                                isvlookupReverse={field.isvlookupReverse}
+                                                                                size="small"
+                                                                                disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
+                                                                                imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                                                } : null}
+                                                                            />
+                                                                        </Box>
+                                                                        {field.leval === "builder-custom" &&
+                                                                            <Box>
+                                                                                <Tooltip title="Remove" className="mt-1">
+                                                                                    <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
+                                                                                        <HighlightOffIcon color="error" />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Box>}
+                                                                    </Box>
                                                                 </Grid>
                                                     ))}
                                                 </Grid>
