@@ -188,12 +188,12 @@ const ProductTemplate = () => {
                 <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
             </Grid>
             <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
-                <label htmlFor="importFromExcel" style={{ color: "white" }} className="cursor-pointer mr-3">
+                <label htmlFor="importField" style={{ color: "white" }} className="cursor-pointer mr-3">
                     Import Fields
                     <input
                         onClick={(e: any) => (e.target.value = null)}
-                        id="importFromExcel"
-                        name="importFromExcel"
+                        id="importField"
+                        name="importField"
                         onChange={handleImportFields}
                         style={{
                             opacity: "0",

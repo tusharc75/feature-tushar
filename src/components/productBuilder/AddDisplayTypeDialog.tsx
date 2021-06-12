@@ -24,16 +24,31 @@ const AddDisplayTypeDialog = (props) => {
     const { displayType, handleClose, handleAddDisplayType, fieldData } = props;
     const [initialData, setInitialData] = useState({ currency: "", unit: "" });
     const history = useHistory();
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = (values) => {
-        let displayValue = ""
+        setLoading(true)
         if (displayType === "currency") {
-            displayValue = values.currency
+            handleAddDisplayType(displayType, fieldData, values.currency)
         }
         else if (displayType === "converter") {
-            displayValue = values.unit
+            handleAddDisplayType(displayType, fieldData, values.unit)
         }
-        handleAddDisplayType(displayType, fieldData, displayValue)
+        else if (displayType === "currencyConverter") {
+            let displayValue: any = {}
+            if (values.currency || values.currency !== "") {
+                displayValue["currency"] = values.currency
+            }
+            if (values.unit || values.unit !== "") {
+                displayValue["unit"] = values.unit
+            }
+            if (!displayValue.currency && !displayValue.unit) {
+                alert("please select one currency / unit")
+                setLoading(false)
+                return
+            }
+            handleAddDisplayType(displayType, fieldData, displayValue)
+        }
     };
 
     function validate(values) {
@@ -53,6 +68,18 @@ const AddDisplayTypeDialog = (props) => {
                 errors["unit"] = "please select unit";
             }
             else {
+                if (fieldData.displayUnits.includes(values.unit)) {
+                    errors["unit"] = "unit alreday added";
+                }
+            }
+        }
+        else if (displayType === "currencyConverter") {
+            if (values.currency || values.currency !== "") {
+                if (fieldData.displayCurrency.includes(values.currency)) {
+                    errors["currency"] = "currency alreday added";
+                }
+            }
+            if (values.unit || values.unit !== "") {
                 if (fieldData.displayUnits.includes(values.unit)) {
                     errors["unit"] = "unit alreday added";
                 }
@@ -87,7 +114,7 @@ const AddDisplayTypeDialog = (props) => {
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
                             <Box p={1}>
-                                {displayType === "currency" &&
+                                {(displayType === "currency" || displayType === "currencyConverter") &&
                                     <Box mt={2}>
                                         <FormTypes
                                             values={values}
@@ -104,7 +131,7 @@ const AddDisplayTypeDialog = (props) => {
                                             size="small"
                                         />
                                     </Box>}
-                                {displayType === "converter" &&
+                                {(displayType === "converter" || displayType === "currencyConverter") &&
                                     <Box mt={2}>
                                         <FormTypes
                                             values={values}
@@ -132,6 +159,8 @@ const AddDisplayTypeDialog = (props) => {
                             variant="contained"
                             color="primary"
                             type="submit"
+                            loading={loading}
+                            disabled={loading}
                             size="small"
                             onClick={submitForm}
                         > Add</CustomButton>
