@@ -811,7 +811,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   var scaled = amount / scale;
 
   // format number and add suffix, For eg - 1.2M, 3.2k etc
-  const formattedAmount = `${scaled.toFixed(1)}${suffix}`;
+  const formattedAmount = `${(amount % scale) !== 0 ? scaled.toFixed(1) : scaled}${suffix}`;
 
   const filterCountries = currencies.filter(
     (data) => data?.currencyCode === currencyCode
