@@ -389,6 +389,7 @@ const Roles: FC = () => {
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={!disableDelete}
+              selectedRecords={selectedRecords}
             />
           </div>
 
