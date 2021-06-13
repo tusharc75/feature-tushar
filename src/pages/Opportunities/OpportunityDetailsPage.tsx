@@ -162,13 +162,7 @@ function OpportunityDetailsPage() {
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
-
-          // if (modifiedData["currency"] && modifiedData["amount"]) {
           modifiedData["estimatedAmount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["estimatedAmount"]).shortFormatAmount
-          // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
-          // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
-          // }
-
           setOpportunityData(modifiedData);
 
           let tempExpanded = {

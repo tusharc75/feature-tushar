@@ -9,7 +9,7 @@ import ProjectHeader from "./Header";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
-import CreateProjectStrategy from "./CreateProjectSales";
+import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -399,7 +399,7 @@ const ProjectSales: FC = () => {
   return (
     <>
       {isOpen && (
-        <CreateProjectStrategy
+        <CreateProjectSales
           open={isOpen}
           close={handleClose}
           fetchData={fetchProjects}
