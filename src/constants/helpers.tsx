@@ -778,8 +778,8 @@ export const getUniqueCurrencies = () => {
 //   }
 // };
 
-//  Currencies Symbols
-const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E"];
+//  Currencies Short Form Symbols
+const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
 
 export const formatAmountWithCurrency = (currencyCode, amount) => {
 
