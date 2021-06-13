@@ -21,6 +21,7 @@ const RoleHeader = (props) => {
     rolePermissions,
     showConfirmBox,
     canDelete,
+    selectedRecords
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
@@ -92,6 +93,7 @@ const RoleHeader = (props) => {
           {rolePermissions.isDelete && (
             <>
               <Button
+                disabled={selectedRecords.length == 0}
                 className={styles.action_submit_btn}
                 variant="outlined"
                 color="default"
@@ -116,6 +118,7 @@ const RoleHeader = (props) => {
                 <MenuItem
                   disabled={Boolean(!canDelete)}
                   onClick={() => {
+                    closeActions();
                     showConfirmBox(null);
                   }}
                 >
