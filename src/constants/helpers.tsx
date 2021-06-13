@@ -785,12 +785,14 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 
   if (!currencyCode && !amount) {
     return {
-      shortFormatAmount: "0", fullFormatAmount: "0"
+      shortFormatAmount: "", fullFormatAmount: ""
     }
   }
 
-  if (amount && isNaN(amount)) {
-    amount = 0
+  if (!amount || isNaN(amount)) {
+    return {
+      shortFormatAmount: "", fullFormatAmount: ""
+    }
   }
 
   // what tier? (determines SI symbol)
@@ -808,23 +810,120 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   // scale the number
   var scaled = amount / scale;
 
-  // format number and add suffix
+  // format number and add suffix, For eg - 1.2M, 3.2k etc
   const formattedAmount = `${scaled.toFixed(1)}${suffix}`;
 
-  const currencyData = currencies.find(
+  const filterCountries = currencies.filter(
     (data) => data?.currencyCode === currencyCode
   );
+
+
+  //  Make default language "en"
+  let language = "en";
+
+  let options = {
+    style: "currency",
+    currency: currencyCode,
+  };
+
+  if (Number.isInteger(amount)) {
+    options["maximumFractionDigits"] = 0;
+  }
+
+  if (filterCountries.length === 0) {
+    return {
+      shortFormatAmount: formattedAmount,
+      fullFormatAmount: new Intl.NumberFormat(
+        `${language}`,
+        options
+      ).format(amount)
+        .replace(/^(\D+)/, "$1 ")
+    };
+  }
+
+  let currencyData = filterCountries[0];
+  let combinedAllLanguages = filterCountries[0].languages;
+
+  if (filterCountries.length > 1) {
+    combinedAllLanguages = [...new Set(filterCountries.map(m => m.languages).flat())];
+
+    switch (currencyCode) {
+      case "AUD":
+        currencyData = filterCountries.find(f => f.country === "Australia");
+        break;
+
+      case "CHF":
+        currencyData = filterCountries.find(f => f.country === "Switzerland");
+        break;
+
+      case "EUR":
+        currencyData = filterCountries.find(f => f.country === "France");
+        break;
+
+      case "GBP":
+        currencyData = filterCountries.find(f => f.country === "United Kingdom");
+        break;
+
+      case "NOK":
+        currencyData = filterCountries.find(f => f.country === "Norway");
+        break;
+
+      case "NZD":
+        currencyData = filterCountries.find(f => f.country === "New Zeland");
+        break;
+
+      case "XAF":
+        currencyData = filterCountries.find(f => f.country === "Cameroon");
+        break;
+
+      case "XCD":
+        currencyData = filterCountries.find(f => f.country === "Dominica");
+        break;
+
+      case "XOF":
+        currencyData = filterCountries.find(f => f.country === "Benin");
+        break;
+
+      case "XPF":
+        currencyData = filterCountries.find(f => f.country === "French Polynesia");
+        break;
+    }
+
+    //  just for safe side, if no record found, change the value to initial state;
+    if (!currencyData) {
+      currencyData = filterCountries[0];
+    }
+
+    currencyData.languages = [...new Set(filterCountries.map(m => m.languages).flat())];
+  }
+
+  // Check if that currency's country has multiple language,
+  //  And if it has "en", then pick that one, or else take first of the array of languages
+  if (
+    currencyData.languages.length > 0 &&
+    currencyData.languages.some((d) => d !== language)
+  ) {
+    language = currencyData.languages[0];
+  }
 
   if (!currencyData) {
     return {
       shortFormatAmount: formattedAmount,
-      fullFormatAmount: amount,
+      fullFormatAmount: new Intl.NumberFormat(
+        `${language}`,
+        options
+      ).format(amount).replace(/^(\D+)/, "$1 ")
     };
   }
 
   return {
     shortFormatAmount: `${currencyData.symbolNative} ${formattedAmount}`,
-    fullFormatAmount: `${currencyData.symbolNative} ${amount}`,
+    fullFormatAmount: new Intl.NumberFormat(
+      `${language}-${currencyData.countryCode}`,
+      options
+    ).format(amount).replace(/^(\D+)/, "$1 ")
+
+    // `${currencyData.symbolNative} ${amount}`,
   };
 }
 
