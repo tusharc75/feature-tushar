@@ -19,8 +19,8 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from "@material-ui/icons/AddCircle";
 
 const ProductBuilderSchema = Yup.object().shape({
-    productCategory: Yup.string()
-        .required("please select product category"),
+    // productCategory: Yup.string()
+    //     .required("please select product category"),
     productTemplate: Yup.string()
         .required("please select product template"),
 });
@@ -33,7 +33,7 @@ const SelectionDialog = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
-    const [productTemplate, setProductTemplate] = useState([{optionLabel: "Standard", optionValue: ""}]);
+    const [productTemplate, setProductTemplate] = useState([{optionLabel: "Standard", optionValue: "Standard"}]);
 
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     // const [productCategory, setProductCategory] = useState([]);
@@ -57,7 +57,7 @@ const SelectionDialog = (props) => {
                 }
             });
         }else{
-            setProductTemplate([{optionLabel: "Standard", optionValue: ""}])
+            setProductTemplate([{optionLabel: "Standard", optionValue: "Standard"}])
         }
     }
 
@@ -142,7 +142,7 @@ const SelectionDialog = (props) => {
                                             type={"dropDown"}
                                             options={productCategory}
                                             setFieldValue={setFieldValue}
-                                            required={true}
+                                            required={false}
                                             doNotShowInfoTooltip={true}
                                             fullWidth
                                             onChange={(e, val) => {
@@ -214,6 +214,8 @@ const SelectionDialog = (props) => {
                                         required={true}
                                         fullWidth
                                         onChange={(e, val) => {
+                                            console.log(productTemplate);
+                                            
                                             setFieldValue("productTemplate", val && val.optionValue ? val.optionValue : "")
                                         }}
                                         size="small"
