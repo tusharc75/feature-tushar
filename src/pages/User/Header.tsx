@@ -15,7 +15,11 @@ const Header = (props) => {
     showConfirmBox,
     canDelete,
     openRolesDialog,
+    openApprovalProcessDialog,
+    openGlobalRolesDialog,
+    openRegionalRolesDialog,
     rolesActionDisabled,
+    openDOADialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -92,15 +96,46 @@ const Header = (props) => {
                   </MenuItem>
                 )}
                 {userPermissions.isUpdate && (
-                  <MenuItem
-                    disabled={rolesActionDisabled}
-                    onClick={() => {
-                      openRolesDialog();
-                      closeActions();
-                    }}
-                  >
-                    Assign Roles
-                  </MenuItem>
+                  <>
+                  
+                   <MenuItem
+                   disabled={rolesActionDisabled}
+                   onClick={() => {
+                     openApprovalProcessDialog();
+                     closeActions();
+                   }}
+                 >
+                   Set Approval Process
+                 </MenuItem>
+                 
+                    <MenuItem
+                      disabled={rolesActionDisabled}
+                      onClick={() => {
+                        openGlobalRolesDialog();
+                        closeActions();
+                      }}
+                    >
+                      Assign company wide roles
+                    </MenuItem>
+                    <MenuItem
+                      disabled={rolesActionDisabled}
+                      onClick={() => {
+                        openRegionalRolesDialog();
+                        closeActions();
+                      }}
+                    >
+                      Assign region wide functional roles
+                    </MenuItem>
+                    <MenuItem
+                      disabled={rolesActionDisabled}
+                      onClick={() => {
+                        openDOADialog();
+                        closeActions();
+                      }}
+                    >
+                      Assign DOA's
+                    </MenuItem>
+                  </>
                 )}
               </Menu>
             </>

@@ -383,7 +383,7 @@ const UserDetailsPage = () => {
     };
     // setHasPermissionToUpdateApprovalProcess(false);
     axiosInstance()
-      .post("/user/permission-setup", newData)
+      .put("/user/permission-setup", newData)
       .then(({ data }) => {
         // setHasPermissionToUpdateApprovalProcess(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
         toastConfig.setToastConfig({
@@ -912,7 +912,7 @@ const UserDetailsPage = () => {
           userList={userList}
           doa={doa}
           doaCurrency={doaCurrency}
-          userSelected={id}
+          userSelected={[id]}
           open={doaDialogOpen}
           onSuccess={() => {
             setDoaDialogOpen(false);
