@@ -467,9 +467,9 @@ const User: FC = () => {
         <ApprovalProcessDialog 
           openApprovalProcessDialog={showApprovalProcessDialog}
           hasPermissionToUpdateApprovalProcess={permissions}
-          onSuccess={()=>{
+          onSuccess={()=>
             setShowApprovalProcessDialog(false)
-            fetchUsers()}}
+            }
           handleCloseDialog={()=>setShowApprovalProcessDialog(false)}
           userIds={selectedRecords.map((user)=>user._id)}
         />
