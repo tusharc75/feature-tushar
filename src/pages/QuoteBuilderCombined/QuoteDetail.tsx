@@ -87,7 +87,10 @@ import ProductGrid from "./ProductGrid";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import Dialog from "@material-ui/core/Dialog";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, customerContact } from "../../constants/helpers";
+import {
+  CustomDialogTransition,
+  customerContact,
+} from "../../constants/helpers";
 
 const Accordion = withStyles({
   root: {
@@ -316,12 +319,13 @@ function QuoteDetail() {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
+  const [deletingDOA, setDeletingDOA] = useState(false);
 
   const [isCloning, setCloning] = useState(false);
   const [quoteData, setQuoteData] = useState(null);
   const [pdfFileBase64, setPdfFileBase64] = useState(null);
   const [excelFileBase64, setExcelFileBase64] = useState(null);
-  const [copyOfquoteDataToUpdate, setCopyOfquoteDataToUpdate] = useState(null);
+  const [copyOfquoteData, setCopyOfquoteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [quoteFields, setquoteFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
@@ -355,14 +359,12 @@ function QuoteDetail() {
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
   const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([]);
-  const [PBversionStatus, setPBversionStatus] = useState("");
   const [loadPB, setLoadPB] = useState(false);
 
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [query, setQuery] = useState({ page: 0, limit: 5 });
   const [TandC, setTNC] = useState([]);
-  const [searchVal, setSearchVal] = useState("");
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
@@ -457,6 +459,12 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, []);
 
+  /**
+   *
+   * @param version
+   * Fetch quote data with versions
+   *
+   */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
       setLoading(true);
@@ -469,16 +477,17 @@ function QuoteDetail() {
           ]);
 
           // handleAllowToEditList(data);
-          setCopyOfquoteDataToUpdate(data);
-
+          setQuoteData(data);
+          
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData["estimatedAmount"] = formatAmountWithCurrency(
-            data["currency"],
-            data["estimatedAmount"]
-          ).fullFormatAmount;
-          setQuoteData(modifiedData);
-          fetchUserEmails(modifiedData);
+            modifiedData["currency"],
+            modifiedData["estimatedAmount"]
+          ).shortFormatAmount;
+          setCopyOfquoteData(modifiedData);
+
+          fetchUserEmails(data);
 
           handleContactsEmails(data);
 
@@ -598,7 +607,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .fullFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -673,6 +682,10 @@ function QuoteDetail() {
     nameRenderer: NameRenderer,
   };
 
+  /**
+   * @TNC HANDLER
+   */
+
   const fetchTermsAndConditions = () => {
     dispatch({ type: "loading", loadingTNC: true });
 
@@ -703,99 +716,48 @@ function QuoteDetail() {
   };
 
   const fetchUserEmails = (quoteData) => {
-    let ownerCollaboratorEmails = []
+    let ownerCollaboratorEmails = [];
     if (quoteData?.collaborator && quoteData.collaborator.length) {
       ownerCollaboratorEmails = quoteData.collaborator.map((o) => o?.email);
     }
     if (quoteData?.owner?.email) {
-      ownerCollaboratorEmails.push(quoteData.owner.email)
+      ownerCollaboratorEmails.push(quoteData.owner.email);
     }
-    let toEmails = []
-    if (quoteData?.customerContactName && quoteData?.customerContactName.length) {
-      toEmails = quoteData?.customerContactName.map(o => o.email)
+    let toEmails = [];
+    if (
+      quoteData?.customerContactName &&
+      quoteData?.customerContactName.length
+    ) {
+      toEmails = quoteData?.customerContactName.map((o) => o.email);
       setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
     } else {
       axiosInstance()
-        .get(`/${customerAccount.accountApi}/related/${quoteData?.customerAccountName?.optionValue}`)
+        .get(
+          `/${customerAccount.accountApi}/related/${quoteData?.customerAccountName?.optionValue}`
+        )
         .then(({ data: { data } }) => {
-          let relatedContacts = data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]]["Account_Name"]
-            ? data[sidebarResource[customerContact.contactResource]]["Account_Name"]
-            : []
+          let relatedContacts =
+            data[sidebarResource[customerContact.contactResource]] &&
+              data[sidebarResource[customerContact.contactResource]][
+              "Account_Name"
+              ]
+              ? data[sidebarResource[customerContact.contactResource]][
+              "Account_Name"
+              ]
+              : [];
           if (relatedContacts.length) {
-            toEmails = relatedContacts.map(o => o?.email)
+            toEmails = relatedContacts.map((o) => o?.email);
           }
-          setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
-        }).catch((err) => {
+          setUserEmails({
+            cc: [...ownerCollaboratorEmails],
+            to: [...toEmails],
+          });
+        })
+        .catch((err) => {
           toastConfig.setToastConfig(err);
         });
     }
-
   };
-
-
-  // const columnsTNC = [
-  //   {
-  //     field: "isChecked",
-  //     headerName: "Select",
-  //     renderCell: (params) => (
-  //       <Checkbox
-  //         color="primary"
-  //         // disabled={!params.canDelete}
-  //         checked={params.value}
-  //         onClick={(ev) => {
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-  //           var prevvalue = gridData[indexOfRecord].isChecked;
-  //           let newTNC = TandC;
-  //           if (prevvalue) {
-  //             gridData[indexOfRecord].isChecked = false;
-  //             const index = newTNC.indexOf(gridData[indexOfRecord]._id);
-  //             newTNC.splice(index, 1);
-  //           } else {
-  //             gridData[indexOfRecord].isChecked = true;
-  //             newTNC.push(gridData[indexOfRecord]._id);
-  //             setRadioIndex(indexOfRecord);
-  //           }
-  //           if (newTNC.length === 0) {
-  //             setRadioIndex(-1);
-  //           }
-  //           setDataRows([...gridData]);
-  //           setTNC(newTNC);
-  //           handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
-
-  //           const checkedRecords = gridData.filter((d) => d.isChecked === true);
-  //         }}
-  //       />
-  //     ),
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     width: 75,
-  //   },
-  //   {
-  //     field: "TACName",
-  //     headerName: "Name",
-  //     width: 500,
-  //     renderCell: (params) => (
-  //       <Link
-  //         onClick={() => {
-  //           setShowCreateDialog(true);
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-
-  //           setEditRecordTNC(cloneDeep(gridData[indexOfRecord]));
-  //         }}
-  //       >
-  //         <CustomRenderCell value={params?.value} />
-  //       </Link>
-  //     ),
-  //   },
-  // ];
 
   const refreshProducts = (data) => {
     fetchDoaLimit();
@@ -820,18 +782,6 @@ function QuoteDetail() {
     }
     productBuilderdatatoQuoteBuilderdata(data);
   };
-
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      setQuery((prevState) => ({
-        ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
 
   const createImagePDF = (view, send) => {
     axiosInstance()
@@ -1177,6 +1127,8 @@ function QuoteDetail() {
       });
       const data = new Blob([excelBuffer], { type: fileType });
 
+      console.log(data);
+
       if (send) {
         generateBase64forFile(data, "excel");
       } else {
@@ -1332,7 +1284,6 @@ function QuoteDetail() {
   };
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
-    console.log(BuilderData);
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
@@ -1418,23 +1369,24 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
       setNextStep(false);
     }
+    console.log(totalSellingPrice);
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
     setTotalProfit(
-      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalProfit)
+      formatAmountWithCurrency(quoteData.currency, totalProfit)
     );
     setTotalMargin(
-      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalMargin)
+      formatAmountWithCurrency(quoteData.currency, totalMargin)
     );
     setTotalSale(
       formatAmountWithCurrency(
-        copyOfquoteDataToUpdate.currency,
+        quoteData.currency,
         totalSellingPrice
       )
     );
     setTotalCost(
-      formatAmountWithCurrency(copyOfquoteDataToUpdate.currency, totalCost)
+      formatAmountWithCurrency(quoteData.currency, totalCost)
     );
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
@@ -1536,6 +1488,7 @@ function QuoteDetail() {
           .then(({ data }) => {
             handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
             fetchQuoteData(currentVersion);
+            console.log(data);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -1649,8 +1602,48 @@ function QuoteDetail() {
       contentType: excelFileBase64.split(";")[0].split(":")[1],
     });
   }
-  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1)
+
+  if (ProcessStatus !== "Quote Builder" && currentTabIndex === 1) {
     setCurrentTabIndex(0);
+  }
+
+  const deleteVersion = () => {
+    let versions = quoteData?.versions;
+
+    delete versions[currentVersion];
+
+    setDeletingDOA(true);
+    axiosInstance()
+      .delete(`${qbApi}/${id}/${currentVersion}`)
+      .then(() => {
+        console.log("Succfully Deleted.");
+        fetchQuoteData(0);
+        setDeletingDOA(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDeletingDOA(false);
+      });
+  };
+
+  const ifQuoteApproved = () => {
+    let approved = false;
+    let versionApproved = currentVersion;
+
+    if (quoteData)
+      versions.forEach((v) => {
+        if (quoteData.versions[v].status.includes("Accepted by Customer")) {
+          approved = true;
+          versionApproved = v;
+        }
+      });
+
+    return {
+      approved,
+      versionApproved,
+    };
+  };
+
   return (
     <>
       <Layout>
@@ -1763,7 +1756,7 @@ function QuoteDetail() {
                           </Box>
                         </Grid>
                       </AccordionSummary>
-                      <DetailsPage data={quoteData} fields={quoteFields} />
+                      <DetailsPage data={copyOfquoteData} fields={quoteFields} />
                     </Accordion>
                   )}
                 </>
@@ -1775,20 +1768,13 @@ function QuoteDetail() {
                 container
                 className="detailHeader d-flex align-items-center form-label-style mb-0"
               >
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={6}
-                  className="justify-content-start"
-                >
-                  <h2>Product Information</h2>
+                <Grid item xs={12} sm={4} className="justify-content-start">
+                  <h2 className="mr-2">Product Information</h2>
                 </Grid>
                 <Grid
                   item
                   xs={12}
-                  sm={6}
-                  md={6}
+                  sm={8}
                   className="d-flex justify-content-end"
                 >
                   <select
@@ -1802,30 +1788,42 @@ function QuoteDetail() {
                       </option>
                     ))}
                   </select>
-                  <Button
-                    disabled={isCloning}
-                    variant="contained"
-                    type="button"
-                    size="small"
-                    startIcon={
-                      isCloning ? (
-                        <CircularProgress color="inherit" size={16} />
-                      ) : (
-                        <BiLayerPlus />
-                      )
-                    }
-                    className="mx-1"
-                    color="primary"
-                    onClick={() => {
-                      cloneVersion();
-                    }}
-                  >
-                    {isCloning ? (
-                      <>Cloning v{currentVersion}</>
-                    ) : (
-                      `Clone Version ${currentVersion}`
-                    )}
-                  </Button>
+                  {ifQuoteApproved().approved === false && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        disabled={deletingDOA}
+                        onClick={deleteVersion}
+                      >
+                        Delete Version
+                      </Button>
+                      <Button
+                        disabled={isCloning}
+                        variant="contained"
+                        type="button"
+                        size="small"
+                        startIcon={
+                          isCloning ? (
+                            <CircularProgress color="inherit" size={16} />
+                          ) : (
+                            <BiLayerPlus />
+                          )
+                        }
+                        className="mx-1"
+                        color="primary"
+                        onClick={() => {
+                          cloneVersion();
+                        }}
+                      >
+                        {isCloning ? (
+                          <>Cloning v{currentVersion}</>
+                        ) : (
+                          `Clone Version ${currentVersion}`
+                        )}
+                      </Button>{" "}
+                    </>
+                  )}
                   <Button
                     variant="contained"
                     type="button"
@@ -1854,6 +1852,7 @@ function QuoteDetail() {
                     nextStep={nextStep}
                     versionStatus={versionStatus}
                     loading={loading}
+                    approvedQuote={ifQuoteApproved()}
                   />
                 ) : (
                   <Steps
@@ -1865,6 +1864,7 @@ function QuoteDetail() {
                     nextStep={nextStep}
                     versionStatus={versionStatus}
                     loading={loading}
+                    approvedQuote={ifQuoteApproved()}
                   />
                 )}
               </div>
@@ -1926,9 +1926,7 @@ function QuoteDetail() {
                         </span>
                         <span>Total Margin</span>
                       </div>
-                      {/* <div className="quoteBox">
-                          <span className="quoteAmount">{versionStatus}</span>
-                        </div> */}
+
                       <div></div>
                     </Grid>
                     <div></div>
@@ -2054,16 +2052,18 @@ function QuoteDetail() {
                         (ProcessStatus === "Send To Customer" &&
                           versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end doaAction">
-                          <Button
-                            onClick={() => handleCases()}
-                            disabled={!DOAreq && !Customerreq}
-                            startIcon={<BiMailSend />}
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                          >
-                            {buttonMessage}
-                          </Button>
+                          {!ifQuoteApproved().approved && (
+                            <Button
+                              onClick={() => handleCases()}
+                              disabled={(!DOAreq && !Customerreq) || loading}
+                              startIcon={<BiMailSend />}
+                              variant="contained"
+                              size="small"
+                              color="primary"
+                            >
+                              {buttonMessage}
+                            </Button>
+                          )}
                         </div>
                       ) : null}
                     </Grid>
@@ -2224,7 +2224,7 @@ function QuoteDetail() {
               setOpenUpdateDialog(false);
             }}
             isNew={false}
-            dataToUpdate={copyOfquoteDataToUpdate}
+            dataToUpdate={quoteData}
             resource={null}
             isRedirectTodetailPage={false}
             contactId={null}
@@ -2267,7 +2267,8 @@ function QuoteDetail() {
               cc={userEmails?.cc}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}

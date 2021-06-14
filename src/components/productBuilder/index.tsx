@@ -129,7 +129,7 @@ const ProductBuilder = (props) => {
                     _fields.forEach((ele) => {
                         if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                             if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                                ele.displayUnits.forEach((_unit) => {
+                                ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
                                     let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
                                     let fieldLabel = ele.fieldLabel + " " + _unit
                                     if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
@@ -147,8 +147,8 @@ const ProductBuilder = (props) => {
                                 })
                             }
                             else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                                ele.displayUnits.forEach((_unit) => {
-                                    ele.displayCurrency.forEach((_currency) => {
+                                ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
+                                    ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
                                         let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
                                         let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
                                         if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
@@ -167,7 +167,7 @@ const ProductBuilder = (props) => {
                                 })
                             }
                             else if (ele.type === "currencyAmount") {
-                                ele.displayCurrency.forEach((_currency) => {
+                                ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
                                     let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
                                     let fieldLabel = ele.fieldLabel + " " + _currency
                                     if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
@@ -345,6 +345,13 @@ const ProductBuilder = (props) => {
         data._ids = selectedRecords.map(d => d.id)
         data.field = field
         data.field.leval = "builder-custom"
+        console.log(addFieldData.fields)
+        console.log(data.field)
+        if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName).length) {
+            if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName)[0].sectionType === "cost") {
+                data.field.sectionType = "cost";
+            }
+        }
         axiosInstance().post(`/productbuilder/addField`, data).then(({ data: { data } }) => {
             fetchProduct(productBuilderId)
             setIsAddField(false)
@@ -352,7 +359,6 @@ const ProductBuilder = (props) => {
             toastConfig.setToastConfig(error);
         });
     }
-
 
     const handelOpenBulkEdit = () => {
         const rows: any = product.filter((data) => selectedRecords.some(rec => rec._id === data._id))
@@ -448,7 +454,7 @@ const ProductBuilder = (props) => {
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder} openFrom="builder"
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
-        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} stage={stage} />}
+        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => { setProductData(null); fetchProduct(productBuilderId) }} stage={stage} />}
         {isAddField && <AddField refrence="builder" section={addFieldData.section}
             fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
         }
