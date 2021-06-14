@@ -334,7 +334,8 @@ const Steps = (props) => {
                         !nextStep ||
                         versionStatus.includes("Accepted  by DOA") ||
                         versionStatus.includes("Sent to Customer") ||
-                        steps[currentStep] === "Send To Customer"
+                        steps[currentStep] === "Send To Customer" ||
+                        versionStatus === "Sent to Customer"
                       }
                       endIcon={<IoIosArrowDroprightCircle />}
                     >
