@@ -912,7 +912,7 @@ const UserDetailsPage = () => {
           userList={userList}
           doa={doa}
           doaCurrency={doaCurrency}
-          userSelected={id}
+          userSelected={[id]}
           open={doaDialogOpen}
           onSuccess={() => {
             setDoaDialogOpen(false);
