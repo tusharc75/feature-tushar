@@ -26,7 +26,6 @@ import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
-import CustomButton from "../../components/Helpers/CustomButton"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -305,16 +304,15 @@ const Steps = (props) => {
             )}
             {versionStatus === "Sent to Customer" && (!hideReminderButton) ? (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <CustomButton
+                <Button
                   className="mx-1"
                   color="primary"
                   variant="contained"
                   type="button"
                   size="small"
-                  loading={reminderLoading}
                   disabled={reminderLoading}
                   onClick={handleSendReminder}
-                >Send Reminder</CustomButton>
+                >Send Reminder</Button>
               </div>
             ) : null}
             {versionStatus.includes("Accepted by Customer") && (
