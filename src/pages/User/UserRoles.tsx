@@ -77,6 +77,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                   />
                   {permissions.user.isUpdate && (
                     <ListItemSecondaryAction
+                      className={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "cursor-stop" : "cursor-pointer"}
                       title={
                         currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin
                           ? "Role can not be deleted"

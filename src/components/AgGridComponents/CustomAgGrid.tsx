@@ -106,7 +106,7 @@ export const intialState = {
 }
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
-    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200,
+    setGridApi, refreshGrid = null, allowSelection = true, allowAction = true, actionWidth = 200,
     isClientSideGrid = false, handleGridReady = null }) {
 
     const [, setColumns] = useState(columns);
@@ -168,7 +168,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
 
     return (
         <>
-            <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
+            <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} refreshGrid={refreshGrid} />
 
             <div className="ag-theme-material ag-grid-listing-grid" style={{zIndex:-500,position:'inherit'}}>
                 <AgGridReact
