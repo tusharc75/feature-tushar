@@ -110,7 +110,7 @@ const Header = (props) => {
                      closeActions();
                    }}
                  >
-                   Approval Process
+                   Set Approval Process
                  </MenuItem>
                  </>
                 )}
