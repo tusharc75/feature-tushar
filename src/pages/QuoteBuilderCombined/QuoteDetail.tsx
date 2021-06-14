@@ -478,7 +478,7 @@ function QuoteDetail() {
 
           // handleAllowToEditList(data);
           setQuoteData(data);
-          
+
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData["estimatedAmount"] = formatAmountWithCurrency(
@@ -718,7 +718,7 @@ function QuoteDetail() {
   const fetchUserEmails = (quoteData) => {
     let ownerCollaboratorEmails = [];
     if (quoteData?.collaborator && quoteData.collaborator.length) {
-      ownerCollaboratorEmails = quoteData.collaborator.map((o) => o?.email);
+      ownerCollaboratorEmails = quoteData.collaborator.filter((o) => o?.email).map((o) => o?.email);
     }
     if (quoteData?.owner?.email) {
       ownerCollaboratorEmails.push(quoteData.owner.email);
@@ -728,7 +728,7 @@ function QuoteDetail() {
       quoteData?.customerContactName &&
       quoteData?.customerContactName.length
     ) {
-      toEmails = quoteData?.customerContactName.map((o) => o.email);
+      toEmails = quoteData?.customerContactName.filter((o) => o?.email).map((o) => o.email);
       setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
     } else {
       axiosInstance()
@@ -1592,6 +1592,7 @@ function QuoteDetail() {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
       contentType: pdfFileBase64.split(";")[0].split(":")[1],
+      name: `Quotation v${currentVersion}`
     });
   }
   if (excelFileBase64) {
@@ -1600,6 +1601,7 @@ function QuoteDetail() {
         parseInt(excelFileBase64.indexOf(",") + 1)
       ),
       contentType: excelFileBase64.split(";")[0].split(":")[1],
+      name: `Quotation v${currentVersion}`
     });
   }
 
@@ -2264,7 +2266,7 @@ function QuoteDetail() {
               isQuoteBuilder={true}
               // users={quoteData.collaborator}
               options={userEmails?.to}
-              cc={userEmails?.cc}
+              cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
               subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""

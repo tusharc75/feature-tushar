@@ -296,6 +296,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                         <img src={getFileIconSrc(attachment?.contentType)}
                                             className={emailStyles.file}
                                             alt="attchment" />
+                                        <Typography noWrap variant="body2" >
+                                            {attachment && attachment?.name ? attachment?.name : "Quotation"}
+                                        </Typography>
                                     </Paper>
                                 </Grid>
                             </>
