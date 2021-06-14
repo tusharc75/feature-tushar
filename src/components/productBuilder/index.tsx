@@ -59,7 +59,7 @@ const ProductBuilder = (props) => {
 
 
     const ActionsRenderer = params => <>
-        <Tooltip title="Clone">
+        {/* <Tooltip title="Clone">
             <IconButton
                 size="small"
                 aria-label="Clone"
@@ -71,7 +71,7 @@ const ProductBuilder = (props) => {
             >
                 <FileCopyIcon fontSize="small" color="primary" />
             </IconButton>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip title="Edit" >
             <IconButton aria-label="Edit" onClick={() => { setProductData(params.data) }}  >
                 <EditIcon fontSize="small" color="primary" />
@@ -450,7 +450,7 @@ const ProductBuilder = (props) => {
                     isClientSideGrid={true} />
             }
         </Box>
-        {isAddNewProduct && <CreateProduct isClone={isClone} productId={productId} handleClose={() => setIsAddNewProduct(false)}
+        {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder} openFrom="builder"
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}

@@ -18,6 +18,7 @@ import moment from "moment";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import SearchBox from '../../Helpers/SearchBox'
 import { CustomDialogTransition } from "../../../constants/helpers";
+import { CommonRenderer } from "../../AgGridComponents/CustomAgGridCellRenderers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 const ignoreField = ["qty"]
@@ -37,8 +38,26 @@ const AddExistingProduct = (props) => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
 
-    const frameworkComponents = {
 
+    const ProductCategoryRenderer = params => <>
+        {
+            params.data.productCategory || params.data.productCategory === 0 ?
+                typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
+                : <NoDataCell />
+        }
+    </>
+    const ProductTemplateRenderer = params => <>
+        {
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
+                : <NoDataCell />
+        }
+    </>
+
+    const frameworkComponents = {
+        commonRenderer: CommonRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const getQueryString = () => {
@@ -83,8 +102,6 @@ const AddExistingProduct = (props) => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
-                productTemplateDisplayValue: u.productTemplate?.optionLabel,
-                productCategoryDisplayValue: u.productCategory?.optionLabel,
             }));
             let column = []
             data.data.forEach((row) => {
@@ -145,35 +162,20 @@ const AddExistingProduct = (props) => {
                     }
                     else {
                         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = {}
+                            let col: any = {};
+                            col.field = ele.fieldName;
+                            col.headerName = ele.fieldLabel;
+                            col.width = 180;
+                            col.show = true
                             if (ele.fieldName === "productCategory") {
-                                col.headerName = ele.fieldLabel
-                                col.width = 180
-                                col.show = true
-                                col.field = "productCategoryDisplayValue"
-                                col.leval = ele.leval
-                                if (!column.some(c => c.field === "productCategoryDisplayValue")) {
-                                    column.push(col)
-                                }
+                                col.cellRenderer = "productCategoryRenderer"
                             }
-                            else if (ele.fieldName === "productTemplate") {
-                                col.headerName = ele.fieldLabel
-                                col.width = 180
-                                col.show = true
-                                col.field = "productTemplateDisplayValue"
-                                col.leval = ele.leval
-                                if (!column.some(c => c.field === "productTemplateDisplayValue")) {
-                                    column.push(col)
-                                }
+                            if (ele.fieldName === "productTemplate") {
+                                col.cellRenderer = "productTemplateRenderer"
                             }
-                            else {
-                                col.field = ele.fieldName
-                                col.headerName = ele.fieldLabel
-                                col.width = 180
-                                col.show = true
-                                col.leval = ele.leval
-                                column.push(col)
-                            }
+                            col.order = ele.order;
+                            col.leval = ele.leval;
+                            column.push(col);
                         }
                     }
                 })
