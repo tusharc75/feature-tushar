@@ -43,11 +43,12 @@ const useStyles = makeStyles((theme) => ({
   stepperNext: {
     marginTop: "8px",
     position: "absolute",
-    right: "22px",
+    right: "12px",
+    bottom: "0",
     color: theme.palette.primary.main,
   },
   pStepper: {
-    padding: "45px 7px 10px 7px !important",
+    padding: "12px 7px 42px 7px !important",
     // border: "1px solid #ece4e4",
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
