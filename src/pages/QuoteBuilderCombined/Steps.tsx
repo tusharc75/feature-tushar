@@ -43,11 +43,12 @@ const useStyles = makeStyles((theme) => ({
   stepperNext: {
     marginTop: "8px",
     position: "absolute",
-    right: "22px",
+    right: "12px",
+    bottom: "0",
     color: theme.palette.primary.main,
   },
   pStepper: {
-    padding: "45px 7px 10px 7px !important",
+    padding: "12px 7px 42px 7px !important",
     // border: "1px solid #ece4e4",
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
@@ -123,6 +124,9 @@ const Steps = (props) => {
     approvedQuote,
     DOAlimit,
     totalCost,
+    handleSendReminder = null,
+    reminderLoading = false,
+    hideReminderButton = false
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -243,11 +247,12 @@ const Steps = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   return (
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-        approvedQuote.approved ? (
+          approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -297,6 +302,19 @@ const Steps = (props) => {
                 </Typography>
               </div>
             )}
+            {versionStatus === "Sent to Customer" && (!hideReminderButton) ? (
+              <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                <Button
+                  className="mx-1"
+                  color="primary"
+                  variant="contained"
+                  type="button"
+                  size="small"
+                  disabled={reminderLoading}
+                  onClick={handleSendReminder}
+                >Send Reminder</Button>
+              </div>
+            ) : null}
             {versionStatus.includes("Accepted by Customer") && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <FcApproval size={30} />
