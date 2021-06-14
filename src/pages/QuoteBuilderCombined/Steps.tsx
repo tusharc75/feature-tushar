@@ -122,10 +122,15 @@ const Steps = (props) => {
     versionStatus,
     loading,
     approvedQuote,
+    DOAlimit,
+    totalCost,
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
+  const totalPrice = totalCost
+    ? totalCost.split("$ ")[1].split(",").join("")
+    : 0;
 
   const ColorlibStepIcon = (props: StepIconProps) => {
     const classes = useColorlibStepIconStyles();
@@ -252,6 +257,17 @@ const Steps = (props) => {
           </div>
         ) : (
           <>
+            {steps[currentStep] === "DOA Process" && totalPrice > DOAlimit && (
+              <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                <Typography
+                  className={classes.rejected}
+                  variant="body1"
+                  style={{ fontWeight: "normal" }}
+                >
+                  User doesn't have DOA setup for this amount
+                </Typography>
+              </div>
+            )}
             {versionStatus === "Sent for DOA" && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <FcClock size={30} />
@@ -335,7 +351,8 @@ const Steps = (props) => {
                         !nextStep ||
                         versionStatus.includes("Accepted  by DOA") ||
                         versionStatus.includes("Sent to Customer") ||
-                        steps[currentStep] === "Send To Customer"
+                        steps[currentStep] === "Send To Customer" ||
+                        versionStatus === "Sent to Customer"
                       }
                       endIcon={<IoIosArrowDroprightCircle />}
                     >

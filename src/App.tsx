@@ -82,6 +82,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "./StateProvider/actionTypes";
 import NotFound from "./pages/NotFound";
+import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -430,6 +431,11 @@ function App() {
           <PrivateRoute exact path={routes.quoteBuilder.path}>
             <QuoteBuilderCombined />
           </PrivateRoute>
+
+          <Route exact path="/inline-grid">
+            <CustomInlineEditableAgGrid />
+          </Route>
+
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
