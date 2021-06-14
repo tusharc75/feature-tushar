@@ -33,7 +33,7 @@ const SelectionDialog = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
-    const [productTemplate, setProductTemplate] = useState([]);
+    const [productTemplate, setProductTemplate] = useState([{optionLabel: "Standard", optionValue: ""}]);
 
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     // const [productCategory, setProductCategory] = useState([]);
@@ -48,7 +48,6 @@ const SelectionDialog = (props) => {
             setProductCategory(data.data)
         });
     }, []);
-
     const handleChangeCategory = (value) => {
         if (value && value !== "") {
             axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
@@ -57,6 +56,8 @@ const SelectionDialog = (props) => {
                     setInitialData({ productCategory: value, productTemplate: data.data[0].optionValue })
                 }
             });
+        }else{
+            setProductTemplate([{optionLabel: "Standard", optionValue: ""}])
         }
     }
 
