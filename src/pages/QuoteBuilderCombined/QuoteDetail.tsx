@@ -465,9 +465,10 @@ function QuoteDetail() {
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+
           setCustomizedRoutes([
             { title: "Quote", path: routes.quoteBuilder.path },
-            { title: `${data.quoteName}` },
+            { title: `${data?.quoteName}` },
           ]);
 
           // handleAllowToEditList(data);
@@ -479,6 +480,7 @@ function QuoteDetail() {
             modifiedData["currency"],
             modifiedData["estimatedAmount"]
           ).shortFormatAmount;
+
           setCopyOfquoteData(modifiedData);
 
           fetchUserEmails(data);
@@ -486,7 +488,7 @@ function QuoteDetail() {
           handleContactsEmails(data);
 
           handleMainPoints(data);
-          setHeadingLbl(data.quoteName);
+          setHeadingLbl(data?.quoteName);
           var keys = Object.keys(data.versions);
           setVersions(keys);
           var ps = "";
@@ -601,7 +603,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -634,7 +636,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -712,7 +714,7 @@ function QuoteDetail() {
   const fetchUserEmails = (quoteData) => {
     let ownerCollaboratorEmails = [];
     if (quoteData?.collaborator && quoteData.collaborator.length) {
-      ownerCollaboratorEmails = quoteData.collaborator.map((o) => o?.email);
+      ownerCollaboratorEmails = quoteData.collaborator.filter((o) => o?.email).map((o) => o?.email);
     }
     if (quoteData?.owner?.email) {
       ownerCollaboratorEmails.push(quoteData.owner.email);
@@ -722,7 +724,7 @@ function QuoteDetail() {
       quoteData?.customerContactName &&
       quoteData?.customerContactName.length
     ) {
-      toEmails = quoteData?.customerContactName.map((o) => o.email);
+      toEmails = quoteData?.customerContactName.filter((o) => o?.email).map((o) => o.email);
       setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
     } else {
       axiosInstance()
@@ -732,12 +734,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1531,7 +1533,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1577,6 +1579,7 @@ function QuoteDetail() {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
       contentType: pdfFileBase64.split(";")[0].split(":")[1],
+      name: `Quotation v${currentVersion}`
     });
   }
   if (excelFileBase64) {
@@ -1585,6 +1588,7 @@ function QuoteDetail() {
         parseInt(excelFileBase64.indexOf(",") + 1)
       ),
       contentType: excelFileBase64.split(";")[0].split(":")[1],
+      name: `Quotation v${currentVersion}`
     });
   }
 
@@ -1683,9 +1687,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1741,10 +1745,13 @@ function QuoteDetail() {
                           </Box>
                         </Grid>
                       </AccordionSummary>
-                      <DetailsPage
-                        data={copyOfquoteData}
-                        fields={quoteFields}
-                      />
+                      {
+                        copyOfquoteData ?
+                          <DetailsPage
+                            data={copyOfquoteData}
+                            fields={quoteFields}
+                          /> : null
+                      }
                     </Accordion>
                   )}
                 </>
@@ -2047,8 +2054,8 @@ function QuoteDetail() {
                       ) : null}
                       {(ProcessStatus === "DOA Process" &&
                         versionStatus === "Building Quote") ||
-                      (ProcessStatus === "Send To Customer" &&
-                        versionStatus !== "Sent to Customer") ? (
+                        (ProcessStatus === "Send To Customer" &&
+                          versionStatus !== "Sent to Customer") ? (
                         <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                           {!ifQuoteApproved().approved && (
                             <Button
@@ -2066,7 +2073,7 @@ function QuoteDetail() {
                       ) : null}
                     </Grid>
                     {ProcessStatus !== "New" &&
-                    ProcessStatus !== "Price Builder" ? (
+                      ProcessStatus !== "Price Builder" ? (
                       <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                         <Button
                           onClick={() => createImagePDF(true, false)}
@@ -2094,8 +2101,8 @@ function QuoteDetail() {
                     ) : null}
                     <Grid item xs={12} sm={12} md={12} className="mt-2">
                       {ProcessStatus === "Quote Builder" &&
-                      currentTabIndex === 0 &&
-                      visibleColumns.length > 0 ? (
+                        currentTabIndex === 0 &&
+                        visibleColumns.length > 0 ? (
                         <ProductGrid
                           productBuilderId={productBuilderID}
                           refreshProducts={refreshProducts}
@@ -2114,14 +2121,14 @@ function QuoteDetail() {
                           stage={ProcessStatus === "New" ? "product" : "cost"}
                           Editable={
                             ProcessStatus === "Price Builder" ||
-                            ProcessStatus === "New"
+                              ProcessStatus === "New"
                               ? true
                               : false
                           }
                         />
                       ) : null}
                       {ProcessStatus === "Quote Builder" &&
-                      currentTabIndex === 1 ? (
+                        currentTabIndex === 1 ? (
                         <Box className="m-3">
                           <div className="position-relative">
                             <h4
@@ -2193,7 +2200,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2229,7 +2236,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            // qbApi={qbApi}
+          // qbApi={qbApi}
           />
         )}
 
@@ -2262,12 +2269,11 @@ function QuoteDetail() {
               isQuoteBuilder={true}
               // users={quoteData.collaborator}
               options={userEmails?.to}
-              cc={userEmails?.cc}
+              cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
