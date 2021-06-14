@@ -402,6 +402,7 @@ function QuoteDetail() {
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
+
   let logo = null;
   let companyName = "";
   let companyAddress = "";
@@ -1786,16 +1787,22 @@ function QuoteDetail() {
                   </select>
                   {ifQuoteApproved().approved === false && (
                     <>
+                      {currentVersion !== 1 && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          disabled={
+                            deletingDOA ||
+                            loading ||
+                            OtherSteps.indexOf(ProcessStatus) > 1
+                          }
+                          onClick={deleteVersion}
+                        >
+                          Delete Version
+                        </Button>
+                      )}
                       <Button
-                        variant="outlined"
-                        size="small"
-                        disabled={deletingDOA || currentVersion === 1}
-                        onClick={deleteVersion}
-                      >
-                        Delete Version
-                      </Button>
-                      <Button
-                        disabled={isCloning}
+                        disabled={isCloning || loading}
                         variant="contained"
                         type="button"
                         size="small"
@@ -1849,6 +1856,8 @@ function QuoteDetail() {
                     versionStatus={versionStatus}
                     loading={loading}
                     approvedQuote={ifQuoteApproved()}
+                    DOAlimit={DOAlimit}
+                    totalCost={totalcost?.fullFormatAmount}
                   />
                 ) : (
                   <Steps
@@ -1861,6 +1870,8 @@ function QuoteDetail() {
                     versionStatus={versionStatus}
                     loading={loading}
                     approvedQuote={ifQuoteApproved()}
+                    DOAlimit={DOAlimit}
+                    totalCost={totalcost?.fullFormatAmount}
                   />
                 )}
               </div>
