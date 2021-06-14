@@ -27,6 +27,7 @@ import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import ApprovalProcessDialog from "./ApprovalProcessDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 
@@ -129,6 +130,7 @@ const User: FC = () => {
     state: { user, permissions },
   }: any = useData();
   const history = useHistory();
+  const [showApprovalProcessDialog, setShowApprovalProcessDialog] = useState(false);
   const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
   const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
@@ -441,6 +443,7 @@ const User: FC = () => {
   };
   return (
     <>
+    {console.log(selectedRecords)}
       {
         isOpen && (
           <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { fetchUsers() }}
@@ -459,6 +462,18 @@ const User: FC = () => {
           }}
         />
       )}
+      {
+        showApprovalProcessDialog && 
+        <ApprovalProcessDialog 
+          openApprovalProcessDialog={showApprovalProcessDialog}
+          hasPermissionToUpdateApprovalProcess={permissions}
+          onSuccess={()=>
+            setShowApprovalProcessDialog(false)
+            }
+          handleCloseDialog={()=>setShowApprovalProcessDialog(false)}
+          userIds={selectedRecords.map((user)=>user._id)}
+        />
+      }
       {regionalRolesDialogOpen && (
         <AssignEntityDialog
           entitiesDialogOpen={regionalRolesDialogOpen}
@@ -510,6 +525,7 @@ const User: FC = () => {
               userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
+              openApprovalProcessDialog={()=>setShowApprovalProcessDialog(true)}
               openGlobalRolesDialog={handleGlobalRolesOpenDialog}
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               openDOADialog={handleDOAOpenDialog}

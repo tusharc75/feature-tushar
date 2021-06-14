@@ -14,6 +14,8 @@ const Header = (props) => {
     userPermissions,
     showConfirmBox,
     canDelete,
+    openRolesDialog,
+    openApprovalProcessDialog,
     openGlobalRolesDialog,
     openRegionalRolesDialog,
     rolesActionDisabled,
@@ -95,6 +97,17 @@ const Header = (props) => {
                 )}
                 {userPermissions.isUpdate && (
                   <>
+                  
+                   <MenuItem
+                   disabled={rolesActionDisabled}
+                   onClick={() => {
+                     openApprovalProcessDialog();
+                     closeActions();
+                   }}
+                 >
+                   Set Approval Process
+                 </MenuItem>
+                 
                     <MenuItem
                       disabled={rolesActionDisabled}
                       onClick={() => {
