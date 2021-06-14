@@ -27,6 +27,7 @@ import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import ApprovalProcessDialog from "./ApprovalProcessDialog";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -128,6 +129,7 @@ const User: FC = () => {
   }: any = useData();
   const history = useHistory();
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
+  const [showApprovalProcessDialog, setShowApprovalProcessDialog] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -417,6 +419,7 @@ const User: FC = () => {
 
   return (
     <>
+    {console.log(selectedRecords)}
       {
         isOpen && (
           <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { fetchUsers() }}
@@ -435,6 +438,18 @@ const User: FC = () => {
           }}
         />
       )}
+      {
+        showApprovalProcessDialog && 
+        <ApprovalProcessDialog 
+          openApprovalProcessDialog={showApprovalProcessDialog}
+          hasPermissionToUpdateApprovalProcess={permissions}
+          onSuccess={()=>{
+            setShowApprovalProcessDialog(false)
+            fetchUsers()}}
+          handleCloseDialog={()=>setShowApprovalProcessDialog(false)}
+          userIds={selectedRecords.map((user)=>user._id)}
+        />
+      }
       <Layout>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
@@ -463,6 +478,7 @@ const User: FC = () => {
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openRolesDialog={handleOpenDialog}
+              openApprovalProcessDialog={()=>setShowApprovalProcessDialog(true)}
               rolesActionDisabled={selectedRecords.length === 0}
               canDelete={selectedRecords.length === 0}
             />
