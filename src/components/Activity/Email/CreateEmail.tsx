@@ -448,7 +448,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                             value={values["to"]}
                                                             onBlur={(e: any) => {
                                                                 if (e.target.value && e.target.value.trim() != "" && validations.email.test(e.target.value)) {
-                                                                    setFieldValue("to", [e.target.value])
+                                                                    setFieldValue("to", isQuoteBuilder ? [e.target.value] : [...values["to"], e.target.value])
                                                                 }
                                                             }}
                                                             onChange={(e, value) => {

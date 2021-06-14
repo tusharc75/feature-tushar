@@ -725,7 +725,6 @@ function QuoteDetail() {
       quoteData?.customerContactName.length
     ) {
       toEmails = quoteData?.customerContactName.filter((o) => o?.email).map((o) => o.email);
-      console.log('toEmails', toEmails)
       setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
     } else {
       axiosInstance()
@@ -1634,7 +1633,6 @@ function QuoteDetail() {
     };
   };
 
-  console.log('copyOfquoteData', copyOfquoteData)
   return (
     <>
       <Layout>
