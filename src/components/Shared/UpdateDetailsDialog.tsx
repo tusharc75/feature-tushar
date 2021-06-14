@@ -7,9 +7,14 @@ import {
   CircularProgress,
   useTheme,
   useMediaQuery,
+  InputAdornment,
 } from "@material-ui/core";
 import { Formik, Form } from "formik";
-import { getObjKeysWithValues, yupSchema } from "../../constants/helpers";
+import {
+  getObjKeysWithValues,
+  getUniqueCurrencies,
+  yupSchema,
+} from "../../constants/helpers";
 import FormTypes from "../Helpers/FormTypes";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
@@ -31,7 +36,9 @@ const UpdateDetailsDialog = (props) => {
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [fieldsData, setFieldsData] = useState([]);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
+    useState(0);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
     sortArray();
@@ -73,14 +80,18 @@ const UpdateDetailsDialog = (props) => {
 
   const sortArray = () => {
     const sections = [];
-    fields.forEach((field) => {
+    const allFields = fields.sort(
+      (a, b) => a.fieldData.order - b.fieldData.order
+    );
+
+    allFields.forEach((field) => {
       if (!sections.includes(field.fieldData.sectionName)) {
         sections.push(field.fieldData.sectionName);
       }
     });
 
     const customData = sections.map((name) => {
-      let fieldsData = fields.filter(
+      let fieldsData = allFields.filter(
         (field) => field.fieldData.sectionName === name
       );
 
@@ -139,6 +150,16 @@ const UpdateDetailsDialog = (props) => {
                                 !field.isUpdate ||
                                 fromProjectSales(field.fieldData.fieldName)
                               }
+                              startAdornment={
+                                <InputAdornment position="start">
+                                  {currencySymbol ||
+                                    getUniqueCurrencies().find(
+                                      (val) =>
+                                        initialVals.currency ===
+                                        val.currencyCode
+                                    )?.symbolNative}
+                                </InputAdornment>
+                              }
                               values={values}
                               errors={errors}
                               touched={touched}
@@ -150,9 +171,36 @@ const UpdateDetailsDialog = (props) => {
                               required={field.fieldData.required}
                               isTooltip={field.fieldData.isTooltip}
                               tooltipMessage={field.fieldData.tooltipMessage}
-                              imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.fieldData.type) ? (completePercentage) => {
-                                setUploadingImageOrFileProgress(completePercentage);
-                              } : null}
+                              imageOrFileUploadCompletePercentage={
+                                ["imageUpload", "fileUpload"].some(
+                                  (s) => s === field.fieldData.type
+                                )
+                                  ? (completePercentage) => {
+                                      setUploadingImageOrFileProgress(
+                                        completePercentage
+                                      );
+                                    }
+                                  : null
+                              }
+                              onChange={
+                                field.fieldData.fieldName === "currency"
+                                  ? (e, val) => {
+                                      if (val && val.currencyCode) {
+                                        setFieldValue(
+                                          field.fieldData.fieldName,
+                                          val.currencyCode
+                                        );
+                                        setCurrencySymbol(val.symbolNative);
+                                      } else {
+                                        setFieldValue(
+                                          field.fieldData.fieldName,
+                                          ""
+                                        );
+                                        setCurrencySymbol(null);
+                                      }
+                                    }
+                                  : null
+                              }
                             />
                           </Grid>
                         ))}
@@ -180,8 +228,9 @@ const UpdateDetailsDialog = (props) => {
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                  Object.values(simplifyValues(values)).toString() ||
-                  isUpdating || uploadingImageOrFileProgress > 0
+                    Object.values(simplifyValues(values)).toString() ||
+                  isUpdating ||
+                  uploadingImageOrFileProgress > 0
                 }
               >
                 {isUpdating ? <CircularProgress size={20} /> : "Save"}
