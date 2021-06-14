@@ -21,7 +21,8 @@ const RoleHeader = (props) => {
     rolePermissions,
     showConfirmBox,
     canDelete,
-    selectedRecords
+    selectedRecords,
+    userDialogOpen
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
@@ -90,7 +91,7 @@ const RoleHeader = (props) => {
             </Button>
           )}
 
-          {rolePermissions.isDelete && (
+          {(rolePermissions.isDelete || rolePermissions.isUpdate) && (
             <>
               <Button
                 disabled={selectedRecords.length == 0}
@@ -123,6 +124,15 @@ const RoleHeader = (props) => {
                   }}
                 >
                   Delete
+                </MenuItem>
+                <MenuItem
+                  disabled={!rolePermissions.isUpdate}
+                  onClick={() => {
+                    closeActions();
+                    userDialogOpen();
+                  }}
+                >
+                  Assign users
                 </MenuItem>
               </Menu>
             </>
