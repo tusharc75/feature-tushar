@@ -14,8 +14,10 @@ const Header = (props) => {
     userPermissions,
     showConfirmBox,
     canDelete,
-    openRolesDialog,
+    openGlobalRolesDialog,
+    openRegionalRolesDialog,
     rolesActionDisabled,
+    openDOADialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -92,15 +94,35 @@ const Header = (props) => {
                   </MenuItem>
                 )}
                 {userPermissions.isUpdate && (
+                  <>
                   <MenuItem
                     disabled={rolesActionDisabled}
                     onClick={() => {
-                      openRolesDialog();
+                      openGlobalRolesDialog();
                       closeActions();
                     }}
                   >
-                    Assign Roles
+                    Assign company wide roles
                   </MenuItem>
+                  <MenuItem
+                    disabled={rolesActionDisabled}
+                    onClick={() => {
+                      openRegionalRolesDialog();
+                      closeActions();
+                    }}
+                  >
+                    Assign region wide functional roles
+                  </MenuItem>
+                  <MenuItem
+                    disabled={rolesActionDisabled}
+                    onClick={() => {
+                      openDOADialog();
+                      closeActions();
+                    }}
+                  >
+                    Assign DOA's
+                  </MenuItem>
+                  </>
                 )}
               </Menu>
             </>

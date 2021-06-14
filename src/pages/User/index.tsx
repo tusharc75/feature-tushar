@@ -27,6 +27,8 @@ import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -127,7 +129,9 @@ const User: FC = () => {
     state: { user, permissions },
   }: any = useData();
   const history = useHistory();
-  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
+  const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
+  const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
+  const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -142,7 +146,7 @@ const User: FC = () => {
     name: history.location?.state?.name,
     type: history.location?.state?.type,
   });
-
+  const [userList, setUserList] = useState<any[]>([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -340,6 +344,12 @@ const User: FC = () => {
           };
           return res;
         });
+
+        setUserList(rows.map((user: any) => ({
+          id: user.id,
+          name: user.concatedName,
+        })));
+
         dispatch({ type: "initialize", data: rows, count: count });
       })
       .catch((error) => {
@@ -407,14 +417,28 @@ const User: FC = () => {
     setIsOpen(false);
   };
 
-  const handleOpenDialog = () => {
-    setRolesDialogOpen(true);
+  const handleGlobalRolesOpenDialog = () => {
+    setGlobalRolesDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setRolesDialogOpen(false);
+  const handleGlobalRolesCloseDialog = () => {
+    setGlobalRolesDialogOpen(false);
+  };
+  const handleRegionalRolesOpenDialog = () => {
+    setRegionalRolesDialogOpen(true);
   };
 
+  const handleRegionalRolesCloseDialog = () => {
+    setRegionalRolesDialogOpen(false);
+  };
+
+  const handleDOAOpenDialog = () => {
+    setDoaDialogOpen(true);
+  };
+
+  const handleDOACloseDialog = () => {
+    setDoaDialogOpen(false);
+  };
   return (
     <>
       {
@@ -424,15 +448,39 @@ const User: FC = () => {
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
       }
-      {rolesDialogOpen && (
+      {globalRolesDialogOpen && (
         <AssignRolesDialog
-          rolesDialogOpen={rolesDialogOpen}
-          handleCloseDialog={handleCloseDialog}
+          rolesDialogOpen={globalRolesDialogOpen}
+          handleCloseDialog={handleGlobalRolesCloseDialog}
           userIds={selectedRecords.map((d) => d._id)}
           assignedRoles={null}
           onSuccess={() => {
-            handleCloseDialog();
+            handleGlobalRolesCloseDialog();
           }}
+        />
+      )}
+      {regionalRolesDialogOpen && (
+        <AssignEntityDialog
+          entitiesDialogOpen={regionalRolesDialogOpen}
+          handleCloseDialog={handleRegionalRolesCloseDialog}
+          type="entity"
+          ids={selectedRecords.map((d) => d._id)}
+          assignedEntity={[]}
+          regionalRole={false}
+          onSuccess={() => {
+            handleRegionalRolesCloseDialog();
+          }}
+        />
+      )}
+      {doaDialogOpen && (
+        <DoaDialog
+          userList={userList}
+          doa={[]}
+          doaCurrency={null}
+          userSelected={selectedRecords.map((d) => d._id)}
+          open={doaDialogOpen}
+          onSuccess={handleDOACloseDialog}
+          onClose={handleDOACloseDialog}
         />
       )}
       <Layout>
@@ -462,7 +510,9 @@ const User: FC = () => {
               userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              openRolesDialog={handleOpenDialog}
+              openGlobalRolesDialog={handleGlobalRolesOpenDialog}
+              openRegionalRolesDialog={handleRegionalRolesOpenDialog}
+              openDOADialog={handleDOAOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
               canDelete={selectedRecords.length === 0}
             />

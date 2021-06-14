@@ -83,7 +83,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: userSelected, name: userList.find(d => d.id === userSelected).name, amount: 0 }]))
+            setUsers(([{ id: userSelected[0], name: userList.find(d => d.id === userSelected[0]).name, amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -107,9 +107,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                 };
             });
 
-        const userDoa = { _id: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
+        const userDoa = { _ids: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
         setLoading(true)
-        axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
+        axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
