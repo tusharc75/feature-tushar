@@ -1049,13 +1049,13 @@ function QuoteDetail() {
   const fetchDoaLimit = () => {
     axiosInstance()
       .post("doa-request/limit", {})
-      .then(({ data }) => {
-        setDOAsetup(data.data.doasetup);
-        setDOALimit(data.data.limit ? data.data.limit : 0);
-        setLastUser(data.data.lastUser);
+      .then(({ data: { data } }) => {
+        setDOAsetup(data.doasetup);
+        setDOALimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
+        setLastUser(data.lastUser);
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
+        // toastConfig.setToastConfig(err);
       });
   };
 
@@ -1339,17 +1339,29 @@ function QuoteDetail() {
                 fieldValue: quoteRows[indexkey],
               });
             }
-            if (key === "totalCost") {
+            if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalCost"
+            ) {
               totalCost = totalCost + quoteRows[indexkey];
               CostCurrency = currency.toUpperCase();
-            } else if (key === "totalSalesPrice") {
+            } else if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalSalesPrice"
+            ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
               hasTSP = false;
-            } else if (key === "totalProfit") {
+            } else if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalProfit"
+            ) {
               totalProfit = totalProfit + quoteRows[indexkey];
               ProfitCurrency = currency.toUpperCase();
-            } else if (key === "totalMargin") {
+            } else if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalMargin"
+            ) {
               totalMargin = totalMargin + quoteRows[indexkey];
               MarginCurrency = currency.toUpperCase();
             }
@@ -1365,7 +1377,7 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
       setNextStep(false);
     }
-    console.log(totalSellingPrice);
+
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
