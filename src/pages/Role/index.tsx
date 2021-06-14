@@ -381,7 +381,7 @@ const Roles: FC = () => {
           selectedEntity={selectedEntity}
         />
       )}
-       {showAssignUserDialog && (
+      {showAssignUserDialog && (
         selectedType === roleTypes.find((d) => d.key === "Global")?.value ?
           <AssignUserDialog
             usersDialogOpen={showAssignUserDialog}

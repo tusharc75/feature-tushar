@@ -365,7 +365,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             variant="contained"
                                         >
                                             Cancel
-                                </Button>
+                                        </Button>
                                         <Button
                                             variant="contained"
                                             color="primary"
@@ -380,7 +380,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             }}
                                         >
                                             Save
-                                </Button>
+                                        </Button>
                                     </CustomDialogFooter>
                                 </>
                             )}
