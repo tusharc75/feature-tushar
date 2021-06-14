@@ -15,99 +15,21 @@ import { GiAbstract055 } from 'react-icons/gi';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
-import { Menu, MenuItem } from "@material-ui/core";
+import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { product, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import {
+    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
-function reducer(state, action) {
-    switch (action.type) {
-        case "loading":
-            return {
-                ...state,
-                loading: action.loading
-            }
-        case "initialize":
-            return {
-                ...state,
-                dataRows: action.data,
-                rowCount: action.count,
-                loading: false
-            }
-        case "selection":
-            return {
-                ...state,
-                selectedRecords: action.selectedRecords,
-            }
-        case "update":
-            return {
-                ...state,
-                dataRows: action.data,
-                loading: false
-            }
-        case "filter":
-            return {
-                ...state,
-                loading: true,
-                filters: action.filters,
-                page: 0
-            }
-        case "sort":
-            return {
-                ...state,
-                sorting: action.sorting,
-                loading: true
-            }
-        case "search":
-            return {
-                ...state,
-                search: action.search,
-                loading: true
-            }
-        case "pageChange":
-            return {
-                ...state,
-                page: action.page
-            }
-        case "pageSizeChange":
-            return {
-                ...state,
-                limit: action.limit,
-                page: 0,
-                loading: true
-            }
-        case "complete":
-            return {
-                ...state,
-                loading: false
-            }
-        default:
-            break;
-    }
-    return state;
-}
-
-const intialState = {
-    dataRows: [],
-    rowCount: 0,
-    loading: false,
-    page: 0,
-    limit: 25,
-    pageSizes: gridPageSizes,
-    search: "",
-    filters: {},
-    sorting: [],
-    selectedRecords: []
-}
-
-let termsTimeout
 
 const Product = () => {
 
@@ -118,9 +40,8 @@ const Product = () => {
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
-
+    const [columns, setColumns] = useState(null);
     const [gridApi, setGridApi] = useState(null);
-    const [columnApi, setColumnApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -128,6 +49,7 @@ const Product = () => {
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
+
 
     const fetchProduct = () => {
 
@@ -139,17 +61,101 @@ const Product = () => {
         const queryString = getQueryString();
         dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            let rows = data.data?.map((u) => ({
+            data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
-                productCategory: u.productCategory?.optionLabel,
-                productTemplate: u.productTemplate?.optionLabel,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
                 updatedByDate: u.updatedBy?.date,
             }));
-            dispatch({ type: "initialize", data: rows, count: data.count });
+            let column = []
+            data.data.forEach((row) => {
+                row.fields.forEach((ele) => {
+                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                            ele.displayUnits.forEach((_unit) => {
+                                let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _unit
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.show = true
+                                    col.cellRenderer = "commonRenderer"
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+                            })
+                        }
+                        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                            ele.displayUnits.forEach((_unit) => {
+                                ele.displayCurrency.forEach((_currency) => {
+                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                                    let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                        let col: any = {}
+                                        col.field = fieldName
+                                        col.headerName = fieldLabel
+                                        col.width = 180
+                                        col.show = true
+                                        col.cellRenderer = "commonRenderer"
+                                        col.leval = ele.leval
+                                        column.push(col)
+                                    }
+                                })
+                            })
+                        }
+                        else if (ele.type === "currencyAmount") {
+                            ele.displayCurrency.forEach((_currency) => {
+                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _currency
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.show = true
+                                    col.cellRenderer = "commonRenderer"
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+                            })
+                        }
+                    }
+                    else {
+                        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+                            let col: any = {};
+                            col.field = ele.fieldName;
+                            col.headerName = ele.fieldLabel;
+                            col.width = 180;
+                            col.show = true
+                            if (ele.fieldName === "productName") {
+                                col.cellRenderer = "productNameRenderer"
+                            }
+                            if (ele.fieldName === "productCategory") {
+                                col.cellRenderer = "productCategoryRenderer"
+                            }
+                            if (ele.fieldName === "productTemplate") {
+                                col.cellRenderer = "productTemplateRenderer"
+                            }
+                            col.order = ele.order;
+                            col.leval = ele.leval;
+                            column.push(col);
+                        }
+                    }
+                })
+            });
+            column.push(
+                { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+                { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+            )
+            // column = sortBy(column, function (item: any) {
+            //     return levalOrderBy.indexOf(item.leval)
+            // });
+            setColumns(column);
+            dispatch({ type: "initialize", data: data.data, count: data.count });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -165,7 +171,7 @@ const Product = () => {
 
             Object.keys(filters).map(field => {
                 updatedFilters.push({
-                    field: field,
+                    field: replaceFieldName(field),
                     term: filters[field].filter
                 })
             });
@@ -234,14 +240,20 @@ const Product = () => {
         </>
     )
 
-    const [columns, setColumns] = useState([
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, cellRenderer: "commonRenderer" },
-        { field: "productTemplate", headerName: "Product Template", show: true, cellRenderer: "commonRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-        { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
-    ]);
+    const ProductCategoryRenderer = params => <>
+        {
+            params.data.productCategory || params.data.productCategory === 0 ?
+                typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
+                : <NoDataCell />
+        }
+    </>
+    const ProductTemplateRenderer = params => <>
+        {
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
+                : <NoDataCell />
+        }
+    </>
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
@@ -270,9 +282,24 @@ const Product = () => {
         productNameRenderer: ProductNameRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer
+        actionsRenderer: ActionsRenderer,
+        commonRenderer: CommonRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
     };
 
+    const replaceFieldName = (field) => {
+        switch (field) {
+            case "createdBy":
+                return "createdBy.user.concatedName";
+
+            case "updatedBy":
+                return "updatedBy.user.concatedName";
+
+            default:
+                return field;
+        }
+    };
 
     return (<Layout>
         <Grid container className="headerbox">
@@ -332,6 +359,7 @@ const Product = () => {
                     </Grid>
                 </Grid>
             </div>
+            {columns ?
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
@@ -344,6 +372,7 @@ const Product = () => {
                     page={page}
                     actionWidth={150}
                 />
+                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} openFrom="productMaster" />}
         {showDeleteConfirmBox &&
