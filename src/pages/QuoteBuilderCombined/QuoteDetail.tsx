@@ -422,6 +422,7 @@ function QuoteDetail() {
   const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
+  const [reminderLoading, setReminderLoading] = useState(false)
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -1687,6 +1688,30 @@ function QuoteDetail() {
       versionApproved,
     };
   };
+  const handleSendReminder = () => {
+    if (quoteData?.versions && quoteData.versions[currentVersion] && quoteData.versions[currentVersion]?.adobeDocumentId) {
+      setReminderLoading(true)
+      axiosInstance()
+        .get(`quote-builder/reminder/${quoteData.versions[currentVersion].adobeDocumentId}`)
+        .then((data: { data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: "Reminder Sent",
+          });
+          setReminderLoading(false)
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setReminderLoading(false)
+        });
+
+    }
+  }
+  let isHideReminder = false
+  if (quoteData?.versions && quoteData.versions[currentVersion] && quoteData.versions[currentVersion]?.adobeAgreementStatus === "SIGNED") {
+    isHideReminder = true
+  }
 
   return (
     <>
@@ -1910,6 +1935,9 @@ function QuoteDetail() {
                               approvedQuote={ifQuoteApproved()}
                               DOAlimit={DOAlimit}
                               totalCost={totalcost?.fullFormatAmount}
+                              handleSendReminder={handleSendReminder}
+                              hideReminderButton={isHideReminder}
+                              reminderLoading={reminderLoading}
                             />
                           ) : (
                             <Steps
@@ -1924,6 +1952,9 @@ function QuoteDetail() {
                               approvedQuote={ifQuoteApproved()}
                               DOAlimit={DOAlimit}
                               totalCost={totalcost?.fullFormatAmount}
+                              handleSendReminder={handleSendReminder}
+                              hideReminderButton={isHideReminder}
+                              reminderLoading={reminderLoading}
                             />
                           )}
                         </div>
