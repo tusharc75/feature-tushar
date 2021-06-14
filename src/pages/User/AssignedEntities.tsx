@@ -136,7 +136,7 @@ export default function AssignedEntities({
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete  ${currentEntity.entity.entityName}`}
+          message={`Are you sure you want to un-assign  ${currentEntity.entity.entityName}`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -189,7 +189,7 @@ export default function AssignedEntities({
                         <Grid item xs={8} justify="flex-start">
                           {permissions.user.isDelete ? (
                             <DeleteButton
-                              text="Delete Entity"
+                              text="Un-assign Entity"
                               onClick={() => handleDeleteEntity()}
                             />
                           ) : null}

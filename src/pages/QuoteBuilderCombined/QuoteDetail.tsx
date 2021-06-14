@@ -508,9 +508,10 @@ function QuoteDetail() {
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+
           setCustomizedRoutes([
             { title: "Quote", path: routes.quoteBuilder.path },
-            { title: `${data.quoteName}` },
+            { title: `${data?.quoteName}` },
           ]);
 
           // handleAllowToEditList(data);
@@ -522,6 +523,7 @@ function QuoteDetail() {
             modifiedData["currency"],
             modifiedData["estimatedAmount"]
           ).shortFormatAmount;
+
           setCopyOfquoteData(modifiedData);
 
           fetchUserEmails(data);
@@ -529,7 +531,7 @@ function QuoteDetail() {
           handleContactsEmails(data);
 
           handleMainPoints(data);
-          setHeadingLbl(data.quoteName);
+          setHeadingLbl(data?.quoteName);
           var keys = Object.keys(data.versions);
           setVersions(keys);
           var ps = "";
@@ -755,7 +757,7 @@ function QuoteDetail() {
   const fetchUserEmails = (quoteData) => {
     let ownerCollaboratorEmails = [];
     if (quoteData?.collaborator && quoteData.collaborator.length) {
-      ownerCollaboratorEmails = quoteData.collaborator.map((o) => o?.email);
+      ownerCollaboratorEmails = quoteData.collaborator.filter((o) => o?.email).map((o) => o?.email);
     }
     if (quoteData?.owner?.email) {
       ownerCollaboratorEmails.push(quoteData.owner.email);
@@ -765,7 +767,7 @@ function QuoteDetail() {
       quoteData?.customerContactName &&
       quoteData?.customerContactName.length
     ) {
-      toEmails = quoteData?.customerContactName.map((o) => o.email);
+      toEmails = quoteData?.customerContactName.filter((o) => o?.email).map((o) => o.email);
       setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
     } else {
       axiosInstance()
@@ -1090,13 +1092,13 @@ function QuoteDetail() {
   const fetchDoaLimit = () => {
     axiosInstance()
       .post("doa-request/limit", {})
-      .then(({ data }) => {
-        setDOAsetup(data.data.doasetup);
-        setDOALimit(data.data.limit ? data.data.limit : 0);
-        setLastUser(data.data.lastUser);
+      .then(({ data: { data } }) => {
+        setDOAsetup(data.doasetup);
+        setDOALimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
+        setLastUser(data.lastUser);
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
+        // toastConfig.setToastConfig(err);
       });
   };
 
@@ -1380,17 +1382,29 @@ function QuoteDetail() {
                 fieldValue: quoteRows[indexkey],
               });
             }
-            if (key === "totalCost") {
+            if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalCost"
+            ) {
               totalCost = totalCost + quoteRows[indexkey];
               CostCurrency = currency.toUpperCase();
-            } else if (key === "totalSalesPrice") {
+            } else if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalSalesPrice"
+            ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
               hasTSP = false;
-            } else if (key === "totalProfit") {
+            } else if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalProfit"
+            ) {
               totalProfit = totalProfit + quoteRows[indexkey];
               ProfitCurrency = currency.toUpperCase();
-            } else if (key === "totalMargin") {
+            } else if (
+              currency.toUpperCase() === quoteData?.currency &&
+              key === "totalMargin"
+            ) {
               totalMargin = totalMargin + quoteRows[indexkey];
               MarginCurrency = currency.toUpperCase();
             }
@@ -1406,7 +1420,7 @@ function QuoteDetail() {
     if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
       setNextStep(false);
     }
-    console.log(totalSellingPrice);
+
     if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
@@ -1620,6 +1634,7 @@ function QuoteDetail() {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
       contentType: pdfFileBase64.split(";")[0].split(":")[1],
+      name: `Quotation v${currentVersion}`
     });
   }
   if (excelFileBase64) {
@@ -1628,6 +1643,7 @@ function QuoteDetail() {
         parseInt(excelFileBase64.indexOf(",") + 1)
       ),
       contentType: excelFileBase64.split(";")[0].split(":")[1],
+      name: `Quotation v${currentVersion}`
     });
   }
 
@@ -1803,11 +1819,11 @@ function QuoteDetail() {
 
                         </Grid>
                       </Grid>
-
-                      <DetailsPage
-                        data={copyOfquoteData}
-                        fields={quoteFields}
-                      />
+                      {copyOfquoteData ?
+                        <DetailsPage
+                          data={copyOfquoteData}
+                          fields={quoteFields}
+                        /> : null}
                     </TabPanel>
                     <TabPanel value={value} index={1}>
                       <Paper className={classes.bgProduct}>
@@ -2213,9 +2229,9 @@ function QuoteDetail() {
                   )}
                 </>
               )}
-            </Paper>
+            </Paper >
 
-          </Grid>
+          </Grid >
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper>
               {!quoteData ? (
@@ -2252,112 +2268,123 @@ function QuoteDetail() {
               )}
             </Paper>
           </Grid>
-        </Grid>
+        </Grid >
 
-        {showConfirmBox ? (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this Quote?`}
-            onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteQuote}
-          />
-        ) : null}
-
-        {openUpdateDialog && (
-          <ManageQuoteDialog
-            open={openUpdateDialog}
-            onSuccess={() => {
-              setOpenUpdateDialog(false);
-              fetchQuoteData(currentVersion);
-            }}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            isNew={false}
-            dataToUpdate={quoteData}
-            resource={null}
-            isRedirectTodetailPage={false}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            disableCurrency={true}
-          // qbApi={qbApi}
-          />
-        )}
-
-        {showCreateDialog && (
-          <ManageTermsAndCondition
-            termsAndCondition={termsAndCondition}
-            open={showCreateDialog}
-            handleClose={handleCloseCreateDialog}
-            fetchData={fetchTermsAndConditions}
-            editRecord={editRecordTNC}
-          />
-        )}
-
-        {sendEmail && (
-          <Dialog
-            open={sendEmail}
-            fullScreen={isMobile || isTablet}
-            TransitionComponent={CustomDialogTransition}
-            aria-labelledby="customized-dialog-title"
-            maxWidth="md"
-            onClose={() => setSendEmail(false)}
-            fullWidth
-          >
-            <CreateEmail
-              handleClose={() => setSendEmail(false)}
-              fetchData={onSuccess}
-              id={id}
-              version={currentVersion}
-              // account={quoteData.customerAccountName}
-              isQuoteBuilder={true}
-              // users={quoteData.collaborator}
-              options={userEmails?.to}
-              cc={userEmails?.cc}
-              emailId={null}
-              qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+        {
+          showConfirmBox ? (
+            <ConfirmationDialog
+              open={showConfirmBox}
+              message={`Are you sure you want to delete this Quote?`}
+              onClose={() => setShowConfirmBox(false)}
+              onOk={handleDeleteQuote}
             />
-          </Dialog>
-        )}
+          ) : null}
 
-        {messageDialog.open && (
-          <MessageDialog
-            open={messageDialog.open}
-            onClose={() => {
-              setMessageDialog({ open: false, message: null });
-            }}
-            message={messageDialog.message}
-          />
-        )}
+        {
+          openUpdateDialog && (
+            <ManageQuoteDialog
+              open={openUpdateDialog}
+              onSuccess={() => {
+                setOpenUpdateDialog(false);
+                fetchQuoteData(currentVersion);
+              }}
+              onClose={() => {
+                setOpenUpdateDialog(false);
+              }}
+              isNew={false}
+              dataToUpdate={quoteData}
+              resource={null}
+              isRedirectTodetailPage={false}
+              contactId={null}
+              opportunityId={null}
+              disableOwnerDropDown={true}
+              disableCurrency={true}
+            // qbApi={qbApi}
+            />
+          )
+        }
 
-        {showVersionsDialog && (
-          <CustomDialogComponent
-            title="All Version Status"
-            open={showVersionsDialog}
-            onClose={() => {
-              setShowVersionsDialog(false);
-            }}
-          >
-            <div style={{ maxHeight: 500, width: "100%" }}>
-              <DataGrid
-                components={{
-                  NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                autoHeight
-                rows={versionStatusData.data}
-                columns={versionStatusData.columns}
-                disableSelectionOnClick
-                disableMultipleSelection
-                disableColumnFilter
-                hideFooter
+        {
+          showCreateDialog && (
+            <ManageTermsAndCondition
+              termsAndCondition={termsAndCondition}
+              open={showCreateDialog}
+              handleClose={handleCloseCreateDialog}
+              fetchData={fetchTermsAndConditions}
+              editRecord={editRecordTNC}
+            />
+          )
+        }
+
+        {
+          sendEmail && (
+            <Dialog
+              open={sendEmail}
+              fullScreen={isMobile || isTablet}
+              TransitionComponent={CustomDialogTransition}
+              aria-labelledby="customized-dialog-title"
+              maxWidth="md"
+              onClose={() => setSendEmail(false)}
+              fullWidth
+            >
+              <CreateEmail
+                handleClose={() => setSendEmail(false)}
+                fetchData={onSuccess}
+                id={id}
+                version={currentVersion}
+                // account={quoteData.customerAccountName}
+                isQuoteBuilder={true}
+                // users={quoteData.collaborator}
+                options={userEmails?.to}
+                cc={userEmails?.cc ?? []}
+                emailId={null}
+                qouteBuilderAttachments={attachments}
+                subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                  }`}
               />
-            </div>
-          </CustomDialogComponent>
-        )}
-      </Layout>
+            </Dialog>
+          )
+        }
+
+        {
+          messageDialog.open && (
+            <MessageDialog
+              open={messageDialog.open}
+              onClose={() => {
+                setMessageDialog({ open: false, message: null });
+              }}
+              message={messageDialog.message}
+            />
+          )
+        }
+
+        {
+          showVersionsDialog && (
+            <CustomDialogComponent
+              title="All Version Status"
+              open={showVersionsDialog}
+              onClose={() => {
+                setShowVersionsDialog(false);
+              }}
+            >
+              <div style={{ maxHeight: 500, width: "100%" }}>
+                <DataGrid
+                  components={{
+                    NoRowsOverlay: CustomDataGridNoDataFound,
+                  }}
+                  autoHeight
+                  rows={versionStatusData.data}
+                  columns={versionStatusData.columns}
+                  disableSelectionOnClick
+                  disableMultipleSelection
+                  disableColumnFilter
+                  hideFooter
+                />
+              </div>
+            </CustomDialogComponent>
+          )
+        }
+      </Layout >
     </>
   );
 }
