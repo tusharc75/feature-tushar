@@ -136,7 +136,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
             setInitialValues({
                 name: subject ?? "", file: "",
                 content: RichTextEditor.createEmptyValue(),
-                to: isQuoteBuilder && options.length ? options[0] : [],
+                to: isQuoteBuilder && options.length ? [options[0]] : [],
                 cc: isQuoteBuilder ? [...cc] : []
             })
         }
@@ -200,7 +200,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
             emailBody: values.content.toString('html'),
             emailSubject: values.name,
             cc: values.cc,
-            bcc: [values.to],
+            bcc: [values.to.slice(-1)[0]],
             id: id,
             attachments: [...qouteBuilderAttachments]
         }
@@ -426,7 +426,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                                         />
                                                         <Autocomplete
-                                                            multiple={isQuoteBuilder ? false : true}
+                                                            multiple
                                                             options={options.filter(option => values.cc.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>
@@ -448,22 +448,19 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                             value={values["to"]}
                                                             onBlur={(e: any) => {
                                                                 if (e.target.value && e.target.value.trim() != "" && validations.email.test(e.target.value)) {
-                                                                    setFieldValue("to", [...values["to"], e.target.value])
+                                                                    setFieldValue("to", [e.target.value])
                                                                 }
                                                             }}
                                                             onChange={(e, value) => {
-                                                                let emails
                                                                 if (isQuoteBuilder) {
-                                                                    if (value && validations.email.test(value)) {
-                                                                        emails = value
+                                                                    if (value && value.length) {
+                                                                        value = [value.slice(-1)[0]]
                                                                     }
                                                                 }
-                                                                else {
-                                                                    emails = []
-                                                                    for (var email of value) {
-                                                                        if (validations.email.test(email)) {
-                                                                            emails.push(email)
-                                                                        }
+                                                                let emails = []
+                                                                for (var email of value) {
+                                                                    if (validations.email.test(email)) {
+                                                                        emails.push(email)
                                                                     }
                                                                 }
                                                                 setFieldValue("to", emails)
@@ -608,7 +605,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                             submitForm()
                                         }}>
                                         {sending ? (<><CircularProgress color="inherit" size={14} style={{ marginRight: "10px" }} />
-                                Sending ... </>) : "send"}
+                                            Sending ... </>) : "send"}
                                     </Button>}
                             </CustomDialogFooter>
                         </>
