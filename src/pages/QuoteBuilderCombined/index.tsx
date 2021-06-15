@@ -123,8 +123,8 @@ const QuoteBuilders = () => {
       cellRenderer: "updatedByRenderer",
     },
     {
-      field: "closeDate",
-      headerName: "Close Date",
+      field: "expiryDate",
+      headerName: "Expiry Date",
       show: true,
       filter: false,
       cellRenderer: "commonRenderer",
@@ -360,7 +360,7 @@ const QuoteBuilders = () => {
               ownerId: u.owner?.optionValue,
 
               canDelete: u.owner?.optionValue === user?.user._id,
-              closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
+              expiryDate: u?.expiryDate ? displayDate(u.expiryDate) : "",
 
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
