@@ -23,7 +23,7 @@ const MyCalendar = (props: Props) => {
       events={activities}
       localizer={localizer}
       formats={formats}
-      style={{ height: "100vh" }}
+      style={{ height: "calc(100vh - 200px)" }}
       popup={true}
       views={{ month: true, week: true, day: true }}
       eventPropGetter={(obj) => {

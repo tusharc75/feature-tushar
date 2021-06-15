@@ -82,10 +82,13 @@ import {
 } from "./StateProvider/actionTypes";
 import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
+import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+
   const {
     state: { user },
     dispatch,
@@ -133,11 +136,26 @@ function App() {
     }
   };
 
+  const getChatNotification = async () => {
+    if (localStorage.getItem("token")) {
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          if (count > 0) {
+            chatNotification.setCount(count);
+          }
+        })
+    }
+  }
+
   useEffect(() => {
     try {
       getNotification();
+      // getChatNotification();
+      
       setInterval(async () => {
         await getNotification();
+        // await getChatNotification();
       }, 60000);
     } catch (e) {
       console.log(e);
