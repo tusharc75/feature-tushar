@@ -264,6 +264,13 @@ const MenuProps = {
 const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
+  const [tabValue, setTabValue] = React.useState(0);
+  const handleMainTabChange = (
+    event: React.ChangeEvent<{}>,
+    newValue: number
+  ) => {
+    setTabValue(newValue);
+  };
   const DOASteps = [
     "New",
     "Price Builder",
@@ -462,13 +469,7 @@ function QuoteDetail() {
       "aria-controls": `main-tabpanel-${index}`,
     };
   }
-  const [tabValue, setTabValue] = React.useState(0);
-  const handleMainTabChange = (
-    event: React.ChangeEvent<{}>,
-    newValue: number
-  ) => {
-    setTabValue(newValue);
-  };
+
 
   useEffect(() => {
     fetchDoaLimit();
@@ -640,7 +641,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -673,7 +674,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -775,12 +776,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1586,7 +1587,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1774,9 +1775,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1814,7 +1815,7 @@ function QuoteDetail() {
                         </div>
                       }
                       {...a11yProps(0)}
-                      // label={"Quotes Information"}
+                    // label={"Quotes Information"}
                     />
                     <Tab
                       label={
@@ -1977,753 +1978,260 @@ function QuoteDetail() {
                               xs={12}
                               md={12}
                               sm={12}
-                              className="d-flex align-items-center gap-1 quotePanel"
-                            >
+                              className="d-flex align-items-stretch gap-1 quotePanel" >
                               <div className="quoteBox">
+                                <span>Total Profit</span>
                                 <span
                                   className="quoteAmount"
                                   title={totalProfit.fullFormatAmount}
                                 >
                                   {totalProfit.shortFormatAmount}
                                 </span>
-                                <span>Total Profit</span>
                               </div>
                               <div className="quoteBox">
+                                <span>Total Cost Price</span>
                                 <span
                                   className="quoteAmount"
                                   title={totalcost.fullFormatAmount}
                                 >
                                   {totalcost.shortFormatAmount}
                                 </span>
-                                <span>Total Cost Price</span>
                               </div>
                               {redCard ? (
                                 <div className="redQuoteBox">
+                                  <span>Total Selling Price</span>
                                   <span
                                     className="quoteAmount"
                                     title={totalsale.fullFormatAmount}
                                   >
                                     {totalsale.shortFormatAmount}
                                   </span>
-                                  <span>Total Selling Price</span>
                                 </div>
                               ) : (
                                 <div className="quoteBox">
+                                  <span>Total Selling Price</span>
                                   <span
                                     className="quoteAmount"
                                     title={totalsale.fullFormatAmount}
                                   >
                                     {totalsale.shortFormatAmount}
                                   </span>
-                                  <span>Total Selling Price</span>
                                 </div>
                               )}
                               <div className="quoteBox">
+                                <span>Total Margin</span>
                                 <span
                                   className="quoteAmount"
                                   title={totalmargin.fullFormatAmount}
                                 >
                                   {totalmargin.shortFormatAmount}
                                 </span>
-                                <span>Total Margin</span>
                               </div>
-
-                              <div></div>
                             </Grid>
-                            <div></div>
                           </Grid>
                         ) : null}
                       </div>
-                      <Tabs
-                        className="oms-tab"
-                        value={currentTabIndex}
-                        onChange={(event, newValue) => {
-                          setCurrentTabIndex(newValue);
-                        }}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        aria-label="icon tabs example"
-                      >
-                        <Tab
-                          label="Quotes"
-                          aria-controls="a11y-tabpanel-0"
-                          id="a11y-tab-0"
-                        />
-                        {/* {ProcessStatus === "Quote Builder" && ( */}
+                    </Paper>
+                  </TabPanel>
+                  {tabValue === 1 && <>
+                    <Tabs
+                      className="oms-tab"
+                      value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Quotes"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      {ProcessStatus === "Quote Builder" && (
                         <Tab
                           label="Terms & Conditions"
                           aria-controls="a11y-tabpanel-1"
                           id="a11y-tab-1"
                         />
-                        {/* )} */}
-                      </Tabs>
-                      <TabPanel value={currentTabIndex} index={0}>
-                        Quotes
-                      </TabPanel>
-                      <TabPanel value={currentTabIndex} index={1}>
-                        Terms
-                      </TabPanel>
-
-                      <div>***********************************************</div>
-                    </Paper>
-                    {/* 
-                   
-                     
-                        <>
-                          <Tabs
-                            className="oms-tab"
-                            value={currentTabIndex}
-                            onChange={(index, newValue) => {
-                              setCurrentTabIndex(newValue);
-                            }}
-                            indicatorColor="primary"
-                            textColor="primary"
-                            aria-label="icon tabs example"
-                          >
-                            <Tab
-                              label="Quotes"
-                              aria-controls="a11y-tabpanel-0"
-                              id="a11y-tab-0"
-                            />
-                            {ProcessStatus === "Quote Builder" && (
-                              <Tab
-                                label="Terms & Conditions"
-                                aria-controls="a11y-tabpanel-1"
-                                id="a11y-tab-1"
-                              />
-                            )}
-                          </Tabs>
-                        </>
-                        {!loading && quoteData ? (
-                          <Grid container className="position-relative">
-                            <Grid
-                              item
-                              xs={12}
-                              sm={12}
-                              md={12}
-                              className="d-flex align-items-center gap-1"
-                            >
-                              {ProcessStatus === "New" ? (
-                                <span className="productPos m-2">
-                                  <Button
-                                    variant="outlined"
-                                    size="small"
-                                    className="mr-1"
-                                    startIcon={<AiFillPlusCircle />}
-                                    color="primary"
-                                    onClick={() => {
-                                      setIsAddNewProduct(true);
-                                    }}
-                                  >
-                                    New
-                                  </Button>
-                                  <Button
-                                    variant="outlined"
-                                    size="small"
-                                    startIcon={<BiLayerPlus />}
-                                    color="primary"
-                                    onClick={() => {
-                                      setIsAddExistingProduct(true);
-                                    }}
-                                  >
-                                    Add Existing
-                                  </Button>
-                                </span>
-                              ) : null}
-
-                              {ProcessStatus === "Quote Builder" ? (
-                                <Grid container>
-                                  <Grid item xs={11} md={11} sm={11}>
-                                    <FormControl
-                                      fullWidth
-                                      className={classes.formControl}
-                                    >
-                                      <InputLabel id="demo-mutiple-chip-label">
-                                        Visible Columns in Quote
-                                      </InputLabel>
-                                      <Select
-                                        labelId="demo-mutiple-chip-label"
-                                        id="demo-mutiple-chip"
-                                        multiple
-                                        value={visibleColumns}
-                                        onChange={handleChangeVisible}
-                                        input={<Input id="select-multiple-chip" />}
-                                        renderValue={(selected: any) => (
-                                          <div className={classes.chips}>
-                                            {selected.map((value) => (
-                                              <Chip
-                                                key={value}
-                                                label={value}
-                                                className={classes.chip}
-                                              />
-                                            ))}
-                                          </div>
-                                        )}
-                                        MenuProps={MenuProps}
-                                      >
-                                        {ColumnName.map((name) => (
-                                          <MenuItem
-                                            key={name}
-                                            value={name}
-                                            style={getStyles(
-                                              name,
-                                              visibleColumns,
-                                              theme
-                                            )}
-                                          >
-                                            <Checkbox
-                                              checked={
-                                                visibleColumns.indexOf(name) > -1
-                                              }
-                                            />
-                                            {name}
-                                          </MenuItem>
-                                        ))}
-                                      </Select>
-                                    </FormControl>
-                                  </Grid>
-                                </Grid>
-                              ) : null}
-                              {(ProcessStatus === "DOA Process" &&
-                                versionStatus === "Building Quote") ||
-                                (ProcessStatus === "Send To Customer" &&
-                                  versionStatus !== "Sent to Customer") ? (
-                                <div className="w-100 d-flex align-items-center justify-content-end doaAction">
-                                  {!ifQuoteApproved().approved && (
-                                    <Button
-                                      onClick={() => handleCases()}
-                                      disabled={(!DOAreq && !Customerreq) || loading}
-                                      startIcon={<BiMailSend />}
-                                      variant="contained"
-                                      size="small"
-                                      color="primary"
-                                    >
-                                      {buttonMessage}
-                                    </Button>
-                                  )}
-                                </div>
-                              ) : null}
-                            </Grid>
-                            {ProcessStatus !== "New" &&
-                              ProcessStatus !== "Price Builder" ? (
-                              <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
-                                <Button
-                                  onClick={() => createImagePDF(true, false)}
-                                  variant="outlined"
-                                  size="small"
-                                  className="mr-1"
-                                  startIcon={<AiOutlineEye />}
-                                  color="primary"
-                                >
-                                  View
-                                </Button>
-                                <Button
-                                  onClick={() => {
-                                    createImagePDF(false, false);
-                                    exportToCSV();
-                                  }}
-                                  variant="outlined"
-                                  size="small"
-                                  startIcon={<FiDownloadCloud />}
-                                  color="primary"
-                                >
-                                  Download
-                                </Button>
-                              </span>
-                            ) : null}
-                            <Grid item xs={12} sm={12} md={12} className="mt-2">
-                              {ProcessStatus === "Quote Builder" &&
-                                currentTabIndex === 0 &&
-                                visibleColumns.length > 0 ? (
-                                <ProductGrid
-                                  productBuilderId={productBuilderID}
-                                  refreshProducts={refreshProducts}
-                                  columnsData={visibleColumns}
-                                  currency={quoteData.currency}
-                                  isAll={false}
-                                />
-                              ) : currentTabIndex === 0 ? (
-                                <ProductBuilder
-                                  productBuilderId={productBuilderID}
-                                  isAddNewProduct={isAddNewProduct}
-                                  setIsAddNewProduct={setIsAddNewProduct}
-                                  isAddExistingProduct={isAddExistingProduct}
-                                  setIsAddExistingProduct={setIsAddExistingProduct}
-                                  refreshProducts={refreshProducts}
-                                  stage={ProcessStatus === "New" ? "product" : "cost"}
-                                  Editable={
-                                    ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
-                                      ? true
-                                      : false
-                                  }
-                                />
-                              ) : null}
-                              {ProcessStatus === "Quote Builder" &&
-                                currentTabIndex === 1 ? (
-                                <Box className="m-3">
-                                  <div className="position-relative">
-                                    <h4
-                                      className="form-label-style"
-                                      title="Add Terms & Conditions"
-                                    >
-                                      Terms & Conditions
-                                    </h4>
-                                    <Button
-                                      onClick={() => setShowCreateDialog(true)}
-                                      variant="contained"
-                                      size="small"
-                                      color="primary"
-                                      className={classes.termsBtn}
-                                      startIcon={<AddIcon />}
-                                    >
-                                      Add Terms & Conditions
-                                    </Button>
-                                  </div>
-                                  <CustomAgGrid
-                                    columns={columnsTNC}
-                                    dataRows={dataRowsTNC}
-                                    frameworkComponents={frameworkComponents}
-                                    setGridApi={setTNCGridApi}
-                                    dispatch={dispatch}
-                                    rowCount={rowCountTNC}
-                                    limit={limit}
-                                    pageSizes={pageSizes}
-                                    page={page}
-                                    actionWidth={150}
-                                    allowSelection={true}
-                                    allowAction={false}
-                                    isClientSideGrid={true}
-                                  />
-                                </Box>
-                              ) : null}
-                            </Grid>
-                          </Grid>
-                        ) : null}
-                      </div>
-                   */}
-                  </TabPanel>
-                </>
-              )}
-            </Paper>
-
-            <Paper className={classes.bgProduct}>
-              <Grid
-                container
-                className="detailHeader d-flex align-items-center form-label-style mb-0"
-              >
-                <Grid item xs={12} sm={4} className="justify-content-start">
-                  <h2 className="mr-2">Product Information</h2>
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  sm={8}
-                  className="d-flex justify-content-end"
-                >
-                  <select
-                    className="customSelect mx-1"
-                    value={currentVersion}
-                    onChange={handleChangeVersion}
-                  >
-                    {versions.map((team) => (
-                      <option key={team} value={team}>
-                        {"Version : " + team}
-                      </option>
-                    ))}
-                  </select>
-                  {ifQuoteApproved().approved === false && (
-                    <>
-                      {currentVersion !== 1 && (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          disabled={
-                            deletingDOA ||
-                            loading ||
-                            OtherSteps.indexOf(ProcessStatus) > 1
-                          }
-                          onClick={deleteVersion}
-                        >
-                          Delete Version
-                        </Button>
                       )}
-                      <Button
-                        disabled={isCloning || loading}
-                        variant="contained"
-                        type="button"
-                        size="small"
-                        startIcon={
-                          isCloning ? (
-                            <CircularProgress color="inherit" size={16} />
-                          ) : (
-                            <BiLayerPlus />
-                          )
-                        }
-                        className="mx-1"
-                        color="primary"
-                        onClick={() => {
-                          cloneVersion();
-                        }}
-                      >
-                        {isCloning ? (
-                          <>Cloning v{currentVersion}</>
-                        ) : (
-                          `Clone Version ${currentVersion}`
-                        )}
-                      </Button>{" "}
-                    </>
-                  )}
-                  <Button
-                    variant="contained"
-                    type="button"
-                    size="small"
-                    disabled={
-                      allVersionStatusButtonText === gettingVersionStatusText
-                    }
-                    startIcon={<InfoIcon />}
-                    color="primary"
-                    onClick={() => {
-                      getVersionStatus();
-                    }}
-                  >
-                    {allVersionStatusButtonText}{" "}
-                  </Button>
-                </Grid>
-              </Grid>
-              <div>
-                {DOAneeded ? (
-                  <Steps
-                    steps={DOASteps}
-                    currentStep={DOASteps.indexOf(ProcessStatus)}
-                    id={id}
-                    version={currentVersion}
-                    Refresh={fetchQuoteData}
-                    nextStep={nextStep}
-                    versionStatus={versionStatus}
-                    loading={loading}
-                    approvedQuote={ifQuoteApproved()}
-                    DOAlimit={DOAlimit}
-                    totalCost={totalcost?.fullFormatAmount}
-                    handleSendReminder={handleSendReminder}
-                    reminderLoading={reminderLoading}
-                    hideReminderButton={isHideReminder}
-                  />
-                ) : (
-                  <Steps
-                    steps={OtherSteps}
-                    currentStep={OtherSteps.indexOf(ProcessStatus)}
-                    id={id}
-                    version={currentVersion}
-                    Refresh={fetchQuoteData}
-                    nextStep={nextStep}
-                    versionStatus={versionStatus}
-                    loading={loading}
-                    approvedQuote={ifQuoteApproved()}
-                    DOAlimit={DOAlimit}
-                    totalCost={totalcost?.fullFormatAmount}
-                    handleSendReminder={handleSendReminder}
-                    reminderLoading={reminderLoading}
-                    hideReminderButton={isHideReminder}
-                  />
-                )}
-              </div>
-              <div className={classes.productInformation}>
-                {ProcessStatus != "New" ? (
-                  <Grid>
-                    <Grid
-                      item
-                      xs={12}
-                      md={12}
-                      sm={12}
-                      className="d-flex align-items-center gap-1 quotePanel"
-                    >
-                      <div className="quoteBox">
-                        <span
-                          className="quoteAmount"
-                          title={totalProfit.fullFormatAmount}
+                    </Tabs>
+                    {!loading && quoteData ? (
+                      <Grid container className="position-relative">
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          md={12}
+                          className="d-flex align-items-center gap-1"
                         >
-                          {totalProfit.shortFormatAmount}
-                        </span>
-                        <span>Total Profit</span>
-                      </div>
-                      <div className="quoteBox">
-                        <span
-                          className="quoteAmount"
-                          title={totalcost.fullFormatAmount}
-                        >
-                          {totalcost.shortFormatAmount}
-                        </span>
-                        <span>Total Cost Price</span>
-                      </div>
-                      {redCard ? (
-                        <div className="redQuoteBox">
-                          <span
-                            className="quoteAmount"
-                            title={totalsale.fullFormatAmount}
-                          >
-                            {totalsale.shortFormatAmount}
-                          </span>
-                          <span>Total Selling Price</span>
-                        </div>
-                      ) : (
-                        <div className="quoteBox">
-                          <span
-                            className="quoteAmount"
-                            title={totalsale.fullFormatAmount}
-                          >
-                            {totalsale.shortFormatAmount}
-                          </span>
-                          <span>Total Selling Price</span>
-                        </div>
-                      )}
-                      <div className="quoteBox">
-                        <span
-                          className="quoteAmount"
-                          title={totalmargin.fullFormatAmount}
-                        >
-                          {totalmargin.shortFormatAmount}
-                        </span>
-                        <span>Total Margin</span>
-                      </div>
-
-                      <div></div>
-                    </Grid>
-                    <div></div>
-                  </Grid>
-                ) : null}
-                <>
-                  <Tabs
-                    className="oms-tab"
-                    value={currentTabIndex}
-                    onChange={(index, newValue) => {
-                      setCurrentTabIndex(newValue);
-                    }}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    aria-label="icon tabs example"
-                  >
-                    <Tab
-                      label="Quotes"
-                      aria-controls="a11y-tabpanel-0"
-                      id="a11y-tab-0"
-                    />
-                    {ProcessStatus === "Quote Builder" && (
-                      <Tab
-                        label="Terms & Conditions"
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
-                    )}
-                  </Tabs>
-                </>
-                {!loading && quoteData ? (
-                  <Grid container className="position-relative">
-                    <Grid
-                      item
-                      xs={12}
-                      sm={12}
-                      md={12}
-                      className="d-flex align-items-center gap-1"
-                    >
-                      {ProcessStatus === "New" ? (
-                        <span className="productPos m-2">
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            className="mr-1"
-                            startIcon={<AiFillPlusCircle />}
-                            color="primary"
-                            onClick={() => {
-                              setIsAddNewProduct(true);
-                            }}
-                          >
-                            New
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<BiLayerPlus />}
-                            color="primary"
-                            onClick={() => {
-                              setIsAddExistingProduct(true);
-                            }}
-                          >
-                            Add Existing
-                          </Button>
-                        </span>
-                      ) : null}
-
-                      {ProcessStatus === "Quote Builder" ? (
-                        <Grid container>
-                          <Grid item xs={11} md={11} sm={11}>
-                            <FormControl
-                              fullWidth
-                              className={classes.formControl}
-                            >
-                              <InputLabel id="demo-mutiple-chip-label">
-                                Visible Columns in Quote
-                              </InputLabel>
-                              <Select
-                                labelId="demo-mutiple-chip-label"
-                                id="demo-mutiple-chip"
-                                multiple
-                                value={visibleColumns}
-                                onChange={handleChangeVisible}
-                                input={<Input id="select-multiple-chip" />}
-                                renderValue={(selected: any) => (
-                                  <div className={classes.chips}>
-                                    {selected.map((value) => (
-                                      <Chip
-                                        key={value}
-                                        label={value}
-                                        className={classes.chip}
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-                                MenuProps={MenuProps}
+                          {ProcessStatus === "New" ? (
+                            <span className="productPos m-2">
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                className="mr-1"
+                                startIcon={<AiFillPlusCircle />}
+                                color="primary"
+                                onClick={() => {
+                                  setIsAddNewProduct(true);
+                                }}
                               >
-                                {ColumnName.map((name) => (
-                                  <MenuItem
-                                    key={name}
-                                    value={name}
-                                    style={getStyles(
-                                      name,
-                                      visibleColumns,
-                                      theme
+                                New
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<BiLayerPlus />}
+                                color="primary"
+                                onClick={() => {
+                                  setIsAddExistingProduct(true);
+                                }}
+                              >
+                                Add Existing
+                              </Button>
+                            </span>
+                          ) : null}
+
+                          {ProcessStatus === "Quote Builder" ? (
+                            <Grid container>
+                              <Grid item xs={11} md={11} sm={11}>
+                                <FormControl
+                                  fullWidth
+                                  className={classes.formControl}
+                                >
+                                  <InputLabel id="demo-mutiple-chip-label">
+                                    Visible Columns in Quote
+                                  </InputLabel>
+                                  <Select
+                                    labelId="demo-mutiple-chip-label"
+                                    id="demo-mutiple-chip"
+                                    multiple
+                                    value={visibleColumns}
+                                    onChange={handleChangeVisible}
+                                    input={<Input id="select-multiple-chip" />}
+                                    renderValue={(selected: any) => (
+                                      <div className={classes.chips}>
+                                        {selected.map((value) => (
+                                          <Chip
+                                            key={value}
+                                            label={value}
+                                            className={classes.chip}
+                                          />
+                                        ))}
+                                      </div>
                                     )}
+                                    MenuProps={MenuProps}
                                   >
-                                    <Checkbox
-                                      checked={
-                                        visibleColumns.indexOf(name) > -1
-                                      }
-                                    />
-                                    {name}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          </Grid>
+                                    {ColumnName.map((name) => (
+                                      <MenuItem
+                                        key={name}
+                                        value={name}
+                                        style={getStyles(
+                                          name,
+                                          visibleColumns,
+                                          theme
+                                        )}
+                                      >
+                                        <Checkbox
+                                          checked={
+                                            visibleColumns.indexOf(name) > -1
+                                          }
+                                        />
+                                        {name}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              </Grid>
+                            </Grid>
+                          ) : null}
+                          {(ProcessStatus === "DOA Process" &&
+                            versionStatus === "Building Quote") ||
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
+                            <div className="w-100 d-flex align-items-center justify-content-end doaAction">
+                              {!ifQuoteApproved().approved && (
+                                <Button
+                                  onClick={() => handleCases()}
+                                  disabled={(!DOAreq && !Customerreq) || loading}
+                                  startIcon={<BiMailSend />}
+                                  variant="contained"
+                                  size="small"
+                                  color="primary"
+                                >
+                                  {buttonMessage}
+                                </Button>
+                              )}
+                            </div>
+                          ) : null}
                         </Grid>
-                      ) : null}
-                      {(ProcessStatus === "DOA Process" &&
-                        versionStatus === "Building Quote") ||
-                      (ProcessStatus === "Send To Customer" &&
-                        versionStatus !== "Sent to Customer") ? (
-                        <div className="w-100 d-flex align-items-center justify-content-end doaAction">
-                          {!ifQuoteApproved().approved && (
+                        {ProcessStatus !== "New" &&
+                          ProcessStatus !== "Price Builder" ? (
+                          <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                             <Button
-                              onClick={() => handleCases()}
-                              disabled={(!DOAreq && !Customerreq) || loading}
-                              startIcon={<BiMailSend />}
-                              variant="contained"
+                              onClick={() => createImagePDF(true, false)}
+                              variant="outlined"
                               size="small"
+                              className="mr-1"
+                              startIcon={<AiOutlineEye />}
                               color="primary"
                             >
-                              {buttonMessage}
+                              View
                             </Button>
-                          )}
-                        </div>
-                      ) : null}
-                    </Grid>
-                    {ProcessStatus !== "New" &&
-                    ProcessStatus !== "Price Builder" ? (
-                      <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
-                        <Button
-                          onClick={() => createImagePDF(true, false)}
-                          variant="outlined"
-                          size="small"
-                          className="mr-1"
-                          startIcon={<AiOutlineEye />}
-                          color="primary"
-                        >
-                          View
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            createImagePDF(false, false);
-                            exportToCSV();
-                          }}
-                          variant="outlined"
-                          size="small"
-                          startIcon={<FiDownloadCloud />}
-                          color="primary"
-                        >
-                          Download
-                        </Button>
-                      </span>
+                            <Button
+                              onClick={() => {
+                                createImagePDF(false, false);
+                                exportToCSV();
+                              }}
+                              variant="outlined"
+                              size="small"
+                              startIcon={<FiDownloadCloud />}
+                              color="primary"
+                            >
+                              Download
+                            </Button>
+                          </span>
+                        ) : null}
+                        <Grid item xs={12} sm={12} md={12} className="mt-2">
+                          {ProcessStatus === "Quote Builder" &&
+                            currentTabIndex === 0 &&
+                            visibleColumns.length > 0 ? (
+                            <ProductGrid
+                              productBuilderId={productBuilderID}
+                              refreshProducts={refreshProducts}
+                              columnsData={visibleColumns}
+                              currency={quoteData.currency}
+                              isAll={false}
+                            />
+                          ) : currentTabIndex === 0 ? (
+                            <ProductBuilder
+                              productBuilderId={productBuilderID}
+                              isAddNewProduct={isAddNewProduct}
+                              setIsAddNewProduct={setIsAddNewProduct}
+                              isAddExistingProduct={isAddExistingProduct}
+                              setIsAddExistingProduct={setIsAddExistingProduct}
+                              refreshProducts={refreshProducts}
+                              stage={ProcessStatus === "New" ? "product" : "cost"}
+                              Editable={
+                                ProcessStatus === "Price Builder" ||
+                                  ProcessStatus === "New"
+                                  ? true
+                                  : false
+                              }
+                            />
+                          ) : null}
+                          {ProcessStatus === "Quote Builder" &&
+                            currentTabIndex === 1 ? (
+                            <></>
+                          ) : null}
+                        </Grid>
+                      </Grid>
                     ) : null}
-                    <Grid item xs={12} sm={12} md={12} className="mt-2">
-                      {ProcessStatus === "Quote Builder" &&
-                      currentTabIndex === 0 &&
-                      visibleColumns.length > 0 ? (
-                        <ProductGrid
-                          productBuilderId={productBuilderID}
-                          refreshProducts={refreshProducts}
-                          columnsData={visibleColumns}
-                          currency={quoteData.currency}
-                          isAll={false}
-                        />
-                      ) : currentTabIndex === 0 ? (
-                        <ProductBuilder
-                          productBuilderId={productBuilderID}
-                          isAddNewProduct={isAddNewProduct}
-                          setIsAddNewProduct={setIsAddNewProduct}
-                          isAddExistingProduct={isAddExistingProduct}
-                          setIsAddExistingProduct={setIsAddExistingProduct}
-                          refreshProducts={refreshProducts}
-                          stage={ProcessStatus === "New" ? "product" : "cost"}
-                          Editable={
-                            ProcessStatus === "Price Builder" ||
-                            ProcessStatus === "New"
-                              ? true
-                              : false
-                          }
-                        />
-                      ) : null}
-                      {ProcessStatus === "Quote Builder" &&
-                      currentTabIndex === 1 ? (
-                        <Box className="m-3">
-                          <div className="position-relative">
-                            <h4
-                              className="form-label-style"
-                              title="Add Terms & Conditions"
-                            >
-                              Terms & Conditions
-                            </h4>
-                            <Button
-                              onClick={() => setShowCreateDialog(true)}
-                              variant="contained"
-                              size="small"
-                              color="primary"
-                              className={classes.termsBtn}
-                              startIcon={<AddIcon />}
-                            >
-                              Add Terms & Conditions
-                            </Button>
-                          </div>
-                          <CustomAgGrid
-                            columns={columnsTNC}
-                            dataRows={dataRowsTNC}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setTNCGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCountTNC}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            actionWidth={150}
-                            allowSelection={true}
-                            allowAction={false}
-                            isClientSideGrid={true}
-                          />
-                        </Box>
-                      ) : null}
-                    </Grid>
-                  </Grid>
-                ) : null}
-              </div>
+                  </>}
+                </>)
+              }
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
@@ -2755,7 +2263,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2791,7 +2299,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            // qbApi={qbApi}
+          // qbApi={qbApi}
           />
         )}
 
@@ -2827,9 +2335,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
