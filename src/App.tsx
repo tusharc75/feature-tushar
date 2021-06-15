@@ -82,10 +82,13 @@ import {
 } from "./StateProvider/actionTypes";
 import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
+import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+
   const {
     state: { user },
     dispatch,
@@ -139,7 +142,7 @@ function App() {
         .get(`/user/notification/unseen`)
         .then(({ data: { count } }) => {
           if (count > 0) {
-            notification.setCount(count);
+            chatNotification.setCount(count);
           }
         })
     }
