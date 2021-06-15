@@ -347,6 +347,7 @@ const LeadDetailsPage = () => {
                 steps={steps}
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
+                hideBackButton={isLeadAlreadyConvertedToOpportunity}
               />
 
               {loading ? (

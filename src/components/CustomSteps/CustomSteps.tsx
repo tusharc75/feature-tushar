@@ -92,7 +92,7 @@ export default function CustomSteps({ steps, active }) {
 
     return (
         <div className={classes.root}>
-            <Stepper activeStep={active}>
+            <Stepper activeStep={active + 1}>
                 {steps.map((step, index) => {
                     const stepProps: any = {};
                     const labelProps: any = {};
@@ -105,10 +105,12 @@ export default function CustomSteps({ steps, active }) {
                     return (
                         <Step
                             key={index} {...stepProps}
-                            className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}>
+                            className={`${index <= active ? classes.completed : (index === (active + 1)) ? classes.current : ""}`}
+                        //className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}
+                        >
                             <StepLabel
-                                // className={classes[textColor[step.text]] ?? ''}
-                                {...labelProps} icon={active > index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
+                                {...labelProps}
+                                icon={active > index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
                                 {step.text}</StepLabel>
                         </Step>
                     );
@@ -154,6 +156,6 @@ export default function CustomSteps({ steps, active }) {
                     </div>
                 )}
             </div> */}
-        </div>
+        </div >
     );
 }

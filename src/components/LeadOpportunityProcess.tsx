@@ -7,7 +7,7 @@ import {
 } from "react-icons/io";
 export default function LeadOpportunityProcess(props) {
 
-    const { steps, activeStep, isProcessing, handleMarkAsCompleted } = props
+    const { steps, activeStep, isProcessing, handleMarkAsCompleted, hideBackButton = false } = props
 
     return <>
         {
@@ -18,7 +18,7 @@ export default function LeadOpportunityProcess(props) {
                 </div>
                 <div className="actionview">
                     <div className="d-flex justify-content-end">
-                        {activeStep > 0 && activeStep <= steps.length ? (
+                        {activeStep > 0 && activeStep <= steps.length && !hideBackButton ? (
                             <Button
                                 variant="contained"
                                 color="primary"
