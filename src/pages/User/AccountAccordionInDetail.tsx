@@ -69,12 +69,12 @@ function DisplayData({ label, value, icon, showCopyToText = false }) {
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText
-                    primary={value ? value : '-'}
-                    secondary={label} />
-                {
-                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
-                }
+                <ListItemText primary={<>
+                    <Grid container>
+                        <Grid item xs={12} md={10} sm={10} className="text-truncate">{value ? value : '-'} </Grid>
+                        <Grid item xs={12} md={2} sm={2} >{showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}</Grid>
+                    </Grid> </>
+                } secondary={label} />
             </ListItem>
         </List>
     </div>

@@ -26,6 +26,7 @@ import { displayDate } from "../../../constants/helpers"
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import { truncate } from "lodash";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 const Note = () => {
     const {
@@ -112,9 +113,9 @@ const Note = () => {
     )
 
     const UpdatedAtDateRenderer = params => (
-        <span style={{ marginLeft: 5, fontSize: 12 }}>
+        params.value ? <span style={{ marginLeft: 5, fontSize: 12 }}>
             {displayDate(params.value)}
-        </span>
+        </span> : <NoDataCell />
     )
 
     const ActionsRenderer = params => <>

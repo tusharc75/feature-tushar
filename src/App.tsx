@@ -49,7 +49,6 @@ import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from "./pages/Quote-Approval";
 import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail";
-import QuoteBuilderPage from "./pages/QuoteBuilder";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 
@@ -82,10 +81,14 @@ import {
   SET_SELECTED_ENTITY,
 } from "./StateProvider/actionTypes";
 import NotFound from "./pages/NotFound";
+import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
+import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+
   const {
     state: { user },
     dispatch,
@@ -133,11 +136,26 @@ function App() {
     }
   };
 
+  const getChatNotification = async () => {
+    if (localStorage.getItem("token")) {
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          if (count > 0) {
+            chatNotification.setCount(count);
+          }
+        })
+    }
+  }
+
   useEffect(() => {
     try {
       getNotification();
+      // getChatNotification();
+      
       setInterval(async () => {
         await getNotification();
+        // await getChatNotification();
       }, 60000);
     } catch (e) {
       console.log(e);
@@ -430,6 +448,11 @@ function App() {
           <PrivateRoute exact path={routes.quoteBuilder.path}>
             <QuoteBuilderCombined />
           </PrivateRoute>
+
+          <Route exact path="/inline-grid">
+            <CustomInlineEditableAgGrid />
+          </Route>
+
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

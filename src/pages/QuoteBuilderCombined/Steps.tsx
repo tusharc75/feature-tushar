@@ -43,11 +43,12 @@ const useStyles = makeStyles((theme) => ({
   stepperNext: {
     marginTop: "8px",
     position: "absolute",
-    right: "22px",
+    right: "12px",
+    bottom: "0",
     color: theme.palette.primary.main,
   },
   pStepper: {
-    padding: "45px 7px 10px 7px !important",
+    padding: "12px 7px 42px 7px !important",
     // border: "1px solid #ece4e4",
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
@@ -121,6 +122,11 @@ const Steps = (props) => {
     versionStatus,
     loading,
     approvedQuote,
+    DOAlimit,
+    totalCost,
+    handleSendReminder = null,
+    reminderLoading = false,
+    hideReminderButton = false,
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -238,6 +244,7 @@ const Steps = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   return (
     <div className={classes.root}>
       <div className="position-relative">
@@ -251,6 +258,17 @@ const Steps = (props) => {
           </div>
         ) : (
           <>
+            {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
+              <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                <Typography
+                  className={classes.rejected}
+                  variant="body1"
+                  style={{ fontWeight: "normal" }}
+                >
+                  User doesn't have DOA setup for this amount
+                </Typography>
+              </div>
+            )}
             {versionStatus === "Sent for DOA" && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <FcClock size={30} />
@@ -281,6 +299,21 @@ const Steps = (props) => {
                 </Typography>
               </div>
             )}
+            {versionStatus === "Sent to Customer" && !hideReminderButton ? (
+              <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                <Button
+                  className="mx-1"
+                  color="primary"
+                  variant="contained"
+                  type="button"
+                  size="small"
+                  disabled={reminderLoading}
+                  onClick={handleSendReminder}
+                >
+                  Send Reminder
+                </Button>
+              </div>
+            ) : null}
             {versionStatus.includes("Accepted by Customer") && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <FcApproval size={30} />
@@ -300,9 +333,7 @@ const Steps = (props) => {
           </>
         )}
 
-        {activeStep === steps.length - 1 ? (
-          <></>
-        ) : (
+        {activeStep !== steps.length - 1 && (
           <>
             <div>
               {!approvedQuote.approved && (
@@ -334,7 +365,8 @@ const Steps = (props) => {
                         !nextStep ||
                         versionStatus.includes("Accepted  by DOA") ||
                         versionStatus.includes("Sent to Customer") ||
-                        steps[currentStep] === "Send To Customer"
+                        steps[currentStep] === "Send To Customer" ||
+                        versionStatus === "Sent to Customer"
                       }
                       endIcon={<IoIosArrowDroprightCircle />}
                     >

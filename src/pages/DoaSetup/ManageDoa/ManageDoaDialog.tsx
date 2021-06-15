@@ -81,9 +81,10 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             : null);
 
     const fetchDoa = useCallback(() => {
+
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: userSelected, name: userList.find(d => d.id === userSelected).name, amount: 0 }]))
+            setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -107,9 +108,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                 };
             });
 
-        const userDoa = { _id: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
+        const userDoa = { _ids: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
         setLoading(true)
-        axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
+        axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
@@ -365,7 +366,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             variant="contained"
                                         >
                                             Cancel
-                                </Button>
+                                        </Button>
                                         <Button
                                             variant="contained"
                                             color="primary"
@@ -380,7 +381,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             }}
                                         >
                                             Save
-                                </Button>
+                                        </Button>
                                     </CustomDialogFooter>
                                 </>
                             )}
