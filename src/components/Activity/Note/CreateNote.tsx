@@ -352,9 +352,12 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
 
                                         {noteId && <Fragment>
 
-                                            <Box mt={2}>
-                                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                                            </Box>
+                                            {
+                                                initialValues.relatedTo && initialValues.relatedTo.length ?
+                                                    <Box mt={2}>
+                                                        <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                                    </Box> : null
+                                            }
                                             {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
                                                 <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
                                             </Box>}
