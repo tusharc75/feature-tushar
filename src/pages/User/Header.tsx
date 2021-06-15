@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
+import { Box, Grid, MenuItem, Button, Menu, Chip } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { FaUsers } from "react-icons/fa";
@@ -19,7 +19,9 @@ const Header = (props) => {
     openGlobalRolesDialog,
     openRegionalRolesDialog,
     rolesActionDisabled,
-    openDOADialog
+    openDOADialog,
+    entityRoleRedirectDetails,
+    onEntityRoleRedirectDetailRemove
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -36,6 +38,17 @@ const Header = (props) => {
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <FaUsers className="headerLogo" />{" "}
         <span className="listingHeader">Users</span>
+
+        {entityRoleRedirectDetails.id && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${entityRoleRedirectDetails.text} : ${entityRoleRedirectDetails.name}`}
+            onDelete={() => {
+              onEntityRoleRedirectDetailRemove();
+            }}
+          />
+        )}
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box component="div" className={styles.filter_side_header}>
@@ -97,17 +110,17 @@ const Header = (props) => {
                 )}
                 {userPermissions.isUpdate && (
                   <>
-                  
-                   <MenuItem
-                   disabled={rolesActionDisabled}
-                   onClick={() => {
-                     openApprovalProcessDialog();
-                     closeActions();
-                   }}
-                 >
-                   Set Approval Process
-                 </MenuItem>
-                 
+
+                    <MenuItem
+                      disabled={rolesActionDisabled}
+                      onClick={() => {
+                        openApprovalProcessDialog();
+                        closeActions();
+                      }}
+                    >
+                      Set Approval Process
+                    </MenuItem>
+
                     <MenuItem
                       disabled={rolesActionDisabled}
                       onClick={() => {
