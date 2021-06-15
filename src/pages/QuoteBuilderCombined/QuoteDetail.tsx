@@ -416,6 +416,7 @@ function QuoteDetail() {
   let companyName = "";
   let companyAddress = "";
   const [DOAlimit, setDOALimit] = useState(0);
+  const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
   const [lastUser, setLastUser] = useState(true);
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
@@ -469,7 +470,6 @@ function QuoteDetail() {
       "aria-controls": `main-tabpanel-${index}`,
     };
   }
-
 
   useEffect(() => {
     fetchDoaLimit();
@@ -641,7 +641,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -674,7 +674,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -776,12 +776,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1093,7 +1093,8 @@ function QuoteDetail() {
       .post("doa-request/limit", {})
       .then(({ data: { data } }) => {
         setDOAsetup(data.doasetup);
-        setDOALimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
+        setDOALimit(data.limit ? data.limit : 0);
+        setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
         setLastUser(data.lastUser);
       })
       .catch((err) => {
@@ -1587,7 +1588,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1775,9 +1776,9 @@ function QuoteDetail() {
                     </Button>
                   ) : null}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1804,8 +1805,12 @@ function QuoteDetail() {
                     className="oms-tab"
                     value={tabValue}
                     onChange={handleMainTabChange}
-                    indicatorColor="primary"
                     textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: "none",
+                      },
+                    }}
                   >
                     <Tab
                       label={
@@ -1815,7 +1820,7 @@ function QuoteDetail() {
                         </div>
                       }
                       {...a11yProps(0)}
-                    // label={"Quotes Information"}
+                      // label={"Quotes Information"}
                     />
                     <Tab
                       label={
@@ -1945,7 +1950,7 @@ function QuoteDetail() {
                             versionStatus={versionStatus}
                             loading={loading}
                             approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAlimit}
+                            DOAlimit={DOAmaxLimit}
                             totalCost={totalcost?.fullFormatAmount}
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
@@ -1962,7 +1967,7 @@ function QuoteDetail() {
                             versionStatus={versionStatus}
                             loading={loading}
                             approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAlimit}
+                            DOAlimit={DOAmaxLimit}
                             totalCost={totalcost?.fullFormatAmount}
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
@@ -1978,7 +1983,8 @@ function QuoteDetail() {
                               xs={12}
                               md={12}
                               sm={12}
-                              className="d-flex align-items-stretch gap-1 quotePanel" >
+                              className="d-flex align-items-stretch gap-1 quotePanel"
+                            >
                               <div className="quoteBox">
                                 <span>Total Profit</span>
                                 <span
@@ -2033,205 +2039,215 @@ function QuoteDetail() {
                       </div>
                     </Paper>
                   </TabPanel>
-                  {tabValue === 1 && <>
-                    <Tabs
-                      className="oms-tab"
-                      value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab
-                        label="Quotes"
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      {ProcessStatus === "Quote Builder" && (
+                  {tabValue === 1 && (
+                    <>
+                      <Tabs
+                        className="oms-tab"
+                        value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
+                      >
                         <Tab
-                          label="Terms & Conditions"
-                          aria-controls="a11y-tabpanel-1"
-                          id="a11y-tab-1"
+                          label="Quotes"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
                         />
-                      )}
-                    </Tabs>
-                    {!loading && quoteData ? (
-                      <Grid container className="position-relative">
-                        <Grid
-                          item
-                          xs={12}
-                          sm={12}
-                          md={12}
-                          className="d-flex align-items-center gap-1"
-                        >
-                          {ProcessStatus === "New" ? (
-                            <span className="productPos m-2">
+                        {ProcessStatus === "Quote Builder" && (
+                          <Tab
+                            label="Terms & Conditions"
+                            aria-controls="a11y-tabpanel-1"
+                            id="a11y-tab-1"
+                          />
+                        )}
+                      </Tabs>
+                      {!loading && quoteData ? (
+                        <Grid container className="position-relative">
+                          <Grid
+                            item
+                            xs={12}
+                            sm={12}
+                            md={12}
+                            className="d-flex align-items-center gap-1"
+                          >
+                            {ProcessStatus === "New" ? (
+                              <span className="productPos m-2">
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  className="mr-1"
+                                  startIcon={<AiFillPlusCircle />}
+                                  color="primary"
+                                  onClick={() => {
+                                    setIsAddNewProduct(true);
+                                  }}
+                                >
+                                  New
+                                </Button>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<BiLayerPlus />}
+                                  color="primary"
+                                  onClick={() => {
+                                    setIsAddExistingProduct(true);
+                                  }}
+                                >
+                                  Add Existing
+                                </Button>
+                              </span>
+                            ) : null}
+
+                            {ProcessStatus === "Quote Builder" ? (
+                              <Grid container>
+                                <Grid item xs={11} md={11} sm={11}>
+                                  <FormControl
+                                    fullWidth
+                                    className={classes.formControl}
+                                  >
+                                    <InputLabel id="demo-mutiple-chip-label">
+                                      Visible Columns in Quote
+                                    </InputLabel>
+                                    <Select
+                                      labelId="demo-mutiple-chip-label"
+                                      id="demo-mutiple-chip"
+                                      multiple
+                                      value={visibleColumns}
+                                      onChange={handleChangeVisible}
+                                      input={
+                                        <Input id="select-multiple-chip" />
+                                      }
+                                      renderValue={(selected: any) => (
+                                        <div className={classes.chips}>
+                                          {selected.map((value) => (
+                                            <Chip
+                                              key={value}
+                                              label={value}
+                                              className={classes.chip}
+                                            />
+                                          ))}
+                                        </div>
+                                      )}
+                                      MenuProps={MenuProps}
+                                    >
+                                      {ColumnName.map((name) => (
+                                        <MenuItem
+                                          key={name}
+                                          value={name}
+                                          style={getStyles(
+                                            name,
+                                            visibleColumns,
+                                            theme
+                                          )}
+                                        >
+                                          <Checkbox
+                                            checked={
+                                              visibleColumns.indexOf(name) > -1
+                                            }
+                                          />
+                                          {name}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  </FormControl>
+                                </Grid>
+                              </Grid>
+                            ) : null}
+                            {(ProcessStatus === "DOA Process" &&
+                              versionStatus === "Building Quote") ||
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
+                              <div className="w-100 d-flex align-items-center justify-content-end doaAction">
+                                {!ifQuoteApproved().approved && (
+                                  <Button
+                                    onClick={() => handleCases()}
+                                    disabled={
+                                      (!DOAreq && !Customerreq) || loading
+                                    }
+                                    startIcon={<BiMailSend />}
+                                    variant="contained"
+                                    size="small"
+                                    color="primary"
+                                  >
+                                    {buttonMessage}
+                                  </Button>
+                                )}
+                              </div>
+                            ) : null}
+                          </Grid>
+                          {ProcessStatus !== "New" &&
+                          ProcessStatus !== "Price Builder" ? (
+                            <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
+                                onClick={() => createImagePDF(true, false)}
                                 variant="outlined"
                                 size="small"
                                 className="mr-1"
-                                startIcon={<AiFillPlusCircle />}
+                                startIcon={<AiOutlineEye />}
                                 color="primary"
-                                onClick={() => {
-                                  setIsAddNewProduct(true);
-                                }}
                               >
-                                New
+                                View
                               </Button>
                               <Button
+                                onClick={() => {
+                                  createImagePDF(false, false);
+                                  exportToCSV();
+                                }}
                                 variant="outlined"
                                 size="small"
-                                startIcon={<BiLayerPlus />}
+                                startIcon={<FiDownloadCloud />}
                                 color="primary"
-                                onClick={() => {
-                                  setIsAddExistingProduct(true);
-                                }}
                               >
-                                Add Existing
+                                Download
                               </Button>
                             </span>
                           ) : null}
-
-                          {ProcessStatus === "Quote Builder" ? (
-                            <Grid container>
-                              <Grid item xs={11} md={11} sm={11}>
-                                <FormControl
-                                  fullWidth
-                                  className={classes.formControl}
-                                >
-                                  <InputLabel id="demo-mutiple-chip-label">
-                                    Visible Columns in Quote
-                                  </InputLabel>
-                                  <Select
-                                    labelId="demo-mutiple-chip-label"
-                                    id="demo-mutiple-chip"
-                                    multiple
-                                    value={visibleColumns}
-                                    onChange={handleChangeVisible}
-                                    input={<Input id="select-multiple-chip" />}
-                                    renderValue={(selected: any) => (
-                                      <div className={classes.chips}>
-                                        {selected.map((value) => (
-                                          <Chip
-                                            key={value}
-                                            label={value}
-                                            className={classes.chip}
-                                          />
-                                        ))}
-                                      </div>
-                                    )}
-                                    MenuProps={MenuProps}
-                                  >
-                                    {ColumnName.map((name) => (
-                                      <MenuItem
-                                        key={name}
-                                        value={name}
-                                        style={getStyles(
-                                          name,
-                                          visibleColumns,
-                                          theme
-                                        )}
-                                      >
-                                        <Checkbox
-                                          checked={
-                                            visibleColumns.indexOf(name) > -1
-                                          }
-                                        />
-                                        {name}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </Grid>
-                            </Grid>
-                          ) : null}
-                          {(ProcessStatus === "DOA Process" &&
-                            versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
-                            <div className="w-100 d-flex align-items-center justify-content-end doaAction">
-                              {!ifQuoteApproved().approved && (
-                                <Button
-                                  onClick={() => handleCases()}
-                                  disabled={(!DOAreq && !Customerreq) || loading}
-                                  startIcon={<BiMailSend />}
-                                  variant="contained"
-                                  size="small"
-                                  color="primary"
-                                >
-                                  {buttonMessage}
-                                </Button>
-                              )}
-                            </div>
-                          ) : null}
-                        </Grid>
-                        {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
-                          <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
-                            <Button
-                              onClick={() => createImagePDF(true, false)}
-                              variant="outlined"
-                              size="small"
-                              className="mr-1"
-                              startIcon={<AiOutlineEye />}
-                              color="primary"
-                            >
-                              View
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                createImagePDF(false, false);
-                                exportToCSV();
-                              }}
-                              variant="outlined"
-                              size="small"
-                              startIcon={<FiDownloadCloud />}
-                              color="primary"
-                            >
-                              Download
-                            </Button>
-                          </span>
-                        ) : null}
-                        <Grid item xs={12} sm={12} md={12} className="mt-2">
-                          {ProcessStatus === "Quote Builder" &&
+                          <Grid item xs={12} sm={12} md={12} className="mt-2">
+                            {ProcessStatus === "Quote Builder" &&
                             currentTabIndex === 0 &&
                             visibleColumns.length > 0 ? (
-                            <ProductGrid
-                              productBuilderId={productBuilderID}
-                              refreshProducts={refreshProducts}
-                              columnsData={visibleColumns}
-                              currency={quoteData.currency}
-                              isAll={false}
-                            />
-                          ) : currentTabIndex === 0 ? (
-                            <ProductBuilder
-                              productBuilderId={productBuilderID}
-                              isAddNewProduct={isAddNewProduct}
-                              setIsAddNewProduct={setIsAddNewProduct}
-                              isAddExistingProduct={isAddExistingProduct}
-                              setIsAddExistingProduct={setIsAddExistingProduct}
-                              refreshProducts={refreshProducts}
-                              stage={ProcessStatus === "New" ? "product" : "cost"}
-                              Editable={
-                                ProcessStatus === "Price Builder" ||
+                              <ProductGrid
+                                productBuilderId={productBuilderID}
+                                refreshProducts={refreshProducts}
+                                columnsData={visibleColumns}
+                                currency={quoteData.currency}
+                                isAll={false}
+                              />
+                            ) : currentTabIndex === 0 ? (
+                              <ProductBuilder
+                                productBuilderId={productBuilderID}
+                                isAddNewProduct={isAddNewProduct}
+                                setIsAddNewProduct={setIsAddNewProduct}
+                                isAddExistingProduct={isAddExistingProduct}
+                                setIsAddExistingProduct={
+                                  setIsAddExistingProduct
+                                }
+                                refreshProducts={refreshProducts}
+                                stage={
+                                  ProcessStatus === "New" ? "product" : "cost"
+                                }
+                                Editable={
+                                  ProcessStatus === "Price Builder" ||
                                   ProcessStatus === "New"
-                                  ? true
-                                  : false
-                              }
-                            />
-                          ) : null}
-                          {ProcessStatus === "Quote Builder" &&
+                                    ? true
+                                    : false
+                                }
+                              />
+                            ) : null}
+                            {ProcessStatus === "Quote Builder" &&
                             currentTabIndex === 1 ? (
-                            <></>
-                          ) : null}
+                              <></>
+                            ) : null}
+                          </Grid>
                         </Grid>
-                      </Grid>
-                    ) : null}
-                  </>}
-                </>)
-              }
+                      ) : null}
+                    </>
+                  )}
+                </>
+              )}
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
@@ -2263,7 +2279,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2299,7 +2315,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-          // qbApi={qbApi}
+            // qbApi={qbApi}
           />
         )}
 
@@ -2335,8 +2351,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
