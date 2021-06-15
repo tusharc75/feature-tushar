@@ -168,7 +168,7 @@ const Opportunities = () => {
 
   const SupplierAccountNameRenderer = params => params.value ? (
     <>
-      <h5 className="createBy">
+      <h5 className="createBy d-flex">
         <Link className="link" title={params.value}
           to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountId}`}
         >
