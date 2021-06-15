@@ -182,7 +182,8 @@ const EntityDetailsPage = () => {
     if (userDeleteRec?._id) {
       const data = {
         user: userDeleteRec?._id,
-        entities: userDeleteRec?.entities.filter(d => d.entity !== id)
+        entities: userDeleteRec?.entities.filter(d => d.entity !== id),
+        withoutRoleLookup: true
       };
       axiosInstance()
         .put("/user/assign-entity", data)
@@ -397,7 +398,8 @@ const EntityDetailsPage = () => {
                             onClick={() => history.push(`/user`, {
                               id: entityData._id,
                               name: entityData.entityName,
-                              type: "entity"
+                              type: "entity",
+                              text: "Entity"
                             })}>
                             <FaEye /> View All &#8599;
                           </Box>

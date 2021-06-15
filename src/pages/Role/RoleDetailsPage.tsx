@@ -553,7 +553,8 @@ const RoleDetailsPage = () => {
                           onClick={() => history.push(`/user`, {
                             id: roleData._id,
                             name: roleData.name,
-                            type: roleData.type === roleTypes.find((d) => d.key === "Global")?.value ? "globalRole" : "regionalRole"
+                            type: roleData.type === roleTypes.find((d) => d.key === "Global")?.value ? "globalRole" : "regionalRole",
+                            text: roleData.type === roleTypes.find((d) => d.key === "Global")?.value ? "Company wide role" : "Region wide functional role"
                           })}>
                           <FaEye /> View All &#8599;
                       </Box>
