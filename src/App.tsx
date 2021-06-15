@@ -49,7 +49,6 @@ import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from "./pages/Quote-Approval";
 import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail";
-import QuoteBuilderPage from "./pages/QuoteBuilder";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 
