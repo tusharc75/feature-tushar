@@ -24,105 +24,15 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
-import { startCase } from "lodash";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import { startCase, uniqBy } from "lodash";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import ApprovalProcessDialog from "./ApprovalProcessDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 let userTimeout: ReturnType<typeof setTimeout>;
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "loading":
-      return {
-        ...state,
-        loading: action.loading
-      }
-
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count,
-        loading: false
-      }
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      }
-
-    case "update":
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      }
-
-    case "filter":
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      }
-
-    case "sort":
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      }
-
-    case "search":
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      }
-
-    case "pageChange":
-      return {
-        ...state,
-        page: action.page
-      }
-
-    case "pageSizeChange":
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      }
-
-    case "complete":
-      return {
-        ...state,
-        loading: false
-      }
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: "",
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-}
 
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -147,6 +57,7 @@ const User: FC = () => {
     id: history.location?.state?.id,
     name: history.location?.state?.name,
     type: history.location?.state?.type,
+    text: history.location?.state?.text,
   });
   const [userList, setUserList] = useState<any[]>([]);
   const [gridApi, setGridApi] = useState(null);
@@ -158,6 +69,14 @@ const User: FC = () => {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
     },
     { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
+    {
+      field: "companyWideRole", headerName: "Company Wide Role(s)", filter: false, show: true,
+      cellRenderer: "companyWideRoleRenderer", width: 300
+    },
+    {
+      field: "regionalWideRole", headerName: "Region Wide Functional Role(s)", filter: false, sortable: false, show: true,
+      cellRenderer: "regionalWideRoleRenderer", width: 350
+    },
     { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
@@ -192,6 +111,42 @@ const User: FC = () => {
       </Tooltip>
     )}{" "}
   </div>;
+
+  const CompanyWideRoleRenderer = params => params.value ? (
+    <>
+      <h5 className="createBy d-flex">
+        <Link className="link" title={params.value}
+          to={`${routes.roleDetail.path}/${params.data.companyWideRoleId}`}
+        >
+          {params.value}
+        </Link>
+        {
+          params.data.restCompanyWideRoles.length > 0 &&
+          <span className="createdAtTime badge-date">
+            {`+${params.data.restCompanyWideRoles.length} more..`}
+          </span>
+        }
+      </h5>
+    </>
+  ) : <NoDataCell />
+
+  const RegionalWideRoleRenderer = params => params.value ? (
+    <>
+      <h5 className="createBy d-flex">
+        <Link className="link" title={params.value}
+          to={`${routes.roleDetail.path}/${params.data.regionalWideRoleId}`}
+        >
+          {params.value}
+        </Link>
+        {
+          params.data.restRegionalWideRoles.length > 0 &&
+          <span className="createdAtTime badge-date">
+            {`+${params.data.restRegionalWideRoles.length} more..`}
+          </span>
+        }
+      </h5>
+    </>
+  ) : <NoDataCell />
 
   const ActionsRenderer = params =>
     user?.user._id === params.data.id ? (
@@ -240,6 +195,8 @@ const User: FC = () => {
     statusRenderer: StatusRenderer,
     emailRenderer: CommonRendererWithCopy,
     createdByRenderer: CreatedByRenderer,
+    companyWideRoleRenderer: CompanyWideRoleRenderer,
+    regionalWideRoleRenderer: RegionalWideRoleRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer
@@ -258,6 +215,20 @@ const User: FC = () => {
     }
   }
 
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "companyWideRole":
+        return "role.name";
+
+      default:
+        return field;
+    }
+  }
+
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
@@ -267,12 +238,12 @@ const User: FC = () => {
           deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }])}`
           break;
 
-        case "regionalRole":
-          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }])}`
-          break;
-
         case "globalRole":
           deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }])}`
+          break;
+
+        case "regionalRole":
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }])}`
           break;
       }
     }
@@ -290,7 +261,7 @@ const User: FC = () => {
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
     }
 
     if (search) {
@@ -330,7 +301,12 @@ const User: FC = () => {
       .get(`/user${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, ...restProperties } = u;
+          const { createdBy, updatedBy, role, entities, ...restProperties } = u;
+
+          const [firstCompanyWideRole, ...restCompanyWideRoles] = role;
+          const allRegionalWideRoles = uniqBy(entities.map(d => d.role).flat(), "_id") as any[];
+
+          const [firstRegionalWideRole, ...restRegionalWideRoles] = allRegionalWideRoles;
 
           let res = {
             ...restProperties,
@@ -342,7 +318,13 @@ const User: FC = () => {
             updatedBy: u.updatedBy?.user?.concatedName,
             updatedByDate: u.updatedBy?.date,
             status: u.blocked ? u.blocked : false,
-            isBrandAdmin: u.userType === userType.brandAdmin
+            isBrandAdmin: u.userType === userType.brandAdmin,
+            companyWideRoleId: firstCompanyWideRole?._id ?? "",
+            companyWideRole: firstCompanyWideRole?.name ?? "",
+            restCompanyWideRoles: restCompanyWideRoles,
+            regionalWideRoleId: firstRegionalWideRole?._id ?? "",
+            regionalWideRole: firstRegionalWideRole?.name ?? "",
+            restRegionalWideRoles: restRegionalWideRoles
           };
           return res;
         });
@@ -443,7 +425,7 @@ const User: FC = () => {
   };
   return (
     <>
-    {console.log(selectedRecords)}
+      {console.log(selectedRecords)}
       {
         isOpen && (
           <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { fetchUsers() }}
@@ -463,15 +445,15 @@ const User: FC = () => {
         />
       )}
       {
-        showApprovalProcessDialog && 
-        <ApprovalProcessDialog 
+        showApprovalProcessDialog &&
+        <ApprovalProcessDialog
           openApprovalProcessDialog={showApprovalProcessDialog}
           hasPermissionToUpdateApprovalProcess={permissions}
-          onSuccess={()=>
+          onSuccess={() =>
             setShowApprovalProcessDialog(false)
-            }
-          handleCloseDialog={()=>setShowApprovalProcessDialog(false)}
-          userIds={selectedRecords.map((user)=>user._id)}
+          }
+          handleCloseDialog={() => setShowApprovalProcessDialog(false)}
+          userIds={selectedRecords.map((user) => user._id)}
         />
       }
       {regionalRolesDialogOpen && (
@@ -525,24 +507,17 @@ const User: FC = () => {
               userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              openApprovalProcessDialog={()=>setShowApprovalProcessDialog(true)}
+              openApprovalProcessDialog={() => setShowApprovalProcessDialog(true)}
               openGlobalRolesDialog={handleGlobalRolesOpenDialog}
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               openDOADialog={handleDOAOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
               canDelete={selectedRecords.length === 0}
+              entityRoleRedirectDetails={entityRoleRedirectDetails}
+              onEntityRoleRedirectDetailRemove={() => {
+                setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
+              }}
             />
-            {entityRoleRedirectDetails.id && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`${startCase(entityRoleRedirectDetails.type)} : ${entityRoleRedirectDetails.name}`}
-                onDelete={() => {
-                  setEntityRoleRedirectDetails({ id: null, name: null, type: null });
-                  // getContacts();
-                }}
-              />
-            )}
           </div>
 
           <CustomAgGrid

@@ -22,7 +22,11 @@ function DisplayData({ key, label, value, icon }) {
       <List>
         <ListItem key={key}>
           <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : "-"} secondary={label} />
+          <ListItemText  primary={<>
+                    <Grid container>
+                        <Grid item xs={12} md={11} sm={11} className="text-truncate">{value ? value : '-'} </Grid>
+                    </Grid> </>
+                } secondary={label} />
         </ListItem>
       </List>
     </div>
