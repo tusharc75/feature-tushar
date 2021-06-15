@@ -41,7 +41,7 @@ function OpportunityDetailsPage() {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
-  const [copyOfOpportunityDataToUpdate, setCopyOfOpportunityDataToUpdate] = useState(null);
+  const [copyOfOpportunityData, setCopyOfOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [opportunityFields, setOpportunityFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
@@ -148,8 +148,7 @@ function OpportunityDetailsPage() {
             (d) => d?.optionValue === user?.user?._id
           ))
 
-          // handleAllowToEditList(data);
-          setCopyOfOpportunityDataToUpdate(data);
+          setOpportunityData(data);
           handleContactsEmails(data)
 
           if (data?.staticData?.notToBeRemoved && typeof data.staticData.notToBeRemoved === 'object') {
@@ -163,7 +162,7 @@ function OpportunityDetailsPage() {
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData["estimatedAmount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["estimatedAmount"]).shortFormatAmount
-          setOpportunityData(modifiedData);
+          setCopyOfOpportunityData(modifiedData);
 
           let tempExpanded = {
             supplierContacts: true,
@@ -461,7 +460,6 @@ function OpportunityDetailsPage() {
 
   return (
     <>
-      {console.log(permissions)}
       <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -547,6 +545,7 @@ function OpportunityDetailsPage() {
                                 };
 
                                 axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+                                  fetchOpportunityData();
                                   setActiveStep(activeStep + 1)
                                   setIsProcessing(false)
                                 }).catch((error) => {
@@ -582,7 +581,7 @@ function OpportunityDetailsPage() {
                   <TabPanel value={currentTabIndex} index={0}>
                     <Box padding="16px">
                       <DetailsPage
-                        data={opportunityData}
+                        data={copyOfOpportunityData}
                         fields={opportunityFields.filter(currentField => currentField.fieldData?.fieldName !== "supplierAccountName")}
                       />
                     </Box>
@@ -716,7 +715,7 @@ function OpportunityDetailsPage() {
               setOpenUpdateDialog(false);
             }}
             isNew={false}
-            dataToUpdate={copyOfOpportunityDataToUpdate}
+            dataToUpdate={opportunityData}
             resource={null}
             isRedirectTodetailPage={false}
           // opportunityApi={opportunityApi}

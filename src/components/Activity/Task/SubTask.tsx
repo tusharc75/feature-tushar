@@ -14,6 +14,8 @@ import { DeleteOutline } from "@material-ui/icons";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { FaPlusCircle } from 'react-icons/fa';
+import TableChartIcon from "@material-ui/icons/TableChart";
 
 const useStyles = makeStyles((theme) => ({
   marginLeft: {
@@ -21,6 +23,11 @@ const useStyles = makeStyles((theme) => ({
   },
   boldFont: {
     fontWeight: 500,
+  },
+  childBtn: {
+    position: "absolute",
+    top: "-16px",
+    right: "0",
   },
 }));
 
@@ -79,7 +86,7 @@ export const SubTask = ({
 
     axiosInstance()
       .delete(`/task/${id}`)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -88,12 +95,28 @@ export const SubTask = ({
   const classes = useStyles();
 
   return (
-    <Box mt={3} mb={3}>
+    <Box>
       {((childTasks && childTasks.length > 0) || openAddSub === true) && (
         <Box mb={1}>
-          <Typography variant="body2" className={classes.boldFont}>
-            Child Task
-          </Typography>
+          <div className="position-relative">
+            <h4
+              className="form-label-style"
+              title="Add Terms & Conditions"
+            >
+              Child Task
+            </h4>
+            <Button
+              variant="outlined"  
+              size="small"
+              color="primary"
+              disableElevation
+              className={classes.childBtn}
+              onClick={() => setOpenAddSub(true)}
+              startIcon={<TableChartIcon />}
+            >
+              Add
+            </Button>
+          </div>
         </Box>
       )}
       {childTasks &&
@@ -153,7 +176,6 @@ export const SubTask = ({
               "Task name must be at least 3 letters"
             }
           />
-
           <Box mt={1}>
             <Button
               color="primary"
