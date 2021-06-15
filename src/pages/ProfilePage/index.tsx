@@ -41,6 +41,7 @@ export default function ProfilePage(props) {
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
     const [otherDetails, setOtherDetails] = useState(null)
+    const [notifiationPreferenceData, setNotifiationPreferenceData] = useState([])
     const [loading, setLoading] = useState(false);
     const [userLoading, setUserLoading] = useState(false);
     const [userFields, setUserFields] = useState([]);
@@ -70,6 +71,7 @@ export default function ProfilePage(props) {
                     })
                     let { blocked, updatedBy, employeeNumber, ...userData } = data.user
                     setUserData(userData)
+                    setNotifiationPreferenceData(data.user.notificationPref)
                 }
                 setUserLoading(false)
             })
@@ -125,7 +127,7 @@ export default function ProfilePage(props) {
                                 otherDetails={otherDetails}
                             /> :
                             activeItem === profileMenuItems.notification ?
-                                <NotifiationPreference />
+                                <NotifiationPreference notifiationPreferenceData={notifiationPreferenceData} user={userData._id} />
                                 : activeItem === profileMenuItems.setting ?
                                     <Paper className={classes.paper}>setting</Paper>
                                     : activeItem === profileMenuItems.users ?
