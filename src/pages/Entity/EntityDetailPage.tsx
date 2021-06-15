@@ -398,7 +398,8 @@ const EntityDetailsPage = () => {
                             onClick={() => history.push(`/user`, {
                               id: entityData._id,
                               name: entityData.entityName,
-                              type: "entity"
+                              type: "entity",
+                              text: "Entity"
                             })}>
                             <FaEye /> View All &#8599;
                           </Box>

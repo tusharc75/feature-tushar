@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { BsBuilding } from 'react-icons/bs';
 import { BiPhone } from 'react-icons/bi';
 import { AiOutlineMail } from 'react-icons/ai';
+import CopyToClipboard from '../Helpers/CopyToClipboard';
 
 const Accordion = withStyles({
     root: {
@@ -54,14 +55,19 @@ const AccordionDetails = withStyles((theme) => ({
     },
 }))(MuiAccordionDetails);
 
-function DisplayData({ key, label, value, icon }) {
+function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
         <List>
             <ListItem key={key}>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value ? value : '-'} secondary={label} />
+                <ListItemText primary={<>
+                    <Grid container>
+                        <Grid item xs={12} md={10} sm={10} className="text-truncate">{value ? value : '-'} </Grid>
+                        <Grid item xs={12} md={2} sm={2} >{showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}</Grid>
+                    </Grid> </>
+                } secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -151,7 +157,7 @@ export default function LeadInAccordion({
                                                     </Grid>
                                                     <Grid item xs={12} sm={12} md={12}>
                                                         {
-                                                            <DisplayData key="2" label='Email' icon={<AiOutlineMail size={15} />} value={lead.email} />
+                                                            <DisplayData key="2" label='Email' showCopyToText={true} icon={<AiOutlineMail size={15} />} value={lead.email} />
                                                         }
                                                     </Grid>
                                                     <Grid item xs={12} sm={12} md={12}>

@@ -403,9 +403,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         onDelete={handleDeleteImageAttachment}
                                                         emailId={emailId}
                                                     />
-                                                    <Box mt={2}>
-                                                        <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                                                    </Box>
+                                                    {
+                                                        initialValues?.relatedTo && initialValues.relatedTo.length ?
+                                                            <Box mt={2}>
+                                                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                                            </Box> : null
+                                                    }
                                                     <Box mt={1} color="text.secondary">
                                                         <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
                                                     </Box>
