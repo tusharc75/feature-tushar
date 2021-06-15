@@ -77,7 +77,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
         .then(({ data }) => {
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: "",
@@ -544,7 +544,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                         </Fragment>
                       )}
 
-                      {eventId && (
+                      {eventId && initialValues?.relatedTo && initialValues.relatedTo.length ? (
                         <Fragment>
                           <Box mt={2}>
                             <RelatedToDispay
@@ -552,7 +552,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                             />
                           </Box>
                         </Fragment>
-                      )}
+                      ) : null}
                     </Box>
                   </MuiPickersUtilsProvider>
                 </Form>
@@ -587,7 +587,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                         .then(({ data }) => {
                           handleClose();
                         })
-                        .catch((err) => {})
+                        .catch((err) => { })
                     }
                   >
                     Delete
