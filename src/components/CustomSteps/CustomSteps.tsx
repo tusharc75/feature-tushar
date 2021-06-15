@@ -4,6 +4,12 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { FaCheckCircle } from 'react-icons/fa';
+
+const setBackGroundColor = {
+    Unqualified: "unqualifiedLead",
+    Qualified: "qualifiedLead"
+}
+
 const useStyles = makeStyles((theme) => ({
     root: {
         // width: "98%",
@@ -26,6 +32,13 @@ const useStyles = makeStyles((theme) => ({
     current: {
         // background: "#50ad50",
         border: "2px solid #003f57 !important"
+    },
+    qualifiedLead: {
+        // background: `${theme.palette.success.main} !important`,
+        // color: `${theme.palette.common.white} !important`,
+    },
+    unqualifiedLead: {
+        //   background: `${theme.palette.error.light} !important`,
     }
 }));
 
@@ -90,8 +103,12 @@ export default function CustomSteps({ steps, active }) {
                         stepProps.completed = false;
                     }
                     return (
-                        <Step key={index} {...stepProps} className={active > index ? classes.completed : (index === active ? classes.current : "")}>
-                            <StepLabel {...labelProps}  icon={active > index ? <FaCheckCircle /> : (index === active ? index+1 : index+1)}>
+                        <Step
+                            key={index} {...stepProps}
+                            className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}>
+                            <StepLabel
+                                // className={classes[textColor[step.text]] ?? ''}
+                                {...labelProps} icon={active > index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
                                 {step.text}</StepLabel>
                         </Step>
                     );
