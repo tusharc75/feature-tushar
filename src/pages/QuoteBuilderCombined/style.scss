@@ -6,10 +6,13 @@
   text-decoration: underline;
 }
 .MuiStepper-horizontal {
-  border-radius: 2px;
-  border: 1px solid #d2cfcf;
-  border-left: none !important;
-}
+    border-radius: 2px;
+    border: 1px solid #d2cfcf;
+    border-left: none !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+
 .productPos{
   position: absolute;
   top: 1px;
@@ -30,4 +33,10 @@
     color: #0e7723 !important;
     font-weight: 600 !important;
   }
+}
+
+.MuiTab-textColorPrimary.Mui-selected{
+  border-bottom: 3px solid var(--primary);
+  border-radius: 0;
+  background: #d9d9d9;
 }

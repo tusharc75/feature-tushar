@@ -236,8 +236,18 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
   },
   bgProduct: {
-    background: "#ececec !important",
+    background: "#f5f5f5 !important",
     paddingBottom: "2px",
+    margin: "10px",
+    marginBottom: "0",
+    border: "1px solid #cec9c9",
+    borderBottom: "none",
+    boxShadow: "none",
+    borderBottomLeftRadius: "0",
+    borderBottomRightRadius: "0"
+    // margin: "10px",
+    // border: "1px solid #d9d7d7",
+    // borderRadius: "6px"
   },
   productInformation: {
     background: "white",
@@ -250,6 +260,16 @@ const useStyles = makeStyles((theme) => ({
     top: "-16px",
     right: "0",
   },
+  detailBox: {
+    margin: "10px",
+    border: "1px solid #d9d7d7",
+    borderRadius: "6px"
+  },
+  btnHeader: {
+    position: "absolute",
+    top: "4px",
+    right: "20px"
+  }
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -1815,7 +1835,7 @@ function QuoteDetail() {
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Quotes
+                          Headers
                         </div>
                       }
                       {...a11yProps(0)}
@@ -1824,33 +1844,17 @@ function QuoteDetail() {
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
-                          Product
+                          Quote Versions
                         </div>
                       }
                       {...a11yProps(1)}
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
-                    {quoteData && (
-                      <>
-                        <Grid
-                          container
-                          className="detailHeader d-flex align-items-center form-label-style mt-0  mb-0"
-                        >
-                          <Grid
-                            item
-                            xs={12}
-                            sm={4}
-                            className="justify-content-start"
-                          >
-                            <h3 className="mr-2">Quote Information</h3>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sm={8}
-                            className="d-flex justify-content-end"
-                          >
+                    <div className={classes.detailBox}>
+                      {quoteData && (
+                        <>
+                          <div className={classes.btnHeader}>
                             {quotePermissions.isCreate ? (
                               <Button
                                 variant="contained"
@@ -1874,35 +1878,82 @@ function QuoteDetail() {
                                 Edit
                               </Button>
                             ) : null}
-                          </Grid>
-                        </Grid>
-                        {copyOfquoteData ? (
-                          <DetailsPage
-                            data={copyOfquoteData}
-                            fields={quoteFields}
-                          />
-                        ) : null}
-                      </>
-                    )}
+                          </div>
+                          {copyOfquoteData ? (
+                            <DetailsPage
+                              data={copyOfquoteData}
+                              fields={quoteFields}
+                            />
+                          ) : null}
+                        </>
+                      )}
+                    </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
-                        className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
-                      >
+                        className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0">
                         <Grid
                           item
                           xs={12}
-                          sm={4}
-                          className="justify-content-start"
-                        >
-                          <h2 className="mr-2">Product Information</h2>
+                          sm={7}
+                          md={7}
+                          className="quoteHeader">
+                          <div className="quoteBox">
+                                <span>Total Profit </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalProfit.fullFormatAmount}
+                                >
+                                  {totalProfit.shortFormatAmount}
+                                </span>
+                              </div>
+                              <div className="quoteBox">
+                                <span>Total Cost Price </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalcost.fullFormatAmount}
+                                >
+                                  {totalcost.shortFormatAmount}
+                                </span>
+                              </div>
+                              {redCard ? (
+                                <div className="redQuoteBox">
+                                  <span>Total Selling Price </span>
+                                  <span
+                                    className="quoteAmount"
+                                    title={totalsale.fullFormatAmount}
+                                  >
+                                    {totalsale.shortFormatAmount}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="quoteBox">
+                                  <span>Total Selling Price </span>
+                                  <span
+                                    className="quoteAmount"
+                                    title={totalsale.fullFormatAmount}
+                                  >
+                                    {totalsale.shortFormatAmount}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="quoteBox noBorder">
+                                <span>Total Margin </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalmargin.fullFormatAmount}
+                                >
+                                  {totalmargin.shortFormatAmount}
+                                </span> 
+                              </div>
                         </Grid>
                         <Grid
                           item
                           xs={12}
-                          sm={8}
+                          sm={5}
+                          md={5}
                           className="d-flex justify-content-end"
                         >
                           <select
@@ -2001,73 +2052,11 @@ function QuoteDetail() {
                           />
                         )}
                       </div>
-                      <div className={classes.productInformation}>
-                        {ProcessStatus != "New" ? (
-                          <Grid>
-                            <Grid
-                              item
-                              xs={12}
-                              md={12}
-                              sm={12}
-                              className="d-flex align-items-stretch gap-1 quotePanel"
-                            >
-                              <div className="quoteBox">
-                                <span>Total Profit</span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalProfit.fullFormatAmount}
-                                >
-                                  {totalProfit.shortFormatAmount}
-                                </span>
-                              </div>
-                              <div className="quoteBox">
-                                <span>Total Cost Price</span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalcost.fullFormatAmount}
-                                >
-                                  {totalcost.shortFormatAmount}
-                                </span>
-                              </div>
-                              {redCard ? (
-                                <div className="redQuoteBox">
-                                  <span>Total Selling Price</span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="quoteBox">
-                                  <span>Total Selling Price</span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="quoteBox">
-                                <span>Total Margin</span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalmargin.fullFormatAmount}
-                                >
-                                  {totalmargin.shortFormatAmount}
-                                </span>
-                              </div>
-                            </Grid>
-                          </Grid>
-                        ) : null}
-                      </div>
                     </Paper>
                   </TabPanel>
                   {tabValue === 1 && (
-                    <>
-                      <Tabs
+                    <div className={`mt-0 subDetailModule ${classes.detailBox}`}>
+                      {/* <Tabs
                         className="oms-tab"
                         value={currentTabIndex}
                         onChange={(index, newValue) => {
@@ -2089,7 +2078,7 @@ function QuoteDetail() {
                             id="a11y-tab-1"
                           />
                         )}
-                      </Tabs>
+                      </Tabs> */}
                       {!loading && quoteData ? (
                         <Grid container className="position-relative">
                           <Grid
@@ -2233,7 +2222,6 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {ProcessStatus === "Quote Builder" &&
-                              currentTabIndex === 0 &&
                               visibleColumns.length > 0 ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
@@ -2263,9 +2251,8 @@ function QuoteDetail() {
                                 }
                               />
                             ) : null}
-                            {ProcessStatus === "Quote Builder" &&
-                              currentTabIndex === 1 ? (
-                                <Box className="m-3">
+                            {ProcessStatus === "Quote Builder" ? (
+                              <Box className="m-3">
                                 <div className="position-relative">
                                   <h4
                                     className="form-label-style"
@@ -2304,7 +2291,7 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                    </>
+                    </div>
                   )}
                 </>
               )}
