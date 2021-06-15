@@ -238,6 +238,9 @@ const useStyles = makeStyles((theme) => ({
   bgProduct: {
     background: "#ececec !important",
     paddingBottom: "2px",
+    margin: "10px",
+    border: "1px solid #d9d7d7",
+    borderRadius: "6px"
   },
   productInformation: {
     background: "white",
@@ -250,6 +253,11 @@ const useStyles = makeStyles((theme) => ({
     top: "-16px",
     right: "0",
   },
+  detailBox: {
+    margin: "10px",
+    border: "1px solid #d9d7d7",
+    borderRadius: "6px"
+  }
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -1831,59 +1839,61 @@ function QuoteDetail() {
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
-                    {quoteData && (
-                      <>
-                        <Grid
-                          container
-                          className="detailHeader d-flex align-items-center form-label-style mt-0  mb-0"
-                        >
+                    <div className={classes.detailBox}>
+                      {quoteData && (
+                        <>
                           <Grid
-                            item
-                            xs={12}
-                            sm={4}
-                            className="justify-content-start"
+                            container
+                            className="detailHeader d-flex align-items-center form-label-style mt-0  mb-0"
                           >
-                            <h3 className="mr-2">Quote Information</h3>
+                            <Grid
+                              item
+                              xs={12}
+                              sm={4}
+                              className="justify-content-start"
+                            >
+                              <h3 className="mr-2">Quote Information</h3>
+                            </Grid>
+                            <Grid
+                              item
+                              xs={12}
+                              sm={8}
+                              className="d-flex justify-content-end"
+                            >
+                              {quotePermissions.isCreate ? (
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  className="mr-1"
+                                  startIcon={<BiLayerPlus />}
+                                  onClick={handleClone}
+                                >
+                                  Clone
+                                </Button>
+                              ) : null}
+                              {allowedToEdit ? (
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  startIcon={<HiPencil />}
+                                  onClick={handleOpenUpdateDialog}
+                                >
+                                  Edit
+                                </Button>
+                              ) : null}
+                            </Grid>
                           </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sm={8}
-                            className="d-flex justify-content-end"
-                          >
-                            {quotePermissions.isCreate ? (
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                className="mr-1"
-                                startIcon={<BiLayerPlus />}
-                                onClick={handleClone}
-                              >
-                                Clone
-                              </Button>
-                            ) : null}
-                            {allowedToEdit ? (
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                startIcon={<HiPencil />}
-                                onClick={handleOpenUpdateDialog}
-                              >
-                                Edit
-                              </Button>
-                            ) : null}
-                          </Grid>
-                        </Grid>
-                        {copyOfquoteData ? (
-                          <DetailsPage
-                            data={copyOfquoteData}
-                            fields={quoteFields}
-                          />
-                        ) : null}
-                      </>
-                    )}
+                          {copyOfquoteData ? (
+                            <DetailsPage
+                              data={copyOfquoteData}
+                              fields={quoteFields}
+                            />
+                          ) : null}
+                        </>
+                      )}
+                    </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <Paper className={classes.bgProduct}>
@@ -2066,7 +2076,7 @@ function QuoteDetail() {
                     </Paper>
                   </TabPanel>
                   {tabValue === 1 && (
-                    <>
+                    <div className={classes.detailBox}>
                       <Tabs
                         className="oms-tab"
                         value={currentTabIndex}
@@ -2265,7 +2275,7 @@ function QuoteDetail() {
                             ) : null}
                             {ProcessStatus === "Quote Builder" &&
                               currentTabIndex === 1 ? (
-                                <Box className="m-3">
+                              <Box className="m-3">
                                 <div className="position-relative">
                                   <h4
                                     className="form-label-style"
@@ -2304,7 +2314,7 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                    </>
+                    </div>
                   )}
                 </>
               )}
