@@ -331,7 +331,6 @@ const User: FC = () => {
 
         if (userList.length === 0) {
           let tempUsers = [{ id: "self", name: "Self" }]
-          tempUsers.push()
           rows.map((user: any) => (
             tempUsers.push({
               id: user.id,
