@@ -133,11 +133,26 @@ function App() {
     }
   };
 
+  const getChatNotification = async () => {
+    if (localStorage.getItem("token")) {
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          if (count > 0) {
+            notification.setCount(count);
+          }
+        })
+    }
+  }
+
   useEffect(() => {
     try {
       getNotification();
+      // getChatNotification();
+      
       setInterval(async () => {
         await getNotification();
+        // await getChatNotification();
       }, 60000);
     } catch (e) {
       console.log(e);

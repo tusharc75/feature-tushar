@@ -37,6 +37,8 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import { isEmpty } from "lodash";
 import { FiCheckCircle } from 'react-icons/fi';
 import { displayCardDate } from "../../constants/helpers"
+import ChatIcon from '@material-ui/icons/Chat';
+import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -179,7 +181,11 @@ const Header = ({ toggleDrawer }) => {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
+
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [notificationList, setNotificationList] = useState([]);
 
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
@@ -231,8 +237,59 @@ const Header = ({ toggleDrawer }) => {
   const mobileScreenNotificationId = mobileScreenNotificationOpen ? 'mobile-screen-notification' : undefined;
   // For MobileScreen Notification - End
 
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const [notificationList, setNotificationList] = useState([]);
+
+  const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
+  const [chatNotificationList, setChatNotificationList] = useState([]);
+
+  // For FullScreen Chat Notification - Start
+  const [fullScreenChatNotificationAnchorEl, setFullScreenChatNotificationAnchorEl] = React.useState(null);
+
+  const handleFullScreenChatNotificationClick = (event) => {
+    setFullScreenChatNotificationAnchorEl(event.currentTarget);
+    setLoadingChatNotifications(true);
+
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      setChatNotificationList(data);
+      setLoadingChatNotifications(false);
+      chatNotification.setCount(0);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
+  };
+
+  const handleFullScreenChatNotificationClose = () => {
+    setFullScreenChatNotificationAnchorEl(null);
+  };
+
+  const fullScreenChatNotificationOpen = Boolean(fullScreenChatNotificationAnchorEl);
+  const fullScreenChatNotificationId = fullScreenChatNotificationOpen ? 'full-screen-chat-notification' : undefined;
+  // For FullScreen Notification - End
+
+  // For MobileScreen Notification - Start
+  const [mobileScreenChatNotificationAnchorEl, setMobileScreenChatNotificationAnchorEl] = React.useState(null);
+
+  const handleMobileScreenChatNotificationClick = async (event) => {
+    setMobileScreenChatNotificationAnchorEl(event.currentTarget);
+    setLoadingChatNotifications(true);
+
+    await axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      setChatNotificationList(data);
+      setLoadingChatNotifications(false);
+      chatNotification.setCount(0);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
+  };
+
+  const handleMobileScreenChatNotificationClose = () => {
+    setMobileScreenChatNotificationAnchorEl(null);
+  };
+
+  const mobileScreenChatNotificationOpen = Boolean(mobileScreenChatNotificationAnchorEl);
+  const mobileScreenChatNotificationId = mobileScreenChatNotificationOpen ? 'mobile-screen-chat-notification' : undefined;
+  // For MobileScreen Notification - End
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -412,7 +469,72 @@ const Header = ({ toggleDrawer }) => {
             toastConfig.setToastConfig(error)
           })
 
-        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16}/><span>Mark all as read</span></Typography>
+        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16} /><span>Mark all as read</span></Typography>
+      </div>
+
+      {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
+        View All &#8599;
+      </Button> */}
+    </div >
+  }
+
+  const ChatNotificationContent = ({ data }) => {
+    return <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: "relative" }}>
+      {
+        data.map((d, index) => {
+          return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
+            className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
+            key={index}
+            onClick={() => {
+              if (d.read == false) {
+                axiosInstance().put("/user/notification/read", {
+                  toggle: true,
+                  notificationId: d.notificationId
+                }).then(() => {
+                }).catch(error => {
+                  toastConfig.setToastConfig(error);
+                })
+              }
+
+              handleFullScreenNotificationClose();
+
+              if (d?.entity) {
+                handleSelectedEnity(d.entity)
+              }
+
+              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath);
+
+            }}>
+            {
+              <>
+                <h4>{d.title}</h4>
+                <h5>{d.description}</h5>
+                <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
+              </>
+            }
+          </div>
+        })
+      }
+
+      <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
+        <Typography onClick={() => {
+          axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
+            let updatedNotificationList = [];
+            notificationList.map(notification => {
+              notification.read = true;
+              updatedNotificationList.push(notification);
+            })
+
+            setNotificationList(updatedNotificationList);
+            toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
+
+            setFullScreenNotificationAnchorEl(null);
+            setMobileScreenNotificationAnchorEl(null);
+          }).catch((error) => {
+            toastConfig.setToastConfig(error)
+          })
+
+        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16} /><span>Mark all as read</span></Typography>
       </div>
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
@@ -487,6 +609,39 @@ const Header = ({ toggleDrawer }) => {
             {curEntity && curEntity.entityName}
           </span>
           <ExpandMore />
+        </MenuItem>
+      }
+
+      {/* Remove below false to show chat notification icon */}
+      {
+        false && <MenuItem onClick={mobileScreenChatNotificationAnchorEl == null ? handleMobileScreenChatNotificationClick : () => { }}>
+
+          <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary"
+            aria-describedby={mobileScreenChatNotificationId}>
+            <ChatIcon />
+          </Badge>
+          <Box component="span" mx={1} />
+          <p>Chat Notifications</p>
+
+          <Popover
+            id={mobileScreenChatNotificationId}
+            open={mobileScreenChatNotificationOpen}
+            anchorEl={mobileScreenChatNotificationAnchorEl}
+            onClose={handleMobileScreenChatNotificationClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+          >
+            {
+              loadingChatNotifications ? <Typography className="m-3">Loading Chat Notifications...</Typography> :
+                (chatNotificationList.length == 0 ? <Typography className="m-3">No Chat Notifications found</Typography> : <ChatNotificationContent data={chatNotificationList} />)
+            }
+          </Popover>
         </MenuItem>
       }
 
@@ -691,6 +846,41 @@ const Header = ({ toggleDrawer }) => {
                 }
               </Popover>
             </div>
+
+            {/* Remove below false to show chat notification icon */}
+            {
+              true && <div>
+                <IconButton aria-describedby={fullScreenChatNotificationId} aria-label="settings" color="inherit"
+                  onClick={handleFullScreenChatNotificationClick}>
+                  <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
+                    <ChatIcon />
+                  </Badge>
+                </IconButton>
+
+                <Popover
+                  className="mr-2"
+                  id={fullScreenChatNotificationId}
+                  open={fullScreenChatNotificationOpen}
+                  anchorEl={fullScreenChatNotificationAnchorEl}
+                  onClose={handleFullScreenChatNotificationClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                  }}
+                >
+                  {
+                    loadingChatNotifications ? <Typography className="m-3">Loading Chat Notifications...</Typography> :
+                      (chatNotificationList.length == 0 ? <Typography className="m-3">No Chat Notifications found</Typography> :
+                        <NotificationContent data={chatNotificationList} />)
+                  }
+                </Popover>
+              </div>
+            }
+
             {/* <IconButton aria-label="settings" color="inherit">
               <Badge badgeContent={1} color="secondary">
                 <Notifications />
