@@ -451,7 +451,7 @@ function QuoteDetail() {
         aria-labelledby={`main-tab-${index}`}
         {...other}
       >
-        {value === index && <Typography>{children}</Typography>}
+        {children}
       </div>
     );
   }
@@ -2038,7 +2038,6 @@ function QuoteDetail() {
                         className="oms-tab"
                         value={currentTabIndex}
                         onChange={(event, newValue) => {
-                          console.log(newValue);
                           setCurrentTabIndex(newValue);
                         }}
                         indicatorColor="primary"
