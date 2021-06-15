@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect } from "react";
+import React, { Fragment, useContext, useEffect, useRef } from "react";
 import {
   Avatar,
   Box,
@@ -180,6 +180,15 @@ const FormTypes = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [isExtraDispayType, setIsExtraDispayType] = React.useState(false);
+
+  const inputNumberRef = useRef(null);
+
+  useEffect(() => {
+    const ignoreScroll = (e) => {
+      e.preventDefault();
+    };
+    inputNumberRef.current && inputNumberRef.current.addEventListener("wheel", ignoreScroll);
+  }, [inputNumberRef]);
 
   const fetch = React.useMemo(
     () =>
@@ -785,6 +794,7 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        ref={inputNumberRef}
         onChange={
           onChange
             ? onChange
@@ -1229,7 +1239,7 @@ const FormTypes = (props) => {
               && <Box>
                 <Tooltip title="Remove" className="mt-1">
                   <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
-                    <HighlightOffIcon color="error"/>
+                    <HighlightOffIcon color="error" />
                   </IconButton>
                 </Tooltip>
               </Box>}
