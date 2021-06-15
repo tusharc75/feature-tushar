@@ -360,7 +360,7 @@ const QuoteBuilders = () => {
               ownerId: u.owner?.optionValue,
 
               canDelete: u.owner?.optionValue === user?.user._id,
-              expiryDate: u?.expiryDate ? displayDate(u.expiryDate) : "",
+              expiryDate: u.expiryDate ? displayDate(u.expiryDate) : "",
 
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
