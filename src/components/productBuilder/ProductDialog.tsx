@@ -277,6 +277,7 @@ const CreateProduct = (props) => {
                     touched,
                     setFieldValue,
                     submitForm,
+                    setValues,
                 }) => (
                     <Fragment>
                         <CustomDialogHeader title={`Edit Product`} onClose={handleClose}></CustomDialogHeader>
@@ -329,6 +330,7 @@ const CreateProduct = (props) => {
                                                                     leval="builder-custom"
                                                                     addDisplayType={addDisplayType}
                                                                     removeDisplayType={removeDisplayType}
+                                                                    setValues={setValues}
                                                                 />
                                                                 :
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
@@ -356,6 +358,7 @@ const CreateProduct = (props) => {
                                                                                 imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
                                                                                     setUploadingImageOrFileProgress(completePercentage);
                                                                                 } : null}
+                                                                                setValues={setValues}
                                                                             />
                                                                         </Box>
                                                                         {field.leval === "builder-custom" &&

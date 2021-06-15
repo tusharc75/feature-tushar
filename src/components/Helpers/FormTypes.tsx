@@ -34,7 +34,7 @@ import parse from "autosuggest-highlight/parse";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
-import { getFormulaValue } from "../../constants/formulaUtility";
+import { getFormulaValue, handleAutoCalculation } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
@@ -165,6 +165,7 @@ const FormTypes = (props) => {
     imageOrFileUploadCompletePercentage,
     addDisplayType,
     removeDisplayType,
+    setValues,
     ...rest
   } = props;
 
@@ -349,15 +350,72 @@ const FormTypes = (props) => {
   };
 
   const handleChange = (name, value) => {
-    setFieldValue(name, value);
-    if (fieldData && fieldData.isMulitFormula) {
-      handleMulitFormula(fieldData, { [name]: value });
+    const result = handleAutoCalculation(fieldData, fields, values, name, "", "", value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
     }
-    if (type === "vlookupDropdown") {
-      handleVlookup(name, value);
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
     }
-    handleFormula(name, value, { [name]: value });
-    handleCheckVlookupReverse(name, value);
+    //setFieldValue(name, value);
+    // if (fieldData && fieldData.isMulitFormula) {
+    //   handleMulitFormula(fieldData, { [name]: value });
+    // }
+    // if (type === "vlookupDropdown") {
+    //   handleVlookup(name, value);
+    // }
+    // handleFormula(name, value, { [name]: value });
+    // handleCheckVlookupReverse(name, value);
+  };
+
+  const handleConverterChange = (name, _unit, value) => {
+    let fieldName = name + "_" + _unit.toLowerCase();
+    const result = handleAutoCalculation(fieldData, fields, values, fieldName, "", _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
+    }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+    // setFieldValue(fieldName, value);
+    // handleFormula(fieldName, value, { fieldName: value });
+    // handleConverter(fieldData, name, _unit, value);
+  };
+
+  const handleCurrencyChange = (name, _currency, value) => {
+    let fieldName = name + "_" + _currency.toLowerCase();
+    const result = handleAutoCalculation(fieldData, fields, values, fieldName, _currency, "", value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
+    }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+    // setFieldValue(fieldName, value);
+    // handleFormula(fieldName, value, { fieldName: value });
+    // handleCurrency(fieldData, name, _currency, value);
+  };
+
+  const handleCurrencyChangeWithConverterChange = (name, _currency, _unit, value) => {
+    let fieldName = name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
+    const result = handleAutoCalculation(fieldData, fields, values, fieldName, _currency, _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
+    }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+    //setFieldValue(fieldName, value);
+    //handleFormula(fieldName, value, {});
+    //handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
 
   const handleMulitFormula = (data, alredyDone) => {
@@ -501,13 +559,6 @@ const FormTypes = (props) => {
     }
   };
 
-  const handleConverterChange = (name, _unit, value) => {
-    let fieldName = name + "_" + _unit.toLowerCase();
-    setFieldValue(fieldName, value);
-    handleFormula(fieldName, value, { fieldName: value });
-    handleConverter(fieldData, name, _unit, value);
-  };
-
   const handleConverter = (data, name, _unit, value) => {
     let indexConverter = data.units.indexOf(_unit);
     if (indexConverter >= 0) {
@@ -520,13 +571,6 @@ const FormTypes = (props) => {
         }
       }
     }
-  };
-
-  const handleCurrencyChange = (name, _currency, value) => {
-    let fieldName = name + "_" + _currency.toLowerCase();
-    setFieldValue(fieldName, value);
-    handleFormula(fieldName, value, { fieldName: value });
-    handleCurrency(fieldData, name, _currency, value);
   };
 
   const handleCurrency = (data, name, _currency, value) => {
@@ -550,19 +594,6 @@ const FormTypes = (props) => {
         }
       }
     }
-  };
-
-  const handleCurrencyChangeWithConverter = (name, _currency, _unit, value) => {
-    setFieldValue(
-      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
-      value
-    );
-    handleFormula(
-      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
-      value,
-      {}
-    );
-    handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
 
   const handleCurrencyConverter = (data, name, _currency, _unit, value) => {
@@ -1094,7 +1125,7 @@ const FormTypes = (props) => {
                       onChange
                         ? onChange
                         : (e) =>
-                          handleCurrencyChangeWithConverter(
+                          handleCurrencyChangeWithConverterChange(
                             name,
                             _currency,
                             _unit,
@@ -1229,7 +1260,7 @@ const FormTypes = (props) => {
               && <Box>
                 <Tooltip title="Remove" className="mt-1">
                   <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
-                    <HighlightOffIcon color="error"/>
+                    <HighlightOffIcon color="error" />
                   </IconButton>
                 </Tooltip>
               </Box>}
