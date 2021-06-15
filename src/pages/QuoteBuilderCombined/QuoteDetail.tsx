@@ -93,6 +93,7 @@ import {
 } from "../../constants/helpers";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
+import { HiPencil } from 'react-icons/hi';
 
 const Accordion = withStyles({
   root: {
@@ -1754,26 +1755,22 @@ function QuoteDetail() {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {quotePermissions.isCreate ? (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleClone}
-                    >
-                      Clone
-                    </Button>
-                  ) : null}
-                  {allowedToEdit ? (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                  ) : null}
+                  <Button
+                    variant="contained"
+                    type="button"
+                    size="small"
+                    disabled={
+                      allVersionStatusButtonText ===
+                      gettingVersionStatusText
+                    }
+                    startIcon={<InfoIcon />}
+                    color="primary"
+                    onClick={() => {
+                      getVersionStatus();
+                    }}
+                  >
+                    {allVersionStatusButtonText}{" "}
+                  </Button>
                   {quotePermissions.isDelete &&
                     quoteData?.owner.optionValue &&
                     user?.user?._id &&
@@ -1830,6 +1827,49 @@ function QuoteDetail() {
                   <TabPanel value={tabValue} index={0}>
                     {quoteData && (
                       <>
+                        <Grid
+                          container
+                          className="detailHeader d-flex align-items-center form-label-style mb-0"
+                        >
+                          <Grid
+                            item
+                            xs={12}
+                            sm={4}
+                            className="justify-content-start"
+                          >
+                            <h3 className="mr-2">Quote Information</h3>
+                          </Grid>
+                          <Grid
+                            item
+                            xs={12}
+                            sm={8}
+                            className="d-flex justify-content-end"
+                          >
+                            {quotePermissions.isCreate ? (
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                className="mr-1"
+                                startIcon={<BiLayerPlus />}
+                                onClick={handleClone}
+                              >
+                                Clone
+                              </Button>
+                            ) : null}
+                            {allowedToEdit ? (
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                startIcon={<HiPencil />}
+                                onClick={handleOpenUpdateDialog}
+                              >
+                                Edit
+                              </Button>
+                            ) : null}
+                          </Grid>
+                        </Grid>
                         {copyOfquoteData ? (
                           <DetailsPage
                             data={copyOfquoteData}
@@ -1915,22 +1955,7 @@ function QuoteDetail() {
                               </Button>{" "}
                             </>
                           )}
-                          <Button
-                            variant="contained"
-                            type="button"
-                            size="small"
-                            disabled={
-                              allVersionStatusButtonText ===
-                              gettingVersionStatusText
-                            }
-                            startIcon={<InfoIcon />}
-                            color="primary"
-                            onClick={() => {
-                              getVersionStatus();
-                            }}
-                          >
-                            {allVersionStatusButtonText}{" "}
-                          </Button>
+
                         </Grid>
                       </Grid>
                       <div>
