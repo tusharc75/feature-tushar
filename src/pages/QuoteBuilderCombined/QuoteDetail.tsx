@@ -1813,17 +1813,16 @@ function QuoteDetail() {
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Quotes Information
+                          Quotes
                         </div>
                       }
                       {...a11yProps(0)}
-                    // label={"Quotes Information"}
                     />
                     <Tab
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
-                          Product Information
+                          Product
                         </div>
                       }
                       {...a11yProps(1)}
@@ -1834,7 +1833,7 @@ function QuoteDetail() {
                       <>
                         <Grid
                           container
-                          className="detailHeader d-flex align-items-center form-label-style mb-0"
+                          className="detailHeader d-flex align-items-center form-label-style mt-0  mb-0"
                         >
                           <Grid
                             item
@@ -1888,7 +1887,7 @@ function QuoteDetail() {
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
-                        className="detailHeader d-flex align-items-center form-label-style mb-0"
+                        className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
                       >
                         <Grid
                           item
