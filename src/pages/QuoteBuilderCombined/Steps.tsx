@@ -126,14 +126,11 @@ const Steps = (props) => {
     totalCost,
     handleSendReminder = null,
     reminderLoading = false,
-    hideReminderButton = false
+    hideReminderButton = false,
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
-  const totalPrice = totalCost
-    ? totalCost.split("$ ")[1].split(",").join("")
-    : 0;
 
   const ColorlibStepIcon = (props: StepIconProps) => {
     const classes = useColorlibStepIconStyles();
@@ -252,7 +249,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+        approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -261,7 +258,7 @@ const Steps = (props) => {
           </div>
         ) : (
           <>
-            {steps[currentStep] === "DOA Process" && totalPrice > DOAlimit && (
+            {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <Typography
                   className={classes.rejected}
@@ -302,7 +299,7 @@ const Steps = (props) => {
                 </Typography>
               </div>
             )}
-            {versionStatus === "Sent to Customer" && (!hideReminderButton) ? (
+            {versionStatus === "Sent to Customer" && !hideReminderButton ? (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <Button
                   className="mx-1"
@@ -312,7 +309,9 @@ const Steps = (props) => {
                   size="small"
                   disabled={reminderLoading}
                   onClick={handleSendReminder}
-                >Send Reminder</Button>
+                >
+                  Send Reminder
+                </Button>
               </div>
             ) : null}
             {versionStatus.includes("Accepted by Customer") && (
@@ -334,9 +333,7 @@ const Steps = (props) => {
           </>
         )}
 
-        {activeStep === steps.length - 1 ? (
-          <></>
-        ) : (
+        {activeStep !== steps.length - 1 && (
           <>
             <div>
               {!approvedQuote.approved && (

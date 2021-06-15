@@ -377,6 +377,7 @@ function QuoteDetail() {
     shortFormatAmount: "",
     fullFormatAmount: "",
   });
+  const [totalPrice, setTotalPrice] = useState(0);
   const [totalcost, setTotalCost] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
@@ -1429,6 +1430,7 @@ function QuoteDetail() {
     setTotalSale(
       formatAmountWithCurrency(quoteData.currency, totalSellingPrice)
     );
+    setTotalPrice(totalCost);
     setTotalCost(formatAmountWithCurrency(quoteData.currency, totalCost));
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
@@ -1951,7 +1953,7 @@ function QuoteDetail() {
                             loading={loading}
                             approvedQuote={ifQuoteApproved()}
                             DOAlimit={DOAmaxLimit}
-                            totalCost={totalcost?.fullFormatAmount}
+                            totalCost={totalPrice}
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
@@ -1968,7 +1970,7 @@ function QuoteDetail() {
                             loading={loading}
                             approvedQuote={ifQuoteApproved()}
                             DOAlimit={DOAmaxLimit}
-                            totalCost={totalcost?.fullFormatAmount}
+                            totalCost={totalPrice}
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
