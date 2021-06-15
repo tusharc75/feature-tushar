@@ -347,10 +347,17 @@ const User: FC = () => {
           return res;
         });
 
-        setUserList(rows.map((user: any) => ({
-          id: user.id,
-          name: user.concatedName,
-        })));
+        if (userList.length === 0) {
+          let tempUsers = [{ id: "self", name: "Self" }]
+          tempUsers.push()
+          rows.map((user: any) => (
+            tempUsers.push({
+              id: user.id,
+              name: user.concatedName,
+            })))
+
+          setUserList(tempUsers)
+        }
 
         dispatch({ type: "initialize", data: rows, count: count });
       })
@@ -398,6 +405,7 @@ const User: FC = () => {
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
           fetchUsers();
+          setUserList([])
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -443,10 +451,10 @@ const User: FC = () => {
   };
   return (
     <>
-    {console.log(selectedRecords)}
+      {console.log(selectedRecords)}
       {
         isOpen && (
-          <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { fetchUsers() }}
+          <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { setUserList([]); fetchUsers() }}
             userId={null} dataToUpdate={null} isNew={true} />
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
@@ -463,15 +471,15 @@ const User: FC = () => {
         />
       )}
       {
-        showApprovalProcessDialog && 
-        <ApprovalProcessDialog 
+        showApprovalProcessDialog &&
+        <ApprovalProcessDialog
           openApprovalProcessDialog={showApprovalProcessDialog}
           hasPermissionToUpdateApprovalProcess={permissions}
-          onSuccess={()=>
+          onSuccess={() =>
             setShowApprovalProcessDialog(false)
-            }
-          handleCloseDialog={()=>setShowApprovalProcessDialog(false)}
-          userIds={selectedRecords.map((user)=>user._id)}
+          }
+          handleCloseDialog={() => setShowApprovalProcessDialog(false)}
+          userIds={selectedRecords.map((user) => user._id)}
         />
       }
       {regionalRolesDialogOpen && (
@@ -513,6 +521,7 @@ const User: FC = () => {
               api={"/user"}
               afterImportCompleted={() => {
                 fetchUsers();
+                setUserList([])
               }}
             />
           </Grid>
@@ -525,7 +534,7 @@ const User: FC = () => {
               userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              openApprovalProcessDialog={()=>setShowApprovalProcessDialog(true)}
+              openApprovalProcessDialog={() => setShowApprovalProcessDialog(true)}
               openGlobalRolesDialog={handleGlobalRolesOpenDialog}
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               openDOADialog={handleDOAOpenDialog}
