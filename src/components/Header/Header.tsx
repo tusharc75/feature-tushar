@@ -849,7 +849,7 @@ const Header = ({ toggleDrawer }) => {
 
             {/* Remove below false to show chat notification icon */}
             {
-              true && <div>
+              false && <div>
                 <IconButton aria-describedby={fullScreenChatNotificationId} aria-label="settings" color="inherit"
                   onClick={handleFullScreenChatNotificationClick}>
                   <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
