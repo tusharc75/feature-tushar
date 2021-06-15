@@ -127,7 +127,7 @@ export default function ProfilePage(props) {
                                 otherDetails={otherDetails}
                             /> :
                             activeItem === profileMenuItems.notification ?
-                                <NotifiationPreference notifiationPreferenceData={notifiationPreferenceData} user={userData._id} />
+                                <NotifiationPreference notifiationPreferenceData={notifiationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
                                 : activeItem === profileMenuItems.setting ?
                                     <Paper className={classes.paper}>setting</Paper>
                                     : activeItem === profileMenuItems.users ?

@@ -57,7 +57,7 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
     </Grid>
 )
 
-export default function NotifiationPreference({ notifiationPreferenceData, user }) {
+export default function NotifiationPreference({ notifiationPreferenceData, user, onSuccess }) {
 
     const toastConfig = useContext(CustomToastContext);
     const [rows, setRows] = useState(notifiationPreferenceData)
@@ -107,7 +107,7 @@ export default function NotifiationPreference({ notifiationPreferenceData, user 
         setUpdating(true);
         let dataObj = {
             _id: user,
-            notificationPref: rows.map(({ id, ...obj }) => obj)
+            notificationPref: rows
         }
 
 
@@ -119,6 +119,7 @@ export default function NotifiationPreference({ notifiationPreferenceData, user 
                     type: "success",
                     message: data.message,
                 });
+                onSuccess();
                 setUpdating(false);
             })
             .catch((error) => {
