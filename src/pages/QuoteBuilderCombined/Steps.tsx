@@ -434,7 +434,7 @@ const Steps = (props) => {
               </Stepper>
             </div>
           </Grid>
-          <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center">
+          <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-start">
             {activeStep !== steps.length - 1 && ( 
               <>
                 <div>
