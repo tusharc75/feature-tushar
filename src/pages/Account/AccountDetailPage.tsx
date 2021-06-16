@@ -665,7 +665,7 @@ export default function AccountDetailPage(props) {
                       quoteBuilderPermission={permissions.quoteBuilder}
                       accountId={id}
                       accountResource={accountResource}
-                      isRenderedFromCustomerAccount = {true}
+                      isRenderedFromCustomerAccount={true}
                     />
                   )
                 }
@@ -686,6 +686,10 @@ export default function AccountDetailPage(props) {
                   {accountData && (
                     <div>
                       <Activity
+                        restrictedAddActivities={permissions &&
+                          permissions[accountResource] &&
+                          permissions[accountResource].isUpdate &&
+                          canEdit ? [] : ["Attachment", "Case"]}
                         relatedTo={[
                           {
                             type: accountResource,

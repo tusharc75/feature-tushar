@@ -540,7 +540,7 @@ const ContactDetailsPage = (props) => {
                   />
                 )}
                 {
-                accountResource === customerAccount.accountResource &&
+                  accountResource === customerAccount.accountResource &&
                   permissions?.quoteBuilder?.isRead && (
                     <QuotesInAccordion
                       recordsPerLine={3}
@@ -568,6 +568,7 @@ const ContactDetailsPage = (props) => {
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: accountResource,
