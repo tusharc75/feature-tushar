@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles } from '@material-ui/core'
+import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles, Table, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -16,6 +16,7 @@ import { HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
 import { imageUploadMaxSize } from "../../../constants/helpers"
+import AddProxyDialog from './AddProxyDialog';
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -50,6 +51,7 @@ export default function ManageProfile(props) {
     const [isEmailUpdate, setEmailUpdate] = useState(false)
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [showAddProxyDialog, setShowAddProxyDialog] = useState(false)
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
 
@@ -222,8 +224,8 @@ export default function ManageProfile(props) {
                         <div>
                             {otherDetails && Object.keys(otherDetails).map((k, i) => (
                                 <span className="d-flex align-items-center gap-1">
-                                    { k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
-                                    { k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
+                                    {k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
+                                    {k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
                                 </span>
                             ))
                             }
@@ -235,6 +237,13 @@ export default function ManageProfile(props) {
                             variant="outlined"
                             size="small"
                             onClick={() => setPasswordUpdate(true)}>Change Password</Button>
+                        <Divider />
+
+                        <Button color="primary"
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setShowAddProxyDialog(true)}>Add DOA Proxy</Button>
                         <Divider />
                     </div>
                     : null
@@ -259,6 +268,41 @@ export default function ManageProfile(props) {
                                     : (
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
+
+
+                                <div className="detail-box">
+                                    <h3 className="form-label-style" title="DOA Proxy">
+                                        DOA Proxy
+                                    </h3>
+                                    <Grid container>
+                                    </Grid>
+                                </div>
+
+                                <TableContainer>
+                                    <Table aria-label="DOA Proxy Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Assigned To</TableCell>
+                                                <TableCell>Start Date</TableCell>
+                                                <TableCell>End Date</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        {/* <TableBody>
+                                            {rows.map((row) => (
+                                                <TableRow key={row.name}>
+                                                    <TableCell component="th" scope="row">
+                                                        {row.name}
+                                                    </TableCell>
+                                                    <TableCell align="right">{row.calories}</TableCell>
+                                                    <TableCell align="right">{row.fat}</TableCell>
+                                                    <TableCell align="right">{row.carbs}</TableCell>
+                                                    <TableCell align="right">{row.protein}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody> */}
+                                    </Table>
+                                </TableContainer>
+
                             </Box>
                         </> : null
                 }
@@ -291,6 +335,25 @@ export default function ManageProfile(props) {
                         onOk={handleDeleteProfilePic}
                     />
                 ) : null}
+
+                {
+                    showAddProxyDialog && <AddProxyDialog
+                        open={showAddProxyDialog}
+                        onClose={() => {
+                            setShowAddProxyDialog(false)
+                        }}
+                        onSuccess={(data) => {
+                            axiosInstance().post("/user/doa/proxy", data).then(({ data }) => {
+                                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                                setShowAddProxyDialog(false);
+                                onFetchUserData();
+                            }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                            })
+                        }}
+                        userId={user?.user?._id}
+                    />
+                }
             </div>
         </>
     </>

@@ -78,7 +78,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -163,50 +163,52 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems='center'>
-                        {quoteBuilderPermission.isCreate ?
-                            <>
-                                <IconButton
-                                    aria-haspopup="true"
+                        {isAllowedToUpdate && <>
+                            {quoteBuilderPermission.isCreate ?
+                                <>
+                                    <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={handleOpenMenu}
+                                    >
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        id="menu"
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowCreateDialog(true);
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Create New
+                                        </MenuItem>
+                                        {isRenderedInCustomerContact && <MenuItem
+
+                                            onClick={() => {
+                                                setShowAddExistingDialog(true)
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Add Exisiting
+                                        </MenuItem>}
+                                    </Menu>
+                                </>
+                                : <IconButton
                                     color="primary"
                                     size="small"
-                                    onClick={handleOpenMenu}
+                                    onClick={() => { setShowCreateDialog(true) }}
                                 >
-                                    <MoreVert />
+                                    <ControlPointIcon />
                                 </IconButton>
-                                <Menu
-                                    id="menu"
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleCloseMenu}
-                                >
-                                    <MenuItem
-                                        onClick={() => {
-                                            setShowCreateDialog(true);
-                                            handleCloseMenu();
-                                        }}
-                                    >
-                                        Create New
-                          </MenuItem>
-                                    {isRenderedInCustomerContact && <MenuItem
-
-                                        onClick={() => {
-                                            setShowAddExistingDialog(true)
-                                            handleCloseMenu();
-                                        }}
-                                    >
-                                        Add Exisiting
-                                    </MenuItem>}
-                                </Menu>
-                            </>
-                            : <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => { setShowCreateDialog(true) }}
-                            >
-                                <ControlPointIcon />
-                            </IconButton>
-                        }
+                            }
+                        </>}
                     </Grid>
                 </Grid>
             </AccordionSummary>
@@ -218,7 +220,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                             {
                                 quotes && quotes?.length ? (
                                     <Grid container spacing={1}>
-                                        {   quotes.map((obj, i) => (
+                                        {quotes.map((obj, i) => (
                                             <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
                                                 <Card className="detailCard">
                                                     <CardContent className="detailListing">

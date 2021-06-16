@@ -93,7 +93,7 @@ import {
 } from "../../constants/helpers";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
-import { HiPencil } from 'react-icons/hi';
+import { HiPencil } from "react-icons/hi";
 
 const Accordion = withStyles({
   root: {
@@ -236,8 +236,18 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
   },
   bgProduct: {
-    background: "#ececec !important",
+    background: "#f5f5f5 !important",
     paddingBottom: "2px",
+    margin: "10px",
+    marginBottom: "0",
+    border: "1px solid #cec9c9",
+    borderBottom: "none",
+    boxShadow: "none",
+    borderBottomLeftRadius: "0",
+    borderBottomRightRadius: "0",
+    // margin: "10px",
+    // border: "1px solid #d9d7d7",
+    // borderRadius: "6px"
   },
   productInformation: {
     background: "white",
@@ -249,6 +259,16 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: "-16px",
     right: "0",
+  },
+  detailBox: {
+    margin: "10px",
+    border: "1px solid #d9d7d7",
+    borderRadius: "6px",
+  },
+  btnHeader: {
+    position: "absolute",
+    top: "4px",
+    right: "20px",
   },
 }));
 const ITEM_HEIGHT = 48;
@@ -324,7 +344,7 @@ function QuoteDetail() {
       cellRenderer: "nameRenderer",
     },
   ]);
-  const [expandQuote, setExpandQuote] = useState(false);
+
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -337,11 +357,13 @@ function QuoteDetail() {
   const [excelFileBase64, setExcelFileBase64] = useState(null);
   const [copyOfquoteData, setCopyOfquoteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [quoteFields, setquoteFields] = useState([]);
+  const [quoteFields, setQuoteFields] = useState([]);
+
   const [mainPoints, setMainPoints] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
+  const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -521,6 +543,11 @@ function QuoteDetail() {
             modifiedData["estimatedAmount"]
           ).shortFormatAmount;
 
+          modifiedData["invoiceAmount"] = formatAmountWithCurrency(
+            modifiedData["currency"],
+            modifiedData["invoiceAmount"]
+          ).shortFormatAmount;
+
           setCopyOfquoteData(modifiedData);
 
           fetchUserEmails(data);
@@ -643,7 +670,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -656,7 +683,7 @@ function QuoteDetail() {
       axiosInstance()
         .get(`/field?resource=Quotes&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          setquoteFields(data);
+          setQuoteFields(data);
 
           if (data && data.length) {
             let fieldData = data.find(
@@ -676,7 +703,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -706,6 +733,7 @@ function QuoteDetail() {
       title={params.value}
       onClick={() => {
         const data = dataRowsTNC.find((d) => d._id === params.data.id);
+
         setEditRecordTNC(data);
         setShowCreateDialog(true);
       }}
@@ -778,12 +806,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1591,7 +1619,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1763,8 +1791,7 @@ function QuoteDetail() {
                     type="button"
                     size="small"
                     disabled={
-                      allVersionStatusButtonText ===
-                      gettingVersionStatusText
+                      allVersionStatusButtonText === gettingVersionStatusText
                     }
                     startIcon={<InfoIcon />}
                     color="primary"
@@ -1775,9 +1802,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button>
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1815,7 +1842,7 @@ function QuoteDetail() {
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Quotes
+                          Headers
                         </div>
                       }
                       {...a11yProps(0)}
@@ -1824,33 +1851,17 @@ function QuoteDetail() {
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
-                          Product
+                          Quote Versions
                         </div>
                       }
                       {...a11yProps(1)}
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
-                    {quoteData && (
-                      <>
-                        <Grid
-                          container
-                          className="detailHeader d-flex align-items-center form-label-style mt-0  mb-0"
-                        >
-                          <Grid
-                            item
-                            xs={12}
-                            sm={4}
-                            className="justify-content-start"
-                          >
-                            <h3 className="mr-2">Quote Information</h3>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sm={8}
-                            className="d-flex justify-content-end"
-                          >
+                    <div className={classes.detailBox}>
+                      {quoteData && (
+                        <>
+                          <div className={classes.btnHeader}>
                             {quotePermissions.isCreate ? (
                               <Button
                                 variant="contained"
@@ -1874,18 +1885,31 @@ function QuoteDetail() {
                                 Edit
                               </Button>
                             ) : null}
-                          </Grid>
-                        </Grid>
-                        {copyOfquoteData ? (
-                          <DetailsPage
-                            data={copyOfquoteData}
-                            fields={quoteFields}
-                          />
-                        ) : null}
-                      </>
-                    )}
+                          </div>
+                          {copyOfquoteData ? (
+                            <DetailsPage
+                              data={copyOfquoteData}
+                              fields={quoteFields.filter(
+                                (_f) =>
+                                  _f.fieldData.sectionName !==
+                                  "Invoice Information"
+                              )}
+                            />
+                          ) : null}
+                        </>
+                      )}
+                    </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
+                    {copyOfquoteData ? (
+                      <DetailsPage
+                        data={copyOfquoteData}
+                        fields={quoteFields.filter(
+                          (_f) =>
+                            _f.fieldData.sectionName === "Invoice Information"
+                        )}
+                      />
+                    ) : null}
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
@@ -1894,15 +1918,64 @@ function QuoteDetail() {
                         <Grid
                           item
                           xs={12}
-                          sm={4}
-                          className="justify-content-start"
+                          sm={7}
+                          md={7}
+                          className="quoteHeader"
                         >
-                          <h2 className="mr-2">Product Information</h2>
+                          <div className="quoteBox">
+                            <span>Total Profit </span>
+                            <span
+                              className="quoteAmount"
+                              title={totalProfit.fullFormatAmount}
+                            >
+                              {totalProfit.shortFormatAmount}
+                            </span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Cost Price </span>
+                            <span
+                              className="quoteAmount"
+                              title={totalcost.fullFormatAmount}
+                            >
+                              {totalcost.shortFormatAmount}
+                            </span>
+                          </div>
+                          {redCard ? (
+                            <div className="redQuoteBox">
+                              <span>Total Selling Price </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalsale.fullFormatAmount}
+                              >
+                                {totalsale.shortFormatAmount}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="quoteBox">
+                              <span>Total Selling Price </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalsale.fullFormatAmount}
+                              >
+                                {totalsale.shortFormatAmount}
+                              </span>
+                            </div>
+                          )}
+                          <div className="quoteBox noBorder">
+                            <span>Total Margin </span>
+                            <span
+                              className="quoteAmount"
+                              title={totalmargin.fullFormatAmount}
+                            >
+                              {totalmargin.shortFormatAmount}
+                            </span>
+                          </div>
                         </Grid>
                         <Grid
                           item
                           xs={12}
-                          sm={8}
+                          sm={5}
+                          md={5}
                           className="d-flex justify-content-end"
                         >
                           <select
@@ -1961,7 +2034,6 @@ function QuoteDetail() {
                               </Button>{" "}
                             </>
                           )}
-
                         </Grid>
                       </Grid>
                       <div>
@@ -1981,6 +2053,13 @@ function QuoteDetail() {
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
+                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            quoteData={copyOfquoteData}
+                            invoiceFields={quoteFields.filter(
+                              (_f) =>
+                                _f.fieldData.sectionName ===
+                                "Invoice Information"
+                            )}
                           />
                         ) : (
                           <Steps
@@ -1998,76 +2077,23 @@ function QuoteDetail() {
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
+                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            quoteData={copyOfquoteData}
+                            invoiceFields={quoteFields.filter(
+                              (_f) =>
+                                _f.fieldData.sectionName ===
+                                "Invoice Information"
+                            )}
                           />
                         )}
-                      </div>
-                      <div className={classes.productInformation}>
-                        {ProcessStatus != "New" ? (
-                          <Grid>
-                            <Grid
-                              item
-                              xs={12}
-                              md={12}
-                              sm={12}
-                              className="d-flex align-items-stretch gap-1 quotePanel"
-                            >
-                              <div className="quoteBox">
-                                <span>Total Profit</span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalProfit.fullFormatAmount}
-                                >
-                                  {totalProfit.shortFormatAmount}
-                                </span>
-                              </div>
-                              <div className="quoteBox">
-                                <span>Total Cost Price</span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalcost.fullFormatAmount}
-                                >
-                                  {totalcost.shortFormatAmount}
-                                </span>
-                              </div>
-                              {redCard ? (
-                                <div className="redQuoteBox">
-                                  <span>Total Selling Price</span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="quoteBox">
-                                  <span>Total Selling Price</span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="quoteBox">
-                                <span>Total Margin</span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalmargin.fullFormatAmount}
-                                >
-                                  {totalmargin.shortFormatAmount}
-                                </span>
-                              </div>
-                            </Grid>
-                          </Grid>
-                        ) : null}
                       </div>
                     </Paper>
                   </TabPanel>
                   {tabValue === 1 && (
-                    <>
-                      <Tabs
+                    <div
+                      className={`mt-0 subDetailModule ${classes.detailBox}`}
+                    >
+                      {/* <Tabs
                         className="oms-tab"
                         value={currentTabIndex}
                         onChange={(index, newValue) => {
@@ -2089,7 +2115,7 @@ function QuoteDetail() {
                             id="a11y-tab-1"
                           />
                         )}
-                      </Tabs>
+                      </Tabs> */}
                       {!loading && quoteData ? (
                         <Grid container className="position-relative">
                           <Grid
@@ -2184,8 +2210,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2205,7 +2231,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2233,8 +2259,7 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {ProcessStatus === "Quote Builder" &&
-                              currentTabIndex === 0 &&
-                              visibleColumns.length > 0 ? (
+                            visibleColumns.length > 0 ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
                                 refreshProducts={refreshProducts}
@@ -2257,15 +2282,14 @@ function QuoteDetail() {
                                 }
                                 Editable={
                                   ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                  ProcessStatus === "New"
                                     ? true
                                     : false
                                 }
                               />
                             ) : null}
-                            {ProcessStatus === "Quote Builder" &&
-                              currentTabIndex === 1 ? (
-                                <Box className="m-3">
+                            {ProcessStatus === "Quote Builder" ? (
+                              <Box className="m-3">
                                 <div className="position-relative">
                                   <h4
                                     className="form-label-style"
@@ -2304,7 +2328,7 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                    </>
+                    </div>
                   )}
                 </>
               )}
@@ -2323,6 +2347,9 @@ function QuoteDetail() {
               ) : (
                 <div>
                   <Activity
+                    restrictedAddActivities={
+                      allowedToEdit ? [] : ["Attachment", "Case"]
+                    }
                     relatedTo={[
                       {
                         type: quoteData?.customerAccountName
@@ -2339,7 +2366,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2375,7 +2402,29 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-          // qbApi={qbApi}
+            // qbApi={qbApi}
+          />
+        )}
+
+        {openInvoiceDialog && (
+          <ManageQuoteDialog
+            open={openInvoiceDialog}
+            onSuccess={() => {
+              setOpenInvoiceDialog(false);
+              fetchQuoteData(currentVersion);
+            }}
+            onClose={() => {
+              setOpenInvoiceDialog(false);
+            }}
+            isNew={false}
+            dataToUpdate={copyOfquoteData}
+            resource={null}
+            isRedirectTodetailPage={false}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            disableCurrency={true}
+            quoteApproved={ifQuoteApproved().approved}
           />
         )}
 
@@ -2411,8 +2460,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
