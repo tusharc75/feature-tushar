@@ -9,6 +9,7 @@ import {
   ListItemIcon,
   ListItemText,
   makeStyles,
+  TextField,
   Typography,
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
@@ -55,6 +56,7 @@ const AssignEntityDialog = ({
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [checkAll, setCheckAll] = useState(false);
   const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
   const classes = useStyles();
 
@@ -73,10 +75,10 @@ const AssignEntityDialog = ({
       .get(`/${type}`)
       .then(({ data: { data } }) => {
         if (type == "user") {
-          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
+          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
         }
         else {
-          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
+          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
         }
         setLoadingData(false);
       })
@@ -116,11 +118,11 @@ const AssignEntityDialog = ({
       }
 
       else {
-          dataObj = {
-            users: selectedData,
-            entity: ids[0],
-            roles: selectedRole
-          };
+        dataObj = {
+          users: selectedData,
+          entity: ids[0],
+          roles: selectedRole
+        };
 
       }
       await axiosInstance()
@@ -146,6 +148,32 @@ const AssignEntityDialog = ({
     switch (step) {
       case 0:
         return <List style={{ padding: 0 }}>
+
+          <ListItem divider>
+            <ListItemIcon>
+              <Checkbox
+                edge="start"
+                onChange={(e) => {
+                  setCheckAll(e.target.checked);
+
+                  const newData = data.map(d => {
+                    return {
+                      ...d,
+                      isChecked: e.target.checked
+                    }
+                  });
+                  setData(newData);
+                  setSelectedData(newData.filter(d => d.isChecked).map(obj => obj._id))
+                }}
+                checked={checkAll}
+                inputProps={{
+                  "aria-labelledby": `checkbox-list-label-check-all-user`,
+                }}
+              />
+            </ListItemIcon>
+            <ListItemText primary="Select all" />
+          </ListItem>
+
           {data.map((d) => (
             <ListItem divider key={d._id}>
               <ListItemIcon>
@@ -154,6 +182,7 @@ const AssignEntityDialog = ({
                   onChange={(e) => {
                     d.isChecked = e.target.checked
                     setSelectedData(data.filter(d => d.isChecked).map(obj => obj._id))
+                    setCheckAll(!data.some(d => d.isChecked === false));
                   }
                   }
                   checked={d.isChecked}
@@ -228,7 +257,7 @@ const AssignEntityDialog = ({
                         className={classes.button}
                       >
                         Back
-                    </Button>
+                      </Button>
                       {(activeStep !== steps.length - 1) &&
                         <Button
                           variant="contained"
@@ -239,7 +268,7 @@ const AssignEntityDialog = ({
                           className={classes.button}
                         >
                           Next
-                      </Button>
+                        </Button>
                       }
                     </div>
                   </div>
