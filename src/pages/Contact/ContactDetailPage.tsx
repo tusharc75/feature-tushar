@@ -527,6 +527,7 @@ const ContactDetailsPage = (props) => {
                     isRedirect={false}
                     contactId={id}
                     contactResource={contactResource}
+                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
                   />
                 )}
                 {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
@@ -537,10 +538,11 @@ const ContactDetailsPage = (props) => {
                     fetchData={fetchRelatedData}
                     permissions={permissions}
                     isAddProjectSale={true}
+                    isAllowedToEdit={contactPermissions.isUpdate && canEdit}
                   />
                 )}
                 {
-                accountResource === customerAccount.accountResource &&
+                  accountResource === customerAccount.accountResource &&
                   permissions?.quoteBuilder?.isRead && (
                     <QuotesInAccordion
                       recordsPerLine={3}
@@ -552,6 +554,7 @@ const ContactDetailsPage = (props) => {
                       accountResource={accountResource}
                       isRenderedInCustomerContact={true}
                       isRenderedFromCustomerAccount={true}
+                      isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
                     />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
@@ -568,6 +571,7 @@ const ContactDetailsPage = (props) => {
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: accountResource,

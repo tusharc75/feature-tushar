@@ -72,6 +72,10 @@ export default function NotificationPreference({ notificationPreferenceData, use
             if (obj.id === id) return { ...obj, [columnName]: isChecked }
             else return obj
         })
+        setAllPreference({
+            portal: tempRows.every(d => d.portal),
+            email: tempRows.every(d => d.email)
+        })
         setRows(tempRows)
     }
 
@@ -170,7 +174,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
                     <TableRow>
                         <TableCell component="th" scope="row" className={classes.tableCell}>
                         </TableCell>
-                        <TableCell padding="checkbox" >
+                        <TableCell padding="checkbox">
                             <FormControlLabel
                                 className={classes.label}
                                 control={<Checkbox
@@ -195,10 +199,10 @@ export default function NotificationPreference({ notificationPreferenceData, use
                                 <TableCell component="th" scope="row" className={classes.tableCell}>
                                     {row.name}
                                 </TableCell>
-                                <TableCell padding="checkbox" align="left">
+                                <TableCell padding="checkbox" align="center">
                                     <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} />
                                 </TableCell>
-                                <TableCell padding="checkbox" align="left">
+                                <TableCell padding="checkbox" align="center">
                                     <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} /></TableCell>
                             </TableRow>
                         ))}

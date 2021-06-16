@@ -62,6 +62,7 @@ export default function ManageQuoteDialog({
   isRenderedFromCustomerAccount = false,
   contacts = null,
   disableCurrency = false,
+  quoteApproved = false,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -98,7 +99,9 @@ export default function ManageQuoteDialog({
     useState(0);
   const [customerContactMainDataSource, setCustomerContactMainDataSource] =
     useState([]);
-  const [opportunityMainDataSource, setOpportunityMainDataSource] = useState([]);
+  const [opportunityMainDataSource, setOpportunityMainDataSource] = useState(
+    []
+  );
   const [opportunityData, setOpportunityData] = useState([]);
   const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null);
   const [customerContactDataSource, setCustomerContactDataSource] = useState(
@@ -166,22 +169,33 @@ export default function ManageQuoteDialog({
           )
         );
       }
-
-
     }
 
-    const opportunityDropDownData = entityData.fields.find((field) => field.fieldName === "opportunity");
-
+    const opportunityDropDownData = entityData.fields.find(
+      (field) => field.fieldName === "opportunity"
+    );
 
     if (opportunityDropDownData) {
       setOpportunityMainDataSource(opportunityDropDownData.option);
 
       if (!isNew) {
-        setOpportunityDataSource(opportunityDropDownData.option.filter((d) => d.customerAccountName === dataToUpdate.customerAccountName.optionValue))
+        setOpportunityDataSource(
+          opportunityDropDownData.option.filter(
+            (d) =>
+              d.customerAccountName ===
+              dataToUpdate.customerAccountName.optionValue
+          )
+        );
       }
 
       if (isNew && opportunityId) {
-        setOpportunityDataSource(opportunityDropDownData.option.filter((d) => d.customerAccountName === entityData.initialValues["customerAccountName"]));
+        setOpportunityDataSource(
+          opportunityDropDownData.option.filter(
+            (d) =>
+              d.customerAccountName ===
+              entityData.initialValues["customerAccountName"]
+          )
+        );
       }
     }
 
@@ -260,6 +274,12 @@ export default function ManageQuoteDialog({
     axiosInstance()
       .get(`/field?resource=Quotes&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
+        if (!quoteApproved) {
+          data = data.filter(
+            (_f) => _f.fieldData.sectionName !== "Invoice Information"
+          );
+        }
+
         const newFields = [];
 
         const filterData = isNew
@@ -277,9 +297,7 @@ export default function ManageQuoteDialog({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, contactId);
           }
 
-          if (
-            opportunityId &&
-            _f.fieldData.fieldName === "opportunity") {
+          if (opportunityId && _f.fieldData.fieldName === "opportunity") {
             _f = initializeDropdownById(
               _f,
               _f.fieldData.fieldName,
@@ -341,7 +359,8 @@ export default function ManageQuoteDialog({
           type: "success",
           message: data.message,
         });
-        if (isRedirectTodetailPage) history.push(`${routes.quoteBuilder.path}/${newId}`);
+        if (isRedirectTodetailPage)
+          history.push(`${routes.quoteBuilder.path}/${newId}`);
         setLoading(false);
         onSuccess(newId);
       })
@@ -406,7 +425,7 @@ export default function ManageQuoteDialog({
         order: entityFields[opportunityFieldIndex].option.length,
         default: false,
         customerAccountName: data.customerAccountName,
-      }
+      };
       entityFields[opportunityFieldIndex].option = [
         ...entityFields[opportunityFieldIndex].option,
         newOpportunity,
@@ -414,7 +433,7 @@ export default function ManageQuoteDialog({
 
       setOpportunityMainDataSource(entityFields[opportunityFieldIndex].option);
 
-      setOpportunityDataSource((prevState) => [...prevState, newOpportunity])
+      setOpportunityDataSource((prevState) => [...prevState, newOpportunity]);
     }
   };
 
@@ -508,11 +527,11 @@ export default function ManageQuoteDialog({
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
-                                      // doNotShowInfoTooltip={true}
-                                      // onChange={(e, value) => {
-                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                      //   setFieldValue("customerContactName", [])
-                                      // }}
+                                        // doNotShowInfoTooltip={true}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        //   setFieldValue("customerContactName", [])
+                                        // }}
                                       />
                                     ) : field.fieldName ==
                                       "customerAccountName" ? (
@@ -563,11 +582,8 @@ export default function ManageQuoteDialog({
                                               setFieldValue(
                                                 "customerContactName",
                                                 []
-                                              )
-                                              setFieldValue(
-                                                "opportunity",
-                                                ""
                                               );
+                                              setFieldValue("opportunity", "");
                                             }}
                                           />
                                         </Grid>
@@ -644,10 +660,10 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                          // }}
+                                            // }}
                                           />
                                         </Grid>
                                         {permissions.customerContact.isCreate &&
@@ -688,19 +704,19 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.opportunity.isCreate &&
-                                              !isRenderedFromOpportunity
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           sm={
                                             permissions.opportunity.isCreate &&
-                                              !isRenderedFromOpportunity
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           md={
                                             permissions.opportunity.isCreate &&
-                                              !isRenderedFromOpportunity
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
@@ -725,14 +741,14 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(
-                                          //     field.fieldName,
-                                          //     value && value.optionValue
-                                          //       ? value.optionValue
-                                          //       : ""
-                                          //   );
-                                          // }}
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(
+                                            //     field.fieldName,
+                                            //     value && value.optionValue
+                                            //       ? value.optionValue
+                                            //       : ""
+                                            //   );
+                                            // }}
                                           />
                                         </Grid>
                                         {permissions.opportunity.isCreate &&
@@ -779,14 +795,32 @@ export default function ManageQuoteDialog({
                                         onChange={(e, val) => {
                                           setFieldValue(
                                             field.fieldName,
-                                            val && val.optionValue ? val.optionValue : ""
+                                            val && val.optionValue
+                                              ? val.optionValue
+                                              : ""
                                           );
 
-                                          if (val && val.optionValue !== user?.user?._id) {
-                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
-                                            if (!checkOwnerAddedInCollaborator) {
-                                              setFieldValue("collaborator",
-                                                [...values["collaborator"], collaboratorData.find(d => d.optionValue === user?.user?._id).optionValue])
+                                          if (
+                                            val &&
+                                            val.optionValue !== user?.user?._id
+                                          ) {
+                                            const checkOwnerAddedInCollaborator =
+                                              values["collaborator"].find(
+                                                (d) =>
+                                                  d.optionValue ===
+                                                  user?.user?._id
+                                              );
+                                            if (
+                                              !checkOwnerAddedInCollaborator
+                                            ) {
+                                              setFieldValue("collaborator", [
+                                                ...values["collaborator"],
+                                                collaboratorData.find(
+                                                  (d) =>
+                                                    d.optionValue ===
+                                                    user?.user?._id
+                                                ).optionValue,
+                                              ]);
                                             }
                                           }
                                         }}
@@ -896,7 +930,8 @@ export default function ManageQuoteDialog({
                                           }
                                         }}
                                       />
-                                    ) : field.fieldName === "estimatedAmount" ? (
+                                    ) : field.fieldName === "estimatedAmount" ||
+                                      field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
                                         // {...rest}
                                         startAdornment={
@@ -941,10 +976,10 @@ export default function ManageQuoteDialog({
                                             (s) => s === field.type
                                           )
                                             ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(
-                                                completePercentage
-                                              );
-                                            }
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
                                             : null
                                         }
                                       />
@@ -1036,7 +1071,6 @@ export default function ManageQuoteDialog({
                         setNewAddedOpportunityId(data._id);
                         updateOpportunityDropdown(data);
                         setFieldValue("opportunity", data._id);
-
                       }}
                       accountId={
                         values["customerAccountName"]
@@ -1076,9 +1110,9 @@ export default function ManageQuoteDialog({
                           entityData.fields
                         )
                       ).toString() ===
-                      Object.values(
-                        simplifyValues(values, entityData.fields)
-                      ).toString()
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                     }
                     onClick={(e) => {
                       e.preventDefault();
