@@ -211,7 +211,29 @@ export default function ManageContact(props) {
                                         options={
                                           fromProject ? owners : ownerDataSource
                                         }
-                                        setFieldValue={setFieldValue}
+                                        onChange={(e, val) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            val && val.optionValue ? val.optionValue : ""
+                                          );
+
+                                          if (val && val.optionValue !== user?.user?._id) {
+                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
+                                            if (!checkOwnerAddedInCollaborator) {
+
+                                              const newCollaboratorDataSource = fromProject
+                                                ? collaborators.filter(
+                                                  (c) =>
+                                                    c.optionValue !==
+                                                    values["owner"]
+                                                )
+                                                : collaboratorDataSource
+
+                                              setFieldValue("collaborator",
+                                                [...values["collaborator"], newCollaboratorDataSource.find(d => d.optionValue === user?.user?._id).optionValue])
+                                            }
+                                          }
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={true}
