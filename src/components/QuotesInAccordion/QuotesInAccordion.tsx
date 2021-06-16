@@ -9,6 +9,7 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
 import { IoCalendarOutline } from 'react-icons/io5';
@@ -247,7 +248,12 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 {
-                                                                    obj.closeDate ? <DisplayData key={i} label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                                    obj.expiryDate ? <DisplayData key={i} label='Expiry Date' value={displayDate(obj.expiryDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                                }
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    obj.incoTerms ? <DisplayData key={i} label='Inco Terms' value={obj.incoTerms} icon={< BusinessOutlinedIcon />} /> : ''
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={12} sm={6} md={6}>
