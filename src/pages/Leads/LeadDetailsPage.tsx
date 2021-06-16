@@ -75,7 +75,7 @@ const LeadDetailsPage = () => {
     if (steps.length > 0) {
       const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
       if (processSteps && processSteps.isRead && leadData) {
-        let currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === leadData[processFieldName])
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === leadData[processFieldName])
         setActiveStep(currentStepToShow);
       }
     }

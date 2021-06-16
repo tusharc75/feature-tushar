@@ -5,11 +5,6 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { FaCheckCircle } from 'react-icons/fa';
 
-const setBackGroundColor = {
-    Unqualified: "unqualifiedLead",
-    Qualified: "qualifiedLead"
-}
-
 const useStyles = makeStyles((theme) => ({
     root: {
         // width: "98%",
@@ -100,7 +95,7 @@ export default function CustomSteps({ steps, active }) {
                         <Step
                             key={index} {...stepProps}
                             style={{ width: `${100 / steps.length}%` }}
-                          className={`${index <= active ? classes.active : (index === (active + 1)) ? classes.currentStep : classes.inActive}`}
+                            className={`${index <= active ? classes.active : (index === (active + 1)) ? classes.currentStep : classes.inActive}`}
                         //className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}
                         >
                             <StepLabel
