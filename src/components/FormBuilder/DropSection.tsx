@@ -50,7 +50,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                     insert_object.inputFields = []
                     insert_object.returnType = "decimal"
                 }
-                if (type === FieldList.FORMULA.type || type === FieldList.DECIMAL.type) {
+                if (type === FieldList.FORMULA.type || type === FieldList.DECIMAL.type || type === FieldList.CONVERTER.type || type === FieldList.CURRENCYAMOUNT.type) {
                     insert_object.decimalPlaces = 2
                 }
                 if (type === FieldList.VLOOKUPDROPDOWN.type) {

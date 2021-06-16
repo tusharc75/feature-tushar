@@ -72,7 +72,7 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         if (fieldData && fieldData.isMulitFormula) {
             resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
         }
-        if (fieldData.type === "vlookupDropdown") {
+        if (fieldData.type === "vlookupDropdown" || fieldData.isVlookup) {
             resultValues = handleVlookup(fieldData, fields, values, name, value, resultValues);
         }
         resultValues = handleFormula(fieldData, fields, values, name, value, resultValues);
@@ -89,6 +89,7 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
     }
     catch (e) {
     }
+    console.log(resultValues)
     return resultValues
 }
 
@@ -98,7 +99,7 @@ const handleMulitFormula = (fieldData, fields, values, resultValues) => {
         fieldData.formulainputFields.forEach((_input) => {
             formulainputFields[_input] = resultValues[_input] || resultValues[_input] === 0 ? resultValues[_input] : values[_input] ? values[_input] : 0;
         });
-        let calValue = getFormulaValue(fieldData.formulaoption[_field], formulainputFields, "decimal", 2);
+        let calValue = getFormulaValue(fieldData.formulaoption[_field], formulainputFields, "decimal", fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
         resultValues[_field] = calValue;
         resultValues = handleFormula(fieldData, fields, values, _field, calValue, resultValues);
         if (fieldData.displayUnits && fieldData.displayUnits.length) {
@@ -121,7 +122,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues) => 
                     }
                 });
                 let calValue = getFormulaValue(_data.formula, inputFields, _data.returnType, _data.decimalPlaces);
-                calValue = formatDecimal(calValue, 2);
+                calValue = formatDecimal(calValue, _data.decimalPlaces ? _data.decimalPlaces : 2);
                 let _fieldName = _data.fieldName;
                 if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
                     if (_data.displayCurrency && _data.displayCurrency.length) {
@@ -203,8 +204,8 @@ const handleVlookup = (fieldData, fields, values, name, value, resultValues) => 
 };
 
 const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resultValues) => {
-    if (fields && fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).length) {
-        fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).forEach((_data) => {
+    if (fields && fields.filter((_f) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).length) {
+        fields.filter((_f) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).forEach((_data) => {
             if (_data.inputFields.includes(name)) {
                 let result = _data.option && _data.option.filter(function (val) {
                     for (var i = 0; i < _data.inputFields.length; i++)
@@ -213,8 +214,24 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
                     return true;
                 });
                 if (result.length) {
-                    resultValues[_data.fieldName] = result[0].optionLabel;
-                    resultValues = handleFormula(_data, fields, values, _data.fieldName, result[0].optionLabel, resultValues)
+                    if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
+                        if (_data.type !== 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
+                            resultValues[_data.fieldName + "_" + _data.displayUnits[0].toLowerCase()] = parseFloat(result[0].optionLabel);
+                            resultValues = handleConverter(_data, fields, values, _data.fieldName, _data.displayUnits[0], result[0].optionLabel, resultValues)
+                        }
+                        else if (_data.type === 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
+                            resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase() + "_" + _data.displayUnits[0].toLowerCase()] = parseFloat(result[0].optionLabel);
+                            resultValues = handleCurrencyConverter(_data, fields, values, _data.fieldName, _data.displayCurrency[0], _data.displayUnits[0], result[0].optionLabel, resultValues)
+                        }
+                        else if (_data.type === 'currencyAmount') {
+                            resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase()] = parseFloat(result[0].optionLabel);
+                            resultValues = handleCurrency(_data, fields, values, _data.fieldName, _data.displayCurrency[0], result[0].optionLabel, resultValues)
+                        }
+                    }
+                    else {
+                        resultValues[_data.fieldName] = result[0].optionLabel;
+                        resultValues = handleFormula(_data, fields, values, _data.fieldName, result[0].optionLabel, resultValues)
+                    }
                 }
             }
         });
@@ -228,7 +245,7 @@ const handleConverter = (fieldData, fields, values, name, _unit, value, resultVa
         for (var x_unit in fieldData.option[indexConverter]) {
             if (x_unit !== _unit) {
                 let calValue = value * fieldData.option[indexConverter][x_unit];
-                calValue = formatDecimal(calValue, 2);
+                calValue = formatDecimal(calValue, fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
                 let fieldName = (name + "_" + x_unit.toLowerCase());
                 resultValues[fieldName] = calValue;
                 resultValues = handleFormula(fieldData, fields, values, fieldName, calValue, resultValues);
@@ -249,7 +266,7 @@ const handleCurrency = (fieldData, fields, values, name, _currency, value, resul
             if (fieldData.displayCurrency.includes(x_currency) && x_currency !== _currency) {
                 let _fieldName = name + "_" + x_currency.toLowerCase();
                 let calValue = value * fieldData.currencyoption[indexCurrency][x_currency];
-                calValue = formatDecimal(calValue, 2);
+                calValue = formatDecimal(calValue, fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
                 resultValues[_fieldName] = calValue;
                 resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues);
             }
@@ -275,14 +292,14 @@ const handleCurrencyConverter = (fieldData, fields, values, name, _currency, _un
                     if (x_currency === _currency && x_unit === _unit) {
                     } else if (x_currency !== _currency && x_unit === _unit) {
                         let calValue = value * fieldData.currencyoption[indexCurrency][x_currency];
-                        calValue = formatDecimal(calValue, 2);
+                        calValue = formatDecimal(calValue, fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
                         let fieldName = name + "_" + x_currency.toLowerCase() + "_" + x_unit.toLowerCase()
                         resultValues[fieldName] = calValue;
                         resultValues = handleFormula(fieldData, fields, values, fieldName, calValue, resultValues);
                     } else {
                         let calValue = value * fieldData.option[indexConverter][x_unit];
                         calValue = calValue * fieldData.currencyoption[indexCurrency][x_currency];
-                        calValue = formatDecimal(calValue, 2);
+                        calValue = formatDecimal(calValue, fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
                         let fieldName = name + "_" + x_currency.toLowerCase() + "_" + x_unit.toLowerCase()
                         resultValues[fieldName] = calValue;
                         resultValues = handleFormula(fieldData, fields, values, fieldName, calValue, resultValues);

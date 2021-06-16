@@ -128,7 +128,8 @@ const AssignUserDialog = ({
           disabled={!selectedUsers.length || isAssigning}
           onClick={handleAssignRoles}
           color="primary"
-          size="small" 
+          size="small"
+          variant="contained"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

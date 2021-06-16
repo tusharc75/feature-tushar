@@ -26,6 +26,7 @@ import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
+import { getObjKeysWithValues } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     margin: "1px",
     borderRadius: "4px",
-    border: "1px solid #d6d5d5"
+    border: "1px solid #d6d5d5",
   },
   inActive: {
     background: "#ebebeb",
@@ -323,8 +324,8 @@ const Steps = (props) => {
                   Approved by Customer
                 </Typography>
 
-                <Button onClick={openInvoiceDialog}>
-                  Fill Invoice Information
+                <Button variant="outlined" onClick={openInvoiceDialog}>
+                  Update Invoice Information
                 </Button>
               </div>
             )}
