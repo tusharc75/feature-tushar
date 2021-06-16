@@ -324,7 +324,7 @@ const Steps = (props) => {
                   Approved by Customer
                 </Typography>
 
-                <Button onClick={openInvoiceDialog}>
+                <Button variant="outlined" onClick={openInvoiceDialog}>
                   Update Invoice Information
                 </Button>
               </div>
