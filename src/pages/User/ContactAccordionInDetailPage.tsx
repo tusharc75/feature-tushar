@@ -64,7 +64,7 @@ const AccordionDetails = withStyles((theme) => ({
 
 export default function ContactAccordionInDetailPage({
     contacts, type,
-    expanded = true, recordsPerLine = 2, userId, onSuccess
+    expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit
 }) {
     const {
         state: { permissions },
@@ -141,43 +141,45 @@ export default function ContactAccordionInDetailPage({
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
-                            {
-                                (type === "customer" ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) &&
-                                // <IconButton
-                                //     color="primary"
-                                //     size="small"
-                                //     onClick={() => { setShowCreateContactDialog(true) }}
-                                // >
-                                //     <ControlPointIcon />
-                                // </IconButton>
+                            {isAllowedToEdit && <>
+                                {
+                                    (type === "customer" ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) &&
+                                    // <IconButton
+                                    //     color="primary"
+                                    //     size="small"
+                                    //     onClick={() => { setShowCreateContactDialog(true) }}
+                                    // >
+                                    //     <ControlPointIcon />
+                                    // </IconButton>
 
-                                <>
-                                    <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={handleOpenMenu}
-                                    >
-                                        <MoreVert />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu"
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowCreateContactDialog(true);
-                                                handleCloseMenu();
-                                            }}
+                                    <>
+                                        <IconButton
+                                            aria-haspopup="true"
+                                            color="primary"
+                                            size="small"
+                                            onClick={handleOpenMenu}
                                         >
-                                            Create New
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            }
+                                            <MoreVert />
+                                        </IconButton>
+                                        <Menu
+                                            id="menu"
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={() => {
+                                                    setShowCreateContactDialog(true);
+                                                    handleCloseMenu();
+                                                }}
+                                            >
+                                                Create New
+                                            </MenuItem>
+                                        </Menu>
+                                    </>
+                                }
+                            </>}
                         </Typography>
                     </Grid>
 
