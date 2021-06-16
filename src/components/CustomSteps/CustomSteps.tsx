@@ -25,21 +25,15 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
     },
-    completed: {
-        background: "#20789a !important",
-        border: "2px solid #04506d !important"
+    inActive: {
+        background: "#ebebeb",
     },
-    current: {
-        // background: "#50ad50",
-        border: "2px solid #003f57 !important"
+    currentStep: {
+        background: "#ffffff",
     },
-    qualifiedLead: {
-        // background: `${theme.palette.success.main} !important`,
-        // color: `${theme.palette.common.white} !important`,
+    active: {
+        background: "#53ac65",
     },
-    unqualifiedLead: {
-        //   background: `${theme.palette.error.light} !important`,
-    }
 }));
 
 
@@ -105,7 +99,8 @@ export default function CustomSteps({ steps, active }) {
                     return (
                         <Step
                             key={index} {...stepProps}
-                            className={`${index <= active ? classes.completed : (index === (active + 1)) ? classes.current : ""}`}
+                            style={{ width: `${100 / steps.length}%` }}
+                          className={`${index <= active ? classes.active : (index === (active + 1)) ? classes.currentStep : classes.inActive}`}
                         //className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}
                         >
                             <StepLabel

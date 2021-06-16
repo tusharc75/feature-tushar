@@ -184,11 +184,22 @@ Button.MuiButtonBase-root {
   }
 
   .MuiStep-horizontal {
-    background: #e4e4e4;
-    padding: 10px;
-    border-radius: 3px;
-    border: 2px solid #dcdada;
+    margin: 1px;
+    display: flex;
+    padding: 5px 8px;
+    text-align: center;
+    align-items: center;
+    padding-left: 8px;
+    border-radius: 4px;
+    padding-right: 8px;
+    justify-content: center;
+    border: 1px solid #e8e6e6;
   }
+
+  .MuiStepper-horizontal{
+    align-items: stretch;
+  }
+  
   .MuiStepLabel-label {
     color: #bab9b9 !important;
     font-weight: 500 !important;
