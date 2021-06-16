@@ -405,6 +405,7 @@ const LeadDetailsPage = () => {
               ) : (
                 <div>
                   <Activity
+                    restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: "lead",

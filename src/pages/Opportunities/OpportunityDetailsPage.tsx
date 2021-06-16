@@ -579,6 +579,7 @@ function OpportunityDetailsPage() {
                           }}
                           recordsPerLine={recordsPerLine}
                           accounts={cloneDeep(opportunityData?.supplierAccountName)}
+                          isAllowedToUpdate={allowedToEdit}
                         />
                       }
                       {
@@ -596,6 +597,7 @@ function OpportunityDetailsPage() {
                           recordsPerLine={recordsPerLine}
                           saveContactToOpportunity={handleAssignContacts}
                           accountId={opportunityData?.customerAccountName?.optionValue}
+                          isAllowedToUpdate={allowedToEdit}
 
                         />
                       }
@@ -607,6 +609,7 @@ function OpportunityDetailsPage() {
                           fetchData={fetchRelatedData}
                           permissions={permissions}
                           isAddProjectSale={true}
+                          isAllowedToEdit={allowedToEdit}
                         />
                       )}
                       {
@@ -620,6 +623,7 @@ function OpportunityDetailsPage() {
                             accountId={opportunityData?.customerAccountName?.optionValue}
                             opportunityName={opportunityData?.opportunityName}
                             isRenderedFromOpportunity={true}
+                            isAllowedToUpdate={allowedToEdit}
                           />
                         )
                       }

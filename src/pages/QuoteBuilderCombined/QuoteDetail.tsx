@@ -1901,53 +1901,53 @@ function QuoteDetail() {
                           md={7}
                           className="quoteHeader">
                           <div className="quoteBox">
-                                <span>Total Profit </span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalProfit.fullFormatAmount}
-                                >
-                                  {totalProfit.shortFormatAmount}
-                                </span>
-                              </div>
-                              <div className="quoteBox">
-                                <span>Total Cost Price </span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalcost.fullFormatAmount}
-                                >
-                                  {totalcost.shortFormatAmount}
-                                </span>
-                              </div>
-                              {redCard ? (
-                                <div className="redQuoteBox">
-                                  <span>Total Selling Price </span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="quoteBox">
-                                  <span>Total Selling Price </span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="quoteBox noBorder">
-                                <span>Total Margin </span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalmargin.fullFormatAmount}
-                                >
-                                  {totalmargin.shortFormatAmount}
-                                </span> 
-                              </div>
+                            <span>Total Profit </span>
+                            <span
+                              className="quoteAmount"
+                              title={totalProfit.fullFormatAmount}
+                            >
+                              {totalProfit.shortFormatAmount}
+                            </span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Cost Price </span>
+                            <span
+                              className="quoteAmount"
+                              title={totalcost.fullFormatAmount}
+                            >
+                              {totalcost.shortFormatAmount}
+                            </span>
+                          </div>
+                          {redCard ? (
+                            <div className="redQuoteBox">
+                              <span>Total Selling Price </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalsale.fullFormatAmount}
+                              >
+                                {totalsale.shortFormatAmount}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="quoteBox">
+                              <span>Total Selling Price </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalsale.fullFormatAmount}
+                              >
+                                {totalsale.shortFormatAmount}
+                              </span>
+                            </div>
+                          )}
+                          <div className="quoteBox noBorder">
+                            <span>Total Margin </span>
+                            <span
+                              className="quoteAmount"
+                              title={totalmargin.fullFormatAmount}
+                            >
+                              {totalmargin.shortFormatAmount}
+                            </span>
+                          </div>
                         </Grid>
                         <Grid
                           item
@@ -2310,6 +2310,7 @@ function QuoteDetail() {
               ) : (
                 <div>
                   <Activity
+                    restrictedAddActivities={allowedToEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: quoteData?.customerAccountName
