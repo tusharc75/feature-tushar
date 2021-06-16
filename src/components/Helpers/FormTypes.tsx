@@ -46,6 +46,8 @@ import {
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -181,6 +183,7 @@ const FormTypes = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [isExtraDispayType, setIsExtraDispayType] = React.useState(false);
+  const [displayType, setDisplayType] = React.useState(null);
 
   const inputNumberRef = useRef(null);
 
@@ -427,283 +430,58 @@ const FormTypes = (props) => {
     //handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
 
-  const handleMulitFormula = (data, alredyDone) => {
-    data.formulaFields.forEach((_field) => {
-      let formulainputFields = {};
-      data.formulainputFields.forEach((_input) => {
-        formulainputFields[_input] = alredyDone[_input] || alredyDone[_input] === 0
-          ? alredyDone[_input]
-          : values[_input]
-            ? values[_input]
-            : 0;
-      });
-      let calValue = getFormulaValue(
-        data.formulaoption[_field],
-        formulainputFields,
-        "decimal",
-        2
-      );
-      setFieldValue(_field, calValue);
-      alredyDone[_field] = calValue;
-      handleFormula(_field, calValue, alredyDone);
-      if (data.displayUnits && data.displayUnits.length) {
-        handleConverter(data, data.fieldName, data.displayUnits[0], calValue);
-      }
-    });
-  };
-
-  const handleFormula = (name, value, alredyDone) => {
-    if (
-      fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length
-    ) {
-      fields
-        .filter((_f) => _f.type === "formula" || _f.isFormula === true)
-        .forEach((_data) => {
-          if (_data.inputFields.includes(name)) {
-            let inputFields = {};
-            _data.inputFields.forEach((_input) => {
-              if (name === _input) {
-                inputFields[_input] = value;
-              } else {
-                inputFields[_input] = alredyDone[_input]
-                  ? alredyDone[_input]
-                  : values[_input]
-                    ? values[_input]
-                    : 0;
-              }
-            });
-            let calValue = getFormulaValue(
-              _data.formula,
-              inputFields,
-              _data.returnType,
-              _data.decimalPlaces
-            );
-            calValue = formatDecimal(calValue, 2);
-            let _fieldName = _data.fieldName;
-            if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
-              if (_data.displayCurrency && _data.displayCurrency.length) {
-                _fieldName = _fieldName + "_" + (_data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency.toLowerCase() : _data.displayCurrency[0].toLowerCase())
-              }
-              if (_data.displayUnits && _data.displayUnits.length) {
-                _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
-              }
-              if (alredyDone[_fieldName] === undefined) {
-                setFieldValue(_fieldName, calValue);
-                alredyDone[_fieldName] = calValue;
-                handleFormula(_fieldName, calValue, alredyDone);
-                if (_data.displayCurrency && _data.displayCurrency.length && _data.displayUnits && _data.displayUnits.length) {
-                  handleCurrencyConverter(
-                    _data,
-                    _data.fieldName,
-                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
-                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
-                    calValue
-                  )
-                }
-                else if (_data.displayCurrency && _data.displayCurrency.length) {
-                  handleCurrency(
-                    _data,
-                    _data.fieldName,
-                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
-                    calValue
-                  );
-                }
-                else if (_data.displayUnits && _data.displayUnits.length) {
-                  handleConverter(
-                    _data,
-                    _data.fieldName,
-                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
-                    calValue
-                  );
-                }
-                if (_data.isMulitFormula) {
-                  handleMulitFormula(_data, alredyDone);
-                }
-              }
-            } else {
-              if (alredyDone[_fieldName] === undefined) {
-                setFieldValue(_fieldName, calValue);
-                alredyDone[_fieldName] = calValue;
-                handleFormula(_fieldName, calValue, alredyDone);
-                if (_data.isMulitFormula) {
-                  handleMulitFormula(_data, alredyDone);
-                }
-              }
-            }
-          }
-        });
-    }
-  };
-
-  const handleVlookup = (name, value) => {
-    if (options && options.length) {
-      let result = options.filter((data) => data.optionValue === value);
-      if (result.length) {
-        for (var x in result[0]) {
-          if (x !== "optionLabel" && x !== "optionValue") {
-            setFieldValue(x, result[0][x]);
-            handleFormula(x, result[0][x], {})
-          }
-        }
-      }
-    }
-  };
-
-  const handleCheckVlookupReverse = (name, value) => {
-    if (fields && fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).length) {
-      fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).forEach((_data) => {
-        if (_data.inputFields.includes(name)) {
-          let result = _data.option && _data.option.filter(function (val) {
-            for (var i = 0; i < _data.inputFields.length; i++)
-              if ((_data.inputFields[i] === name ? value.toString() : values[_data.inputFields[i]].toString()) !== val[_data.inputFields[i].toString()])
-                return false;
-            return true;
-          });
-          if (result.length) {
-            setFieldValue(_data.fieldName, result[0].optionLabel);
-            handleFormula(_data.fieldName, result[0].optionLabel, {})
-          }
-        }
-      });
-    }
-  };
-
-  const handleConverter = (data, name, _unit, value) => {
-    let indexConverter = data.units.indexOf(_unit);
-    if (indexConverter >= 0) {
-      for (var x_unit in data.option[indexConverter]) {
-        if (x_unit !== _unit) {
-          let calValue = value * data.option[indexConverter][x_unit];
-          calValue = formatDecimal(calValue, 2);
-          setFieldValue(name + "_" + x_unit.toLowerCase(), calValue);
-          handleFormula(name + "_" + x_unit.toLowerCase(), calValue, {});
-        }
-      }
-    }
-  };
-
-  const handleCurrency = (data, name, _currency, value) => {
-    if (data.isMulitFormula) {
-      handleMulitFormula(data, {
-        [name + "_" + _currency.toLowerCase()]: value,
-      });
-    }
-    let indexCurrency = data.currency.indexOf(_currency);
-    if (indexCurrency >= 0) {
-      for (var x_currency in data.currencyoption[indexCurrency]) {
-        if (
-          data.displayCurrency.includes(x_currency) &&
-          x_currency !== _currency
-        ) {
-          let _fieldName = name + "_" + x_currency.toLowerCase();
-          let calValue = value * data.currencyoption[indexCurrency][x_currency];
-          calValue = formatDecimal(calValue, 2);
-          setFieldValue(_fieldName, calValue);
-          handleFormula(_fieldName, calValue, {});
-        }
-      }
-    }
-  };
-
-  const handleCurrencyConverter = (data, name, _currency, _unit, value) => {
-    if (data.isMulitFormula) {
-      handleMulitFormula(data, {
-        [name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]:
-          value,
-      });
-    }
-    let indexConverter = data.units.indexOf(_unit);
-    let indexCurrency = data.currency.indexOf(_currency);
-    if (indexConverter >= 0 && indexCurrency >= 0) {
-      for (var x_unit in data.option[indexConverter]) {
-        for (var x_currency in data.currencyoption[indexCurrency]) {
-          if (
-            data.displayUnits.includes(x_unit) &&
-            data.displayCurrency.includes(x_currency)
-          ) {
-            if (x_currency === _currency && x_unit === _unit) {
-            } else if (x_currency !== _currency && x_unit === _unit) {
-              let calValue =
-                value * data.currencyoption[indexCurrency][x_currency];
-              calValue = formatDecimal(calValue, 2);
-              setFieldValue(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue
-              );
-              handleFormula(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue,
-                {}
-              );
-            } else {
-              let calValue = value * data.option[indexConverter][x_unit];
-              calValue =
-                calValue * data.currencyoption[indexCurrency][x_currency];
-              calValue = formatDecimal(calValue, 2);
-              setFieldValue(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue
-              );
-              handleFormula(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue,
-                {}
-              );
-            }
-          }
-        }
-      }
-    }
-  };
-
   const handleAddDisplayType = (displayType, field, displayValue) => {
+
     if (displayType === "currency") {
-      if (field.isConverter) {
-        let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
-        field.displayCurrency.push(displayValue)
-        handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
-      }
-      else {
-        let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
-        field.displayCurrency.push(displayValue)
-        handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
-      }
+      field.displayCurrency.push(displayValue)
     }
     else if (displayType === "converter") {
-      let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
       field.displayUnits.push(displayValue)
-      handleConverter(field, field.fieldName, field.displayUnits[0], values[_fieldName])
     }
-    else if (displayType === "currencyConverter") {
+
+    if (field.type !== 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
+      let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
+      handleConverterChange(field.fieldName, field.displayUnits[0], values[_fieldName])
+    } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
       let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
-      if (displayValue.currency) {
-        field.displayCurrency.push(displayValue.currency)
-      }
-      if (displayValue.unit) {
-        field.displayUnits.push(displayValue.unit)
-      }
-      handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+      handleCurrencyChangeWithConverterChange(field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName])
+    }
+    else if (field.type === 'currencyAmount') {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+      handleCurrencyChange(field.fieldName, field.displayCurrency[0], values[_fieldName])
     }
     if (addDisplayType) {
       addDisplayType(displayType, field, displayValue)
     }
     setIsExtraDispayType(false)
+
+    // if (displayType === "currency") {
+    //   if (field.isConverter) {
+    //     let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+    //     field.displayCurrency.push(displayValue)
+    //     handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    //   }
+    //   else {
+    //     let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+    //     field.displayCurrency.push(displayValue)
+    //     handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
+    //   }
+    // }
+    // else if (displayType === "converter") {
+    //   let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
+    //   field.displayUnits.push(displayValue)
+    //   handleConverter(field, field.fieldName, field.displayUnits[0], values[_fieldName])
+    // }
+    // else if (displayType === "currencyConverter") {
+    //   let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+    //   if (displayValue.currency) {
+    //     field.displayCurrency.push(displayValue.currency)
+    //   }
+    //   if (displayValue.unit) {
+    //     field.displayUnits.push(displayValue.unit)
+    //   }
+    //   handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    // }
   }
 
   const handleRemoveDisplayType = (displayType, field, displayValue) => {
@@ -1046,7 +824,7 @@ const FormTypes = (props) => {
             <Box>
               <Tooltip title="Add Converter" className="mt-1">
                 <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                  <ControlPointIcon />
+                  <SwapHorizIcon />
                 </IconButton>
               </Tooltip>
               {isExtraDispayType && <AddDisplayTypeDialog
@@ -1161,17 +939,23 @@ const FormTypes = (props) => {
               </Box>
               {(i === 0 && j === 0) &&
                 <Box>
-                  <Tooltip title="Add Currency / Converter" className="mt-1">
-                    <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                      <ControlPointIcon />
+                  <Tooltip title="Add Currency" className="mt-1">
+                    <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("currency") }} color="primary" size="small"  >
+                      <AttachMoneyIcon />
                     </IconButton>
                   </Tooltip>
+                  {fieldData.displayUnits.length !== fieldData.units.length &&
+                    <Tooltip title="Add Converter" className="mt-1">
+                      <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("converter") }} color="primary" size="small"  >
+                        <SwapHorizIcon />
+                      </IconButton>
+                    </Tooltip>}
                   {isExtraDispayType &&
                     <AddDisplayTypeDialog
                       handleAddDisplayType={handleAddDisplayType}
-                      displayType="currencyConverter"
+                      displayType={displayType}
                       fieldData={fieldData}
-                      handleClose={() => setIsExtraDispayType(false)} />}
+                      handleClose={() => { setIsExtraDispayType(false); setDisplayType(null) }} />}
                 </Box>
               }
               {(i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
@@ -1255,9 +1039,8 @@ const FormTypes = (props) => {
               <Box>
                 <Tooltip title="Add Currency" className="mt-1">
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                    <ControlPointIcon />
+                    <AttachMoneyIcon />
                   </IconButton>
-
                 </Tooltip>
                 {isExtraDispayType &&
                   <AddDisplayTypeDialog
