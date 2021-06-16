@@ -7,6 +7,8 @@ import CopyToClipboard from '../components/Helpers/CopyToClipboard'
 import { FcApproval } from 'react-icons/fc';
 import routes from "./Helpers/Routes";
 import { Link } from "react-router-dom";
+import { FiCheckCircle } from 'react-icons/fi'
+import { AiOutlineCloseCircle } from "react-icons/ai"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,10 +33,16 @@ const useStyles = makeStyles((theme) => ({
   skeleton: {
     marginRight: "10px",
   },
+  qualified: {
+    color: theme.palette.success.dark
+  },
+  unQulified: {
+    color: theme.palette.error.dark
+  }
 }));
 
 const DetailsPageHeader = (props) => {
-  const { mainPoints, heading, children, showHeading, loading, isApproved } = props;
+  const { mainPoints, heading, children, showHeading, loading, isApproved, leadStatus } = props;
 
   const classes = useStyles();
   return (
@@ -53,9 +61,20 @@ const DetailsPageHeader = (props) => {
                   component="h2"
                   color="primary"
                 >
-                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}</span> {
-                    isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
-                  }</span>
+                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}
+                  </span>
+                    {
+                      isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
+                    }
+                    {
+                      leadStatus ?
+                        <>
+                          {leadStatus === "Qualified" ? <FiCheckCircle title={leadStatus} className={classes.qualified} color="green" /> :
+                            leadStatus === "Unqualified" ? <AiOutlineCloseCircle title={leadStatus} className={classes.unQulified} /> : ""}
+                        </>
+                        : null
+                    }
+                  </span>
                 </Typography>
               </>
             ) : null}
@@ -146,7 +165,8 @@ DetailsPageHeader.propTypes = {
   logo: PropTypes.any,
   mainPoints: PropTypes.any,
   showHeading: PropTypes.any,
-  isApproved: PropTypes.any
+  isApproved: PropTypes.any,
+  leadStatus: PropTypes.string
 };
 
 export default DetailsPageHeader;

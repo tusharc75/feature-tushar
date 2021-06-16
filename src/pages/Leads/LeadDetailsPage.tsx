@@ -301,6 +301,7 @@ const LeadDetailsPage = () => {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
+                  leadStatus={leadData?.process ?? ""}
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
@@ -421,15 +422,17 @@ const LeadDetailsPage = () => {
           </Grid>
         </Grid>
 
-        {convertLeadToOpportunityConfirmationDialog.open ? (
-          <ConfirmationDialog
-            open={convertLeadToOpportunityConfirmationDialog.open}
-            message={convertLeadToOpportunityConfirmationDialog.message}
-            onClose={() => setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null, })}
-            onOk={convertLeadToOpportunity}
-          />
-        ) : null}
-      </Layout>
+        {
+          convertLeadToOpportunityConfirmationDialog.open ? (
+            <ConfirmationDialog
+              open={convertLeadToOpportunityConfirmationDialog.open}
+              message={convertLeadToOpportunityConfirmationDialog.message}
+              onClose={() => setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null, })}
+              onOk={convertLeadToOpportunity}
+            />
+          ) : null
+        }
+      </Layout >
     </>
   );
 };

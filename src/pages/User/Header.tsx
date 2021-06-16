@@ -128,7 +128,7 @@ const Header = (props) => {
                         closeActions();
                       }}
                     >
-                      Assign company wide roles
+                      Assign Company Wide Roles
                     </MenuItem>
                     <MenuItem
                       disabled={rolesActionDisabled}
@@ -137,7 +137,7 @@ const Header = (props) => {
                         closeActions();
                       }}
                     >
-                      Assign region wide functional roles
+                      Assign Region Wide Functional Roles
                     </MenuItem>
                     <MenuItem
                       disabled={rolesActionDisabled}

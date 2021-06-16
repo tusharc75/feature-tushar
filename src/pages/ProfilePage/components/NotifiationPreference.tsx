@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Grid, Box, Checkbox, FormControlLabel, Typography } from '@material-ui/core'
+import { useContext, useEffect, useState } from 'react'
+import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -9,6 +9,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { BsEnvelopeOpen, BsPhone, BsDisplay } from 'react-icons/bs'
 import styles from "../profilePage.module.scss"
+import DetailsPageHeader from '../../../components/DetailsPageHeader';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
 
 const useStyles = makeStyles((theme) => ({
     tableCell: {
@@ -26,12 +29,6 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: "1px"
     }
 }));
-
-let notificationPreferenceTitles = ['Activity in all unassigned conversation', 'Activity in any of your Teams',
-    'Activity in conversations assigned to other teams or teammates', 'Any mentions of you in a conversation',
-    'Activity on conversation started from messages you sent', 'Activity in anything assigned to you',
-    'New conversation with Leads and users you own'
-]
 
 const RenderCheckBox = ({ name, val, id, onChange }) => (
     // <FormControlLabel
@@ -60,23 +57,16 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
     </Grid>
 )
 
-export default function NotifiationPreference(props) {
+export default function NotifiationPreference({ notifiationPreferenceData, user, onSuccess }) {
 
-    const [rows, setRows] = useState([])
+    const toastConfig = useContext(CustomToastContext);
+    const [rows, setRows] = useState(notifiationPreferenceData)
+    const [isUpdating, setUpdating] = useState(false);
     const [isAllPreference, setAllPreference] = useState({
-        desktop: false,
-        mobile: false,
-        email: false
+        portal: notifiationPreferenceData.every(d => d.portal),
+        email: notifiationPreferenceData.every(d => d.email)
     })
     const classes = useStyles();
-
-    useEffect(() => {
-        let rows = notificationPreferenceTitles.map((str, i) => {
-            return { id: "preference" + i, title: str, desktop: false, mobile: false, email: false }
-        })
-        setRows(rows)
-    }, [])
-
     const handleChange = (isChecked, id, columnName) => {
         let tempRows = rows.map(obj => {
             if (obj.id === id) return { ...obj, [columnName]: isChecked }
@@ -101,15 +91,9 @@ export default function NotifiationPreference(props) {
     const options = [
         {
             icon: <BsDisplay size={60} className={classes.notificationIcon} />,
-            heading: "Desktop",
-            subtitle: "A banner in corner of your screen",
-            id: "Desktop1"
-        },
-        {
-            icon: <BsPhone size={60} className={classes.notificationIcon} />,
-            heading: "Mobile",
-            subtitle: "A Notification on your phone",
-            id: "Mobil2"
+            heading: "Portal",
+            subtitle: "A banner in corner of your website",
+            id: "Portal"
         },
         {
             icon: <BsEnvelopeOpen size={50} className={classes.notificationIcon} />,
@@ -118,6 +102,32 @@ export default function NotifiationPreference(props) {
             id: "Email3"
         }
     ]
+
+    const updateNotificationPref = () => {
+        setUpdating(true);
+        let dataObj = {
+            _id: user,
+            notificationPref: rows
+        }
+
+
+        axiosInstance()
+            .put(`/user/notification`, dataObj)
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
+                onSuccess();
+                setUpdating(false);
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                setUpdating(false);
+            });
+    }
+
     return <>
         <div className={styles.preferenceHeader}>
             <Typography variant="h5">Your Notification Preference</Typography>
@@ -143,6 +153,18 @@ export default function NotifiationPreference(props) {
                     }
                 </Grid>
             </Box>
+            <DetailsPageHeader heading={""} showHeading={true}>
+                <Button
+                    disabled={isUpdating}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => { updateNotificationPref() }}
+                >
+                    {isUpdating ? <CircularProgress size={22} /> : "Update"}
+                </Button>
+
+            </DetailsPageHeader>
             <TableContainer component={Paper}>
                 <Table>
                     <TableRow>
@@ -152,22 +174,16 @@ export default function NotifiationPreference(props) {
                             <FormControlLabel
                                 className={classes.label}
                                 control={<Checkbox
-                                    onChange={() => handleSelectAll("desktop")} title="Desktop" />}
-                                label="Desktop"
+                                    checked={isAllPreference.portal}
+                                    onChange={() => handleSelectAll("portal")} title="Portal" />}
+                                label="Portal"
                             />
                         </TableCell>
                         <TableCell padding="checkbox">
                             <FormControlLabel
                                 className={classes.label}
                                 control={<Checkbox
-                                    onChange={() => handleSelectAll("mobile")} title="Mobile" />}
-                                label="Mobile"
-                            />
-                        </TableCell>
-                        <TableCell padding="checkbox">
-                            <FormControlLabel
-                                className={classes.label}
-                                control={<Checkbox
+                                    checked={isAllPreference.email}
                                     onChange={() => handleSelectAll("email")} title="Email" />}
                                 label="Email"
                             />
@@ -177,14 +193,10 @@ export default function NotifiationPreference(props) {
                         {rows.map((row) => (
                             <TableRow key={row?.id}>
                                 <TableCell component="th" scope="row" className={classes.tableCell}>
-                                    {row.title}
+                                    {row.name}
                                 </TableCell>
                                 <TableCell padding="checkbox" align="left">
-                                    <RenderCheckBox name="desktop" val={row.desktop} id={row.id} onChange={handleChange} />
-                                </TableCell>
-                                <TableCell padding="checkbox" align="left">
-                                    <RenderCheckBox name="mobile" val={row.mobile}
-                                        onChange={handleChange} id={row.id} />
+                                    <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} />
                                 </TableCell>
                                 <TableCell padding="checkbox" align="left">
                                     <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} /></TableCell>

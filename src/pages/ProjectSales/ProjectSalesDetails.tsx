@@ -134,7 +134,10 @@ const ProjectSalesDetails = () => {
       let modifiedData: any = {};
       Object.assign(modifiedData, data);
 
-      modifiedData["amount"] = formatAmountWithCurrency(modifiedData.currency, modifiedData.amount).shortFormatAmount
+      modifiedData["amount"] = formatAmountWithCurrency(
+        modifiedData.currency,
+        modifiedData.amount
+      ).shortFormatAmount;
 
       setCopyOfProjectSalesData(modifiedData);
 
@@ -163,7 +166,9 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["Amount"]: formatAmountWithCurrency(data.currency, data.amount).shortFormatAmount || "",
+      ["Amount"]:
+        formatAmountWithCurrency(data.currency, data.amount)
+          .shortFormatAmount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
@@ -371,7 +376,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -393,8 +398,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                    !projectSalesFields.length ||
-                    !projectSalesData ? (
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -439,8 +444,9 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${node.id
-                                    }`,
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
                                 });
                               }
                             }}
@@ -464,7 +470,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -523,8 +529,28 @@ const ProjectSalesDetails = () => {
                       referenceId: id,
                       access: true,
                     },
+                    ...opportunities?.map((op) => ({
+                      type: "opportunity",
+                      referenceId: op._id,
+                      access: true,
+                    })),
+                    ...customerAccounts?.map((ca) => ({
+                      type: "customerAccount",
+                      referenceId: ca._id,
+                      access: true,
+                    })),
+                    ...customerContacts?.map((cc) => ({
+                      type: "customerContact",
+                      referenceId: cc._id,
+                      access: true,
+                    })),
+                    ...quotes?.map((q) => ({
+                      type: "quote",
+                      referenceId: q._id,
+                      access: true,
+                    })),
                   ]}
-                  handleActivityRefresh={() => { }}
+                  handleActivityRefresh={() => {}}
                   emails={[]}
                 />
               </div>
@@ -556,8 +582,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-                : ""
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
