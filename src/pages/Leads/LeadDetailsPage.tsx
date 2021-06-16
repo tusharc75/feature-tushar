@@ -345,6 +345,7 @@ const LeadDetailsPage = () => {
               )}
 
               <LeadOpportunityProcess
+                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
                 steps={steps}
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
