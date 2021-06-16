@@ -478,11 +478,12 @@ const User: FC = () => {
       )}
       {doaDialogOpen && (
         <DoaDialog
-          userList={userList}
+          userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
           doa={[]}
           doaCurrency={null}
           userSelected={selectedRecords.map((d) => d._id)}
           open={doaDialogOpen}
+          from={"UserListPage"}
           onSuccess={handleDOACloseDialog}
           onClose={handleDOACloseDialog}
         />
