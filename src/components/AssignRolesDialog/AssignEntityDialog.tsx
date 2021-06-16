@@ -319,6 +319,7 @@ const AssignEntityDialog = ({
           onClick={handleAssignEntity}
           color="primary"
           size="small"
+          variant="contained"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

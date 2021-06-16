@@ -23,7 +23,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { camelCase } from "./../../../constants/helpers";
-import { Vlokup } from "./vlokup";
+import { Vlookup } from "./vlookup";
 import { Formula } from "./formula";
 import { Converter } from "./converter";
 import { Currency } from "./currency";
@@ -231,7 +231,7 @@ export const AddField = (props) => {
               onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
             />
 
-            {(values["type"] === "decimal" || values["type"] === "formula") &&
+            {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
               <Grid spacing={3} container>
                 {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
                   <FormControl fullWidth margin="dense" variant="outlined">
@@ -251,7 +251,7 @@ export const AddField = (props) => {
                   </FormControl>
                 </Grid>
                 }
-                {(values["type"] === "decimal" || values["returnType"] === "decimal") &&
+                {(values["type"] === "decimal" || values["type"] === "converter" || values["returnType"] === "decimal") &&
                   <Grid item xs={12} sm={6} md={6}>
                     <FormControl fullWidth margin="dense" variant="outlined">
                       <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
@@ -298,13 +298,15 @@ export const AddField = (props) => {
               fields={new_fields}
               values={values}
               setFieldValue={setFieldValue}
+              _id={fieldData._id}
             />}
 
             {values["type"] === "vlookupDropdown" &&
-              <Vlokup
+              <Vlookup
                 fields={new_fields}
                 values={values}
                 setFieldValue={setFieldValue}
+                _id={fieldData._id}
               />}
 
             {values["type"] === "currencyAmount" &&

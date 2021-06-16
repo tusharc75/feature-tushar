@@ -182,35 +182,24 @@ const CreateProduct = (props) => {
             else if (displayType === "converter") {
                 _fieldChanges.push({ fieldName: field.fieldName, displayUnits: [displayValue] })
             }
-            else if (displayType === "currencyConverter") {
-                let insertData: any = {}
-                insertData.fieldName = field.fieldName;
-                insertData.displayCurrency = []
-                insertData.displayUnits = []
-                if (displayValue.currency) {
-                    insertData.displayCurrency.push(displayValue.currency);
-                }
-                if (displayValue.unit) {
-                    insertData.displayUnits.push(displayValue.unit);
-                }
-                _fieldChanges.push(insertData)
-            }
         }
         else {
             _fieldChanges.forEach(_f => {
                 if (_f.fieldName === field.fieldName) {
                     if (displayType === "currency") {
-                        _f.displayCurrency.push(displayValue);
+                        if (_f.displayCurrency) {
+                            _f.displayCurrency.push(displayValue);
+                        }
+                        else {
+                            _f.displayCurrency = [displayValue];
+                        }
                     }
                     else if (displayType === "converter") {
-                        _f.displayUnits.push(displayValue);
-                    }
-                    else if (displayType === "currencyConverter") {
-                        if (displayValue.currency) {
-                            _f.displayCurrency.push(displayValue.currency);
+                        if (_f.displayUnits) {
+                            _f.displayUnits.push(displayValue);
                         }
-                        if (displayValue.unit) {
-                            _f.displayUnits.push(displayValue.unit);
+                        else {
+                            _f.displayUnits = [displayValue];
                         }
                     }
                 }
