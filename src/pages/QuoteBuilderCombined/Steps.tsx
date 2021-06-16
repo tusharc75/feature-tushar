@@ -26,6 +26,7 @@ import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
+import { getObjKeysWithValues } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -128,6 +129,8 @@ const Steps = (props) => {
     reminderLoading = false,
     hideReminderButton = false,
     openInvoiceDialog,
+    quoteData,
+    invoiceFields,
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -246,6 +249,9 @@ const Steps = (props) => {
       });
   };
 
+  const isNewInvoice =
+    Object.values(getObjKeysWithValues(quoteData, invoiceFields)).length === 0;
+
   return (
     <div className={classes.root}>
       <div className="position-relative">
@@ -323,7 +329,7 @@ const Steps = (props) => {
                 </Typography>
 
                 <Button onClick={openInvoiceDialog}>
-                  Fill Invoice Information
+                  {isNewInvoice ? "Fill" : "Update"} Invoice Information
                 </Button>
               </div>
             )}
