@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import axios from 'axios'
 import { couldStartTrivia } from "typescript";
+import { backendApi } from './../../config';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -49,17 +50,14 @@ const QuoteApproval = () => {
     const [sellingPrice, setSellingPrice] = useState(0);
     const[currency,setCurrency]=useState("");
 
-    const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com"
     useEffect(() => {
         fetchQuote()
     }, []);
 
-
     //to fetch Quote Data from QuoteID 
     const fetchQuote = () => {
-        //const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
 
-        axios.get(baseURL + "/quote-builder/getQuotefromId/" + id+location)
+        axios.get(backendApi + "/quote-builder/getQuotefromId/" + id+location)
             .then(({ data }) => {
                 console.log(data);
                 if (data.Quote_Status === "Sent to Customer") {
@@ -89,7 +87,7 @@ const QuoteApproval = () => {
         else {
             body.status = "Rejected by Customer";
         }
-        axios.post(baseURL + "/quote-builder/updateStatusfromCustomer/" + id+location, body)
+        axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id+location, body)
             .then(({ data }) => {
                 setReplied(true);
             })

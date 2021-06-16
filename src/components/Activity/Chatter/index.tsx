@@ -13,6 +13,7 @@ import io from "socket.io-client";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { backendApi } from './../../../config';
 
 const useStyles = makeStyles((theme) => ({
   messageBubble: {
@@ -82,7 +83,7 @@ const Chatter = (props) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const s = io("https://oms-backend.vebholic.com/chatter", {
+    const s = io(`${backendApi}/chatter`, {
       auth: {
         token,
       },

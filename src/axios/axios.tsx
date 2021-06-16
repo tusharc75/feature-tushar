@@ -1,10 +1,11 @@
 import axios from "axios";
-const BASE_URL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
+import { backendApi } from './../config';
+
 const axiosAPI = () => {
     const token = localStorage.getItem("token");
 
     return axios.create({
-        baseURL: BASE_URL,
+        baseURL: backendApi,
         headers: { Authorization: `Bearer ${token}` },
     });
 };
