@@ -149,7 +149,7 @@ const AssignEntityDialog = ({
       case 0:
         return <List style={{ padding: 0 }}>
 
-          <ListItem divider>
+          {/* <ListItem divider>
             <ListItemIcon>
               <Checkbox
                 edge="start"
@@ -172,7 +172,7 @@ const AssignEntityDialog = ({
               />
             </ListItemIcon>
             <ListItemText primary="Select all" />
-          </ListItem>
+          </ListItem> */}
 
           {data.map((d) => (
             <ListItem divider key={d._id}>
