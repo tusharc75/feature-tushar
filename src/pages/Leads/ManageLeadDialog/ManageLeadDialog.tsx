@@ -269,7 +269,20 @@ export default function ManageLeadDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={ownerData}
-                                        setFieldValue={setFieldValue}
+                                        onChange={(e, val) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            val && val.optionValue ? val.optionValue : ""
+                                          );
+
+                                          if (val && val.optionValue !== user?.user?._id) {
+                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
+                                            if (!checkOwnerAddedInCollaborator) {
+                                              setFieldValue("collaborator",
+                                                [...values["collaborator"], collaboratorData.find(d => d.optionValue === user?.user?._id).optionValue])
+                                            }
+                                          }
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={true}

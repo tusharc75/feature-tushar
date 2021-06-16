@@ -57,20 +57,24 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
     </Grid>
 )
 
-export default function NotifiationPreference({ notifiationPreferenceData, user, onSuccess }) {
+export default function NotificationPreference({ notificationPreferenceData, user, onSuccess }) {
 
     const toastConfig = useContext(CustomToastContext);
-    const [rows, setRows] = useState(notifiationPreferenceData)
+    const [rows, setRows] = useState(notificationPreferenceData)
     const [isUpdating, setUpdating] = useState(false);
     const [isAllPreference, setAllPreference] = useState({
-        portal: notifiationPreferenceData.every(d => d.portal),
-        email: notifiationPreferenceData.every(d => d.email)
+        portal: notificationPreferenceData.every(d => d.portal),
+        email: notificationPreferenceData.every(d => d.email)
     })
     const classes = useStyles();
     const handleChange = (isChecked, id, columnName) => {
         let tempRows = rows.map(obj => {
             if (obj.id === id) return { ...obj, [columnName]: isChecked }
             else return obj
+        })
+        setAllPreference({
+            portal: tempRows.every(d => d.portal),
+            email: tempRows.every(d => d.email)
         })
         setRows(tempRows)
     }
@@ -170,7 +174,7 @@ export default function NotifiationPreference({ notifiationPreferenceData, user,
                     <TableRow>
                         <TableCell component="th" scope="row" className={classes.tableCell}>
                         </TableCell>
-                        <TableCell padding="checkbox" >
+                        <TableCell padding="checkbox">
                             <FormControlLabel
                                 className={classes.label}
                                 control={<Checkbox
@@ -195,10 +199,10 @@ export default function NotifiationPreference({ notifiationPreferenceData, user,
                                 <TableCell component="th" scope="row" className={classes.tableCell}>
                                     {row.name}
                                 </TableCell>
-                                <TableCell padding="checkbox" align="left">
+                                <TableCell padding="checkbox" align="center">
                                     <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} />
                                 </TableCell>
-                                <TableCell padding="checkbox" align="left">
+                                <TableCell padding="checkbox" align="center">
                                     <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} /></TableCell>
                             </TableRow>
                         ))}
