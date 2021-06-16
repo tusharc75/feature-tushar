@@ -11,11 +11,12 @@ export default function LeadOpportunityProcess(props) {
         disableBackNext = false
     } = props
 
+
     return <>
         {
             steps.length > 0 &&
-            <div className="stepper-box">
-                <div className="mainview">
+            <div className="stepper-box" style={{ paddingBottom: (activeStep < (steps.length - 1)) ? "" : "10px" }} >
+                <div className="mainview" >
                     <CustomSteps steps={steps} active={activeStep} />
                 </div>
                 {
