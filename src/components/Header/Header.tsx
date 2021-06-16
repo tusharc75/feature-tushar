@@ -40,6 +40,7 @@ import { FiCheckCircle } from "react-icons/fi";
 import { displayCardDate } from "../../constants/helpers";
 import ChatIcon from "@material-ui/icons/Chat";
 import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import { backendApi } from "../../config";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -267,7 +268,7 @@ const Header = ({ toggleDrawer }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const s = io("https://oms-backend.vebholic.com/user", {
+    const s = io(`${backendApi}/user`, {
       auth: {
         token,
       },
