@@ -695,8 +695,8 @@ body::-webkit-scrollbar-thumb {
     display: flex;
     flex-direction: column;
     align-items: center;
-    grid-row-gap: 6px;
-    row-gap: 6px;
+    grid-row-gap: 1px;
+    row-gap: 1px;
     border-right: 1px solid #c3bdbd;
   // display: flex;
   // align-items: center;
@@ -718,7 +718,7 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   flex-direction: column;
   align-items: center;
-  row-gap: 6px;
+  row-gap: 1px;
   border-right: 1px solid #c3bdbd;
   // display: flex;
   // align-items: center;
