@@ -1901,7 +1901,7 @@ function QuoteDetail() {
                     </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
-                    {copyOfquoteData ? (
+                    {ifQuoteApproved().approved && copyOfquoteData ? (
                       <DetailsPage
                         data={copyOfquoteData}
                         fields={quoteFields.filter(
@@ -2054,6 +2054,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            
                           />
                         ) : (
                           <Steps
@@ -2072,6 +2073,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                           
                           />
                         )}
                       </div>
@@ -2413,6 +2415,7 @@ function QuoteDetail() {
             disableOwnerDropDown={true}
             disableCurrency={true}
             quoteApproved={ifQuoteApproved().approved}
+            forInvoice={true}
           />
         )}
 

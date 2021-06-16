@@ -24,7 +24,7 @@ import {
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, Link } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -121,6 +121,7 @@ const UserDetailsPage = () => {
       fetchDoa();
       fetchUsers()
       fetchUserRelatedDetail()
+      setCurrentTabIndex(0);
     }
     // eslint-disable-next-line
   }, [id]);
@@ -540,24 +541,37 @@ const UserDetailsPage = () => {
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
+                      {
+                        userData?.proxyDOA && <Tab
+                          label="DOA Proxy"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      }
                     </Tabs>
                     <Box hidden={currentTabIndex !== 0}>
                       <DetailsPage data={userData} fields={userFields} />
-                      {userData?.proxyDOA ?
-                        <>
-                          <div className="detail-box">
-                            <h3 className="form-label-style" title="DOA Proxy">
-                              DOA Proxy
-                            </h3>
-                            <Grid container>
-                            </Grid>
-                          </div>
+                    </Box>
+
+                    <Box hidden={currentTabIndex !== 1}>
+                      <OrgChartContainer data={orgChartData} onClick={(id) => {
+                        history.push(`${routes.userDetail.path}/${id}`)
+                      }} />
+                    </Box>
+
+
+                    {
+                      userData?.proxyDOA && <Box hidden={currentTabIndex !== 2}>
+                        {/* <div className="detail-box"> */}
+                          {/* <h3 className="form-label-style" title="DOA Proxy">
+                            DOA Proxy
+                          </h3> */}
 
                           <TableContainer>
-                            <Table aria-label="DOA Proxy Table">
+                            <Table aria-label="DOA Proxy Table" size="small">
                               <TableHead>
                                 <TableRow>
-                                  <TableCell align="center">
+                                  <TableCell>
                                     <h4
                                       title="assignedTo"
                                       className={classes.detailLabel}
@@ -587,8 +601,8 @@ const UserDetailsPage = () => {
                               </TableHead>
                               <TableBody>
                                 <TableRow key={userData.proxyDOA.user}>
-                                  <TableCell align="center">
-                                    <span className={classes.dataValue}>{userData.proxyDOA.optionLabel}</span>
+                                  <TableCell>
+                                    <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>{userData.proxyDOA.optionLabel}</Link>
                                   </TableCell>
                                   <TableCell align="center">
                                     <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
@@ -600,14 +614,10 @@ const UserDetailsPage = () => {
                               </TableBody>
                             </Table>
                           </TableContainer>
-                        </> : null
-                      }
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer data={orgChartData} onClick={(id) => {
-                        history.push(`${routes.userDetail.path}/${id}`)
-                      }} />
-                    </Box>
+
+                        {/* </div> */}
+                      </Box>
+                    }
                   </>
                 )}
               </Box>

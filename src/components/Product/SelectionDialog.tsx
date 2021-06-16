@@ -33,7 +33,7 @@ const SelectionDialog = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
-    const [productTemplate, setProductTemplate] = useState([{optionLabel: "Standard", optionValue: "Standard"}]);
+    const [productTemplate, setProductTemplate] = useState([]);
 
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     // const [productCategory, setProductCategory] = useState([]);
@@ -47,6 +47,12 @@ const SelectionDialog = (props) => {
             }));
             setProductCategory(data.data)
         });
+        axiosInstance().get(`/product-template/template/standard`).then(({ data:{data} }) => {
+            setProductTemplate(data.data)
+            if (data.data.length) {
+                setInitialData({...initialData, productTemplate: data.data[0].optionValue })
+            }
+        });
     }, []);
     const handleChangeCategory = (value) => {
         if (value && value !== "") {
@@ -57,7 +63,12 @@ const SelectionDialog = (props) => {
                 }
             });
         }else{
-            setProductTemplate([{optionLabel: "Standard", optionValue: "Standard"}])
+            axiosInstance().get(`/product-template/template/standard`).then(({ data:{data} }) => {
+                setProductTemplate(data.data)
+                if (data.data.length) {
+                    setInitialData({...initialData, productTemplate: data.data[0].optionValue })
+                }
+            });
         }
     }
 
@@ -214,8 +225,6 @@ const SelectionDialog = (props) => {
                                         required={true}
                                         fullWidth
                                         onChange={(e, val) => {
-                                            console.log(productTemplate);
-                                            
                                             setFieldValue("productTemplate", val && val.optionValue ? val.optionValue : "")
                                         }}
                                         size="small"

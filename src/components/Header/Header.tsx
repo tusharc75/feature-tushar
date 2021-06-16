@@ -284,8 +284,8 @@ const Header = ({ toggleDrawer }) => {
       });
 
       socket.on("data", (data) => {
-        console.log(data);
         setChatNotificationList(data);
+        chatNotification.setCount(chatNotification.count + 1);
       });
     }
     return () => {
@@ -301,7 +301,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingChatNotifications(true);
 
     axiosInstance()
-      .get("/user/notification")
+      .get("/user/user-notification")
       .then(({ data: { data } }) => {
         setChatNotificationList(data);
         setLoadingChatNotifications(false);
@@ -336,7 +336,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingChatNotifications(true);
 
     await axiosInstance()
-      .get("/user/notification")
+      .get("/user/user-notification")
       .then(({ data: { data } }) => {
         setChatNotificationList(data);
         setLoadingChatNotifications(false);
@@ -525,6 +525,7 @@ const Header = ({ toggleDrawer }) => {
                 }
 
                 handleFullScreenNotificationClose();
+                handleMobileScreenNotificationClose();
 
                 if (d?.entity) {
                   handleSelectedEnity(d.entity);
@@ -613,7 +614,7 @@ const Header = ({ toggleDrawer }) => {
               onClick={() => {
                 if (d.read == false) {
                   axiosInstance()
-                    .put("/user/notification/read", {
+                    .put("/user/user-notification/read", {
                       toggle: true,
                       notificationId: d.notificationId,
                     })
@@ -623,7 +624,8 @@ const Header = ({ toggleDrawer }) => {
                     });
                 }
 
-                handleFullScreenNotificationClose();
+                handleFullScreenChatNotificationClose();
+                handleMobileScreenChatNotificationClose();
 
                 if (d?.entity) {
                   handleSelectedEnity(d.entity);
@@ -651,23 +653,23 @@ const Header = ({ toggleDrawer }) => {
           <Typography
             onClick={() => {
               axiosInstance()
-                .put("/user/notification/all-read", { toggle: true })
+                .put("/user/user-notification/all-read", { toggle: true })
                 .then(({ data }) => {
                   let updatedNotificationList = [];
-                  notificationList.map((notification) => {
+                  chatNotificationList.map((notification) => {
                     notification.read = true;
                     updatedNotificationList.push(notification);
                   });
 
-                  setNotificationList(updatedNotificationList);
+                  setChatNotificationList(updatedNotificationList);
                   toastConfig.setToastConfig({
                     open: true,
                     message: data.message,
                     type: "success",
                   });
 
-                  setFullScreenNotificationAnchorEl(null);
-                  setMobileScreenNotificationAnchorEl(null);
+                  setFullScreenChatNotificationAnchorEl(null);
+                  setMobileScreenChatNotificationAnchorEl(null);
                 })
                 .catch((error) => {
                   toastConfig.setToastConfig(error);

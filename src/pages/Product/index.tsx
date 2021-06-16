@@ -30,6 +30,7 @@ import {
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 
+const ignoreField = ["qty"]
 
 const Product = () => {
 
@@ -72,7 +73,9 @@ const Product = () => {
             let column = []
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {
-                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                    if (ignoreField.includes(ele.fieldName)) {
+                    }
+                    else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                             ele.displayUnits.forEach((_unit) => {
                                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
