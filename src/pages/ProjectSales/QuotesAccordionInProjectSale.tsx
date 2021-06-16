@@ -21,6 +21,7 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import TrendingUpOutlinedIcon from "@material-ui/icons/TrendingUpOutlined";
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import axiosInstance from "../../axios/axiosInstance";
 import { Link } from "react-router-dom";
@@ -302,7 +303,7 @@ export default function QuotesAccordionInProjectSale({
                                     ""
                                   )}
                                   {(permissions.isUpdate && isTeamMember) ||
-                                  isManager ? (
+                                    isManager ? (
                                     <>
                                       <Box ml={1} />
                                       <IconButton
@@ -323,16 +324,26 @@ export default function QuotesAccordionInProjectSale({
 
                             <Grid container>
                               <Grid item xs={12} sm={6} md={6}>
-                                {obj.closeDate ? (
+                                {obj.expiryDate ? (
                                   <DisplayData
                                     key={i}
                                     label="Closing Date"
-                                    value={displayDate(obj.closeDate)}
+                                    value={displayDate(obj.expiryDate)}
                                     icon={<IoCalendarOutline size={15} />}
                                   />
                                 ) : (
                                   ""
                                 )}
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={6}>
+                                {
+                                  obj.incoTerms ? (
+                                    <DisplayData
+                                      key={i} label='Inco Terms'
+                                      value={obj.incoTerms}
+                                      icon={< BusinessOutlinedIcon />}
+                                    />) : ''
+                                }
                               </Grid>
                               <Grid item xs={12} sm={6} md={6}>
                                 {obj.probability ? (
