@@ -57,14 +57,14 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
     </Grid>
 )
 
-export default function NotifiationPreference({ notifiationPreferenceData, user, onSuccess }) {
+export default function NotificationPreference({ notificationPreferenceData, user, onSuccess }) {
 
     const toastConfig = useContext(CustomToastContext);
-    const [rows, setRows] = useState(notifiationPreferenceData)
+    const [rows, setRows] = useState(notificationPreferenceData)
     const [isUpdating, setUpdating] = useState(false);
     const [isAllPreference, setAllPreference] = useState({
-        portal: notifiationPreferenceData.every(d => d.portal),
-        email: notifiationPreferenceData.every(d => d.email)
+        portal: notificationPreferenceData.every(d => d.portal),
+        email: notificationPreferenceData.every(d => d.email)
     })
     const classes = useStyles();
     const handleChange = (isChecked, id, columnName) => {
