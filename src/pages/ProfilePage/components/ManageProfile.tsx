@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles } from '@material-ui/core'
+import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles, Table, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -268,6 +268,41 @@ export default function ManageProfile(props) {
                                     : (
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
+
+
+                                <div className="detail-box">
+                                    <h3 className="form-label-style" title="DOA Proxy">
+                                        DOA Proxy
+                                    </h3>
+                                    <Grid container>
+                                    </Grid>
+                                </div>
+
+                                <TableContainer>
+                                    <Table aria-label="DOA Proxy Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Assigned To</TableCell>
+                                                <TableCell>Start Date</TableCell>
+                                                <TableCell>End Date</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        {/* <TableBody>
+                                            {rows.map((row) => (
+                                                <TableRow key={row.name}>
+                                                    <TableCell component="th" scope="row">
+                                                        {row.name}
+                                                    </TableCell>
+                                                    <TableCell align="right">{row.calories}</TableCell>
+                                                    <TableCell align="right">{row.fat}</TableCell>
+                                                    <TableCell align="right">{row.carbs}</TableCell>
+                                                    <TableCell align="right">{row.protein}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody> */}
+                                    </Table>
+                                </TableContainer>
+
                             </Box>
                         </> : null
                 }

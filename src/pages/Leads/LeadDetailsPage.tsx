@@ -19,7 +19,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
-import CustomSteps from "../../components/CustomSteps/CustomSteps";
+import LeadOpportunityProcess from "../../components/LeadOpportunityProcess"
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -75,7 +75,7 @@ const LeadDetailsPage = () => {
     if (steps.length > 0) {
       const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
       if (processSteps && processSteps.isRead && leadData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === leadData[processFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === leadData[processFieldName])
         setActiveStep(currentStepToShow);
       }
     }
@@ -228,6 +228,28 @@ const LeadDetailsPage = () => {
       });
   };
 
+  const handleMarkAsCompleted = (data) => {
+    setIsProcessing(true)
+    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep
+
+    const updatedData = {
+      ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
+      [processFieldName]: steps[tempActiveStep].text,
+      _id: leadData._id
+    };
+
+    axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
+      // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
+      setIsProcessing(false)
+      // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
+      // }
+      fetchLeadData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setIsProcessing(false)
+    })
+  }
+
   return (
     <>
       {openUpdateDialog && (
@@ -322,52 +344,13 @@ const LeadDetailsPage = () => {
                 </DetailsPageHeader>
               )}
 
-              {
-                steps.length > 0 &&
-                <div className="stepper-box">
-                  <div className="mainview">
-                    <CustomSteps steps={steps} active={activeStep} />
-                  </div>
-                  <div className="actionview">
-                    <div className="d-flex justify-content-center">
-                      {
-                        activeStep != steps.length ?
-                          isProcessing ? <Button variant="outlined"
-                            color="primary"
-                            disabled={true}
-                            onClick={() => { }}>
-                            Processing...
-                          </Button> :
-                            <Button variant="contained"
-                              color="primary"
-                              size="small"
-                              disabled={!steps[activeStep].canCompleteManually}
-                              onClick={() => {
-                                setIsProcessing(true)
-                                const updatedData = {
-                                  ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
-                                  [processFieldName]: steps[activeStep].text,
-                                  _id: leadData._id
-                                };
-
-                                axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
-                                  setActiveStep(activeStep + 1)
-                                  setIsProcessing(false)
-                                  if (steps[activeStep].text.toLowerCase() === "qualified") {
-                                    fetchLeadData();
-                                  }
-                                }).catch((error) => {
-                                  toastConfig.setToastConfig(error);
-                                  setIsProcessing(false)
-                                })
-                              }}>
-                              Mark {steps[activeStep].text} as Completed
-                            </Button> : ""
-                      }
-                    </div>
-                  </div>
-                </div>
-              }
+              <LeadOpportunityProcess
+                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
+                steps={steps}
+                activeStep={activeStep}
+                handleMarkAsCompleted={handleMarkAsCompleted}
+                hideBackButton={isLeadAlreadyConvertedToOpportunity}
+              />
 
               {loading ? (
                 <Grid container spacing={2}>
@@ -422,6 +405,7 @@ const LeadDetailsPage = () => {
               ) : (
                 <div>
                   <Activity
+                    restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: "lead",
