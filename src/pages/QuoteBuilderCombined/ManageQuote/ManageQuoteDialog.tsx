@@ -63,6 +63,7 @@ export default function ManageQuoteDialog({
   contacts = null,
   disableCurrency = false,
   quoteApproved = false,
+  forInvoice = false,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -276,7 +277,12 @@ export default function ManageQuoteDialog({
       .get(`/field?resource=Quotes&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         setQuoteFields(data.map((f) => f.fieldData));
-        if (quoteApproved) {
+
+        if (!quoteApproved && !forInvoice) {
+          data = data.filter(
+            (_f) => _f.fieldData.sectionName !== "Invoice Information"
+          );
+        } else if (quoteApproved && forInvoice) {
           data = data.filter(
             (_f) => _f.fieldData.sectionName === "Invoice Information"
           );
@@ -1111,6 +1117,7 @@ export default function ManageQuoteDialog({
                     color="primary"
                     size="small"
                     disabled={
+                      loading ||
                       uploadingImageOrFileProgress > 0 ||
                       Object.values(
                         simplifyValues(

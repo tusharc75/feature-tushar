@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     margin: "1px",
     borderRadius: "4px",
-    border: "1px solid #d6d5d5"
+    border: "1px solid #d6d5d5",
   },
   inActive: {
     background: "#ebebeb",
@@ -130,8 +130,6 @@ const Steps = (props) => {
     reminderLoading = false,
     hideReminderButton = false,
     openInvoiceDialog,
-    quoteData,
-    invoiceFields,
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -250,9 +248,6 @@ const Steps = (props) => {
       });
   };
 
-  const isNewInvoice =
-    Object.values(getObjKeysWithValues(quoteData, invoiceFields)).length === 0;
-
   return (
     <div className={classes.root}>
       <div className="position-relative">
@@ -330,7 +325,7 @@ const Steps = (props) => {
                 </Typography>
 
                 <Button onClick={openInvoiceDialog}>
-                  {isNewInvoice ? "Fill" : "Update"} Invoice Information
+                  Update Invoice Information
                 </Button>
               </div>
             )}
