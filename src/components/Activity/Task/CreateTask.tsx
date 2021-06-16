@@ -183,43 +183,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                               variant="outlined"
                             />
                           </Box>
-                          {id && (
-                            <Fragment>
-                              <Box mt={1}>
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  disableElevation
-                                  onClick={() => setOpenAddSub(true)}
-                                  startIcon={<TableChartIcon />}
-                                >
-                                  Add a child Task
-                                </Button>
-                              </Box>
-                              <Box mt={2}>
-                                <SubTask
-                                  openAddSub={openAddSub}
-                                  setOpenAddSub={setOpenAddSub}
-                                  data={initialValues}
-                                  fetchTaskDetail={fetchTaskDetail}
-                                  setId={setId}
-                                />
-                              </Box>
-                              <Box mt={2}>
-                                <RelatedToDispay
-                                  relatedTo={initialValues.relatedTo}
-                                />
-                              </Box>
-                              <Box mt={2}>
-                                <Divider />
-                                <Box mt={1}>
-                                  <Comment referenceId={id} />
-                                </Box>
-                              </Box>
-                            </Fragment>
-                          )}
-                        </Grid>
-                        <Grid item xs={12} md={5} sm={6}>
                           <Box pt={1}>
                             <FormControl variant="outlined" fullWidth>
                               <InputLabel id="demo-simple-select-outlined-label">
@@ -242,67 +205,75 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             </FormControl>
                           </Box>
                           <Box pt={1}>
-                            <UserDropdown
-                              name="assignee"
-                              label="Assignee"
-                              errors={errors}
-                              touched={touched}
-                              required={true}
-                              setFieldValue={setFieldValue}
-                              multiple={false}
-                              value={values["assignee"]}
-                            />
+                            <Grid container spacing={1}>
+                              <Grid item xs={12} sm={6} md={6}>
+                                <UserDropdown
+                                  name="assignee"
+                                  label="Assignee"
+                                  errors={errors}
+                                  touched={touched}
+                                  required={true}
+                                  setFieldValue={setFieldValue}
+                                  multiple={false}
+                                  value={values["assignee"]}
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={6}>
+                                <UserDropdown
+                                  name="reporter"
+                                  label="Reporter"
+                                  errors={errors}
+                                  touched={touched}
+                                  required={true}
+                                  setFieldValue={setFieldValue}
+                                  multiple={false}
+                                  value={values["reporter"]}
+                                />
+                              </Grid>
+                            </Grid>
                           </Box>
                           <Box pt={1}>
-                            <UserDropdown
-                              name="reporter"
-                              label="Reporter"
-                              errors={errors}
-                              touched={touched}
-                              required={true}
-                              setFieldValue={setFieldValue}
-                              multiple={false}
-                              value={values["reporter"]}
-                            />
-                          </Box>
-                          <Box pt={1}>
-                            <Field
-                              component={KeyboardDatePicker}
-                              label="Start Date"
-                              name="startDate"
-                              autoOk
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                              margin="dense"
-                              format={dateFormat}
-                              minDate={
-                                initialValues.parentData &&
-                                initialValues.parentData.startDate
-                              }
-                              maxDate={
-                                initialValues.parentData &&
-                                initialValues.parentData.dueDate
-                              }
-                            />
-                          </Box>
-                          <Box pt={1}>
-                            <Field
-                              component={KeyboardDatePicker}
-                              label="Due Date"
-                              name="dueDate"
-                              autoOk
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                              margin="dense"
-                              minDate={values.startDate}
-                              maxDate={
-                                initialValues.parentData &&
-                                initialValues.parentData.dueDate
-                              }
-                              format={dateFormat}
-                            />
+                            <Grid container spacing={1}>
+                              <Grid item xs={12} sm={6} md={6}>
+                                <Field
+                                  component={KeyboardDatePicker}
+                                  label="Start Date"
+                                  name="startDate"
+                                  autoOk
+                                  variant="inline"
+                                  inputVariant="outlined"
+                                  fullWidth
+                                  margin="dense"
+                                  format={dateFormat}
+                                  minDate={
+                                    initialValues.parentData &&
+                                    initialValues.parentData.startDate
+                                  }
+                                  maxDate={
+                                    initialValues.parentData &&
+                                    initialValues.parentData.dueDate
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={6}>
+                                <Field
+                                  component={KeyboardDatePicker}
+                                  label="Due Date"
+                                  name="dueDate"
+                                  autoOk
+                                  variant="inline"
+                                  inputVariant="outlined"
+                                  fullWidth
+                                  margin="dense"
+                                  minDate={values.startDate}
+                                  maxDate={
+                                    initialValues.parentData &&
+                                    initialValues.parentData.dueDate
+                                  }
+                                  format={dateFormat}
+                                />
+                              </Grid>
+                            </Grid>
                           </Box>
                           {id && (
                             <Fragment>
@@ -331,7 +302,31 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             </Fragment>
                           )}
                         </Grid>
+                        <Grid item xs={12} md={5} sm={6}>
+                          {id && (
+                              <Box mt={2}>
+                                <SubTask
+                                  openAddSub={openAddSub}
+                                  setOpenAddSub={setOpenAddSub}
+                                  data={initialValues}
+                                  fetchTaskDetail={fetchTaskDetail}
+                                  setId={setId}
+                                />
+                              </Box>
+                          )}
+                        </Grid>
                       </Grid>
+                      <Box mt={2}>
+                        <RelatedToDispay
+                          relatedTo={initialValues.relatedTo}
+                        />
+                      </Box>
+                      <Box mt={2}>
+                        <Divider />
+                        <Box mt={1}>
+                          <Comment referenceId={id} />
+                        </Box>
+                      </Box>
                     </MuiPickersUtilsProvider>
                   </Box>
                 </Form>
