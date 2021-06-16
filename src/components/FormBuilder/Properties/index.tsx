@@ -17,11 +17,12 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { camelCase } from "./../../../constants/helpers";
-import { Vlokup } from "../AddField/vlokup";
+import { Vlookup } from "../AddField/vlookup";
 import { Formula } from "../AddField/formula";
 import { Converter } from "../AddField/converter";
 import { Option } from "../AddField/option";
 import { Currency } from "../AddField/currency";
+import { DecimalPlaces } from "../AddField/decimalPlaces";
 import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
@@ -50,8 +51,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   const [initialValues, setInitialValues] = useState(fieldData);
 
+  const [isChangeFieldName, setIsChangeFieldName] = useState(false);
+
   useEffect(() => {
-    console.log(fieldData)
     if (fieldData.type === "dropDown" && !fieldData.lookup) {
       if (fieldData.option && fieldData.option.filter((data) => data.default === true).length) {
         setInitialValues({ ...initialValues, defaultDropdownOption: fieldData.option.filter((data) => data.default === true)[0].optionValue })
@@ -63,32 +65,35 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   if (module === "producttemplate") {
     fields.push({ fieldName: "qty", fieldLabel: "Qty" })
   }
+
   section.forEach(_section => {
     _section.field.forEach(_field => {
-      let fid = { ..._field }
-      if (!fid.fieldName) {
-        fid.fieldName = camelCase(fid.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
+      let ele = { ..._field }
+      if (!ele.fieldName) {
+        ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
       }
       //if (fid._id.toString() !== fieldData._id.toString()) { }
-      if (fid.type !== "currencyAmount" && (fid.type === "converter" || fid.isConverter === true)) {
-        fid.displayUnits && fid.displayUnits.forEach(_unit => {
-          fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _unit.toLowerCase() })
-        })
-      }
-      else if (fid.type === "currencyAmount") {
-        fid.displayCurrency && fid.displayCurrency.forEach(_currency => {
-          if (fid.isConverter) {
-            fid.displayUnits && fid.displayUnits.forEach(_unit => {
-              fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+      if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+        if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+          ele.displayUnits && ele.displayUnits.forEach(_unit => {
+            fields.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _unit + ")", fieldName: ele.fieldName + "_" + _unit.toLowerCase() })
+          })
+        }
+        else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+          ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+            ele.displayUnits && ele.displayUnits.forEach(_unit => {
+              fields.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + "/" + _unit + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
             })
-          }
-          else {
-            fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _currency, fieldName: fid.fieldName + "_" + _currency.toLowerCase() })
-          }
-        })
+          })
+        }
+        else if (ele.type === 'currencyAmount') {
+          ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+            fields.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() })
+          })
+        }
       }
       else {
-        fields.push(fid)
+        fields.push(ele)
       }
     })
   })
@@ -109,6 +114,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isFormula = values.isFormula
             ele.isMulitFormula = values.isMulitFormula
             ele.isUneditable = values.isUneditable
+            ele.isVlookup = values.isVlookup
+
+            if (isChangeFieldName) {
+              ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+            }
 
             if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
               values.option.forEach((ele, index) => {
@@ -124,7 +134,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               })
               ele.option = values.option
             }
-            if (fieldData.type === "decimal") {
+            if (fieldData.type === "decimal" || fieldData.type === "converter" || fieldData.type === "currencyAmount") {
               ele.decimalPlaces = values.decimalPlaces
             }
             if (values.lookup) {
@@ -137,7 +147,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.returnType = values.returnType ? values.returnType : "decimal"
               ele.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2
             }
-            if (fieldData.type === "vlookupDropdown") {
+            if (fieldData.type === "vlookupDropdown" || fieldData.isVlookup) {
               values.option.forEach((ele) => {
                 ele.optionValue = ele.optionLabel
               })
@@ -207,7 +217,25 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               helperText={touched["fieldLabel"] && errors["fieldLabel"]}
               onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
             />
-            {(values["type"] === "decimal" || values["type"] === "formula") &&
+            {(module === "producttemplate" && values["editAble"]) &&
+              <Box display="flex" >
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isChangeFieldName"
+                        checked={isChangeFieldName}
+                        onChange={(e) => setIsChangeFieldName(e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label="Change Field Name"
+                  />
+                </Box>
+              </Box>
+            }
+
+            {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
               <Grid spacing={3} container>
                 {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
                   <FormControl fullWidth margin="dense" variant="outlined">
@@ -229,23 +257,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }
                 {(values["type"] === "decimal" || values["returnType"] === "decimal") &&
                   <Grid item xs={12} sm={6} md={6}>
-                    <FormControl fullWidth margin="dense" variant="outlined">
-                      <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
-                      <Select
-                        labelId="demo-simple-select-outlined-label"
-                        id="demo-simple-select-outlined"
-                        value={values["decimalPlaces"]}
-                        onChange={(e) => setFieldValue("decimalPlaces", e.target.value)}
-                        label="Number of decimal places"
-                        name="decimalPlaces"
-                      >
-                        <MenuItem value={0}>0</MenuItem>
-                        <MenuItem value={1}>1</MenuItem>
-                        <MenuItem value={2}>2</MenuItem>
-                        <MenuItem value={3}>3</MenuItem>
-                        <MenuItem value={4}>4</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <DecimalPlaces
+                      values={values}
+                      setFieldValue={setFieldValue}
+                    />
                   </Grid>}
               </Grid>}
             {(values["type"] === "dropDown" || values["type"] === "multiSelect") &&
@@ -311,6 +326,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               fields={fields}
               values={values}
               setFieldValue={setFieldValue}
+              _id={fieldData._id}
             />}
             {values["type"] === "currencyAmount" &&
               <Fragment>
@@ -356,13 +372,33 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               fields={fields}
               values={values}
               setFieldValue={setFieldValue}
+              _id={fieldData._id}
             />}
-            {values["type"] === "vlookupDropdown" &&
-              <Vlokup
+
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
+              <><br></br>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isVlookup"
+                      checked={values["isVlookup"]}
+                      onChange={(e) => {
+                        setFieldValue("isVlookup", e.target.checked)
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Vlookup"
+                />
+              </>}
+            {(values["isVlookup"] || values["type"] === "vlookupDropdown") &&
+              <Vlookup
                 fields={fields}
                 values={values}
                 setFieldValue={setFieldValue}
-              />}
+                _id={fieldData._id}
+              />
+            }
 
             <Box pt={1} pb={1}>
               <FormControlLabel
@@ -388,7 +424,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }
                 label="Show Tooltip"
               />
-
               {values["isTooltip"] &&
                 <TextField
                   variant="outlined"

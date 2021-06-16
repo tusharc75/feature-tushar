@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -19,6 +19,8 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { camelCase, UnCamelCase } from "../../../constants/helpers";
 import * as XLSX from 'xlsx';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import Chip from '@material-ui/core/Chip';
 
 const MenuProps = {
     PaperProps: {
@@ -28,7 +30,13 @@ const MenuProps = {
     },
 };
 
-export const Vlokup = ({ fields, values, setFieldValue, }) => {
+export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
+
+    useEffect(() => {
+        if (!values["option"] || values["option"].length === 0) {
+            setFieldValue("option", [{ optionLabel: "Option 1", optionValue: "Option 1" }])
+        }
+    }, []);
 
     const onChangeValue = (index, fieldName, value) => {
         let data = [...values["option"]]
@@ -87,32 +95,56 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
         XLSX.writeFile(wb, "vlookup dropdown options.xlsx");
     }
 
+
+    const convertLabeltoValue = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            if (fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v).length) {
+                result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldName)
+            }
+            else {
+                result.push(_v)
+            }
+        })
+        return result;
+    }
+
+    const convertValuetoLabel = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            if (fields.filter((data) => data.fieldName === _v).length) {
+                result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldLabel)
+            }
+            else {
+                result.push(_v)
+            }
+        })
+        return result;
+    }
+
     return (
         <Box marginTop={2}>
-            <FormControl variant="outlined" fullWidth margin="dense">
-                <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
-                <Select
-                    inputProps={{
-                        name: 'inputFields',
-                        id: "demo-simple-select-outlined"
-                    }}
-                    margin="dense"
-                    label="Input Parameters"
-                    multiple
-                    name="inputFields"
-                    value={values["inputFields"]}
-                    onChange={(e) => setFieldValue("inputFields", e.target.value)}
-                    renderValue={(selected: any) => selected.join(', ')}
-                    MenuProps={MenuProps}
-                >
-                    {fields && fields.map((_field) => (
-                        <MenuItem key={_field.fieldName} value={_field.fieldName}>
-                            <Checkbox color="primary" checked={values["inputFields"].indexOf(_field.fieldName) > -1} />
-                            <ListItemText primary={_field.fieldLabel} />
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+            <Autocomplete
+                multiple
+                id="tags-filled"
+                options={fields && (fields.filter((_f) => _f._id !== _id)).map((_field) => { return _field.fieldLabel })}
+                getOptionLabel={(option) => option}
+                value={values["inputFields"] ? convertValuetoLabel(values["inputFields"]) : []}
+                renderTags={(value: string[], getTagProps) =>
+                    value.map((option: string, index: number) => (
+                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                    ))
+                }
+                onChange={(e, value) => setFieldValue("inputFields", convertLabeltoValue(value))}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        margin="dense"
+                        variant="outlined"
+                        label="Input Parameters"
+                        placeholder="Input Parameters" />
+                )}
+            />
             <Box marginTop={1} marginBottom={2}>
                 <Box>
                     <Grid spacing={3} container>
@@ -147,9 +179,9 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                             <Box minWidth={200} pl={1}>
                                 <Typography variant="body2">Option Label</Typography>
                             </Box>
-                            {values["inputFields"] && values["inputFields"].map((_row) => (
+                            {values["inputFields"] && convertValuetoLabel(values["inputFields"]).map((_row) => (
                                 <Box minWidth={200} pl={1}>
-                                    <Typography variant="body2">{UnCamelCase(_row)}</Typography>
+                                    <Typography variant="body2">{_row}</Typography>
                                 </Box>
                             ))}
                         </Box>
@@ -193,17 +225,18 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                     ))}
                 </Box>
             </Box>
-            <FormControlLabel
-                control={
-                    <Checkbox
-                        name="isvlookupReverse"
-                        checked={values["isvlookupReverse"]}
-                        onChange={(e) => setFieldValue("isvlookupReverse", e.target.checked)}
-                        color="primary"
-                    />
-                }
-                label="Vlookup Reverse"
-            />
+            {!values["isVlookup"] &&
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            name="isvlookupReverse"
+                            checked={values["isvlookupReverse"]}
+                            onChange={(e) => setFieldValue("isvlookupReverse", e.target.checked)}
+                            color="primary"
+                        />
+                    }
+                    label="Vlookup Reverse"
+                />}
         </Box>
     );
 }
