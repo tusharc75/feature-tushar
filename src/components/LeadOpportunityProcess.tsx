@@ -11,7 +11,6 @@ export default function LeadOpportunityProcess(props) {
         disableBackNext = false
     } = props
 
-
     return <>
         {
             steps.length > 0 &&
@@ -46,7 +45,7 @@ export default function LeadOpportunityProcess(props) {
                                             <Button variant="contained"
                                                 color="primary"
                                                 size="small"
-                                                disabled={!steps[activeStep]?.canCompleteManually}
+                                                disabled={(!steps[activeStep + 1]?.canCompleteManually) || isProcessing ? true : false}
                                                 onClick={handleMarkAsCompleted}
                                                 endIcon={<IoIosArrowDroprightCircle />}
                                             >
