@@ -363,6 +363,7 @@ function QuoteDetail() {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
+  const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -1888,15 +1889,11 @@ function QuoteDetail() {
                           {copyOfquoteData ? (
                             <DetailsPage
                               data={copyOfquoteData}
-                              fields={
-                                ifQuoteApproved().approved
-                                  ? quoteFields
-                                  : quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Invoice Information"
-                                    )
-                              }
+                              fields={quoteFields.filter(
+                                (_f) =>
+                                  _f.fieldData.sectionName !==
+                                  "Invoice Information"
+                              )}
                             />
                           ) : null}
                         </>
@@ -1904,6 +1901,15 @@ function QuoteDetail() {
                     </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
+                    {copyOfquoteData ? (
+                      <DetailsPage
+                        data={copyOfquoteData}
+                        fields={quoteFields.filter(
+                          (_f) =>
+                            _f.fieldData.sectionName === "Invoice Information"
+                        )}
+                      />
+                    ) : null}
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
@@ -2047,6 +2053,7 @@ function QuoteDetail() {
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
+                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                           />
                         ) : (
                           <Steps
@@ -2064,6 +2071,7 @@ function QuoteDetail() {
                             handleSendReminder={handleSendReminder}
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
+                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                           />
                         )}
                       </div>
@@ -2327,7 +2335,9 @@ function QuoteDetail() {
               ) : (
                 <div>
                   <Activity
-                    restrictedAddActivities={allowedToEdit ? [] : ["Attachment", "Case"]}
+                    restrictedAddActivities={
+                      allowedToEdit ? [] : ["Attachment", "Case"]
+                    }
                     relatedTo={[
                       {
                         type: quoteData?.customerAccountName
@@ -2380,8 +2390,29 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            quoteApproved={ifQuoteApproved().approved}
             // qbApi={qbApi}
+          />
+        )}
+
+        {openInvoiceDialog && (
+          <ManageQuoteDialog
+            open={openInvoiceDialog}
+            onSuccess={() => {
+              setOpenInvoiceDialog(false);
+              fetchQuoteData(currentVersion);
+            }}
+            onClose={() => {
+              setOpenInvoiceDialog(false);
+            }}
+            isNew={false}
+            dataToUpdate={copyOfquoteData}
+            resource={null}
+            isRedirectTodetailPage={false}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            disableCurrency={true}
+            quoteApproved={ifQuoteApproved().approved}
           />
         )}
 

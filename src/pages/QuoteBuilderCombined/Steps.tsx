@@ -127,6 +127,7 @@ const Steps = (props) => {
     handleSendReminder = null,
     reminderLoading = false,
     hideReminderButton = false,
+    openInvoiceDialog,
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -249,7 +250,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+        approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -320,6 +321,10 @@ const Steps = (props) => {
                 <Typography className={classes.approved}>
                   Approved by Customer
                 </Typography>
+
+                <Button onClick={openInvoiceDialog}>
+                  Fill Invoice Information
+                </Button>
               </div>
             )}
             {versionStatus.includes("Rejected by Customer") && (
@@ -379,7 +384,13 @@ const Steps = (props) => {
           </>
         )} */}
         <Grid container>
-          <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-end">
+          <Grid
+            item
+            xs={12}
+            sm={2}
+            md={1}
+            className="d-flex align-items-center justify-content-end"
+          >
             {activeStep !== steps.length - 1 && (
               <>
                 <div>
@@ -434,8 +445,14 @@ const Steps = (props) => {
               </Stepper>
             </div>
           </Grid>
-          <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-start">
-            {activeStep !== steps.length - 1 && ( 
+          <Grid
+            item
+            xs={12}
+            sm={2}
+            md={1}
+            className="d-flex align-items-center justify-content-start"
+          >
+            {activeStep !== steps.length - 1 && (
               <>
                 <div>
                   {!approvedQuote.approved && (
@@ -468,7 +485,6 @@ const Steps = (props) => {
             )}
           </Grid>
         </Grid>
-
       </div>
     </div>
   );
