@@ -22,7 +22,6 @@ import {
   getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
 import { opportunity, sidebarResource, lead } from '../../constants/helpers'
-import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
@@ -30,6 +29,7 @@ import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
+import LeadOpportunityProcess from "../../components/LeadOpportunityProcess"
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -121,13 +121,11 @@ function OpportunityDetailsPage() {
     if (steps.length > 0) {
       const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && opportunityData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[processFieldName]) + 1;
-        setActiveStep(currentStepToShow);
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[processFieldName]);
+        if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
       }
     }
   }, [steps])
-
-
 
   const fetchOpportunityData = () => {
     if (selectedEntity) {
@@ -422,36 +420,56 @@ function OpportunityDetailsPage() {
       });
   };
 
-  const handleAssignContacts = async (newAddedContactId,contactType,contacts) => {
+  const handleAssignContacts = async (newAddedContactId, contactType, contacts) => {
     // allContacts.filter(f => f.isChecked).map(m => m._id)
     let previousIds = [];
-    if(contacts){
-      contacts.map((obj)=>{
+    if (contacts) {
+      contacts.map((obj) => {
         previousIds.push(obj._id)
       })
     }
     const dataToSave = {
-        _id: id,
-        supplierContact: contactType === "supplier" && newAddedContactId ? [newAddedContactId,...previousIds]: [],
-        customerContact: contactType === "customer" && newAddedContactId ? [newAddedContactId,...previousIds]: [],
-        notToBeRemoved: null
+      _id: id,
+      supplierContact: contactType === "supplier" && newAddedContactId ? [newAddedContactId, ...previousIds] : [],
+      customerContact: contactType === "customer" && newAddedContactId ? [newAddedContactId, ...previousIds] : [],
+      notToBeRemoved: null
     };
 
     await axiosInstance()
-        .put(`/opportunity/add-contacts`, dataToSave)
-        .then(({ data }) => {
-            toastConfig.setToastConfig({
-                message: data.message,
-                type: "success",
-                open: true,
-            });
-
-            fetchOpportunityData();
-        })
-        .catch((error) => {
-            toastConfig.setToastConfig(error);
+      .put(`/opportunity/add-contacts`, dataToSave)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          message: data.message,
+          type: "success",
+          open: true,
         });
-};
+
+        fetchOpportunityData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleMarkAsCompleted = (data) => {
+    setIsProcessing(true)
+    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep
+    const updatedData = {
+      ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
+      process: steps[tempActiveStep].text,
+      _id: opportunityData._id
+    };
+
+    axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+      fetchOpportunityData();
+      // setActiveStep(activeStep + 1)
+      setIsProcessing(false)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setIsProcessing(false)
+    })
+  }
+
 
   let selectedSupplierAccounts = []
   if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
@@ -515,51 +533,12 @@ function OpportunityDetailsPage() {
                 </DetailsPageHeader>
               )}
 
-              {
-                steps.length > 0 &&
-                <div className="stepper-box">
-                  <div className="mainview">
-                    <CustomSteps steps={steps} active={activeStep} />
-                  </div>
-                  <div className="actionview">
-                    <div className="d-flex justify-content-center">
-                      {
-                        activeStep !== steps.length ?
-                          isProcessing ? <Button variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={true}
-                            onClick={() => { }}>
-                            Processing...
-                    </Button> :
-                            <Button variant="contained"
-                              color="primary"
-                              size="small"
-                              disabled={!steps[activeStep].canCompleteManually}
-                              onClick={() => {
-                                setIsProcessing(true)
-                                const updatedData = {
-                                  ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
-                                  process: steps[activeStep].text,
-                                  _id: opportunityData._id
-                                };
-
-                                axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-                                  fetchOpportunityData();
-                                  setActiveStep(activeStep + 1)
-                                  setIsProcessing(false)
-                                }).catch((error) => {
-                                  toastConfig.setToastConfig(error);
-                                  setIsProcessing(false)
-                                })
-                              }}>
-                              <BsCheckAll />&nbsp; Mark {steps[activeStep].text} as Completed
-                  </Button> : ""
-                      }
-                    </div>
-                  </div>
-                </div>
-              }
+              <LeadOpportunityProcess
+                disableBackNext={allowedToEdit ? false : true}
+                steps={steps}
+                activeStep={activeStep}
+                handleMarkAsCompleted={handleMarkAsCompleted}
+              />
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
@@ -616,8 +595,8 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
                           }}
                           recordsPerLine={recordsPerLine}
-                          saveContactToOpportunity = {handleAssignContacts}
-                          accountId = {opportunityData?.customerAccountName?.optionValue}
+                          saveContactToOpportunity={handleAssignContacts}
+                          accountId={opportunityData?.customerAccountName?.optionValue}
                           isAllowedToUpdate={allowedToEdit}
 
                         />
@@ -642,8 +621,8 @@ function OpportunityDetailsPage() {
                             quoteBuilderPermission={permissions.quoteBuilder}
                             opportunityId={id}
                             accountId={opportunityData?.customerAccountName?.optionValue}
-                            opportunityName = {opportunityData?.opportunityName }
-                            isRenderedFromOpportunity ={true}
+                            opportunityName={opportunityData?.opportunityName}
+                            isRenderedFromOpportunity={true}
                             isAllowedToUpdate={allowedToEdit}
                           />
                         )
