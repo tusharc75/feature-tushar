@@ -6,7 +6,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar'
 import { profileMenuItems } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
-import NotifiationPreference from './components/NotifiationPreference'
+import NotificationPreference from './components/NotificationPreference'
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomContainer from '../../components/CustomContainer';
@@ -41,7 +41,7 @@ export default function ProfilePage(props) {
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
     const [otherDetails, setOtherDetails] = useState(null)
-    const [notifiationPreferenceData, setNotifiationPreferenceData] = useState([])
+    const [notificationPreferenceData, setNotificationPreferenceData] = useState([])
     const [loading, setLoading] = useState(false);
     const [userLoading, setUserLoading] = useState(false);
     const [userFields, setUserFields] = useState([]);
@@ -71,7 +71,7 @@ export default function ProfilePage(props) {
                     })
                     let { blocked, updatedBy, employeeNumber, ...userData } = data.user
                     setUserData(userData)
-                    setNotifiationPreferenceData(data.user.notificationPref)
+                    setNotificationPreferenceData(data.user.notificationPref)
                 }
                 setUserLoading(false)
             })
@@ -127,7 +127,7 @@ export default function ProfilePage(props) {
                                 otherDetails={otherDetails}
                             /> :
                             activeItem === profileMenuItems.notification ?
-                                <NotifiationPreference notifiationPreferenceData={notifiationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
+                                <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
                                 : activeItem === profileMenuItems.setting ?
                                     <Paper className={classes.paper}>setting</Paper>
                                     : activeItem === profileMenuItems.users ?
