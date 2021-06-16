@@ -80,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale=false }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale = false, isAllowedToEdit }) {
     ;
     const [
         showCreateProjectSalesDialog,
@@ -112,7 +112,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     const [
         showAddProjectSalesDialog,
         setShowAddProjectSalesDialog,
-      ] = useState(false);
+    ] = useState(false);
 
     useEffect(() => {
         setExpandProject(projectSales && projectSales?.length !== 0 ? true : false);
@@ -154,52 +154,54 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
-                        {permissions?.projectSales?.isCreate && isAddProjectSale ?
-                            <>
+                        {isAllowedToEdit && <>
+                            {permissions?.projectSales?.isCreate && isAddProjectSale ?
+                                <>
+                                    <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={handleOpenMenu}
+                                    >
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        id="menu"
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowCreateProjectSalesDialog(true);
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Create New
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={() => {
+                                                setShowAddProjectSalesDialog(true)
+                                                handleCloseMenu();
+                                            }}
+                                        >
+                                            Add Exisiting
+                                        </MenuItem>
+                                    </Menu>
+                                </>
+                                :
                                 <IconButton
-                                    aria-haspopup="true"
                                     color="primary"
                                     size="small"
-                                    onClick={handleOpenMenu}
+                                    onClick={() => {
+                                        setShowCreateProjectSalesDialog(true);
+                                    }}
                                 >
-                                    <MoreVert />
+                                    <ControlPointIcon />
                                 </IconButton>
-                                <Menu
-                                    id="menu"
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleCloseMenu}
-                                >
-                                    <MenuItem
-                                        onClick={() => {
-                                            setShowCreateProjectSalesDialog(true);
-                                            handleCloseMenu();
-                                        }}
-                                    >
-                                        Create New
-                                    </MenuItem>
-                                    <MenuItem
-                                        onClick={() => {
-                                            setShowAddProjectSalesDialog(true)
-                                            handleCloseMenu();
-                                        }}
-                                    >
-                                        Add Exisiting
-                                    </MenuItem>
-                                </Menu>
-                            </>
-                            :
-                            <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => {
-                                    setShowCreateProjectSalesDialog(true);
-                                }}
-                            >
-                                <ControlPointIcon />
-                            </IconButton>
-                        }
+                            }
+                        </>}
                     </Grid>
                 </Grid>
             </AccordionSummary>
@@ -268,15 +270,15 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
         )}
         {showAddProjectSalesDialog && (
             <AssignProjectSalesDialog
-            projectSalesDialogOpen={showAddProjectSalesDialog}
-            onSuccess={() => {
-                setShowAddProjectSalesDialog(false);
-                fetchData()
-            }}
-            handleCloseDialog={() => setShowAddProjectSalesDialog(false)}
-            assignedProjectSales={projectSales}
-            type={type}
-          />
+                projectSalesDialogOpen={showAddProjectSalesDialog}
+                onSuccess={() => {
+                    setShowAddProjectSalesDialog(false);
+                    fetchData()
+                }}
+                handleCloseDialog={() => setShowAddProjectSalesDialog(false)}
+                assignedProjectSales={projectSales}
+                type={type}
+            />
         )}
     </>
 }

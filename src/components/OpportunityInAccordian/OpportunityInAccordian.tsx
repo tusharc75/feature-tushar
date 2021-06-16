@@ -107,6 +107,7 @@ export default function OpportunityInAccordian({
   isRedirect,
   contactId = null,
   contactResource = null,
+  isAllowedToUpdate,
 }) {
   const history = useHistory();
   const {
@@ -189,68 +190,70 @@ export default function OpportunityInAccordian({
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               <Typography variant="subtitle2">
-                {opportunityPermissions.isCreate && contactResource === customerContact.contactResource ?
-                  <>
-                    <IconButton
-                      aria-haspopup="true"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenMenu}
-                    >
-                      <MoreVert />
-                    </IconButton>
-                    <Menu
-                      id="menu"
-                      anchorEl={anchorEl}
-                      keepMounted
-                      open={Boolean(anchorEl)}
-                      onClose={handleCloseMenu}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          setShowCreateOpportunityDialog(true);
-                          handleCloseMenu();
-                        }}
+                {isAllowedToUpdate && <>
+                  {opportunityPermissions.isCreate && contactResource === customerContact.contactResource ?
+                    <>
+                      <IconButton
+                        aria-haspopup="true"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenMenu}
                       >
-                        Create New
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setShowAddOpportunityDialog(true)
-                          handleCloseMenu();
-                        }}
+                        <MoreVert />
+                      </IconButton>
+                      <Menu
+                        id="menu"
+                        anchorEl={anchorEl}
+                        keepMounted
+                        open={Boolean(anchorEl)}
+                        onClose={handleCloseMenu}
                       >
-                        Add Exisiting
-                      </MenuItem>
-                    </Menu>
-                  </>
-                  : <>
-                    <IconButton
-                      aria-haspopup="true"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenMenu}
-                    >
-                      <MoreVert />
-                    </IconButton>
-                    <Menu
-                      id="menu"
-                      anchorEl={anchorEl}
-                      keepMounted
-                      open={Boolean(anchorEl)}
-                      onClose={handleCloseMenu}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          setShowCreateOpportunityDialog(true);
-                          handleCloseMenu();
-                        }}
+                        <MenuItem
+                          onClick={() => {
+                            setShowCreateOpportunityDialog(true);
+                            handleCloseMenu();
+                          }}
+                        >
+                          Create New
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setShowAddOpportunityDialog(true)
+                            handleCloseMenu();
+                          }}
+                        >
+                          Add Exisiting
+                        </MenuItem>
+                      </Menu>
+                    </>
+                    : <>
+                      <IconButton
+                        aria-haspopup="true"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenMenu}
                       >
-                        Create New
-                 </MenuItem>
-                    </Menu>
-                  </>
-                }
+                        <MoreVert />
+                      </IconButton>
+                      <Menu
+                        id="menu"
+                        anchorEl={anchorEl}
+                        keepMounted
+                        open={Boolean(anchorEl)}
+                        onClose={handleCloseMenu}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            setShowCreateOpportunityDialog(true);
+                            handleCloseMenu();
+                          }}
+                        >
+                          Create New
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  }
+                </>}
               </Typography>
             </Grid>
           </Grid>

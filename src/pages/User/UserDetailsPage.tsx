@@ -773,6 +773,7 @@ const UserDetailsPage = () => {
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
+                  isAllowedToEdit={permissions.user.isUpdate}
                 />
                 <LeadAccordionInUserDetailPage
                   leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
@@ -782,6 +783,7 @@ const UserDetailsPage = () => {
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
+                  isAllowedToEdit={permissions.user.isUpdate}
                 />
                 <AccountAccordionDetail
                   type="customer"
@@ -792,6 +794,7 @@ const UserDetailsPage = () => {
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
+                  isAllowedToEdit={permissions.user.isUpdate}
                 />
                 <AccountAccordionDetail
                   type="supplier"
@@ -802,6 +805,7 @@ const UserDetailsPage = () => {
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
+                  isAllowedToEdit={permissions.user.isUpdate}
                 />
                 <ContactAccordionInDetailPage
                   type="customer"
@@ -812,6 +816,7 @@ const UserDetailsPage = () => {
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
+                  isAllowedToEdit={permissions.user.isUpdate}
                 />
                 <ContactAccordionInDetailPage
                   type="supplier"
@@ -822,6 +827,7 @@ const UserDetailsPage = () => {
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
+                  isAllowedToEdit={permissions.user.isUpdate}
                 />
               </div>
             </Paper>
