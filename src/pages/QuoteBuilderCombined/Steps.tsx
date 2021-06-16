@@ -65,6 +65,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     margin: "1px",
     borderRadius: "4px",
+    border: "1px solid #d6d5d5"
   },
   inActive: {
     background: "#ebebeb",
