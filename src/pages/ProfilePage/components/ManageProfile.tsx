@@ -16,6 +16,7 @@ import { HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
 import { imageUploadMaxSize } from "../../../constants/helpers"
+import AddProxyDialog from './AddProxyDialog';
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -50,6 +51,7 @@ export default function ManageProfile(props) {
     const [isEmailUpdate, setEmailUpdate] = useState(false)
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [showAddProxyDialog, setShowAddProxyDialog] = useState(false)
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
 
@@ -222,8 +224,8 @@ export default function ManageProfile(props) {
                         <div>
                             {otherDetails && Object.keys(otherDetails).map((k, i) => (
                                 <span className="d-flex align-items-center gap-1">
-                                    { k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
-                                    { k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
+                                    {k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
+                                    {k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
                                 </span>
                             ))
                             }
@@ -235,6 +237,13 @@ export default function ManageProfile(props) {
                             variant="outlined"
                             size="small"
                             onClick={() => setPasswordUpdate(true)}>Change Password</Button>
+                        <Divider />
+
+                        <Button color="primary"
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setShowAddProxyDialog(true)}>Add DOA Proxy</Button>
                         <Divider />
                     </div>
                     : null
@@ -291,6 +300,25 @@ export default function ManageProfile(props) {
                         onOk={handleDeleteProfilePic}
                     />
                 ) : null}
+
+                {
+                    showAddProxyDialog && <AddProxyDialog
+                        open={showAddProxyDialog}
+                        onClose={() => {
+                            setShowAddProxyDialog(false)
+                        }}
+                        onSuccess={(data) => {
+                            axiosInstance().post("/user/doa/proxy", data).then(({ data }) => {
+                                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                                setShowAddProxyDialog(false);
+                                onFetchUserData();
+                            }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                            })
+                        }}
+                        userId={user?.user?._id}
+                    />
+                }
             </div>
         </>
     </>

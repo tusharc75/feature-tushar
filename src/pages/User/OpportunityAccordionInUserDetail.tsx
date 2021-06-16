@@ -78,7 +78,7 @@ function DisplayData({ key, label, value, icon }) {
 
 export default function OpportunityAccordionInUserDetail({
     opportunities,
-    expanded = true, recordsPerLine = 2, userId, onSuccess
+    expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit
 }) {
     const {
         state: { permissions, selectedEntity },
@@ -156,42 +156,44 @@ export default function OpportunityAccordionInUserDetail({
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
-                            {
-                                // permissions?.opportunity?.isCreate && <IconButton
-                                //     color="primary"
-                                //     size="small"
-                                //     onClick={() => { setShowCreateOpportunityDialog(true) }}
-                                // >
-                                //     <ControlPointIcon />
-                                // </IconButton>
-                                permissions?.opportunity?.isCreate &&
-                                <>
-                                    <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={handleOpenMenu}
-                                    >
-                                        <MoreVert />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu"
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowCreateOpportunityDialog(true);
-                                                handleCloseMenu();
-                                            }}
+                            {isAllowedToEdit && <>
+                                {
+                                    // permissions?.opportunity?.isCreate && <IconButton
+                                    //     color="primary"
+                                    //     size="small"
+                                    //     onClick={() => { setShowCreateOpportunityDialog(true) }}
+                                    // >
+                                    //     <ControlPointIcon />
+                                    // </IconButton>
+                                    permissions?.opportunity?.isCreate &&
+                                    <>
+                                        <IconButton
+                                            aria-haspopup="true"
+                                            color="primary"
+                                            size="small"
+                                            onClick={handleOpenMenu}
                                         >
-                                            Create New
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            }
+                                            <MoreVert />
+                                        </IconButton>
+                                        <Menu
+                                            id="menu"
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={() => {
+                                                    setShowCreateOpportunityDialog(true);
+                                                    handleCloseMenu();
+                                                }}
+                                            >
+                                                Create New
+                                            </MenuItem>
+                                        </Menu>
+                                    </>
+                                }
+                            </>}
                         </Typography>
                     </Grid>
                 </Grid>

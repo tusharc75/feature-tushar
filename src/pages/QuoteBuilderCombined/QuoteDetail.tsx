@@ -2327,6 +2327,7 @@ function QuoteDetail() {
               ) : (
                 <div>
                   <Activity
+                    restrictedAddActivities={allowedToEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: quoteData?.customerAccountName
