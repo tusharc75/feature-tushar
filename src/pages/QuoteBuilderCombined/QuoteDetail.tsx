@@ -2054,6 +2054,12 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            quoteData={copyOfquoteData}
+                            invoiceFields={quoteFields.filter(
+                              (_f) =>
+                                _f.fieldData.sectionName ===
+                                "Invoice Information"
+                            )}
                           />
                         ) : (
                           <Steps
@@ -2072,6 +2078,12 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            quoteData={copyOfquoteData}
+                            invoiceFields={quoteFields.filter(
+                              (_f) =>
+                                _f.fieldData.sectionName ===
+                                "Invoice Information"
+                            )}
                           />
                         )}
                       </div>
