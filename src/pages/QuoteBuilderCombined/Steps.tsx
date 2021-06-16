@@ -13,7 +13,7 @@ import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
-import { StepIconProps } from "@material-ui/core";
+import { StepIconProps, Grid } from "@material-ui/core";
 import {
   IoIosArrowDroprightCircle,
   IoIosArrowDropleftCircle,
@@ -41,14 +41,14 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
   stepperNext: {
-    marginTop: "8px",
-    position: "absolute",
-    right: "12px",
-    bottom: "0",
-    color: theme.palette.primary.main,
+    // marginTop: "8px",
+    // position: "absolute",
+    // right: "12px",
+    // bottom: "0",
+    // color: theme.palette.primary.main,
   },
   pStepper: {
-    padding: "12px 7px 42px 7px !important",
+    padding: "10px 4px",
     // border: "1px solid #ece4e4",
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
   },
   currentStep: {
     background: "#ffffff",
-    boxShadow: "2px 2px 6px #a7a3a3",
+    // boxShadow: "2px 2px 6px #a7a3a3",
   },
 
   active: {
@@ -250,7 +250,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-        approvedQuote.approved ? (
+          approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -333,7 +333,7 @@ const Steps = (props) => {
             )}
           </>
         )}
-
+        {/* 
         {activeStep !== steps.length - 1 && (
           <>
             <div>
@@ -353,8 +353,6 @@ const Steps = (props) => {
                       Back
                     </Button>
                   ) : null}
-
-                  {/* <IoIosArrowDroprightCircle className="cursor-pointer" size={28} onClick={handleNext} /> */}
                   {versionStatus.split(" ")[0] != "Rejected" ? (
                     <Button
                       variant="contained"
@@ -380,35 +378,98 @@ const Steps = (props) => {
               )}
             </div>
           </>
-        )}
-        <div className={classes.pStepper}>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, i) => (
-              <Step
-                key={label}
-                className={clsx(classes.step, {
-                  [classes.active]:
-                    currentStep > i ||
-                    steps[currentStep] === "End" ||
-                    approvedQuote.approved,
-                  [classes.currentStep]: currentStep == i,
-                  [classes.inActive]: currentStep !== i,
-                })}
-              >
-                <StepLabel
-                  StepIconComponent={ColorlibStepIcon}
-                  className={
-                    currentStep === i || approvedQuote.approved
-                      ? "currentStepColor"
-                      : null
-                  }
-                >
-                  {label}
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </div>
+        )} */}
+        <Grid container>
+          <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-end">
+            {activeStep !== steps.length - 1 && (
+              <>
+                <div>
+                  {!approvedQuote.approved && (
+                    <div className={classes.stepperNext}>
+                      {activeStep === 1 || activeStep === 2 ? (
+                        // <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleBack}
+                          disabled={loading}
+                          size="small"
+                          startIcon={<IoIosArrowDropleftCircle />}
+                        >
+                          Back
+                        </Button>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </Grid>
+          <Grid item xs={12} sm={8} md={10}>
+            <div className={classes.pStepper}>
+              <Stepper className="pbStepper" activeStep={activeStep}>
+                {steps.map((label, i) => (
+                  <Step
+                    key={label}
+                    className={clsx(classes.step, {
+                      [classes.active]:
+                        currentStep > i ||
+                        steps[currentStep] === "End" ||
+                        approvedQuote.approved,
+                      [classes.currentStep]: currentStep == i,
+                      [classes.inActive]: currentStep !== i,
+                    })}
+                  >
+                    <StepLabel
+                      StepIconComponent={ColorlibStepIcon}
+                      className={
+                        currentStep === i || approvedQuote.approved
+                          ? "currentStepColor"
+                          : null
+                      }
+                    >
+                      {label}
+                    </StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            </div>
+          </Grid>
+          <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-start">
+            {activeStep !== steps.length - 1 && ( 
+              <>
+                <div>
+                  {!approvedQuote.approved && (
+                    <div className={classes.stepperNext}>
+                      {versionStatus.split(" ")[0] != "Rejected" ? (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleNext}
+                          size="small"
+                          disabled={
+                            loading ||
+                            !nextStep ||
+                            versionStatus.includes("Accepted  by DOA") ||
+                            versionStatus.includes("Sent to Customer") ||
+                            steps[currentStep] === "Send To Customer" ||
+                            versionStatus === "Sent to Customer"
+                          }
+                          endIcon={<IoIosArrowDroprightCircle />}
+                        >
+                          {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                        </Button>
+                      ) : (
+                        <p>{versionStatus}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </Grid>
+        </Grid>
+
       </div>
     </div>
   );

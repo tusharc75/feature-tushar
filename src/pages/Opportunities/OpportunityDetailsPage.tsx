@@ -534,6 +534,7 @@ function OpportunityDetailsPage() {
               )}
 
               <LeadOpportunityProcess
+                disableBackNext={allowedToEdit ? false : true}
                 steps={steps}
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}

@@ -182,7 +182,8 @@ const EntityDetailsPage = () => {
     if (userDeleteRec?._id) {
       const data = {
         user: userDeleteRec?._id,
-        entities: userDeleteRec?.entities.filter(d => d.entity !== id)
+        entities: userDeleteRec?.entities.filter(d => d.entity !== id),
+        withoutRoleLookup: true
       };
       axiosInstance()
         .put("/user/assign-entity", data)
