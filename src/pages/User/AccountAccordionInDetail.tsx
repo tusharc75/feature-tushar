@@ -83,7 +83,7 @@ function DisplayData({ label, value, icon, showCopyToText = false }) {
 
 export default function AccountAccordionDetail({
     accounts, type,
-    expanded = true, recordsPerLine = 2, userId, onSuccess
+    expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit
 }) {
     const {
         state: { permissions },
@@ -160,43 +160,45 @@ export default function AccountAccordionDetail({
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
-                            {
-                                (type === "customer" ? permissions?.customerAccount?.isCreate : permissions?.supplierAccount?.isCreate) &&
-                                // <IconButton
-                                //     color="primary"
-                                //     size="small"
-                                //     onClick={() => { setShowCreateAccountDialog(true) }}
-                                // >
-                                //     <ControlPointIcon />
-                                // </IconButton>
+                            {isAllowedToEdit && <>
+                                {
+                                    (type === "customer" ? permissions?.customerAccount?.isCreate : permissions?.supplierAccount?.isCreate) &&
+                                    // <IconButton
+                                    //     color="primary"
+                                    //     size="small"
+                                    //     onClick={() => { setShowCreateAccountDialog(true) }}
+                                    // >
+                                    //     <ControlPointIcon />
+                                    // </IconButton>
 
-                                <>
-                                    <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={handleOpenMenu}
-                                    >
-                                        <MoreVert />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu"
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowCreateAccountDialog(true);
-                                                handleCloseMenu();
-                                            }}
+                                    <>
+                                        <IconButton
+                                            aria-haspopup="true"
+                                            color="primary"
+                                            size="small"
+                                            onClick={handleOpenMenu}
                                         >
-                                            Create New
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            }
+                                            <MoreVert />
+                                        </IconButton>
+                                        <Menu
+                                            id="menu"
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={() => {
+                                                    setShowCreateAccountDialog(true);
+                                                    handleCloseMenu();
+                                                }}
+                                            >
+                                                Create New
+                                            </MenuItem>
+                                        </Menu>
+                                    </>
+                                }
+                            </>}
                         </Typography>
                     </Grid>
 

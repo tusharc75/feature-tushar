@@ -84,7 +84,7 @@ function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     </div>
 }
 export default function OpportunityContacts({ contacts, title, onAddContact,
-    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null, saveContactToOpportunity = null, accountId = null }) {
+    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null, saveContactToOpportunity = null, accountId = null, isAllowedToUpdate }) {
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -178,7 +178,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                         <ControlPointIcon />
                     </IconButton> */}
 
-                    <>
+                    {isAllowedToUpdate && <>
                         <IconButton
                             aria-haspopup="true"
                             color="primary"
@@ -212,7 +212,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                             </MenuItem>
 
                         </Menu>
-                    </>
+                    </>}
                 </Grid>
             </Grid>
         </AccordionSummary>

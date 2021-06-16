@@ -643,6 +643,10 @@ export default function AccountDetailPage(props) {
                     recordsPerLine={3}
                     resource={accountResource}
                     isRedirect={false}
+                    isAllowedToUpdate={permissions &&
+                      permissions[accountResource] &&
+                      permissions[accountResource].isUpdate &&
+                      canEdit}
                   />
                 )}
                 {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
@@ -653,6 +657,10 @@ export default function AccountDetailPage(props) {
                     fetchData={fetchRelatedData}
                     permissions={permissions}
                     isAddProjectSale={true}
+                    isAllowedToEdit={permissions &&
+                      permissions[accountResource] &&
+                      permissions[accountResource].isUpdate &&
+                      canEdit}
                   />
                 )}
                 {
@@ -665,7 +673,11 @@ export default function AccountDetailPage(props) {
                       quoteBuilderPermission={permissions.quoteBuilder}
                       accountId={id}
                       accountResource={accountResource}
-                      isRenderedFromCustomerAccount = {true}
+                      isRenderedFromCustomerAccount={true}
+                      isAllowedToUpdate={permissions &&
+                        permissions[accountResource] &&
+                        permissions[accountResource].isUpdate &&
+                        canEdit}
                     />
                   )
                 }
@@ -686,6 +698,10 @@ export default function AccountDetailPage(props) {
                   {accountData && (
                     <div>
                       <Activity
+                        restrictedAddActivities={permissions &&
+                          permissions[accountResource] &&
+                          permissions[accountResource].isUpdate &&
+                          canEdit ? [] : ["Attachment", "Case"]}
                         relatedTo={[
                           {
                             type: accountResource,

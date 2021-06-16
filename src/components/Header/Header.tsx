@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import {
   Slide,
@@ -13,7 +13,7 @@ import {
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover
+  Popover,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
@@ -23,6 +23,7 @@ import {
   HelpOutline,
   ExpandMore,
 } from "@material-ui/icons";
+import io from "socket.io-client";
 import { useHistory, Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
@@ -32,13 +33,14 @@ import "./Header.scss";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import routes from "../Helpers/Routes"
+import routes from "../Helpers/Routes";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { isEmpty } from "lodash";
-import { FiCheckCircle } from 'react-icons/fi';
-import { displayCardDate } from "../../constants/helpers"
-import ChatIcon from '@material-ui/icons/Chat';
+import { FiCheckCircle } from "react-icons/fi";
+import { displayCardDate } from "../../constants/helpers";
+import ChatIcon from "@material-ui/icons/Chat";
 import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import { backendApi } from "../../config";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -137,11 +139,11 @@ const useStyles = makeStyles((theme) => ({
   notificationHeight: {
     minWidth: 300,
     minHeight: 200,
-    maxHeight: `calc(100vh - 200px)`
+    maxHeight: `calc(100vh - 200px)`,
   },
   notificationHeightWithData: {
     minWidth: 300,
-    maxHeight: `calc(100vh - 200px)`
+    maxHeight: `calc(100vh - 200px)`,
   },
   markAll: {
     borderTop: "1px solid lightgrey",
@@ -151,8 +153,8 @@ const useStyles = makeStyles((theme) => ({
     padding: "5px",
     display: "flex !important",
     alignItems: "center !important",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 }));
 
 const Header = ({ toggleDrawer }) => {
@@ -167,6 +169,7 @@ const Header = ({ toggleDrawer }) => {
   const history = useHistory();
   const isMobile = useMediaQuery("(max-width:599px)");
   const [isSearch, setSearch] = useState(false);
+  const [socket, setSocket] = useState(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
   const [entitiesEl, setEntitiesEl] = useState(null);
@@ -188,20 +191,24 @@ const Header = ({ toggleDrawer }) => {
   const [notificationList, setNotificationList] = useState([]);
 
   // For FullScreen Notification - Start
-  const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
+  const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] =
+    React.useState(null);
 
   const handleFullScreenNotificationClick = (event) => {
     setFullScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
-    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      setNotificationList(data);
-      setLoadingNotifications(false);
-      notification.setCount(0);
-    }).catch((error) => {
-      setLoadingNotifications(false);
-      toastConfig.setToastConfig(error);
-    })
+    axiosInstance()
+      .get("/user/notification")
+      .then(({ data: { data } }) => {
+        setNotificationList(data);
+        setLoadingNotifications(false);
+        notification.setCount(0);
+      })
+      .catch((error) => {
+        setLoadingNotifications(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleFullScreenNotificationClose = () => {
@@ -209,86 +216,148 @@ const Header = ({ toggleDrawer }) => {
   };
 
   const fullScreenNotificationOpen = Boolean(fullScreenNotificationAnchorEl);
-  const fullScreenNotificationId = fullScreenNotificationOpen ? 'full-screen-notification' : undefined;
+  const fullScreenNotificationId = fullScreenNotificationOpen
+    ? "full-screen-notification"
+    : undefined;
   // For FullScreen Notification - End
 
   // For MobileScreen Notification - Start
-  const [mobileScreenNotificationAnchorEl, setMobileScreenNotificationAnchorEl] = React.useState(null);
+  const [
+    mobileScreenNotificationAnchorEl,
+    setMobileScreenNotificationAnchorEl,
+  ] = React.useState(null);
 
   const handleMobileScreenNotificationClick = async (event) => {
     setMobileScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
-    await axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      setNotificationList(data);
-      setLoadingNotifications(false);
-      notification.setCount(0);
-    }).catch((error) => {
-      setLoadingNotifications(false);
-      toastConfig.setToastConfig(error);
-    })
+    await axiosInstance()
+      .get("/user/notification")
+      .then(({ data: { data } }) => {
+        setNotificationList(data);
+        setLoadingNotifications(false);
+        notification.setCount(0);
+      })
+      .catch((error) => {
+        setLoadingNotifications(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleMobileScreenNotificationClose = () => {
     setMobileScreenNotificationAnchorEl(null);
   };
 
-  const mobileScreenNotificationOpen = Boolean(mobileScreenNotificationAnchorEl);
-  const mobileScreenNotificationId = mobileScreenNotificationOpen ? 'mobile-screen-notification' : undefined;
+  const mobileScreenNotificationOpen = Boolean(
+    mobileScreenNotificationAnchorEl
+  );
+  const mobileScreenNotificationId = mobileScreenNotificationOpen
+    ? "mobile-screen-notification"
+    : undefined;
   // For MobileScreen Notification - End
 
-
-  const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
+  const [loadingChatNotifications, setLoadingChatNotifications] =
+    useState(false);
   const [chatNotificationList, setChatNotificationList] = useState([]);
 
   // For FullScreen Chat Notification - Start
-  const [fullScreenChatNotificationAnchorEl, setFullScreenChatNotificationAnchorEl] = React.useState(null);
+  const [
+    fullScreenChatNotificationAnchorEl,
+    setFullScreenChatNotificationAnchorEl,
+  ] = React.useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const s = io(`${backendApi}/user`, {
+      auth: {
+        token,
+      },
+    });
+    setSocket(s);
+  }, [user]);
+
+  // Socket listening for data
+  useEffect(() => {
+    if (socket && user) {
+      socket.on("connect", () => {
+        socket.emit("join", user.user._id);
+      });
+
+      socket.on("data", (data) => {
+        console.log(data);
+        setChatNotificationList(data);
+      });
+    }
+    return () => {
+      if (socket) {
+        socket.off("connect");
+        socket.off("data");
+      }
+    };
+  }, [socket, user]);
 
   const handleFullScreenChatNotificationClick = (event) => {
     setFullScreenChatNotificationAnchorEl(event.currentTarget);
     setLoadingChatNotifications(true);
 
-    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      setChatNotificationList(data);
-      setLoadingChatNotifications(false);
-      chatNotification.setCount(0);
-    }).catch((error) => {
-      setLoadingNotifications(false);
-      toastConfig.setToastConfig(error);
-    })
+    axiosInstance()
+      .get("/user/notification")
+      .then(({ data: { data } }) => {
+        setChatNotificationList(data);
+        setLoadingChatNotifications(false);
+        chatNotification.setCount(0);
+      })
+      .catch((error) => {
+        setLoadingNotifications(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleFullScreenChatNotificationClose = () => {
     setFullScreenChatNotificationAnchorEl(null);
   };
 
-  const fullScreenChatNotificationOpen = Boolean(fullScreenChatNotificationAnchorEl);
-  const fullScreenChatNotificationId = fullScreenChatNotificationOpen ? 'full-screen-chat-notification' : undefined;
+  const fullScreenChatNotificationOpen = Boolean(
+    fullScreenChatNotificationAnchorEl
+  );
+  const fullScreenChatNotificationId = fullScreenChatNotificationOpen
+    ? "full-screen-chat-notification"
+    : undefined;
   // For FullScreen Notification - End
 
   // For MobileScreen Notification - Start
-  const [mobileScreenChatNotificationAnchorEl, setMobileScreenChatNotificationAnchorEl] = React.useState(null);
+  const [
+    mobileScreenChatNotificationAnchorEl,
+    setMobileScreenChatNotificationAnchorEl,
+  ] = React.useState(null);
 
   const handleMobileScreenChatNotificationClick = async (event) => {
     setMobileScreenChatNotificationAnchorEl(event.currentTarget);
     setLoadingChatNotifications(true);
 
-    await axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      setChatNotificationList(data);
-      setLoadingChatNotifications(false);
-      chatNotification.setCount(0);
-    }).catch((error) => {
-      setLoadingNotifications(false);
-      toastConfig.setToastConfig(error);
-    })
+    await axiosInstance()
+      .get("/user/notification")
+      .then(({ data: { data } }) => {
+        setChatNotificationList(data);
+        setLoadingChatNotifications(false);
+        chatNotification.setCount(0);
+      })
+      .catch((error) => {
+        setLoadingNotifications(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleMobileScreenChatNotificationClose = () => {
     setMobileScreenChatNotificationAnchorEl(null);
   };
 
-  const mobileScreenChatNotificationOpen = Boolean(mobileScreenChatNotificationAnchorEl);
-  const mobileScreenChatNotificationId = mobileScreenChatNotificationOpen ? 'mobile-screen-chat-notification' : undefined;
+  const mobileScreenChatNotificationOpen = Boolean(
+    mobileScreenChatNotificationAnchorEl
+  );
+  const mobileScreenChatNotificationId = mobileScreenChatNotificationOpen
+    ? "mobile-screen-chat-notification"
+    : undefined;
   // For MobileScreen Notification - End
 
   const handleMobileMenuClose = () => {
@@ -338,12 +407,12 @@ const Header = ({ toggleDrawer }) => {
 
     if (option && option.profile) {
       history.push({
-        pathname: routes.profilePage.path
+        pathname: routes.profilePage.path,
       });
     }
     if (option && option.brandConfiguration) {
       history.push({
-        pathname: routes.brandConfiguration.path
+        pathname: routes.brandConfiguration.path,
       });
     }
     setOpen(false);
@@ -353,24 +422,31 @@ const Header = ({ toggleDrawer }) => {
     try {
       if (!isEmpty(account)) {
         await instance.logoutPopup({
-          account: account
+          account: account,
         });
       }
     } catch (e) {
-      toastConfig.setToastConfig({ open: true, type: "error", message: "Need to logout from Azure" })
-    } finally {
-      await axiosInstance().get("/user/logout").then(() => {
-        history.push("/");
-        dispatch({ type: SET_USER, payload: null });
-        dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-        // localStorage.removeItem("token");
-        localStorage.clear();
-        history.push("/login");
-      }).catch((error) => {
-        toastConfig.setToastConfig(error)
+      toastConfig.setToastConfig({
+        open: true,
+        type: "error",
+        message: "Need to logout from Azure",
       });
+    } finally {
+      await axiosInstance()
+        .get("/user/logout")
+        .then(() => {
+          history.push("/");
+          dispatch({ type: SET_USER, payload: null });
+          dispatch({ type: SET_SELECTED_ENTITY, payload: null });
+          // localStorage.removeItem("token");
+          localStorage.clear();
+          history.push("/login");
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
     }
-  }
+  };
 
   function handleListKeyDown(event) {
     if (event.key === "Tab") {
@@ -414,134 +490,202 @@ const Header = ({ toggleDrawer }) => {
   );
 
   const NotificationContent = ({ data }) => {
-    return <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: "relative" }}>
-      {
-        data.map((d, index) => {
-          return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
-            className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
-            key={index}
+    return (
+      <div
+        className={`${
+          data.length == 0
+            ? classes.notificationHeight
+            : classes.notificationHeightWithData
+        }`}
+        style={{ position: "relative" }}
+      >
+        {data.map((d, index) => {
+          return (
+            <div
+              style={{
+                borderBottom: d.read
+                  ? "1px solid lightgrey"
+                  : "1px solid white",
+              }}
+              className={`${
+                d.read == true ? "" : "light-grey-bg"
+              } p-3 cursor-pointer`}
+              key={index}
+              onClick={() => {
+                if (d.read == false) {
+                  axiosInstance()
+                    .put("/user/notification/read", {
+                      toggle: true,
+                      notificationId: d.notificationId,
+                    })
+                    .then(() => {})
+                    .catch((error) => {
+                      toastConfig.setToastConfig(error);
+                    });
+                }
+
+                handleFullScreenNotificationClose();
+
+                if (d?.entity) {
+                  handleSelectedEnity(d.entity);
+                }
+
+                history.push(
+                  d.resourceId
+                    ? `${d.resourcePath}/${d.resourceId}`
+                    : d.resourcePath
+                );
+              }}
+            >
+              {
+                <>
+                  <h4>{d.title}</h4>
+                  <h5>{d.description}</h5>
+                  <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
+                </>
+              }
+            </div>
+          );
+        })}
+
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
+          <Typography
             onClick={() => {
-              if (d.read == false) {
-                axiosInstance().put("/user/notification/read", {
-                  toggle: true,
-                  notificationId: d.notificationId
-                }).then(() => {
-                }).catch(error => {
-                  toastConfig.setToastConfig(error);
+              axiosInstance()
+                .put("/user/notification/all-read", { toggle: true })
+                .then(({ data }) => {
+                  let updatedNotificationList = [];
+                  notificationList.map((notification) => {
+                    notification.read = true;
+                    updatedNotificationList.push(notification);
+                  });
+
+                  setNotificationList(updatedNotificationList);
+                  toastConfig.setToastConfig({
+                    open: true,
+                    message: data.message,
+                    type: "success",
+                  });
+
+                  setFullScreenNotificationAnchorEl(null);
+                  setMobileScreenNotificationAnchorEl(null);
                 })
-              }
+                .catch((error) => {
+                  toastConfig.setToastConfig(error);
+                });
+            }}
+            className="cursor-pointer"
+          >
+            <FiCheckCircle className="mr-2 pt-1" size={16} />
+            <span>Mark all as read</span>
+          </Typography>
+        </div>
 
-              handleFullScreenNotificationClose();
-
-              if (d?.entity) {
-                handleSelectedEnity(d.entity)
-              }
-
-              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath);
-
-            }}>
-            {
-              <>
-                <h4>{d.title}</h4>
-                <h5>{d.description}</h5>
-                <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
-              </>
-            }
-          </div>
-        })
-      }
-
-      <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
-        <Typography onClick={() => {
-          axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
-            let updatedNotificationList = [];
-            notificationList.map(notification => {
-              notification.read = true;
-              updatedNotificationList.push(notification);
-            })
-
-            setNotificationList(updatedNotificationList);
-            toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
-
-            setFullScreenNotificationAnchorEl(null);
-            setMobileScreenNotificationAnchorEl(null);
-          }).catch((error) => {
-            toastConfig.setToastConfig(error)
-          })
-
-        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16} /><span>Mark all as read</span></Typography>
-      </div>
-
-      {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
+        {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
       </Button> */}
-    </div >
-  }
+      </div>
+    );
+  };
 
   const ChatNotificationContent = ({ data }) => {
-    return <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: "relative" }}>
-      {
-        data.map((d, index) => {
-          return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
-            className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
-            key={index}
+    return (
+      <div
+        className={`${
+          data.length == 0
+            ? classes.notificationHeight
+            : classes.notificationHeightWithData
+        }`}
+        style={{ position: "relative" }}
+      >
+        {data.map((d, index) => {
+          return (
+            <div
+              style={{
+                borderBottom: d.read
+                  ? "1px solid lightgrey"
+                  : "1px solid white",
+              }}
+              className={`${
+                d.read == true ? "" : "light-grey-bg"
+              } p-3 cursor-pointer`}
+              key={index}
+              onClick={() => {
+                if (d.read == false) {
+                  axiosInstance()
+                    .put("/user/notification/read", {
+                      toggle: true,
+                      notificationId: d.notificationId,
+                    })
+                    .then(() => {})
+                    .catch((error) => {
+                      toastConfig.setToastConfig(error);
+                    });
+                }
+
+                handleFullScreenNotificationClose();
+
+                if (d?.entity) {
+                  handleSelectedEnity(d.entity);
+                }
+
+                history.push(
+                  d.resourceId
+                    ? `${d.resourcePath}/${d.resourceId}`
+                    : d.resourcePath
+                );
+              }}
+            >
+              {
+                <>
+                  <h4>{d.title}</h4>
+                  <h5>{d.description}</h5>
+                  <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
+                </>
+              }
+            </div>
+          );
+        })}
+
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
+          <Typography
             onClick={() => {
-              if (d.read == false) {
-                axiosInstance().put("/user/notification/read", {
-                  toggle: true,
-                  notificationId: d.notificationId
-                }).then(() => {
-                }).catch(error => {
-                  toastConfig.setToastConfig(error);
+              axiosInstance()
+                .put("/user/notification/all-read", { toggle: true })
+                .then(({ data }) => {
+                  let updatedNotificationList = [];
+                  notificationList.map((notification) => {
+                    notification.read = true;
+                    updatedNotificationList.push(notification);
+                  });
+
+                  setNotificationList(updatedNotificationList);
+                  toastConfig.setToastConfig({
+                    open: true,
+                    message: data.message,
+                    type: "success",
+                  });
+
+                  setFullScreenNotificationAnchorEl(null);
+                  setMobileScreenNotificationAnchorEl(null);
                 })
-              }
+                .catch((error) => {
+                  toastConfig.setToastConfig(error);
+                });
+            }}
+            className="cursor-pointer"
+          >
+            <FiCheckCircle className="mr-2 pt-1" size={16} />
+            <span>Mark all as read</span>
+          </Typography>
+        </div>
 
-              handleFullScreenNotificationClose();
-
-              if (d?.entity) {
-                handleSelectedEnity(d.entity)
-              }
-
-              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath);
-
-            }}>
-            {
-              <>
-                <h4>{d.title}</h4>
-                <h5>{d.description}</h5>
-                <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
-              </>
-            }
-          </div>
-        })
-      }
-
-      <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
-        <Typography onClick={() => {
-          axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
-            let updatedNotificationList = [];
-            notificationList.map(notification => {
-              notification.read = true;
-              updatedNotificationList.push(notification);
-            })
-
-            setNotificationList(updatedNotificationList);
-            toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
-
-            setFullScreenNotificationAnchorEl(null);
-            setMobileScreenNotificationAnchorEl(null);
-          }).catch((error) => {
-            toastConfig.setToastConfig(error)
-          })
-
-        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16} /><span>Mark all as read</span></Typography>
-      </div>
-
-      {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
+        {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
       </Button> */}
-    </div >
-  }
+      </div>
+    );
+  };
 
   const entitiesMenuId = "entities-menu";
 
@@ -563,24 +707,24 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>
-              {curEntity.entityName}
-            </Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && (
-              <Chip size="small" label="Current" color="primary" />
-            )}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>
+                {curEntity.entityName}
+              </Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && (
+                <Chip size="small" label="Current" color="primary" />
+              )}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -603,52 +747,76 @@ const Header = ({ toggleDrawer }) => {
       {/* <MenuItem onClick={openServicesMenu}>
         <p>Services</p> <ExpandMore />
       </MenuItem> */}
-      {
-        selectedEntity && <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu} className="d-flex justify-content-space-between">
+      {selectedEntity && (
+        <MenuItem
+          disabled={!selectedEntity}
+          onClick={openEntitiesMenu}
+          className="d-flex justify-content-space-between"
+        >
           <span className={classes.entityName}>
             {curEntity && curEntity.entityName}
           </span>
           <ExpandMore />
         </MenuItem>
-      }
+      )}
 
       {/* Remove below false to show chat notification icon */}
-      {
-        false && <MenuItem onClick={mobileScreenChatNotificationAnchorEl == null ? handleMobileScreenChatNotificationClick : () => { }}>
 
-          <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary"
-            aria-describedby={mobileScreenChatNotificationId}>
-            <ChatIcon />
-          </Badge>
-          <Box component="span" mx={1} />
-          <p>Chat Notifications</p>
+      <MenuItem
+        onClick={
+          mobileScreenChatNotificationAnchorEl == null
+            ? handleMobileScreenChatNotificationClick
+            : () => {}
+        }
+      >
+        <Badge
+          badgeContent={chatNotification ? chatNotification.count : 0}
+          color="secondary"
+          aria-describedby={mobileScreenChatNotificationId}
+        >
+          <ChatIcon />
+        </Badge>
+        <Box component="span" mx={1} />
+        <p>Chat Notifications</p>
 
-          <Popover
-            id={mobileScreenChatNotificationId}
-            open={mobileScreenChatNotificationOpen}
-            anchorEl={mobileScreenChatNotificationAnchorEl}
-            onClose={handleMobileScreenChatNotificationClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-          >
-            {
-              loadingChatNotifications ? <Typography className="m-3">Loading Chat Notifications...</Typography> :
-                (chatNotificationList.length == 0 ? <Typography className="m-3">No Chat Notifications found</Typography> : <ChatNotificationContent data={chatNotificationList} />)
-            }
-          </Popover>
-        </MenuItem>
-      }
+        <Popover
+          id={mobileScreenChatNotificationId}
+          open={mobileScreenChatNotificationOpen}
+          anchorEl={mobileScreenChatNotificationAnchorEl}
+          onClose={handleMobileScreenChatNotificationClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          {loadingChatNotifications ? (
+            <Typography className="m-3">
+              Loading Chat Notifications...
+            </Typography>
+          ) : chatNotificationList.length == 0 ? (
+            <Typography className="m-3">No Chat Notifications found</Typography>
+          ) : (
+            <ChatNotificationContent data={chatNotificationList} />
+          )}
+        </Popover>
+      </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl == null ? handleMobileScreenNotificationClick : () => { }}>
-
-        <Badge badgeContent={notification ? notification.count : 0} color="secondary"
-          aria-describedby={mobileScreenNotificationId}>
+      <MenuItem
+        onClick={
+          mobileScreenNotificationAnchorEl == null
+            ? handleMobileScreenNotificationClick
+            : () => {}
+        }
+      >
+        <Badge
+          badgeContent={notification ? notification.count : 0}
+          color="secondary"
+          aria-describedby={mobileScreenNotificationId}
+        >
           <Notifications />
         </Badge>
         <Box component="span" mx={1} />
@@ -660,18 +828,21 @@ const Header = ({ toggleDrawer }) => {
           anchorEl={mobileScreenNotificationAnchorEl}
           onClose={handleMobileScreenNotificationClose}
           anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
+            vertical: "bottom",
+            horizontal: "center",
           }}
           transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
+            vertical: "top",
+            horizontal: "center",
           }}
         >
-          {
-            loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
-              (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
-          }
+          {loadingNotifications ? (
+            <Typography className="m-3">Loading Notifications...</Typography>
+          ) : notificationList.length == 0 ? (
+            <Typography className="m-3">No Notifications found</Typography>
+          ) : (
+            <NotificationContent data={notificationList} />
+          )}
         </Popover>
       </MenuItem>
 
@@ -686,10 +857,10 @@ const Header = ({ toggleDrawer }) => {
   function handleSelectedEnity(id) {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
     if (history.location.pathname.includes(routes.opportunityDetail.path)) {
-      history.push({ pathname: routes.opportunity.path })
+      history.push({ pathname: routes.opportunity.path });
     }
     if (history.location.pathname.includes(routes.lead.path)) {
-      history.push({ pathname: routes.lead.path })
+      history.push({ pathname: routes.lead.path });
     }
   }
 
@@ -817,9 +988,16 @@ const Header = ({ toggleDrawer }) => {
 
           <div className={classes.sectionDesktop}>
             <div>
-              <IconButton aria-describedby={fullScreenNotificationId} aria-label="settings" color="inherit"
-                onClick={handleFullScreenNotificationClick}>
-                <Badge badgeContent={notification ? notification.count : 0} color="secondary">
+              <IconButton
+                aria-describedby={fullScreenNotificationId}
+                aria-label="settings"
+                color="inherit"
+                onClick={handleFullScreenNotificationClick}
+              >
+                <Badge
+                  badgeContent={notification ? notification.count : 0}
+                  color="secondary"
+                >
                   <Notifications />
                 </Badge>
               </IconButton>
@@ -831,55 +1009,73 @@ const Header = ({ toggleDrawer }) => {
                 anchorEl={fullScreenNotificationAnchorEl}
                 onClose={handleFullScreenNotificationClose}
                 anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
+                  vertical: "bottom",
+                  horizontal: "center",
                 }}
                 transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center',
+                  vertical: "top",
+                  horizontal: "center",
                 }}
               >
-                {
-                  loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
-                    (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> :
-                      <NotificationContent data={notificationList} />)
-                }
+                {loadingNotifications ? (
+                  <Typography className="m-3">
+                    Loading Notifications...
+                  </Typography>
+                ) : notificationList.length == 0 ? (
+                  <Typography className="m-3">
+                    No Notifications found
+                  </Typography>
+                ) : (
+                  <NotificationContent data={notificationList} />
+                )}
               </Popover>
             </div>
 
             {/* Remove below false to show chat notification icon */}
-            {
-              false && <div>
-                <IconButton aria-describedby={fullScreenChatNotificationId} aria-label="settings" color="inherit"
-                  onClick={handleFullScreenChatNotificationClick}>
-                  <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                    <ChatIcon />
-                  </Badge>
-                </IconButton>
 
-                <Popover
-                  className="mr-2"
-                  id={fullScreenChatNotificationId}
-                  open={fullScreenChatNotificationOpen}
-                  anchorEl={fullScreenChatNotificationAnchorEl}
-                  onClose={handleFullScreenChatNotificationClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                  }}
+            <div>
+              <IconButton
+                aria-describedby={fullScreenChatNotificationId}
+                aria-label="settings"
+                color="inherit"
+                onClick={handleFullScreenChatNotificationClick}
+              >
+                <Badge
+                  badgeContent={chatNotification ? chatNotification.count : 0}
+                  color="secondary"
                 >
-                  {
-                    loadingChatNotifications ? <Typography className="m-3">Loading Chat Notifications...</Typography> :
-                      (chatNotificationList.length == 0 ? <Typography className="m-3">No Chat Notifications found</Typography> :
-                        <NotificationContent data={chatNotificationList} />)
-                  }
-                </Popover>
-              </div>
-            }
+                  <ChatIcon />
+                </Badge>
+              </IconButton>
+
+              <Popover
+                className="mr-2"
+                id={fullScreenChatNotificationId}
+                open={fullScreenChatNotificationOpen}
+                anchorEl={fullScreenChatNotificationAnchorEl}
+                onClose={handleFullScreenChatNotificationClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "center",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "center",
+                }}
+              >
+                {loadingChatNotifications ? (
+                  <Typography className="m-3">
+                    Loading Chat Notifications...
+                  </Typography>
+                ) : chatNotificationList.length == 0 ? (
+                  <Typography className="m-3">
+                    No Chat Notifications found
+                  </Typography>
+                ) : (
+                  <ChatNotificationContent data={chatNotificationList} />
+                )}
+              </Popover>
+            </div>
 
             {/* <IconButton aria-label="settings" color="inherit">
               <Badge badgeContent={1} color="secondary">
