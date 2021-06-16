@@ -23,7 +23,11 @@ const MenuProps = {
     },
 };
 
-export const MultipleFormula = ({ fields, values, setFieldValue }) => {
+export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
+
+
+    let inputRef = useRef([]);
+    const [isMyInputFocused, setIsMyInputFocused] = useState(null);
 
     const onChangeValue = (index, fieldName, value) => {
         let data = values["formulaoption"] ? values["formulaoption"] : {}
@@ -32,24 +36,66 @@ export const MultipleFormula = ({ fields, values, setFieldValue }) => {
     };
 
     const handleAddInputField = (field) => {
-        navigator.clipboard.writeText(field)
+        if (isMyInputFocused || isMyInputFocused === 0) {
+            let pushPosition = inputRef.current[isMyInputFocused].current.selectionStart
+            let fieldName = inputRef.current[isMyInputFocused].current.name;
+            let data = values["formulaoption"] ? values["formulaoption"] : {}
+            if (!data[fieldName]) {
+                data[fieldName] = ""
+            }
+            data[fieldName] = [data[fieldName].slice(0, pushPosition), field, data[fieldName].slice(pushPosition)].join('');
+            setFieldValue("formulaoption", data)
+            inputRef.current[isMyInputFocused].current.focus();
+        }
     }
+
+
+    const convertLabeltoValue = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            if (fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v).length) {
+                result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldName)
+            }
+            else {
+                result.push(_v)
+            }
+        })
+        return result;
+    }
+
+    const convertValuetoLabel = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            if (fields.filter((data) => data.fieldName === _v).length) {
+                result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldLabel)
+            }
+            else {
+                result.push(_v)
+            }
+        })
+        return result;
+    }
+
+
+    inputRef.current = values["formulaFields"] && values["formulaFields"].map(
+        (_field, index) => inputRef.current[index] = React.createRef()
+    )
 
     return (<Box>
         <FormControl variant="outlined" fullWidth margin="dense">
             <Autocomplete
                 multiple
                 id="tags-filled"
-                options={fields && fields.map((_field) => { return _field.fieldName })}
+                options={fields && (fields.filter((_f) => _f._id !== _id)).map((_field) => { return _field.fieldLabel })}
                 getOptionLabel={(option) => option}
-                value={values["formulaFields"] ? values["formulaFields"] : []}
+                value={values["formulaFields"] ? convertValuetoLabel(values["formulaFields"]) : []}
                 freeSolo
                 renderTags={(value: string[], getTagProps) =>
                     value.map((option: string, index: number) => (
                         <Chip variant="outlined" label={option} {...getTagProps({ index })} />
                     ))
                 }
-                onChange={(e, value) => setFieldValue("formulaFields", value)}
+                onChange={(e, value) => setFieldValue("formulaFields", convertLabeltoValue(value))}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -64,16 +110,16 @@ export const MultipleFormula = ({ fields, values, setFieldValue }) => {
             <Autocomplete
                 multiple
                 id="tags-filled"
-                options={fields && fields.map((_field) => { return _field.fieldName })}
+                options={fields && fields.map((_field) => { return _field.fieldLabel })}
                 getOptionLabel={(option) => option}
-                value={values["formulainputFields"] ? values["formulainputFields"] : []}
+                value={values["formulainputFields"] ? convertValuetoLabel(values["formulainputFields"]) : []}
                 freeSolo
                 renderTags={(value: string[], getTagProps) =>
                     value.map((option: string, index: number) => (
                         <Chip variant="outlined" label={option} {...getTagProps({ index })} />
                     ))
                 }
-                onChange={(e, value) => setFieldValue("formulainputFields", value)}
+                onChange={(e, value) => setFieldValue("formulainputFields", convertLabeltoValue(value))}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -87,9 +133,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue }) => {
         {(values["formulainputFields"] && values["formulainputFields"].length > 0) &&
             <Box pt={0.5} pb={0.5}>
                 {values["formulainputFields"].map((_field) => (
-                    <Tooltip title="Copied to clipboard" >
-                        <Chip className="ml-1 cursor-pointer" key={_field} label={_field} onClick={() => handleAddInputField(_field)} />
-                    </Tooltip>
+                    <Chip className="ml-1 cursor-pointer" key={_field} label={_field} onClick={() => handleAddInputField(_field)} />
                 ))}
             </Box>}
         {(values["formulaFields"] && values["formulaFields"].length > 0) &&
@@ -111,6 +155,10 @@ export const MultipleFormula = ({ fields, values, setFieldValue }) => {
                                         rows={2}
                                         placeholder="Formula (return field1 + field2)"
                                         style={{ margin: 0 }}
+                                        name={_field}
+                                        inputRef={inputRef.current[i]}
+                                        //onBlur={() => setIsMyInputFocused(null)}
+                                        onFocus={() => setIsMyInputFocused(i)}
                                         onKeyPress={(event) => { event.stopPropagation(); }}
                                         value={values["formulaoption"] && values["formulaoption"][_field] && values["formulaoption"][_field]}
                                         onChange={(event) => onChangeValue(i, _field, event.target.value)}
