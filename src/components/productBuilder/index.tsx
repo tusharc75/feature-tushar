@@ -43,7 +43,6 @@ const ProductBuilder = (props) => {
     const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [productId, setProductId] = useState(null);
     const [isClone, setIsClone] = useState(false);
     const [isBulkEdit, setIsBulkEdit] = useState(false)
     const [productDataList, setproductDataList] = useState([]);
@@ -59,19 +58,11 @@ const ProductBuilder = (props) => {
 
 
     const ActionsRenderer = params => <>
-        {/* <Tooltip title="Clone">
-            <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                    setProductId(params.data._id);
-                    setIsClone(true)
-                    setIsAddNewProduct(true)
-                }}
-            >
+        <Tooltip title="Clone">
+            <IconButton size="small" aria-label="Clone" onClick={() => { setProductData(params.data); setIsClone(true) }} >
                 <FileCopyIcon fontSize="small" color="primary" />
             </IconButton>
-        </Tooltip> */}
+        </Tooltip>
         <Tooltip title="Edit" >
             <IconButton aria-label="Edit" onClick={() => { setProductData(params.data) }}  >
                 <EditIcon fontSize="small" color="primary" />
@@ -260,17 +251,24 @@ const ProductBuilder = (props) => {
     }
 
     const handleSaveProduct = (rows) => {
-        let data: any = {}
-        data.product = rows
-        data._id = productBuilderId
-        axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
+        if (isClone) {
+            addProductInBuilder(rows)
             setProductData(null)
-            setIsBulkEdit(false)
-            setproductDataList([])
-            fetchProduct(productBuilderId);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+            setIsClone(false)
+        }
+        else {
+            let data: any = {}
+            data.product = rows
+            data._id = productBuilderId
+            axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
+                setProductData(null)
+                setIsBulkEdit(false)
+                setproductDataList([])
+                fetchProduct(productBuilderId);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
     }
 
     const handleDelete = () => {
@@ -345,8 +343,6 @@ const ProductBuilder = (props) => {
         data._ids = selectedRecords.map(d => d.id)
         data.field = field
         data.field.leval = "builder-custom"
-        console.log(addFieldData.fields)
-        console.log(data.field)
         if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName).length) {
             if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName)[0].sectionType === "cost") {
                 data.field.sectionType = "cost";
@@ -454,7 +450,7 @@ const ProductBuilder = (props) => {
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder} openFrom="builder"
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
-        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => { setProductData(null); fetchProduct(productBuilderId) }} stage={stage} />}
+        {productData && <ProductDialog isClone={isClone} productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => { setProductData(null); fetchProduct(productBuilderId) }} stage={stage} />}
         {isAddField && <AddField refrence="builder" section={addFieldData.section}
             fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
         }
