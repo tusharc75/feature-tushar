@@ -1,7 +1,7 @@
 import axios from 'axios';
+import { backendApi } from './../config';
 
 export default (history = null, passedHeaders = null) => {
-    const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
     let headers: any = passedHeaders ? passedHeaders : {};
 
     if (localStorage.token) {
@@ -14,7 +14,7 @@ export default (history = null, passedHeaders = null) => {
     }
 
     const axiosInstance = axios.create({
-        baseURL: baseURL,
+        baseURL: backendApi,
         headers
     });
 
