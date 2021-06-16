@@ -128,6 +128,7 @@ export default function AssignContactsDialog({
                 <Button
                     onClick={handleAssignContacts}
                     color="primary"
+                    variant="contained"
                     size="small" 
                 >
                     {isAssigning ? <CircularProgress size={22} /> : "Save"}
