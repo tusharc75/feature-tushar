@@ -2054,7 +2054,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            
+                            allowedToEdit={allowedToEdit}
                           />
                         ) : (
                           <Steps
