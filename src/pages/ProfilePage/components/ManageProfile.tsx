@@ -10,7 +10,7 @@ import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword'
 import { cloneDeep } from 'lodash'
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
@@ -18,6 +18,7 @@ import { HiOutlinePencilAlt } from 'react-icons/hi';
 import { displayDate, imageUploadMaxSize } from "../../../constants/helpers"
 import AddProxyDialog from './AddProxyDialog';
 import DeleteIcon from "@material-ui/icons/Delete";
+import routes from '../../../components/Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -305,82 +306,85 @@ export default function ManageProfile(props) {
                                     <h3 className="form-label-style" title="DOA Proxy">
                                         DOA Proxy
                                     </h3>
-                                    <Grid container>
-                                    </Grid>
+
+                                    {userData?.proxyDOA ?
+                                        (
+                                            <TableContainer>
+                                                <Table aria-label="DOA Proxy Table" size="small">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>
+                                                                <h4
+                                                                    title="assignedTo"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    Assigned To
+                                                                </h4>
+                                                            </TableCell>
+
+                                                            <TableCell align="center">
+                                                                <h4
+                                                                    title="startDate"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    Start Date
+                                                                </h4>
+                                                            </TableCell>
+
+                                                            <TableCell align="center">
+                                                                <h4
+                                                                    title="endDate"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    End Date
+                                                                </h4>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                Action
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        <TableRow key={userData.proxyDOA.user}>
+                                                            <TableCell>
+                                                                <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>{userData.proxyDOA.optionLabel}</Link>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    edge="end"
+                                                                    aria-label="delete"
+                                                                    onClick={() => {
+                                                                        setShowDeleteConfirmBox(true)
+                                                                        setIsDeleteProxy(true)
+                                                                    }
+                                                                    }
+                                                                >
+                                                                    <DeleteIcon
+                                                                        color="error"
+                                                                    />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        ) :
+                                        (
+                                            <Box textAlign="center" padding={2}>
+                                                <Typography>No proxy is assigned </Typography>
+                                            </Box>
+                                        )
+                                    }
                                 </div>
-                                {userData?.proxyDOA ?
-                                    (
-                                        <TableContainer>
-                                            <Table aria-label="DOA Proxy Table">
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell align="center">
-                                                            <h4
-                                                                title="assignedTo"
-                                                                className={classes.detailLabel}
-                                                            >
-                                                                Assigned To
-                                                            </h4>
-                                                        </TableCell>
 
-                                                        <TableCell align="center">
-                                                            <h4
-                                                                title="startDate"
-                                                                className={classes.detailLabel}
-                                                            >
-                                                                Start Date
-                                                            </h4>
-                                                        </TableCell>
-
-                                                        <TableCell align="center">
-                                                            <h4
-                                                                title="endDate"
-                                                                className={classes.detailLabel}
-                                                            >
-                                                                End Date
-                                                            </h4>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    <TableRow key={userData.proxyDOA.user}>
-                                                        <TableCell align="center">
-                                                            <span className={classes.dataValue}>{userData.proxyDOA.optionLabel}</span>
-                                                        </TableCell>
-                                                        <TableCell align="center">
-                                                            <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
-                                                        </TableCell>
-                                                        <TableCell align="center">
-                                                            <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
-                                                        </TableCell>
-                                                        <TableCell align="center">
-                                                            <IconButton
-                                                                size="small"
-                                                                edge="end"
-                                                                aria-label="delete"
-                                                                onClick={() => {
-                                                                    setShowDeleteConfirmBox(true)
-                                                                    setIsDeleteProxy(true)
-                                                                }
-                                                                }
-                                                            >
-                                                                <DeleteIcon
-                                                                    color="error"
-                                                                />
-                                                            </IconButton>
-                                                        </TableCell>
-                                                    </TableRow>
-
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                    ) :
-                                    (
-                                        <Box textAlign="center" padding={2}>
-                                            <Typography>No proxy is assigned </Typography>
-                                        </Box>
-                                    )
-                                }
                             </Box>
                         </> : null
                 }
