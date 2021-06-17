@@ -516,6 +516,14 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, []);
 
+  useEffect(() => {
+    if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
+      createImagePDF(false, true);
+    } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
+      createImagePDF(false, true);
+    }
+  }, [ProcessStatus]);
+
   /**
    *
    * @param version
@@ -1052,6 +1060,7 @@ function QuoteDetail() {
                 },
               })
               .then(({ data }) => {
+                setPdf(data.fieldName);
                 handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
               })
               .catch((err) => {
@@ -1378,7 +1387,7 @@ function QuoteDetail() {
     let MarginCurrency = "";
     let ProfitCurrency = "";
     BuilderData.map((quoteRows: { [x: string]: any }) => {
-      let hasTSP = false;
+      let hasTSP = true;
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
@@ -1412,6 +1421,7 @@ function QuoteDetail() {
                 fieldValue: quoteRows[indexkey],
               });
             }
+
             if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalCost"
@@ -1438,12 +1448,20 @@ function QuoteDetail() {
               totalMargin = totalMargin + quoteRows[indexkey];
               MarginCurrency = currency.toUpperCase();
             }
+
+            if (key !== "totalSalesPrice") {
+              invalidPrice = true;
+            }
+            console.log(currency);
+            console.log(key);
           }
         }
       });
+
       if (!hasTSP) {
         invalidPrice = true;
       }
+
       inventory.push(inventorydata);
     });
 
@@ -1555,18 +1573,15 @@ function QuoteDetail() {
 
   const handleCases = () => {
     if (DOAreq) {
-      if (!PDF) {
-        axiosInstance()
-          .post(`/doa-request/create/${id}?version=${currentVersion}`)
-          .then(({ data }) => {
-            handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
-            fetchQuoteData(currentVersion);
-            console.log(data);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      }
+      axiosInstance()
+        .post(`/doa-request/create/${id}?version=${currentVersion}`)
+        .then(({ data }) => {
+          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+          fetchQuoteData(currentVersion);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     }
     if (Customerreq) {
       createImagePDF(false, true);
@@ -1889,11 +1904,15 @@ function QuoteDetail() {
                           {copyOfquoteData ? (
                             <DetailsPage
                               data={copyOfquoteData}
-                              fields={quoteFields.filter(
-                                (_f) =>
-                                  _f.fieldData.sectionName !==
-                                  "Invoice Information"
-                              )}
+                              fields={
+                                !ifQuoteApproved().approved
+                                  ? quoteFields.filter(
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
+                                  : quoteFields
+                              }
                             />
                           ) : null}
                         </>
@@ -1901,15 +1920,6 @@ function QuoteDetail() {
                     </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
-                    {ifQuoteApproved().approved && copyOfquoteData ? (
-                      <DetailsPage
-                        data={copyOfquoteData}
-                        fields={quoteFields.filter(
-                          (_f) =>
-                            _f.fieldData.sectionName === "Invoice Information"
-                        )}
-                      />
-                    ) : null}
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
@@ -1978,6 +1988,17 @@ function QuoteDetail() {
                           md={5}
                           className="d-flex justify-content-end"
                         >
+                          {allowedToEdit && ifQuoteApproved().approved ? (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              startIcon={<HiPencil />}
+                              onClick={handleOpenUpdateDialog}
+                            >
+                              Edit Information
+                            </Button>
+                          ) : null}
                           <select
                             className="customSelect mx-1"
                             value={currentVersion}
@@ -1996,9 +2017,9 @@ function QuoteDetail() {
                                   variant="outlined"
                                   size="small"
                                   disabled={
-                                    deletingDOA ||
-                                    loading ||
-                                    OtherSteps.indexOf(ProcessStatus) > 1
+                                    deletingDOA || loading || DOAneeded
+                                      ? DOASteps.indexOf(ProcessStatus) > 1
+                                      : OtherSteps.indexOf(ProcessStatus) > 1
                                   }
                                   onClick={deleteVersion}
                                 >
@@ -2073,7 +2094,6 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                           
                           />
                         )}
                       </div>
@@ -2392,30 +2412,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            // qbApi={qbApi}
-          />
-        )}
-
-        {openInvoiceDialog && (
-          <ManageQuoteDialog
-            open={openInvoiceDialog}
-            onSuccess={() => {
-              setOpenInvoiceDialog(false);
-              fetchQuoteData(currentVersion);
-            }}
-            onClose={() => {
-              setOpenInvoiceDialog(false);
-            }}
-            isNew={false}
-            dataToUpdate={copyOfquoteData}
-            resource={null}
-            isRedirectTodetailPage={false}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            disableCurrency={true}
             quoteApproved={ifQuoteApproved().approved}
-            forInvoice={true}
           />
         )}
 
