@@ -1430,7 +1430,7 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
-              hasTSP = false;
+              invalidPrice = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1444,19 +1444,9 @@ function QuoteDetail() {
               totalMargin = totalMargin + quoteRows[indexkey];
               MarginCurrency = currency.toUpperCase();
             }
-
-            if (key !== "totalSalesPrice") {
-              invalidPrice = true;
-            }
-            console.log(currency);
-            console.log(key);
           }
         }
       });
-
-      if (!hasTSP) {
-        invalidPrice = true;
-      }
 
       inventory.push(inventorydata);
     });
@@ -1480,6 +1470,8 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
+      console.log(invalidQty);
+      console.log(invalidPrice);
       if (!invalidQty || !invalidPrice) {
         setNextStep(true);
       } else {
@@ -1850,15 +1842,23 @@ function QuoteDetail() {
                     }}
                   >
                     <Tab
+                      style={{
+                        background: tabValue === 0 ? "#163340" : "",
+                        color: tabValue === 0 ? "white" : "#163340",
+                      }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Headers
+                          Details
                         </div>
                       }
                       {...a11yProps(0)}
                     />
                     <Tab
+                      style={{
+                        background: tabValue === 1 ? "#163340" : "",
+                        color: tabValue === 1 ? "white" : "#163340",
+                      }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
@@ -2279,7 +2279,8 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {ProcessStatus === "Quote Builder" &&
-                            visibleColumns.length > 0 ? (
+                            visibleColumns.length > 0 &&
+                            ifQuoteApproved().approved ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
                                 refreshProducts={refreshProducts}

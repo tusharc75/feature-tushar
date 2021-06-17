@@ -17,6 +17,7 @@ import {
   gridPageSizes,
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
+import { useData } from "../../StateProvider/Provider";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -110,6 +111,11 @@ const intialState = {
 };
 
 const DOAApproval = () => {
+  const {
+    state: {
+      user: { user: currentUser },
+    },
+  } = useData();
   const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
@@ -125,7 +131,8 @@ const DOAApproval = () => {
     pageSizes,
   } = state;
   const [sellingPrice, setSellingPrice] = useState(0);
-  const [QData, setQData] = useState({});
+  const [QData, setQData] = useState(null);
+  const [loadingData, setLoadingData] = useState(true);
   const [needDOA, setneedDOA] = useState(false);
   const [PDFName, setPDFName] = useState("");
   const [buttontext, setButton] = useState("Accept");
@@ -165,6 +172,8 @@ const DOAApproval = () => {
       gridApi.showLoadingOverlay();
     }
 
+    setLoadingData(true);
+
     axiosInstance()
       .get("/quote-builder/getQuotefromDOAId/" + id)
       .then(({ data }) => {
@@ -198,10 +207,12 @@ const DOAApproval = () => {
         if (data.Quote_Status !== "Sent for DOA") {
           setQStatus(false);
         }
+        setLoadingData(false);
       })
       .catch((err) => {
         dispatch({ type: "loading", loading: false });
         setToastConfig(err);
+        setLoadingData(false);
       });
   };
 
@@ -297,7 +308,10 @@ const DOAApproval = () => {
                 >
                   View
                 </Button>
-                {QStatus ? (
+                {QData &&
+                QStatus &&
+                QData?.DOA.approveBy.filter((u) => u.user === currentUser._id)
+                  .length === 0 ? (
                   <>
                     <Button
                       onClick={() => QuoteStatusChange(true)}
@@ -330,78 +344,82 @@ const DOAApproval = () => {
                   sm={12}
                   className="d-flex align-items-center gap-1 quotePanel"
                 >
-                  <div className="quoteBox">
-                    <span>Total Profit</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          QData["TotalProfitcurr"],
-                          QData["TotalProfitamount"]
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          QData["TotalProfitcurr"],
-                          QData["TotalProfitamount"]
-                        ).shortFormatAmount
-                      }
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Cost Price</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          QData["TotalCostcurr"],
-                          QData["TotalCostamount"]
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          QData["TotalCostcurr"],
-                          QData["TotalCostamount"]
-                        ).shortFormatAmount
-                      }
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Selling Price</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          QData["TotalSellingPricecurr"],
-                          QData["TotalSellingPriceamount"]
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          QData["TotalSellingPricecurr"],
-                          QData["TotalSellingPriceamount"]
-                        ).shortFormatAmount
-                      }
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Margin</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          QData["TotalMargincurr"],
-                          QData["TotalMarginamount"]
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          QData["TotalMargincurr"],
-                          QData["TotalMarginamount"]
-                        ).shortFormatAmount
-                      }
-                    </span>
-                  </div>
+                  {QData && (
+                    <>
+                      <div className="quoteBox">
+                        <span>Total Profit</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalProfitcurr"],
+                              QData["TotalProfitamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalProfitcurr"],
+                              QData["TotalProfitamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                      <div className="quoteBox">
+                        <span>Total Cost Price</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalCostcurr"],
+                              QData["TotalCostamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalCostcurr"],
+                              QData["TotalCostamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                      <div className="quoteBox">
+                        <span>Total Selling Price</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalSellingPricecurr"],
+                              QData["TotalSellingPriceamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalSellingPricecurr"],
+                              QData["TotalSellingPriceamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                      <div className="quoteBox">
+                        <span>Total Margin</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalMargincurr"],
+                              QData["TotalMarginamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalMargincurr"],
+                              QData["TotalMarginamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                    </>
+                  )}
                   <div></div>
                 </Grid>
                 <div style={{ height: 500 }}>
@@ -429,7 +447,7 @@ const DOAApproval = () => {
             relatedTo={[
               {
                 type: "DOA",
-                referenceId: QData["quoteBuilderId"],
+                referenceId: QData?.quoteBuilderId,
                 access: true,
               },
             ]}
