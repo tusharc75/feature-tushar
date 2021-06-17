@@ -21,7 +21,7 @@ import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { gridPageSizes } from "../../constants/helpers";
+import { gridPageSizes, opportunity, quote } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -237,23 +237,21 @@ const useStyles = makeStyles((theme) => ({
   },
   bgProduct: {
     background: "#f5f5f5 !important",
-    paddingBottom: "2px",
-    margin: "10px",
-    marginBottom: "0",
-    border: "1px solid #cec9c9",
+    padding: "10px",
+    paddingBottom: "0",
+    border: "1px solid #163340",
     borderBottom: "none",
     boxShadow: "none",
-    borderBottomLeftRadius: "0",
-    borderBottomRightRadius: "0",
+    borderRadius: "0",
     // margin: "10px",
     // border: "1px solid #d9d7d7",
     // borderRadius: "6px"
   },
   productInformation: {
     background: "white",
-    margin: "9px",
+    padding: "9px",
     borderRadius: "3px",
-    border: "1px solid #d2cbcb",
+    border: "1px solid #163340",
   },
   termsBtn: {
     position: "absolute",
@@ -261,9 +259,7 @@ const useStyles = makeStyles((theme) => ({
     right: "0",
   },
   detailBox: {
-    margin: "10px",
-    border: "1px solid #d9d7d7",
-    borderRadius: "6px",
+    border: "1px solid #163340",
   },
   btnHeader: {
     position: "absolute",
@@ -907,7 +903,7 @@ function QuoteDetail() {
     const pagewidth = PdfDoc.internal.pageSize.width;
 
     if (logo !== null) {
-      PdfDoc.addImage(logo, "JPEG", pagewidth - 80, 0, 70, 50);
+      PdfDoc.addImage(logo, "JPEG", pagewidth - 65, 10, 40, 40);
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
@@ -972,7 +968,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(12);
     PdfDoc.text(quoteData.customerAccountName.optionLabel, 20, 115);
 
-    var text = "Please find the Quoatation Below:";
+    var text = "Please find the quotation below:";
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50);
     PdfDoc.text(text, 20, 200);
@@ -982,7 +978,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale.fullFormatAmountWithCurrencyName}`,
+          content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
@@ -990,7 +986,7 @@ function QuoteDetail() {
     ];
 
     autoTable(PdfDoc, {
-      margin: { top: 140 + blockHeight, left: 20, right: 20 },
+      margin: { top: 150 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: "center", cellWidth: "auto", overflow: "linebreak" },
@@ -1350,7 +1346,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(`${qbApi}/clone/${quoteData._id}`)
       .then(({ data }) => {
-        history.push(`${routes.quoteBuilder.path}/${data.data._id}`);
+        history.push(`${routes.quoteBuilder.path}/detail/${data.data._id}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -1831,7 +1827,7 @@ function QuoteDetail() {
               ) : (
                 <>
                   <Tabs
-                    className="oms-tab"
+                    className="quote-tab"
                     value={tabValue}
                     onChange={handleMainTabChange}
                     textColor="primary"
@@ -2375,6 +2371,11 @@ function QuoteDetail() {
                     }
                     relatedTo={[
                       {
+                        type: quote.quoteResource,
+                        referenceId: quoteData?._id,
+                        access: true,
+                      },
+                      {
                         type: quoteData?.customerAccountName
                           ? customerAccount?.accountResource
                           : supplierAccount?.accountResource,
@@ -2384,9 +2385,9 @@ function QuoteDetail() {
                         access: false,
                       },
                       {
-                        type: "opportunity",
-                        referenceId: quoteData?._id,
-                        access: true,
+                        type: opportunity.opportunityResource,
+                        referenceId: quoteData.opportunity?.optionValue,
+                        access: false,
                       },
                     ]}
                     handleActivityRefresh={() => {}}
