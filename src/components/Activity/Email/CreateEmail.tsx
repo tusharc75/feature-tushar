@@ -430,6 +430,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         />
                                                         <Autocomplete
                                                             multiple
+                                                            disableCloseOnSelect={true}
                                                             options={options.filter(option => values.cc.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>
@@ -471,6 +472,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         />
                                                         <Autocomplete
                                                             multiple
+                                                            disableCloseOnSelect={true}
                                                             options={isQuoteBuilder ? cc : options.filter(option => values.to.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>

@@ -1760,7 +1760,7 @@ function QuoteDetail() {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Grid item xs={12} sm={12} md={12} lg={8}>
             <Paper>
               {!quoteData ? (
                 <div>
@@ -1858,7 +1858,7 @@ function QuoteDetail() {
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
-                    <div className={classes.detailBox}>
+                    <div className={`position-relative ${classes.detailBox}`}>
                       {quoteData && (
                         <>
                           <div className={classes.btnHeader}>
@@ -2054,7 +2054,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            
+                            allowedToEdit={allowedToEdit}
                           />
                         ) : (
                           <Steps
@@ -2324,7 +2324,7 @@ function QuoteDetail() {
               )}
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
+          <Grid item xs={12} sm={12} md={12} lg={4}>
             <Paper>
               {!quoteData ? (
                 <Box>

@@ -130,6 +130,7 @@ const Steps = (props) => {
     reminderLoading = false,
     hideReminderButton = false,
     openInvoiceDialog,
+    allowedToEdit
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -324,9 +325,11 @@ const Steps = (props) => {
                   Approved by Customer
                 </Typography>
 
-                <Button onClick={openInvoiceDialog}>
-                  Update Invoice Information
-                </Button>
+                {
+                  allowedToEdit && <Button variant="outlined" onClick={openInvoiceDialog}>
+                    Update Invoice Information
+                  </Button>
+                }
               </div>
             )}
             {versionStatus.includes("Rejected by Customer") && (

@@ -100,7 +100,7 @@ export default function CustomSteps({ steps, active }) {
                         >
                             <StepLabel
                                 {...labelProps}
-                                icon={active > index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
+                                icon={active >= index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
                                 {step.text}</StepLabel>
                         </Step>
                     );

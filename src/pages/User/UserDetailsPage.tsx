@@ -12,12 +12,19 @@ import {
   Paper,
   Tooltip,
   Tabs,
-  Tab
+  Tab,
+  TableRow,
+  TableContainer,
+  TableHead,
+  Table,
+  TableBody,
+  TableCell,
+  makeStyles
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, Link } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -35,7 +42,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { isObjectEmpty, userType } from "../../constants/helpers";
+import { displayDate, isObjectEmpty, userType } from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -48,9 +55,22 @@ import { FcFlowChart } from 'react-icons/fc';
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import AssignedEntities from "./AssignedEntities";
 
+
+const useStyles = makeStyles((theme) => ({
+  dataValue: {
+    fontWeight: 500,
+    color: theme.palette.primary.main,
+  },
+  detailLabel: {
+    fontSize: "0.8rem",
+    fontWeight: "normal",
+    color: "#656464",
+  }
+}));
+
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const classes = useStyles();
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -101,6 +121,7 @@ const UserDetailsPage = () => {
       fetchDoa();
       fetchUsers()
       fetchUserRelatedDetail()
+      setCurrentTabIndex(0);
     }
     // eslint-disable-next-line
   }, [id]);
@@ -520,15 +541,83 @@ const UserDetailsPage = () => {
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
+                      {
+                        userData?.proxyDOA && <Tab
+                          label="DOA Proxy"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      }
                     </Tabs>
                     <Box hidden={currentTabIndex !== 0}>
                       <DetailsPage data={userData} fields={userFields} />
                     </Box>
+
                     <Box hidden={currentTabIndex !== 1}>
                       <OrgChartContainer data={orgChartData} onClick={(id) => {
                         history.push(`${routes.userDetail.path}/${id}`)
                       }} />
                     </Box>
+
+
+                    {
+                      userData?.proxyDOA && <Box hidden={currentTabIndex !== 2}>
+                        {/* <div className="detail-box"> */}
+                          {/* <h3 className="form-label-style" title="DOA Proxy">
+                            DOA Proxy
+                          </h3> */}
+
+                          <TableContainer>
+                            <Table aria-label="DOA Proxy Table" size="small">
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>
+                                    <h4
+                                      title="assignedTo"
+                                      className={classes.detailLabel}
+                                    >
+                                      Assigned To
+                                    </h4>
+                                  </TableCell>
+
+                                  <TableCell align="center">
+                                    <h4
+                                      title="startDate"
+                                      className={classes.detailLabel}
+                                    >
+                                      Start Date
+                                    </h4>
+                                  </TableCell>
+
+                                  <TableCell align="center">
+                                    <h4
+                                      title="endDate"
+                                      className={classes.detailLabel}
+                                    >
+                                      End Date
+                                    </h4>
+                                  </TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                <TableRow key={userData.proxyDOA.user}>
+                                  <TableCell>
+                                    <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>{userData.proxyDOA.optionLabel}</Link>
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                  </TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+
+                        {/* </div> */}
+                      </Box>
+                    }
                   </>
                 )}
               </Box>
@@ -541,7 +630,7 @@ const UserDetailsPage = () => {
                         <Box padding="5px">
                           <Typography variant="subtitle2">
                             Assigned Company Wide Roles ({globalRoles.length || "0"})
-                      </Typography>
+                          </Typography>
                         </Box>
                       </Box>
                     </Grid>
@@ -589,7 +678,7 @@ const UserDetailsPage = () => {
                         <Box textAlign="center" marginTop={2}>
                           <Typography variant="body2">
                             User doesn't have any roles
-                      </Typography>
+                          </Typography>
                         </Box>
                       ) : (
                         <Box
@@ -684,7 +773,7 @@ const UserDetailsPage = () => {
                           <Box textAlign="center" marginTop={2}>
                             <Typography variant="body2">
                               User doesn't have any DOA
-                    </Typography>
+                            </Typography>
                           </Box>
                         )}
                       </BoxWithBorder>
@@ -703,7 +792,7 @@ const UserDetailsPage = () => {
                   >
                     <Typography variant="subtitle2">
                       Assigned Entity ({entities?.length || 0})
-                </Typography>
+                    </Typography>
                     {permissions.entity.isUpdate && (
                       <IconButton
                         title="Assign entities"

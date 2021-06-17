@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose }) => {
+const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage" }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
@@ -84,7 +84,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
 
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
+            from === "UserDetailPage" ?
+                setUsers(([{ id: userList.find(v => v.id == userSelected[0]).id, name: userList.find(v => v.id == userSelected[0]).name, amount: 0 }]))
+                : setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
