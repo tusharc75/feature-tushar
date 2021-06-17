@@ -35,7 +35,9 @@
 }
 
 .MuiTab-textColorPrimary.Mui-selected {
-  border-bottom: 3px solid var(--primary);
-  border-radius: 0;
-  background: #d9d9d9;
+      border-radius: 0;
+      background: #163340;
+      color: white !important;
+      border-top-right-radius: 12px;
+      border-top-left-radius: 12px;
 }
