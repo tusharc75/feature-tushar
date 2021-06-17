@@ -341,7 +341,7 @@ const Product = () => {
                         />
                         <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                         <Button
-                            className={styles.add_submit_btn}
+                            className={styles.action_submit_btn}
                             variant="outlined"
                             color="default"
                             size="small"
