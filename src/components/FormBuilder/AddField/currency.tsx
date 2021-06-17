@@ -32,6 +32,7 @@ export const Currency = ({ values, setFieldValue }) => {
     return (<Box>
         <Autocomplete
             multiple
+            disableCloseOnSelect={true}
             id="tags-filled"
             options={currency}
             value={values["displayCurrency"] ? values["displayCurrency"] : []}
