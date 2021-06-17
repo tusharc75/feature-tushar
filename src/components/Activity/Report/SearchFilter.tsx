@@ -78,6 +78,7 @@ export const SearchFilter = ({
   return (
     <Autocomplete
       multiple={true}
+      disableCloseOnSelect={true}
       size="small"
       fullWidth
       loading={loading}

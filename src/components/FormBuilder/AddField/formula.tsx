@@ -84,6 +84,7 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
         <FormControl variant="outlined" fullWidth margin="dense">
             <Autocomplete
                 multiple
+                disableCloseOnSelect={true}
                 id="tags-filled"
                 options={fields && (fields.filter((_f) => _f._id !== _id)).map((_field) => { return _field.fieldLabel })}
                 getOptionLabel={(option) => option}

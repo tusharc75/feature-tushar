@@ -1135,6 +1135,7 @@ const FormTypes = (props) => {
       <Autocomplete
         {...rest}
         multiple
+        disableCloseOnSelect={true}
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
         value={
