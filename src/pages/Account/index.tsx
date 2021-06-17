@@ -9,7 +9,8 @@ import {
   IconButton,
   Grid,
   Chip,
-  MenuList
+  MenuList,
+  Box
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
@@ -51,7 +52,8 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-
+import zIndex from "@material-ui/core/styles/zIndex";
+import styles from "../Leads/Header.module.scss";
 const AccTypes = [
   {
     key: "All Accounts",
@@ -586,85 +588,82 @@ export default function Account(props) {
         </Grid>
         <CustomContainer>
           <div className={`${accountClass["account_header_inner_container"]}`}>
-
             <Grid
               container
               className="header-panel"
               justify="space-between"
               alignContent="center"
             >
-              <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
-                {AccTypes && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-8"
-                    value={filter}
-                    exclusive
-                    onChange={handleFilter}
-                  >
-                    {AccTypes.map((k: any, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                )}
-
-                <div>
-                  <ButtonGroup size="small" variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
-                    <Button >{options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                    >
-                      <ArrowDropDownIcon />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
-                        }}
+              <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
+                <Box component="div" className={styles.filter_side_header}>
+                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
+                  <div className="d-flex align-items-center gap-1 m-2">
+                    {AccTypes && (
+                      <ToggleButtonGroup
+                        size="small"
+                        className="ml-8"
+                        value={filter}
+                        exclusive
+                        onChange={handleFilter}
                       >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList
-                              id="menu"
-                              style={{ backgroundColor: 'transparent', fontSize: '10px' }}
-                            >
-                              {options.map((option, index) => (
-                                <MenuItem
-                                  key={option}
-                                  selected={index === selectedIndex}
-                                  onClick={(event) => handleMenuItemClick(event, index)}
-                                  style={{ color: 'black' }}
-                                >
-                                  {option}
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
+                        {AccTypes.map((k: any, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
                     )}
-                  </Popper>
-                </div>
-
+                    <ButtonGroup size="small" variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
+                      <Button >{options[selectedIndex]}</Button>
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-controls={open ? 'split-button-menu' : undefined}
+                        aria-expanded={open ? 'true' : undefined}
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
+                        onClick={handleToggle}
+                      >
+                        <ArrowDropDownIcon />
+                      </Button>
+                    </ButtonGroup>
+                    <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                      {({ TransitionProps, placement }) => (
+                        <Grow
+                          {...TransitionProps}
+                          style={{
+                            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                          }}
+                        >
+                          <Paper>
+                            <ClickAwayListener onClickAway={handleClose}>
+                              <MenuList
+                                id="menu"
+                                style={{ backgroundColor: 'transparent', fontSize: '10px' }}
+                              >
+                                {options.map((option, index) => (
+                                  <MenuItem
+                                    key={option}
+                                    selected={index === selectedIndex}
+                                    onClick={(event) => handleMenuItemClick(event, index)}
+                                    style={{ color: 'black' }}
+                                  >
+                                    {option}
+                                  </MenuItem>
+                                ))}
+                              </MenuList>
+                            </ClickAwayListener>
+                          </Paper>
+                        </Grow>
+                      )}
+                    </Popper>
+                  </div>
+                </Box>
               </Grid>
               <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-                <div
-                  className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`}
-                >
+                <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox="account_header_search_bar"
@@ -672,14 +671,14 @@ export default function Account(props) {
                     value={search}
                   />
                   <div
-                    className={`${accountClass.account_header_add_btn_action_btn_group}`}
+                    className={`${accountClass.account_header_add_btn_action_btn_group} mt-2`}
                   >
                     {accountPermissions.isCreate && (
                       <Button
                         variant="contained"
                         color="primary"
                         size="small"
-                        className={`${accountClass.account_header_add_btn}`}
+                        className={styles.add_submit_btn}
                         onClick={clickCreateNew}
                         startIcon={<AddOutlined />}
                       >
@@ -694,7 +693,7 @@ export default function Account(props) {
                           variant="outlined"
                           color="default"
                           size="small"
-                          className={`${accountClass.account_header_action_btn}`}
+                          className={styles.add_submit_btn}
                           onClick={openActions}
                           aria-controls="action-menu"
                         >
