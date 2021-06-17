@@ -12,7 +12,10 @@ import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Activity from "../../components/Activity";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import { formatAmountWithCurrency, gridPageSizes } from "../../constants/helpers";
+import {
+  formatAmountWithCurrency,
+  gridPageSizes,
+} from "../../constants/helpers";
 import { camelCase } from "lodash";
 
 function reducer(state, action) {
@@ -107,7 +110,7 @@ const intialState = {
 };
 
 const DOAApproval = () => {
-  const toastConfig = useContext(CustomToastContext);
+  const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
   const [columns, setColumns] = useState([]);
@@ -116,17 +119,12 @@ const DOAApproval = () => {
   const {
     dataRows,
     rowCount,
-    loading,
+
     page,
     limit,
     pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
   } = state;
   const [sellingPrice, setSellingPrice] = useState(0);
-  const [chatid, setChatid] = useState("");
   const [QData, setQData] = useState({});
   const [needDOA, setneedDOA] = useState(false);
   const [PDFName, setPDFName] = useState("");
@@ -155,7 +153,7 @@ const DOAApproval = () => {
         setDoaName(data.data.doaName);
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
+        setToastConfig(err);
       });
   };
 
@@ -195,7 +193,6 @@ const DOAApproval = () => {
         setSellingPrice(data.TotalSellingPrice);
         fetchDOA(data.Quotedby);
         setPDFName(data.PDF);
-        setChatid(data.chatter);
 
         setQData(data);
         if (data.Quote_Status !== "Sent for DOA") {
@@ -204,7 +201,7 @@ const DOAApproval = () => {
       })
       .catch((err) => {
         dispatch({ type: "loading", loading: false });
-        console.log(err);
+        setToastConfig(err);
       });
   };
 
@@ -226,7 +223,7 @@ const DOAApproval = () => {
             history.push("/doa-request");
           })
           .catch((err) => {
-            console.log(err);
+            setToastConfig(err);
           });
       }
     } else {
@@ -236,7 +233,7 @@ const DOAApproval = () => {
           history.push("/doa-request");
         })
         .catch((err) => {
-          console.log(err);
+          setToastConfig(err);
         });
     }
   };
@@ -254,7 +251,7 @@ const DOAApproval = () => {
         pdfWindow.location.href = fileURL;
       })
       .catch((err) => {
-        console.log(err);
+        setToastConfig(err);
       });
   };
 
@@ -335,26 +332,74 @@ const DOAApproval = () => {
                 >
                   <div className="quoteBox">
                     <span>Total Profit</span>
-                    <span title={formatAmountWithCurrency(QData["TotalProfitcurr"], QData["TotalProfitamount"]).fullFormatAmount}>
-                      {formatAmountWithCurrency(QData["TotalProfitcurr"], QData["TotalProfitamount"]).shortFormatAmount}
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          QData["TotalProfitcurr"],
+                          QData["TotalProfitamount"]
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          QData["TotalProfitcurr"],
+                          QData["TotalProfitamount"]
+                        ).shortFormatAmount
+                      }
                     </span>
                   </div>
                   <div className="quoteBox">
                     <span>Total Cost Price</span>
-                    <span title={formatAmountWithCurrency(QData["TotalCostcurr"], QData["TotalCostamount"]).fullFormatAmount}>
-                      {formatAmountWithCurrency(QData["TotalCostcurr"], QData["TotalCostamount"]).shortFormatAmount}
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          QData["TotalCostcurr"],
+                          QData["TotalCostamount"]
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          QData["TotalCostcurr"],
+                          QData["TotalCostamount"]
+                        ).shortFormatAmount
+                      }
                     </span>
                   </div>
                   <div className="quoteBox">
                     <span>Total Selling Price</span>
-                    <span title={formatAmountWithCurrency(QData["TotalSellingPricecurr"], QData["TotalSellingPriceamount"]).fullFormatAmount}>
-                      {formatAmountWithCurrency(QData["TotalSellingPricecurr"], QData["TotalSellingPriceamount"]).shortFormatAmount}
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          QData["TotalSellingPricecurr"],
+                          QData["TotalSellingPriceamount"]
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          QData["TotalSellingPricecurr"],
+                          QData["TotalSellingPriceamount"]
+                        ).shortFormatAmount
+                      }
                     </span>
                   </div>
                   <div className="quoteBox">
                     <span>Total Margin</span>
-                    <span title={formatAmountWithCurrency(QData["TotalMargincurr"], QData["TotalMarginamount"]).fullFormatAmount}>
-                      {formatAmountWithCurrency(QData["TotalMargincurr"], QData["TotalMarginamount"]).shortFormatAmount}
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          QData["TotalMargincurr"],
+                          QData["TotalMarginamount"]
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          QData["TotalMargincurr"],
+                          QData["TotalMarginamount"]
+                        ).shortFormatAmount
+                      }
                     </span>
                   </div>
                   <div></div>

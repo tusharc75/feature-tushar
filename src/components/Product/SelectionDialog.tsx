@@ -29,16 +29,16 @@ const SelectionDialog = (props) => {
 
     const { state: { permissions } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, api, refrenceId } = props;
+    const { handleClose, api, refrenceId,isUpload,uploadData } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
     const [productTemplate, setProductTemplate] = useState([]);
-
+    const [fileError, setFileError] = useState(null);
+    const [selectedFile,setSelectedFile] = useState(null)
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     // const [productCategory, setProductCategory] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
-
     useEffect(() => {
         axiosInstance().get(`/product-category`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
@@ -71,9 +71,13 @@ const SelectionDialog = (props) => {
             });
         }
     }
-
     const handleSubmit = (values) => {
-        axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&productTemplate=" + values.productTemplate
+        if(isUpload){
+            if(!selectedFile) setFileError("Please Select File")
+            else uploadData(selectedFile,{productCategory:values.productCategory,productTemplate:values.productTemplate});
+        }
+
+        else axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&productTemplate=" + values.productTemplate
             + "&refrenceId=" + refrenceId,
             { responseType: "arraybuffer" }).then((response) => {
                 const fileName = response.headers["content-disposition"].split("filename=")[1];
@@ -230,6 +234,31 @@ const SelectionDialog = (props) => {
                                         size="small"
                                     />
                                 </Box>
+                                {isUpload && 
+                                    <Box mt={1}>
+                                        <label htmlFor="btn-upload">
+                                            <input
+                                                id="btn-upload"
+                                                name="btn-upload"
+                                                style={{ display: 'none' }}
+                                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                                type="file"
+                                                onChange={(e) => {
+                                                    setFileError(null)
+                                                    setSelectedFile(e)
+                                                }}
+                                            />
+                                                <Button
+                                                    className={`btn-choose`}
+                                                    variant="outlined"
+                                                    component="span">
+                                                    Choose Files
+                                                </Button>
+                                                {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}
+                                                <span style={{marginLeft:'5px'}}>{selectedFile && selectedFile.target.files.length > 0 ? selectedFile.target.files[0].name : null}</span>
+                                            </label>
+                                    </Box>
+                                }
                             </Box>
                         </Form>
                     </CustomDialogContent>
@@ -241,7 +270,7 @@ const SelectionDialog = (props) => {
                             color="primary"
                             type="submit"
                             onClick={submitForm}
-                        > Download</CustomButton>
+                        > {isUpload ? "Upload" : "Download"} </CustomButton>
                     </CustomDialogFooter>
                 </Fragment>
             )}

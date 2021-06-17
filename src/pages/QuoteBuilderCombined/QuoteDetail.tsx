@@ -273,14 +273,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
 
 const gettingVersionStatusText = "Getting Status...";
 
@@ -399,19 +391,23 @@ function QuoteDetail() {
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: "",
   });
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalcost, setTotalCost] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: "",
   });
   const [totalsale, setTotalSale] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: "",
   });
   const [totalmargin, setTotalMargin] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: "",
   });
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [ColumnName, setColName] = useState([]);
@@ -986,7 +982,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale.fullFormatAmount}`,
+          content: `Quote Total : ${totalsale.fullFormatAmountWithCurrencyName}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
@@ -1775,7 +1771,7 @@ function QuoteDetail() {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Grid item xs={12} sm={12} md={12} lg={8}>
             <Paper>
               {!quoteData ? (
                 <div>
@@ -1873,7 +1869,7 @@ function QuoteDetail() {
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
-                    <div className={classes.detailBox}>
+                    <div className={`position-relative ${classes.detailBox}`}>
                       {quoteData && (
                         <>
                           <div className={classes.btnHeader}>
@@ -2193,7 +2189,21 @@ function QuoteDetail() {
                                           ))}
                                         </div>
                                       )}
-                                      MenuProps={MenuProps}
+                                      MenuProps={{
+                                        PaperProps: {
+                                          style: {
+                                            maxHeight:
+                                              ITEM_HEIGHT * 4.5 +
+                                              ITEM_PADDING_TOP,
+                                            width: 250,
+                                          },
+                                        },
+                                        anchorOrigin: {
+                                          vertical: "bottom",
+                                          horizontal: "left",
+                                        },
+                                        getContentAnchorEl: null,
+                                      }}
                                     >
                                       {ColumnName.map((name) => (
                                         <MenuItem
@@ -2344,7 +2354,7 @@ function QuoteDetail() {
               )}
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
+          <Grid item xs={12} sm={12} md={12} lg={4}>
             <Paper>
               {!quoteData ? (
                 <Box>
