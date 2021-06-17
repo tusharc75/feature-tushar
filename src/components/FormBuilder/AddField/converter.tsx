@@ -80,6 +80,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
         <Box marginTop={2}>
             <Autocomplete
                 multiple
+                disableCloseOnSelect={true}
                 id="tags-filled"
                 options={[]}
                 value={values["units"] ? values["units"] : []}

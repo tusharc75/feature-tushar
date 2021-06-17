@@ -145,6 +145,7 @@ export const UserDropdown = ({
     <Fragment>
       <Autocomplete
         multiple={multiple}
+        disableCloseOnSelect={multiple}
         options={users ? users : []}
         getOptionLabel={(option) => {
           if (typeof option === "string") {

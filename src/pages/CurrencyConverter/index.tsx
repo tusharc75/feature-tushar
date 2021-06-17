@@ -163,6 +163,7 @@ const CurrencyConverter = () => {
               <Grid item xs={6}>
                 <Autocomplete
                   multiple
+                  disableCloseOnSelect={true}
                   id="tags-filled"
                   options={getUniqueCurrencies().map((_c) => { return _c.currencyCode })}
                   getOptionLabel={(option) => option}
