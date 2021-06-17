@@ -36,7 +36,7 @@ const ProjectStrategyHeader = (props) => {
 
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
         <BiNetworkChart className="headerLogo" />
         <span className="listingHeader">Project Sales</span>
         <ToggleButtonGroup

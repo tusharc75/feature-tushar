@@ -408,7 +408,7 @@ const LeadDetailsPage = () => {
                     restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
-                        type: "lead",
+                        type: leadResource,
                         referenceId: leadData._id,
                         access: true,
                       },

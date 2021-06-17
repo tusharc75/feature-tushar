@@ -21,7 +21,7 @@ import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { gridPageSizes } from "../../constants/helpers";
+import { gridPageSizes, opportunity, quote } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -387,23 +387,23 @@ function QuoteDetail() {
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
-    fullFormatAmountWithCurrencyName: ""
+    fullFormatAmountWithCurrencyName: "",
   });
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalcost, setTotalCost] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
-    fullFormatAmountWithCurrencyName: ""
+    fullFormatAmountWithCurrencyName: "",
   });
   const [totalsale, setTotalSale] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
-    fullFormatAmountWithCurrencyName: ""
+    fullFormatAmountWithCurrencyName: "",
   });
   const [totalmargin, setTotalMargin] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
-    fullFormatAmountWithCurrencyName: ""
+    fullFormatAmountWithCurrencyName: "",
   });
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [ColumnName, setColName] = useState([]);
@@ -507,6 +507,14 @@ function QuoteDetail() {
   useEffect(() => {
     fetchTermsAndConditions();
   }, []);
+
+  useEffect(() => {
+    if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
+      createImagePDF(false, true);
+    } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
+      createImagePDF(false, true);
+    }
+  }, [ProcessStatus]);
 
   /**
    *
@@ -662,7 +670,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -695,7 +703,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -798,12 +806,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -895,7 +903,7 @@ function QuoteDetail() {
     const pagewidth = PdfDoc.internal.pageSize.width;
 
     if (logo !== null) {
-      PdfDoc.addImage(logo, "JPEG", pagewidth - 80, 0, 70, 50);
+      PdfDoc.addImage(logo, "JPEG", pagewidth - 65, 10, 40, 40);
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
@@ -960,7 +968,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(12);
     PdfDoc.text(quoteData.customerAccountName.optionLabel, 20, 115);
 
-    var text = "Please find the Quoatation Below:";
+    var text = "Please find the quotation below:";
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50);
     PdfDoc.text(text, 20, 200);
@@ -970,7 +978,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale.fullFormatAmountWithCurrencyName}`,
+          content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
@@ -978,7 +986,7 @@ function QuoteDetail() {
     ];
 
     autoTable(PdfDoc, {
-      margin: { top: 140 + blockHeight, left: 20, right: 20 },
+      margin: { top: 150 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: "center", cellWidth: "auto", overflow: "linebreak" },
@@ -1044,6 +1052,7 @@ function QuoteDetail() {
                 },
               })
               .then(({ data }) => {
+                setPdf(data.fieldName);
                 handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
               })
               .catch((err) => {
@@ -1337,7 +1346,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(`${qbApi}/clone/${quoteData._id}`)
       .then(({ data }) => {
-        history.push(`${routes.quoteBuilder.path}/${data.data._id}`);
+        history.push(`${routes.quoteBuilder.path}/detail/${data.data._id}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -1370,7 +1379,7 @@ function QuoteDetail() {
     let MarginCurrency = "";
     let ProfitCurrency = "";
     BuilderData.map((quoteRows: { [x: string]: any }) => {
-      let hasTSP = false;
+      let hasTSP = true;
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
@@ -1404,6 +1413,7 @@ function QuoteDetail() {
                 fieldValue: quoteRows[indexkey],
               });
             }
+
             if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalCost"
@@ -1416,7 +1426,7 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
-              hasTSP = false;
+              invalidPrice = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1433,9 +1443,7 @@ function QuoteDetail() {
           }
         }
       });
-      if (!hasTSP) {
-        invalidPrice = true;
-      }
+
       inventory.push(inventorydata);
     });
 
@@ -1458,6 +1466,8 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
+      console.log(invalidQty);
+      console.log(invalidPrice);
       if (!invalidQty || !invalidPrice) {
         setNextStep(true);
       } else {
@@ -1547,18 +1557,15 @@ function QuoteDetail() {
 
   const handleCases = () => {
     if (DOAreq) {
-      if (!PDF) {
-        axiosInstance()
-          .post(`/doa-request/create/${id}?version=${currentVersion}`)
-          .then(({ data }) => {
-            handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
-            fetchQuoteData(currentVersion);
-            console.log(data);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      }
+      axiosInstance()
+        .post(`/doa-request/create/${id}?version=${currentVersion}`)
+        .then(({ data }) => {
+          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+          fetchQuoteData(currentVersion);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     }
     if (Customerreq) {
       createImagePDF(false, true);
@@ -1611,7 +1618,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1794,9 +1801,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button>
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1831,15 +1838,23 @@ function QuoteDetail() {
                     }}
                   >
                     <Tab
+                      style={{
+                        background: tabValue === 0 ? "#163340" : "",
+                        color: tabValue === 0 ? "white" : "#163340",
+                      }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Headers
+                          Details
                         </div>
                       }
                       {...a11yProps(0)}
                     />
                     <Tab
+                      style={{
+                        background: tabValue === 1 ? "#163340" : "",
+                        color: tabValue === 1 ? "white" : "#163340",
+                      }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
@@ -1881,11 +1896,15 @@ function QuoteDetail() {
                           {copyOfquoteData ? (
                             <DetailsPage
                               data={copyOfquoteData}
-                              fields={quoteFields.filter(
-                                (_f) =>
-                                  _f.fieldData.sectionName !==
-                                  "Invoice Information"
-                              )}
+                              fields={
+                                !ifQuoteApproved().approved
+                                  ? quoteFields.filter(
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
+                                  : quoteFields
+                              }
                             />
                           ) : null}
                         </>
@@ -1893,15 +1912,6 @@ function QuoteDetail() {
                     </div>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
-                    {ifQuoteApproved().approved && copyOfquoteData ? (
-                      <DetailsPage
-                        data={copyOfquoteData}
-                        fields={quoteFields.filter(
-                          (_f) =>
-                            _f.fieldData.sectionName === "Invoice Information"
-                        )}
-                      />
-                    ) : null}
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
@@ -1970,6 +1980,17 @@ function QuoteDetail() {
                           md={5}
                           className="d-flex justify-content-end"
                         >
+                          {allowedToEdit && ifQuoteApproved().approved ? (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              startIcon={<HiPencil />}
+                              onClick={handleOpenUpdateDialog}
+                            >
+                              Edit Information
+                            </Button>
+                          ) : null}
                           <select
                             className="customSelect mx-1"
                             value={currentVersion}
@@ -1988,9 +2009,9 @@ function QuoteDetail() {
                                   variant="outlined"
                                   size="small"
                                   disabled={
-                                    deletingDOA ||
-                                    loading ||
-                                    OtherSteps.indexOf(ProcessStatus) > 1
+                                    deletingDOA || loading || DOAneeded
+                                      ? DOASteps.indexOf(ProcessStatus) > 1
+                                      : OtherSteps.indexOf(ProcessStatus) > 1
                                   }
                                   onClick={deleteVersion}
                                 >
@@ -2065,7 +2086,6 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-
                           />
                         )}
                       </div>
@@ -2107,7 +2127,8 @@ function QuoteDetail() {
                             md={12}
                             className="d-flex align-items-center gap-1"
                           >
-                            {ProcessStatus === "New" ? (
+                            {!ifQuoteApproved().approved &&
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2168,15 +2189,17 @@ function QuoteDetail() {
                                       MenuProps={{
                                         PaperProps: {
                                           style: {
-                                            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                                            maxHeight:
+                                              ITEM_HEIGHT * 4.5 +
+                                              ITEM_PADDING_TOP,
                                             width: 250,
                                           },
                                         },
                                         anchorOrigin: {
                                           vertical: "bottom",
-                                          horizontal: "left"
+                                          horizontal: "left",
                                         },
-                                        getContentAnchorEl: null
+                                        getContentAnchorEl: null,
                                       }}
                                     >
                                       {ColumnName.map((name) => (
@@ -2204,8 +2227,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2225,7 +2248,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2253,7 +2276,8 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0 ? (
+                            visibleColumns.length > 0 ||
+                            ifQuoteApproved().approved ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
                                 refreshProducts={refreshProducts}
@@ -2261,7 +2285,7 @@ function QuoteDetail() {
                                 currency={quoteData.currency}
                                 isAll={false}
                               />
-                            ) : currentTabIndex === 0 ? (
+                            ) : (
                               <ProductBuilder
                                 productBuilderId={productBuilderID}
                                 isAddNewProduct={isAddNewProduct}
@@ -2276,12 +2300,13 @@ function QuoteDetail() {
                                 }
                                 Editable={
                                   ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                  ProcessStatus === "New"
                                     ? true
                                     : false
                                 }
                               />
-                            ) : null}
+                            )}
+
                             {ProcessStatus === "Quote Builder" ? (
                               <Box className="m-3">
                                 <div className="position-relative">
@@ -2346,6 +2371,11 @@ function QuoteDetail() {
                     }
                     relatedTo={[
                       {
+                        type: quote.quoteResource,
+                        referenceId: quoteData?._id,
+                        access: true,
+                      },
+                      {
                         type: quoteData?.customerAccountName
                           ? customerAccount?.accountResource
                           : supplierAccount?.accountResource,
@@ -2355,12 +2385,12 @@ function QuoteDetail() {
                         access: false,
                       },
                       {
-                        type: "opportunity",
-                        referenceId: quoteData?._id,
-                        access: true,
+                        type: opportunity.opportunityResource,
+                        referenceId: quoteData.opportunity?.optionValue,
+                        access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2396,30 +2426,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-          // qbApi={qbApi}
-          />
-        )}
-
-        {openInvoiceDialog && (
-          <ManageQuoteDialog
-            open={openInvoiceDialog}
-            onSuccess={() => {
-              setOpenInvoiceDialog(false);
-              fetchQuoteData(currentVersion);
-            }}
-            onClose={() => {
-              setOpenInvoiceDialog(false);
-            }}
-            isNew={false}
-            dataToUpdate={copyOfquoteData}
-            resource={null}
-            isRedirectTodetailPage={false}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            disableCurrency={true}
             quoteApproved={ifQuoteApproved().approved}
-            forInvoice={true}
           />
         )}
 
@@ -2455,8 +2462,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}

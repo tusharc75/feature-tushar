@@ -144,15 +144,15 @@ function App() {
           if (count > 0) {
             chatNotification.setCount(count);
           }
-        })
+        });
     }
-  }
+  };
 
   useEffect(() => {
     try {
       getNotification();
       getChatNotification();
-      
+
       setInterval(async () => {
         await getNotification();
       }, 60000);
@@ -422,7 +422,7 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-          <PrivateRoute exact path={`${routes.quoteBuilder.path}/:id`}>
+          <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
             <QuoteDetail />
           </PrivateRoute>
           <Route exact path={"/dashboards"}>
@@ -438,20 +438,18 @@ function App() {
           <Route exact path={"/quote-approval/:id"}>
             <QuoteApproval />
           </Route>
-          <Route exact path={"/doa-request"}>
+          <PrivateRoute exact path={"/doa-request"}>
             <DOARequest />
-          </Route>
-          <Route exact path={"/doa-request/:id"}>
+          </PrivateRoute>
+          <PrivateRoute exact path={"/doa-request/:id"}>
             <DOAapproval />
-          </Route>
+          </PrivateRoute>
           <PrivateRoute exact path={routes.quoteBuilder.path}>
             <QuoteBuilderCombined />
           </PrivateRoute>
-
           <Route exact path="/inline-grid">
             <CustomInlineEditableAgGrid />
           </Route>
-
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

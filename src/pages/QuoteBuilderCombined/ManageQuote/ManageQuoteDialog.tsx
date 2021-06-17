@@ -63,7 +63,6 @@ export default function ManageQuoteDialog({
   contacts = null,
   disableCurrency = false,
   quoteApproved = false,
-  forInvoice = false,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -278,13 +277,9 @@ export default function ManageQuoteDialog({
       .then(({ data: { data } }) => {
         setQuoteFields(data.map((f) => f.fieldData));
 
-        if (!quoteApproved && !forInvoice) {
+        if (!quoteApproved) {
           data = data.filter(
-            (_f) => _f.fieldData.sectionName !== "Invoice Information"
-          );
-        } else if (quoteApproved && forInvoice) {
-          data = data.filter(
-            (_f) => _f.fieldData.sectionName === "Invoice Information"
+            (_f) => _f.fieldData.sectionName !== "Post-Quote Information"
           );
         }
 
@@ -368,7 +363,7 @@ export default function ManageQuoteDialog({
           message: data.message,
         });
         if (isRedirectTodetailPage)
-          history.push(`${routes.quoteBuilder.path}/${newId}`);
+          history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
         setLoading(false);
         onSuccess(newId);
       })
@@ -379,13 +374,7 @@ export default function ManageQuoteDialog({
   };
 
   const handleUpdateQuote = (values) => {
-    values = quoteApproved
-      ? {
-          ...getObjKeysWithValues(dataToUpdate, quoteFields),
-          ...values,
-          _id: dataToUpdate._id,
-        }
-      : { ...values, _id: dataToUpdate._id };
+    values = { ...values, _id: dataToUpdate._id };
     setLoading(true);
 
     axiosInstance()

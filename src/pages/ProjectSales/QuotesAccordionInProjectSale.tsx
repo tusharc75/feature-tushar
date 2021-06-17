@@ -274,7 +274,7 @@ export default function QuotesAccordionInProjectSale({
                                 {obj.entity === selectedEntity ? (
                                   <Link
                                     className="link"
-                                    to={`${routes.quoteBuilder.path}/${obj._id}`}
+                                    to={`${routes.quoteBuilder.path}/detail/${obj._id}`}
                                   >
                                     <Typography className="detailName text-truncate">
                                       {obj.quoteName}
