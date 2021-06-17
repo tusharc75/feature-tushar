@@ -41,7 +41,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import {
   imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl,
-  getUniqueCurrencies
+  getUniqueCurrencies,
+  documentUploadSupportExtensions
 } from "../../constants/helpers"
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
@@ -1424,7 +1425,7 @@ const FormTypes = (props) => {
           style={{ display: "none" }}
           onClick={(e: any) => (e.target.value = null)}
           type="file"
-          accept={accept || ""}
+          accept={accept || documentUploadSupportExtensions}
           multiple={isMultipleUpload}
         />
         <label htmlFor={name}>

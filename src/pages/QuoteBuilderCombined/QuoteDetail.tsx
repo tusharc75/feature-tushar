@@ -907,7 +907,7 @@ function QuoteDetail() {
     const pagewidth = PdfDoc.internal.pageSize.width;
 
     if (logo !== null) {
-      PdfDoc.addImage(logo, "JPEG", pagewidth - 80, 0, 70, 50);
+      PdfDoc.addImage(logo, "JPEG", pagewidth - 65, 10, 40, 40);
     }
     PdfDoc.setFontSize(26);
     PdfDoc.text(companyName, 20, 30);
@@ -972,7 +972,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(12);
     PdfDoc.text(quoteData.customerAccountName.optionLabel, 20, 115);
 
-    var text = "Please find the Quoatation Below:";
+    var text = "Please find the quotation below:";
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50);
     PdfDoc.text(text, 20, 200);
@@ -982,7 +982,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale.fullFormatAmountWithCurrencyName}`,
+          content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
@@ -990,7 +990,7 @@ function QuoteDetail() {
     ];
 
     autoTable(PdfDoc, {
-      margin: { top: 140 + blockHeight, left: 20, right: 20 },
+      margin: { top: 150 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: "center", cellWidth: "auto", overflow: "linebreak" },
