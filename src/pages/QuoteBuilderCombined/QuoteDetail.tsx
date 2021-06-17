@@ -237,23 +237,21 @@ const useStyles = makeStyles((theme) => ({
   },
   bgProduct: {
     background: "#f5f5f5 !important",
-    paddingBottom: "2px",
-    margin: "10px",
-    marginBottom: "0",
-    border: "1px solid #cec9c9",
+    padding: "10px",
+    paddingBottom: "0",
+    border: "1px solid #163340",
     borderBottom: "none",
     boxShadow: "none",
-    borderBottomLeftRadius: "0",
-    borderBottomRightRadius: "0",
+    borderRadius: "0",
     // margin: "10px",
     // border: "1px solid #d9d7d7",
     // borderRadius: "6px"
   },
   productInformation: {
     background: "white",
-    margin: "9px",
+    padding: "9px",
     borderRadius: "3px",
-    border: "1px solid #d2cbcb",
+    border: "1px solid #163340",
   },
   termsBtn: {
     position: "absolute",
@@ -261,9 +259,7 @@ const useStyles = makeStyles((theme) => ({
     right: "0",
   },
   detailBox: {
-    margin: "10px",
-    border: "1px solid #d9d7d7",
-    borderRadius: "6px",
+    border: "1px solid #163340",
   },
   btnHeader: {
     position: "absolute",
@@ -1831,7 +1827,7 @@ function QuoteDetail() {
               ) : (
                 <>
                   <Tabs
-                    className="oms-tab"
+                    className="quote-tab"
                     value={tabValue}
                     onChange={handleMainTabChange}
                     textColor="primary"
