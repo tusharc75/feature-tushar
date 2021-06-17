@@ -59,6 +59,7 @@ const useStyles = makeStyles((theme) => ({
     width: "48px",
     [theme.breakpoints.down("sm")]: {
       width: 0,
+      borderRight: "none !important"
     },
   },
   toolbar: {
