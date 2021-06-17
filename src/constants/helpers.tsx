@@ -134,6 +134,15 @@ export const quoteBuilder = {
   qbApi: "/quote-builder",
 };
 
+export const projectSales = {
+  projectSalesResource: "projectSales",
+  projectSalesApi: "/project-sales",
+};
+
+export const quote = {
+  quoteResource: "quote",
+};
+
 export const supplierAccount = {
   accountApi: "supplier-account",
   accountRoute: "supplier-account",

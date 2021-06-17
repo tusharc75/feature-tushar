@@ -201,7 +201,7 @@ const QuoteBuilders = () => {
     <Link
       className="link"
       title={params.value}
-      to={`${routes.quoteBuilder.path}/${params.data._id}`}
+      to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}
     >
       {params.value}
     </Link>
