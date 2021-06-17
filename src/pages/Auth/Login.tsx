@@ -18,7 +18,6 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
-CustomChatNotificationCountContext
 import {
   AuthenticatedTemplate,
   UnauthenticatedTemplate,
