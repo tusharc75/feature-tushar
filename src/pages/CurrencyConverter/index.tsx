@@ -149,19 +149,20 @@ const CurrencyConverter = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
+            <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1">
               <FaWpforms /> <span className="listingHeader">{routes.currencyConverter.title}</span>
             </Grid>
-            <Grid xs={6} container justify="flex-end">
+            <Grid xs={6} md={6} sm={6} container justify="flex-end">
               <Button onClick={handleUpdate} variant="contained" size="small" color="primary" >Update</Button>
             </Grid>
           </Grid>
         </div>
         <div className="listing-grid">
           <Box p={1}>
-            <Grid container className="greyBox">
-              <Grid item xs={6}>
+            <Grid container style={{background:"#f0f0f0",border:"1px solid #ddd",padding:"10px 10px"}}>
+              <Grid item xs={12} md={6} sm={6}>
                 <Autocomplete
+                  fullWidth
                   multiple
                   disableCloseOnSelect={true}
                   id="tags-filled"
@@ -210,7 +211,7 @@ const CurrencyConverter = () => {
                   // }}
                   />
               </Grid>
-              <Grid xs={6} container justify="flex-end">
+              <Grid xs={12} md={6} sm={6} container justify="flex-end">
                 <FormControlLabel
                   control={
                     <Checkbox
