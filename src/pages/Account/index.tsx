@@ -52,7 +52,6 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import zIndex from "@material-ui/core/styles/zIndex";
 import styles from "../Leads/Header.module.scss";
 const AccTypes = [
   {
