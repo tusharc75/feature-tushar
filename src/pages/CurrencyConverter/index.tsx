@@ -139,6 +139,30 @@ const CurrencyConverter = () => {
 
   const classes = useStyles();
 
+
+  const convertLabeltoValue = (value) => {
+    const result = []
+    value.forEach((_v) => {
+      let _data = getUniqueCurrencies().filter((data) => data.currencyCode === _v || data.currencyCode + " - " + data.currencyName + " - (" + data.symbolNative + ")" === _v)
+      if (_data.length) {
+        result.push(_data[0].currencyCode)
+      }
+    })
+    return result;
+  }
+
+  const convertValuetoLabel = (value) => {
+    const result = []
+    value.forEach((_v) => {
+      let _data = getUniqueCurrencies().filter((data) => data.currencyCode === _v)
+      if (_data.length) {
+        result.push(_data[0].currencyCode + " - " + _data[0].currencyName + " - (" + _data[0].symbolNative + ")")
+      }
+    })
+    return result;
+  }
+
+
   return (
     <Layout>
       <Grid container className="headerbox">
@@ -159,22 +183,23 @@ const CurrencyConverter = () => {
         </div>
         <div className="listing-grid">
           <Box p={1}>
-            <Grid container style={{background:"#f0f0f0",border:"1px solid #ddd",padding:"10px 10px"}}>
-              <Grid item xs={12} md={6} sm={6}>
+            <Grid container style={{ background: "#f0f0f0", border: "1px solid #ddd", padding: "10px 10px" }}>
+              <Grid item xs={12} md={8} sm={8}>
                 <Autocomplete
                   fullWidth
                   multiple
                   disableCloseOnSelect={true}
                   id="tags-filled"
-                  options={getUniqueCurrencies().map((_c) => { return _c.currencyCode })}
+                  options={getUniqueCurrencies().map((_c) => { return _c.currencyCode + " - " + _c.currencyName + " - (" + _c.symbolNative + ")" })}
+                  //options={getUniqueCurrencies().map((_c) => { return _c.currencyCode })}
                   getOptionLabel={(option) => option}
-                  value={currency}
+                  value={convertValuetoLabel(currency)}
                   renderTags={(value: string[], getTagProps) =>
                     value.map((option: string, index: number) => (
                       <Chip variant="outlined" label={option} {...getTagProps({ index })} />
                     ))
                   }
-                  onChange={(e, value) => handleChange(value)}
+                  onChange={(e, value) => handleChange(convertLabeltoValue(value))}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -183,35 +208,13 @@ const CurrencyConverter = () => {
                       label="Currency in use"
                       placeholder="Currency in use" />
                   )}
-                  renderOption={(option) => {
-                    const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
-                    return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                  }}
-                  // renderOption={(option) => {
-                  //   const { currencyCode, name, countryCode, symbolNative } = currencyList.find(d => d.currencyCode === option);
-                  //   return (
-                  //     <Grid container alignItems="center">
-                  //       <Grid item>
-                  //         <Avatar
-                  //           variant="rounded"
-                  //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                  //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-                  //         />
-                  //       </Grid>
-                  //       <Grid item xs>
-                  //         <Typography>
-                  //           {currencyCode} ({symbolNative})
-                  //         </Typography>
-                  //         <Typography variant="body2" color="textSecondary">
-                  //           {name}
-                  //         </Typography>
-                  //       </Grid>
-                  //     </Grid>
-                  //   );
-                  // }}
-                  />
+                // renderOption={(option) => {
+                //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                // }}
+                />
               </Grid>
-              <Grid xs={12} md={6} sm={6} container justify="flex-end">
+              <Grid xs={12} md={4} sm={4} container justify="flex-end">
                 <FormControlLabel
                   control={
                     <Checkbox
