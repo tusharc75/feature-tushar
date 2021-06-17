@@ -2131,7 +2131,8 @@ function QuoteDetail() {
                             md={12}
                             className="d-flex align-items-center gap-1"
                           >
-                            {ProcessStatus === "New" ? (
+                            {!ifQuoteApproved().approved &&
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2279,7 +2280,7 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {ProcessStatus === "Quote Builder" &&
-                            visibleColumns.length > 0 &&
+                            visibleColumns.length > 0 ||
                             ifQuoteApproved().approved ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
@@ -2288,7 +2289,7 @@ function QuoteDetail() {
                                 currency={quoteData.currency}
                                 isAll={false}
                               />
-                            ) : currentTabIndex === 0 ? (
+                            ) : (
                               <ProductBuilder
                                 productBuilderId={productBuilderID}
                                 isAddNewProduct={isAddNewProduct}
@@ -2308,7 +2309,8 @@ function QuoteDetail() {
                                     : false
                                 }
                               />
-                            ) : null}
+                            )}
+
                             {ProcessStatus === "Quote Builder" ? (
                               <Box className="m-3">
                                 <div className="position-relative">
