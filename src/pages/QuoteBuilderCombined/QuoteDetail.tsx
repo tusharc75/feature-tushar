@@ -21,7 +21,7 @@ import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { gridPageSizes } from "../../constants/helpers";
+import { gridPageSizes, opportunity, quote } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -1337,7 +1337,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(`${qbApi}/clone/${quoteData._id}`)
       .then(({ data }) => {
-        history.push(`${routes.quoteBuilder.path}/${data.data._id}`);
+        history.push(`${routes.quoteBuilder.path}/detail/${data.data._id}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -2346,6 +2346,11 @@ function QuoteDetail() {
                     }
                     relatedTo={[
                       {
+                        type: quote.quoteResource,
+                        referenceId: quoteData?._id,
+                        access: true,
+                      },
+                      {
                         type: quoteData?.customerAccountName
                           ? customerAccount?.accountResource
                           : supplierAccount?.accountResource,
@@ -2355,9 +2360,9 @@ function QuoteDetail() {
                         access: false,
                       },
                       {
-                        type: "opportunity",
-                        referenceId: quoteData?._id,
-                        access: true,
+                        type: opportunity.opportunityResource,
+                        referenceId: quoteData.opportunity?.optionValue,
+                        access: false,
                       },
                     ]}
                     handleActivityRefresh={() => { }}

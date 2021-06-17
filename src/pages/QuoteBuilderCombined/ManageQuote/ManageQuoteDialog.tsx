@@ -368,7 +368,7 @@ export default function ManageQuoteDialog({
           message: data.message,
         });
         if (isRedirectTodetailPage)
-          history.push(`${routes.quoteBuilder.path}/${newId}`);
+          history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
         setLoading(false);
         onSuccess(newId);
       })
