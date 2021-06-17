@@ -12,6 +12,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import { downloadExcel } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import SelectionDialog from "./SelectionDialog";
+import { isEmpty } from "lodash";
+import { useEffect } from "react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,7 +72,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isSelection, setIsSelection] = useState(false);
-
+  const [isUpladDialog,setIsUploadDialog] = useState(false);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -79,7 +81,14 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
     setAnchorEl(null);
   };
 
-  const uploadData = (event) => {
+  useEffect(()=>{
+    if(!isSelection) {
+      setIsUploadDialog(false)
+    }
+  },[isSelection])
+  
+  const uploadData = (event,data:any = null) => {
+    setIsSelection(false)
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         open: true,
@@ -87,15 +96,17 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         message: `Uploading ${module}, Please wait...`,
       });
       const file = event.target.files[0];
-
       let formData = new FormData();
       formData.append("file", file);
       formData.append("refrenceId", refrenceId);
+      if(!isEmpty(data)){
+        formData.append('productCategory', data.productCategory)
+        formData.append('productTemplate', data.productTemplate)
+      }
       axiosInstance()
         .post(`${api}/import`, formData, {
           responseType: "blob",
           headers: { "Content-Type": "multipart/form-data" },
-
         })
         .then((response) => {
           if (!response.headers["content-disposition"]) {
@@ -181,10 +192,15 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
     <div className={module !== "builder" ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>
         <label
+          onClick={() => {
+            setIsSelection(true);
+            setIsUploadDialog(true);
+            handleClose();
+          }}
           htmlFor="importFromExcel"
           className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
         >
-          {ImportInput}
+          {/* {ImportInput} */}
           Import from Excel
         </label>
         <Divider
@@ -228,9 +244,9 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem>
+        <MenuItem        >
           <label htmlFor="importFromExcel" className="cursor-pointer">
-            {ImportInput}
+            {/* {ImportInput} */}
             Import from Excel
           </label>
         </MenuItem>
@@ -257,7 +273,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
           <IoIosArrowDropdown className={module !== "builder" ? classes.expandIcon : classes.custom_expandIcon} />
         </IconButton>
       )}
-      {isSelection && <SelectionDialog refrenceId={refrenceId} handleClose={() => setIsSelection(false)} api={api} />}
+      {isSelection && <SelectionDialog uploadData={uploadData} isUpload = {isUpladDialog} refrenceId={refrenceId} handleClose={() => { setIsSelection(false);setIsSelection(false)}} api={api} />}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { backendApi } from './../../../config';
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   messageBubble: {
@@ -211,6 +212,11 @@ const Chatter = (props) => {
                       <div className="cm-msg-text self">
                         <p className="chat-user">{data.userName}</p>
                         <div className="message"> {data.message}</div>
+                        <Box textAlign="right" className="chatTimer">
+                          <Typography variant="caption">
+                            {moment(data.date).fromNow()}
+                          </Typography>
+                        </Box>
                       </div>
                     </div>
                   ) : (
@@ -218,6 +224,11 @@ const Chatter = (props) => {
                       <div className="cm-msg-text user">
                         <p className="chat-user">{data.userName}</p>
                         <div className="message"> {data.message} </div>
+                        <Box textAlign="right" className="chatTimer"> 
+                          <Typography variant="caption">
+                            {moment(data.date).fromNow()}
+                          </Typography>
+                        </Box>
                       </div>
                     </div>
                   )}

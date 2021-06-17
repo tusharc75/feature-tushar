@@ -667,7 +667,7 @@ export const getUniqueCurrencies = () => {
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
-      shortFormatAmount: "", fullFormatAmount: ""
+      shortFormatAmount: "", fullFormatAmount: "", fullFormatAmountWithCurrencyName: ""
     }
   }
 
@@ -687,6 +687,10 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       fullFormatAmount: new Intl.NumberFormat(language, {
         notation: "compact",
         compactDisplay: "short",
+      }).format(amount).replace(/^(\D+)/, "$1 "),
+      fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
+        style: 'currency',
+        currencyDisplay: "code"
       }).format(amount).replace(/^(\D+)/, "$1 "),
     };
   }
@@ -779,8 +783,12 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     fullFormatAmount: new Intl.NumberFormat(
       `${language}-${currencyData.countryCode}`,
       options
-    ).format(amount)
-      .replace(/^(\D+)/, "$1 ")
+    ).format(amount).replace(/^(\D+)/, "$1 "),
+    fullFormatAmountWithCurrencyName: new Intl.NumberFormat(
+      `${language}-${currencyData.countryCode}`, {
+      currencyDisplay: "code",
+      ...options
+    }).format(amount).replace(/^(\D+)/, "$1 "),
   }
 };
 
