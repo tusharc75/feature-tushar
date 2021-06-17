@@ -399,19 +399,23 @@ function QuoteDetail() {
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: ""
   });
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalcost, setTotalCost] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: ""
   });
   const [totalsale, setTotalSale] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: ""
   });
   const [totalmargin, setTotalMargin] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
+    fullFormatAmountWithCurrencyName: ""
   });
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [ColumnName, setColName] = useState([]);
@@ -978,7 +982,7 @@ function QuoteDetail() {
       ...PDFData,
       [
         {
-          content: `Quote Total : ${totalsale.fullFormatAmount}`,
+          content: `Quote Total : ${totalsale.fullFormatAmountWithCurrencyName}`,
           colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
