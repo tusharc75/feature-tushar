@@ -232,7 +232,7 @@ const Note = () => {
 
     return (<Layout>
         <Grid container className="headerbox">
-            <Grid item xs={12}>
+            <Grid item xs={6}>
                 <CustomBreadCrumbs routes={[{ title: "Note" }]} />
             </Grid>
         </Grid>
@@ -240,11 +240,11 @@ const Note = () => {
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                    <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <GoNote className="headerLogo" />{" "}
                         <span className="listingHeader">Note ({dataRows.length})</span>
                     </Grid>
-                    <Grid item xs={10} className={styles.filter_side}>
+                    <Grid item xs={6} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
                             <SearchFilter
                                 handleChangeFilter={handleChangeFilter}
