@@ -273,14 +273,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
 
 const gettingVersionStatusText = "Getting Status...";
 
@@ -670,7 +662,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -703,7 +695,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -806,12 +798,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1619,7 +1611,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1802,9 +1794,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button>
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2073,7 +2065,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                           
+
                           />
                         )}
                       </div>
@@ -2173,7 +2165,19 @@ function QuoteDetail() {
                                           ))}
                                         </div>
                                       )}
-                                      MenuProps={MenuProps}
+                                      MenuProps={{
+                                        PaperProps: {
+                                          style: {
+                                            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                                            width: 250,
+                                          },
+                                        },
+                                        anchorOrigin: {
+                                          vertical: "bottom",
+                                          horizontal: "left"
+                                        },
+                                        getContentAnchorEl: null
+                                      }}
                                     >
                                       {ColumnName.map((name) => (
                                         <MenuItem
@@ -2200,8 +2204,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2221,7 +2225,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2249,7 +2253,7 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {ProcessStatus === "Quote Builder" &&
-                            visibleColumns.length > 0 ? (
+                              visibleColumns.length > 0 ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
                                 refreshProducts={refreshProducts}
@@ -2272,7 +2276,7 @@ function QuoteDetail() {
                                 }
                                 Editable={
                                   ProcessStatus === "Price Builder" ||
-                                  ProcessStatus === "New"
+                                    ProcessStatus === "New"
                                     ? true
                                     : false
                                 }
@@ -2356,7 +2360,7 @@ function QuoteDetail() {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2392,7 +2396,7 @@ function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            // qbApi={qbApi}
+          // qbApi={qbApi}
           />
         )}
 
@@ -2451,9 +2455,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
