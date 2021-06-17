@@ -7,10 +7,6 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CreateIcon from "@material-ui/icons/Create";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
 import { StepIconProps, Grid } from "@material-ui/core";
@@ -21,12 +17,10 @@ import {
 import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
-import { ImHourGlass } from "react-icons/im";
 import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
-import { getObjKeysWithValues } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -129,8 +123,6 @@ const Steps = (props) => {
     handleSendReminder = null,
     reminderLoading = false,
     hideReminderButton = false,
-    openInvoiceDialog,
-    allowedToEdit
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -324,12 +316,6 @@ const Steps = (props) => {
                 <Typography className={classes.approved}>
                   Approved by Customer
                 </Typography>
-
-                {
-                  allowedToEdit && <Button variant="outlined" onClick={openInvoiceDialog}>
-                    Update Invoice Information
-                  </Button>
-                }
               </div>
             )}
             {versionStatus.includes("Rejected by Customer") && (
