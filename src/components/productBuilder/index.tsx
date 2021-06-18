@@ -640,7 +640,7 @@ const ProductBuilder = (props) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure, you want to delete product ?`}
+          message={`Are you sure you want to delete the product?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />

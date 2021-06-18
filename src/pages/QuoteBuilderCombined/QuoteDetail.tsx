@@ -1,21 +1,14 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
-  useReducer,
-} from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Box,
   Button,
   CircularProgress,
   Grid,
-  IconButton,
   Paper,
   Tab,
   Tabs,
-  Typography,
+  IconButton,
+  Tooltip,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -95,6 +88,9 @@ import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
 import Loader from "../../components/Loader";
+import { GiVintageRobot } from "react-icons/gi";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 
 const Accordion = withStyles({
   root: {
@@ -448,6 +444,7 @@ function QuoteDetail() {
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
+  const [showAiDialog, setShowAiDialog] = useState(false);
 
   let { id } = useParams();
 
@@ -674,6 +671,17 @@ function QuoteDetail() {
           .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
+
+    let tempStatus = "Building Quote";
+    let versionArray = [];
+    Object.keys(data.versions).forEach((key) => {
+      versionArray.push(data.versions[key]);
+    });
+    const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
+    if (updatedVersion) {
+      tempStatus = updatedVersion.status;
+    }
+    mainPoint["Quote Status"] = tempStatus;
 
     setMainPoints(mainPoint);
   };
@@ -980,7 +988,7 @@ function QuoteDetail() {
       [
         {
           content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData[0].length,
+          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
           styles: { halign: "right", valign: "middle" },
         },
       ],
@@ -2288,49 +2296,54 @@ function QuoteDetail() {
                                 }}
                                 variant="outlined"
                                 size="small"
+                                className="mr-1"
                                 startIcon={<FiDownloadCloud />}
                                 color="primary"
                               >
                                 Download
                               </Button>
+
+                              <Tooltip title="AI Suggestion">
+                                <IconButton
+                                  onClick={() => {
+                                    setShowAiDialog(true);
+                                  }}
+                                >
+                                  <GiVintageRobot />
+                                </IconButton>
+                              </Tooltip>
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {quoteData && !loading && productBuilderID ? (
-                              ProcessStatus === "Quote Builder" ? (
-                                <ProductGrid
-                                  productBuilderId={productBuilderID}
-                                  refreshProducts={refreshProducts}
-                                  stage={"cost"}
-                                  isAll={false}
-                                  columnsData={visibleColumns}
-                                  currency={quoteData?.currency}
-                                />
-                              ) : (
-                                <ProductBuilder
-                                  productBuilderId={productBuilderID}
-                                  isAddNewProduct={isAddNewProduct}
-                                  setIsAddNewProduct={setIsAddNewProduct}
-                                  isAddExistingProduct={isAddExistingProduct}
-                                  setIsAddExistingProduct={
-                                    setIsAddExistingProduct
-                                  }
-                                  refreshProducts={refreshProducts}
-                                  stage={
-                                    ProcessStatus === "New" ? "product" : "cost"
-                                  }
-                                  Editable={
-                                    ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
-                                      ? true
-                                      : false
-                                  }
-                                />
-                              )
+                            {(ProcessStatus === "Quote Builder" &&
+                              visibleColumns.length > 0) ||
+                            ifQuoteApproved().approved ? (
+                              <ProductGrid
+                                productBuilderId={productBuilderID}
+                                refreshProducts={refreshProducts}
+                                columnsData={visibleColumns}
+                                currency={quoteData.currency}
+                                isAll={false}
+                              />
                             ) : (
-                              <Loader
-                                style={{ minHeight: 300 }}
-                                text="Loading..."
+                              <ProductBuilder
+                                productBuilderId={productBuilderID}
+                                isAddNewProduct={isAddNewProduct}
+                                setIsAddNewProduct={setIsAddNewProduct}
+                                isAddExistingProduct={isAddExistingProduct}
+                                setIsAddExistingProduct={
+                                  setIsAddExistingProduct
+                                }
+                                refreshProducts={refreshProducts}
+                                stage={
+                                  ProcessStatus === "New" ? "product" : "cost"
+                                }
+                                Editable={
+                                  ProcessStatus === "Price Builder" ||
+                                  ProcessStatus === "New"
+                                    ? true
+                                    : false
+                                }
                               />
                             )}
                             {ProcessStatus === "Quote Builder" ? (
@@ -2528,6 +2541,28 @@ function QuoteDetail() {
               />
             </div>
           </CustomDialogComponent>
+        )}
+
+        {showAiDialog && (
+          <Dialog
+            open={showAiDialog}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="sm"
+            onClose={() => {
+              setShowAiDialog(false);
+            }}
+            fullWidth
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            <CustomDialogHeader
+              title="Under Construction"
+              onClose={() => {
+                setShowAiDialog(false);
+              }}
+            />
+            <CustomDialogContent></CustomDialogContent>
+          </Dialog>
         )}
       </Layout>
     </>
