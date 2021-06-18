@@ -1,0 +1,19 @@
+@supports not (gap: 0.25rem) {
+    .gap-1 > *:not(:nth-child(1)) {
+        margin-left: 0.25rem !important;
+    }
+}
+
+@supports not (gap: 0.5rem) {
+    .gap-2 > *:not(:nth-child(1)) {
+        margin-left: 0.5rem !important;
+    }
+}
+
+@supports not (gap: 0.5rem) {
+    .gap-2 > *:not(:nth-child(1)) {
+        margin-left: 0.5rem !important;
+    }
+}
+
+
