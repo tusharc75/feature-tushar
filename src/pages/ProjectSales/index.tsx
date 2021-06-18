@@ -461,7 +461,7 @@ const ProjectSales: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete this record ${deleteRec.name || ""
+            message={`Are you sure you want to delete this record ${deleteRec.name || ""
               }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});

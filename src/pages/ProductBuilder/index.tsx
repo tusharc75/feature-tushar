@@ -42,7 +42,6 @@ const ProductBuilder = () => {
     const columns = [
         { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, sortable: false, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, sortable: false, cellRenderer: "updatedByRenderer" },
     ];
     //  Grid Variables - End
 
@@ -74,17 +73,16 @@ const ProductBuilder = () => {
         axiosInstance().get(`/productbuilder`).then(({ data: { data } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, ...restProperties } = u;
+                const { createdBy, ...restProperties } = u;
 
                 let res = {
                     ...restProperties,
                     id: u._id,
 
                     name: u.name,
-                    createdBy: u.createdBy?.user?.concatedName,
+                    createdBy: u.createdBy?.user?.concatedCreatedByName,
                     createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date,
+                    
                 }
 
                 return res;
@@ -204,7 +202,7 @@ const ProductBuilder = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete ${deleteRecord ? deleteRecord.name : "selected product(s)"} ?`}
+                    message={`Are you sure you want to delete ${deleteRecord ? deleteRecord.name : "selected product(s)"}?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                     okBtnLoading={okButtonLoading}
