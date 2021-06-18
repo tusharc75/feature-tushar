@@ -693,7 +693,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
         style: 'currency',
         currencyDisplay: "code"
-      }).format(amount).replace(/^(\D+)/, "$1 "),
+      }).format(amount),
     };
   }
 
@@ -790,7 +790,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       `${language}-${currencyData.countryCode}`, {
       currencyDisplay: "code",
       ...options
-    }).format(amount).replace(/^(\D+)/, "$1 "),
+    }).format(amount),
   }
 };
 
