@@ -430,6 +430,11 @@ const User: FC = () => {
   const handleDOACloseDialog = () => {
     setDoaDialogOpen(false);
   };
+
+  const unAssignUsersFromEntity = () =>{
+    
+  }
+
   return (
     <>
       {console.log(selectedRecords)}
@@ -526,6 +531,7 @@ const User: FC = () => {
               onEntityRoleRedirectDetailRemove={() => {
                 setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
               }}
+              unAssignUsersFromEntity={unAssignUsersFromEntity}
             />
           </div>
 
