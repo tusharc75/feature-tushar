@@ -586,7 +586,7 @@ export default function AccountDetailPage(props) {
                         id="a11y-tab-1"
                       />
                       <Tab
-                        label="3D Graph"
+                        label="OM-Neurons"
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
