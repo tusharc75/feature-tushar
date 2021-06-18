@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
         padding: "10px",
         display: "flex",
         alignItems: "center",
-        gap: "10px",
     },
     gridContent: {
         height: "calc(100vh - 24vh)",
@@ -115,7 +114,7 @@ const QuoteApproval = () => {
                                 rows={rows}
                                 getRowId={(row) => row.id} />
                         </div>
-                        <div className={classes.footer}>
+                        <div className={`gap-2 ${classes.footer}`}>
                             <Grid container>
                                 <Grid item xs={12} md={4} sm={4} className="centerItem">
                                    <h1>Total : {sellingPrice} {currency}</h1> 

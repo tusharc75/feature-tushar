@@ -569,8 +569,8 @@ const ProductBuilder = (props) => {
           </Grid>
         )}
       </Grid>
-      <Box mt={1} className="productAgGrid">
-        {columns && !loading ? (
+      <Box mt={1}>
+        {columns ? (
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
