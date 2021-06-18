@@ -15,9 +15,10 @@ import {
   Paper,
   Tab,
   Tabs,
+  TextField,
   Typography,
 } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -95,7 +96,10 @@ import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
 import Loader from "../../components/Loader";
-
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
@@ -225,6 +229,7 @@ const intialState = {
 const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(1),
+    paddingRight: "15px"
   },
   chips: {
     display: "flex",
@@ -671,7 +676,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -704,7 +709,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -807,12 +812,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1619,7 +1624,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1816,9 +1821,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button>
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1914,10 +1919,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2143,7 +2148,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
+                              ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2173,77 +2178,47 @@ function QuoteDetail() {
 
                             {ProcessStatus === "Quote Builder" ? (
                               <Grid container>
-                                <Grid item xs={11} md={11} sm={11}>
+                                <Grid item xs={12} md={12} sm={12}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
                                   >
-                                    <InputLabel id="demo-mutiple-chip-label">
-                                      Visible Columns in Quote
-                                    </InputLabel>
-                                    <Select
-                                      labelId="demo-mutiple-chip-label"
+                                    <Autocomplete
                                       id="demo-mutiple-chip"
+                                      fullWidth
+                                      size="small"
                                       multiple
                                       value={visibleColumns}
-                                      onChange={handleChangeVisible}
-                                      input={
-                                        <Input id="select-multiple-chip" />
-                                      }
-                                      renderValue={(selected: any) => (
-                                        <div className={classes.chips}>
-                                          {selected.map((value) => (
-                                            <Chip
-                                              key={value}
-                                              label={value}
-                                              className={classes.chip}
-                                            />
-                                          ))}
-                                        </div>
-                                      )}
-                                      MenuProps={{
-                                        PaperProps: {
-                                          style: {
-                                            maxHeight:
-                                              ITEM_HEIGHT * 4.5 +
-                                              ITEM_PADDING_TOP,
-                                            width: 250,
-                                          },
-                                        },
-                                        anchorOrigin: {
-                                          vertical: "bottom",
-                                          horizontal: "left",
-                                        },
-                                        getContentAnchorEl: null,
+                                      onChange={(e, val) => {
+                                        setVisibleColumnName(val);
+                                        handleVersionUpdate(PDF, val, versionStatus, TandC);
                                       }}
-                                    >
-                                      {ColumnName.map((name) => (
-                                        <MenuItem
-                                          key={name}
-                                          value={name}
-                                          style={getStyles(
-                                            name,
-                                            visibleColumns,
-                                            theme
-                                          )}
-                                        >
+                                      options={ColumnName}
+                                      disableCloseOnSelect
+                                      getOptionLabel={(option) => option}
+                                      renderOption={(option, { selected }) => (
+                                        <React.Fragment>
                                           <Checkbox
-                                            checked={
-                                              visibleColumns.indexOf(name) > -1
-                                            }
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
                                           />
-                                          {name}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
+                                          {option}
+                                        </React.Fragment>
+                                      )}
+                                      renderInput={(params) => (
+                                        <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />
+                                      )}
+                                    />
                                   </FormControl>
                                 </Grid>
                               </Grid>
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2263,7 +2238,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2315,7 +2290,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                      ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2410,7 +2385,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2482,9 +2457,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
