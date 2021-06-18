@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import ReactGA from "react-ga";
 import App from "./App";
 // import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
@@ -7,6 +8,7 @@ import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { MsalProvider } from "@azure/msal-react";
 import AzureInstance from "./AzureInstance";
+import RouteChangeTracker from "./components/GoogleAnalytics/RouteChangeTracker";
 import * as Sentry from "@sentry/react";
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -33,22 +35,28 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
+//* Google Analytics */
+const TRACKING_ID = "UA-196035023-2"; // YOUR_OWN_TRACKING_ID
+ReactGA.initialize(TRACKING_ID);
+
 
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <Provider>
-        <CustomToastProvider>
-          <CustomNotificationCountProvider>
-            <CustomChatNotificationCountProvider>
-              <MsalProvider instance={AzureInstance}>
-                <App />
-              </MsalProvider>
-            </CustomChatNotificationCountProvider>
-          </CustomNotificationCountProvider>
-        </CustomToastProvider>
-      </Provider>
+      <RouteChangeTracker>
+        <Provider>
+          <CustomToastProvider>
+            <CustomNotificationCountProvider>
+              <CustomChatNotificationCountProvider>
+                <MsalProvider instance={AzureInstance}>
+                  <App />
+                </MsalProvider>
+              </CustomChatNotificationCountProvider>
+            </CustomNotificationCountProvider>
+          </CustomToastProvider>
+        </Provider>
+      </RouteChangeTracker>
     </Router>
   </React.StrictMode>,
   document.getElementById("root")
