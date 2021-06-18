@@ -81,7 +81,7 @@ const ProductBuilder = (props) => {
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, [productBuilderId]);
+  }, []);
 
   const ActionsRenderer = (params) => (
     <>
@@ -209,10 +209,8 @@ const ProductBuilder = (props) => {
                       col.headerName = fieldLabel;
                       col.width = 180;
                       // col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
-                      col.show = true;
                       col.cellRenderer = "commonRenderer";
-                      col.order = ele.order;
-                      col.leval = ele.leval;
+
                       column.push(col);
                     }
                   });
@@ -244,12 +242,8 @@ const ProductBuilder = (props) => {
                           let col: any = {};
                           col.field = fieldName;
                           col.headerName = fieldLabel;
-                          // col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
-                          col.show = true;
                           col.cellRenderer = "commonRenderer";
                           col.width = 180;
-                          col.order = ele.order;
-                          col.leval = ele.leval;
                           column.push(col);
                         }
                       });
@@ -270,12 +264,8 @@ const ProductBuilder = (props) => {
                       let col: any = {};
                       col.field = fieldName;
                       col.headerName = fieldLabel;
-                      // col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
-                      col.show = true;
                       col.cellRenderer = "commonRenderer";
                       col.width = 180;
-                      col.order = ele.order;
-                      col.leval = ele.leval;
                       column.push(col);
                     }
                   });
@@ -293,18 +283,14 @@ const ProductBuilder = (props) => {
                   col.field = ele.fieldName;
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
-                  col.show = true;
                   col.cellRenderer = "productNameRenderer";
-                  col.order = ele.order;
-                  col.leval = ele.leval;
+                  col.order = ele.ord;
                   column.push(col);
                 } else if (ele.fieldName === "productCategory") {
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
-                  col.show = true;
                   col.field = "productCategoryDisplayValue";
-                  col.order = ele.order;
-                  col.leval = ele.leval;
+
                   if (
                     !column.some(
                       (c) => c.field === "productCategoryDisplayValue"
@@ -315,10 +301,8 @@ const ProductBuilder = (props) => {
                 } else if (ele.fieldName === "productTemplate") {
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
-                  col.show = true;
                   col.field = "productTemplateDisplayValue";
-                  col.order = ele.order;
-                  col.leval = ele.leval;
+
                   if (
                     !column.some(
                       (c) => c.field === "productTemplateDisplayValue"
@@ -330,9 +314,6 @@ const ProductBuilder = (props) => {
                   col.field = ele.fieldName;
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
-                  col.show = true;
-                  col.order = ele.order;
-                  col.leval = ele.leval;
                   column.push(col);
                 }
               }
@@ -345,7 +326,6 @@ const ProductBuilder = (props) => {
         });
         setColumns(column);
         setProduct(data);
-        dispatch({ type: "initialize", data: [], count: 0 });
         dispatch({ type: "initialize", data: data, count: data.length });
         dispatch({ type: "loading", loading: false });
       })
@@ -590,7 +570,7 @@ const ProductBuilder = (props) => {
         )}
       </Grid>
       <Box mt={1} className="productAgGrid">
-        {columns ? (
+        {columns && !loading ? (
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}

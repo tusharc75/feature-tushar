@@ -94,6 +94,7 @@ import {
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
+import Loader from "../../components/Loader";
 
 const Accordion = withStyles({
   root: {
@@ -1357,8 +1358,8 @@ function QuoteDetail() {
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
-    let invalidQty = false;
-    let invalidPrice = false;
+    let invalidQty = true;
+    let invalidPrice = true;
 
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
     const ignoredKeys = [
@@ -1378,16 +1379,25 @@ function QuoteDetail() {
     let SPCurrency = "";
     let MarginCurrency = "";
     let ProfitCurrency = "";
-    BuilderData.map((quoteRows: { [x: string]: any }) => {
-      let hasTSP = false;
+
+    BuilderData.map((quoteRows: { [x: string]: any }, idx) => {
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
-        if (key === "qty") {
-          if (quoteRows[key] === 0) {
-            invalidQty = true;
+        if (BuilderData.length - 1 === idx && key === "qty") {
+          if (quoteRows[key] !== 0) {
+            invalidQty = false;
           }
         }
+
+        if (
+          BuilderData.length - 1 === idx &&
+          key.split("_")[0] === "totalSalesPrice" &&
+          quoteRows[key] !== undefined
+        ) {
+          invalidPrice = false;
+        }
+
         if (ignoredKeys.indexOf(key) === -1) {
           let indexkey = key;
           let currency = "";
@@ -1414,8 +1424,6 @@ function QuoteDetail() {
               });
             }
 
-            console.log(key);
-
             if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalCost"
@@ -1428,7 +1436,6 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
-              hasTSP = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1445,23 +1452,15 @@ function QuoteDetail() {
           }
         }
       });
-
-      if (!hasTSP) {
-        invalidPrice = true;
-      }
-
-      console.log("TSP : ", hasTSP);
-
-      inventory.push(inventorydata);
     });
 
-    if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
-      setNextStep(false);
-    }
+    // if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
+    //   setNextStep(false);
+    // }
 
-    if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
-      setNextStep(true);
-    }
+    // if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
+    //   setNextStep(true);
+    // }
     setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
     setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
     setTotalSale(
@@ -1474,9 +1473,8 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
-      console.log(`QTY: ${invalidQty}`);
-      console.log(`PRICE: ${invalidPrice}`);
-      if (invalidQty && invalidPrice) {
+      console.log("Invalid Price: ", invalidPrice, "Invalid Qty: ", invalidQty);
+      if (invalidPrice || invalidQty) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -1560,6 +1558,7 @@ function QuoteDetail() {
       }
       TableData = [...TableData, DataRecord];
     }
+
     setDynamicTableData(TableData);
   };
 
@@ -1647,13 +1646,30 @@ function QuoteDetail() {
         setShowVersionsDialog(true);
 
         const newData = data.versions.map((d, index) => {
-          return { ...d, id: index + 1 };
+          return {
+            ...d,
+            id: index + 1,
+            totalcost: formatAmountWithCurrency(
+              quoteData?.currency,
+              d.productData.totalCost
+            ).fullFormatAmount,
+            totalSalesPrice: formatAmountWithCurrency(
+              quoteData?.currency,
+              d.productData.totalSalesPrice
+            ).fullFormatAmount,
+          };
         });
 
         setVersionStatusData({
           columns: [
             { field: "versionNumber", headerName: "Version #", flex: 0.5 },
             { field: "status", headerName: "Status", flex: 1 },
+            { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
+            {
+              field: "totalSalesPrice",
+              headerName: "Total Sales Price",
+              flex: 0.5,
+            },
             // { field: "processStatus", headerName: "ProcessStatus" }
           ],
           data: newData,
@@ -1727,16 +1743,10 @@ function QuoteDetail() {
   };
 
   const handleSendReminder = () => {
-    if (
-      quoteData?.versions &&
-      quoteData.versions[currentVersion] &&
-      quoteData.versions[currentVersion]?.adobeDocumentId
-    ) {
+    if (quoteData && currentVersion) {
       setReminderLoading(true);
       axiosInstance()
-        .get(
-          `quote-builder/reminder/${quoteData.versions[currentVersion].adobeDocumentId}`
-        )
+        .get(`quote-builder/reminder/${quoteData._id}/${currentVersion}`)
         .then((data: { data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -1790,7 +1800,10 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={mainPoints}
+                  mainPoints={{
+                    ...mainPoints,
+                    "Quote Status": quoteData?.versions[currentVersion]?.status,
+                  }}
                   showHeading={true}
                 >
                   <Button
@@ -2283,38 +2296,43 @@ function QuoteDetail() {
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {(ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0) ||
-                            ifQuoteApproved().approved ? (
-                              <ProductGrid
-                                productBuilderId={productBuilderID}
-                                refreshProducts={refreshProducts}
-                                columnsData={visibleColumns}
-                                currency={quoteData.currency}
-                                isAll={false}
-                              />
+                            {quoteData && !loading && productBuilderID ? (
+                              ProcessStatus === "Quote Builder" ? (
+                                <ProductGrid
+                                  productBuilderId={productBuilderID}
+                                  refreshProducts={refreshProducts}
+                                  stage={"cost"}
+                                  isAll={false}
+                                  columnsData={visibleColumns}
+                                  currency={quoteData?.currency}
+                                />
+                              ) : (
+                                <ProductBuilder
+                                  productBuilderId={productBuilderID}
+                                  isAddNewProduct={isAddNewProduct}
+                                  setIsAddNewProduct={setIsAddNewProduct}
+                                  isAddExistingProduct={isAddExistingProduct}
+                                  setIsAddExistingProduct={
+                                    setIsAddExistingProduct
+                                  }
+                                  refreshProducts={refreshProducts}
+                                  stage={
+                                    ProcessStatus === "New" ? "product" : "cost"
+                                  }
+                                  Editable={
+                                    ProcessStatus === "Price Builder" ||
+                                    ProcessStatus === "New"
+                                      ? true
+                                      : false
+                                  }
+                                />
+                              )
                             ) : (
-                              <ProductBuilder
-                                productBuilderId={productBuilderID}
-                                isAddNewProduct={isAddNewProduct}
-                                setIsAddNewProduct={setIsAddNewProduct}
-                                isAddExistingProduct={isAddExistingProduct}
-                                setIsAddExistingProduct={
-                                  setIsAddExistingProduct
-                                }
-                                refreshProducts={refreshProducts}
-                                stage={
-                                  ProcessStatus === "New" ? "product" : "cost"
-                                }
-                                Editable={
-                                  ProcessStatus === "Price Builder" ||
-                                  ProcessStatus === "New"
-                                    ? true
-                                    : false
-                                }
+                              <Loader
+                                style={{ minHeight: 300 }}
+                                text="Loading..."
                               />
                             )}
-
                             {ProcessStatus === "Quote Builder" ? (
                               <Box className="m-3">
                                 <div className="position-relative">
