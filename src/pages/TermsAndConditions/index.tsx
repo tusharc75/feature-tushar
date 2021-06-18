@@ -17,8 +17,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "../../components/CustomContainer";
-import styles from "./terms.module.scss"
-import CustomHeader from '../../components/Helpers/CustomHeader'
+import styles from "../Leads/Header.module.scss";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
@@ -181,109 +180,109 @@ export default function TermsAndCondition(props) {
     };
 
     return (
-        <>
-            <Layout>
-                <Grid container className="headerbox">
+
+        <Layout>
+            <Grid container className="headerbox">
+                <Grid item xs={12}>
                     <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
                 </Grid>
-                <Box component="div">
-                    <CustomContainer>
-                        <div className={`${styles["terms_header_inner_container"]}`} >
-                            <CustomHeader
-                                total={rowCount}
-                                heading="Terms and Conditions"
-                                secondHeading="Terms and Conditions"
-                                icon={<IoDocumentTextOutline className="headerLogo" />}
-                            >
-                                <div className={`${styles.terms_header} ${styles["terms_header-mobile"]}`} >
-                                    <SearchBox
-                                        onSearch={handleSearch}
-                                        searchbox="terms_header_search_bar"
-                                        width="300px"
-                                        value={search}
-                                    />
-                                    <div className={`${styles.terms_header_add_btn_action_btn_group}`}>
-                                        {
-                                            actionsPermissions.isCreate && <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                className={`${styles.terms_header_add_btn}`}
-                                                onClick={() => setShowCreateDialog(true)}
-                                                startIcon={<AddOutlined />} >Add</Button>
-                                        }
+            </Grid>
+            <CustomContainer>
+                <div className="header-panel">
+                    <Grid container className={styles.filter_side_container}>
+                        <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
+                            <IoDocumentTextOutline className="headerLogo" />{" "}
+                            <span className="listingHeader">Terms and Conditions</span>
+                        </Grid>
 
-                                        <Button
-                                            disabled={selectedRecords.length === 0}
-                                            variant="outlined"
-                                            color="default"
-                                            size="small"
-                                            className={`${styles.terms_header_action_btn}`}
-                                            onClick={openActions}
-                                            aria-controls="action-menu"
-                                        >
-                                            Actions <ExpandMore />
-                                        </Button>
-                                        <Menu
-                                            anchorEl={anchorEl}
-                                            keepMounted
-                                            getContentAnchorEl={null}
-                                            anchorOrigin={{
-                                                vertical: "bottom",
-                                                horizontal: "left"
-                                            }}
-                                            id="action-menu"
-                                            open={Boolean(anchorEl)}
-                                            onClose={closeActions}>
-                                            {
-                                                actionsPermissions.isDelete &&
-                                                <MenuItem
-                                                    onClick={() => {
-                                                        closeActions();
-                                                        setShowDeleteConfirmBox(true);
-                                                    }}>Delete</MenuItem>
-                                            }
+                        <Grid item xs={6} className={styles.filter_side}>
+                            <Box className={styles.filter_side_header} component="div">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width="300px"
+                                    value={search}
+                                />
+                                {
+                                    actionsPermissions.isCreate && <Button
+                                        variant="contained"
+                                        color="primary"
+                                        size="small"
+                                        className={styles.add_submit_btn}
+                                        onClick={() => setShowCreateDialog(true)}
+                                        startIcon={<AddOutlined />} >Add</Button>
+                                }
 
-                                        </Menu>
+                                <Button
+                                    disabled={selectedRecords.length === 0}
+                                    variant="outlined"
+                                    color="default"
+                                    size="small"
+                                    className={styles.action_submit_btn}
+                                    onClick={openActions}
+                                    aria-controls="action-menu"
+                                >
+                                    Actions <ExpandMore />
+                                </Button>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "left"
+                                    }}
+                                    id="action-menu"
+                                    open={Boolean(anchorEl)}
+                                    onClose={closeActions}>
+                                    {
+                                        actionsPermissions.isDelete &&
+                                        <MenuItem
+                                            onClick={() => {
+                                                closeActions();
+                                                setShowDeleteConfirmBox(true);
+                                            }}>Delete</MenuItem>
+                                    }
 
-                                    </div>
-                                </div>
-                            </CustomHeader>
-                        </div>
-                        <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            actionWidth={150} />
+                                </Menu>
+                            </Box>
 
-                        {
-                            showDeleteConfirmBox ?
-                                <ConfirmationDialog
-                                    open={showDeleteConfirmBox}
-                                    message={`Are you sure, you want to delete selected TermsAndCondition  ${deleteRec?._id ? deleteRec?.TACName : ""} ?`}
-                                    onClose={() => setShowDeleteConfirmBox(false)}
-                                    onOk={handleDeleteTermsAndConditions}
-                                /> : null
-                        }
-                        {showCreateDialog ? (
-                            <ManageTermsAndCondition
-                                termsAndCondition={termsAndCondition}
-                                open={showCreateDialog}
-                                handleClose={handleCloseCreateDialog}
-                                fetchData={fetchTermsAndConditions}
-                                editRecord={editRecord}
-                            />
-                        ) : null}
-                    </CustomContainer>
-                </Box>
-            </Layout>
+                        </Grid>
+                    </Grid>
+                </div>
+                <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={150} />
 
-        </>
+                {
+                    showDeleteConfirmBox ?
+                        <ConfirmationDialog
+                            open={showDeleteConfirmBox}
+                            message={`Are you sure you want to delete the selected TermsAndCondition  ${deleteRec?._id ? deleteRec?.TACName : ""}?`}
+                            onClose={() => setShowDeleteConfirmBox(false)}
+                            onOk={handleDeleteTermsAndConditions}
+                        /> : null
+                }
+                {showCreateDialog ? (
+                    <ManageTermsAndCondition
+                        termsAndCondition={termsAndCondition}
+                        open={showCreateDialog}
+                        handleClose={handleCloseCreateDialog}
+                        fetchData={fetchTermsAndConditions}
+                        editRecord={editRecord}
+                    />
+                ) : null}
+            </CustomContainer>
+        </Layout>
+
+
     )
 }

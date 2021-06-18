@@ -1,21 +1,14 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
-  useReducer,
-} from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Box,
   Button,
   CircularProgress,
   Grid,
-  IconButton,
   Paper,
   Tab,
   Tabs,
-  Typography,
+  IconButton,
+  Tooltip,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -94,6 +87,10 @@ import {
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
+import Loader from "../../components/Loader";
+import { GiVintageRobot } from "react-icons/gi";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 
 const Accordion = withStyles({
   root: {
@@ -237,23 +234,21 @@ const useStyles = makeStyles((theme) => ({
   },
   bgProduct: {
     background: "#f5f5f5 !important",
-    paddingBottom: "2px",
-    margin: "10px",
-    marginBottom: "0",
-    border: "1px solid #cec9c9",
+    padding: "10px",
+    paddingBottom: "0",
+    border: "1px solid #163340",
     borderBottom: "none",
     boxShadow: "none",
-    borderBottomLeftRadius: "0",
-    borderBottomRightRadius: "0",
+    borderRadius: "0",
     // margin: "10px",
     // border: "1px solid #d9d7d7",
     // borderRadius: "6px"
   },
   productInformation: {
     background: "white",
-    margin: "9px",
+    padding: "9px",
     borderRadius: "3px",
-    border: "1px solid #d2cbcb",
+    border: "1px solid #163340",
   },
   termsBtn: {
     position: "absolute",
@@ -261,9 +256,7 @@ const useStyles = makeStyles((theme) => ({
     right: "0",
   },
   detailBox: {
-    margin: "10px",
-    border: "1px solid #d9d7d7",
-    borderRadius: "6px",
+    border: "1px solid #163340",
   },
   btnHeader: {
     position: "absolute",
@@ -451,6 +444,7 @@ function QuoteDetail() {
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
+  const [showAiDialog, setShowAiDialog] = useState(false);
 
   let { id } = useParams();
 
@@ -677,6 +671,17 @@ function QuoteDetail() {
           .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
+
+    let tempStatus = "Building Quote";
+    let versionArray = [];
+    Object.keys(data.versions).forEach((key) => {
+      versionArray.push(data.versions[key]);
+    });
+    const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
+    if (updatedVersion) {
+      tempStatus = updatedVersion.status;
+    }
+    mainPoint["Quote Status"] = tempStatus;
 
     setMainPoints(mainPoint);
   };
@@ -983,7 +988,7 @@ function QuoteDetail() {
       [
         {
           content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData[0].length,
+          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
           styles: { halign: "right", valign: "middle" },
         },
       ],
@@ -1361,8 +1366,8 @@ function QuoteDetail() {
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
-    let invalidQty = false;
-    let invalidPrice = false;
+    let invalidQty = true;
+    let invalidPrice = true;
 
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
     const ignoredKeys = [
@@ -1382,16 +1387,25 @@ function QuoteDetail() {
     let SPCurrency = "";
     let MarginCurrency = "";
     let ProfitCurrency = "";
-    BuilderData.map((quoteRows: { [x: string]: any }) => {
-      let hasTSP = true;
+
+    BuilderData.map((quoteRows: { [x: string]: any }, idx) => {
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
-        if (key === "qty") {
-          if (quoteRows[key] === 0) {
-            invalidQty = true;
+        if (BuilderData.length - 1 === idx && key === "qty") {
+          if (quoteRows[key] !== 0) {
+            invalidQty = false;
           }
         }
+
+        if (
+          BuilderData.length - 1 === idx &&
+          key.split("_")[0] === "totalSalesPrice" &&
+          quoteRows[key] !== undefined
+        ) {
+          invalidPrice = false;
+        }
+
         if (ignoredKeys.indexOf(key) === -1) {
           let indexkey = key;
           let currency = "";
@@ -1430,7 +1444,6 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
-              invalidPrice = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1447,17 +1460,15 @@ function QuoteDetail() {
           }
         }
       });
-
-      inventory.push(inventorydata);
     });
 
-    if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
-      setNextStep(false);
-    }
+    // if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
+    //   setNextStep(false);
+    // }
 
-    if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
-      setNextStep(true);
-    }
+    // if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
+    //   setNextStep(true);
+    // }
     setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
     setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
     setTotalSale(
@@ -1470,12 +1481,11 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
-      console.log(invalidQty);
-      console.log(invalidPrice);
-      if (!invalidQty || !invalidPrice) {
-        setNextStep(true);
-      } else {
+      console.log("Invalid Price: ", invalidPrice, "Invalid Qty: ", invalidQty);
+      if (invalidPrice || invalidQty) {
         setNextStep(false);
+      } else {
+        setNextStep(true);
       }
     }
 
@@ -1556,6 +1566,7 @@ function QuoteDetail() {
       }
       TableData = [...TableData, DataRecord];
     }
+
     setDynamicTableData(TableData);
   };
 
@@ -1643,13 +1654,30 @@ function QuoteDetail() {
         setShowVersionsDialog(true);
 
         const newData = data.versions.map((d, index) => {
-          return { ...d, id: index + 1 };
+          return {
+            ...d,
+            id: index + 1,
+            totalcost: formatAmountWithCurrency(
+              quoteData?.currency,
+              d.productData.totalCost
+            ).fullFormatAmount,
+            totalSalesPrice: formatAmountWithCurrency(
+              quoteData?.currency,
+              d.productData.totalSalesPrice
+            ).fullFormatAmount,
+          };
         });
 
         setVersionStatusData({
           columns: [
             { field: "versionNumber", headerName: "Version #", flex: 0.5 },
             { field: "status", headerName: "Status", flex: 1 },
+            { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
+            {
+              field: "totalSalesPrice",
+              headerName: "Total Sales Price",
+              flex: 0.5,
+            },
             // { field: "processStatus", headerName: "ProcessStatus" }
           ],
           data: newData,
@@ -1723,16 +1751,10 @@ function QuoteDetail() {
   };
 
   const handleSendReminder = () => {
-    if (
-      quoteData?.versions &&
-      quoteData.versions[currentVersion] &&
-      quoteData.versions[currentVersion]?.adobeDocumentId
-    ) {
+    if (quoteData && currentVersion) {
       setReminderLoading(true);
       axiosInstance()
-        .get(
-          `quote-builder/reminder/${quoteData.versions[currentVersion].adobeDocumentId}`
-        )
+        .get(`quote-builder/reminder/${quoteData._id}/${currentVersion}`)
         .then((data: { data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -1786,7 +1808,10 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={mainPoints}
+                  mainPoints={{
+                    ...mainPoints,
+                    "Quote Status": quoteData?.versions[currentVersion]?.status,
+                  }}
                   showHeading={true}
                 >
                   <Button
@@ -1831,7 +1856,7 @@ function QuoteDetail() {
               ) : (
                 <>
                   <Tabs
-                    className="oms-tab"
+                    className="quote-tab"
                     value={tabValue}
                     onChange={handleMainTabChange}
                     textColor="primary"
@@ -2271,16 +2296,27 @@ function QuoteDetail() {
                                 }}
                                 variant="outlined"
                                 size="small"
+                                className="mr-1"
                                 startIcon={<FiDownloadCloud />}
                                 color="primary"
                               >
                                 Download
                               </Button>
+
+                              <Tooltip title="AI Suggestion">
+                                <IconButton
+                                  onClick={() => {
+                                    setShowAiDialog(true);
+                                  }}
+                                >
+                                  <GiVintageRobot />
+                                </IconButton>
+                              </Tooltip>
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {ProcessStatus === "Quote Builder" &&
-                            visibleColumns.length > 0 ||
+                            {(ProcessStatus === "Quote Builder" &&
+                              visibleColumns.length > 0) ||
                             ifQuoteApproved().approved ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
@@ -2310,7 +2346,6 @@ function QuoteDetail() {
                                 }
                               />
                             )}
-
                             {ProcessStatus === "Quote Builder" ? (
                               <Box className="m-3">
                                 <div className="position-relative">
@@ -2506,6 +2541,28 @@ function QuoteDetail() {
               />
             </div>
           </CustomDialogComponent>
+        )}
+
+        {showAiDialog && (
+          <Dialog
+            open={showAiDialog}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="sm"
+            onClose={() => {
+              setShowAiDialog(false);
+            }}
+            fullWidth
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            <CustomDialogHeader
+              title="Under Construction"
+              onClose={() => {
+                setShowAiDialog(false);
+              }}
+            />
+            <CustomDialogContent></CustomDialogContent>
+          </Dialog>
         )}
       </Layout>
     </>
