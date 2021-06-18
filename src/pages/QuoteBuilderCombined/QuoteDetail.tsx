@@ -999,7 +999,7 @@ function QuoteDetail() {
       [
         {
           content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData[0].length,
+          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
           styles: { halign: "right", valign: "middle" },
         },
       ],
