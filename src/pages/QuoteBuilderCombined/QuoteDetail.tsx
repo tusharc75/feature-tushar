@@ -676,6 +676,17 @@ function QuoteDetail() {
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
+    let tempStatus = "Building Quote"
+    let versionArray = []
+    Object.keys(data.versions).forEach(key => {
+      versionArray.push(data.versions[key])
+    })
+    const updatedVersion = versionArray.find(v => v.status !== tempStatus)
+    if (updatedVersion) {
+      tempStatus = updatedVersion.status
+    }
+    mainPoint["Quote Status"] = tempStatus;
+
     setMainPoints(mainPoint);
   };
 
