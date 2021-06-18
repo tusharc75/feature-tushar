@@ -84,7 +84,6 @@ import {
 import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
 import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
-import RouteChangeTracker from "./components/GoogleAnalytics/RouteChangeTracker";
 import { TRACKING_ID } from "./config";
 
 function App() {
