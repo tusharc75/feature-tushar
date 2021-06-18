@@ -1,14 +1,21 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+  useReducer,
+} from "react";
 import {
   Box,
   Button,
   CircularProgress,
   Grid,
+  IconButton,
   Paper,
   Tab,
   Tabs,
-  IconButton,
-  Tooltip,
+  Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -88,9 +95,6 @@ import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
 import Loader from "../../components/Loader";
-import { GiVintageRobot } from "react-icons/gi";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 
 const Accordion = withStyles({
   root: {
@@ -444,7 +448,6 @@ function QuoteDetail() {
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
-  const [showAiDialog, setShowAiDialog] = useState(false);
 
   let { id } = useParams();
 
@@ -671,17 +674,6 @@ function QuoteDetail() {
           .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
-
-    let tempStatus = "Building Quote";
-    let versionArray = [];
-    Object.keys(data.versions).forEach((key) => {
-      versionArray.push(data.versions[key]);
-    });
-    const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
-    if (updatedVersion) {
-      tempStatus = updatedVersion.status;
-    }
-    mainPoint["Quote Status"] = tempStatus;
 
     setMainPoints(mainPoint);
   };
@@ -988,7 +980,7 @@ function QuoteDetail() {
       [
         {
           content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
+          colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
       ],
@@ -1366,8 +1358,8 @@ function QuoteDetail() {
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
-    let invalidQty = true;
-    let invalidPrice = true;
+    let invalidQty = false;
+    let invalidPrice = false;
 
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
     const ignoredKeys = [
@@ -1387,25 +1379,16 @@ function QuoteDetail() {
     let SPCurrency = "";
     let MarginCurrency = "";
     let ProfitCurrency = "";
-
-    BuilderData.map((quoteRows: { [x: string]: any }, idx) => {
+    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
+      let hasTSP = true;
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
-        if (BuilderData.length - 1 === idx && key === "qty") {
-          if (quoteRows[key] !== 0) {
-            invalidQty = false;
+        if (key === "qty") {
+          if (quoteRows[key] === 0) {
+            invalidQty = true;
           }
         }
-
-        if (
-          BuilderData.length - 1 === idx &&
-          key.split("_")[0] === "totalSalesPrice" &&
-          quoteRows[key] !== undefined
-        ) {
-          invalidPrice = false;
-        }
-
         if (ignoredKeys.indexOf(key) === -1) {
           let indexkey = key;
           let currency = "";
@@ -1444,6 +1427,7 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
+              invalidPrice = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1460,15 +1444,17 @@ function QuoteDetail() {
           }
         }
       });
+
+      inventory.push(inventorydata);
     });
 
-    // if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
-    //   setNextStep(false);
-    // }
+    if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
+      setNextStep(false);
+    }
 
-    // if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
-    //   setNextStep(true);
-    // }
+    if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
+      setNextStep(true);
+    }
     setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
     setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
     setTotalSale(
@@ -1481,11 +1467,12 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
-      console.log("Invalid Price: ", invalidPrice, "Invalid Qty: ", invalidQty);
-      if (invalidPrice || invalidQty) {
-        setNextStep(false);
-      } else {
+      console.log(invalidQty);
+      console.log(invalidPrice);
+      if (!invalidQty || !invalidPrice) {
         setNextStep(true);
+      } else {
+        setNextStep(false);
       }
     }
 
@@ -1566,7 +1553,6 @@ function QuoteDetail() {
       }
       TableData = [...TableData, DataRecord];
     }
-
     setDynamicTableData(TableData);
   };
 
@@ -2296,54 +2282,49 @@ function QuoteDetail() {
                                 }}
                                 variant="outlined"
                                 size="small"
-                                className="mr-1"
                                 startIcon={<FiDownloadCloud />}
                                 color="primary"
                               >
                                 Download
                               </Button>
-
-                              <Tooltip title="AI Suggestion">
-                                <IconButton
-                                  onClick={() => {
-                                    setShowAiDialog(true);
-                                  }}
-                                >
-                                  <GiVintageRobot />
-                                </IconButton>
-                              </Tooltip>
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {(ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0) ||
-                            ifQuoteApproved().approved ? (
-                              <ProductGrid
-                                productBuilderId={productBuilderID}
-                                refreshProducts={refreshProducts}
-                                columnsData={visibleColumns}
-                                currency={quoteData.currency}
-                                isAll={false}
-                              />
+                            {quoteData && !loading && productBuilderID ? (
+                              ProcessStatus === "Quote Builder" ? (
+                                <ProductGrid
+                                  productBuilderId={productBuilderID}
+                                  refreshProducts={refreshProducts}
+                                  stage={"cost"}
+                                  isAll={false}
+                                  columnsData={visibleColumns}
+                                  currency={quoteData?.currency}
+                                />
+                              ) : (
+                                <ProductBuilder
+                                  productBuilderId={productBuilderID}
+                                  isAddNewProduct={isAddNewProduct}
+                                  setIsAddNewProduct={setIsAddNewProduct}
+                                  isAddExistingProduct={isAddExistingProduct}
+                                  setIsAddExistingProduct={
+                                    setIsAddExistingProduct
+                                  }
+                                  refreshProducts={refreshProducts}
+                                  stage={
+                                    ProcessStatus === "New" ? "product" : "cost"
+                                  }
+                                  Editable={
+                                    ProcessStatus === "Price Builder" ||
+                                    ProcessStatus === "New"
+                                      ? true
+                                      : false
+                                  }
+                                />
+                              )
                             ) : (
-                              <ProductBuilder
-                                productBuilderId={productBuilderID}
-                                isAddNewProduct={isAddNewProduct}
-                                setIsAddNewProduct={setIsAddNewProduct}
-                                isAddExistingProduct={isAddExistingProduct}
-                                setIsAddExistingProduct={
-                                  setIsAddExistingProduct
-                                }
-                                refreshProducts={refreshProducts}
-                                stage={
-                                  ProcessStatus === "New" ? "product" : "cost"
-                                }
-                                Editable={
-                                  ProcessStatus === "Price Builder" ||
-                                  ProcessStatus === "New"
-                                    ? true
-                                    : false
-                                }
+                              <Loader
+                                style={{ minHeight: 300 }}
+                                text="Loading..."
                               />
                             )}
                             {ProcessStatus === "Quote Builder" ? (
@@ -2541,28 +2522,6 @@ function QuoteDetail() {
               />
             </div>
           </CustomDialogComponent>
-        )}
-
-        {showAiDialog && (
-          <Dialog
-            open={showAiDialog}
-            aria-labelledby="customized-dialog-title"
-            maxWidth="sm"
-            onClose={() => {
-              setShowAiDialog(false);
-            }}
-            fullWidth
-            fullScreen={isMobile || isTablet}
-            TransitionComponent={CustomDialogTransition}
-          >
-            <CustomDialogHeader
-              title="Under Construction"
-              onClose={() => {
-                setShowAiDialog(false);
-              }}
-            />
-            <CustomDialogContent></CustomDialogContent>
-          </Dialog>
         )}
       </Layout>
     </>
