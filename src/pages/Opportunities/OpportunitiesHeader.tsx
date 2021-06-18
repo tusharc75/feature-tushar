@@ -51,7 +51,7 @@ function OpportunitiesHeader(props) {
   } = props;
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid item xs={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
         {options && (
           <ToggleButtonGroup

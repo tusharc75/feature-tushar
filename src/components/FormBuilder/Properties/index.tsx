@@ -51,7 +51,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   const [initialValues, setInitialValues] = useState(fieldData);
 
-  const [isChangeFieldName, setIsChangeFieldName] = useState(false);
+  const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
     if (fieldData.type === "dropDown" && !fieldData.lookup) {
@@ -116,7 +116,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isUneditable = values.isUneditable
             ele.isVlookup = values.isVlookup
 
-            if (isChangeFieldName) {
+            if (isChangeFieldName && module === "producttemplate") {
               ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
             }
 
@@ -219,7 +219,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             />
             {(module === "producttemplate" && values["editAble"]) &&
               <Box display="flex" >
-                <Box>
+                <Box mb={1}>
                   <FormControlLabel
                     control={
                       <Checkbox

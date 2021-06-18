@@ -229,7 +229,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                                             <Grid item xs={7} sm={8}>
 
                                                                 {obj.entity === selectedEntity ? (
-                                                                    < Link className="link" to={`${routes.quoteBuilder.path}/${obj._id}`}>
+                                                                    < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
                                                                         <Typography className="detailName">{obj.quoteName}</Typography>
                                                                     </Link>) : (<span className="d-flex gap-2 align-items-center">
                                                                         <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
