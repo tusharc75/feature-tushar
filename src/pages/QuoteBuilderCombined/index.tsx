@@ -568,8 +568,9 @@ const QuoteBuilders = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${deleteRecord?.quoteName ? "Quote" : "Quotes"
-                }   ${deleteRecord.quoteName || ""}?`}
+              message={`Are you sure you want to delete ${
+                deleteRecord?.quoteName ? "Quote" : "Quotes"
+              }   ${deleteRecord.quoteName || ""}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
@@ -582,7 +583,7 @@ const QuoteBuilders = () => {
           {singleQuoteDelete.show ? (
             <ConfirmationDialog
               open={singleQuoteDelete.show}
-              message={`Are you sure, you want to delete Quote: ${singleQuoteDelete.quoteName} ?`}
+              message={`Are you sure you want to delete Quote: ${singleQuoteDelete.quoteName}?`}
               onClose={() =>
                 setSingleQuoteDelete({
                   id: null,

@@ -553,7 +553,7 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${deleteRec.name || ""
+            message={`Are you sure you want to delete user ${deleteRec.name || ""
               }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
