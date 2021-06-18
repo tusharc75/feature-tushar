@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch } from "react-router-dom";
+import ReactGA from 'react-ga';
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -83,6 +84,8 @@ import {
 import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
 import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import RouteChangeTracker from "./components/GoogleAnalytics/RouteChangeTracker";
+import { TRACKING_ID } from "./config";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -93,6 +96,9 @@ function App() {
     state: { user },
     dispatch,
   }: any = useData();
+  const history = useHistory();
+  ReactGA.initialize(TRACKING_ID);
+  
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -152,7 +158,11 @@ function App() {
     try {
       getNotification();
       getChatNotification();
-
+    //   history.listen((location, action) => {
+    //     ReactGA.set({ page: location.pathname });
+    //     ReactGA.pageview(location.pathname);
+    // });
+    RouteChangeTracker(history);
       setInterval(async () => {
         await getNotification();
       }, 60000);
@@ -160,6 +170,8 @@ function App() {
       console.log(e);
     }
   }, []);
+
+  
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;

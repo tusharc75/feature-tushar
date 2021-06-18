@@ -23,9 +23,7 @@ import { Integrations } from "@sentry/tracing";
 import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
-import RouteChangeTracker from "./components/GoogleAnalytics/RouteChangeTracker";
-import ReactGa from "react-ga";
-import { TRACKING_ID } from "./config";
+
 
 Sentry.init({
   dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
@@ -37,7 +35,6 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-ReactGa.initialize(TRACKING_ID);
 
 
 
@@ -45,7 +42,6 @@ ReactGa.initialize(TRACKING_ID);
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <RouteChangeTracker />
       <Provider>
         <CustomToastProvider>
           <CustomNotificationCountProvider>
