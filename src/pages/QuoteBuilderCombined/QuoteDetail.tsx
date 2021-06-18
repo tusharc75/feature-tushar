@@ -2,9 +2,9 @@ import React, {
   useState,
   useEffect,
   useContext,
-  useCallback,
   useRef,
   useReducer,
+  useMemo
 } from "react";
 import {
   Box,
@@ -16,13 +16,14 @@ import {
   Tab,
   Tabs,
   TextField,
-  Typography,
+  Tooltip,
+  Typography
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { gridPageSizes, opportunity, quote } from "../../constants/helpers";
+import { gridPageSizes, opportunity, quote, currencyCodeToSymbol } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -95,6 +96,10 @@ import {
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
+import { GiVintageRobot } from 'react-icons/gi'
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import PerformanceTuningImg from "../../assets/PerformanceTuning.png"
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -450,6 +455,7 @@ function QuoteDetail() {
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
+  const [showAiDialog, setShowAiDialog] = useState(false)
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -462,6 +468,15 @@ function QuoteDetail() {
     isRead: false,
     isDelete: false,
   });
+
+  const defaultTotalValue = useMemo(() => {
+    let result = "0"
+    if (quoteData && quoteData?.currency) {
+      result = `${currencyCodeToSymbol(quoteData.currency)} 0`
+    }
+    return result
+  }, [quoteData])
+
   const { qbResource, qbApi } = quoteBuilder;
 
   interface TabPanelProps {
@@ -1937,67 +1952,70 @@ function QuoteDetail() {
                         container
                         className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
                       >
+                        {
+                          ProcessStatus === "New" ? null :
+                            <Grid
+                              item
+                              xs={12}
+                              sm={7}
+                              md={7}
+                              className="quoteHeader"
+                            >
+                              <div className="quoteBox">
+                                <span>Total Profit </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalProfit.fullFormatAmount}
+                                >
+                                  {totalProfit.shortFormatAmount ? totalProfit.shortFormatAmount : defaultTotalValue}
+                                </span>
+                              </div>
+                              <div className="quoteBox">
+                                <span>Total Cost Price </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalcost.fullFormatAmount}
+                                >
+                                  {totalcost.shortFormatAmount ? totalcost.shortFormatAmount : defaultTotalValue}
+                                </span>
+                              </div>
+                              {redCard ? (
+                                <div className="redQuoteBox">
+                                  <span>Total Selling Price </span>
+                                  <span
+                                    className="quoteAmount"
+                                    title={totalsale.fullFormatAmount}
+                                  >
+                                    {totalsale.shortFormatAmount ? totalsale.shortFormatAmount : defaultTotalValue}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="quoteBox">
+                                  <span>Total Selling Price </span>
+                                  <span
+                                    className="quoteAmount"
+                                    title={totalsale.fullFormatAmount}
+                                  >
+                                    {totalsale.shortFormatAmount ? totalsale.shortFormatAmount : defaultTotalValue}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="quoteBox noBorder">
+                                <span>Total Margin </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalmargin.fullFormatAmount}
+                                >
+                                  {totalmargin.shortFormatAmount ? totalmargin.shortFormatAmount : defaultTotalValue}
+                                </span>
+                              </div>
+                            </Grid>
+                        }
                         <Grid
                           item
-                          xs={12}
-                          sm={7}
-                          md={7}
-                          className="quoteHeader"
-                        >
-                          <div className="quoteBox">
-                            <span>Total Profit </span>
-                            <span
-                              className="quoteAmount"
-                              title={totalProfit.fullFormatAmount}
-                            >
-                              {totalProfit.shortFormatAmount}
-                            </span>
-                          </div>
-                          <div className="quoteBox">
-                            <span>Total Cost Price </span>
-                            <span
-                              className="quoteAmount"
-                              title={totalcost.fullFormatAmount}
-                            >
-                              {totalcost.shortFormatAmount}
-                            </span>
-                          </div>
-                          {redCard ? (
-                            <div className="redQuoteBox">
-                              <span>Total Selling Price </span>
-                              <span
-                                className="quoteAmount"
-                                title={totalsale.fullFormatAmount}
-                              >
-                                {totalsale.shortFormatAmount}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="quoteBox">
-                              <span>Total Selling Price </span>
-                              <span
-                                className="quoteAmount"
-                                title={totalsale.fullFormatAmount}
-                              >
-                                {totalsale.shortFormatAmount}
-                              </span>
-                            </div>
-                          )}
-                          <div className="quoteBox noBorder">
-                            <span>Total Margin </span>
-                            <span
-                              className="quoteAmount"
-                              title={totalmargin.fullFormatAmount}
-                            >
-                              {totalmargin.shortFormatAmount}
-                            </span>
-                          </div>
-                        </Grid>
-                        <Grid
-                          item
-                          xs={12}
-                          sm={5}
-                          md={5}
+                          xs={ProcessStatus === "New" ? 9 : 12}
+                          sm={ProcessStatus === "New" ? 4 : 5}
+                          md={ProcessStatus === "New" ? 4 : 5}
                           className="d-flex justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
@@ -2262,6 +2280,15 @@ function QuoteDetail() {
                               >
                                 Download
                               </Button>
+
+                              <Tooltip title="AI Suggestion">
+                                <IconButton onClick={() => {
+                                  setShowAiDialog(true)
+                                }}>
+                                  <GiVintageRobot />
+                                </IconButton>
+                              </Tooltip>
+
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
@@ -2497,6 +2524,26 @@ function QuoteDetail() {
             </div>
           </CustomDialogComponent>
         )}
+
+        {
+          showAiDialog && <Dialog
+            open={showAiDialog}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="sm"
+            onClose={() => { setShowAiDialog(false) }}
+            fullWidth
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            <CustomDialogHeader title="Under Construction" onClose={() => { setShowAiDialog(false) }} />
+            <CustomDialogContent>
+              <div className="text-align-center">
+                <Typography variant="h4" >Under Construction </Typography>
+                <img src={`${PerformanceTuningImg}`} style={{ height: "300px" }} />
+              </div>
+            </CustomDialogContent>
+          </Dialog>
+        }
       </Layout>
     </>
   );
