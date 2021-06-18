@@ -800,7 +800,7 @@ export default function Account(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure, you want to delete selected account(s) ?`}
+              message={`Are you sure you want to delete the selected account(s) ?`}
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={handleDeleteAccounts}
             />
@@ -808,7 +808,7 @@ export default function Account(props) {
           {singleAccountDelete.show ? (
             <ConfirmationDialog
               open={singleAccountDelete.show}
-              message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
+              message={`Are you sure you want to delete the account: ${singleAccountDelete.accountName} ? `}
               onClose={() =>
                 setSingleAccountDelete({
                   id: null,
@@ -823,7 +823,7 @@ export default function Account(props) {
           {singleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
+              message={`Are you sure you want to ${singleApproveDisapproveAccount.approved
                 ? "approve"
                 : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
@@ -841,7 +841,7 @@ export default function Account(props) {
           {multipleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
+              message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved
                 ? "approve"
                 : "disapprove"
                 } selected ${multipleApproveDisapproveAccount.selectedRecords

@@ -202,7 +202,7 @@ const ProductBuilder = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete ${deleteRecord ? deleteRecord.name : "selected product(s)"} ?`}
+                    message={`Are you sure you want to delete ${deleteRecord ? deleteRecord.name : "selected product(s)"}?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                     okBtnLoading={okButtonLoading}

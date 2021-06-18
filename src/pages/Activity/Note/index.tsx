@@ -315,7 +315,7 @@ const Note = () => {
             isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRecord.name || "Notes"
+                    message={`Are you sure you want to delete ${deleteRecord.name || "Notes"
                         }?`}
                     onClose={() => {
                         if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
