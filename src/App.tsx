@@ -158,11 +158,11 @@ function App() {
     try {
       getNotification();
       getChatNotification();
-    //   history.listen((location, action) => {
-    //     ReactGA.set({ page: location.pathname });
-    //     ReactGA.pageview(location.pathname);
-    // });
-    RouteChangeTracker(history);
+      history.listen((location, action) => {
+        ReactGA.set({ page: location.pathname });
+        ReactGA.pageview(location.pathname);
+    });
+    
       setInterval(async () => {
         await getNotification();
       }, 60000);
