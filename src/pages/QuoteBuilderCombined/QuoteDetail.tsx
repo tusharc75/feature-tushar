@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   useContext,
-  useCallback,
   useRef,
   useReducer,
   useMemo
@@ -16,7 +15,6 @@ import {
   Paper,
   Tab,
   Tabs,
-  IconButton,
   Tooltip,
   Typography
 } from "@material-ui/core";
@@ -452,6 +450,7 @@ function QuoteDetail() {
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
+  const [showAiDialog, setShowAiDialog] = useState(false)
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -2009,9 +2008,9 @@ function QuoteDetail() {
                         }
                         <Grid
                           item
-                          xs={12}
-                          sm={5}
-                          md={5}
+                          xs={ProcessStatus === "New" ? 9 : 12}
+                          sm={ProcessStatus === "New" ? 4 : 5}
+                          md={ProcessStatus === "New" ? 4 : 5}
                           className="d-flex justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
