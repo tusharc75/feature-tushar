@@ -2,6 +2,8 @@ import React, {
   useState,
   useEffect,
   useContext,
+  useCallback,
+  useRef,
   useReducer,
   useMemo
 } from "react";
@@ -10,6 +12,7 @@ import {
   Button,
   CircularProgress,
   Grid,
+  IconButton,
   Paper,
   Tab,
   Tabs,
@@ -98,6 +101,7 @@ import { GiVintageRobot } from 'react-icons/gi'
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import PerformanceTuningImg from "../../assets/PerformanceTuning.png"
+import Loader from "../../components/Loader";
 
 const Accordion = withStyles({
   root: {
@@ -451,7 +455,6 @@ function QuoteDetail() {
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
-  const [showAiDialog, setShowAiDialog] = useState(false)
 
   let { id } = useParams();
 
@@ -993,7 +996,7 @@ function QuoteDetail() {
       [
         {
           content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
+          colSpan: PDFData[0].length,
           styles: { halign: "right", valign: "middle" },
         },
       ],
@@ -1392,7 +1395,7 @@ function QuoteDetail() {
     let SPCurrency = "";
     let MarginCurrency = "";
     let ProfitCurrency = "";
-    BuilderData.map((quoteRows: { [x: string]: any }) => {
+    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
       let hasTSP = true;
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
@@ -1653,13 +1656,30 @@ function QuoteDetail() {
         setShowVersionsDialog(true);
 
         const newData = data.versions.map((d, index) => {
-          return { ...d, id: index + 1 };
+          return {
+            ...d,
+            id: index + 1,
+            totalcost: formatAmountWithCurrency(
+              quoteData?.currency,
+              d.productData.totalCost
+            ).fullFormatAmount,
+            totalSalesPrice: formatAmountWithCurrency(
+              quoteData?.currency,
+              d.productData.totalSalesPrice
+            ).fullFormatAmount,
+          };
         });
 
         setVersionStatusData({
           columns: [
             { field: "versionNumber", headerName: "Version #", flex: 0.5 },
             { field: "status", headerName: "Status", flex: 1 },
+            { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
+            {
+              field: "totalSalesPrice",
+              headerName: "Total Sales Price",
+              flex: 0.5,
+            },
             // { field: "processStatus", headerName: "ProcessStatus" }
           ],
           data: newData,
@@ -1733,16 +1753,10 @@ function QuoteDetail() {
   };
 
   const handleSendReminder = () => {
-    if (
-      quoteData?.versions &&
-      quoteData.versions[currentVersion] &&
-      quoteData.versions[currentVersion]?.adobeDocumentId
-    ) {
+    if (quoteData && currentVersion) {
       setReminderLoading(true);
       axiosInstance()
-        .get(
-          `quote-builder/reminder/${quoteData.versions[currentVersion].adobeDocumentId}`
-        )
+        .get(`quote-builder/reminder/${quoteData._id}/${currentVersion}`)
         .then((data: { data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -1796,7 +1810,10 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={mainPoints}
+                  mainPoints={{
+                    ...mainPoints,
+                    "Quote Status": quoteData?.versions[currentVersion]?.status,
+                  }}
                   showHeading={true}
                 >
                   <Button
@@ -2284,7 +2301,6 @@ function QuoteDetail() {
                                 }}
                                 variant="outlined"
                                 size="small"
-                                className="mr-1"
                                 startIcon={<FiDownloadCloud />}
                                 color="primary"
                               >
@@ -2302,38 +2318,43 @@ function QuoteDetail() {
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0 ||
-                              ifQuoteApproved().approved ? (
-                              <ProductGrid
-                                productBuilderId={productBuilderID}
-                                refreshProducts={refreshProducts}
-                                columnsData={visibleColumns}
-                                currency={quoteData.currency}
-                                isAll={false}
-                              />
+                            {quoteData && !loading && productBuilderID ? (
+                              ProcessStatus === "Quote Builder" ? (
+                                <ProductGrid
+                                  productBuilderId={productBuilderID}
+                                  refreshProducts={refreshProducts}
+                                  stage={"cost"}
+                                  isAll={false}
+                                  columnsData={visibleColumns}
+                                  currency={quoteData?.currency}
+                                />
+                              ) : (
+                                <ProductBuilder
+                                  productBuilderId={productBuilderID}
+                                  isAddNewProduct={isAddNewProduct}
+                                  setIsAddNewProduct={setIsAddNewProduct}
+                                  isAddExistingProduct={isAddExistingProduct}
+                                  setIsAddExistingProduct={
+                                    setIsAddExistingProduct
+                                  }
+                                  refreshProducts={refreshProducts}
+                                  stage={
+                                    ProcessStatus === "New" ? "product" : "cost"
+                                  }
+                                  Editable={
+                                    ProcessStatus === "Price Builder" ||
+                                      ProcessStatus === "New"
+                                      ? true
+                                      : false
+                                  }
+                                />
+                              )
                             ) : (
-                              <ProductBuilder
-                                productBuilderId={productBuilderID}
-                                isAddNewProduct={isAddNewProduct}
-                                setIsAddNewProduct={setIsAddNewProduct}
-                                isAddExistingProduct={isAddExistingProduct}
-                                setIsAddExistingProduct={
-                                  setIsAddExistingProduct
-                                }
-                                refreshProducts={refreshProducts}
-                                stage={
-                                  ProcessStatus === "New" ? "product" : "cost"
-                                }
-                                Editable={
-                                  ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
-                                    ? true
-                                    : false
-                                }
+                              <Loader
+                                style={{ minHeight: 300 }}
+                                text="Loading..."
                               />
                             )}
-
                             {ProcessStatus === "Quote Builder" ? (
                               <Box className="m-3">
                                 <div className="position-relative">

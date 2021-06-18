@@ -173,7 +173,7 @@ const KpiDashboard = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete dashboard ${deleteRecord?.name} ?`}
+                    message={`Are you sure you want to delete dashboard ${deleteRecord?.name}?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                 />

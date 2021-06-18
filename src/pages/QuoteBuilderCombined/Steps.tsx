@@ -380,7 +380,7 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-end"
+            className="d-flex align-items-center justify-content-center"
           >
             {activeStep !== steps.length - 1 && (
               <>
@@ -441,7 +441,7 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-start"
+            className="d-flex align-items-center justify-content-center"
           >
             {activeStep !== steps.length - 1 && (
               <>

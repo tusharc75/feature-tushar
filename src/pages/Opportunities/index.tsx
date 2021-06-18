@@ -473,7 +473,7 @@ const Opportunities = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${deleteRecord?.opportunityName ? "Opportunity" : "Opportunities"
+              message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? "Opportunity" : "Opportunities"
                 }   ${deleteRecord.opportunityName || ""}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
@@ -496,7 +496,7 @@ const Opportunities = () => {
           {singleOpportunityDelete.show ? (
             <ConfirmationDialog
               open={singleOpportunityDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+              message={`Are you sure you want to delete contact: ${singleOpportunityDelete.opportunityName}?`}
               onClose={() =>
                 setSingleOpportunityDelete({
                   id: null,

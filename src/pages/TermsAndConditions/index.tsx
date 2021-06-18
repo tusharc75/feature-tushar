@@ -266,7 +266,7 @@ export default function TermsAndCondition(props) {
                     showDeleteConfirmBox ?
                         <ConfirmationDialog
                             open={showDeleteConfirmBox}
-                            message={`Are you sure, you want to delete selected TermsAndCondition  ${deleteRec?._id ? deleteRec?.TACName : ""} ?`}
+                            message={`Are you sure you want to delete the selected TermsAndCondition  ${deleteRec?._id ? deleteRec?.TACName : ""}?`}
                             onClose={() => setShowDeleteConfirmBox(false)}
                             onOk={handleDeleteTermsAndConditions}
                         /> : null

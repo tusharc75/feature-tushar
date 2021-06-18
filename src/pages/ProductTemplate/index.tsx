@@ -335,7 +335,7 @@ const ProductTemplate: FC = () => {
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
-                        message={`Are you sure, you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
+                        message={`Are you sure you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
                         onClose={() => setShowDeleteConfirmBox(false)}
                         onOk={handleDelete}
                     />
