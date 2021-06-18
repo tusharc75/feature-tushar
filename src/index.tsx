@@ -8,7 +8,6 @@ import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { MsalProvider } from "@azure/msal-react";
 import AzureInstance from "./AzureInstance";
-import RouteChangeTracker from "./components/GoogleAnalytics/RouteChangeTracker";
 import * as Sentry from "@sentry/react";
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -24,6 +23,9 @@ import { Integrations } from "@sentry/tracing";
 import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import RouteChangeTracker from "./components/GoogleAnalytics/RouteChangeTracker";
+import ReactGa from "react-ga";
+import { TRACKING_ID } from "./config";
 
 Sentry.init({
   dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
@@ -35,28 +37,26 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-//* Google Analytics */
-const TRACKING_ID = "UA-196035023-2"; // YOUR_OWN_TRACKING_ID
-ReactGA.initialize(TRACKING_ID);
+ReactGa.initialize(TRACKING_ID);
+
 
 
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <RouteChangeTracker>
-        <Provider>
-          <CustomToastProvider>
-            <CustomNotificationCountProvider>
-              <CustomChatNotificationCountProvider>
-                <MsalProvider instance={AzureInstance}>
+      <RouteChangeTracker />
+      <Provider>
+        <CustomToastProvider>
+          <CustomNotificationCountProvider>
+            <CustomChatNotificationCountProvider>
+              <MsalProvider instance={AzureInstance}>
                   <App />
-                </MsalProvider>
-              </CustomChatNotificationCountProvider>
-            </CustomNotificationCountProvider>
-          </CustomToastProvider>
-        </Provider>
-      </RouteChangeTracker>
+              </MsalProvider>
+            </CustomChatNotificationCountProvider>
+          </CustomNotificationCountProvider>
+        </CustomToastProvider>
+      </Provider>
     </Router>
   </React.StrictMode>,
   document.getElementById("root")
