@@ -1034,10 +1034,10 @@ function QuoteDetail() {
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
 
-      let signatureContent = `<br><br><span--style='font-size:15px;'>Note:</span><br>`;
-      signatureContent = signatureContent + `<span--style='font-size:15px;'>Thanks for your business</span><br><br>`;
+      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      signatureContent = signatureContent + `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
 
-      signatureContent = signatureContent + `<span--style='font-size:15px'>Customer Signature</span><br><br><br><br>`;
+      signatureContent = signatureContent + `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
       signatureContent = signatureContent + `<span--style='color:lightgrey'>__________________________</span>`;
 
       signatureContent = signatureContent.replaceAll(" ", "&nbsp");
