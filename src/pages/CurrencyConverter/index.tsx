@@ -83,7 +83,7 @@ const CurrencyConverter = () => {
       toastConfig.setToastConfig({
         open: true,
         type: "success",
-        message: "Update Sucessfully",
+        message: "Updated successfully",
       });
       fetchConverter()
     }).catch((error) => {
