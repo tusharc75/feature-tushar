@@ -15,10 +15,11 @@ import {
   Paper,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography
 } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -100,7 +101,10 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import PerformanceTuningImg from "../../assets/PerformanceTuning.png"
 import Loader from "../../components/Loader";
-
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
@@ -230,6 +234,7 @@ const intialState = {
 const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(1),
+    paddingRight: "15px"
   },
   chips: {
     display: "flex",
@@ -2191,69 +2196,39 @@ function QuoteDetail() {
 
                             {ProcessStatus === "Quote Builder" ? (
                               <Grid container>
-                                <Grid item xs={11} md={11} sm={11}>
+                                <Grid item xs={12} md={12} sm={12}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
                                   >
-                                    <InputLabel id="demo-mutiple-chip-label">
-                                      Visible Columns in Quote
-                                    </InputLabel>
-                                    <Select
-                                      labelId="demo-mutiple-chip-label"
+                                    <Autocomplete
                                       id="demo-mutiple-chip"
+                                      fullWidth
+                                      size="small"
                                       multiple
                                       value={visibleColumns}
-                                      onChange={handleChangeVisible}
-                                      input={
-                                        <Input id="select-multiple-chip" />
-                                      }
-                                      renderValue={(selected: any) => (
-                                        <div className={classes.chips}>
-                                          {selected.map((value) => (
-                                            <Chip
-                                              key={value}
-                                              label={value}
-                                              className={classes.chip}
-                                            />
-                                          ))}
-                                        </div>
-                                      )}
-                                      MenuProps={{
-                                        PaperProps: {
-                                          style: {
-                                            maxHeight:
-                                              ITEM_HEIGHT * 4.5 +
-                                              ITEM_PADDING_TOP,
-                                            width: 250,
-                                          },
-                                        },
-                                        anchorOrigin: {
-                                          vertical: "bottom",
-                                          horizontal: "left",
-                                        },
-                                        getContentAnchorEl: null,
+                                      onChange={(e, val) => {
+                                        setVisibleColumnName(val);
+                                        handleVersionUpdate(PDF, val, versionStatus, TandC);
                                       }}
-                                    >
-                                      {ColumnName.map((name) => (
-                                        <MenuItem
-                                          key={name}
-                                          value={name}
-                                          style={getStyles(
-                                            name,
-                                            visibleColumns,
-                                            theme
-                                          )}
-                                        >
+                                      options={ColumnName}
+                                      disableCloseOnSelect
+                                      getOptionLabel={(option) => option}
+                                      renderOption={(option, { selected }) => (
+                                        <React.Fragment>
                                           <Checkbox
-                                            checked={
-                                              visibleColumns.indexOf(name) > -1
-                                            }
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
                                           />
-                                          {name}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
+                                          {option}
+                                        </React.Fragment>
+                                      )}
+                                      renderInput={(params) => (
+                                        <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />
+                                      )}
+                                    />
                                   </FormControl>
                                 </Grid>
                               </Grid>
