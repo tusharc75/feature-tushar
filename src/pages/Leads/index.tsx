@@ -359,7 +359,7 @@ const Leads = () => {
               open: true,
               id: _id,
               leadName: concatedName,
-              message: `Are you sure, You want to convert ${concatedName} to opportunity ?`,
+              message: `Are you sure you want to convert ${concatedName} to opportunity?`,
             });
           }}
         >
@@ -489,7 +489,7 @@ const Leads = () => {
                 open: true,
                 id: null,
                 leadName: null,
-                message: `Are you sure, You want to convert selected leads to opportunity ?`,
+                message: `Are you sure you want to convert selected leads to opportunity?`,
               });
             }}
           />
@@ -524,7 +524,7 @@ const Leads = () => {
           isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete Lead ${deleteRecord.name || ""
+              message={`Are you sure you want to delete Lead ${deleteRecord.name || ""
                 }?`}
               onClose={() => {
                 if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
