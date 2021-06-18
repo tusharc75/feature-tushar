@@ -1383,7 +1383,7 @@ function QuoteDetail() {
     let MarginCurrency = "";
     let ProfitCurrency = "";
     BuilderData.map((quoteRows: { [x: string]: any }) => {
-      let hasTSP = true;
+      let hasTSP = false;
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       quoteRowKeys.map((key) => {
@@ -1418,6 +1418,8 @@ function QuoteDetail() {
               });
             }
 
+            console.log(key);
+
             if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalCost"
@@ -1430,7 +1432,7 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
-              invalidPrice = false;
+              hasTSP = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1447,6 +1449,12 @@ function QuoteDetail() {
           }
         }
       });
+
+      if (!hasTSP) {
+        invalidPrice = true;
+      }
+
+      console.log("TSP : ", hasTSP);
 
       inventory.push(inventorydata);
     });
@@ -1470,12 +1478,12 @@ function QuoteDetail() {
     }
 
     if (ProcessStatus === "Price Builder") {
-      console.log(invalidQty);
-      console.log(invalidPrice);
-      if (!invalidQty || !invalidPrice) {
-        setNextStep(true);
-      } else {
+      console.log(`QTY: ${invalidQty}`);
+      console.log(`PRICE: ${invalidPrice}`);
+      if (invalidQty && invalidPrice) {
         setNextStep(false);
+      } else {
+        setNextStep(true);
       }
     }
 
@@ -2279,8 +2287,8 @@ function QuoteDetail() {
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {ProcessStatus === "Quote Builder" &&
-                            visibleColumns.length > 0 ||
+                            {(ProcessStatus === "Quote Builder" &&
+                              visibleColumns.length > 0) ||
                             ifQuoteApproved().approved ? (
                               <ProductGrid
                                 productBuilderId={productBuilderID}
