@@ -4,7 +4,7 @@ import React, {
   useContext,
   useRef,
   useReducer,
-  useMemo
+  useMemo,
 } from "react";
 import {
   Box,
@@ -16,13 +16,18 @@ import {
   Tab,
   Tabs,
   Tooltip,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { gridPageSizes, opportunity, quote, currencyCodeToSymbol } from "../../constants/helpers";
+import {
+  gridPageSizes,
+  opportunity,
+  quote,
+  currencyCodeToSymbol,
+} from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -95,10 +100,10 @@ import {
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
-import { GiVintageRobot } from 'react-icons/gi'
+import { GiVintageRobot } from "react-icons/gi";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import PerformanceTuningImg from "../../assets/PerformanceTuning.png"
+import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 
 const Accordion = withStyles({
@@ -450,7 +455,7 @@ function QuoteDetail() {
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
-  const [showAiDialog, setShowAiDialog] = useState(false)
+  const [showAiDialog, setShowAiDialog] = useState(false);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -465,12 +470,12 @@ function QuoteDetail() {
   });
 
   const defaultTotalValue = useMemo(() => {
-    let result = "0"
+    let result = "0";
     if (quoteData && quoteData?.currency) {
-      result = `${currencyCodeToSymbol(quoteData.currency)} 0`
+      result = `${currencyCodeToSymbol(quoteData.currency)} 0`;
     }
-    return result
-  }, [quoteData])
+    return result;
+  }, [quoteData]);
 
   const { qbResource, qbApi } = quoteBuilder;
 
@@ -686,7 +691,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -719,7 +724,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -822,12 +827,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1373,8 +1378,6 @@ function QuoteDetail() {
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
-    let invalidQty = false;
-    let invalidPrice = false;
 
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
     const ignoredKeys = [
@@ -1394,16 +1397,26 @@ function QuoteDetail() {
     let SPCurrency = "";
     let MarginCurrency = "";
     let ProfitCurrency = "";
+
+    const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+    const withZeroAmt = BuilderData.filter(
+      (d) => d[`totalSalesPrice_${quoteData?.currency}`] === 0
+    );
+
+    console.log(withZeroQty.length, withZeroAmt.length);
+
+    if (ProcessStatus === "Price Builder") {
+      if (!withZeroAmt.length && !withZeroQty.length) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+
     BuilderData.forEach((quoteRows: { [x: string]: any }) => {
-      let hasTSP = true;
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-      quoteRowKeys.map((key) => {
-        if (key === "qty") {
-          if (quoteRows[key] === 0) {
-            invalidQty = true;
-          }
-        }
+      quoteRowKeys.forEach((key) => {
         if (ignoredKeys.indexOf(key) === -1) {
           let indexkey = key;
           let currency = "";
@@ -1442,7 +1455,6 @@ function QuoteDetail() {
             ) {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
               SPCurrency = currency.toUpperCase();
-              invalidPrice = false;
             } else if (
               currency.toUpperCase() === quoteData?.currency &&
               key === "totalProfit"
@@ -1463,13 +1475,6 @@ function QuoteDetail() {
       inventory.push(inventorydata);
     });
 
-    if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
-      setNextStep(false);
-    }
-
-    if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
-      setNextStep(true);
-    }
     setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
     setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
     setTotalSale(
@@ -1479,16 +1484,6 @@ function QuoteDetail() {
     setTotalCost(formatAmountWithCurrency(quoteData.currency, totalCost));
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
-    }
-
-    if (ProcessStatus === "Price Builder") {
-      console.log(invalidQty);
-      console.log(invalidPrice);
-      if (!invalidQty || !invalidPrice) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
     }
 
     setButtonMessage("Send to Customer");
@@ -1634,7 +1629,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1831,9 +1826,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button>
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1929,10 +1924,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                    (_f) =>
-                                      _f.fieldData.sectionName !==
-                                      "Post-Quote Information"
-                                  )
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
                                   : quoteFields
                               }
                             />
@@ -1947,65 +1942,74 @@ function QuoteDetail() {
                         container
                         className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
                       >
-                        {
-                          ProcessStatus === "New" ? null :
-                            <Grid
-                              item
-                              xs={12}
-                              sm={7}
-                              md={7}
-                              className="quoteHeader"
-                            >
+                        {ProcessStatus === "New" ? null : (
+                          <Grid
+                            item
+                            xs={12}
+                            sm={7}
+                            md={7}
+                            className="quoteHeader"
+                          >
+                            <div className="quoteBox">
+                              <span>Total Profit </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalProfit.fullFormatAmount}
+                              >
+                                {totalProfit.shortFormatAmount
+                                  ? totalProfit.shortFormatAmount
+                                  : defaultTotalValue}
+                              </span>
+                            </div>
+                            <div className="quoteBox">
+                              <span>Total Cost Price </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalcost.fullFormatAmount}
+                              >
+                                {totalcost.shortFormatAmount
+                                  ? totalcost.shortFormatAmount
+                                  : defaultTotalValue}
+                              </span>
+                            </div>
+                            {redCard ? (
+                              <div className="redQuoteBox">
+                                <span>Total Selling Price </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalsale.fullFormatAmount}
+                                >
+                                  {totalsale.shortFormatAmount
+                                    ? totalsale.shortFormatAmount
+                                    : defaultTotalValue}
+                                </span>
+                              </div>
+                            ) : (
                               <div className="quoteBox">
-                                <span>Total Profit </span>
+                                <span>Total Selling Price </span>
                                 <span
                                   className="quoteAmount"
-                                  title={totalProfit.fullFormatAmount}
+                                  title={totalsale.fullFormatAmount}
                                 >
-                                  {totalProfit.shortFormatAmount ? totalProfit.shortFormatAmount : defaultTotalValue}
+                                  {totalsale.shortFormatAmount
+                                    ? totalsale.shortFormatAmount
+                                    : defaultTotalValue}
                                 </span>
                               </div>
-                              <div className="quoteBox">
-                                <span>Total Cost Price </span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalcost.fullFormatAmount}
-                                >
-                                  {totalcost.shortFormatAmount ? totalcost.shortFormatAmount : defaultTotalValue}
-                                </span>
-                              </div>
-                              {redCard ? (
-                                <div className="redQuoteBox">
-                                  <span>Total Selling Price </span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount ? totalsale.shortFormatAmount : defaultTotalValue}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="quoteBox">
-                                  <span>Total Selling Price </span>
-                                  <span
-                                    className="quoteAmount"
-                                    title={totalsale.fullFormatAmount}
-                                  >
-                                    {totalsale.shortFormatAmount ? totalsale.shortFormatAmount : defaultTotalValue}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="quoteBox noBorder">
-                                <span>Total Margin </span>
-                                <span
-                                  className="quoteAmount"
-                                  title={totalmargin.fullFormatAmount}
-                                >
-                                  {totalmargin.shortFormatAmount ? totalmargin.shortFormatAmount : defaultTotalValue}
-                                </span>
-                              </div>
-                            </Grid>
-                        }
+                            )}
+                            <div className="quoteBox noBorder">
+                              <span>Total Margin </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalmargin.fullFormatAmount}
+                              >
+                                {totalmargin.shortFormatAmount
+                                  ? totalmargin.shortFormatAmount
+                                  : defaultTotalValue}
+                              </span>
+                            </div>
+                          </Grid>
+                        )}
                         <Grid
                           item
                           xs={ProcessStatus === "New" ? 9 : 12}
@@ -2161,7 +2165,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2260,8 +2264,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2281,7 +2285,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2307,13 +2311,14 @@ function QuoteDetail() {
                               </Button>
 
                               <Tooltip title="AI Suggestion">
-                                <IconButton onClick={() => {
-                                  setShowAiDialog(true)
-                                }}>
+                                <IconButton
+                                  onClick={() => {
+                                    setShowAiDialog(true);
+                                  }}
+                                >
                                   <GiVintageRobot />
                                 </IconButton>
                               </Tooltip>
-
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
@@ -2342,7 +2347,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2437,7 +2442,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2509,8 +2514,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
@@ -2550,25 +2556,35 @@ function QuoteDetail() {
           </CustomDialogComponent>
         )}
 
-        {
-          showAiDialog && <Dialog
+        {showAiDialog && (
+          <Dialog
             open={showAiDialog}
             aria-labelledby="customized-dialog-title"
             maxWidth="sm"
-            onClose={() => { setShowAiDialog(false) }}
+            onClose={() => {
+              setShowAiDialog(false);
+            }}
             fullWidth
             fullScreen={isMobile || isTablet}
             TransitionComponent={CustomDialogTransition}
           >
-            <CustomDialogHeader title="Under Construction" onClose={() => { setShowAiDialog(false) }} />
+            <CustomDialogHeader
+              title="Under Construction"
+              onClose={() => {
+                setShowAiDialog(false);
+              }}
+            />
             <CustomDialogContent>
               <div className="text-align-center">
-                <Typography variant="h4" >Under Construction </Typography>
-                <img src={`${PerformanceTuningImg}`} style={{ height: "300px" }} />
+                <Typography variant="h4">Under Construction </Typography>
+                <img
+                  src={`${PerformanceTuningImg}`}
+                  style={{ height: "300px" }}
+                />
               </div>
             </CustomDialogContent>
           </Dialog>
-        }
+        )}
       </Layout>
     </>
   );
