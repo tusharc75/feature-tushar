@@ -23,6 +23,7 @@ import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificat
 import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
+
 Sentry.init({
   dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
   integrations: [new Integrations.BrowserTracing()],
@@ -35,6 +36,8 @@ Sentry.init({
 
 
 
+
+
 ReactDOM.render(
   <React.StrictMode>
     <Router>
@@ -43,7 +46,7 @@ ReactDOM.render(
           <CustomNotificationCountProvider>
             <CustomChatNotificationCountProvider>
               <MsalProvider instance={AzureInstance}>
-                <App />
+                  <App />
               </MsalProvider>
             </CustomChatNotificationCountProvider>
           </CustomNotificationCountProvider>

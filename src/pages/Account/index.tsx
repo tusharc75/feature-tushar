@@ -12,6 +12,7 @@ import {
   MenuList,
   Box
 } from "@material-ui/core";
+import ReactGa from 'react-ga';
 import { Link } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -437,6 +438,10 @@ export default function Account(props) {
   };
 
   const clickCreateNew = () => {
+    ReactGa.event({
+      category:"Account Button",
+      action:"clicked"
+    });
     setIsAccDialogVisible(true);
   };
 
