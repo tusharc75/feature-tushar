@@ -1,7 +1,7 @@
-import React from 'react'
-function NoDataCell(props) {
+function NoDataCell() {
     return <span style={{ color: 'grey' }}>
         {`- - - - - - - `}
     </span>
 }
+
 export default NoDataCell
