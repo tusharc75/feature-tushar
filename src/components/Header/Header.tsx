@@ -492,11 +492,10 @@ const Header = ({ toggleDrawer }) => {
   const NotificationContent = ({ data }) => {
     return (
       <div
-        className={`${
-          data.length == 0
-            ? classes.notificationHeight
-            : classes.notificationHeightWithData
-        }`}
+        className={`${data.length == 0
+          ? classes.notificationHeight
+          : classes.notificationHeightWithData
+          }`}
         style={{ position: "relative" }}
       >
         {data.map((d, index) => {
@@ -507,9 +506,8 @@ const Header = ({ toggleDrawer }) => {
                   ? "1px solid lightgrey"
                   : "1px solid white",
               }}
-              className={`${
-                d.read == true ? "" : "light-grey-bg"
-              } p-3 cursor-pointer`}
+              className={`${d.read == true ? "" : "light-grey-bg"
+                } p-3 cursor-pointer`}
               key={index}
               onClick={() => {
                 if (d.read == false) {
@@ -518,7 +516,7 @@ const Header = ({ toggleDrawer }) => {
                       toggle: true,
                       notificationId: d.notificationId,
                     })
-                    .then(() => {})
+                    .then(() => { })
                     .catch((error) => {
                       toastConfig.setToastConfig(error);
                     });
@@ -549,7 +547,8 @@ const Header = ({ toggleDrawer }) => {
           );
         })}
 
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`}
+          style={{ position: "sticky", bottom: 0 }}>
           <Typography
             onClick={() => {
               axiosInstance()
@@ -592,11 +591,10 @@ const Header = ({ toggleDrawer }) => {
   const ChatNotificationContent = ({ data }) => {
     return (
       <div
-        className={`${
-          data.length == 0
-            ? classes.notificationHeight
-            : classes.notificationHeightWithData
-        }`}
+        className={`${data.length == 0
+          ? classes.notificationHeight
+          : classes.notificationHeightWithData
+          }`}
         style={{ position: "relative" }}
       >
         {data.map((d, index) => {
@@ -607,9 +605,8 @@ const Header = ({ toggleDrawer }) => {
                   ? "1px solid lightgrey"
                   : "1px solid white",
               }}
-              className={`${
-                d.read == true ? "" : "light-grey-bg"
-              } p-3 cursor-pointer`}
+              className={`${d.read == true ? "" : "light-grey-bg"
+                } p-3 cursor-pointer`}
               key={index}
               onClick={() => {
                 if (d.read == false) {
@@ -618,7 +615,7 @@ const Header = ({ toggleDrawer }) => {
                       toggle: true,
                       notificationId: d.notificationId,
                     })
-                    .then(() => {})
+                    .then(() => { })
                     .catch((error) => {
                       toastConfig.setToastConfig(error);
                     });
@@ -649,7 +646,8 @@ const Header = ({ toggleDrawer }) => {
           );
         })}
 
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`}
+          style={{ position: "sticky", bottom: 0 }}>
           <Typography
             onClick={() => {
               axiosInstance()
@@ -709,24 +707,24 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={classes.entityName}>
-                {curEntity.entityName}
-              </Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && (
-                <Chip size="small" label="Current" color="primary" />
-              )}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={classes.entityName}>
+              {curEntity.entityName}
+            </Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && (
+              <Chip size="small" label="Current" color="primary" />
+            )}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -768,7 +766,7 @@ const Header = ({ toggleDrawer }) => {
         onClick={
           mobileScreenChatNotificationAnchorEl == null
             ? handleMobileScreenChatNotificationClick
-            : () => {}
+            : () => { }
         }
       >
         <Badge
@@ -811,7 +809,7 @@ const Header = ({ toggleDrawer }) => {
         onClick={
           mobileScreenNotificationAnchorEl == null
             ? handleMobileScreenNotificationClick
-            : () => {}
+            : () => { }
         }
       >
         <Badge

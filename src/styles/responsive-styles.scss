@@ -45,7 +45,6 @@
         align-items: normal;
         justify-content: center;
         flex-direction: column;
-        gap: 6px;
     }
 
     .listing-grid {
@@ -67,9 +66,15 @@
     }
     .chat-box {
         position: absolute;
+        top: 10px;
+        left: 2px;
         right: 10px;
         bottom: 14px;
     }
+    .bgbox, .profileBox{
+        background: transparent;
+    }
+
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */

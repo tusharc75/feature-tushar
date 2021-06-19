@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch } from "react-router-dom";
+import ReactGA from 'react-ga';
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -83,6 +84,7 @@ import {
 import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
 import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import { TRACKING_ID } from "./config";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -93,6 +95,9 @@ function App() {
     state: { user },
     dispatch,
   }: any = useData();
+  const history = useHistory();
+  ReactGA.initialize(TRACKING_ID);
+  
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -139,28 +144,33 @@ function App() {
   const getChatNotification = async () => {
     if (localStorage.getItem("token")) {
       await axiosInstance()
-        .get(`/user/notification/unseen`)
+        .get(`/user/user-notification/unseen`)
         .then(({ data: { count } }) => {
           if (count > 0) {
             chatNotification.setCount(count);
           }
-        })
+        });
     }
-  }
+  };
 
   useEffect(() => {
     try {
       getNotification();
-      // getChatNotification();
-      
+      getChatNotification();
+      history.listen((location, action) => {
+        ReactGA.set({ page: location.pathname });
+        ReactGA.pageview(location.pathname);
+    });
+    
       setInterval(async () => {
         await getNotification();
-        // await getChatNotification();
       }, 60000);
     } catch (e) {
       console.log(e);
     }
   }, []);
+
+  
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
@@ -423,7 +433,7 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-          <PrivateRoute exact path={`${routes.quoteBuilder.path}/:id`}>
+          <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
             <QuoteDetail />
           </PrivateRoute>
           <Route exact path={"/dashboards"}>
@@ -439,20 +449,18 @@ function App() {
           <Route exact path={"/quote-approval/:id"}>
             <QuoteApproval />
           </Route>
-          <Route exact path={"/doa-request"}>
+          <PrivateRoute exact path={"/doa-request"}>
             <DOARequest />
-          </Route>
-          <Route exact path={"/doa-request/:id"}>
+          </PrivateRoute>
+          <PrivateRoute exact path={"/doa-request/:id"}>
             <DOAapproval />
-          </Route>
+          </PrivateRoute>
           <PrivateRoute exact path={routes.quoteBuilder.path}>
             <QuoteBuilderCombined />
           </PrivateRoute>
-
           <Route exact path="/inline-grid">
             <CustomInlineEditableAgGrid />
           </Route>
-
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

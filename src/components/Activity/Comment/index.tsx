@@ -72,12 +72,12 @@ export const Comment = ({ referenceId }) => {
         comment.map((element, index) => (
           <Box key={index} mt={1}>
             <Grid container spacing={5}>
-              <Grid item xs={1}>
+              <Grid item xs={2} sm={1} md={1}>
                 <Avatar className={classes.avatar}>
                   {element.firstName[0] + element.lastName[0]}
                 </Avatar>
               </Grid>
-              <Grid item xs={11}>
+              <Grid item xs={10} sm={11} md={11}>
                 <Typography variant="body2" className={classes.boldFont}>
                   {element.firstName + " " + element.lastName}
                   <Typography variant="caption" className={classes.marginLeft}>
@@ -92,13 +92,13 @@ export const Comment = ({ referenceId }) => {
         ))}
       <Box pt={3}>
         <Grid container spacing={3}>
-          <Grid item xs={1}>
+          <Grid item xs={2} sm={1} md={1}>
             <Avatar className={classes.avatar}>
               {currentUser &&
                 currentUser.firstName[0] + currentUser.lastName[0]}
             </Avatar>
           </Grid>
-          <Grid item xs={10}>
+          <Grid item xs={10} sm={11} md={11}>
             <TextField
               id="outlined-multiline-static"
               label="Comment"

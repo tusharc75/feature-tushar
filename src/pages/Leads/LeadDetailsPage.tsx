@@ -327,7 +327,7 @@ const LeadDetailsPage = () => {
                             open: true,
                             id: leadData._id,
                             leadName: leadName,
-                            message: `Are you sure, You want to convert ${leadName} to opportunity ?`,
+                            message: `Are you sure you want to convert ${leadName} to opportunity?`,
                           });
                         }}
                       >
@@ -408,7 +408,7 @@ const LeadDetailsPage = () => {
                     restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
-                        type: "lead",
+                        type: leadResource,
                         referenceId: leadData._id,
                         access: true,
                       },

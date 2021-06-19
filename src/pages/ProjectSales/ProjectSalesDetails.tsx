@@ -31,8 +31,13 @@ import AssignDataDialog from "./AssignDataDialog";
 import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import {
+  customerAccount,
+  customerContact,
   displayCardDate,
   formatAmountWithCurrency,
+  opportunity,
+  projectSales,
+  quote,
 } from "../../constants/helpers";
 import Activity from "../../components/Activity";
 
@@ -88,7 +93,7 @@ const ProjectSalesDetails = () => {
     if (currentTabIndex === 1) {
       setLoadingGraphData(true);
       axiosInstance()
-        .get(`/project-sales/nodal-structure/${id}`)
+        .get(`${projectSales.projectSalesApi}/nodal-structure/${id}`)
         .then(({ data }) => {
           setLoadingGraphData(false);
           setGraphData({
@@ -112,7 +117,7 @@ const ProjectSalesDetails = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().get(`/project-sales/${id}`);
+      } = await axiosInstance().get(`${projectSales.projectSalesApi}/${id}`);
 
       // data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
       // data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
@@ -186,7 +191,7 @@ const ProjectSalesDetails = () => {
     setUpdating(true);
 
     axiosInstance()
-      .put(`/project-sales`, { ...values, _id: id })
+      .put(`${projectSales.projectSalesApi}`, { ...values, _id: id })
       .then(({ data }) => {
         getSalesData();
         toastConfig.setToastConfig({
@@ -228,7 +233,7 @@ const ProjectSalesDetails = () => {
     if (deleteRec) {
       setDeleting(true);
       axiosInstance()
-        .put(`/project-sales/remove`, { ids: [deleteRec] })
+        .put(`${projectSales.projectSalesApi}/remove`, { ids: [deleteRec] })
         .then(({ data }) => {
           setDeleting(false);
           setShowConfirmBox(false);
@@ -261,7 +266,7 @@ const ProjectSalesDetails = () => {
       };
       setDeleting(true);
       axiosInstance()
-        .put(`/project-sales/add-user`, dataObj)
+        .put(`${projectSales.projectSalesApi}/add-user`, dataObj)
         .then(() => {
           getSalesData();
           setDeleting(false);
@@ -421,8 +426,8 @@ const ProjectSalesDetails = () => {
                           id="a11y-tab-0"
                         />
                         <Tab
-                          label="3D Graph"
-                          aria-controls="a11y-tabpanel-1"
+                          label="OM-Neurons"
+                        aria-controls="a11y-tabpanel-1"
                           id="a11y-tab-1"
                         />
                       </Tabs>
@@ -525,29 +530,29 @@ const ProjectSalesDetails = () => {
                 <Activity
                   relatedTo={[
                     {
-                      type: "projectSales",
+                      type: projectSales.projectSalesResource,
                       referenceId: id,
                       access: true,
                     },
                     ...opportunities?.map((op) => ({
-                      type: "opportunity",
+                      type: opportunity.opportunityResource,
                       referenceId: op._id,
-                      access: true,
+                      access: false,
                     })),
                     ...customerAccounts?.map((ca) => ({
-                      type: "customerAccount",
+                      type: customerAccount.accountResource,
                       referenceId: ca._id,
-                      access: true,
+                      access: false,
                     })),
                     ...customerContacts?.map((cc) => ({
-                      type: "customerContact",
+                      type: customerContact.contactResource,
                       referenceId: cc._id,
-                      access: true,
+                      access: false,
                     })),
                     ...quotes?.map((q) => ({
-                      type: "quote",
+                      type: quote.quoteResource,
                       referenceId: q._id,
-                      access: true,
+                      access: false,
                     })),
                   ]}
                   handleActivityRefresh={() => {}}

@@ -17,6 +17,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
 import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
+import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -324,19 +325,23 @@ const Product = () => {
         </Grid>
         <div className="main-container">
             <div className="header-panel">
-                <Grid container>
-                    <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
+                <Grid container className={styles.filter_side_container}>
+                    <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
                     </Grid>
-                    <Grid md={6} sm={12} xs={12} container justify="flex-end">
+                    <Grid xs={6} container className={styles.filter_side} >
+                    <Box className={styles.filter_side_header} component="div" >
+
                         <SearchBox
                             onSearch={handleSearch}
-                            searchbox="product_header_search_bar"
-                            width="300px"
+                            searchbox={styles.search_box_input}
+                            width="242px"
+                            size="small"
                             value={search}
                         />
-                        <Button className="ml-2 mr-2" onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                         <Button
+                            className={styles.action_submit_btn}
                             variant="outlined"
                             color="default"
                             size="small"
@@ -359,6 +364,7 @@ const Product = () => {
                         >
                             <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                         </Menu>
+                        </Box>
                     </Grid>
                 </Grid>
             </div>
@@ -381,7 +387,7 @@ const Product = () => {
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure, you want to delete product ${deleteRecord?._id ? deleteRecord?.productName : ""} ?`}
+                message={`Are you sure you want to delete the product ${deleteRecord?._id ? deleteRecord?.productName : ""} ?`}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

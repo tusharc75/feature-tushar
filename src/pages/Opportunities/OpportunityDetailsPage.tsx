@@ -655,8 +655,18 @@ function OpportunityDetailsPage() {
                         referenceId: opportunityData?.customerAccountName ? opportunityData?.customerAccountName?.optionValue : opportunityData?.supplierAccountName?.optionValue,
                         access: false,
                       },
+                      ...opportunityData?.staticData.customerContact?.map((cc) => ({
+                        type: customerContact.contactResource,
+                        referenceId: cc._id,
+                        access: false,
+                      })),
+                      ...opportunityData?.staticData.supplierContact?.map((sc) => ({
+                        type: supplierContact.contactResource,
+                        referenceId: sc._id,
+                        access: false,
+                      })),
                       {
-                        type: "opportunity",
+                        type: opportunityResource,
                         referenceId: opportunityData?._id,
                         access: true,
                       },

@@ -41,7 +41,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import {
   imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl,
-  getUniqueCurrencies
+  getUniqueCurrencies,
+  documentUploadSupportExtensions
 } from "../../constants/helpers"
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
@@ -822,7 +823,7 @@ const FormTypes = (props) => {
           </Box>
           {(i === 0 && fieldData.displayUnits.length !== fieldData.units.length) &&
             <Box>
-              <Tooltip title="Add Converter" className="mt-1">
+              <Tooltip title="Add Converter" className="formActionButton">
                 <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                   <SwapHorizIcon />
                 </IconButton>
@@ -835,7 +836,7 @@ const FormTypes = (props) => {
             </Box>}
           {(fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
             && <Box>
-              <Tooltip title="Remove" className="mt-1">
+              <Tooltip title="Remove" className="formActionButton">
                 <IconButton onClick={() => handleRemoveDisplayType("converter", fieldData, _unit)} color="primary" size="small"  >
                   <HighlightOffIcon color="error" />
                 </IconButton>
@@ -939,13 +940,13 @@ const FormTypes = (props) => {
               </Box>
               {(i === 0 && j === 0) &&
                 <Box>
-                  <Tooltip title="Add Currency" className="mt-1">
+                  <Tooltip title="Add Currency" className="formActionButton">
                     <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("currency") }} color="primary" size="small"  >
                       <AttachMoneyIcon />
                     </IconButton>
                   </Tooltip>
                   {fieldData.displayUnits.length !== fieldData.units.length &&
-                    <Tooltip title="Add Converter" className="mt-1">
+                    <Tooltip title="Add Converter" className="formActionButton">
                       <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("converter") }} color="primary" size="small"  >
                         <SwapHorizIcon />
                       </IconButton>
@@ -960,7 +961,7 @@ const FormTypes = (props) => {
               }
               {(i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
                 && <Box>
-                  <Tooltip title="Remove" className="mt-1">
+                  <Tooltip title="Remove" className="formActionButton">
                     <IconButton onClick={() => handleRemoveDisplayType("converter", fieldData, _unit)} color="primary" size="small"  >
                       <HighlightOffIcon color="error" />
                     </IconButton>
@@ -969,7 +970,7 @@ const FormTypes = (props) => {
               }
               {(j === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency))
                 && <Box>
-                  <Tooltip title="Remove" className="mt-1">
+                  <Tooltip title="Remove" className="formActionButton">
                     <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
                       <HighlightOffIcon color="error" />
                     </IconButton>
@@ -1037,7 +1038,7 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 &&
               <Box>
-                <Tooltip title="Add Currency" className="mt-1">
+                <Tooltip title="Add Currency" className="formActionButton">
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
                     <AttachMoneyIcon />
                   </IconButton>
@@ -1051,7 +1052,7 @@ const FormTypes = (props) => {
               </Box>}
             {(fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency))
               && <Box>
-                <Tooltip title="Remove" className="mt-1">
+                <Tooltip title="Remove" className="formActionButton">
                   <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
                     <HighlightOffIcon color="error" />
                   </IconButton>
@@ -1424,7 +1425,7 @@ const FormTypes = (props) => {
           style={{ display: "none" }}
           onClick={(e: any) => (e.target.value = null)}
           type="file"
-          accept={accept || ""}
+          accept={accept || documentUploadSupportExtensions}
           multiple={isMultipleUpload}
         />
         <label htmlFor={name}>

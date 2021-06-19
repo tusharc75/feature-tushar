@@ -31,6 +31,8 @@ export const validations = {
   email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
 };
 
+export const documentUploadSupportExtensions = ".odp,.ods,.odt,.docx,.doc,.csv,.pot,.pps,.ppt,.pptx,.pdf,.xls,.xlsx,.ico,.tif,.tiff,.jpe,.png,.jpg,.jpeg,.gif,.txt,.jflsn";
+
 //  1048576 = 1 MB
 export const imageUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
 export const documentUploadMaxSize = { size: 1048576 * 10, text: "10 MB" };
@@ -130,6 +132,15 @@ export const productTemplate = {
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
   qbApi: "/quote-builder",
+};
+
+export const projectSales = {
+  projectSalesResource: "projectSales",
+  projectSalesApi: "/project-sales",
+};
+
+export const quote = {
+  quoteResource: "quote",
 };
 
 export const supplierAccount = {
@@ -658,7 +669,7 @@ export const getUniqueCurrencies = () => {
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
-      shortFormatAmount: "", fullFormatAmount: ""
+      shortFormatAmount: "", fullFormatAmount: "", fullFormatAmountWithCurrencyName: ""
     }
   }
 
@@ -679,6 +690,10 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         notation: "compact",
         compactDisplay: "short",
       }).format(amount).replace(/^(\D+)/, "$1 "),
+      fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
+        style: 'currency',
+        currencyDisplay: "code"
+      }).format(amount),
     };
   }
 
@@ -770,8 +785,12 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     fullFormatAmount: new Intl.NumberFormat(
       `${language}-${currencyData.countryCode}`,
       options
-    ).format(amount)
-      .replace(/^(\D+)/, "$1 ")
+    ).format(amount).replace(/^(\D+)/, "$1 "),
+    fullFormatAmountWithCurrencyName: new Intl.NumberFormat(
+      `${language}-${currencyData.countryCode}`, {
+      currencyDisplay: "code",
+      ...options
+    }).format(amount),
   }
 };
 

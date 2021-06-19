@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
     let path = camelCase(pathnames[0]);
 
     if (path === "quotes") {
-      path = "quoteBuilder"
+      path = "quoteBuilder";
     }
     if (permissions && permissions[path]) {
       if (permissions[path].isRead) {
@@ -33,8 +33,25 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === "/" ||
-      ["case", "task", "attachment", "note", "event", "terms-conditions", "product-category", "product-template", "product-cost", "form-builder", "product-builder", "currency-converter",
-        "profile", "brand-configuration", "project-sales"].indexOf(pathnames[0]) >= 0) {
+      [
+        "case",
+        "task",
+        "attachment",
+        "note",
+        "event",
+        "terms-conditions",
+        "product-category",
+        "product-template",
+        "product-cost",
+        "form-builder",
+        "product-builder",
+        "currency-converter",
+        "profile",
+        "brand-configuration",
+        "project-sales",
+        "doa-request",
+      ].indexOf(pathnames[0]) >= 0
+    ) {
       setAccess(true);
       setChecking(false);
     }
@@ -61,11 +78,17 @@ const ProtectedRoute = ({ children, ...rest }) => {
             <Unauthorized />
           )
         ) : (
-          <Redirect to={{
-            pathname: "/login",
-            search: `${location && location.pathname ? `?redirect=${location.pathname}` : null}`,
-            state: { from: location }
-          }} />
+          <Redirect
+            to={{
+              pathname: "/login",
+              search: `${
+                location && location.pathname
+                  ? `?redirect=${location.pathname}`
+                  : null
+              }`,
+              state: { from: location },
+            }}
+          />
         )
       }
     />

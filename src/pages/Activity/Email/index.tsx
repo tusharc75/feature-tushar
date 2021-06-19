@@ -419,7 +419,7 @@ const Email = () => {
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={3} className="d-flex align-items-center gap-1">
+                    <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
                         <HiOutlineMail className="headerLogo" />{" "}
                         <span className="listingHeader">Email</span>
                         <ToggleButtonGroup
@@ -435,7 +435,7 @@ const Email = () => {
                             ))}
                         </ToggleButtonGroup>
                     </Grid>
-                    <Grid item xs={9} className={styles.filter_side}>
+                    <Grid item xs={6} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
                             {/* <Box style={{ width: '70%' }}> */}
                             <SearchFilter
@@ -514,7 +514,7 @@ const Email = () => {
             {isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRecord?.id ? "this email" : "these emails"} ?`}
+                    message={`Are you sure you want to delete ${deleteRecord?.id ? "this email" : "these emails"}?`}
                     onClose={() => {
                         if (deleteRecord) setDeleteRecord({});
                         setIsConformDialogVisible(false);
