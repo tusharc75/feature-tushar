@@ -528,8 +528,8 @@ const ProductBuilder = (props) => {
               }}
             />
             <Button
-              variant="outlined"
-              color="default"
+              variant="contained"
+              color="primary"
               size="small"
               className="float-right ml-1 mr-2"
               onClick={handelOpenBulkEdit}
@@ -539,8 +539,8 @@ const ProductBuilder = (props) => {
               Bulk Edit
             </Button>
             <Button
-              variant="outlined"
-              color="default"
+              variant="contained"
+              color="primary"
               size="small"
               className="float-right"
               onClick={openActions}
