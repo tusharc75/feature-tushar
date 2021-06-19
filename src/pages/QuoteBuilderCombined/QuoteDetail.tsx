@@ -1,20 +1,34 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useReducer,
+  useMemo,
+} from "react";
 import {
   Box,
   Button,
   CircularProgress,
   Grid,
+  IconButton,
   Paper,
   Tab,
   Tabs,
-  IconButton,
+  TextField,
   Tooltip,
+  Typography,
 } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { gridPageSizes, opportunity, quote } from "../../constants/helpers";
+import {
+  gridPageSizes,
+  opportunity,
+  quote,
+  currencyCodeToSymbol,
+} from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -87,11 +101,15 @@ import {
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi";
-import Loader from "../../components/Loader";
 import { GiVintageRobot } from "react-icons/gi";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-
+import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
+import Loader from "../../components/Loader";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
@@ -221,6 +239,7 @@ const intialState = {
 const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(1),
+    paddingRight: "15px",
   },
   chips: {
     display: "flex",
@@ -441,10 +460,15 @@ function QuoteDetail() {
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
+  const [showAiDialog, setShowAiDialog] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState({
+    show: false,
+    text: null,
+  });
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
-  const [showAiDialog, setShowAiDialog] = useState(false);
 
   let { id } = useParams();
 
@@ -454,6 +478,15 @@ function QuoteDetail() {
     isRead: false,
     isDelete: false,
   });
+
+  const defaultTotalValue = useMemo(() => {
+    let result = "0";
+    if (quoteData && quoteData?.currency) {
+      result = `${currencyCodeToSymbol(quoteData.currency)} 0`;
+    }
+    return result;
+  }, [quoteData]);
+
   const { qbResource, qbApi } = quoteBuilder;
 
   interface TabPanelProps {
@@ -672,17 +705,6 @@ function QuoteDetail() {
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
-    let tempStatus = "Building Quote";
-    let versionArray = [];
-    Object.keys(data.versions).forEach((key) => {
-      versionArray.push(data.versions[key]);
-    });
-    const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
-    if (updatedVersion) {
-      tempStatus = updatedVersion.status;
-    }
-    mainPoint["Quote Status"] = tempStatus;
-
     setMainPoints(mainPoint);
   };
 
@@ -861,6 +883,7 @@ function QuoteDetail() {
   };
 
   const createImagePDF = (view, send) => {
+    setGeneratingPdf({ show: true, text: "Generating..." });
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -877,6 +900,7 @@ function QuoteDetail() {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setGeneratingPdf({ show: false, text: null });
       });
   };
 
@@ -1003,19 +1027,6 @@ function QuoteDetail() {
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
 
-    finalY = finalY + 40;
-    PdfDoc.setFontSize(10);
-    PdfDoc.text("Note:", 20, finalY);
-
-    finalY = finalY + 15;
-    PdfDoc.text("Thanks for your business", 20, finalY);
-
-    finalY = finalY + 50;
-    PdfDoc.text("Customer Signature", 20, finalY);
-
-    finalY = finalY + 75;
-    PdfDoc.line(15, finalY, 260, finalY);
-
     if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
       PdfDoc.setFontSize(14);
@@ -1035,6 +1046,23 @@ function QuoteDetail() {
       });
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+
+      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      signatureContent =
+        signatureContent +
+        `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
+
+      signatureContent =
+        signatureContent +
+        `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
+      signatureContent =
+        signatureContent +
+        `<span--style='color:lightgrey'>__________________________</span>`;
+
+      signatureContent = signatureContent.replaceAll(" ", "&nbsp");
+      signatureContent = signatureContent.replaceAll("--", " ");
+
+      finalmarkup = finalmarkup + signatureContent;
 
       PdfDoc.html(finalmarkup, {
         callback: function (doc) {
@@ -1074,6 +1102,19 @@ function QuoteDetail() {
         margin: [20, 10, 20, 10],
       });
     } else {
+      finalY = finalY + 40;
+      PdfDoc.setFontSize(10);
+      PdfDoc.text("Note:", 20, finalY);
+
+      finalY = finalY + 15;
+      PdfDoc.text("Thanks for your business", 20, finalY);
+
+      finalY = finalY + 50;
+      PdfDoc.text("Customer Signature", 20, finalY);
+
+      finalY = finalY + 75;
+      PdfDoc.line(15, finalY, 260, finalY);
+
       if (view && !send) {
         PdfDoc.setProperties({
           title: `Quotation - ${currentVersion}`,
@@ -1104,6 +1145,10 @@ function QuoteDetail() {
           });
       }
     }
+
+    setTimeout(() => {
+      setGeneratingPdf({ show: false, text: null });
+    }, 1500);
   };
 
   const generateBase64forFile = (blobData, type) => {
@@ -1366,8 +1411,6 @@ function QuoteDetail() {
     setOptions([]);
     setRedCard(false);
     let optionstoSet = [];
-    let invalidQty = true;
-    let invalidPrice = true;
 
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
     const ignoredKeys = [
@@ -1388,24 +1431,25 @@ function QuoteDetail() {
     let MarginCurrency = "";
     let ProfitCurrency = "";
 
-    BuilderData.map((quoteRows: { [x: string]: any }, idx) => {
+    const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+    const withZeroAmt = BuilderData.filter(
+      (d) => d[`totalSalesPrice_${quoteData?.currency}`] === 0
+    );
+
+    console.log(withZeroQty.length, withZeroAmt.length);
+
+    if (ProcessStatus === "Price Builder") {
+      if (!withZeroAmt.length && !withZeroQty.length) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+
+    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
       const quoteRowKeys = Object.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-      quoteRowKeys.map((key) => {
-        if (BuilderData.length - 1 === idx && key === "qty") {
-          if (quoteRows[key] !== 0) {
-            invalidQty = false;
-          }
-        }
-
-        if (
-          BuilderData.length - 1 === idx &&
-          key.split("_")[0] === "totalSalesPrice" &&
-          quoteRows[key] !== undefined
-        ) {
-          invalidPrice = false;
-        }
-
+      quoteRowKeys.forEach((key) => {
         if (ignoredKeys.indexOf(key) === -1) {
           let indexkey = key;
           let currency = "";
@@ -1460,15 +1504,10 @@ function QuoteDetail() {
           }
         }
       });
+
+      inventory.push(inventorydata);
     });
 
-    // if (ProcessStatus === "Price Builder" && totalSellingPrice === 0) {
-    //   setNextStep(false);
-    // }
-
-    // if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
-    //   setNextStep(true);
-    // }
     setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
     setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
     setTotalSale(
@@ -1478,15 +1517,6 @@ function QuoteDetail() {
     setTotalCost(formatAmountWithCurrency(quoteData.currency, totalCost));
     if (totalSellingPrice < totalCost) {
       setRedCard(true);
-    }
-
-    if (ProcessStatus === "Price Builder") {
-      console.log("Invalid Price: ", invalidPrice, "Invalid Qty: ", invalidQty);
-      if (invalidPrice || invalidQty) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
     }
 
     setButtonMessage("Send to Customer");
@@ -1566,7 +1596,6 @@ function QuoteDetail() {
       }
       TableData = [...TableData, DataRecord];
     }
-
     setDynamicTableData(TableData);
   };
 
@@ -1946,67 +1975,79 @@ function QuoteDetail() {
                         container
                         className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
                       >
-                        <Grid
-                          item
-                          xs={12}
-                          sm={7}
-                          md={7}
-                          className="quoteHeader"
-                        >
-                          <div className="quoteBox">
-                            <span>Total Profit </span>
-                            <span
-                              className="quoteAmount"
-                              title={totalProfit.fullFormatAmount}
-                            >
-                              {totalProfit.shortFormatAmount}
-                            </span>
-                          </div>
-                          <div className="quoteBox">
-                            <span>Total Cost Price </span>
-                            <span
-                              className="quoteAmount"
-                              title={totalcost.fullFormatAmount}
-                            >
-                              {totalcost.shortFormatAmount}
-                            </span>
-                          </div>
-                          {redCard ? (
-                            <div className="redQuoteBox">
-                              <span>Total Selling Price </span>
-                              <span
-                                className="quoteAmount"
-                                title={totalsale.fullFormatAmount}
-                              >
-                                {totalsale.shortFormatAmount}
-                              </span>
-                            </div>
-                          ) : (
+                        {ProcessStatus === "New" ? null : (
+                          <Grid
+                            item
+                            xs={12}
+                            sm={7}
+                            md={7}
+                            className="quoteHeader"
+                          >
                             <div className="quoteBox">
-                              <span>Total Selling Price </span>
+                              <span>Total Profit </span>
                               <span
                                 className="quoteAmount"
-                                title={totalsale.fullFormatAmount}
+                                title={totalProfit.fullFormatAmount}
                               >
-                                {totalsale.shortFormatAmount}
+                                {totalProfit.shortFormatAmount
+                                  ? totalProfit.shortFormatAmount
+                                  : defaultTotalValue}
                               </span>
                             </div>
-                          )}
-                          <div className="quoteBox noBorder">
-                            <span>Total Margin </span>
-                            <span
-                              className="quoteAmount"
-                              title={totalmargin.fullFormatAmount}
-                            >
-                              {totalmargin.shortFormatAmount}
-                            </span>
-                          </div>
-                        </Grid>
+                            <div className="quoteBox">
+                              <span>Total Cost Price </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalcost.fullFormatAmount}
+                              >
+                                {totalcost.shortFormatAmount
+                                  ? totalcost.shortFormatAmount
+                                  : defaultTotalValue}
+                              </span>
+                            </div>
+                            {redCard ? (
+                              <div className="redQuoteBox">
+                                <span>Total Selling Price </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalsale.fullFormatAmount}
+                                >
+                                  {totalsale.shortFormatAmount
+                                    ? totalsale.shortFormatAmount
+                                    : defaultTotalValue}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="quoteBox">
+                                <span>Total Selling Price </span>
+                                <span
+                                  className="quoteAmount"
+                                  title={totalsale.fullFormatAmount}
+                                >
+                                  {totalsale.shortFormatAmount
+                                    ? totalsale.shortFormatAmount
+                                    : defaultTotalValue}
+                                </span>
+                              </div>
+                            )}
+                            <div className="quoteBox noBorder">
+                              <span>Total Margin </span>
+                              <span
+                                className="quoteAmount"
+                                title={totalmargin.fullFormatAmount}
+                              >
+                                {totalmargin.shortFormatAmount
+                                  ? totalmargin.shortFormatAmount
+                                  : defaultTotalValue}
+                              </span>
+                            </div>
+                          </Grid>
+                        )}
                         <Grid
                           item
-                          xs={12}
-                          sm={5}
-                          md={5}
+                          xs={ProcessStatus === "New" ? 9 : 12}
+                          sm={ProcessStatus === "New" ? 4 : 5}
+                          md={ProcessStatus === "New" ? 4 : 5}
                           className="d-flex justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
@@ -2187,69 +2228,49 @@ function QuoteDetail() {
 
                             {ProcessStatus === "Quote Builder" ? (
                               <Grid container>
-                                <Grid item xs={11} md={11} sm={11}>
+                                <Grid item xs={12} md={12} sm={12}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
                                   >
-                                    <InputLabel id="demo-mutiple-chip-label">
-                                      Visible Columns in Quote
-                                    </InputLabel>
-                                    <Select
-                                      labelId="demo-mutiple-chip-label"
+                                    <Autocomplete
                                       id="demo-mutiple-chip"
+                                      fullWidth
+                                      size="small"
                                       multiple
                                       value={visibleColumns}
-                                      onChange={handleChangeVisible}
-                                      input={
-                                        <Input id="select-multiple-chip" />
-                                      }
-                                      renderValue={(selected: any) => (
-                                        <div className={classes.chips}>
-                                          {selected.map((value) => (
-                                            <Chip
-                                              key={value}
-                                              label={value}
-                                              className={classes.chip}
-                                            />
-                                          ))}
-                                        </div>
-                                      )}
-                                      MenuProps={{
-                                        PaperProps: {
-                                          style: {
-                                            maxHeight:
-                                              ITEM_HEIGHT * 4.5 +
-                                              ITEM_PADDING_TOP,
-                                            width: 250,
-                                          },
-                                        },
-                                        anchorOrigin: {
-                                          vertical: "bottom",
-                                          horizontal: "left",
-                                        },
-                                        getContentAnchorEl: null,
+                                      onChange={(e, val) => {
+                                        setVisibleColumnName(val);
+                                        handleVersionUpdate(
+                                          PDF,
+                                          val,
+                                          versionStatus,
+                                          TandC
+                                        );
                                       }}
-                                    >
-                                      {ColumnName.map((name) => (
-                                        <MenuItem
-                                          key={name}
-                                          value={name}
-                                          style={getStyles(
-                                            name,
-                                            visibleColumns,
-                                            theme
-                                          )}
-                                        >
+                                      options={ColumnName}
+                                      disableCloseOnSelect
+                                      getOptionLabel={(option) => option}
+                                      renderOption={(option, { selected }) => (
+                                        <React.Fragment>
                                           <Checkbox
-                                            checked={
-                                              visibleColumns.indexOf(name) > -1
-                                            }
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
                                           />
-                                          {name}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
+                                          {option}
+                                        </React.Fragment>
+                                      )}
+                                      renderInput={(params) => (
+                                        <TextField
+                                          {...params}
+                                          variant="outlined"
+                                          label="Visible Columns in Quote"
+                                          placeholder="Select "
+                                        />
+                                      )}
+                                    />
                                   </FormControl>
                                 </Grid>
                               </Grid>
@@ -2282,12 +2303,15 @@ function QuoteDetail() {
                               <Button
                                 onClick={() => createImagePDF(true, false)}
                                 variant="outlined"
+                                disabled={generatingPdf.text}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<AiOutlineEye />}
                                 color="primary"
                               >
-                                View
+                                {generatingPdf.text === null
+                                  ? "View"
+                                  : "Generating..."}
                               </Button>
                               <Button
                                 onClick={() => {
@@ -2296,7 +2320,6 @@ function QuoteDetail() {
                                 }}
                                 variant="outlined"
                                 size="small"
-                                className="mr-1"
                                 startIcon={<FiDownloadCloud />}
                                 color="primary"
                               >
@@ -2315,35 +2338,41 @@ function QuoteDetail() {
                             </span>
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
-                            {(ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0) ||
-                            ifQuoteApproved().approved ? (
-                              <ProductGrid
-                                productBuilderId={productBuilderID}
-                                refreshProducts={refreshProducts}
-                                columnsData={visibleColumns}
-                                currency={quoteData.currency}
-                                isAll={false}
-                              />
+                            {quoteData && !loading && productBuilderID ? (
+                              ProcessStatus === "Quote Builder" ? (
+                                <ProductGrid
+                                  productBuilderId={productBuilderID}
+                                  refreshProducts={refreshProducts}
+                                  stage={"cost"}
+                                  isAll={false}
+                                  columnsData={visibleColumns}
+                                  currency={quoteData?.currency}
+                                />
+                              ) : (
+                                <ProductBuilder
+                                  productBuilderId={productBuilderID}
+                                  isAddNewProduct={isAddNewProduct}
+                                  setIsAddNewProduct={setIsAddNewProduct}
+                                  isAddExistingProduct={isAddExistingProduct}
+                                  setIsAddExistingProduct={
+                                    setIsAddExistingProduct
+                                  }
+                                  refreshProducts={refreshProducts}
+                                  stage={
+                                    ProcessStatus === "New" ? "product" : "cost"
+                                  }
+                                  Editable={
+                                    ProcessStatus === "Price Builder" ||
+                                    ProcessStatus === "New"
+                                      ? true
+                                      : false
+                                  }
+                                />
+                              )
                             ) : (
-                              <ProductBuilder
-                                productBuilderId={productBuilderID}
-                                isAddNewProduct={isAddNewProduct}
-                                setIsAddNewProduct={setIsAddNewProduct}
-                                isAddExistingProduct={isAddExistingProduct}
-                                setIsAddExistingProduct={
-                                  setIsAddExistingProduct
-                                }
-                                refreshProducts={refreshProducts}
-                                stage={
-                                  ProcessStatus === "New" ? "product" : "cost"
-                                }
-                                Editable={
-                                  ProcessStatus === "Price Builder" ||
-                                  ProcessStatus === "New"
-                                    ? true
-                                    : false
-                                }
+                              <Loader
+                                style={{ minHeight: 300 }}
+                                text="Loading..."
                               />
                             )}
                             {ProcessStatus === "Quote Builder" ? (
@@ -2561,7 +2590,15 @@ function QuoteDetail() {
                 setShowAiDialog(false);
               }}
             />
-            <CustomDialogContent></CustomDialogContent>
+            <CustomDialogContent>
+              <div className="text-align-center">
+                <Typography variant="h4">Under Construction </Typography>
+                <img
+                  src={`${PerformanceTuningImg}`}
+                  style={{ height: "300px" }}
+                />
+              </div>
+            </CustomDialogContent>
           </Dialog>
         )}
       </Layout>

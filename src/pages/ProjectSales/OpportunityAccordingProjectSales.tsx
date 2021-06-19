@@ -228,13 +228,21 @@ export default function OpportunityAccordianProjectSales({
                 alignItems="center"
                 flexGrow={1}
               >
-                {expandOpportunity === true ? (
-                  <ExpandLessIcon />
-                ) : (
-                  <ExpandMoreIcon />
-                )}
-
-                <strong>Opportunity ({opportunities.length})</strong>
+                <IconButton
+                  size="small"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  {expandOpportunity === true ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </IconButton>
+                <Box>
+                  <Typography variant="subtitle2">
+                    Opportunity ({opportunities.length})
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
@@ -306,7 +314,7 @@ export default function OpportunityAccordianProjectSales({
                                       ""
                                     )}
                                     {(permissions.isUpdate && isTeamMember) ||
-                                    isManager ? (
+                                      isManager ? (
                                       <>
                                         <Box ml={1} />
                                         <IconButton

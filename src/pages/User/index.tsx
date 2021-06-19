@@ -162,8 +162,8 @@ const User: FC = () => {
               className="cursor-stop"
               title="Brand Admin Can not be Deleted"
             >
-              <IconButton size="small" aria-label="Delete">
-                <DeleteIcon />
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small"/>
               </IconButton>
             </Tooltip>
           ) :
