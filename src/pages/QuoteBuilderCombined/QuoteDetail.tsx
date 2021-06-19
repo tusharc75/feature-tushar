@@ -15,10 +15,11 @@ import {
   Paper,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography,
 } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -105,7 +106,10 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
-
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
@@ -235,6 +239,7 @@ const intialState = {
 const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(1),
+    paddingRight: "15px"
   },
   chips: {
     display: "flex",
@@ -455,7 +460,13 @@ function QuoteDetail() {
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
+<<<<<<< HEAD
   const [showAiDialog, setShowAiDialog] = useState(false);
+=======
+  const [showAiDialog, setShowAiDialog] = useState(false)
+  const [generatingPdf, setGeneratingPdf] = useState({ show: false, text: null })
+
+>>>>>>> 87ba2ff3536db126cf383d3195fffab71f55a542
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -873,6 +884,7 @@ function QuoteDetail() {
   };
 
   const createImagePDF = (view, send) => {
+    setGeneratingPdf({ show: true, text: "Generating..." })
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -889,6 +901,7 @@ function QuoteDetail() {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setGeneratingPdf({ show: false, text: null })
       });
   };
 
@@ -1000,7 +1013,7 @@ function QuoteDetail() {
       [
         {
           content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData[0].length,
+          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
           styles: { halign: "right", valign: "middle" },
         },
       ],
@@ -1014,19 +1027,6 @@ function QuoteDetail() {
       theme: "grid",
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
-
-    finalY = finalY + 40;
-    PdfDoc.setFontSize(10);
-    PdfDoc.text("Note:", 20, finalY);
-
-    finalY = finalY + 15;
-    PdfDoc.text("Thanks for your business", 20, finalY);
-
-    finalY = finalY + 50;
-    PdfDoc.text("Customer Signature", 20, finalY);
-
-    finalY = finalY + 75;
-    PdfDoc.line(15, finalY, 260, finalY);
 
     if (selectedRecords.length) {
       PdfDoc.setDrawColor(0, 0, 0);
@@ -1047,6 +1047,17 @@ function QuoteDetail() {
       });
 
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+
+      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      signatureContent = signatureContent + `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
+
+      signatureContent = signatureContent + `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
+      signatureContent = signatureContent + `<span--style='color:lightgrey'>__________________________</span>`;
+
+      signatureContent = signatureContent.replaceAll(" ", "&nbsp");
+      signatureContent = signatureContent.replaceAll("--", " ");
+
+      finalmarkup = finalmarkup + signatureContent;
 
       PdfDoc.html(finalmarkup, {
         callback: function (doc) {
@@ -1086,6 +1097,20 @@ function QuoteDetail() {
         margin: [20, 10, 20, 10],
       });
     } else {
+
+      finalY = finalY + 40;
+      PdfDoc.setFontSize(10);
+      PdfDoc.text("Note:", 20, finalY);
+
+      finalY = finalY + 15;
+      PdfDoc.text("Thanks for your business", 20, finalY);
+
+      finalY = finalY + 50;
+      PdfDoc.text("Customer Signature", 20, finalY);
+
+      finalY = finalY + 75;
+      PdfDoc.line(15, finalY, 260, finalY);
+
       if (view && !send) {
         PdfDoc.setProperties({
           title: `Quotation - ${currentVersion}`,
@@ -1116,6 +1141,10 @@ function QuoteDetail() {
           });
       }
     }
+
+    setTimeout(() => {
+      setGeneratingPdf({ show: false, text: null });
+    }, 1500)
   };
 
   const generateBase64forFile = (blobData, type) => {
@@ -2195,69 +2224,39 @@ function QuoteDetail() {
 
                             {ProcessStatus === "Quote Builder" ? (
                               <Grid container>
-                                <Grid item xs={11} md={11} sm={11}>
+                                <Grid item xs={12} md={12} sm={12}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
                                   >
-                                    <InputLabel id="demo-mutiple-chip-label">
-                                      Visible Columns in Quote
-                                    </InputLabel>
-                                    <Select
-                                      labelId="demo-mutiple-chip-label"
+                                    <Autocomplete
                                       id="demo-mutiple-chip"
+                                      fullWidth
+                                      size="small"
                                       multiple
                                       value={visibleColumns}
-                                      onChange={handleChangeVisible}
-                                      input={
-                                        <Input id="select-multiple-chip" />
-                                      }
-                                      renderValue={(selected: any) => (
-                                        <div className={classes.chips}>
-                                          {selected.map((value) => (
-                                            <Chip
-                                              key={value}
-                                              label={value}
-                                              className={classes.chip}
-                                            />
-                                          ))}
-                                        </div>
-                                      )}
-                                      MenuProps={{
-                                        PaperProps: {
-                                          style: {
-                                            maxHeight:
-                                              ITEM_HEIGHT * 4.5 +
-                                              ITEM_PADDING_TOP,
-                                            width: 250,
-                                          },
-                                        },
-                                        anchorOrigin: {
-                                          vertical: "bottom",
-                                          horizontal: "left",
-                                        },
-                                        getContentAnchorEl: null,
+                                      onChange={(e, val) => {
+                                        setVisibleColumnName(val);
+                                        handleVersionUpdate(PDF, val, versionStatus, TandC);
                                       }}
-                                    >
-                                      {ColumnName.map((name) => (
-                                        <MenuItem
-                                          key={name}
-                                          value={name}
-                                          style={getStyles(
-                                            name,
-                                            visibleColumns,
-                                            theme
-                                          )}
-                                        >
+                                      options={ColumnName}
+                                      disableCloseOnSelect
+                                      getOptionLabel={(option) => option}
+                                      renderOption={(option, { selected }) => (
+                                        <React.Fragment>
                                           <Checkbox
-                                            checked={
-                                              visibleColumns.indexOf(name) > -1
-                                            }
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
                                           />
-                                          {name}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
+                                          {option}
+                                        </React.Fragment>
+                                      )}
+                                      renderInput={(params) => (
+                                        <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />
+                                      )}
+                                    />
                                   </FormControl>
                                 </Grid>
                               </Grid>
@@ -2290,12 +2289,13 @@ function QuoteDetail() {
                               <Button
                                 onClick={() => createImagePDF(true, false)}
                                 variant="outlined"
+                                disabled={generatingPdf.text}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<AiOutlineEye />}
                                 color="primary"
                               >
-                                View
+                                {generatingPdf.text === null ? "View" : "Generating..."}
                               </Button>
                               <Button
                                 onClick={() => {
