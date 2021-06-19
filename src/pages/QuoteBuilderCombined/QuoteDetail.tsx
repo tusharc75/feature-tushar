@@ -106,8 +106,8 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
@@ -239,7 +239,7 @@ const intialState = {
 const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(1),
-    paddingRight: "15px"
+    paddingRight: "15px",
   },
   chips: {
     display: "flex",
@@ -460,13 +460,12 @@ function QuoteDetail() {
     useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
-<<<<<<< HEAD
   const [showAiDialog, setShowAiDialog] = useState(false);
-=======
-  const [showAiDialog, setShowAiDialog] = useState(false)
-  const [generatingPdf, setGeneratingPdf] = useState({ show: false, text: null })
+  const [generatingPdf, setGeneratingPdf] = useState({
+    show: false,
+    text: null,
+  });
 
->>>>>>> 87ba2ff3536db126cf383d3195fffab71f55a542
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -884,7 +883,7 @@ function QuoteDetail() {
   };
 
   const createImagePDF = (view, send) => {
-    setGeneratingPdf({ show: true, text: "Generating..." })
+    setGeneratingPdf({ show: true, text: "Generating..." });
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -901,7 +900,7 @@ function QuoteDetail() {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setGeneratingPdf({ show: false, text: null })
+        setGeneratingPdf({ show: false, text: null });
       });
   };
 
@@ -1049,10 +1048,16 @@ function QuoteDetail() {
       finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
 
       let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
-      signatureContent = signatureContent + `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
+      signatureContent =
+        signatureContent +
+        `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
 
-      signatureContent = signatureContent + `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
-      signatureContent = signatureContent + `<span--style='color:lightgrey'>__________________________</span>`;
+      signatureContent =
+        signatureContent +
+        `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
+      signatureContent =
+        signatureContent +
+        `<span--style='color:lightgrey'>__________________________</span>`;
 
       signatureContent = signatureContent.replaceAll(" ", "&nbsp");
       signatureContent = signatureContent.replaceAll("--", " ");
@@ -1097,7 +1102,6 @@ function QuoteDetail() {
         margin: [20, 10, 20, 10],
       });
     } else {
-
       finalY = finalY + 40;
       PdfDoc.setFontSize(10);
       PdfDoc.text("Note:", 20, finalY);
@@ -1144,7 +1148,7 @@ function QuoteDetail() {
 
     setTimeout(() => {
       setGeneratingPdf({ show: false, text: null });
-    }, 1500)
+    }, 1500);
   };
 
   const generateBase64forFile = (blobData, type) => {
@@ -2237,7 +2241,12 @@ function QuoteDetail() {
                                       value={visibleColumns}
                                       onChange={(e, val) => {
                                         setVisibleColumnName(val);
-                                        handleVersionUpdate(PDF, val, versionStatus, TandC);
+                                        handleVersionUpdate(
+                                          PDF,
+                                          val,
+                                          versionStatus,
+                                          TandC
+                                        );
                                       }}
                                       options={ColumnName}
                                       disableCloseOnSelect
@@ -2254,7 +2263,12 @@ function QuoteDetail() {
                                         </React.Fragment>
                                       )}
                                       renderInput={(params) => (
-                                        <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />
+                                        <TextField
+                                          {...params}
+                                          variant="outlined"
+                                          label="Visible Columns in Quote"
+                                          placeholder="Select "
+                                        />
                                       )}
                                     />
                                   </FormControl>
@@ -2295,7 +2309,9 @@ function QuoteDetail() {
                                 startIcon={<AiOutlineEye />}
                                 color="primary"
                               >
-                                {generatingPdf.text === null ? "View" : "Generating..."}
+                                {generatingPdf.text === null
+                                  ? "View"
+                                  : "Generating..."}
                               </Button>
                               <Button
                                 onClick={() => {
