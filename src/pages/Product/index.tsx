@@ -30,8 +30,18 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { sortBy } from 'lodash';
 
 const ignoreField = ["qty"]
+
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 
 const Product = () => {
 
@@ -155,9 +165,9 @@ const Product = () => {
                 { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
                 { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
             )
-            // column = sortBy(column, function (item: any) {
-            //     return levalOrderBy.indexOf(item.leval)
-            // });
+            column = sortBy(column, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
             setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
             dispatch({ type: "loading", loading: false });

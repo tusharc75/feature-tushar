@@ -148,9 +148,9 @@ const routes = {
     title: "Project Sales",
     path: "/project-sales/detail",
   },
-  productCost: {
-    title: "Product Cost",
-    path: "/product-cost"
+  priceTemplate: {
+    title: "Price Template",
+    path: "/price-template"
   },
   productBuilder: {
     title: "Product Builder",

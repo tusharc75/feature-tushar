@@ -42,8 +42,8 @@ import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
 import TermsAndConditions from "./pages/TermsAndConditions";
 
-import ProductCost from "./pages/ProductCost";
-import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+import PriceTemplate from "./pages/PriceTemplate";
+import CreatePriceTemplate from "./pages/PriceTemplate/CreatePriceTemplate";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
@@ -407,11 +407,11 @@ function App() {
               termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path}>
-            <ProductCost />
+          <PrivateRoute exact path={routes.priceTemplate.path}>
+            <PriceTemplate />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path + "/:id"}>
-            <CreateProductCost />
+          <PrivateRoute exact path={routes.priceTemplate.path + "/:id"}>
+            <CreatePriceTemplate />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />

@@ -311,7 +311,35 @@ const handleCurrencyConverter = (fieldData, fields, values, name, _currency, _un
     return resultValues;
 };
 
-
+export const extractFields = (fields) => {
+    const result: any = []
+    fields.forEach(_field => {
+        let ele = { ..._field }
+        if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+            if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                    result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _unit + ")", fieldName: ele.fieldName + "_" + _unit.toLowerCase() })
+                })
+            }
+            else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+                    ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                        result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + "/" + _unit + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+                    })
+                })
+            }
+            else if (ele.type === 'currencyAmount') {
+                ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+                    result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() })
+                })
+            }
+        }
+        else {
+            result.push(ele)
+        }
+    })
+    return result
+}
 
 
 
