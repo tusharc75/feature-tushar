@@ -19,6 +19,7 @@ const Header = (props) => {
     openGlobalRolesDialog,
     openRegionalRolesDialog,
     rolesActionDisabled,
+    approvalProcessActionDisabled,
     openDOADialog,
     entityRoleRedirectDetails,
     onEntityRoleRedirectDetailRemove
@@ -112,7 +113,7 @@ const Header = (props) => {
                   <>
 
                     <MenuItem
-                      disabled={rolesActionDisabled}
+                      disabled={approvalProcessActionDisabled}
                       onClick={() => {
                         openApprovalProcessDialog();
                         closeActions();
