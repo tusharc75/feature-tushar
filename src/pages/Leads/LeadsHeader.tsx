@@ -98,7 +98,7 @@ function LeadsHeader(props) {
                 }
 
                 {
-                    leadPermissions.isDelete && <>
+                    (leadPermissions.isDelete || allowToConvertLeadToOpportunity) && <>
                         <Button
                             variant="outlined"
                             color="default"
@@ -109,6 +109,7 @@ function LeadsHeader(props) {
                         >
                             Actions <ExpandMore />
                         </Button>
+
                         <Menu
                             anchorEl={anchorEl}
                             keepMounted
@@ -121,13 +122,15 @@ function LeadsHeader(props) {
                             open={Boolean(anchorEl)}
                             onClose={closeActions}
                         >
-                            <MenuItem
-                                onClick={() => {
-                                    closeActions();
-                                    showConfirmBox(null)
-                                }}
-                                disabled={selectedLeads.length === 0 || selectedLeads.some(d => d.ownerId !== userId)}
-                            >Delete</MenuItem>
+                            {
+                                leadPermissions.isDelete && <MenuItem
+                                    onClick={() => {
+                                        closeActions();
+                                        showConfirmBox(null)
+                                    }}
+                                    disabled={selectedLeads.length === 0 || selectedLeads.some(d => d.ownerId !== userId)}
+                                >Delete</MenuItem>
+                            }
 
                             {
                                 allowToConvertLeadToOpportunity && <MenuItem
