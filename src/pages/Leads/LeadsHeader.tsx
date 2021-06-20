@@ -134,6 +134,7 @@ function LeadsHeader(props) {
 
                             {
                                 allowToConvertLeadToOpportunity && <MenuItem
+                                    disabled={selectedLeads.length === 0}
                                     onClick={() => {
                                         closeActions();
                                         if (selectedLeads.some((d) => d.convertedToOpportunity)) {
