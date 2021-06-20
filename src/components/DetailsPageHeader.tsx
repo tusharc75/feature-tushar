@@ -81,7 +81,7 @@ const DetailsPageHeader = (props) => {
           </Grid>
           <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
-        <Box className="detailHeaderDashboard">
+        <Box className="gap-2 detailHeaderDashboard">
           {loading ? (
             <Grid container wrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (

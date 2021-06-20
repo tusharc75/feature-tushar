@@ -1,11 +1,11 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { DataGrid } from "@material-ui/data-grid";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
@@ -15,32 +15,30 @@ import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import moment from "moment";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import CustomContainer from "../../components/CustomContainer";
-import CreateNewDialog from "./CreateNewDialog";
-import EditIcon from '@material-ui/icons/Edit';
+import routes from "../../components/Helpers/Routes";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { dateFormat } from "../../constants/helpers"
 
-const KpiDashboard = () => {
+const ProductCost = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const [loading, setLoading] = useState(true);
-    const [isCreate, setIsCreate] = useState(false);
-    const [productBuilder, setProductBuilder] = useState([]);
+    const [productCost, setProductCost] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
 
     useEffect(() => {
-        fetchProductBuilder();
+        fetchProductCost();
     }, []);
 
-    const fetchProductBuilder = () => {
+    const fetchProductCost = () => {
         setLoading(true)
-        axiosInstance().get(`/dashboard`).then(({ data: { data } }) => {
-            setProductBuilder(data);
+        axiosInstance().get(`/productcost`).then(({ data: { data } }) => {
+            setProductCost(data);
             setLoading(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -48,8 +46,8 @@ const KpiDashboard = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().delete(`/dashboard/` + deleteRecord._id).then(() => {
-            fetchProductBuilder();
+        axiosInstance().delete(`/productcost/` + deleteRecord._id).then(() => {
+            fetchProductCost();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
         }).catch((error) => {
@@ -62,13 +60,25 @@ const KpiDashboard = () => {
         { field: 'id', headerName: 'id', hide: true },
         {
             field: "name",
-            headerName: "Name",
+            headerName: "Product Cost",
             width: 300,
             renderCell: (params) => (
-                <Link className="link" to={`/dashboard/${params.row.id}`} >
+                <Link className="link" to={`${routes.productCost.path}/${params.row.id}`} >
                     {params.row.name}
                 </Link>
             )
+        },
+        {
+            field: "incoTermsFrom",
+            headerName: "Inco Terms From",
+            width: 200,
+            renderCell: (params) => (params.row.incoTermsFrom)
+        },
+        {
+            field: "incoTermsTo",
+            headerName: "Inco Terms To",
+            width: 200,
+            renderCell: (params) => (params.row.incoTermsTo)
         },
         {
             field: "createdBy",
@@ -106,9 +116,7 @@ const KpiDashboard = () => {
                         params.row.updatedBy.date.slice(0, 10)
                     ).format(dateFormat)}`}
                 >
-                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
-                        dateFormat
-                    )}
+                    {moment(params.row.updatedBy.date.slice(0, 10)).format(dateFormat)}
                 </span>
             </h5>) : <NoDataCell />
         },
@@ -116,18 +124,11 @@ const KpiDashboard = () => {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
                 <Fragment>
-                    <Tooltip title="Edit" >
-                        <IconButton aria-label="Delete" onClick={() => { history.push('/dashboard-edit/' + params.row._id) }} >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip >
-
                     <Tooltip title="Delete" >
                         <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}  >
                             <DeleteIcon fontSize="small" color="error" />
                         </IconButton>
                     </Tooltip >
-
                 </Fragment>
             ),
             width: 200,
@@ -137,32 +138,35 @@ const KpiDashboard = () => {
         }
     ];
 
+    const CreateNew = () => {
+        history.push({ pathname: "/product-cost/0" })
+    }
 
     return (<Layout>
         <Grid container className="headerbox">
-            <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
+            <Grid item xs={12}>
+                <CustomBreadCrumbs routes={[{ title: routes.productCost.title }]} />
             </Grid>
         </Grid>
-        <CustomContainer>
+        <div className="main-container">
             <div className="header-panel">
                 <Grid container>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">{'Dashboards'}</span>
+                        <GiAbstract055 /> <span className="listingHeader">Product Cost</span>
                     </Grid>
                     <Grid xs={6} container justify="flex-end">
-                        <Button onClick={() => setIsCreate(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                     </Grid>
                 </Grid>
             </div>
             <div className="listing-grid">
                 <DataGrid
                     components={{
-                        Toolbar: DataGridCustomToolbar,
+                        Toolbar: CustomDataGridToolbar,
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
-                    rows={productBuilder}
+                    rows={productCost}
                     disableSelectionOnClick
                     disableMultipleSelection
                     columns={columns}
@@ -170,18 +174,17 @@ const KpiDashboard = () => {
                     density="compact"
                 />
             </div>
-            {showDeleteConfirmBox &&
-                <ConfirmationDialog
-                    open={showDeleteConfirmBox}
-                    message={`Are you sure you want to delete dashboard ${deleteRecord?.name}?`}
-                    onClose={() => setShowDeleteConfirmBox(false)}
-                    onOk={handleDelete}
-                />
-            }
-            {isCreate && <CreateNewDialog handleClose={() => setIsCreate(false)} />}
-        </CustomContainer>
+        </div>
+        {showDeleteConfirmBox &&
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure you want to delete product cost ${deleteRecord?.name}?`}
+                onClose={() => setShowDeleteConfirmBox(false)}
+                onOk={handleDelete}
+            />
+        }
     </Layout>
     );
 }
 
-export default KpiDashboard;
+export default ProductCost;

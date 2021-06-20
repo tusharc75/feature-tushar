@@ -245,7 +245,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-        approvedQuote.approved ? (
+          approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -380,7 +380,7 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-end"
+            className="d-flex align-items-center justify-content-center"
           >
             {activeStep !== steps.length - 1 && (
               <>
@@ -441,7 +441,7 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-start"
+            className="d-flex align-items-center justify-content-center"
           >
             {activeStep !== steps.length - 1 && (
               <>

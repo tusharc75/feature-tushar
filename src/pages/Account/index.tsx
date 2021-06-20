@@ -12,6 +12,7 @@ import {
   MenuList,
   Box
 } from "@material-ui/core";
+import ReactGa from 'react-ga';
 import { Link } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -437,6 +438,10 @@ export default function Account(props) {
   };
 
   const clickCreateNew = () => {
+    ReactGa.event({
+      category:"Account Button",
+      action:"clicked"
+    });
     setIsAccDialogVisible(true);
   };
 
@@ -593,14 +598,15 @@ export default function Account(props) {
               justify="space-between"
               alignContent="center"
             >
-              <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-                <Box component="div" className={styles.filter_side_header}>
+              <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+                <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                   <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
-                  <div className="d-flex align-items-center gap-1 m-2">
+                  <div
+                    className={`${accountClass.account_header_add_btn_action_btn_group}`} >
                     {AccTypes && (
                       <ToggleButtonGroup
                         size="small"
-                        className="ml-8"
+                        className={`ml-8 ${accountClass.accountActions}`}
                         value={filter}
                         exclusive
                         onChange={handleFilter}
@@ -614,7 +620,7 @@ export default function Account(props) {
                         })}
                       </ToggleButtonGroup>
                     )}
-                    <ButtonGroup size="small" variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
+                    <ButtonGroup size="small" className={accountClass.accountActions} variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
                       <Button >{options[selectedIndex]}</Button>
                       <Button
                         color="primary"
@@ -659,7 +665,7 @@ export default function Account(props) {
                       )}
                     </Popper>
                   </div>
-                </Box>
+                </div>
               </Grid>
               <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
                 <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
@@ -670,7 +676,7 @@ export default function Account(props) {
                     value={search}
                   />
                   <div
-                    className={`${accountClass.account_header_add_btn_action_btn_group} mt-2`}
+                    className={`${accountClass.account_header_add_btn_action_btn_group}`}
                   >
                     {accountPermissions.isCreate && (
                       <Button
@@ -800,7 +806,7 @@ export default function Account(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure, you want to delete selected account(s) ?`}
+              message={`Are you sure you want to delete the selected account(s) ?`}
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={handleDeleteAccounts}
             />
@@ -808,7 +814,7 @@ export default function Account(props) {
           {singleAccountDelete.show ? (
             <ConfirmationDialog
               open={singleAccountDelete.show}
-              message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
+              message={`Are you sure you want to delete the account: ${singleAccountDelete.accountName} ? `}
               onClose={() =>
                 setSingleAccountDelete({
                   id: null,
@@ -823,7 +829,7 @@ export default function Account(props) {
           {singleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
+              message={`Are you sure you want to ${singleApproveDisapproveAccount.approved
                 ? "approve"
                 : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
@@ -841,7 +847,7 @@ export default function Account(props) {
           {multipleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
+              message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved
                 ? "approve"
                 : "disapprove"
                 } selected ${multipleApproveDisapproveAccount.selectedRecords
