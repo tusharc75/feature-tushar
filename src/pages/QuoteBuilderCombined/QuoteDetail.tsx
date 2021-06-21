@@ -1857,15 +1857,6 @@ function QuoteDetail() {
     isHideReminder = true;
   }
 
-  // function handleGridReady(params) {
-  //   console.log('selectedRecords', selectedRecords)
-  //   console.log("params", params)
-  //   params.api.forEachNode(node => {
-  //     console.log("node", node)
-  //     selectedRecords.indexOf(node?.data?._id) >= 0 ? node.setSelected(true) : node.setSelected(false);
-  //   })
-  // }
-
   return (
     <>
       <Layout>
