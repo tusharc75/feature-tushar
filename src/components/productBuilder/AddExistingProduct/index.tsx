@@ -20,7 +20,15 @@ import SearchBox from '../../Helpers/SearchBox'
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { CommonRenderer } from "../../AgGridComponents/CustomAgGridCellRenderers";
 
-var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
+
 const ignoreField = ["qty"]
 
 const AddExistingProduct = (props) => {

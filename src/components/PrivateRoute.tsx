@@ -42,7 +42,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "terms-conditions",
         "product-category",
         "product-template",
-        "product-cost",
+        "price-template",
         "form-builder",
         "product-builder",
         "currency-converter",
