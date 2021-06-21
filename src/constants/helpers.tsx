@@ -109,6 +109,7 @@ export const sidebarResource = {
   productTemplate: "Product Template",
   productCategory: "Product Category",
   priceTemplate: "Price Template",
+  productBuilder: "Product Builder",
 };
 
 export const lead = {

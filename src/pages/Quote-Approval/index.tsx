@@ -14,7 +14,7 @@ import { backendApi } from './../../config';
 
 const useStyles = makeStyles((theme) => ({
     header: {
-        background: "#047d1c",
+        background: "#53ac65",
         textAlign: "center",
         padding: "10px",
         color: "white",
@@ -95,6 +95,8 @@ const QuoteApproval = () => {
             });
     };
 
+    
+
 
     return (
         <div>
@@ -121,7 +123,7 @@ const QuoteApproval = () => {
                                 </Grid>
                                 <Grid item xs={12} md={8} sm={8} className="centerItem">
                                     
-                                    <Button variant="contained" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
+                                    <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
                                         Accept
                                     </Button>
                                     <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => QuoteStatusChange(false)} >

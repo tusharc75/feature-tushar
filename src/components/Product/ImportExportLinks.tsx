@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ permissions,module, api, refrenceId, onSuccessfulImport }) {
+export default function ImportExportLinks({ permissions=null,module, api, refrenceId, onSuccessfulImport }) {
 
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -191,7 +191,7 @@ export default function ImportExportLinks({ permissions,module, api, refrenceId,
   return (
     <div className={module !== "builder" ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>
-        {permissions.isCreate && <>
+        {permissions?.isCreate && <>
         <label
           onClick={() => {
             setIsSelection(true);
