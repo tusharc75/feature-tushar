@@ -455,7 +455,7 @@ const User: FC = () => {
         showApprovalProcessDialog &&
         <ApprovalProcessDialog
           openApprovalProcessDialog={showApprovalProcessDialog}
-          hasPermissionToUpdateApprovalProcess={permissions}
+          hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
           onSuccess={() =>
             setShowApprovalProcessDialog(false)
           }
@@ -521,6 +521,7 @@ const User: FC = () => {
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               openDOADialog={handleDOAOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
+              approvalProcessActionDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
               canDelete={selectedRecords.length === 0}
               entityRoleRedirectDetails={entityRoleRedirectDetails}
               onEntityRoleRedirectDetailRemove={() => {
