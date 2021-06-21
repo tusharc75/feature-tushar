@@ -27,6 +27,7 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import BulkEditDialog from "./BulkEditDialog";
 import _ from "lodash";
 import Loader from "../Loader";
+import { useData } from "../../StateProvider/Provider";
 
 var levalOrderBy = [
   "product",
@@ -50,6 +51,9 @@ const ProductBuilder = (props) => {
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user, permissions },
+  }: any = useData();
 
   const [product, setProduct] = useState([]);
   const [columns, setColumns] = useState(null);
@@ -518,6 +522,7 @@ const ProductBuilder = (props) => {
         {Editable && (
           <Grid xs={10} container justify="flex-end">
             <ImportExportLinks
+              permissions={permissions.productBuilder}
               module="builder"
               api={"productbuilder"}
               refrenceId={productBuilderId}

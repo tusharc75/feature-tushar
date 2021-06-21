@@ -419,6 +419,7 @@ const Opportunities = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
+                    permissions={opportunityPermissions}
                     module="opportunities"
                     api={opportunityApi}
                     afterImportCompleted={() => {

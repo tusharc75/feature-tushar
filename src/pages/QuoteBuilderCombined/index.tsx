@@ -500,6 +500,7 @@ const QuoteBuilders = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
+                    permissions={quotePermissions}
                     module="quotes"
                     api={qbApi}
                     afterImportCompleted={() => {

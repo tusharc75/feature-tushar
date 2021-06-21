@@ -191,7 +191,7 @@ export default function OpportunityInAccordian({
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               <Typography variant="subtitle2">
                 {isAllowedToUpdate && <>
-                  {opportunityPermissions.isCreate && contactResource === customerContact.contactResource ?
+                  {contactResource === customerContact.contactResource ?
                     <>
                       <IconButton
                         aria-haspopup="true"
@@ -209,6 +209,7 @@ export default function OpportunityInAccordian({
                         onClose={handleCloseMenu}
                       >
                         <MenuItem
+                          disabled={!opportunityPermissions.isCreate}
                           onClick={() => {
                             setShowCreateOpportunityDialog(true);
                             handleCloseMenu();
@@ -217,6 +218,7 @@ export default function OpportunityInAccordian({
                           Create New
                         </MenuItem>
                         <MenuItem
+                          disabled={!opportunityPermissions.isUpdate}
                           onClick={() => {
                             setShowAddOpportunityDialog(true)
                             handleCloseMenu();
@@ -243,6 +245,7 @@ export default function OpportunityInAccordian({
                         onClose={handleCloseMenu}
                       >
                         <MenuItem
+                          disabled={!opportunityPermissions.isCreate}
                           onClick={() => {
                             setShowCreateOpportunityDialog(true);
                             handleCloseMenu();

@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ module, api, afterImportCompleted }) {
+export default function ImportExportLinks({ permissions, module, api, afterImportCompleted }) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
   const toastConfig = useContext(CustomToastContext);
@@ -160,7 +160,8 @@ export default function ImportExportLinks({ module, api, afterImportCompleted })
   return (
     <div className={`${classes.root}`}>
       <div className={classes.linksContainer}>
-        <label
+       {permissions.isCreate && <>
+       <label
           htmlFor="importFromExcel"
           className={`${classes.links} cursor-pointer`}
         >
@@ -172,6 +173,8 @@ export default function ImportExportLinks({ module, api, afterImportCompleted })
           flexItem
           className={classes.linkDivider}
         />
+        </>
+        }
         <label
           onClick={exportToExcel}
           className={`${classes.links} cursor-pointer`}

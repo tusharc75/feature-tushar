@@ -582,6 +582,7 @@ export default function Account(props) {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
+              permissions={accountPermissions}
               module="account(s)"
               api={accountApi}
               afterImportCompleted={() => {

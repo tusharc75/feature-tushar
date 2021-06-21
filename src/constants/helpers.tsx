@@ -107,6 +107,7 @@ export const sidebarResource = {
   attachment: "Attachment",
   case: "Case",
   productTemplate: "Product Template",
+  productCategory: "Product Category"
 };
 
 export const lead = {
