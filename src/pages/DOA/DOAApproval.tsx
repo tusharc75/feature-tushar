@@ -415,7 +415,7 @@ const DOAApproval = () => {
                           }
                         </span>
                       </div>
-                      <div className="quoteBox">
+                      {/* <div className="quoteBox">
                         <span>Total Margin</span>
                         <span
                           title={
@@ -432,7 +432,7 @@ const DOAApproval = () => {
                             ).shortFormatAmount
                           }
                         </span>
-                      </div>
+                      </div> */}
                     </>
                   )}
                   <div></div>
