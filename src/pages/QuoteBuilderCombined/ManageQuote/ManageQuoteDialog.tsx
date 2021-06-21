@@ -987,39 +987,67 @@ export default function ManageQuoteDialog({
                                         isTooltip={true}
                                         size="small"
                                       />
-                                    ) : (
-                                      <FormTypes
-                                        // {...rest}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={true}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ["imageUpload", "fileUpload"].some(
-                                            (s) => s === field.type
-                                          )
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(
-                                                completePercentage
-                                              );
-                                            }
-                                            : null
-                                        }
-                                        customError={customError}
-                                        onChange={(date) => {
-                                          setFieldValue(field.fieldName, date)
-                                          handleErrors({ ...values, [field.fieldName]: date })
-                                        }}
-                                      />
-                                    )}
+                                    ) : ["quoteAcceptDate", "salesOrderCreationDate", "invoiceCreationDate", "invoicedDate"].indexOf(field?.fieldName) >= 0 ?
+                                      (
+                                        <FormTypes
+                                          // {...rest}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ["imageUpload", "fileUpload"].some(
+                                              (s) => s === field.type
+                                            )
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                              : null
+                                          }
+                                          customError={customError}
+                                          onChange={(date) => {
+                                            setFieldValue(field.fieldName, date)
+                                            handleErrors({ ...values, [field.fieldName]: date })
+                                          }}
+                                        />
+                                      ) : (
+                                        <FormTypes
+                                          // {...rest}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ["imageUpload", "fileUpload"].some(
+                                              (s) => s === field.type
+                                            )
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                              : null
+                                          }
+                                        />
+                                      )}
                                   </Grid>
                                 ))}
                               </Grid>
