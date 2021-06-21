@@ -1,4 +1,4 @@
-import { useParams,useLocation } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
 import Layout from "../../components/Layout";
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const QuoteApproval = () => {
-    let location= useLocation().search;
+    let location = useLocation().search;
     console.log(location);
     const classes = useStyles();
     const { id } = useParams();
@@ -47,7 +47,7 @@ const QuoteApproval = () => {
     const [columns, setColumns] = useState([]);
     const [rows, setRows] = useState([]);
     const [sellingPrice, setSellingPrice] = useState(0);
-    const[currency,setCurrency]=useState("");
+    const [currency, setCurrency] = useState("");
 
     useEffect(() => {
         fetchQuote()
@@ -56,11 +56,11 @@ const QuoteApproval = () => {
     //to fetch Quote Data from QuoteID 
     const fetchQuote = () => {
 
-        axios.get(backendApi + "/quote-builder/getQuotefromId/" + id+location)
+        axios.get(backendApi + "/quote-builder/getQuotefromId/" + id + location)
             .then(({ data }) => {
-                console.log(data);
+                const newColumn = data.Columns.map((obj) => ({ ...obj, width: 200 }))
                 if (data.Quote_Status === "Sent to Customer") {
-                    setColumns(data.Columns);
+                    setColumns(newColumn);
                     setRows(data.Rows);
                     setSellingPrice(data.TotalSellingPriceamount);
                     setCurrency(data.TotalSellingPricecurr)
@@ -79,14 +79,14 @@ const QuoteApproval = () => {
     }
 
     const QuoteStatusChange = (accepted) => {
-        var body = { status: ""}
+        var body = { status: "" }
         if (accepted) {
             body.status = "Accepted by Customer";
         }
         else {
             body.status = "Rejected by Customer";
         }
-        axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id+location, body)
+        axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
             .then(({ data }) => {
                 setReplied(true);
             })
@@ -95,7 +95,7 @@ const QuoteApproval = () => {
             });
     };
 
-    
+
 
 
     return (
@@ -119,10 +119,10 @@ const QuoteApproval = () => {
                         <div className={`gap-2 ${classes.footer}`}>
                             <Grid container>
                                 <Grid item xs={12} md={4} sm={4} className="centerItem">
-                                   <h1>Total : {sellingPrice} {currency}</h1> 
+                                    <h1>Total : {sellingPrice} {currency}</h1>
                                 </Grid>
                                 <Grid item xs={12} md={8} sm={8} className="centerItem">
-                                    
+
                                     <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
                                         Accept
                                     </Button>
