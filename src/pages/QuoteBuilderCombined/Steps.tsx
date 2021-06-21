@@ -21,6 +21,7 @@ import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
+import NewStepper from "../../components/Helpers/NewStepper";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -123,6 +124,7 @@ const Steps = (props) => {
     handleSendReminder = null,
     reminderLoading = false,
     hideReminderButton = false,
+    DOAData = null
   } = props;
   const classes = useStyles();
   var activeStep = currentStep;
@@ -241,6 +243,7 @@ const Steps = (props) => {
       });
   };
 
+
   return (
     <div className={classes.root}>
       <div className="position-relative">
@@ -254,7 +257,7 @@ const Steps = (props) => {
           </div>
         ) : (
           <>
-            {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
+            {/* {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <Typography
                   className={classes.rejected}
@@ -264,28 +267,49 @@ const Steps = (props) => {
                   User doesn't have DOA setup for this amount
                 </Typography>
               </div>
-            )}
+            )} */}
             {versionStatus === "Sent for DOA" && (
-              <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <FcClock size={30} />
-                <Typography className={classes.sent}>DOA Sent</Typography>
-              </div>
+              <>
+                {DOAData && (<NewStepper
+                  heading={" "}
+                  quoteDOA={DOAData}
+                />)}
+
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <FcClock size={30} />
+                  <Typography className={classes.sent}>DOA Sent</Typography>
+                </div>
+              </>
             )}
             {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
-              <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <FcApproval size={30} />
-                <Typography className={classes.approved}>
-                  Approved by DOA
-                </Typography>
-              </div>
+              <>
+                {DOAData && (<NewStepper
+                  heading={" "}
+                  quoteDOA={DOAData}
+                />)}
+
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <FcApproval size={30} />
+                  <Typography className={classes.approved}>
+                    Approved by DOA
+                  </Typography>
+                </div>
+              </>
             )}
             {versionStatus.split(" (")[0] === "Rejected by DOA" && (
-              <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <FcCancel size={30} />
-                <Typography className={classes.rejected}>
-                  Rejected by DOA
-                </Typography>
-              </div>
+              <>
+                {DOAData && (<NewStepper
+                  heading={" "}
+                  quoteDOA={DOAData}
+                />)}
+
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <FcCancel size={30} />
+                  <Typography className={classes.rejected}>
+                    Rejected by DOA
+                  </Typography>
+                </div>
+              </>
             )}
             {versionStatus === "Sent to Customer" && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
@@ -295,7 +319,7 @@ const Steps = (props) => {
                 </Typography>
               </div>
             )}
-            {versionStatus === "Sent to Customer" && !hideReminderButton ? (
+            {/* {versionStatus === "Sent to Customer" && !hideReminderButton ? (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <Button
                   className="mx-1"
@@ -309,7 +333,8 @@ const Steps = (props) => {
                   Send Reminder
                 </Button>
               </div>
-            ) : null}
+            )
+             : null} */}
             {versionStatus.includes("Accepted by Customer") && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <FcApproval size={30} />
