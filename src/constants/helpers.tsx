@@ -107,6 +107,9 @@ export const sidebarResource = {
   attachment: "Attachment",
   case: "Case",
   productTemplate: "Product Template",
+  productCategory: "Product Category",
+  priceTemplate: "Price Template",
+  productBuilder: "Product Builder",
 };
 
 export const lead = {
@@ -127,6 +130,11 @@ export const entity = {
 export const productTemplate = {
   productTemplateResource: "productTemplate",
   productTemplateApi: "/product-template",
+};
+
+export const priceTemplate = {
+  priceTemplateResource: "priceTemplate",
+  priceTemplateApi: "/price-template",
 };
 
 export const quoteBuilder = {

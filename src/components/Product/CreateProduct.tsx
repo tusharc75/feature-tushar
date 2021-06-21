@@ -191,7 +191,7 @@ const CreateProduct = (props) => {
         if (value && value !== "") {
             axiosInstance().get(`/product-template/fields/` + value).then(({ data: { data } }) => {
                 let newField = [...masterFields];
-                data.fields.filter((f) => f.sectionType !== "cost").forEach(_f => {
+                data.fields.forEach(_f => {
                     newField.push(_f)
                 })
                 setIsStandardTemplate(data.isStandard)

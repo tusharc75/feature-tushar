@@ -21,6 +21,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
@@ -108,6 +109,7 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
@@ -228,8 +230,8 @@ const intialState = {
   rowCountTNC: 0,
   loadingTNC: false,
   page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
+  limit: 2,
+  pageSizes: [2, 4, 6],
   search: "",
   filters: {},
   sorting: [],
@@ -339,16 +341,19 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
+
   const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
+      rowDrag: true,
       headerName: "Name",
       cellRenderer: "nameRenderer",
     },
   ]);
 
+  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -447,6 +452,7 @@ function QuoteDetail() {
   let logo = null;
   let companyName = "";
   let companyAddress = "";
+  const [DOAData, setDOAData] = useState(null);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
@@ -519,8 +525,16 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
+    setSelectedTnC(selectedRecords.map(o => o._id))
+  }, [selectedRecords]);
+
+  useEffect(() => {
     fetchDoaLimit();
   }, []);
+
+  useEffect(() => {
+    fetchDOAData()
+  }, [currentVersion, DOAreq]);
 
   useEffect(() => {
     if (permissions) {
@@ -555,6 +569,9 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
+      if (selectedRecords.length > 0) {
+        setTNC(selectedRecords);
+      }
       setLoading(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
@@ -704,7 +721,13 @@ function QuoteDetail() {
         .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
-
+    let tempProcessArray: Array<number> = []
+    Object.keys(data?.versions).forEach(key => {
+      DOAneeded ?
+        tempProcessArray.push(DOASteps.indexOf(data.versions[key].processStatus))
+        : tempProcessArray.push(OtherSteps.indexOf(data.versions[key].processStatus))
+    })
+    mainPoint["Quote Status"] = DOAneeded ? DOASteps[Math.max(...tempProcessArray)] : OtherSteps[Math.max(...tempProcessArray)]
     setMainPoints(mainPoint);
   };
 
@@ -763,9 +786,7 @@ function QuoteDetail() {
       className="cursor-pointer"
       title={params.value}
       onClick={() => {
-        const data = dataRowsTNC.find((d) => d._id === params.data.id);
-
-        setEditRecordTNC(data);
+        setEditRecordTNC(params.data);
         setShowCreateDialog(true);
       }}
     >
@@ -785,24 +806,32 @@ function QuoteDetail() {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
-      gridApi.setRowData([]);
+      // gridApi.setRowData([]);
       gridApi.showLoadingOverlay();
     }
+
     axiosInstance()
-      .get(termsAndCondition.api)
+      .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
-        setDataTNC(data);
-        let rows = data.map((tnc) => ({
-          ...tnc,
-          id: tnc._id,
-          name: tnc.TACName,
-        }));
+        let selectedRows = []
+        let rows = data.map((tnc) => {
+          if (selectedTnC.indexOf(tnc._id) >= 0) {
+            selectedRows.push(tnc)
+          }
+          return {
+            ...tnc,
+            id: tnc._id,
+            name: tnc.TACName,
+          }
+        });
         dispatch({
           type: "initialize",
           data: rows,
           count: count,
         });
-        dispatch({ type: "loading", loadingTNC: false });
+        dispatch({ type: "selection", selectedRecords: selectedRows })
+        setDataTNC(data);
+        // dispatch({ type: "loading", loadingTNC: false });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -1045,9 +1074,11 @@ function QuoteDetail() {
         finalmarkup = finalmarkup + markup + "<br>";
       });
 
-      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
+      finalmarkup = finalmarkup.replaceAll("<p>", "<p style='overflow-wrap:break-word;word-wrap:break-word;'>");
+      // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
 
-      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      let signatureContent = "<br><br><span--style='font-size:10px;'>Note:</span><br>";
       signatureContent =
         signatureContent +
         `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
@@ -1059,12 +1090,12 @@ function QuoteDetail() {
         signatureContent +
         `<span--style='color:lightgrey'>__________________________</span>`;
 
-      signatureContent = signatureContent.replaceAll(" ", "&nbsp");
+      signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
       signatureContent = signatureContent.replaceAll("--", " ");
 
       finalmarkup = finalmarkup + signatureContent;
-
-      PdfDoc.html(finalmarkup, {
+      
+      PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
@@ -1186,6 +1217,17 @@ function QuoteDetail() {
         // toastConfig.setToastConfig(err);
       });
   };
+
+  const fetchDOAData = () => {
+    axiosInstance()
+      .get(`doa-request/doaFlow/${id}/${currentVersion}`)
+      .then(({ data: { data } }) => {
+        setDOAData(data.reverse())
+      })
+      .catch((err) => {
+        // toastConfig.setToastConfig(err);
+      });
+  }
 
   useEffect(() => {
     if (
@@ -1699,8 +1741,40 @@ function QuoteDetail() {
 
         setVersionStatusData({
           columns: [
-            { field: "versionNumber", headerName: "Version #", flex: 0.5 },
-            { field: "status", headerName: "Status", flex: 1 },
+            {
+              field: "versionNumber", headerName: "Version #", flex: 0.5,
+              renderCell: (params: any) => (
+                <Link
+                  title={params.value}
+                  className="text-truncate link"
+                  onClick={() => {
+                    setcurrentVersion(params.value);
+                    setShowVersionsDialog(false);
+
+                  }
+                  }
+                >
+                  {params.value}
+                </Link>
+              ),
+            },
+            {
+              field: "status", headerName: "Status", flex: 1,
+              renderCell: (params: any) => (
+                <Link
+                  title={params.value}
+                  className="text-truncate link"
+                  onClick={() => {
+                    setcurrentVersion(params.row.versionNumber);
+                    setShowVersionsDialog(false);
+
+                  }
+                  }
+                >
+                  {params.value}
+                </Link>
+              ),
+            },
             { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
             {
               field: "totalSalesPrice",
@@ -1837,10 +1911,7 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={{
-                    ...mainPoints,
-                    "Quote Status": quoteData?.versions[currentVersion]?.status,
-                  }}
+                  mainPoints={mainPoints}
                   showHeading={true}
                 >
                   <Button
@@ -1927,7 +1998,7 @@ function QuoteDetail() {
                       {quoteData && (
                         <>
                           <div className={classes.btnHeader}>
-                            {quotePermissions.isCreate ? (
+                            {quotePermissions?.isCreate ? (
                               <Button
                                 variant="contained"
                                 color="primary"
@@ -2138,6 +2209,7 @@ function QuoteDetail() {
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             allowedToEdit={allowedToEdit}
+                            DOAData={DOAData}
                           />
                         ) : (
                           <Steps
@@ -2409,6 +2481,7 @@ function QuoteDetail() {
                                   allowSelection={true}
                                   allowAction={false}
                                   isClientSideGrid={true}
+                                  allowPagination={false}
                                 />
                               </Box>
                             ) : null}

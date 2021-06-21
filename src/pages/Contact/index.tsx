@@ -381,6 +381,7 @@ export default function Contact(props) {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
+            permissions={contactPermission}
             module="contact(s)"
             api={contactApi}
             afterImportCompleted={() => {

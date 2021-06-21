@@ -154,54 +154,44 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
-                        {isAllowedToEdit && <>
-                            {permissions?.projectSales?.isCreate && isAddProjectSale ?
-                                <>
-                                    <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={handleOpenMenu}
-                                    >
-                                        <MoreVert />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu"
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowCreateProjectSalesDialog(true);
-                                                handleCloseMenu();
-                                            }}
-                                        >
-                                            Create New
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowAddProjectSalesDialog(true)
-                                                handleCloseMenu();
-                                            }}
-                                        >
-                                            Add Exisiting
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                                :
+                        {isAllowedToEdit &&
+                            <>
                                 <IconButton
+                                    aria-haspopup="true"
                                     color="primary"
                                     size="small"
-                                    onClick={() => {
-                                        setShowCreateProjectSalesDialog(true);
-                                    }}
+                                    onClick={handleOpenMenu}
                                 >
-                                    <ControlPointIcon />
+                                    <MoreVert />
                                 </IconButton>
-                            }
-                        </>}
+                                <Menu
+                                    id="menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleCloseMenu}
+                                >
+                                    <MenuItem
+                                        disabled={!permissions.projectSales.isCreate}
+                                        onClick={() => {
+                                            setShowCreateProjectSalesDialog(true);
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Create New
+                                    </MenuItem>
+                                    <MenuItem
+                                        disabled={!permissions.projectSales.isUpdate}
+                                        onClick={() => {
+                                            setShowAddProjectSalesDialog(true)
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Add Exisiting
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        }
                     </Grid>
                 </Grid>
             </AccordionSummary>

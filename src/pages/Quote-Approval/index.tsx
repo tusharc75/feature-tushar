@@ -95,6 +95,8 @@ const QuoteApproval = () => {
             });
     };
 
+    
+
 
     return (
         <div>
@@ -120,6 +122,7 @@ const QuoteApproval = () => {
                                    <h1>Total : {sellingPrice} {currency}</h1> 
                                 </Grid>
                                 <Grid item xs={12} md={8} sm={8} className="centerItem">
+                                    
                                     <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
                                         Accept
                                     </Button>
