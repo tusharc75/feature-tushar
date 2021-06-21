@@ -109,6 +109,14 @@ export default function ManageQuoteDialog({
     []
   );
   const [opportunityDataSource, setOpportunityDataSource] = useState([]);
+  const [customError, setCustomError] = useState({});
+
+  useEffect(() => {
+    if (entityData.fields.length === 0 && Object.keys(customError).length > 0) {
+      setCustomError({})
+    }
+  }, [entityData])
+
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
@@ -465,6 +473,20 @@ export default function ManageQuoteDialog({
     }
   };
 
+  const handleErrors = (values) => {
+    let tempErrors = customError
+    if (values?.salesOrderCreationDate && values?.invoiceCreationDate && new Date(values?.salesOrderCreationDate) > new Date(values?.invoiceCreationDate)) {
+      tempErrors["salesOrderCreationDate"] = "Sales Order Creation Date should be less than Invoice Creation Date"
+    }
+    else if (tempErrors["salesOrderCreationDate"]) { delete tempErrors["salesOrderCreationDate"] }
+
+    if (values?.invoiceCreationDate && values?.invoicedDate && new Date(values?.invoiceCreationDate) > new Date(values?.invoicedDate)) {
+      tempErrors["invoiceCreationDate"] = "Invoice Creation Date should be less than Invoiced Date"
+    }
+    else if (tempErrors["invoiceCreationDate"]) { delete tempErrors["invoiceCreationDate"] }
+    setCustomError({ ...tempErrors })
+  }
+
   return (
     <>
       <Dialog
@@ -530,11 +552,11 @@ export default function ManageQuoteDialog({
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
-                                        // doNotShowInfoTooltip={true}
-                                        // onChange={(e, value) => {
-                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                        //   setFieldValue("customerContactName", [])
-                                        // }}
+                                      // doNotShowInfoTooltip={true}
+                                      // onChange={(e, value) => {
+                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                      //   setFieldValue("customerContactName", [])
+                                      // }}
                                       />
                                     ) : field.fieldName ==
                                       "customerAccountName" ? (
@@ -663,10 +685,10 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                            // onChange={(e, value) => {
-                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                            // }}
+                                          // }}
                                           />
                                         </Grid>
                                         {permissions.customerContact.isCreate &&
@@ -707,19 +729,19 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.opportunity.isCreate &&
-                                            !isRenderedFromOpportunity
+                                              !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           sm={
                                             permissions.opportunity.isCreate &&
-                                            !isRenderedFromOpportunity
+                                              !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           md={
                                             permissions.opportunity.isCreate &&
-                                            !isRenderedFromOpportunity
+                                              !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
@@ -744,14 +766,14 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                            // onChange={(e, value) => {
-                                            //   setFieldValue(
-                                            //     field.fieldName,
-                                            //     value && value.optionValue
-                                            //       ? value.optionValue
-                                            //       : ""
-                                            //   );
-                                            // }}
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(
+                                          //     field.fieldName,
+                                          //     value && value.optionValue
+                                          //       ? value.optionValue
+                                          //       : ""
+                                          //   );
+                                          // }}
                                           />
                                         </Grid>
                                         {permissions.opportunity.isCreate &&
@@ -979,12 +1001,17 @@ export default function ManageQuoteDialog({
                                             (s) => s === field.type
                                           )
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(
-                                                  completePercentage
-                                                );
-                                              }
+                                              setUploadingImageOrFileProgress(
+                                                completePercentage
+                                              );
+                                            }
                                             : null
                                         }
+                                        customError={customError}
+                                        onChange={(date) => {
+                                          setFieldValue(field.fieldName, date)
+                                          handleErrors({ ...values, [field.fieldName]: date })
+                                        }}
                                       />
                                     )}
                                   </Grid>
@@ -1114,13 +1141,15 @@ export default function ManageQuoteDialog({
                           entityData.fields
                         )
                       ).toString() ===
-                        Object.values(
-                          simplifyValues(values, entityData.fields)
-                        ).toString()
+                      Object.values(
+                        simplifyValues(values, entityData.fields)
+                      ).toString()
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      submitForm();
+                      if (Object.keys(customError).length > 0) {
+                        return
+                      } else submitForm();
                     }}
                   >
                     Save
