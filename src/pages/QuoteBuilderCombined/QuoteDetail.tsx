@@ -1062,9 +1062,11 @@ function QuoteDetail() {
         finalmarkup = finalmarkup + markup + "<br>";
       });
 
-      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
+      finalmarkup = finalmarkup.replaceAll("<p>", "<p style='overflow-wrap:break-word;word-wrap:break-word;'>");
+      // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
 
-      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      let signatureContent = "<br><br><span--style='font-size:10px;'>Note:</span><br>";
       signatureContent =
         signatureContent +
         `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
@@ -1076,12 +1078,12 @@ function QuoteDetail() {
         signatureContent +
         `<span--style='color:lightgrey'>__________________________</span>`;
 
-      signatureContent = signatureContent.replaceAll(" ", "&nbsp");
+      signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
       signatureContent = signatureContent.replaceAll("--", " ");
 
       finalmarkup = finalmarkup + signatureContent;
-
-      PdfDoc.html(finalmarkup, {
+      
+      PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
