@@ -2030,7 +2030,7 @@ function QuoteDetail() {
                                 </span>
                               </div>
                             )}
-                            <div className="quoteBox noBorder">
+                            {/* <div className="quoteBox noBorder">
                               <span>Total Margin </span>
                               <span
                                 className="quoteAmount"
@@ -2040,7 +2040,7 @@ function QuoteDetail() {
                                   ? totalmargin.shortFormatAmount
                                   : defaultTotalValue}
                               </span>
-                            </div>
+                            </div> */}
                           </Grid>
                         )}
                         <Grid
