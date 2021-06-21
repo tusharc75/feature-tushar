@@ -109,7 +109,6 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -559,6 +558,9 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
+      if(selectedRecords.length > 0) {
+        setTNC(selectedRecords);
+      }
       setLoading(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)

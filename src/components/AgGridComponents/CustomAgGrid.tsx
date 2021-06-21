@@ -6,6 +6,7 @@ import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridP
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import { orderBy } from 'lodash';
 
 export function reducer(state, action) {
     switch (action.type) {
@@ -235,6 +236,10 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     rowSelection={'multiple'}
                     onSelectionChanged={(event: any) => {
                         dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
+                    }}
+                    onRowDragEnd={(event: any) => {
+                        //  Did this for quote screen, as we need updated sequence and selected records
+                        dispatch({ type: "selection", selectedRecords: orderBy(event.api.getSelectedNodes(), "rowIndex", ["asc"]).map(d => d.data) })
                     }}
                     immutableData={true}
                     getRowNodeId={(data) => {
