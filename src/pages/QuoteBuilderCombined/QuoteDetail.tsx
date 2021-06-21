@@ -2584,7 +2584,7 @@ function QuoteDetail() {
             TransitionComponent={CustomDialogTransition}
           >
             <CustomDialogHeader
-              title="Under Construction"
+              title="AI Suggestion"
               onClose={() => {
                 setShowAiDialog(false);
               }}
