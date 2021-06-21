@@ -457,7 +457,6 @@ const User: FC = () => {
         .catch((error) => {
           toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false);
-          setDeleteLoading(false);
         });
     }
   }
