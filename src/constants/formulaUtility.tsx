@@ -54,12 +54,13 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
 }
 
 const formatDecimal = (value, decimalPlaces) => {
-    if (value === "" && isNaN(value)) {
+    if (value === "") {
         return 0;
     }
-    else if (parseFloat(value) < 0) {
-        return 0;
-    }
+    //&& isNaN(value)
+    // else if (parseFloat(value) < 0) {
+    //     return 0;
+    // }
     else {
         return parseFloat(value.toFixed(decimalPlaces));
     }

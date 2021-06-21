@@ -319,6 +319,7 @@ const ProductBuilder = (props) => {
         });
         setColumns(column);
         setProduct(data);
+        dispatch({ type: "initialize", data: [], count: 0 });
         dispatch({ type: "initialize", data: data, count: data.length });
         dispatch({ type: "loading", loading: false });
       })
