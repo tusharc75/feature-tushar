@@ -160,7 +160,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
   return (
     <div className={`${classes.root}`}>
       <div className={classes.linksContainer}>
-       {permissions.isCreate && <>
+       {permissions?.isCreate && <>
        <label
           htmlFor="importFromExcel"
           className={`${classes.links} cursor-pointer`}
