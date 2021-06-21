@@ -450,6 +450,7 @@ function QuoteDetail() {
   let logo = null;
   let companyName = "";
   let companyAddress = "";
+  const [DOAData, setDOAData] = useState(null);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
@@ -524,6 +525,10 @@ function QuoteDetail() {
   useEffect(() => {
     fetchDoaLimit();
   }, []);
+
+  useEffect(() => {
+    fetchDOAData()
+  }, [currentVersion, DOAreq]);
 
   useEffect(() => {
     if (permissions) {
@@ -1198,6 +1203,17 @@ function QuoteDetail() {
         // toastConfig.setToastConfig(err);
       });
   };
+
+  const fetchDOAData = () => {
+    axiosInstance()
+      .get(`doa-request/doaFlow/${id}/${currentVersion}`)
+      .then(({ data: { data } }) => {
+        setDOAData(data.reverse())
+      })
+      .catch((err) => {
+        // toastConfig.setToastConfig(err);
+      });
+  }
 
   useEffect(() => {
     if (
@@ -2179,6 +2195,7 @@ function QuoteDetail() {
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             allowedToEdit={allowedToEdit}
+                            DOAData={DOAData}
                           />
                         ) : (
                           <Steps
