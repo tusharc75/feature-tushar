@@ -26,7 +26,7 @@ const dropstyle = {
     height: "54px"
 }
 
-export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data, addDeleteField }) => {
+export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data, addDeleteField, extraFields }) => {
 
     const ref = useRef(null);
 
@@ -152,6 +152,16 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
         handleClose()
     };
 
+    const handleClone = (fieldData) => {
+        let data = [...section];
+        data.forEach((row) => {
+            if (row.sectionId.toString() === sectionId.toString()) {
+                row.field.splice(index + 1, 0, { ...fieldData, _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: fieldData.type, fieldName: fieldData.type });
+            }
+        })
+        setSection(data);
+        handleClose();
+    }
 
     // const [editFieldName, setEditFieldName] = React.useState(false);
     // const onMouseEnter = () => {
@@ -200,6 +210,7 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
                                 onClose={handleClose}
                             >
                                 <MenuItem onClick={() => handleClickOpenPropertie(data)}  >Edit Properties</MenuItem>
+                                {data.editAble && <MenuItem onClick={() => handleClone(data)}  >Clone</MenuItem>}
                                 {data.editAble && <MenuItem onClick={() => deleteField(data._id)} >Delete</MenuItem>}
                             </Menu>
                             {propertie_open ? <Properties
@@ -208,7 +219,9 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
                                 sectionId={sectionId}
                                 section={section}
                                 setSection={setSection}
-                                module={module} /> : null}
+                                module={module}
+                                extraFields={extraFields}
+                            /> : null}
                         </Grid>
                     </Grid>
                 </Box>

@@ -32,10 +32,10 @@ import { useData } from "../../StateProvider/Provider";
 var levalOrderBy = [
   "product",
   "product-custom",
-  "template",
-  "cost",
-  "builder",
-  "builder-custom",
+  "product-template",
+  "price-template",
+  "product-builder-custom",
+  "price-builder-custom",
 ];
 
 const ProductBuilder = (props) => {
@@ -177,15 +177,8 @@ const ProductBuilder = (props) => {
         ];
         data.forEach((row) => {
           let _fields = row.fields;
-          if (stage) {
-            if (stage === "product") {
-              _fields = row.fields.filter(
-                (t) =>
-                  t.leval === "product" ||
-                  t.leval === "product-custom" ||
-                  (t.leval === "template" && t.sectionType !== "cost")
-              );
-            }
+          if (stage && stage === "product") {
+            _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || t.leval === "product-template");
           }
           _fields.forEach((ele) => {
             if (
@@ -330,6 +323,7 @@ const ProductBuilder = (props) => {
         });
         setColumns(column);
         setProduct(data);
+        dispatch({ type: "initialize", data: [], count: 0 });
         dispatch({ type: "initialize", data: data, count: data.length });
         dispatch({ type: "loading", loading: false });
       })
@@ -470,18 +464,10 @@ const ProductBuilder = (props) => {
     data.productBuilderId = productBuilderId;
     data._ids = selectedRecords.map((d) => d.id);
     data.field = field;
-    data.field.leval = "builder-custom";
-    if (
-      addFieldData.fields.filter(
-        (_f) => _f.sectionName === data.field.sectionName
-      ).length
-    ) {
-      if (
-        addFieldData.fields.filter(
-          (_f) => _f.sectionName === data.field.sectionName
-        )[0].sectionType === "cost"
-      ) {
-        data.field.sectionType = "cost";
+    data.field.leval = "price-builder-custom";
+    if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName).length) {
+      if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName)[0].leval !== "price-template") {
+        data.field.leval = "product-builder-custom";
       }
     }
     axiosInstance()
