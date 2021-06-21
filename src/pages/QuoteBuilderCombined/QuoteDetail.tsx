@@ -801,7 +801,7 @@ function QuoteDetail() {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
-      gridApi.setRowData([]);
+      // gridApi.setRowData([]);
       gridApi.showLoadingOverlay();
     }
 
@@ -810,7 +810,7 @@ function QuoteDetail() {
       .then(({ data: { data, count } }) => {
         let selectedRows = []
         let rows = data.map((tnc) => {
-          if (selectedRecords.indexOf(tnc._id) >= 0) {
+          if (selectedTnC.indexOf(tnc._id) >= 0) {
             selectedRows.push(tnc)
           }
           return {
@@ -1980,7 +1980,7 @@ function QuoteDetail() {
                       {quoteData && (
                         <>
                           <div className={classes.btnHeader}>
-                            {quotePermissions.isCreate ? (
+                            {quotePermissions?.isCreate ? (
                               <Button
                                 variant="contained"
                                 color="primary"
