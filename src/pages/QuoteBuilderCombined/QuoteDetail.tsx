@@ -339,6 +339,7 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
+
   const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
@@ -349,6 +350,7 @@ function QuoteDetail() {
     },
   ]);
 
+  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -517,6 +519,10 @@ function QuoteDetail() {
       "aria-controls": `main-tabpanel-${index}`,
     };
   }
+
+  useEffect(() => {
+    setSelectedTnC(selectedRecords.map(o => o._id))
+  }, [selectedRecords]);
 
   useEffect(() => {
     fetchDoaLimit();
@@ -701,7 +707,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -734,7 +740,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -763,9 +769,7 @@ function QuoteDetail() {
       className="cursor-pointer"
       title={params.value}
       onClick={() => {
-        const data = dataRowsTNC.find((d) => d._id === params.data.id);
-
-        setEditRecordTNC(data);
+        setEditRecordTNC(params.data);
         setShowCreateDialog(true);
       }}
     >
@@ -783,26 +787,28 @@ function QuoteDetail() {
 
   const fetchTermsAndConditions = () => {
     dispatch({ type: "loading", loadingTNC: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
-    }
     axiosInstance()
       .get(termsAndCondition.api)
       .then(({ data: { data, count } }) => {
-        setDataTNC(data);
-        let rows = data.map((tnc) => ({
-          ...tnc,
-          id: tnc._id,
-          name: tnc.TACName,
-        }));
+        let selectedRows = []
+        let rows = data.map((tnc) => {
+          if (selectedRecords.indexOf(tnc._id) >= 0) {
+            selectedRows.push(tnc)
+          }
+          return {
+            ...tnc,
+            id: tnc._id,
+            name: tnc.TACName,
+          }
+        });
         dispatch({
           type: "initialize",
           data: rows,
           count: count,
         });
-        dispatch({ type: "loading", loadingTNC: false });
+        dispatch({ type: "selection", selectedRecords: selectedRows })
+        setDataTNC(data);
+        // dispatch({ type: "loading", loadingTNC: false });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -837,12 +843,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1662,7 +1668,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1807,6 +1813,15 @@ function QuoteDetail() {
     isHideReminder = true;
   }
 
+  // function handleGridReady(params) {
+  //   console.log('selectedRecords', selectedRecords)
+  //   console.log("params", params)
+  //   params.api.forEachNode(node => {
+  //     console.log("node", node)
+  //     selectedRecords.indexOf(node?.data?._id) >= 0 ? node.setSelected(true) : node.setSelected(false);
+  //   })
+  // }
+
   return (
     <>
       <Layout>
@@ -1859,9 +1874,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button>
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1957,10 +1972,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2198,7 +2213,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
+                              ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2277,8 +2292,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2298,7 +2313,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2363,7 +2378,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                      ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2458,7 +2473,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2530,9 +2545,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
