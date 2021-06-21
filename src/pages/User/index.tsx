@@ -48,6 +48,7 @@ const User: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [unAssignLoading, setUnAssignLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
@@ -68,6 +69,7 @@ const User: FC = () => {
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
     },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
     {
       field: "companyWideRole", headerName: "Company Wide Role(s)", filter: false, show: true,
@@ -77,7 +79,6 @@ const User: FC = () => {
       field: "regionalWideRole", headerName: "Region Wide Functional Role(s)", filter: false, sortable: false, show: true,
       cellRenderer: "regionalWideRoleRenderer", width: 350
     },
-    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
@@ -163,7 +164,7 @@ const User: FC = () => {
               title="Brand Admin Can not be Deleted"
             >
               <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small"/>
+                <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           ) :
@@ -430,9 +431,38 @@ const User: FC = () => {
   const handleDOACloseDialog = () => {
     setDoaDialogOpen(false);
   };
+
+  const unAssignUsersFromEntity = () => {
+    setIsConformDialogVisible(true);
+
+    let recs = selectedRecords.map((o) => o.id)
+
+    if (recs && recs.length > 0 && entityRoleRedirectDetails.id) {
+      let dataObj = {
+        "users": recs,
+        "entity": entityRoleRedirectDetails.id
+      }
+      axiosInstance()
+        .put(`/user/unassign-users`, dataObj)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setIsConformDialogVisible(false);
+          fetchUsers();
+          setUserList([])
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsConformDialogVisible(false);
+        });
+    }
+  }
+
   return (
     <>
-      {console.log(selectedRecords)}
       {
         isOpen && (
           <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { setUserList([]); fetchUsers() }}
@@ -455,7 +485,7 @@ const User: FC = () => {
         showApprovalProcessDialog &&
         <ApprovalProcessDialog
           openApprovalProcessDialog={showApprovalProcessDialog}
-          hasPermissionToUpdateApprovalProcess={permissions}
+          hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
           onSuccess={() =>
             setShowApprovalProcessDialog(false)
           }
@@ -521,10 +551,15 @@ const User: FC = () => {
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               openDOADialog={handleDOAOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
+              approvalProcessActionDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
               canDelete={selectedRecords.length === 0}
               entityRoleRedirectDetails={entityRoleRedirectDetails}
               onEntityRoleRedirectDetailRemove={() => {
                 setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
+              }}
+              unAssignUsersFromEntity={() => {
+                setIsConformDialogVisible(true);
+                setUnAssignLoading(true)
               }}
             />
           </div>
@@ -553,14 +588,19 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete user ${deleteRec.name || ""
-              }?`}
+            message={
+              unAssignLoading ?
+                `Are you sure you want to un-assign user from entity ${entityRoleRedirectDetails.name || ""}?`
+                : `Are you sure you want to delete user ${deleteRec.name || ""}?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteUser}
+            onOk={
+              unAssignLoading ?
+                unAssignUsersFromEntity
+                : handleDeleteUser}
           />
         ) : null}
       </Layout>

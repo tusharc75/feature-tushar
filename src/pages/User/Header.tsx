@@ -19,9 +19,11 @@ const Header = (props) => {
     openGlobalRolesDialog,
     openRegionalRolesDialog,
     rolesActionDisabled,
+    approvalProcessActionDisabled,
     openDOADialog,
     entityRoleRedirectDetails,
-    onEntityRoleRedirectDetailRemove
+    onEntityRoleRedirectDetailRemove,
+    unAssignUsersFromEntity
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -112,7 +114,7 @@ const Header = (props) => {
                   <>
 
                     <MenuItem
-                      disabled={rolesActionDisabled}
+                      disabled={approvalProcessActionDisabled}
                       onClick={() => {
                         openApprovalProcessDialog();
                         closeActions();
@@ -148,6 +150,17 @@ const Header = (props) => {
                     >
                       Assign DOA's
                     </MenuItem>
+                    {entityRoleRedirectDetails.id && (
+                      <MenuItem
+                        disabled={rolesActionDisabled}
+                        onClick={() => {
+                          unAssignUsersFromEntity();
+                          closeActions();
+                        }}
+                      >
+                        Un-assign Entity
+                      </MenuItem>
+                    )}
                   </>
                 )}
               </Menu>
