@@ -475,6 +475,12 @@ export default function ManageQuoteDialog({
 
   const handleErrors = (values) => {
     let tempErrors = customError
+
+    if (values?.quoteAcceptDate && values?.salesOrderCreationDate && new Date(values?.quoteAcceptDate) > new Date(values?.salesOrderCreationDate)) {
+      tempErrors["quoteAcceptDate"] = "Quote Accept Date should be less than Sales Order Creation Date"
+    }
+    else if (tempErrors["quoteAcceptDate"]) { delete tempErrors["quoteAcceptDate"] }
+
     if (values?.salesOrderCreationDate && values?.invoiceCreationDate && new Date(values?.salesOrderCreationDate) > new Date(values?.invoiceCreationDate)) {
       tempErrors["salesOrderCreationDate"] = "Sales Order Creation Date should be less than Invoice Creation Date"
     }
