@@ -452,6 +452,7 @@ function QuoteDetail() {
   let logo = null;
   let companyName = "";
   let companyAddress = "";
+  const [DOAData, setDOAData] = useState(null);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
@@ -530,6 +531,10 @@ function QuoteDetail() {
   useEffect(() => {
     fetchDoaLimit();
   }, []);
+
+  useEffect(() => {
+    fetchDOAData()
+  }, [currentVersion, DOAreq]);
 
   useEffect(() => {
     if (permissions) {
@@ -1069,9 +1074,11 @@ function QuoteDetail() {
         finalmarkup = finalmarkup + markup + "<br>";
       });
 
-      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
+      finalmarkup = finalmarkup.replaceAll("<p>", "<p style='overflow-wrap:break-word;word-wrap:break-word;'>");
+      // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
 
-      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      let signatureContent = "<br><br><span--style='font-size:10px;'>Note:</span><br>";
       signatureContent =
         signatureContent +
         `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
@@ -1083,12 +1090,12 @@ function QuoteDetail() {
         signatureContent +
         `<span--style='color:lightgrey'>__________________________</span>`;
 
-      signatureContent = signatureContent.replaceAll(" ", "&nbsp");
+      signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
       signatureContent = signatureContent.replaceAll("--", " ");
 
       finalmarkup = finalmarkup + signatureContent;
-
-      PdfDoc.html(finalmarkup, {
+      
+      PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
@@ -1210,6 +1217,17 @@ function QuoteDetail() {
         // toastConfig.setToastConfig(err);
       });
   };
+
+  const fetchDOAData = () => {
+    axiosInstance()
+      .get(`doa-request/doaFlow/${id}/${currentVersion}`)
+      .then(({ data: { data } }) => {
+        setDOAData(data.reverse())
+      })
+      .catch((err) => {
+        // toastConfig.setToastConfig(err);
+      });
+  }
 
   useEffect(() => {
     if (
@@ -2191,6 +2209,7 @@ function QuoteDetail() {
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             allowedToEdit={allowedToEdit}
+                            DOAData={DOAData}
                           />
                         ) : (
                           <Steps

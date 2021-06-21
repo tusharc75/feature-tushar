@@ -502,6 +502,7 @@ const ProductBuilder = (props) => {
   };
 
   return (
+    
     <Box p={1} pt={0}>
       <Grid container>
         <Grid item xs={2} className="d-flex align-items-center gap-1"></Grid>
