@@ -45,7 +45,6 @@
         align-items: normal;
         justify-content: center;
         flex-direction: column;
-        gap: 6px;
     }
 
     .listing-grid {
@@ -72,6 +71,10 @@
         right: 10px;
         bottom: 14px;
     }
+    .bgbox, .profileBox{
+        background: transparent;
+    }
+
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */

@@ -162,8 +162,8 @@ const User: FC = () => {
               className="cursor-stop"
               title="Brand Admin Can not be Deleted"
             >
-              <IconButton size="small" aria-label="Delete">
-                <DeleteIcon />
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small"/>
               </IconButton>
             </Tooltip>
           ) :
@@ -559,7 +559,7 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${deleteRec.name || ""
+            message={`Are you sure you want to delete user ${deleteRec.name || ""
               }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
