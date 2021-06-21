@@ -170,6 +170,7 @@ const FormTypes = (props) => {
     addDisplayType,
     removeDisplayType,
     setValues,
+    customError = {},
     ...rest
   } = props;
 
@@ -1507,10 +1508,15 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={label}
-          onChange={(date) => setFieldValue(name, date ? date : "")}
+          onChange={
+            onChange
+              ? onChange
+              : (date) => setFieldValue(name, date ? date : "")
+          }
+          // onChange={(date) => setFieldValue(name, date ? date : "")}
+          error={customError[name] || (touched[name] && Boolean(errors[name]))}
+          helperText={customError[name] || (touched[name] && errors[name])}
           format={dateFormatForInputControl}
-          error={touched[name] && Boolean(errors[name])}
-          helperText={touched[name] && errors[name]}
           InputLabelProps={{
             shrink: true,
           }}
