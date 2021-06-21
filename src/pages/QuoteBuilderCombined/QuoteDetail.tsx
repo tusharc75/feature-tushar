@@ -21,6 +21,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
@@ -704,7 +705,13 @@ function QuoteDetail() {
         .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
-
+    let tempProcessArray: Array<number> = []
+    Object.keys(data?.versions).forEach(key => {
+      DOAneeded ?
+        tempProcessArray.push(DOASteps.indexOf(data.versions[key].processStatus))
+        : tempProcessArray.push(OtherSteps.indexOf(data.versions[key].processStatus))
+    })
+    mainPoint["Quote Status"] = DOAneeded ? DOASteps[Math.max(...tempProcessArray)] : OtherSteps[Math.max(...tempProcessArray)]
     setMainPoints(mainPoint);
   };
 
@@ -1699,8 +1706,40 @@ function QuoteDetail() {
 
         setVersionStatusData({
           columns: [
-            { field: "versionNumber", headerName: "Version #", flex: 0.5 },
-            { field: "status", headerName: "Status", flex: 1 },
+            {
+              field: "versionNumber", headerName: "Version #", flex: 0.5,
+              renderCell: (params: any) => (
+                <Link
+                  title={params.value}
+                  className="text-truncate link"
+                  onClick={() => {
+                    setcurrentVersion(params.value);
+                    setShowVersionsDialog(false);
+
+                  }
+                  }
+                >
+                  {params.value}
+                </Link>
+              ),
+            },
+            {
+              field: "status", headerName: "Status", flex: 1,
+              renderCell: (params: any) => (
+                <Link
+                  title={params.value}
+                  className="text-truncate link"
+                  onClick={() => {
+                    setcurrentVersion(params.row.versionNumber);
+                    setShowVersionsDialog(false);
+
+                  }
+                  }
+                >
+                  {params.value}
+                </Link>
+              ),
+            },
             { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
             {
               field: "totalSalesPrice",
@@ -1837,10 +1876,7 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={{
-                    ...mainPoints,
-                    "Quote Status": quoteData?.versions[currentVersion]?.status,
-                  }}
+                  mainPoints={mainPoints}
                   showHeading={true}
                 >
                   <Button
