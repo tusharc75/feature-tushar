@@ -14,10 +14,10 @@ import Loader from "../../components/Loader";
 var levalOrderBy = [
   "product",
   "product-custom",
-  "template",
-  "cost",
-  "builder",
-  "builder-custom",
+  "product-template",
+  "price-template",
+  "product-builder-custom",
+  "price-builder-custom",
 ];
 
 const ProductGrid = (props) => {
@@ -107,7 +107,6 @@ const ProductGrid = (props) => {
           let _fields = row.fields;
           console.log(_fields);
           if (stage) {
-            //|| (t.leval === "template" && t.sectionType !== "cost")
             if (stage === "product") {
               _fields = row.fields.filter(
                 (t) => t.leval === "product" || t.leval === "product-custom"

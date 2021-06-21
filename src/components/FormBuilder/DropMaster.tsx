@@ -14,7 +14,7 @@ const dropstyle = {
 }
 
 
-export const DropMaster = ({ module, screenHeight, section, setSection, addSection, addDeleteField }) => {
+export const DropMaster = ({ module, screenHeight, section, setSection, addSection, addDeleteField, extraFields }) => {
 
     const [sectionHoverIndex, setSectionHoverIndex] = useState(null);
     const [fieldHoverId, setFieldHoverId] = React.useState(null);
@@ -48,7 +48,9 @@ export const DropMaster = ({ module, screenHeight, section, setSection, addSecti
                         fieldHoverId={fieldHoverId} setFieldHoverId={setFieldHoverId}
                         section={section} setSection={setSection}
                         addDeleteField={addDeleteField}
-                        module={module} />
+                        module={module}
+                        extraFields={extraFields}
+                        />
                 )) : <Typography variant="body2" align="center">Drag and drop your sections here</Typography>}
         </Box>
     </div>);

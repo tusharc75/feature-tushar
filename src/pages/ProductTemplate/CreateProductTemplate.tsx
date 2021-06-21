@@ -16,7 +16,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
-import DefaultFields from './defaultFields';
 import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
 import queryString from "query-string";
@@ -54,17 +53,20 @@ const ProductTemplate = () => {
     const fetchOneProductTemplate = () => {
         if (id === "0") {
             setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
-            const _data = []
-            const _section = uniq(map(DefaultFields, 'sectionName'));
-            _section.forEach((element: any, index: number) => {
-                _data.push({
-                    sectionId: index,
-                    sectionName: element,
-                    sectionType: "cost",
-                    field: DefaultFields.filter((el: any) => el.sectionName === element),
+            axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
+                const _data = []
+                const _section = uniq(map(data.fields, 'sectionName'));
+                _section.forEach((element: any, index: number) => {
+                    _data.push({
+                        sectionId: index,
+                        sectionName: element,
+                        field: data.fields.filter((el: any) => el.sectionName === element),
+                    });
                 });
+                setSection(_data);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
-            setSection(_data);
         }
         else {
             axiosInstance().get(`/product-template/` + id).then(({ data: { data } }) => {
@@ -119,7 +121,6 @@ const ProductTemplate = () => {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
                 _field_data.sectionName = _section.sectionName
-                _field_data.sectionType = _section.sectionType
                 _field_data.order = ++order
                 fields.push(_field_data)
             })
@@ -160,7 +161,6 @@ const ProductTemplate = () => {
         }
         return errors;
     }
-
 
     const handleExportFields = () => {
         var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(section));
@@ -317,7 +317,8 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
-                                    module="producttemplate"
+                                    extraFields={[{ fieldLabel: "Qty", fieldName: "qty" }]}
+                                    module="product-template"
                                 />
                             </Box>
                         </Form>)}

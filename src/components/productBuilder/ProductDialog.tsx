@@ -25,7 +25,15 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
-var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 
 const CreateProduct = (props) => {
 
@@ -50,8 +58,7 @@ const CreateProduct = (props) => {
         let _fields = [];
         productData.fields.forEach((_f) => {
             if (stage === "product") {
-                if (_f.leval === "product" || _f.leval === "product-custom"
-                    || (_f.leval === "template" && _f.sectionType !== "cost") || (_f.leval === "builder-custom" && _f.sectionType !== "cost")) {
+                if (_f.leval === "product" || _f.leval === "product-custom" || _f.leval === "product-template" || _f.leval === "product-builder-custom") {
                     _fields.push(_f)
                 }
             }
@@ -68,7 +75,7 @@ const CreateProduct = (props) => {
         });
 
         setMasterFields(_fields.filter((_f) => _f.leval !== "cost"))
-        setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
+        setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
 
         let values = { ...productData }
         values.productCategory = values.productCategory.optionValue
@@ -142,13 +149,12 @@ const CreateProduct = (props) => {
 
     const handleAddField = (field) => {
         field.sectionName = sectionName;
-        field.leval = "builder-custom";
+        field.leval = "price-builder-custom";
         if (productData.fields.filter((_f) => _f.sectionName === sectionName).length) {
-            if (productData.fields.filter((_f) => _f.sectionName === sectionName)[0].sectionType === "cost") {
-                field.sectionType = "cost";
+            if (productData.fields.filter((_f) => _f.sectionName === sectionName)[0].leval !== "price-template") {
+                field.leval = "product-builder-custom";
             }
         }
-        field.leval = "builder-custom";
         fields.push(field)
         setFields(fields)
         let newField = initialData.fields;
@@ -316,7 +322,6 @@ const CreateProduct = (props) => {
                                                                     tooltipMessage={field.tooltipMessage}
                                                                     doNotShowInfoTooltip={true}
                                                                     size="small"
-                                                                    leval="builder-custom"
                                                                     addDisplayType={addDisplayType}
                                                                     removeDisplayType={removeDisplayType}
                                                                     setValues={setValues}
@@ -350,7 +355,7 @@ const CreateProduct = (props) => {
                                                                                 setValues={setValues}
                                                                             />
                                                                         </Box>
-                                                                        {field.leval === "builder-custom" &&
+                                                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") &&
                                                                             <Box>
                                                                                 <Tooltip title="Remove" className="mt-1">
                                                                                     <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >

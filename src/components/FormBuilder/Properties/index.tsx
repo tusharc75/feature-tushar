@@ -47,7 +47,7 @@ const LookupResource = [
   { name: "Product Template", value: "Product Template" },
 ]
 
-export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
 
   const [initialValues, setInitialValues] = useState(fieldData);
 
@@ -62,8 +62,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   }, []);
 
   const fields = [];
-  if (module === "producttemplate") {
-    fields.push({ fieldName: "qty", fieldLabel: "Qty" })
+  if (module === "product-template" || module === "price-template") {
+    if (extraFields) {
+      extraFields.forEach((_f) => {
+        fields.push(_f)
+      })
+    }
   }
 
   section.forEach(_section => {
@@ -116,7 +120,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isUneditable = values.isUneditable
             ele.isVlookup = values.isVlookup
 
-            if (isChangeFieldName && module === "producttemplate") {
+            if (isChangeFieldName && (module === "product-template" || module === "price-template")) {
               ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
             }
 
@@ -217,7 +221,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               helperText={touched["fieldLabel"] && errors["fieldLabel"]}
               onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
             />
-            {(module === "producttemplate" && values["editAble"]) &&
+            {((module === "product-template" || module === "price-template") && values["editAble"]) &&
               <Box display="flex" >
                 <Box mb={1}>
                   <FormControlLabel

@@ -76,10 +76,11 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
         return result;
     }
 
-
-    inputRef.current = values["formulaFields"] && values["formulaFields"].map(
-        (_field, index) => inputRef.current[index] = React.createRef()
-    )
+    if (values["formulaFields"] && values["formulaFields"].length) {
+        inputRef.current = values["formulaFields"] && values["formulaFields"].map(
+            (_field, index) => inputRef.current[index] = React.createRef()
+        )
+    }
 
     return (<Box>
         <FormControl variant="outlined" fullWidth margin="dense">
