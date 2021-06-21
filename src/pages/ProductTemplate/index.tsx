@@ -275,6 +275,7 @@ const ProductTemplate: FC = () => {
                     sm={1}
                     xs={2}>
                     <ImportExportLinks
+                        permissions={productTemplatePermissions}
                         module="productTemplateApi(s)"
                         api={productTemplateApi}
                         afterImportCompleted={() => {

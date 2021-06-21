@@ -529,6 +529,7 @@ const User: FC = () => {
             sm={1}
             xs={2}>
             <ImportExportLinks
+              permissions={permissions.user}
               module="user(s)"
               api={"/user"}
               afterImportCompleted={() => {
