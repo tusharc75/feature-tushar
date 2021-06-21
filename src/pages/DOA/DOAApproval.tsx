@@ -6,18 +6,23 @@ import Layout from "../../components/Layout";
 
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { Button, Grid, Paper } from "@material-ui/core";
-import { GiAbstract055 } from "react-icons/gi";
+import { Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography } from "@material-ui/core";
+import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
 import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Activity from "../../components/Activity";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import {
+  CustomDialogTransition,
   formatAmountWithCurrency,
   gridPageSizes,
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
 import { useData } from "../../StateProvider/Provider";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import { isMobile, isTablet } from "react-device-detect";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -138,6 +143,7 @@ const DOAApproval = () => {
   const [buttontext, setButton] = useState("Accept");
   const [QStatus, setQStatus] = useState(true);
   const [doaName, setDoaName] = useState("");
+  const [showAIDialog, setShowAIDialog] = useState(false);
   var DOALimit = 0;
   var DOAsetup = false;
 
@@ -308,10 +314,19 @@ const DOAApproval = () => {
                 >
                   View
                 </Button>
+                <Tooltip title="AI Suggestion">
+                  <IconButton
+                    onClick={() => {
+                      setShowAIDialog(true);
+                    }}
+                  >
+                    <GiVintageRobot />
+                  </IconButton>
+                </Tooltip>
                 {QData &&
-                QStatus &&
-                QData?.DOA.approveBy.filter((u) => u.user === currentUser._id)
-                  .length === 0 ? (
+                  QStatus &&
+                  QData?.DOA.approveBy.filter((u) => u.user === currentUser._id)
+                    .length === 0 ? (
                   <>
                     <Button
                       onClick={() => QuoteStatusChange(true)}
@@ -451,10 +466,41 @@ const DOAApproval = () => {
                 access: true,
               },
             ]}
-            handleActivityRefresh={() => {}}
+            handleActivityRefresh={() => { }}
           />
         </Grid>
       </Grid>
+      {
+        showAIDialog && (
+          <Dialog
+            open={showAIDialog}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="sm"
+            onClose={() => {
+              setShowAIDialog(false);
+            }}
+            fullWidth
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            <CustomDialogHeader
+              title="AI Suggestion"
+              onClose={() => {
+                setShowAIDialog(false);
+              }}
+            />
+            <CustomDialogContent>
+              <div className="text-align-center">
+                <Typography variant="h4">Under Construction </Typography>
+                <img
+                  src={`${PerformanceTuningImg}`}
+                  style={{ height: "300px" }}
+                />
+              </div>
+            </CustomDialogContent>
+          </Dialog>
+        )
+      }
     </Layout>
   );
 };
