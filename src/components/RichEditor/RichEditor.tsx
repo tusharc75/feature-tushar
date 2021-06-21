@@ -59,10 +59,8 @@ export function RichTextEditor(props) {
   }
 
   const handleReturn = (e) => {
-    // const { editorState } = this.state;
     if (e.shiftKey) {
       props.onChange('editorState', RichUtils.insertSoftNewline(editorState));
-      // this.setState({ editorState: RichUtils.insertSoftNewline(editorState) });
       return 'handled';
     }
     return 'not-handled';

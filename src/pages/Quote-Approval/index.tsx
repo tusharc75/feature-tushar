@@ -11,6 +11,7 @@ import {
 import axios from 'axios'
 import { couldStartTrivia } from "typescript";
 import { backendApi } from './../../config';
+import SignatureDialog from "../../components/Helpers/SignatureDialog";
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -56,6 +57,7 @@ const QuoteApproval = () => {
     const [rows, setRows] = useState([]);
     const [sellingPrice, setSellingPrice] = useState(0);
     const [currency, setCurrency] = useState("");
+    const [showSignatureDialog, setShowSignatureDialog] = useState(false);
 
     useEffect(() => {
         fetchQuote()
@@ -87,8 +89,8 @@ const QuoteApproval = () => {
             });
     }
 
-    const QuoteStatusChange = (accepted) => {
-        var body = { status: "" }
+    const QuoteStatusChange = (accepted, signature) => {
+        let body = { status: "", signature: signature }
         if (accepted) {
             body.status = "Accepted by Customer";
         }
@@ -122,7 +124,7 @@ const QuoteApproval = () => {
                                 />
                             </Grid>
                             <Grid item xs={6} md={9} sm={8} className="d-flex align-items-center justify-content-center">
-                                    <h1>Thanks, Response for the Quote has been sent.</h1>
+                                <h1>Thanks, Response for the Quote has been sent.</h1>
                             </Grid>
                             <Grid item xs={6} md={2} sm={2}>
                                 {logo && (
@@ -167,10 +169,10 @@ const QuoteApproval = () => {
                                     <h1>Total : {sellingPrice} {currency}</h1>
                                 </Grid>
                                 <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
-                                    <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
+                                    <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
                                         Accept
                                     </Button>
-                                    <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => QuoteStatusChange(false)} >
+                                    <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => QuoteStatusChange(false, "")} >
                                         Reject
                                     </Button>
                                 </Grid>
@@ -183,6 +185,13 @@ const QuoteApproval = () => {
                         <h1>Invalid URL, Please check the URL</h1>
                     </div>
                 )}
+
+            {
+                showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
+                    QuoteStatusChange(true, imageData);
+                    setShowSignatureDialog(false);
+                }} onClose={() => { setShowSignatureDialog(false) }} />
+            }
         </div>
     );
 
