@@ -9,7 +9,6 @@ const useStyles = makeStyles((theme) => ({
   loadingContent: {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
     fontSize: "1.5rem",
     flexDirection: "column",
     justifyContent: "center",
@@ -81,7 +80,7 @@ export default function ChatRender({ id, isLoaded }) {
                     </div>
                   )}
                 </div>
-              )) : <span className={classes.loadingContent}>No message to display!</span>
+              )) : <span className={`gap-2 ${classes.loadingContent}`}>No message to display!</span>
               : <span className={classes.loadingContent}><CgSearchLoading />Loading...</span>
           }
         </div>

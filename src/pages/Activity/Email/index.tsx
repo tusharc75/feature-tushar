@@ -514,7 +514,7 @@ const Email = () => {
             {isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRecord?.id ? "this email" : "these emails"} ?`}
+                    message={`Are you sure you want to delete ${deleteRecord?.id ? "this email" : "these emails"}?`}
                     onClose={() => {
                         if (deleteRecord) setDeleteRecord({});
                         setIsConformDialogVisible(false);

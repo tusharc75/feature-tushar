@@ -130,7 +130,7 @@ const AssignEntityDialog = ({
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
-            message: ` ${type} assigned successfully`,
+            message: `${startCase(type)} assigned successfully`,
             type: "success",
             open: true,
           });

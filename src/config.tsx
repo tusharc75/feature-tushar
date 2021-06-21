@@ -5,4 +5,6 @@ export const azureConfig = {
   cache: "localStorage", // This configures where your cache will be stored
 }
 
+export const TRACKING_ID = "UA-196035023-2";//Google analytics tracking id
+
 export const backendApi = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";

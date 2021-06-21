@@ -34,6 +34,7 @@ import CustomAgGrid, {
 } from "../../components/AgGridComponents/CustomAgGrid";
 import QuoteHeader from "./QuoteHeader";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 let quoteTimeout;
 const QuoteType = [
@@ -105,11 +106,25 @@ const QuoteBuilders = () => {
       cellRenderer: "quoteNameRenderer",
     },
     {
+      field: "status",
+      headerName: "Status",
+      show: true,
+      filter: false,
+      cellRenderer: "commonRenderer",
+    },
+    {
       field: "customerAccountName",
       headerName: "Customer Account Name",
       show: true,
       cellRenderer: "customerAccountNameRenderer",
     },
+    {
+      field: "relatedOpportunity",
+      headerName: "Related Opportunity",
+      show: true,
+      cellRenderer: "relatedOpportunityRenderer"
+    },
+
     {
       field: "createdBy",
       headerName: "Created By",
@@ -217,6 +232,16 @@ const QuoteBuilders = () => {
     </Link>
   );
 
+  const RelatedOpportunityRenderer = params => <>
+    {
+      params.value ?
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+          {params.value}
+        </Link>
+        : <NoDataCell />
+    }
+  </>
+
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -238,6 +263,7 @@ const QuoteBuilders = () => {
   const frameworkComponents = {
     quoteNameRenderer: QuoteNameRenderer,
     customerAccountNameRenderer: CustomerAccountNameRenderer,
+    relatedOpportunityRenderer: RelatedOpportunityRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
@@ -352,6 +378,16 @@ const QuoteBuilders = () => {
               ...restProperties
             } = u;
 
+            let tempStatus = "Building Quote"
+            let versionArray = []
+            Object.keys(u.versions).forEach(key => {
+              versionArray.push(u.versions[key])
+            })
+            const updatedVersion = versionArray.find(v => v.status !== tempStatus)
+            if (updatedVersion) {
+              tempStatus = updatedVersion.status
+            }
+
             let res = {
               ...restProperties,
               id: u._id,
@@ -364,6 +400,9 @@ const QuoteBuilders = () => {
 
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
+              status: tempStatus,
+              relatedOpportunity: u.opportunity?.optionLabel,
+              relatedOpportunityId: u.opportunity?.optionValue,
 
               createdBy: u.createdBy?.user?.concatedName,
               createdByDate: u.createdBy?.date,
@@ -529,7 +568,7 @@ const QuoteBuilders = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${
+              message={`Are you sure you want to delete ${
                 deleteRecord?.quoteName ? "Quote" : "Quotes"
               }   ${deleteRecord.quoteName || ""}?`}
               onClose={() => {
@@ -544,7 +583,7 @@ const QuoteBuilders = () => {
           {singleQuoteDelete.show ? (
             <ConfirmationDialog
               open={singleQuoteDelete.show}
-              message={`Are you sure, you want to delete Quote: ${singleQuoteDelete.quoteName} ?`}
+              message={`Are you sure you want to delete Quote: ${singleQuoteDelete.quoteName}?`}
               onClose={() =>
                 setSingleQuoteDelete({
                   id: null,

@@ -426,8 +426,8 @@ const ProjectSalesDetails = () => {
                           id="a11y-tab-0"
                         />
                         <Tab
-                          label="3D Graph"
-                          aria-controls="a11y-tabpanel-1"
+                          label="OM-Neurons"
+                        aria-controls="a11y-tabpanel-1"
                           id="a11y-tab-1"
                         />
                       </Tabs>

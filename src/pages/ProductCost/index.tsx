@@ -178,7 +178,7 @@ const ProductCost = () => {
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure, you want to delete product cost ${deleteRecord?.name} ?`}
+                message={`Are you sure you want to delete product cost ${deleteRecord?.name}?`}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />
