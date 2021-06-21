@@ -66,7 +66,7 @@ const QuoteApproval = () => {
 
         axios.get(backendApi + "/quote-builder/getQuotefromId/" + id + location)
             .then(({ data }) => {
-                console.log(data);
+                const newColumn = data.Columns.map((obj) => ({ ...obj, width: 200 }))
                 if (data.Quote_Status === "Sent to Customer") {
                     setLogo(data.logo);
                     setColumns(data.Columns);
@@ -143,7 +143,7 @@ const QuoteApproval = () => {
                                     title="eQuipt Logo"
                                 />
                             </Grid>
-                            <Grid item xs={6} md={9} sm={8}>
+                            <Grid item xs={6} md={9} sm={8} className="d-flex align-items-center justify-content-center">
                                 <h1>Approve Quote</h1>
                             </Grid>
                             <Grid item xs={6} md={2} sm={2}>
