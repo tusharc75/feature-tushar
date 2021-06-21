@@ -69,6 +69,7 @@ const User: FC = () => {
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
     },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
     {
       field: "companyWideRole", headerName: "Company Wide Role(s)", filter: false, show: true,
@@ -78,7 +79,6 @@ const User: FC = () => {
       field: "regionalWideRole", headerName: "Region Wide Functional Role(s)", filter: false, sortable: false, show: true,
       cellRenderer: "regionalWideRoleRenderer", width: 350
     },
-    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
