@@ -455,6 +455,7 @@ const Leads = () => {
           sm={1}
           xs={2}>
           <ImportExportLinks
+            permissions={leadsPermissions}
             module="lead(s)"
             api={leadApi}
             afterImportCompleted={() => {

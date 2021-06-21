@@ -30,6 +30,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
 
 const ignoreField = ["qty"]
@@ -57,10 +58,14 @@ const Product = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-
+    const {
+        state: { user, permissions },
+      }: any = useData();
+      
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
+
 
 
     const fetchProduct = () => {
@@ -324,6 +329,7 @@ const Product = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
+                    permissions={permissions.product}
                     module="product(s)"
                     api={"product"}
                     refrenceId={null}

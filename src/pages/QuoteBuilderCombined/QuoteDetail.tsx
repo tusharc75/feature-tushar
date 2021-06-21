@@ -109,6 +109,7 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
@@ -229,8 +230,8 @@ const intialState = {
   rowCountTNC: 0,
   loadingTNC: false,
   page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
+  limit: 2,
+  pageSizes: [2,4,6],
   search: "",
   filters: {},
   sorting: [],
@@ -345,6 +346,7 @@ function QuoteDetail() {
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
+      rowDrag: true,
       headerName: "Name",
       cellRenderer: "nameRenderer",
     },
@@ -561,6 +563,9 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
+      if(selectedRecords.length > 0) {
+        setTNC(selectedRecords);
+      }
       setLoading(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
@@ -770,20 +775,20 @@ function QuoteDetail() {
     }
   };
 
-  const NameRenderer = (params) => (
-    <p
-      className="cursor-pointer"
-      title={params.value}
-      onClick={() => {
-        const data = dataRowsTNC.find((d) => d._id === params.data.id);
+  const NameRenderer = (params) => {
+    return <p
+        className="cursor-pointer link"
+        title={params.value}
+        onClick={() => {
+          const data = dataRowsTNC.find((d) => d._id === params.data.id);
 
-        setEditRecordTNC(data);
-        setShowCreateDialog(true);
-      }}
-    >
-      {params.value}
-    </p>
-  );
+          setEditRecordTNC(data);
+          setShowCreateDialog(true);
+        }}
+      >
+        {params.value}
+      </p>
+  }
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
@@ -801,7 +806,7 @@ function QuoteDetail() {
       gridApi.showLoadingOverlay();
     }
     axiosInstance()
-      .get(termsAndCondition.api)
+      .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         setDataTNC(data);
         let rows = data.map((tnc) => ({
@@ -2462,6 +2467,7 @@ function QuoteDetail() {
                                   allowSelection={true}
                                   allowAction={false}
                                   isClientSideGrid={true}
+                                  allowPagination={false}
                                 />
                               </Box>
                             ) : null}

@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ module, api, refrenceId, onSuccessfulImport }) {
+export default function ImportExportLinks({ permissions, module, api, refrenceId, onSuccessfulImport }) {
 
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -191,6 +191,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
   return (
     <div className={module !== "builder" ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>
+        {permissions?.isCreate && <>
         <label
           onClick={() => {
             setIsSelection(true);
@@ -208,6 +209,8 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
           flexItem
           className={classes.linkDivider}
         />
+        </>
+        }
         <label
           onClick={exportToExcel}
           className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}

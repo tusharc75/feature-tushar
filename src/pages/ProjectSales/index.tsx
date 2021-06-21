@@ -413,6 +413,7 @@ const ProjectSales: FC = () => {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
+              permissions={permissions.projectSales}
               module="project-sale(s)"
               api={"project-sales"}
               afterImportCompleted={() => {

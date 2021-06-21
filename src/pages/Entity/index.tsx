@@ -265,6 +265,7 @@ const Entity: FC = () => {
           sm={1}
           xs={2}>
           <ImportExportLinks
+            permissions={entityPermissions}
             module="entity(s)"
             api={entityApi}
             afterImportCompleted={() => {
