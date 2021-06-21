@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ permissions=null,module, api, refrenceId, onSuccessfulImport }) {
+export default function ImportExportLinks({ permissions, module, api, refrenceId, onSuccessfulImport }) {
 
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
