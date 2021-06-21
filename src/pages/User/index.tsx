@@ -463,7 +463,6 @@ const User: FC = () => {
 
   return (
     <>
-      {console.log(selectedRecords)}
       {
         isOpen && (
           <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { setUserList([]); fetchUsers() }}
