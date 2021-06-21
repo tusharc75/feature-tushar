@@ -231,7 +231,7 @@ const intialState = {
   loadingTNC: false,
   page: 0,
   limit: 2,
-  pageSizes: [2,4,6],
+  pageSizes: [2, 4, 6],
   search: "",
   filters: {},
   sorting: [],
@@ -341,6 +341,7 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
+
   const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
@@ -352,6 +353,7 @@ function QuoteDetail() {
     },
   ]);
 
+  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -523,6 +525,10 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
+    setSelectedTnC(selectedRecords.map(o => o._id))
+  }, [selectedRecords]);
+
+  useEffect(() => {
     fetchDoaLimit();
   }, []);
 
@@ -563,7 +569,7 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
-      if(selectedRecords.length > 0) {
+      if (selectedRecords.length > 0) {
         setTNC(selectedRecords);
       }
       setLoading(true);
@@ -775,20 +781,18 @@ function QuoteDetail() {
     }
   };
 
-  const NameRenderer = (params) => {
-    return <p
-        className="cursor-pointer link"
-        title={params.value}
-        onClick={() => {
-          const data = dataRowsTNC.find((d) => d._id === params.data.id);
-
-          setEditRecordTNC(data);
-          setShowCreateDialog(true);
-        }}
-      >
-        {params.value}
-      </p>
-  }
+  const NameRenderer = (params) => (
+    <p
+      className="cursor-pointer"
+      title={params.value}
+      onClick={() => {
+        setEditRecordTNC(params.data);
+        setShowCreateDialog(true);
+      }}
+    >
+      {params.value}
+    </p>
+  );
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
@@ -802,24 +806,32 @@ function QuoteDetail() {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
-      gridApi.setRowData([]);
+      // gridApi.setRowData([]);
       gridApi.showLoadingOverlay();
     }
+
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
-        setDataTNC(data);
-        let rows = data.map((tnc) => ({
-          ...tnc,
-          id: tnc._id,
-          name: tnc.TACName,
-        }));
+        let selectedRows = []
+        let rows = data.map((tnc) => {
+          if (selectedTnC.indexOf(tnc._id) >= 0) {
+            selectedRows.push(tnc)
+          }
+          return {
+            ...tnc,
+            id: tnc._id,
+            name: tnc.TACName,
+          }
+        });
         dispatch({
           type: "initialize",
           data: rows,
           count: count,
         });
-        dispatch({ type: "loading", loadingTNC: false });
+        dispatch({ type: "selection", selectedRecords: selectedRows })
+        setDataTNC(data);
+        // dispatch({ type: "loading", loadingTNC: false });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -1986,7 +1998,7 @@ function QuoteDetail() {
                       {quoteData && (
                         <>
                           <div className={classes.btnHeader}>
-                            {quotePermissions.isCreate ? (
+                            {quotePermissions?.isCreate ? (
                               <Button
                                 variant="contained"
                                 color="primary"
