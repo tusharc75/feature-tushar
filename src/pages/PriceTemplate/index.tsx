@@ -10,7 +10,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { productTemplate, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { priceTemplate, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -36,9 +36,9 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
-let productTemplateTimeout;
+let priceTemplateTimeout;
 
-const ProductTemplate: FC = () => {
+const PriceTemplate: FC = () => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
@@ -47,7 +47,7 @@ const ProductTemplate: FC = () => {
         state: { user, permissions },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
-    const [productTemplatePermissions, setProductTemplatePermissions] = useState({
+    const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
         isCreate: false,
         isUpdate: false,
         isRead: false,
@@ -71,34 +71,34 @@ const ProductTemplate: FC = () => {
     //  Grid Variables - End
 
 
-    const { productTemplateApi } = productTemplate;
+    const { priceTemplateApi } = priceTemplate;
 
     useEffect(() => {
-        if (permissions && permissions.productTemplate) {
-            setProductTemplatePermissions(permissions.productTemplate);
+        if (permissions && permissions.priceTemplate) {
+            setpriceTemplatePermissions(permissions.priceTemplate);
         }
     }, [permissions]);
 
     useEffect(() => {
         let millisec = Object.keys(search).length > 0 ? 600 : 5;
-        if (productTemplateTimeout) {
-            clearTimeout(productTemplateTimeout);
+        if (priceTemplateTimeout) {
+            clearTimeout(priceTemplateTimeout);
         }
 
-        productTemplateTimeout = setTimeout(() => {
-            fetchProductTemplate();
+        priceTemplateTimeout = setTimeout(() => {
+            fetchpriceTemplate();
         }, millisec);
     }, [search]);
 
     useEffect(() => {
         if (renderCount > 0) {
-            fetchProductTemplate();
+            fetchpriceTemplate();
         } else setRenderCount((preCount) => preCount + 1);
     }, [page, limit, filters, sorting]);
 
 
     const NameRenderer = params => <Link className="link"
-        to={`${routes.productTemplate.path}/${params.data._id}`} title={params.value}>
+        to={`${routes.priceTemplate.path}/${params.data._id}`} title={params.value}>
         {params.value}
     </Link>;
 
@@ -110,7 +110,7 @@ const ProductTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {productTemplatePermissions.isUpdate ?
+        {priceTemplatePermissions.isUpdate ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -161,10 +161,10 @@ const ProductTemplate: FC = () => {
 
     const CreateNew = (id, isClone) => {
         if (isClone) {
-            history.push(routes.productTemplate.path + "/" + id, { isClone: true })
+            history.push(routes.priceTemplate.path + "/" + id, { isClone: true })
         }
         else {
-            history.push(routes.productTemplate.path + "/0", { isClone: false })
+            history.push(routes.priceTemplate.path + "/0", { isClone: false })
         }
     }
 
@@ -176,8 +176,8 @@ const ProductTemplate: FC = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`${routes.productTemplate.path}/remove`, { "ids": ids }).then(({ data }) => {
-            fetchProductTemplate();
+        axiosInstance().put(`${routes.priceTemplate.path}/remove`, { "ids": ids }).then(({ data }) => {
+            fetchpriceTemplate();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
             setAnchorEl(null)
@@ -217,7 +217,7 @@ const ProductTemplate: FC = () => {
         return deepFilter;
     };
 
-    const fetchProductTemplate = () => {
+    const fetchpriceTemplate = () => {
         const queryString = getQueryString();
         dispatch({ type: "loading", loading: true });
 
@@ -227,7 +227,7 @@ const ProductTemplate: FC = () => {
         }
 
         axiosInstance()
-            .get(`${productTemplateApi}${queryString}`)
+            .get(`${priceTemplateApi}${queryString}`)
             .then(({ data: { data, count } }) => {
 
                 let rows = data.map((u) => {
@@ -267,33 +267,17 @@ const ProductTemplate: FC = () => {
         <Layout>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
-                    <CustomBreadCrumbs routes={[routes.productTemplate]} />
-                </Grid>
-                <Grid
-                    item
-                    md={8}
-                    sm={1}
-                    xs={2}>
-                    <ImportExportLinks
-                        permissions={productTemplatePermissions}
-                        module="productTemplateApi(s)"
-                        api={productTemplateApi}
-                        afterImportCompleted={() => {
-                            fetchProductTemplate();
-                        }}
-                    />
+                    <CustomBreadCrumbs routes={[routes.priceTemplate]} />
                 </Grid>
             </Grid>
-
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
                         <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                            <GiAbstract055 /> <span className="listingHeader">{routes.productTemplate.title}</span>
+                            <GiAbstract055 /> <span className="listingHeader">{routes.priceTemplate.title}</span>
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >
-
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
@@ -336,7 +320,7 @@ const ProductTemplate: FC = () => {
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
-                        message={`Are you sure you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
+                        message={`Are you sure, you want to delete price template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
                         onClose={() => setShowDeleteConfirmBox(false)}
                         onOk={handleDelete}
                     />
@@ -347,4 +331,4 @@ const ProductTemplate: FC = () => {
 
 };
 
-export default ProductTemplate;
+export default PriceTemplate;

@@ -29,6 +29,7 @@ import {
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import { useData } from "../../StateProvider/Provider";
 
 
 function reducer(state, action) {
@@ -125,6 +126,9 @@ const intialState = {
 const ProductCategory = () => {
 
     const toastConfig = useContext(CustomToastContext)
+    const {
+        state: { user, permissions },
+      }: any = useData();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
@@ -288,6 +292,7 @@ const ProductCategory = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
+                    permissions={permissions.productCategory}
                     module="product category"
                     api={"product-category"}
                     afterImportCompleted={() => {

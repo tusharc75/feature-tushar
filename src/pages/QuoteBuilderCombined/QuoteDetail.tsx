@@ -21,6 +21,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
@@ -108,6 +109,7 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const Accordion = withStyles({
@@ -228,8 +230,8 @@ const intialState = {
   rowCountTNC: 0,
   loadingTNC: false,
   page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
+  limit: 2,
+  pageSizes: [2, 4, 6],
   search: "",
   filters: {},
   sorting: [],
@@ -345,6 +347,7 @@ function QuoteDetail() {
   const [columnsTNC, setColumnsTNC] = useState([
     {
       field: "name",
+      rowDrag: true,
       headerName: "Name",
       cellRenderer: "nameRenderer",
     },
@@ -561,6 +564,9 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
+      if (selectedRecords.length > 0) {
+        setTNC(selectedRecords);
+      }
       setLoading(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
@@ -710,7 +716,13 @@ function QuoteDetail() {
         .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
-
+    let tempProcessArray: Array<number> = []
+    Object.keys(data?.versions).forEach(key => {
+      DOAneeded ?
+        tempProcessArray.push(DOASteps.indexOf(data.versions[key].processStatus))
+        : tempProcessArray.push(OtherSteps.indexOf(data.versions[key].processStatus))
+    })
+    mainPoint["Quote Status"] = DOAneeded ? DOASteps[Math.max(...tempProcessArray)] : OtherSteps[Math.max(...tempProcessArray)]
     setMainPoints(mainPoint);
   };
 
@@ -788,7 +800,7 @@ function QuoteDetail() {
   const fetchTermsAndConditions = () => {
     dispatch({ type: "loading", loadingTNC: true });
     axiosInstance()
-      .get(termsAndCondition.api)
+      .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         let selectedRows = []
         let rows = data.map((tnc) => {
@@ -1705,8 +1717,40 @@ function QuoteDetail() {
 
         setVersionStatusData({
           columns: [
-            { field: "versionNumber", headerName: "Version #", flex: 0.5 },
-            { field: "status", headerName: "Status", flex: 1 },
+            {
+              field: "versionNumber", headerName: "Version #", flex: 0.5,
+              renderCell: (params: any) => (
+                <Link
+                  title={params.value}
+                  className="text-truncate link"
+                  onClick={() => {
+                    setcurrentVersion(params.value);
+                    setShowVersionsDialog(false);
+
+                  }
+                  }
+                >
+                  {params.value}
+                </Link>
+              ),
+            },
+            {
+              field: "status", headerName: "Status", flex: 1,
+              renderCell: (params: any) => (
+                <Link
+                  title={params.value}
+                  className="text-truncate link"
+                  onClick={() => {
+                    setcurrentVersion(params.row.versionNumber);
+                    setShowVersionsDialog(false);
+
+                  }
+                  }
+                >
+                  {params.value}
+                </Link>
+              ),
+            },
             { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
             {
               field: "totalSalesPrice",
@@ -1852,10 +1896,7 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={{
-                    ...mainPoints,
-                    "Quote Status": quoteData?.versions[currentVersion]?.status,
-                  }}
+                  mainPoints={mainPoints}
                   showHeading={true}
                 >
                   <Button
@@ -2045,7 +2086,7 @@ function QuoteDetail() {
                                 </span>
                               </div>
                             )}
-                            <div className="quoteBox noBorder">
+                            {/* <div className="quoteBox noBorder">
                               <span>Total Margin </span>
                               <span
                                 className="quoteAmount"
@@ -2055,14 +2096,14 @@ function QuoteDetail() {
                                   ? totalmargin.shortFormatAmount
                                   : defaultTotalValue}
                               </span>
-                            </div>
+                            </div> */}
                           </Grid>
                         )}
                         <Grid
                           item
-                          xs={ProcessStatus === "New" ? 9 : 12}
-                          sm={ProcessStatus === "New" ? 4 : 5}
-                          md={ProcessStatus === "New" ? 4 : 5}
+                          xs={ProcessStatus === "New" ? 12 : 12}
+                          sm={ProcessStatus === "New" ? 12 : 5}
+                          md={ProcessStatus === "New" ? 12 : 5}
                           className="d-flex justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
@@ -2424,6 +2465,7 @@ function QuoteDetail() {
                                   allowSelection={true}
                                   allowAction={false}
                                   isClientSideGrid={true}
+                                  allowPagination={false}
                                 />
                               </Box>
                             ) : null}
@@ -2599,7 +2641,7 @@ function QuoteDetail() {
             TransitionComponent={CustomDialogTransition}
           >
             <CustomDialogHeader
-              title="Under Construction"
+              title="AI Suggestion"
               onClose={() => {
                 setShowAiDialog(false);
               }}

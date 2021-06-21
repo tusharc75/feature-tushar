@@ -25,7 +25,14 @@ import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Tooltip from '@material-ui/core/Tooltip';
 
-var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 
 const BulkEditDialog = (props) => {
 
@@ -51,12 +58,12 @@ const BulkEditDialog = (props) => {
         let _fields = [];
         productData.fields.forEach((_f) => {
             if (stage === "product") {
-                if (_f.fieldName === "qty" || (_f.leval === "template" && _f.sectionType !== "cost")) {
+                if (_f.fieldName === "qty" || ( _f.leval === "product-template" || _f.leval === "product-builder-custom")) {
                     _fields.push(_f)
                 }
             }
             else {
-                if (_f.leval === "template" || _f.fieldName === "qty") {
+                if (_f.fieldName === "qty" || _f.leval === "product-template" || _f.leval === "price-template" || _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"  ) {
                     _fields.push(_f)
                 }
             }
@@ -70,7 +77,7 @@ const BulkEditDialog = (props) => {
             return levalOrderBy.indexOf(item.leval)
         });
 
-        setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
+        setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
 
         let values = { ...productData }
         delete values.fields
@@ -117,7 +124,12 @@ const BulkEditDialog = (props) => {
 
     const handleAddField = (field) => {
         field.sectionName = sectionName;
-        field.leval = "builder-custom";
+        field.leval = "price-builder-custom";
+        if (initialData.fields.filter((_f) => _f.sectionName === sectionName).length) {
+            if (initialData.fields.filter((_f) => _f.sectionName === sectionName)[0].leval !== "price-template") {
+                field.leval = "product-builder-custom";
+            }
+        }
         fields.push(field)
         setFields(fields)
         let newField = initialData.fields;
@@ -286,7 +298,6 @@ const BulkEditDialog = (props) => {
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
-                                                                    leval="builder-custom"
                                                                     addDisplayType={addDisplayType}
                                                                     removeDisplayType={removeDisplayType}
                                                                 /> :
@@ -317,7 +328,7 @@ const BulkEditDialog = (props) => {
                                                                                 } : null}
                                                                             />
                                                                         </Box>
-                                                                        {field.leval === "builder-custom" &&
+                                                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") &&
                                                                             <Box>
                                                                                 <Tooltip title="Remove" className="mt-1">
                                                                                     <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >

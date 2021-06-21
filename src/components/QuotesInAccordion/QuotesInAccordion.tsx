@@ -164,52 +164,47 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems='center'>
-                        {isAllowedToUpdate && <>
-                            {quoteBuilderPermission.isCreate ?
-                                <>
-                                    <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={handleOpenMenu}
-                                    >
-                                        <MoreVert />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu"
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowCreateDialog(true);
-                                                handleCloseMenu();
-                                            }}
-                                        >
-                                            Create New
-                                        </MenuItem>
-                                        {isRenderedInCustomerContact && <MenuItem
-
-                                            onClick={() => {
-                                                setShowAddExistingDialog(true)
-                                                handleCloseMenu();
-                                            }}
-                                        >
-                                            Add Exisiting
-                                        </MenuItem>}
-                                    </Menu>
-                                </>
-                                : <IconButton
+                        {isAllowedToUpdate &&
+                            <>
+                                <IconButton
+                                    aria-haspopup="true"
                                     color="primary"
                                     size="small"
-                                    onClick={() => { setShowCreateDialog(true) }}
+                                    onClick={handleOpenMenu}
                                 >
-                                    <ControlPointIcon />
+                                    <MoreVert />
                                 </IconButton>
-                            }
-                        </>}
+                                <Menu
+                                    id="menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleCloseMenu}
+                                >
+                                    <MenuItem
+                                        disabled={!quoteBuilderPermission.isCreate}
+                                        onClick={() => {
+                                            setShowCreateDialog(true);
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Create New
+                                    </MenuItem>
+                                    {isRenderedInCustomerContact && <MenuItem
+                                        disabled={!quoteBuilderPermission.isUpdate}
+                                        onClick={() => {
+                                            setShowAddExistingDialog(true)
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Add Exisiting
+                                    </MenuItem>}
+                                </Menu>
+                            </>
+                        }
+
+
+
                     </Grid>
                 </Grid>
             </AccordionSummary>

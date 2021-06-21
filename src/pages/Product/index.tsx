@@ -30,8 +30,19 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { useData } from "../../StateProvider/Provider";
+import { sortBy } from 'lodash';
 
 const ignoreField = ["qty"]
+
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 
 const Product = () => {
 
@@ -47,10 +58,14 @@ const Product = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-
+    const {
+        state: { user, permissions },
+      }: any = useData();
+      
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
+
 
 
     const fetchProduct = () => {
@@ -151,13 +166,15 @@ const Product = () => {
                     }
                 })
             });
-            column.push(
-                { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-                { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-            )
-            // column = sortBy(column, function (item: any) {
-            //     return levalOrderBy.indexOf(item.leval)
-            // });
+            column = sortBy(column, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
+            if (column.length) {
+                column.push(
+                    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
+                    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
+                )
+            }
             setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
             dispatch({ type: "loading", loading: false });
@@ -312,6 +329,7 @@ const Product = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
+                    permissions={permissions.product}
                     module="product(s)"
                     api={"product"}
                     refrenceId={null}
@@ -330,40 +348,40 @@ const Product = () => {
                         <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
-                    <Box className={styles.filter_side_header} component="div" >
+                        <Box className={styles.filter_side_header} component="div" >
 
-                        <SearchBox
-                            onSearch={handleSearch}
-                            searchbox={styles.search_box_input}
-                            width="242px"
-                            size="small"
-                            value={search}
-                        />
-                        <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                        <Button
-                            className={styles.action_submit_btn}
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={openActions}
-                            disabled={selectedRecords.length ? false : true}
-                            aria-controls="action-menu"
-                        >Actions <ExpandMore />
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                        </Menu>
+                            <SearchBox
+                                onSearch={handleSearch}
+                                searchbox={styles.search_box_input}
+                                width="242px"
+                                size="small"
+                                value={search}
+                            />
+                            <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            <Button
+                                className={styles.action_submit_btn}
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                disabled={selectedRecords.length ? false : true}
+                                aria-controls="action-menu"
+                            >Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                            </Menu>
                         </Box>
                     </Grid>
                 </Grid>
