@@ -799,6 +799,12 @@ function QuoteDetail() {
 
   const fetchTermsAndConditions = () => {
     dispatch({ type: "loading", loadingTNC: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
