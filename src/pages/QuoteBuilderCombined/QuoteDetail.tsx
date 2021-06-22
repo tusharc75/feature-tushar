@@ -2092,7 +2092,7 @@ function QuoteDetail() {
                             md={7}
                             className="quoteHeader"
                           >
-                            <div className="quoteBox">
+                            <div className={redCard ? "redQuoteBox":"quoteBox"}>
                               <span>Total Profit </span>
                               <span
                                 className="quoteAmount"
