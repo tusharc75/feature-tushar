@@ -105,7 +105,13 @@ const QuoteBuilders = () => {
         renderCell: (params: any) => (
           <span
             title={params.value}
-            className="text-truncate"              
+            className="text-truncate link"     
+            onClick={()=>{
+              history.push(`quotes/detail/${params.row._id}`,{
+                versionNumber:`${params.row.versionNumber}`,
+                tabValue:2
+              })
+            }}        
           >
             {params.value}
           </span>
