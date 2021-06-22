@@ -91,7 +91,7 @@ const QuoteBuilders = () => {
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
       {
-        field: "versionNumber", headerName: "Version #", flex: 1,
+        field: "versionNumber", headerName: "Version #", flex: .75,
         renderCell: (params: any) => (
           <span
             title={params.value}
@@ -271,7 +271,7 @@ const QuoteBuilders = () => {
             id: index + 1,
             versionNumber: index+1,
             _id: quoteId,
-            totalcost: formatAmountWithCurrency(
+            totalCost: formatAmountWithCurrency(
               currency,
               d.productData.totalCost
             ).fullFormatAmount,
