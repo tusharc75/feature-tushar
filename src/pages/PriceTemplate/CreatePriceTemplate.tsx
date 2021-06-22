@@ -86,6 +86,12 @@ const PriceTemplate = () => {
         data.name = values.name;
         data.productTemplate = values.productTemplate;
 
+        const resultproductTemplate = productTemplate.filter((_f) => _f._id === values.productTemplate);
+        if (resultproductTemplate.length) {
+            data.isStandard = resultproductTemplate[0].isStandard;
+            data.productCategory = resultproductTemplate[0].productCategory;
+        }
+
         let fields: any = []
         let order = 0;
         section.forEach(_section => {
@@ -146,7 +152,7 @@ const PriceTemplate = () => {
     const handleProductTemplateField = (productTemplate_id) => {
         if (productTemplate_id && productTemplate_id !== "") {
             axiosInstance().get(`/product-template/fields/` + productTemplate_id).then(({ data: { data } }) => {
-                setTemplateField([{ fieldLabel: "Qty", fieldName: "qty" }, ...extractFields(data.fields)])
+                setTemplateField([...extractFields(data.fields)])
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -194,7 +200,7 @@ const PriceTemplate = () => {
                                         <TextField
                                             variant="outlined"
                                             type="text"
-                                            label="Template Name"
+                                            label="Price Template Name"
                                             required={true}
                                             name="name"
                                             fullWidth
@@ -214,7 +220,13 @@ const PriceTemplate = () => {
                                                 ? productTemplate.filter((data) => data._id === values["productTemplate"])[0]
                                                 : ""
                                             }
-                                            onChange={(e, val) => { setFieldValue("productTemplate", val && val._id ? val._id : ""); handleProductTemplateField(val && val._id ? val._id : "") }}
+                                            onChange={(e, val) => {
+                                                setFieldValue("productTemplate", val && val._id ? val._id : "");
+                                                if (val && val.name) {
+                                                    setFieldValue("name", val.name);
+                                                }
+                                                handleProductTemplateField(val && val._id ? val._id : "")
+                                            }}
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}

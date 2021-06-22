@@ -54,10 +54,10 @@ const AddExistingProduct = (props) => {
                 : <NoDataCell />
         }
     </>
-    const ProductTemplateRenderer = params => <>
+    const PriceTemplateRenderer = params => <>
         {
-            params.data.productTemplate || params.data.productTemplate === 0 ?
-                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
+            params.data.priceTemplate || params.data.priceTemplate === 0 ?
+                typeof params.data.priceTemplate === 'object' ? params.data.priceTemplate["optionLabel"] : params.data.priceTemplate
                 : <NoDataCell />
         }
     </>
@@ -65,7 +65,7 @@ const AddExistingProduct = (props) => {
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
-        productTemplateRenderer: ProductTemplateRenderer,
+        productTemplateRenderer: PriceTemplateRenderer,
     };
 
     const getQueryString = () => {
@@ -178,7 +178,7 @@ const AddExistingProduct = (props) => {
                             if (ele.fieldName === "productCategory") {
                                 col.cellRenderer = "productCategoryRenderer"
                             }
-                            if (ele.fieldName === "productTemplate") {
+                            if (ele.fieldName === "priceTemplate") {
                                 col.cellRenderer = "productTemplateRenderer"
                             }
                             col.order = ele.order;

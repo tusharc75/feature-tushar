@@ -269,22 +269,7 @@ const ProductTemplate: FC = () => {
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.productTemplate]} />
                 </Grid>
-                <Grid
-                    item
-                    md={8}
-                    sm={1}
-                    xs={2}>
-                    <ImportExportLinks
-                        permissions={productTemplatePermissions}
-                        module="productTemplateApi(s)"
-                        api={productTemplateApi}
-                        afterImportCompleted={() => {
-                            fetchProductTemplate();
-                        }}
-                    />
-                </Grid>
             </Grid>
-
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
