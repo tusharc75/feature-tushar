@@ -109,6 +109,7 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import VersionStatus from "./VersionStatus";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -457,13 +458,53 @@ function QuoteDetail() {
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
   const [lastUser, setLastUser] = useState(true);
-  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [loadingVersions, setLoadingVersions] = useState(true);
   const [versionStatusData, setVersionStatusData] = useState({
-    columns: [],
+    columns: [
+      {
+        field: "versionNumber", headerName: "Version #", flex: 0.5,
+        renderCell: (params: any) => (
+          <Link
+            title={params.value}
+            className="text-truncate link"
+            onClick={() => {
+              setcurrentVersion(params.value);
+              setTabValue(2);
+              // setShowVersionsDialog(false);
+            }}
+          >
+            {params.value}
+          </Link>
+        ),
+      },
+      {
+        field: "status", headerName: "Status", flex: 1,
+        renderCell: (params: any) => (
+          <Link
+            title={params.value}
+            className="text-truncate link"
+            onClick={() => {
+              setcurrentVersion(params.row.versionNumber);
+              setTabValue(2);
+              // setShowVersionsDialog(false);
+            }}
+          >
+            {params.value}
+          </Link>
+        ),
+      },
+      { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
+      {
+        field: "totalSalesPrice",
+        headerName: "Total Sales Price",
+        flex: 0.5,
+      },
+      // { field: "processStatus", headerName: "ProcessStatus" }
+    ],
     data: [],
   });
-  const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
-    useState("All Version Status");
+  // const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
+  //   useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showAiDialog, setShowAiDialog] = useState(false);
@@ -533,7 +574,8 @@ function QuoteDetail() {
   }, []);
 
   useEffect(() => {
-    fetchDOAData()
+    if (currentVersion !== 0)
+      fetchDOAData()
   }, [currentVersion, DOAreq]);
 
   useEffect(() => {
@@ -548,6 +590,10 @@ function QuoteDetail() {
       getQuoteFields();
     }
   }, [id]);
+
+  useEffect(() => {
+    getVersionStatus();
+  }, [quoteData])
 
   useEffect(() => {
     fetchTermsAndConditions();
@@ -1206,7 +1252,7 @@ function QuoteDetail() {
 
   const fetchDoaLimit = () => {
     axiosInstance()
-      .post("doa-request/limit", {})
+      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
       .then(({ data: { data } }) => {
         setDOAsetup(data.doasetup);
         setDOALimit(data.limit ? data.limit : 0);
@@ -1225,6 +1271,7 @@ function QuoteDetail() {
         setDOAData(data.reverse())
       })
       .catch((err) => {
+        setDOAData(null)
         // toastConfig.setToastConfig(err);
       });
   }
@@ -1718,11 +1765,12 @@ function QuoteDetail() {
   };
 
   const getVersionStatus = () => {
-    setAllVersionStatusButtonText(gettingVersionStatusText);
+    // setAllVersionStatusButtonText(gettingVersionStatusText);
+    setLoadingVersions(true)
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        setShowVersionsDialog(true);
+        // setShowVersionsDialog(true);
 
         const newData = data.versions.map((d, index) => {
           return {
@@ -1739,58 +1787,20 @@ function QuoteDetail() {
           };
         });
 
-        setVersionStatusData({
-          columns: [
-            {
-              field: "versionNumber", headerName: "Version #", flex: 0.5,
-              renderCell: (params: any) => (
-                <Link
-                  title={params.value}
-                  className="text-truncate link"
-                  onClick={() => {
-                    setcurrentVersion(params.value);
-                    setShowVersionsDialog(false);
-
-                  }
-                  }
-                >
-                  {params.value}
-                </Link>
-              ),
-            },
-            {
-              field: "status", headerName: "Status", flex: 1,
-              renderCell: (params: any) => (
-                <Link
-                  title={params.value}
-                  className="text-truncate link"
-                  onClick={() => {
-                    setcurrentVersion(params.row.versionNumber);
-                    setShowVersionsDialog(false);
-
-                  }
-                  }
-                >
-                  {params.value}
-                </Link>
-              ),
-            },
-            { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
-            {
-              field: "totalSalesPrice",
-              headerName: "Total Sales Price",
-              flex: 0.5,
-            },
-            // { field: "processStatus", headerName: "ProcessStatus" }
-          ],
-          data: newData,
+        setVersionStatusData((prevState) => {
+          return {
+            ...prevState,
+            data: newData,
+          }
         });
 
-        setAllVersionStatusButtonText("All Version Status");
+        setLoadingVersions(false);
+        // setAllVersionStatusButtonText("All Version Status");
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setAllVersionStatusButtonText("All Version Status");
+        setLoadingVersions(false);
+        // setAllVersionStatusButtonText("All Version Status");
       });
   };
 
@@ -1914,7 +1924,7 @@ function QuoteDetail() {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  <Button
+                  {/* <Button
                     variant="contained"
                     type="button"
                     size="small"
@@ -1928,7 +1938,7 @@ function QuoteDetail() {
                     }}
                   >
                     {allVersionStatusButtonText}{" "}
-                  </Button>
+                  </Button> */}
                   {quotePermissions.isDelete &&
                     quoteData?.owner.optionValue &&
                     user?.user?._id &&
@@ -1973,8 +1983,8 @@ function QuoteDetail() {
                       }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
-                          <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Details
+                          <InfoIcon className="mr-1" fontSize="inherit" />{" "}
+                          All Version Status
                         </div>
                       }
                       {...a11yProps(0)}
@@ -1986,6 +1996,19 @@ function QuoteDetail() {
                       }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
+                          <FaWpforms className="mr-1" fontSize="inherit" />{" "}
+                          Details
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    />
+                    <Tab
+                      style={{
+                        background: tabValue === 2 ? "#163340" : "",
+                        color: tabValue === 2 ? "white" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
                           Quote Versions
                         </div>
@@ -1993,7 +2016,14 @@ function QuoteDetail() {
                       {...a11yProps(1)}
                     />
                   </Tabs>
+
                   <TabPanel value={tabValue} index={0}>
+                    <VersionStatus loadingVersions={loadingVersions} 
+                      versionStatusData={versionStatusData}
+                    />
+                  </TabPanel>
+
+                  <TabPanel value={tabValue} index={1}>
                     <div className={`position-relative ${classes.detailBox}`}>
                       {quoteData && (
                         <>
@@ -2040,7 +2070,7 @@ function QuoteDetail() {
                       )}
                     </div>
                   </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
+                  <TabPanel value={tabValue} index={2}>
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
@@ -2054,7 +2084,7 @@ function QuoteDetail() {
                             md={7}
                             className="quoteHeader"
                           >
-                            <div className="quoteBox">
+                            <div className={redCard ? "redQuoteBox":"quoteBox"}>
                               <span>Total Profit </span>
                               <span
                                 className="quoteAmount"
@@ -2233,7 +2263,8 @@ function QuoteDetail() {
                       </div>
                     </Paper>
                   </TabPanel>
-                  {tabValue === 1 && (
+
+                  {tabValue === 2 && (
                     <div
                       className={`mt-0 subDetailModule ${classes.detailBox}`}
                     >
@@ -2617,31 +2648,6 @@ function QuoteDetail() {
             }}
             message={messageDialog.message}
           />
-        )}
-
-        {showVersionsDialog && (
-          <CustomDialogComponent
-            title="All Version Status"
-            open={showVersionsDialog}
-            onClose={() => {
-              setShowVersionsDialog(false);
-            }}
-          >
-            <div style={{ maxHeight: 500, width: "100%" }}>
-              <DataGrid
-                components={{
-                  NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                autoHeight
-                rows={versionStatusData.data}
-                columns={versionStatusData.columns}
-                disableSelectionOnClick
-                disableMultipleSelection
-                disableColumnFilter
-                hideFooter
-              />
-            </div>
-          </CustomDialogComponent>
         )}
 
         {showAiDialog && (
