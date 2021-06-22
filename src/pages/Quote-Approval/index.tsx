@@ -71,7 +71,7 @@ const QuoteApproval = () => {
                 const newColumn = data.Columns.map((obj) => ({ ...obj, width: 200 }))
                 if (data.Quote_Status === "Sent to Customer") {
                     setLogo(data.logo);
-                    setColumns(data.Columns);
+                    setColumns(newColumn);
                     setRows(data.Rows);
                     setSellingPrice(data.TotalSellingPriceamount);
                     setCurrency(data.TotalSellingPricecurr)
