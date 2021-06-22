@@ -470,6 +470,8 @@ function QuoteDetail() {
             onClick={() => {
               setcurrentVersion(params.value);
               setTabValue(2);
+              fetchQuoteData(params.value);
+
               // setShowVersionsDialog(false);
             }}
           >
@@ -485,6 +487,7 @@ function QuoteDetail() {
             className="text-truncate link"
             onClick={() => {
               setcurrentVersion(params.row.versionNumber);
+              fetchQuoteData(params.row.versionNumber);
               setTabValue(2);
               // setShowVersionsDialog(false);
             }}
