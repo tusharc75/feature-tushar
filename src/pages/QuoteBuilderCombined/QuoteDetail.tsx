@@ -1231,6 +1231,7 @@ function QuoteDetail() {
         setDOAData(data.reverse())
       })
       .catch((err) => {
+        setDOAData(null)
         // toastConfig.setToastConfig(err);
       });
   }
