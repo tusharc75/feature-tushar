@@ -231,7 +231,7 @@ const intialState = {
   loadingTNC: false,
   page: 0,
   limit: 2,
-  pageSizes: [2,4,6],
+  pageSizes: [2, 4, 6],
   search: "",
   filters: {},
   sorting: [],
@@ -527,7 +527,8 @@ function QuoteDetail() {
   }, []);
 
   useEffect(() => {
-    fetchDOAData()
+    if (currentVersion !== 0)
+      fetchDOAData()
   }, [currentVersion, DOAreq]);
 
   useEffect(() => {
@@ -563,7 +564,7 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
-      if(selectedRecords.length > 0) {
+      if (selectedRecords.length > 0) {
         setTNC(selectedRecords);
       }
       setLoading(true);
@@ -777,17 +778,17 @@ function QuoteDetail() {
 
   const NameRenderer = (params) => {
     return <p
-        className="cursor-pointer link"
-        title={params.value}
-        onClick={() => {
-          const data = dataRowsTNC.find((d) => d._id === params.data.id);
+      className="cursor-pointer link"
+      title={params.value}
+      onClick={() => {
+        const data = dataRowsTNC.find((d) => d._id === params.data.id);
 
-          setEditRecordTNC(data);
-          setShowCreateDialog(true);
-        }}
-      >
-        {params.value}
-      </p>
+        setEditRecordTNC(data);
+        setShowCreateDialog(true);
+      }}
+    >
+      {params.value}
+    </p>
   }
 
   const frameworkComponents = {
@@ -1192,7 +1193,7 @@ function QuoteDetail() {
 
   const fetchDoaLimit = () => {
     axiosInstance()
-      .post("doa-request/limit", {})
+      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
       .then(({ data: { data } }) => {
         setDOAsetup(data.doasetup);
         setDOALimit(data.limit ? data.limit : 0);
@@ -1761,6 +1762,7 @@ function QuoteDetail() {
                 </Link>
               ),
             },
+            { field: "comment", headerName: "Comment", flex: 0.5 },
             { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
             {
               field: "totalSalesPrice",

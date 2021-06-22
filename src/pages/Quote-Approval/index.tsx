@@ -1,4 +1,4 @@
-import { useParams,useLocation } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
 import Layout from "../../components/Layout";
@@ -11,6 +11,7 @@ import {
 import axios from 'axios'
 import { couldStartTrivia } from "typescript";
 import { backendApi } from './../../config';
+import DOAReasonDialog from "../DOA/DOAReasonDialog";
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -38,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const QuoteApproval = () => {
-    let location= useLocation().search;
+    let location = useLocation().search;
     console.log(location);
     const classes = useStyles();
     const { id } = useParams();
@@ -47,8 +48,9 @@ const QuoteApproval = () => {
     const [columns, setColumns] = useState([]);
     const [rows, setRows] = useState([]);
     const [sellingPrice, setSellingPrice] = useState(0);
-    const[currency,setCurrency]=useState("");
-
+    const [currency, setCurrency] = useState("");
+    const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
+    const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
     useEffect(() => {
         fetchQuote()
     }, []);
@@ -56,7 +58,7 @@ const QuoteApproval = () => {
     //to fetch Quote Data from QuoteID 
     const fetchQuote = () => {
 
-        axios.get(backendApi + "/quote-builder/getQuotefromId/" + id+location)
+        axios.get(backendApi + "/quote-builder/getQuotefromId/" + id + location)
             .then(({ data }) => {
                 console.log(data);
                 if (data.Quote_Status === "Sent to Customer") {
@@ -78,24 +80,28 @@ const QuoteApproval = () => {
             });
     }
 
-    const QuoteStatusChange = (accepted) => {
-        var body = { status: ""}
-        if (accepted) {
+    const QuoteStatusChange = (accepted, comment) => {
+        var body = { status: "", comment: "" }
+
+        if (accepted !== "Rejected") {
             body.status = "Accepted by Customer";
         }
         else {
             body.status = "Rejected by Customer";
+            body.comment = comment;
         }
-        axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id+location, body)
+        axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
             .then(({ data }) => {
                 setReplied(true);
+                setShowQuoteStatusChangeDialog(false)
             })
             .catch((err) => {
                 console.log(err);
+                setShowQuoteStatusChangeDialog(false)
             });
     };
 
-    
+
 
 
     return (
@@ -119,14 +125,17 @@ const QuoteApproval = () => {
                         <div className={`gap-2 ${classes.footer}`}>
                             <Grid container>
                                 <Grid item xs={12} md={4} sm={4} className="centerItem">
-                                   <h1>Total : {sellingPrice} {currency}</h1> 
+                                    <h1>Total : {sellingPrice} {currency}</h1>
                                 </Grid>
                                 <Grid item xs={12} md={8} sm={8} className="centerItem">
-                                    
-                                    <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
+
+                                    <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange("Accepted", "")}>
                                         Accept
                                     </Button>
-                                    <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => QuoteStatusChange(false)} >
+                                    <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
+                                        setQuoteStatusChangeData("Rejected")
+                                        setShowQuoteStatusChangeDialog(true)
+                                    }} >
                                         Reject
                                     </Button>
                                 </Grid>
@@ -139,6 +148,14 @@ const QuoteApproval = () => {
                         <h1>Invalid URL, Please check the URL</h1>
                     </div>
                 )}
+            {showQuoteStatusChangeDialog && (
+                <DOAReasonDialog
+                    reasonDialogOpen={showQuoteStatusChangeDialog}
+                    handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+                    QuoteStatusChange={QuoteStatusChange}
+                    accepted={quoteStatusChangeData}
+                />
+            )}
         </div>
     );
 

@@ -23,6 +23,7 @@ import { useData } from "../../StateProvider/Provider";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import { isMobile, isTablet } from "react-device-detect";
+import DOAReasonDialog from "./DOAReasonDialog"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -144,6 +145,8 @@ const DOAApproval = () => {
   const [QStatus, setQStatus] = useState(true);
   const [doaName, setDoaName] = useState("");
   const [showAIDialog, setShowAIDialog] = useState(false);
+  const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
+  const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
   var DOALimit = 0;
   var DOAsetup = false;
 
@@ -222,38 +225,7 @@ const DOAApproval = () => {
       });
   };
 
-  const QuoteStatusChange = (accepted) => {
-    if (accepted) {
-      if (needDOA) {
-        axiosInstance()
-          .post("/doa-request/createParent/" + id)
-          .then(({ data }) => {
-            history.push("/doa-request");
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        axiosInstance()
-          .post("/doa-request/DOAResponse/" + id, { response: "Accepted " })
-          .then(({ data }) => {
-            history.push("/doa-request");
-          })
-          .catch((err) => {
-            setToastConfig(err);
-          });
-      }
-    } else {
-      axiosInstance()
-        .post("/doa-request/DOAResponse/" + id, { response: "Rejected" })
-        .then(({ data }) => {
-          history.push("/doa-request");
-        })
-        .catch((err) => {
-          setToastConfig(err);
-        });
-    }
-  };
+
 
   const ViewQuote = () => {
     axiosInstance()
@@ -270,6 +242,43 @@ const DOAApproval = () => {
       .catch((err) => {
         setToastConfig(err);
       });
+  };
+
+
+  const QuoteStatusChange = (accepted, comment) => {
+    if (accepted !== "Rejected") {
+      if (needDOA) {
+        axiosInstance()
+          .post("/doa-request/createParent/" + id)
+          .then(({ data }) => {
+            history.push("/doa-request");
+          })
+          .catch((err) => {
+            console.log(err);
+            setShowQuoteStatusChangeDialog(false)
+          });
+      } else {
+        axiosInstance()
+          .post("/doa-request/DOAResponse/" + id, { response: "Accepted" })
+          .then(({ data }) => {
+            history.push("/doa-request");
+          })
+          .catch((err) => {
+            setToastConfig(err);
+            setShowQuoteStatusChangeDialog(false)
+          });
+      }
+    } else {
+      axiosInstance()
+        .post("/doa-request/DOAResponse/" + id, { response: "Rejected", comment: comment })
+        .then(({ data }) => {
+          history.push("/doa-request");
+        })
+        .catch((err) => {
+          setToastConfig(err);
+          setShowQuoteStatusChangeDialog(false)
+        });
+    }
   };
 
   return (
@@ -329,7 +338,9 @@ const DOAApproval = () => {
                     .length === 0 ? (
                   <>
                     <Button
-                      onClick={() => QuoteStatusChange(true)}
+                      onClick={() => {
+                        QuoteStatusChange("Accepted", "")
+                      }}
                       variant="outlined"
                       size="small"
                       startIcon={<ThumbUpIcon />}
@@ -338,7 +349,10 @@ const DOAApproval = () => {
                       {buttontext}
                     </Button>
                     <Button
-                      onClick={() => QuoteStatusChange(false)}
+                      onClick={() => {
+                        setQuoteStatusChangeData("Rejected")
+                        setShowQuoteStatusChangeDialog(true)
+                      }}
                       startIcon={<ThumbDownIcon />}
                       variant="contained"
                       size="small"
@@ -501,6 +515,14 @@ const DOAApproval = () => {
           </Dialog>
         )
       }
+      {showQuoteStatusChangeDialog && (
+        <DOAReasonDialog
+          reasonDialogOpen={showQuoteStatusChangeDialog}
+          handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+          QuoteStatusChange={QuoteStatusChange}
+          accepted={quoteStatusChangeData}
+        />
+      )}
     </Layout>
   );
 };
