@@ -35,6 +35,10 @@ import CustomAgGrid, {
 import QuoteHeader from "./QuoteHeader";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import { DataGrid } from "@material-ui/data-grid";
+import VersionStatus from "./VersionStatus";
 
 let quoteTimeout;
 const QuoteType = [
@@ -78,7 +82,11 @@ const QuoteBuilders = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   });
-
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [versionStatusData, setVersionStatusData] = useState({
+    columns: [],
+    data: [],
+  });
   const { qbResource, qbApi } = quoteBuilder;
 
   //  Grid Variables - Start
@@ -569,9 +577,8 @@ const QuoteBuilders = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${
-                deleteRecord?.quoteName ? "Quote" : "Quotes"
-              }   ${deleteRecord.quoteName || ""}?`}
+              message={`Are you sure you want to delete ${deleteRecord?.quoteName ? "Quote" : "Quotes"
+                }   ${deleteRecord.quoteName || ""}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
@@ -615,6 +622,19 @@ const QuoteBuilders = () => {
           contacts={null}
           isRenderedFromOpportunity={false}
         />
+      )}
+
+      {showVersionsDialog && (
+        <CustomDialogComponent
+          title="All Version Status"
+          open={showVersionsDialog}
+          onClose={() => {
+            setShowVersionsDialog(false);
+          }}
+        >
+          <VersionStatus loadingVersions={false} versionStatusData={versionStatusData}
+          />
+        </CustomDialogComponent>
       )}
     </>
   );

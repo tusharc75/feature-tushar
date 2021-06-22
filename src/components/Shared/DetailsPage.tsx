@@ -153,7 +153,7 @@ const Details = (props: DetailProps) => {
       const opt = getUniqueCurrencies().find(
         (c) => c.currencyCode === values[input.fieldName]
       );
-      text = opt ? `${opt.currencyCode} - ${opt.name}` : "-";
+      text = opt ? `${opt.currencyCode} - ${opt.currencyName}` : "-";
     } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
