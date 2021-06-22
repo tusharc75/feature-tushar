@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
@@ -10,6 +10,7 @@ import SignaturePad from 'react-signature-canvas';
 export default function SignatureDialog({ open, onClose, onSigned }) {
 
     const signCanvas: any = useRef(null);
+    const [loading, setLoading] = useState(false);
 
     const clear = () => signCanvas.current.clear();
 
@@ -43,10 +44,13 @@ export default function SignatureDialog({ open, onClose, onSigned }) {
                     Clear
                 </Button>
 
-                <Button size="small" onClick={() => {
-                    onSigned(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))
-                }} color="primary" variant="contained">
-                    Send
+                <Button size="small"
+                    disabled={loading}
+                    onClick={() => {
+                        setLoading(true);
+                        onSigned(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))
+                    }} color="primary" variant="contained">
+                    {loading ? "Sending..." : "Send"}
                 </Button>
             </CustomDialogFooter>
         </Dialog >
