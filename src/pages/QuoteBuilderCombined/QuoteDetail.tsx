@@ -516,6 +516,7 @@ function QuoteDetail() {
     show: false,
     text: null,
   });
+  const [prevVersionTNC, setPrevVersionTNC] = useState([]);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -632,6 +633,12 @@ function QuoteDetail() {
 
           // handleAllowToEditList(data);
           setQuoteData(data);
+          if (data?.versions) {
+            let lastVersionData = data?.versions[currentVersion - 1];
+            if (lastVersionData && lastVersionData.TNC) {
+              setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
+            }
+          }
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -857,7 +864,7 @@ function QuoteDetail() {
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         let selectedRows = [];
-        let rows = data.map((tnc) => {
+        let rows = data.map((tnc, i) => {
           if (selectedTnC.indexOf(tnc._id) >= 0) {
             selectedRows.push(tnc);
           }
@@ -1341,7 +1348,7 @@ function QuoteDetail() {
       });
       const data = new Blob([excelBuffer], { type: fileType });
 
-      console.log(data);
+      // console.log(data);
 
       if (send) {
         generateBase64forFile(data, "excel");
@@ -1485,7 +1492,6 @@ function QuoteDetail() {
 
     setLoadPB(true);
   };
-
   const handleClone = () => {
     axiosInstance()
       .post(`${qbApi}/clone/${quoteData._id}`)
@@ -2530,6 +2536,7 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
+                                  selectedRecords={[...prevVersionTNC]}
                                 />
                               </Box>
                             ) : null}

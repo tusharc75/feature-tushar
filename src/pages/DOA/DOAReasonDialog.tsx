@@ -31,7 +31,7 @@ const DOAReasonDialog = ({
     const { setToastConfig } = useContext(CustomToastContext);
     const history = useHistory();
 
-    const reasons = ["Price Too High", "Not Needed", "Others"]
+    const reasons = ["Price Too High", "Price Too Low", "Incorrect Data", "Not Needed", "DOA", "Others"]
     const [value, setValue] = React.useState('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

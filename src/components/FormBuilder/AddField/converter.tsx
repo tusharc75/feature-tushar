@@ -72,6 +72,16 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
             newOptions.push(row)
         });
         setFieldValue("option", newOptions)
+
+        if (values["displayUnits"]) {
+            const result = []
+            values["displayUnits"].forEach((_unit) => {
+                if (value.includes(_unit)) {
+                    result.push(_unit)
+                }
+            })
+            setFieldValue("displayUnits", result)
+        }
     }
 
 

@@ -42,16 +42,12 @@ const CreateProduct = (props) => {
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
     const [productTemplate, setProductTemplate] = useState([]);
-    const [isStandardTemplate, setIsStandardTemplate] = useState(false);
 
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-
-    const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
-
-
+    const [isShowTemplate, setIsShowTemplate] = useState(false);
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
@@ -84,8 +80,7 @@ const CreateProduct = (props) => {
                         values: data.productData
                     });
                     EvaluteproductFields(newField)
-                    handleChangeCategory(data.productData.productCategory, false)
-                    setIsStandardTemplate(data.isStandard)
+                    handleChangeCategory(data.productData.productCategory, "", false)
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -166,21 +161,41 @@ const CreateProduct = (props) => {
         setProductFields(customData)
     }
 
-    const handleChangeCategory = (value, isChange) => {
+    const handleChangeCategory = (value, label, isChange) => {
         if (value && value !== "") {
-            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
+            axiosInstance().get(`/price-template/template/` + value).then(({ data: { data } }) => {
                 setProductTemplate(data.data)
                 if (isChange) {
                     let defaultproductTemplate = ""
+                    let defaultpriceTemplate = ""
                     if (data.data.length) {
-                        defaultproductTemplate = data.data[0].optionValue
+                        defaultproductTemplate = data.data[0].productTemplate
+                        defaultpriceTemplate = data.data[0].optionValue
+                        data.data.forEach((_f) => {
+                            let re = new RegExp(_f.optionLabel);
+                            if (label.match(re)) {
+                                defaultpriceTemplate = _f.optionValue
+                                defaultproductTemplate = _f.productTemplate
+                                return
+                            }
+                        })
                     }
                     setInitialData({
                         fields: initialData.fields,
-                        values: { ...ref.current.values, productTemplate: defaultproductTemplate },
+                        values: { ...ref.current.values, priceTemplate: defaultpriceTemplate, productTemplate: defaultproductTemplate },
                     });
                     if (defaultproductTemplate !== "") {
-                        handleChangeTemplate(defaultproductTemplate)
+                        axiosInstance().get(`/product-template/fields/` + defaultproductTemplate).then(({ data: { data } }) => {
+                            let newField = [...masterFields];
+                            data.fields.forEach(_f => {
+                                newField.push(_f)
+                            })
+                            setInitialData({
+                                fields: newField,
+                                values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: defaultproductTemplate },
+                            });
+                            EvaluteproductFields(newField)
+                        });
                     }
                 }
             });
@@ -189,18 +204,20 @@ const CreateProduct = (props) => {
 
     const handleChangeTemplate = (value) => {
         if (value && value !== "") {
-            axiosInstance().get(`/product-template/fields/` + value).then(({ data: { data } }) => {
-                let newField = [...masterFields];
-                data.fields.forEach(_f => {
-                    newField.push(_f)
-                })
-                setIsStandardTemplate(data.isStandard)
-                setInitialData({
-                    fields: newField,
-                    values: { ...getObjKeys('', newField), ...ref.current.values, unit: data.unit },
+            const result = productTemplate.filter((_f) => _f.optionValue === value)
+            if (result.length) {
+                axiosInstance().get(`/product-template/fields/` + result[0].productTemplate).then(({ data: { data } }) => {
+                    let newField = [...masterFields];
+                    data.fields.forEach(_f => {
+                        newField.push(_f)
+                    })
+                    setInitialData({
+                        fields: newField,
+                        values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].productTemplate },
+                    });
+                    EvaluteproductFields(newField)
                 });
-                EvaluteproductFields(newField)
-            });
+            }
         }
     }
 
@@ -332,7 +349,8 @@ const CreateProduct = (props) => {
                                                                             onChange={(e, val) => {
                                                                                 setNewProductCategoryId(null);
                                                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                handleChangeCategory(val && val.optionValue ? val.optionValue : "", true)
+                                                                                handleChangeCategory(val && val.optionValue ? val.optionValue : "",
+                                                                                    val && val.optionLabel ? val.optionLabel : "", true)
                                                                             }}
                                                                             size="small"
                                                                             values={
@@ -379,19 +397,19 @@ const CreateProduct = (props) => {
                                                                     ) : null}
                                                                 </Grid>
                                                             </Grid> :
-                                                            field.fieldName === "productTemplate" ?
+                                                            field.fieldName === "priceTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    {!isShowProductTemplate ?
+                                                                    {!isShowTemplate ?
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
-                                                                                    checked={isShowProductTemplate}
-                                                                                    onChange={() => setIsShowProductTemplate(true)}
-                                                                                    name="isShowProductTemplate"
+                                                                                    checked={isShowTemplate}
+                                                                                    onChange={() => setIsShowTemplate(true)}
+                                                                                    name="isShowTemplate"
                                                                                     color="primary"
                                                                                 />
                                                                             }
-                                                                            label="Show Product Template"
+                                                                            label="Show Template"
                                                                         /> :
                                                                         <FormTypes
                                                                             fields={initialData.fields}
@@ -453,7 +471,6 @@ const CreateProduct = (props) => {
                                                                                     isTooltip={field.isTooltip}
                                                                                     tooltipMessage={field.tooltipMessage}
                                                                                     size="small"
-                                                                                    disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
                                                                                     imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
                                                                                         setUploadingImageOrFileProgress(completePercentage);
                                                                                     } : null}
@@ -517,7 +534,7 @@ const CreateProduct = (props) => {
                             ];
                         });
                         setNewProductCategoryId(data._id);
-                        handleChangeCategory(data._id, true)
+                        handleChangeCategory(data._id, data.name, true)
                     }
                     setShowAddProductCategoryDialog(false);
                     // fetchProductCategory();

@@ -101,12 +101,12 @@ const InfoLabel = ({
     <>{children}</>
   ) : (
     <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
+      <Grid item xs={12} sm={12} md={12}>
         {children}
       </Grid>
-      <Grid item xs={1} sm={1} md={1}>
+      {/* <Grid item xs={1} sm={1} md={1}>
         <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 
@@ -173,8 +173,6 @@ const FormTypes = (props) => {
     customError = {},
     ...rest
   } = props;
-
-
 
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
