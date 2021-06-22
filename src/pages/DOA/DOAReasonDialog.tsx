@@ -49,7 +49,7 @@ const DOAReasonDialog = ({
                         onClose={handleCloseDialog}
                         aria-labelledby="assign-roles-dialog"
                     >
-                        <CustomDialogHeader title={`Reason For ${accepted}`} />
+                        <CustomDialogHeader title={`Reason For Reject`} />
                         <CustomDialogContent>
 
                             <>
@@ -97,7 +97,7 @@ const DOAReasonDialog = ({
                             </Button>
                             <Button
                                 disabled={isAssigning}
-                                onClick={() => QuoteStatusChange(accepted, selectedRec === "Others" ? value : selectedRec)}
+                                onClick={() => QuoteStatusChange(accepted, "", selectedRec === "Others" ? value : selectedRec)}
                                 color="primary"
                                 size="small"
                                 variant="contained"

@@ -245,7 +245,7 @@ const DOAApproval = () => {
   };
 
 
-  const QuoteStatusChange = (accepted, comment) => {
+  const QuoteStatusChange = (accepted, signature, comment) => {
     if (accepted !== "Rejected") {
       if (needDOA) {
         axiosInstance()
@@ -339,7 +339,7 @@ const DOAApproval = () => {
                   <>
                     <Button
                       onClick={() => {
-                        QuoteStatusChange("Accepted", "")
+                        QuoteStatusChange("Accepted", "", "")
                       }}
                       variant="outlined"
                       size="small"
