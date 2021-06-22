@@ -209,7 +209,7 @@ const QuoteApproval = () => {
                     QuoteStatusChange("Accepted", imageData, "");
                     setShowSignatureDialog(false);
                 }} onClose={() => { setShowSignatureDialog(false) }} />
-            }s
+            }
         </div >
     );
 
