@@ -108,7 +108,7 @@ export const intialState = {
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
     setGridApi, refreshGrid = null, allowSelection = true, allowAction = true, actionWidth = 200,
-    isClientSideGrid = false, handleGridReady = null, allowPagination = true }) {
+    isClientSideGrid = false, handleGridReady = null, allowPagination = true, selectedRecords = [] }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
@@ -121,6 +121,11 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         setGridApi(params.api);
         setColumnApi(params.columnApi);
         setClientSideGridApi(params.api);
+        if (selectedRecords.length) {
+            params.api.forEachNode(function (node) {
+                node.setSelected(selectedRecords.some(o => o === node.data._id));
+            });
+        }
         if (handleGridReady) handleGridReady(params)
     }
 
