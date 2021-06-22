@@ -44,7 +44,7 @@ const ProductTemplate = () => {
     const [section, setSection] = useState([]);
     const [deleteField, setDeleteField] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
-    const [productUnit, setProductUnit] = useState(null);
+    //const [productUnit, setProductUnit] = useState(null);
 
     useEffect(() => {
         fetchOneProductTemplate();
@@ -52,7 +52,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
+            setInitialValues({ name: "", productCategory: "", isStandard: false });
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -80,15 +80,15 @@ const ProductTemplate = () => {
             });
         }
         fetchProductCategory()
-        axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
-            let field = data.map((_f) => _f.fieldData)
-            if (field.filter((data) => data.fieldName === "unit").length) {
-                let unit = field.filter((data) => data.fieldName === "unit")[0].option
-                setProductUnit(unit);
-            }
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+        // axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
+        //     let field = data.map((_f) => _f.fieldData)
+        //     if (field.filter((data) => data.fieldName === "unit").length) {
+        //         let unit = field.filter((data) => data.fieldName === "unit")[0].option
+        //         setProductUnit(unit);
+        //     }
+        // }).catch((error) => {
+        //     toastConfig.setToastConfig(error);
+        // });
     };
 
     const fetchProductCategory = () => {
@@ -155,9 +155,9 @@ const ProductTemplate = () => {
             if (!values.productCategory || values.productCategory === "") {
                 errors["productCategory"] = "Product category is required";
             }
-            if (!values.unit || values.unit === "") {
-                errors["unit"] = "Unit is required";
-            }
+            // if (!values.unit || values.unit === "") {
+            //     errors["unit"] = "Unit is required";
+            // }
         }
         return errors;
     }
@@ -210,7 +210,7 @@ const ProductTemplate = () => {
             </Grid>
         </Grid>
         <CustomContainer>
-            {(initialValues && productCategory && productUnit) ?
+            {(initialValues && productCategory) ?
                 <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
@@ -220,7 +220,7 @@ const ProductTemplate = () => {
                                         <TextField
                                             variant="outlined"
                                             type="text"
-                                            label="Template Name"
+                                            label="Product Template Name"
                                             required={true}
                                             name="name"
                                             fullWidth
@@ -257,7 +257,12 @@ const ProductTemplate = () => {
                                                 ? productCategory.filter((data) => data._id === values["productCategory"])[0]
                                                 : ""
                                             }
-                                            onChange={(e, val) => setFieldValue("productCategory", val && val._id ? val._id : "")}
+                                            onChange={(e, val) => {
+                                                setFieldValue("productCategory", val && val._id ? val._id : "")
+                                                if (val && val.name) {
+                                                    setFieldValue("name", val.name);
+                                                } 
+                                            }}
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
@@ -274,7 +279,7 @@ const ProductTemplate = () => {
                                         />}
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
-                                        {!values["isStandard"] && <Autocomplete
+                                        {/* {!values["isStandard"] && <Autocomplete
                                             options={productUnit}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
                                             getOptionSelected={(option: any, val) => option.optionLabel === val}
@@ -296,7 +301,7 @@ const ProductTemplate = () => {
                                                     fullWidth
                                                 />
                                             )}
-                                        />}
+                                        />} */}
                                     </Grid>
                                     <Grid item xs={12} sm={2} container justify="flex-end">
                                         <Box>
@@ -317,7 +322,7 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
-                                    extraFields={[{ fieldLabel: "Qty", fieldName: "qty" }]}
+                                    extraFields={[]}
                                     module="product-template"
                                 />
                             </Box>
