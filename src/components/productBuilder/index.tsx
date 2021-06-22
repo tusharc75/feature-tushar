@@ -86,7 +86,7 @@ const ProductBuilder = (props) => {
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, []);
+  }, [productBuilderId]);
 
   const ActionsRenderer = (params) => (
     <>
