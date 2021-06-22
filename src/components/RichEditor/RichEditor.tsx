@@ -57,6 +57,15 @@ export function RichTextEditor(props) {
       className += ' RichEditor-hidePlaceholder';
     }
   }
+
+  const handleReturn = (e) => {
+    if (e.shiftKey) {
+      props.onChange('editorState', RichUtils.insertSoftNewline(editorState));
+      return 'handled';
+    }
+    return 'not-handled';
+  }
+
   return (
     <div className="RichEditor-root" style={style ? { ...style } : null}>
       <div className="container">
@@ -81,6 +90,7 @@ export function RichTextEditor(props) {
           // ref="editor"
           ref={editorRef}
           spellCheck={true}
+          handleReturn={handleReturn}
         />
       </div>
     </div>

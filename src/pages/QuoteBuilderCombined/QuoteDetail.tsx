@@ -341,6 +341,7 @@ function QuoteDetail() {
     sorting,
     selectedRecords,
   } = state;
+
   const [gridApi, setTNCGridApi] = useState(null);
 
   const [columnsTNC, setColumnsTNC] = useState([
@@ -352,6 +353,7 @@ function QuoteDetail() {
     },
   ]);
 
+  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -521,6 +523,10 @@ function QuoteDetail() {
       "aria-controls": `main-tabpanel-${index}`,
     };
   }
+
+  useEffect(() => {
+    setSelectedTnC(selectedRecords.map(o => o._id))
+  }, [selectedRecords]);
 
   useEffect(() => {
     fetchDoaLimit();
@@ -776,20 +782,18 @@ function QuoteDetail() {
     }
   };
 
-  const NameRenderer = (params) => {
-    return <p
-      className="cursor-pointer link"
+  const NameRenderer = (params) => (
+    <p
+      className="cursor-pointer"
       title={params.value}
       onClick={() => {
-        const data = dataRowsTNC.find((d) => d._id === params.data.id);
-
-        setEditRecordTNC(data);
+        setEditRecordTNC(params.data);
         setShowCreateDialog(true);
       }}
     >
       {params.value}
     </p>
-  }
+  );
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
@@ -803,24 +807,32 @@ function QuoteDetail() {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
-      gridApi.setRowData([]);
+      // gridApi.setRowData([]);
       gridApi.showLoadingOverlay();
     }
+
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
-        setDataTNC(data);
-        let rows = data.map((tnc) => ({
-          ...tnc,
-          id: tnc._id,
-          name: tnc.TACName,
-        }));
+        let selectedRows = []
+        let rows = data.map((tnc) => {
+          if (selectedTnC.indexOf(tnc._id) >= 0) {
+            selectedRows.push(tnc)
+          }
+          return {
+            ...tnc,
+            id: tnc._id,
+            name: tnc.TACName,
+          }
+        });
         dispatch({
           type: "initialize",
           data: rows,
           count: count,
         });
-        dispatch({ type: "loading", loadingTNC: false });
+        dispatch({ type: "selection", selectedRecords: selectedRows })
+        setDataTNC(data);
+        // dispatch({ type: "loading", loadingTNC: false });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -1063,9 +1075,11 @@ function QuoteDetail() {
         finalmarkup = finalmarkup + markup + "<br>";
       });
 
-      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
+      finalmarkup = finalmarkup.replaceAll("<p>", "<p style='overflow-wrap:break-word;word-wrap:break-word;'>");
+      // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
 
-      let signatureContent = `<br><br><span--style='font-size:10px;'>Note:</span><br>`;
+      let signatureContent = "<br><br><span--style='font-size:10px;'>Note:</span><br>";
       signatureContent =
         signatureContent +
         `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
@@ -1077,12 +1091,12 @@ function QuoteDetail() {
         signatureContent +
         `<span--style='color:lightgrey'>__________________________</span>`;
 
-      signatureContent = signatureContent.replaceAll(" ", "&nbsp");
+      signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
       signatureContent = signatureContent.replaceAll("--", " ");
 
       finalmarkup = finalmarkup + signatureContent;
-
-      PdfDoc.html(finalmarkup, {
+      
+      PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
@@ -1986,7 +2000,7 @@ function QuoteDetail() {
                       {quoteData && (
                         <>
                           <div className={classes.btnHeader}>
-                            {quotePermissions.isCreate ? (
+                            {quotePermissions?.isCreate ? (
                               <Button
                                 variant="contained"
                                 color="primary"
