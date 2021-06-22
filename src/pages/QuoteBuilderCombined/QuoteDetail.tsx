@@ -468,8 +468,8 @@ function QuoteDetail() {
             title={params.value}
             className="text-truncate link"
             onClick={() => {
-              setcurrentVersion(params.value);
               setTabValue(2);
+              setcurrentVersion(params.value);
               // setShowVersionsDialog(false);
             }}
           >
@@ -484,8 +484,8 @@ function QuoteDetail() {
             title={params.value}
             className="text-truncate link"
             onClick={() => {
-              setcurrentVersion(params.row.versionNumber);
               setTabValue(2);
+              setcurrentVersion(params.row.versionNumber);
               // setShowVersionsDialog(false);
             }}
           >
