@@ -11,6 +11,7 @@ import {
 import axios from 'axios'
 import { couldStartTrivia } from "typescript";
 import { backendApi } from './../../config';
+import DOAReasonDialog from "../DOA/DOAReasonDialog";
 import SignatureDialog from "../../components/Helpers/SignatureDialog";
 
 const useStyles = makeStyles((theme) => ({
@@ -57,6 +58,8 @@ const QuoteApproval = () => {
     const [rows, setRows] = useState([]);
     const [sellingPrice, setSellingPrice] = useState(0);
     const [currency, setCurrency] = useState("");
+    const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
+    const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
     const [showSignatureDialog, setShowSignatureDialog] = useState(false);
 
     useEffect(() => {
@@ -89,20 +92,22 @@ const QuoteApproval = () => {
             });
     }
 
-    const QuoteStatusChange = (accepted, signature) => {
-        let body = { status: "", signature: signature }
-        if (accepted) {
-            body.status = "Accepted by Customer";
+    const QuoteStatusChange = (accepted, signature, comment) => {
+        let body;
+        if (accepted !== "Rejected") {
+            body = { status: "Accepted by Customer", signature: signature }
         }
         else {
-            body.status = "Rejected by Customer";
+            body = { status: "Rejected by Customer", comment: comment }
         }
         axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
             .then(({ data }) => {
                 setReplied(true);
+                setShowQuoteStatusChangeDialog(false)
             })
             .catch((err) => {
                 console.log(err);
+                setShowQuoteStatusChangeDialog(false)
             });
     };
 
@@ -172,7 +177,10 @@ const QuoteApproval = () => {
                                     <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
                                         Accept
                                     </Button>
-                                    <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => QuoteStatusChange(false, "")} >
+                                    <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
+                                        setQuoteStatusChangeData("Rejected")
+                                        setShowQuoteStatusChangeDialog(true)
+                                    }} >
                                         Reject
                                     </Button>
                                 </Grid>
@@ -185,14 +193,24 @@ const QuoteApproval = () => {
                         <h1>Invalid URL, Please check the URL</h1>
                     </div>
                 )}
+            {
+                showQuoteStatusChangeDialog && (
+                    <DOAReasonDialog
+                        reasonDialogOpen={showQuoteStatusChangeDialog}
+                        handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+                        QuoteStatusChange={QuoteStatusChange}
+                        accepted={quoteStatusChangeData}
+                    />
+                )
+            }
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    QuoteStatusChange(true, imageData);
+                    QuoteStatusChange("Accepted", imageData, "");
                     setShowSignatureDialog(false);
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
-        </div>
+        </div >
     );
 
 }

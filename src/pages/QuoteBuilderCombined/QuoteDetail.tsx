@@ -574,7 +574,8 @@ function QuoteDetail() {
   }, []);
 
   useEffect(() => {
-    fetchDOAData()
+    if (currentVersion !== 0)
+      fetchDOAData()
   }, [currentVersion, DOAreq]);
 
   useEffect(() => {
@@ -1251,7 +1252,7 @@ function QuoteDetail() {
 
   const fetchDoaLimit = () => {
     axiosInstance()
-      .post("doa-request/limit", {})
+      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
       .then(({ data: { data } }) => {
         setDOAsetup(data.doasetup);
         setDOALimit(data.limit ? data.limit : 0);
@@ -1270,6 +1271,7 @@ function QuoteDetail() {
         setDOAData(data.reverse())
       })
       .catch((err) => {
+        setDOAData(null)
         // toastConfig.setToastConfig(err);
       });
   }
