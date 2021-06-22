@@ -457,13 +457,14 @@ function QuoteDetail() {
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
   const [lastUser, setLastUser] = useState(true);
-  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [loadingVersions, setLoadingVersions] = useState(true);
+  // const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [],
     data: [],
   });
-  const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
-    useState("All Version Status");
+  // const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
+  //   useState("All Version Status");
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showAiDialog, setShowAiDialog] = useState(false);
@@ -549,6 +550,10 @@ function QuoteDetail() {
       getQuoteFields();
     }
   }, [id]);
+
+  useEffect(() => {
+    getVersionStatus();
+  }, [quoteData])
 
   useEffect(() => {
     fetchTermsAndConditions();
@@ -1719,11 +1724,12 @@ function QuoteDetail() {
   };
 
   const getVersionStatus = () => {
-    setAllVersionStatusButtonText(gettingVersionStatusText);
+    // setAllVersionStatusButtonText(gettingVersionStatusText);
+    setLoadingVersions(true)
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        setShowVersionsDialog(true);
+        // setShowVersionsDialog(true);
 
         const newData = data.versions.map((d, index) => {
           return {
@@ -1750,10 +1756,9 @@ function QuoteDetail() {
                   className="text-truncate link"
                   onClick={() => {
                     setcurrentVersion(params.value);
-                    setShowVersionsDialog(false);
-
-                  }
-                  }
+                    setTabValue(2);
+                    // setShowVersionsDialog(false);
+                  }}
                 >
                   {params.value}
                 </Link>
@@ -1767,10 +1772,9 @@ function QuoteDetail() {
                   className="text-truncate link"
                   onClick={() => {
                     setcurrentVersion(params.row.versionNumber);
-                    setShowVersionsDialog(false);
-
-                  }
-                  }
+                    setTabValue(2);
+                    // setShowVersionsDialog(false);
+                  }}
                 >
                   {params.value}
                 </Link>
@@ -1788,11 +1792,13 @@ function QuoteDetail() {
           data: newData,
         });
 
-        setAllVersionStatusButtonText("All Version Status");
+        setLoadingVersions(false);
+        // setAllVersionStatusButtonText("All Version Status");
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setAllVersionStatusButtonText("All Version Status");
+        setLoadingVersions(false);
+        // setAllVersionStatusButtonText("All Version Status");
       });
   };
 
@@ -1916,7 +1922,7 @@ function QuoteDetail() {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  <Button
+                  {/* <Button
                     variant="contained"
                     type="button"
                     size="small"
@@ -1930,7 +1936,7 @@ function QuoteDetail() {
                     }}
                   >
                     {allVersionStatusButtonText}{" "}
-                  </Button>
+                  </Button> */}
                   {quotePermissions.isDelete &&
                     quoteData?.owner.optionValue &&
                     user?.user?._id &&
@@ -1975,8 +1981,8 @@ function QuoteDetail() {
                       }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
-                          <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                          Details
+                          <InfoIcon className="mr-1" fontSize="inherit" />{" "}
+                          All Version Status
                         </div>
                       }
                       {...a11yProps(0)}
@@ -1988,6 +1994,19 @@ function QuoteDetail() {
                       }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
+                          <FaWpforms className="mr-1" fontSize="inherit" />{" "}
+                          Details
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    />
+                    <Tab
+                      style={{
+                        background: tabValue === 2 ? "#163340" : "",
+                        color: tabValue === 2 ? "white" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center font-size-3">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
                           Quote Versions
                         </div>
@@ -1995,7 +2014,26 @@ function QuoteDetail() {
                       {...a11yProps(1)}
                     />
                   </Tabs>
+
                   <TabPanel value={tabValue} index={0}>
+                    <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
+                      <DataGrid
+                        components={{
+                          NoRowsOverlay: CustomDataGridNoDataFound,
+                        }}
+                        loading={loadingVersions}
+                        autoHeight
+                        density="compact"
+                        rows={loadingVersions ? [] : versionStatusData.data}
+                        columns={versionStatusData.columns}
+                        disableSelectionOnClick
+                        disableMultipleSelection
+                        disableColumnFilter
+                        hideFooter
+                      />
+                    </div>
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={1}>
                     <div className={`position-relative ${classes.detailBox}`}>
                       {quoteData && (
                         <>
@@ -2042,7 +2080,7 @@ function QuoteDetail() {
                       )}
                     </div>
                   </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
+                  <TabPanel value={tabValue} index={2}>
                     <Paper className={classes.bgProduct}>
                       <Grid
                         container
@@ -2235,7 +2273,8 @@ function QuoteDetail() {
                       </div>
                     </Paper>
                   </TabPanel>
-                  {tabValue === 1 && (
+
+                  {tabValue === 2 && (
                     <div
                       className={`mt-0 subDetailModule ${classes.detailBox}`}
                     >
@@ -2621,7 +2660,7 @@ function QuoteDetail() {
           />
         )}
 
-        {showVersionsDialog && (
+        {/* {showVersionsDialog && (
           <CustomDialogComponent
             title="All Version Status"
             open={showVersionsDialog}
@@ -2644,7 +2683,7 @@ function QuoteDetail() {
               />
             </div>
           </CustomDialogComponent>
-        )}
+        )} */}
 
         {showAiDialog && (
           <Dialog
