@@ -614,7 +614,6 @@ function QuoteDetail() {
    * Fetch quote data with versions
    *
    */
-  console.log('prevVersionTNC', prevVersionTNC)
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
       if (selectedRecords.length > 0) {
@@ -2025,7 +2024,7 @@ function QuoteDetail() {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-                    <VersionStatus loadingVersions={loadingVersions} 
+                    <VersionStatus loadingVersions={loadingVersions}
                       versionStatusData={versionStatusData}
                     />
                   </TabPanel>
@@ -2091,7 +2090,7 @@ function QuoteDetail() {
                             md={7}
                             className="quoteHeader"
                           >
-                            <div className={redCard ? "redQuoteBox":"quoteBox"}>
+                            <div className={redCard ? "redQuoteBox" : "quoteBox"}>
                               <span>Total Profit </span>
                               <span
                                 className="quoteAmount"
