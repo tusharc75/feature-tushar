@@ -470,10 +470,9 @@ function QuoteDetail() {
             title={params.value}
             className="text-truncate link"
             onClick={() => {
-              setcurrentVersion(params.value);
               setTabValue(2);
               fetchQuoteData(params.value);
-
+              setcurrentVersion(params.value);
               // setShowVersionsDialog(false);
             }}
           >
