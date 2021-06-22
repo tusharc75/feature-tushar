@@ -1,21 +1,11 @@
 import { useState, useEffect, Fragment, FormEvent } from "react";
 import PropTypes from "prop-types";
 import { TextField, Chip } from "@material-ui/core";
-import Autocomplete, {
-  createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { flatMap, map } from "lodash";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
-
-interface UserOptionType {
-  inputValue?: string;
-  userId?: string;
-  name?: string;
-}
-
-const filter = createFilterOptions<UserOptionType>();
 
 export const UserDropdown = ({
   email,
@@ -28,11 +18,6 @@ export const UserDropdown = ({
   setFieldValue,
   required,
 }) => {
-  const {
-    state: {
-      user: { user },
-    },
-  } = useData();
   const [users, setUsers] = useState(null);
 
   useEffect(() => {
@@ -71,6 +56,12 @@ export const UserDropdown = ({
       if (multiple === true) {
         if (reason === "clear" || reason === "clear-option") {
           setFieldValue(name, []);
+        }
+
+        if (reason === "remove-option") {
+          if (value.length === 1) {
+            setFieldValue(name, []);
+          }
         }
 
         values.forEach((val: any) => {
