@@ -45,6 +45,7 @@ const LookupResource = [
   { name: "Opportunity", value: "Opportunity" },
   { name: "Product Category", value: "Product Category" },
   { name: "Product Template", value: "Product Template" },
+  { name: "Price Template", value: "Price Template" },
 ]
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {

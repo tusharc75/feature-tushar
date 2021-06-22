@@ -50,7 +50,7 @@ const CreateProduct = (props) => {
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
 
-    const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
+    const [isShowTemplate, setIsShowTemplate] = useState(false);
     const [fieldChanges, setFieldChanges] = useState([]);
 
 
@@ -79,7 +79,7 @@ const CreateProduct = (props) => {
 
         let values = { ...productData }
         values.productCategory = values.productCategory.optionValue
-        values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue
+        values.priceTemplate = values.priceTemplate && values.priceTemplate.optionValue && values.priceTemplate.optionValue
         delete values.fields
 
         setInitialData({
@@ -177,7 +177,6 @@ const CreateProduct = (props) => {
         setFields(fields.filter((_f) => _f._id !== field._id))
         EvaluteproductFields(newField)
     }
-
 
     const addDisplayType = (displayType, field, displayValue) => {
         let _fieldChanges = fieldChanges;
@@ -291,18 +290,18 @@ const CreateProduct = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "productTemplate" && !isShowProductTemplate ?
+                                                        field.fieldName === "priceTemplate" && !isShowTemplate ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormControlLabel
                                                                     control={
                                                                         <Checkbox
-                                                                            checked={isShowProductTemplate}
-                                                                            onChange={() => setIsShowProductTemplate(true)}
-                                                                            name="isShowProductTemplate"
+                                                                            checked={isShowTemplate}
+                                                                            onChange={() => setIsShowTemplate(true)}
+                                                                            name="isShowTemplate"
                                                                             color="primary"
                                                                         />
                                                                     }
-                                                                    label="Show Product Template"
+                                                                    label="Show Template"
                                                                 />
                                                             </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
                                                                 <FormTypes
@@ -348,7 +347,7 @@ const CreateProduct = (props) => {
                                                                                 decimalPlaces={field.decimalPlaces}
                                                                                 isvlookupReverse={field.isvlookupReverse}
                                                                                 size="small"
-                                                                                disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
+                                                                                disabled={['unit', 'productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
                                                                                 imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
                                                                                     setUploadingImageOrFileProgress(completePercentage);
                                                                                 } : null}

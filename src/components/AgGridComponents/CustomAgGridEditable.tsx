@@ -7,6 +7,7 @@ import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import { orderBy } from 'lodash';
+import NumericEditor from './NumericEditor';
 
 export function reducer(state, action) {
     switch (action.type) {
@@ -108,7 +109,7 @@ export const intialState = {
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
     setGridApi, refreshGrid = null, allowSelection = true, allowAction = true, actionWidth = 200,
-    isClientSideGrid = false, handleGridReady = null, allowPagination = true, selectedRecords = [] }) {
+    isClientSideGrid = false, handleGridReady = null, allowPagination = true, onCellValueChanged }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
@@ -121,11 +122,6 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         setGridApi(params.api);
         setColumnApi(params.columnApi);
         setClientSideGridApi(params.api);
-        if (selectedRecords.length) {
-            params.api.forEachNode(function (node) {
-                node.setSelected(selectedRecords.some(o => o === node.data._id));
-            });
-        }
         if (handleGridReady) handleGridReady(params)
     }
 
@@ -150,6 +146,8 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 minWidth={column.width ?? 250}
                 flex={1}
                 rowDrag={column.rowDrag ?? false}
+                editable={column.editable ?? false}
+                singleClickEdit={true}
             // floatingFilterComponent={column.floatingFilterComponent ?? null}
             // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
             //   suppressFilterButton: true,
@@ -166,6 +164,8 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 flex={1}
                 filterParams={customFilterParams}
                 comparator={() => { return 0; }}
+                editable={column.editable ?? false}
+                singleClickEdit={true}
             // floatingFilterComponent={column.floatingFilterComponent ?? null}
             // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
             //   suppressFilterButton: true,
@@ -192,6 +192,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                         ...frameworkComponents,
                         customLoadingOverlay: CustomLoadingOverlay,
                         customFloatingFilter: CustomFloatingFilter,
+                        numericCellEditor: NumericEditor
                         // customLoadingCellRenderer: CustomLoadingCellRenderer,
                         // customNoRowsOverlay: CustomNoRowsOverlay
                     }}
@@ -209,6 +210,9 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                         if (!isClientSideGrid) {
                             dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
                         }
+                    }}
+                    onCellValueChanged={(row) => {
+                        onCellValueChanged(row)
                     }}
                     onFilterChanged={(e) => {
                         if (isClientSideGrid) {
