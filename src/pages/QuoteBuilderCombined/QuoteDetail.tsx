@@ -109,6 +109,7 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import VersionStatus from "./VersionStatus";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -458,9 +459,48 @@ function QuoteDetail() {
   const [DOAsetup, setDOAsetup] = useState(false);
   const [lastUser, setLastUser] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(true);
-  // const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [versionStatusData, setVersionStatusData] = useState({
-    columns: [],
+    columns: [
+      {
+        field: "versionNumber", headerName: "Version #", flex: 0.5,
+        renderCell: (params: any) => (
+          <Link
+            title={params.value}
+            className="text-truncate link"
+            onClick={() => {
+              setcurrentVersion(params.value);
+              setTabValue(2);
+              // setShowVersionsDialog(false);
+            }}
+          >
+            {params.value}
+          </Link>
+        ),
+      },
+      {
+        field: "status", headerName: "Status", flex: 1,
+        renderCell: (params: any) => (
+          <Link
+            title={params.value}
+            className="text-truncate link"
+            onClick={() => {
+              setcurrentVersion(params.row.versionNumber);
+              setTabValue(2);
+              // setShowVersionsDialog(false);
+            }}
+          >
+            {params.value}
+          </Link>
+        ),
+      },
+      { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
+      {
+        field: "totalSalesPrice",
+        headerName: "Total Sales Price",
+        flex: 0.5,
+      },
+      // { field: "processStatus", headerName: "ProcessStatus" }
+    ],
     data: [],
   });
   // const [allVersionStatusButtonText, setAllVersionStatusButtonText] =
@@ -535,7 +575,8 @@ function QuoteDetail() {
   }, []);
 
   useEffect(() => {
-    fetchDOAData()
+    if (currentVersion !== 0)
+      fetchDOAData()
   }, [currentVersion, DOAreq]);
 
   useEffect(() => {
@@ -1219,7 +1260,7 @@ function QuoteDetail() {
 
   const fetchDoaLimit = () => {
     axiosInstance()
-      .post("doa-request/limit", {})
+      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
       .then(({ data: { data } }) => {
         setDOAsetup(data.doasetup);
         setDOALimit(data.limit ? data.limit : 0);
@@ -1238,6 +1279,7 @@ function QuoteDetail() {
         setDOAData(data.reverse())
       })
       .catch((err) => {
+        setDOAData(null)
         // toastConfig.setToastConfig(err);
       });
   }
@@ -1752,49 +1794,11 @@ function QuoteDetail() {
           };
         });
 
-        setVersionStatusData({
-          columns: [
-            {
-              field: "versionNumber", headerName: "Version #", flex: 0.5,
-              renderCell: (params: any) => (
-                <Link
-                  title={params.value}
-                  className="text-truncate link"
-                  onClick={() => {
-                    setcurrentVersion(params.value);
-                    setTabValue(2);
-                    // setShowVersionsDialog(false);
-                  }}
-                >
-                  {params.value}
-                </Link>
-              ),
-            },
-            {
-              field: "status", headerName: "Status", flex: 1,
-              renderCell: (params: any) => (
-                <Link
-                  title={params.value}
-                  className="text-truncate link"
-                  onClick={() => {
-                    setcurrentVersion(params.row.versionNumber);
-                    setTabValue(2);
-                    // setShowVersionsDialog(false);
-                  }}
-                >
-                  {params.value}
-                </Link>
-              ),
-            },
-            { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
-            {
-              field: "totalSalesPrice",
-              headerName: "Total Sales Price",
-              flex: 0.5,
-            },
-            // { field: "processStatus", headerName: "ProcessStatus" }
-          ],
-          data: newData,
+        setVersionStatusData((prevState) => {
+          return {
+            ...prevState,
+            data: newData,
+          }
         });
 
         setLoadingVersions(false);
@@ -2021,23 +2025,11 @@ function QuoteDetail() {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-                    <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
-                      <DataGrid
-                        components={{
-                          NoRowsOverlay: CustomDataGridNoDataFound,
-                        }}
-                        loading={loadingVersions}
-                        autoHeight
-                        density="compact"
-                        rows={loadingVersions ? [] : versionStatusData.data}
-                        columns={versionStatusData.columns}
-                        disableSelectionOnClick
-                        disableMultipleSelection
-                        disableColumnFilter
-                        hideFooter
-                      />
-                    </div>
+                    <VersionStatus loadingVersions={loadingVersions} 
+                      versionStatusData={versionStatusData}
+                    />
                   </TabPanel>
+
                   <TabPanel value={tabValue} index={1}>
                     <div className={`position-relative ${classes.detailBox}`}>
                       {quoteData && (
@@ -2099,7 +2091,7 @@ function QuoteDetail() {
                             md={7}
                             className="quoteHeader"
                           >
-                            <div className="quoteBox">
+                            <div className={redCard ? "redQuoteBox":"quoteBox"}>
                               <span>Total Profit </span>
                               <span
                                 className="quoteAmount"
@@ -2665,31 +2657,6 @@ function QuoteDetail() {
             message={messageDialog.message}
           />
         )}
-
-        {/* {showVersionsDialog && (
-          <CustomDialogComponent
-            title="All Version Status"
-            open={showVersionsDialog}
-            onClose={() => {
-              setShowVersionsDialog(false);
-            }}
-          >
-            <div style={{ maxHeight: 500, width: "100%" }}>
-              <DataGrid
-                components={{
-                  NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                autoHeight
-                rows={versionStatusData.data}
-                columns={versionStatusData.columns}
-                disableSelectionOnClick
-                disableMultipleSelection
-                disableColumnFilter
-                hideFooter
-              />
-            </div>
-          </CustomDialogComponent>
-        )} */}
 
         {showAiDialog && (
           <Dialog
