@@ -19,26 +19,25 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from "@material-ui/icons/AddCircle";
 
 const ProductBuilderSchema = Yup.object().shape({
-    // productCategory: Yup.string()
-    //     .required("please select product category"),
-    productTemplate: Yup.string()
-        .required("please select product template"),
+    priceTemplate: Yup.string()
+        .required("please select price template"),
 });
 
 const SelectionDialog = (props) => {
 
     const { state: { permissions } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, api, refrenceId,isUpload,uploadData } = props;
+    const { handleClose, api, refrenceId, isUpload, uploadData } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
+    const [initialData, setInitialData] = useState({ productCategory: "", priceTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
-    const [productTemplate, setProductTemplate] = useState([]);
+    const [priceTemplate, setPriceTemplate] = useState([]);
     const [fileError, setFileError] = useState(null);
-    const [selectedFile,setSelectedFile] = useState(null)
+    const [selectedFile, setSelectedFile] = useState(null)
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     // const [productCategory, setProductCategory] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
+
     useEffect(() => {
         axiosInstance().get(`/product-category`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
@@ -47,37 +46,48 @@ const SelectionDialog = (props) => {
             }));
             setProductCategory(data.data)
         });
-        axiosInstance().get(`/product-template/template/standard`).then(({ data:{data} }) => {
-            setProductTemplate(data.data)
+        axiosInstance().get(`/price-template/template/standard`).then(({ data: { data } }) => {
+            setPriceTemplate(data.data)
             if (data.data.length) {
-                setInitialData({...initialData, productTemplate: data.data[0].optionValue })
+                setInitialData({ ...initialData, priceTemplate: data.data[0].optionValue })
             }
         });
     }, []);
-    const handleChangeCategory = (value) => {
+
+
+    const handleChangeCategory = (value, label) => {
         if (value && value !== "") {
-            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
-                setProductTemplate(data.data)
+            axiosInstance().get(`/price-template/template/` + value).then(({ data: { data } }) => {
+                setPriceTemplate(data.data)
                 if (data.data.length) {
-                    setInitialData({ productCategory: value, productTemplate: data.data[0].optionValue })
+                    var defaultpriceTemplate = data.data[0].optionValue
+                    data.data.forEach((_f) => {
+                        let re = new RegExp(_f.optionLabel);
+                        if (label.match(re)) {
+                            defaultpriceTemplate = _f.optionValue
+                            return
+                        }
+                    })
+                    setInitialData({ productCategory: value, priceTemplate: defaultpriceTemplate })
                 }
             });
-        }else{
-            axiosInstance().get(`/product-template/template/standard`).then(({ data:{data} }) => {
-                setProductTemplate(data.data)
+        } else {
+            axiosInstance().get(`/price-template/template/standard`).then(({ data: { data } }) => {
+                setPriceTemplate(data.data)
                 if (data.data.length) {
-                    setInitialData({...initialData, productTemplate: data.data[0].optionValue })
+                    setInitialData({ ...initialData, priceTemplate: data.data[0].optionValue })
                 }
             });
         }
     }
+
     const handleSubmit = (values) => {
-        if(isUpload){
-            if(!selectedFile) setFileError("Please Select File")
-            else uploadData(selectedFile,{productCategory:values.productCategory,productTemplate:values.productTemplate});
+        if (isUpload) {
+            if (!selectedFile) setFileError("Please Select File")
+            else uploadData(selectedFile, { productCategory: values.productCategory, priceTemplate: values.priceTemplate });
         }
 
-        else axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&productTemplate=" + values.productTemplate
+        else axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&priceTemplate=" + values.priceTemplate
             + "&refrenceId=" + refrenceId,
             { responseType: "arraybuffer" }).then((response) => {
                 const fileName = response.headers["content-disposition"].split("filename=")[1];
@@ -162,8 +172,8 @@ const SelectionDialog = (props) => {
                                             fullWidth
                                             onChange={(e, val) => {
                                                 setFieldValue("productCategory", val && val.optionValue ? val.optionValue : "")
-                                                handleChangeCategory(val && val.optionValue ? val.optionValue : "")
-                                                setFieldValue("productTemplate", "")
+                                                handleChangeCategory(val && val.optionValue ? val.optionValue : "", val && val.optionLabel ? val.optionLabel : "")
+                                                setFieldValue("priceTemplate", "")
                                             }}
                                             size="small"
                                             values={
@@ -196,45 +206,25 @@ const SelectionDialog = (props) => {
                                         )
                                     }
                                 </Grid>
-
-                                {/* <FormTypes
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={"Product Category"}
-                                        name={"productCategory"}
-                                        type={"dropDown"}
-                                        options={productCategory}
-                                        setFieldValue={setFieldValue}
-                                        required={true}
-                                        fullWidth
-                                        onChange={(e, val) => {
-                                            setFieldValue("productCategory", val && val.optionValue ? val.optionValue : "")
-                                            handleChangeCategory(val && val.optionValue ? val.optionValue : "")
-                                            setFieldValue("productTemplate", "")
-                                        }}
-                                        size="small"
-                                    /> */}
-
                                 <Box mt={1}>
                                     <FormTypes
                                         values={values}
                                         errors={errors}
                                         touched={touched}
-                                        label={"Product Template"}
-                                        name={"productTemplate"}
+                                        label={"Price Template"}
+                                        name={"priceTemplate"}
                                         type={"dropDown"}
-                                        options={productTemplate}
+                                        options={priceTemplate}
                                         setFieldValue={setFieldValue}
                                         required={true}
                                         fullWidth
                                         onChange={(e, val) => {
-                                            setFieldValue("productTemplate", val && val.optionValue ? val.optionValue : "")
+                                            setFieldValue("priceTemplate", val && val.optionValue ? val.optionValue : "")
                                         }}
                                         size="small"
                                     />
                                 </Box>
-                                {isUpload && 
+                                {isUpload &&
                                     <Box mt={1}>
                                         <label htmlFor="btn-upload">
                                             <input
@@ -248,15 +238,15 @@ const SelectionDialog = (props) => {
                                                     setSelectedFile(e)
                                                 }}
                                             />
-                                                <Button
-                                                    className={`btn-choose`}
-                                                    variant="outlined"
-                                                    component="span">
-                                                    Choose Files
-                                                </Button>
-                                                {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}
-                                                <span style={{marginLeft:'5px'}}>{selectedFile && selectedFile.target.files.length > 0 ? selectedFile.target.files[0].name : null}</span>
-                                            </label>
+                                            <Button
+                                                className={`btn-choose`}
+                                                variant="outlined"
+                                                component="span">
+                                                Choose Files
+                                            </Button>
+                                            {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}
+                                            <span style={{ marginLeft: '5px' }}>{selectedFile && selectedFile.target.files.length > 0 ? selectedFile.target.files[0].name : null}</span>
+                                        </label>
                                     </Box>
                                 }
                             </Box>
@@ -294,7 +284,7 @@ const SelectionDialog = (props) => {
                             ];
                         });
                         setNewProductCategoryId(data._id);
-                        handleChangeCategory(data._id)
+                        handleChangeCategory(data._id, data.name)
                     }
                     setShowAddProductCategoryDialog(false);
                     // fetchProductCategory();

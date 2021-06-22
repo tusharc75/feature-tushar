@@ -21,7 +21,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
@@ -462,7 +462,9 @@ function QuoteDetail() {
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
       {
-        field: "versionNumber", headerName: "Version #", flex: 0.5,
+        field: "versionNumber",
+        headerName: "Version #",
+        flex: 0.5,
         renderCell: (params: any) => (
           <Link
             title={params.value}
@@ -480,7 +482,9 @@ function QuoteDetail() {
         ),
       },
       {
-        field: "status", headerName: "Status", flex: 1,
+        field: "status",
+        headerName: "Status",
+        flex: 1,
         renderCell: (params: any) => (
           <Link
             title={params.value}
@@ -515,6 +519,7 @@ function QuoteDetail() {
     show: false,
     text: null,
   });
+  const [prevVersionTNC, setPrevVersionTNC] = useState([]);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -569,7 +574,7 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
-    setSelectedTnC(selectedRecords.map(o => o._id))
+    setSelectedTnC(selectedRecords.map((o) => o._id));
   }, [selectedRecords]);
 
   useEffect(() => {
@@ -577,8 +582,7 @@ function QuoteDetail() {
   }, []);
 
   useEffect(() => {
-    if (currentVersion !== 0)
-      fetchDOAData()
+    if (currentVersion !== 0) fetchDOAData();
   }, [currentVersion, DOAreq]);
 
   useEffect(() => {
@@ -596,7 +600,7 @@ function QuoteDetail() {
 
   useEffect(() => {
     getVersionStatus();
-  }, [quoteData])
+  }, [quoteData]);
 
   useEffect(() => {
     fetchTermsAndConditions();
@@ -632,6 +636,12 @@ function QuoteDetail() {
 
           // handleAllowToEditList(data);
           setQuoteData(data);
+          if (data?.versions) {
+            let lastVersionData = data?.versions[currentVersion - 1];
+            if (lastVersionData && lastVersionData.TNC) {
+              setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
+            }
+          }
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -767,16 +777,10 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
-    let tempProcessArray: Array<number> = []
-    Object.keys(data?.versions).forEach(key => {
-      DOAneeded ?
-        tempProcessArray.push(DOASteps.indexOf(data.versions[key].processStatus))
-        : tempProcessArray.push(OtherSteps.indexOf(data.versions[key].processStatus))
-    })
-    mainPoint["Quote Status"] = DOAneeded ? DOASteps[Math.max(...tempProcessArray)] : OtherSteps[Math.max(...tempProcessArray)]
+
     setMainPoints(mainPoint);
   };
 
@@ -806,7 +810,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -862,23 +866,23 @@ function QuoteDetail() {
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
-        let selectedRows = []
-        let rows = data.map((tnc) => {
+        let selectedRows = [];
+        let rows = data.map((tnc, i) => {
           if (selectedTnC.indexOf(tnc._id) >= 0) {
-            selectedRows.push(tnc)
+            selectedRows.push(tnc);
           }
           return {
             ...tnc,
             id: tnc._id,
             name: tnc.TACName,
-          }
+          };
         });
         dispatch({
           type: "initialize",
           data: rows,
           count: count,
         });
-        dispatch({ type: "selection", selectedRecords: selectedRows })
+        dispatch({ type: "selection", selectedRecords: selectedRows });
         setDataTNC(data);
         // dispatch({ type: "loading", loadingTNC: false });
       })
@@ -915,12 +919,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1124,10 +1128,14 @@ function QuoteDetail() {
       });
 
       // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
-      finalmarkup = finalmarkup.replaceAll("<p>", "<p style='overflow-wrap:break-word;word-wrap:break-word;'>");
+      finalmarkup = finalmarkup.replaceAll(
+        "<p>",
+        "<p style='overflow-wrap:break-word;word-wrap:break-word;'>"
+      );
       // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
 
-      let signatureContent = "<br><br><span--style='font-size:10px;'>Note:</span><br>";
+      let signatureContent =
+        "<br><br><span--style='font-size:10px;'>Note:</span><br>";
       signatureContent =
         signatureContent +
         `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
@@ -1143,7 +1151,7 @@ function QuoteDetail() {
       signatureContent = signatureContent.replaceAll("--", " ");
 
       finalmarkup = finalmarkup + signatureContent;
-      
+
       PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
         callback: function (doc) {
           if (view && !send) {
@@ -1271,13 +1279,13 @@ function QuoteDetail() {
     axiosInstance()
       .get(`doa-request/doaFlow/${id}/${currentVersion}`)
       .then(({ data: { data } }) => {
-        setDOAData(data.reverse())
+        setDOAData(data.reverse());
       })
       .catch((err) => {
-        setDOAData(null)
+        setDOAData(null);
         // toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   useEffect(() => {
     if (
@@ -1343,7 +1351,7 @@ function QuoteDetail() {
       });
       const data = new Blob([excelBuffer], { type: fileType });
 
-      console.log(data);
+      // console.log(data);
 
       if (send) {
         generateBase64forFile(data, "excel");
@@ -1487,7 +1495,6 @@ function QuoteDetail() {
 
     setLoadPB(true);
   };
-
   const handleClone = () => {
     axiosInstance()
       .post(`${qbApi}/clone/${quoteData._id}`)
@@ -1754,7 +1761,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1769,7 +1776,7 @@ function QuoteDetail() {
 
   const getVersionStatus = () => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
-    setLoadingVersions(true)
+    setLoadingVersions(true);
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
@@ -1794,7 +1801,7 @@ function QuoteDetail() {
           return {
             ...prevState,
             data: newData,
-          }
+          };
         });
 
         setLoadingVersions(false);
@@ -1850,7 +1857,9 @@ function QuoteDetail() {
 
   const ifQuoteApproved = () => {
     let approved = false;
+    let disapproved = false;
     let versionApproved = currentVersion;
+    let versionDisapproved = currentVersion;
 
     if (quoteData) {
       versions.forEach((v) => {
@@ -1858,11 +1867,17 @@ function QuoteDetail() {
           approved = true;
           versionApproved = v;
         }
+        if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
+          disapproved = true;
+          versionDisapproved = v;
+        }
       });
     }
     return {
       approved,
       versionApproved,
+      disapproved,
+      versionDisapproved,
     };
   };
 
@@ -1924,7 +1939,12 @@ function QuoteDetail() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={mainPoints}
+                  mainPoints={{
+                    ...mainPoints,
+                    "Quote Status": ifQuoteApproved().approved
+                      ? "End (Accepted By Customer"
+                      : "In Progress",
+                  }}
                   showHeading={true}
                 >
                   {/* <Button
@@ -1943,9 +1963,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -1986,8 +2006,8 @@ function QuoteDetail() {
                       }}
                       label={
                         <div className="d-flex align-items-center font-size-3">
-                          <InfoIcon className="mr-1" fontSize="inherit" />{" "}
-                          All Version Status
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
                         </div>
                       }
                       {...a11yProps(0)}
@@ -2021,7 +2041,8 @@ function QuoteDetail() {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-                    <VersionStatus loadingVersions={loadingVersions} 
+                    <VersionStatus
+                      loadingVersions={loadingVersions}
                       versionStatusData={versionStatusData}
                     />
                   </TabPanel>
@@ -2061,10 +2082,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                    (_f) =>
-                                      _f.fieldData.sectionName !==
-                                      "Post-Quote Information"
-                                  )
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
                                   : quoteFields
                               }
                             />
@@ -2087,7 +2108,9 @@ function QuoteDetail() {
                             md={7}
                             className="quoteHeader"
                           >
-                            <div className={redCard ? "redQuoteBox":"quoteBox"}>
+                            <div
+                              className={redCard ? "redQuoteBox" : "quoteBox"}
+                            >
                               <span>Total Profit </span>
                               <span
                                 className="quoteAmount"
@@ -2304,7 +2327,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2383,8 +2406,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2404,7 +2427,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2469,7 +2492,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2516,6 +2539,7 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
+                                  selectedRecords={[...prevVersionTNC]}
                                 />
                               </Box>
                             ) : null}
@@ -2565,7 +2589,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2637,8 +2661,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
