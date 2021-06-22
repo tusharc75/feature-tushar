@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import { Link } from 'react-router-dom'
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -291,7 +291,8 @@ const ITEM_PADDING_TOP = 8;
 
 const gettingVersionStatusText = "Getting Status...";
 
-function QuoteDetail() {
+function QuoteDetail () {
+  const history = useHistory();  
   const [tabValue, setTabValue] = React.useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
@@ -316,7 +317,6 @@ function QuoteDetail() {
   ];
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -493,6 +493,16 @@ function QuoteDetail() {
           </Link>
         ),
       },
+      {
+        field: "comment", headerName: "Comment", flex: 1,
+        renderCell: (params: any) => (
+          <Typography
+            title={params.value}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
       { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
       {
         field: "totalSalesPrice",
@@ -571,6 +581,7 @@ function QuoteDetail() {
 
   useEffect(() => {
     fetchDoaLimit();
+    // setTabValue(history.location?.state?.tabValue ? history.location?.state?.tabValue:0)
   }, []);
 
   useEffect(() => {
@@ -1774,6 +1785,7 @@ function QuoteDetail() {
           return {
             ...d,
             id: index + 1,
+            comment: d.comment ? d.comment:"",
             totalcost: formatAmountWithCurrency(
               quoteData?.currency,
               d.productData.totalCost

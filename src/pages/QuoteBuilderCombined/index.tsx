@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useReducer } from "react";
-import { Grid, Chip } from "@material-ui/core";
+import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
@@ -17,6 +17,7 @@ import {
   customerAccount,
   supplierAccount,
   quoteBuilder,
+  formatAmountWithCurrency,
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -39,6 +40,7 @@ import CustomDialogComponent from "../../components/CustomDialog/CustomDialogCom
 import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { DataGrid } from "@material-ui/data-grid";
 import VersionStatus from "./VersionStatus";
+import { Console } from "console";
 
 let quoteTimeout;
 const QuoteType = [
@@ -63,6 +65,9 @@ const QuoteBuilders = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [loadingVersions, setLoadingVersions] = useState(false);
+  const [currentVersion, setcurrentVersion] = useState(0);
+  const [tabValue, setTabValue] = React.useState(0);
   const [quotePermissions, setQuotePermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -84,9 +89,64 @@ const QuoteBuilders = () => {
   });
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [versionStatusData, setVersionStatusData] = useState({
-    columns: [],
+    columns: [
+      {
+        field: "versionNumber", headerName: "Version #", flex: 1,
+        renderCell: (params: any) => (
+          <span
+            title={params.value}
+          >
+            {params.value}
+          </span>
+        ),
+      },
+      {
+        field: "status", headerName: "Status", flex: 1,
+        renderCell: (params: any) => (
+          <span
+            title={params.value}
+            className="text-truncate"              
+          >
+            {params.value}
+          </span>
+        ),
+      },
+      {
+        field: "comment", headerName: "Comment", flex: 1,
+        renderCell: (params: any) => (
+          <Typography
+            title={params.value}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
+
+
+      {
+        field: "totalCost", headerName: "Total Cost", flex: 1,
+        renderCell: (params: any) => (
+          <span>
+            {params.value}
+          </span>
+        ),
+      },
+      {
+        field: "totalSalesPrice",
+        headerName: "Total Sales Price",
+        flex: 1,
+        renderCell: (params: any) => (
+          <span
+          >
+            {params.value}
+          </span>
+        ),
+      },
+      // { field: "processStatus", headerName: "ProcessStatus" }
+    ],
     data: [],
   });
+
   const { qbResource, qbApi } = quoteBuilder;
 
   //  Grid Variables - Start
@@ -197,6 +257,49 @@ const QuoteBuilders = () => {
     accountDetails,
   ]);
 
+  const getVersionStatus = (id, currency) => {
+    // setAllVersionStatusButtonText(gettingVersionStatusText);
+    setLoadingVersions(true)
+    axiosInstance()
+      .get(`/quote-builder/quote-hierarchy/${id}`)
+      .then(({ data: { data } }) => {
+        // setShowVersionsDialog(true);
+        let quoteId=id;
+        const newData = data.versions.map((d, index) => {
+          return {
+            ...d,
+            id: index + 1,
+            versionNumber: index+1,
+            _id: quoteId,
+            totalcost: formatAmountWithCurrency(
+              currency,
+              d.productData.totalCost
+            ).fullFormatAmount,
+            totalSalesPrice: formatAmountWithCurrency(
+              currency,
+              d.productData.totalSalesPrice
+            ).fullFormatAmount,
+            comment: d.comment ? d.comment : "",
+          };
+        });
+
+        setVersionStatusData((prevState) => {
+          return {
+            ...prevState,
+            data: newData,
+          }
+        });
+
+        setLoadingVersions(false);
+        // setAllVersionStatusButtonText("All Version Status");
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoadingVersions(false);
+        // setAllVersionStatusButtonText("All Version Status");
+      });
+  };
+
   const handleSingleDeleteQuote = async () => {
     dispatch({ type: "loading", loading: true });
 
@@ -221,13 +324,24 @@ const QuoteBuilders = () => {
   };
 
   const QuoteNameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}
-    >
-      {params.value}
-    </Link>
+    <span>
+      <Link
+        className="link"
+        title={params.value}
+        to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}
+      >
+        {params.value}
+      </Link>
+      <Tooltip
+        title="Versions">
+        <span
+          className="cursor-pointer link ml-1"
+          onClick={() => {
+            setShowVersionsDialog(true)
+            getVersionStatus(params.data._id, params.data.currency)
+          }}>({params.data.versionCount})</span>
+      </Tooltip>
+    </span>
   );
 
   const CustomerAccountNameRenderer = (params) => (
@@ -386,11 +500,14 @@ const QuoteBuilders = () => {
               ...restProperties
             } = u;
 
+            let count = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
             let versionArray = []
             Object.keys(u.versions).forEach(key => {
               versionArray.push(u.versions[key])
             })
+            console.log(versionArray)
+
             const updatedVersion = versionArray.find(v => v.status !== tempStatus)
             if (updatedVersion) {
               tempStatus = updatedVersion.status
@@ -409,6 +526,9 @@ const QuoteBuilders = () => {
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
               status: tempStatus,
+              versionCount: count,
+              versionData: versionArray,
+              currency: u.currency,
               relatedOpportunity: u.opportunity?.optionLabel,
               relatedOpportunityId: u.opportunity?.optionValue,
 
