@@ -92,14 +92,13 @@ const QuoteApproval = () => {
             });
     }
 
-    const QuoteStatusChange = (accepted, signature, comment) => {
-        let body = { status: "", signature: signature, comment: "" }
+    const QuoteStatusChange = (accepted, signature) => {
+        let body;
         if (accepted !== "Rejected") {
-            body.status = "Accepted by Customer";
+            body = { status: "Accepted by Customer", signature: signature }
         }
         else {
-            body.status = "Rejected by Customer";
-            body.comment = comment;
+            body = { status: "Rejected by Customer", comment: signature }
         }
         axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
             .then(({ data }) => {
@@ -207,7 +206,7 @@ const QuoteApproval = () => {
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    QuoteStatusChange("Accepted", imageData, "");
+                    QuoteStatusChange("Accepted", imageData);
                     setShowSignatureDialog(false);
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
