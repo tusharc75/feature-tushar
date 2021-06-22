@@ -9,20 +9,11 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import FieldList from '../FieldList';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import ListItemText from '@material-ui/core/ListItemText';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import { camelCase, UnCamelCase } from "../../../constants/helpers";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { DecimalPlaces } from './decimalPlaces';
 
 
 export const Currency = ({ values, setFieldValue }) => {
@@ -38,28 +29,29 @@ export const Currency = ({ values, setFieldValue }) => {
         });
     }, []);
 
-    return (
-        <Box>
-            <Autocomplete
-                multiple
-                id="tags-filled"
-                options={currency}
-                value={values["displayCurrency"] ? values["displayCurrency"] : []}
-                renderTags={(value: string[], getTagProps) =>
-                    value.map((option: string, index: number) => (
-                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-                    ))
-                }
-                onChange={(e, value) => setFieldValue("displayCurrency", value)}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        margin="dense"
-                        variant="outlined"
-                        label="Currency"
-                        placeholder="Currency" />
-                )}
-            />
-        </Box>
+    return (<Box>
+        <Autocomplete
+            multiple
+            disableCloseOnSelect={true}
+            id="tags-filled"
+            options={currency}
+            value={values["displayCurrency"] ? values["displayCurrency"] : []}
+            renderTags={(value: string[], getTagProps) =>
+                value.map((option: string, index: number) => (
+                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                ))
+            }
+            onChange={(e, value) => setFieldValue("displayCurrency", value)}
+            renderInput={(params) => (
+                <TextField
+                    {...params}
+                    margin="dense"
+                    variant="outlined"
+                    label="Currency"
+                    placeholder="Currency" />
+            )}
+        />
+        <DecimalPlaces values={values} setFieldValue={setFieldValue} />
+    </Box>
     );
 }

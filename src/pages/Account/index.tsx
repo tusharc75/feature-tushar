@@ -9,8 +9,10 @@ import {
   IconButton,
   Grid,
   Chip,
-  MenuList
+  MenuList,
+  Box
 } from "@material-ui/core";
+import ReactGa from 'react-ga';
 import { Link } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -49,7 +51,9 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import styles from "../Leads/Header.module.scss";
 const AccTypes = [
   {
     key: "All Accounts",
@@ -116,6 +120,7 @@ export default function Account(props) {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [filter, setFilter] = useState("All Accounts");
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -433,6 +438,10 @@ export default function Account(props) {
   };
 
   const clickCreateNew = () => {
+    ReactGa.event({
+      category:"Account Button",
+      action:"clicked"
+    });
     setIsAccDialogVisible(true);
   };
 
@@ -557,6 +566,13 @@ export default function Account(props) {
       });
   };
 
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      handleAccountSelect(AccTypes.find((d) => d.key === newFilter).value);
+    }
+  };
+
   return (
     <>
       <Layout>
@@ -566,6 +582,7 @@ export default function Account(props) {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
+              permissions={accountPermissions}
               module="account(s)"
               api={accountApi}
               afterImportCompleted={() => {
@@ -575,8 +592,197 @@ export default function Account(props) {
           </Grid>
         </Grid>
         <CustomContainer>
-          <div className={`${accountClass["account_header_inner_container"]}`} >
-            <CustomHeader
+          <div className={`${accountClass["account_header_inner_container"]}`}>
+            <Grid
+              container
+              className="header-panel"
+              justify="space-between"
+              alignContent="center"
+            >
+              <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+                <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
+                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
+                  <div
+                    className={`${accountClass.account_header_add_btn_action_btn_group}`} >
+                    {AccTypes && (
+                      <ToggleButtonGroup
+                        size="small"
+                        className={`ml-8 ${accountClass.accountActions}`}
+                        value={filter}
+                        exclusive
+                        onChange={handleFilter}
+                      >
+                        {AccTypes.map((k: any, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    )}
+                    <ButtonGroup size="small" className={accountClass.accountActions} variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
+                      <Button >{options[selectedIndex]}</Button>
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-controls={open ? 'split-button-menu' : undefined}
+                        aria-expanded={open ? 'true' : undefined}
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
+                        onClick={handleToggle}
+                      >
+                        <ArrowDropDownIcon />
+                      </Button>
+                    </ButtonGroup>
+                    <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                      {({ TransitionProps, placement }) => (
+                        <Grow
+                          {...TransitionProps}
+                          style={{
+                            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                          }}
+                        >
+                          <Paper>
+                            <ClickAwayListener onClickAway={handleClose}>
+                              <MenuList
+                                id="menu"
+                                style={{ backgroundColor: 'transparent', fontSize: '10px' }}
+                              >
+                                {options.map((option, index) => (
+                                  <MenuItem
+                                    key={option}
+                                    selected={index === selectedIndex}
+                                    onClick={(event) => handleMenuItemClick(event, index)}
+                                    style={{ color: 'black' }}
+                                  >
+                                    {option}
+                                  </MenuItem>
+                                ))}
+                              </MenuList>
+                            </ClickAwayListener>
+                          </Paper>
+                        </Grow>
+                      )}
+                    </Popper>
+                  </div>
+                </div>
+              </Grid>
+              <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
+                <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
+                  <SearchBox
+                    onSearch={handleSearch}
+                    searchbox="account_header_search_bar"
+                    width="300px"
+                    value={search}
+                  />
+                  <div
+                    className={`${accountClass.account_header_add_btn_action_btn_group}`}
+                  >
+                    {accountPermissions.isCreate && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        className={styles.add_submit_btn}
+                        onClick={clickCreateNew}
+                        startIcon={<AddOutlined />}
+                      >
+                        Add
+                      </Button>
+                    )}
+
+                    {(accountPermissions.isDelete ||
+                      accountPermissions.approveAccount) && (
+                        <Button
+                          disabled={selectedRecords.length === 0}
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          className={styles.add_submit_btn}
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                        >
+                          Actions <ExpandMore />
+                        </Button>
+                      )}
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left",
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {accountPermissions.isUpdate &&
+                        accountPermissions.approveAccount && (
+                          <MenuItem
+                            disabled={selectedRecords.filter((d) => !d.approved).length === 0}
+                            onClick={() => {
+                              closeActions();
+                              setMultipleApproveDisapproveAccount({
+                                show: true,
+                                approved: true,
+                                selectedRecords: selectedRecords.filter((d) => !d.approved).length,
+                              });
+                            }}
+                          >
+                            Approve Accounts &nbsp;{" "}
+                            <Chip
+                              size="small"
+                              label={selectedRecords.filter((d) => !d.approved).length}
+                            />
+                          </MenuItem>
+                        )}
+                      {accountPermissions.isUpdate &&
+                        accountPermissions.approveAccount && (
+                          <MenuItem
+                            disabled={selectedRecords.filter((d) => d.approved).length === 0}
+                            onClick={() => {
+                              closeActions();
+                              setMultipleApproveDisapproveAccount({
+                                show: true,
+                                approved: false,
+                                selectedRecords: selectedRecords.filter((d) => d.approved).length,
+                              });
+                            }}
+                          >
+                            Disapprove Accounts &nbsp;{" "}
+                            <Chip
+                              size="small"
+                              label={selectedRecords.filter((d) => d.approved).length}
+                            />
+                          </MenuItem>
+                        )}
+                      {accountPermissions.isDelete && (
+                        <MenuItem
+                          disabled={selectedRecords.length === 0}
+                          onClick={() => {
+                            if (selectedRecords.some((d) => d.canDelete === false)) {
+                              closeActions();
+                              setShowDeleteWarningConfirmBox(true);
+                            } else {
+                              closeActions();
+                              setShowDeleteConfirmBox(true);
+                            }
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      )}
+                    </Menu>
+                  </div>
+                </div>
+              </Grid>
+            </Grid>
+
+
+
+            {/* <CustomHeader
               total={rowCount}
               heading={sidebarResource[accountResource]}
               selectedType={selectedType}
@@ -585,165 +791,7 @@ export default function Account(props) {
               secondHeading="Account"
               icon={<MdAccountCircle className="headerLogo" />}
             >
-              <div>
-                <ButtonGroup size="small" variant="outlined" color="primary" ref={anchorRef} aria-label="small outlined button group">
-                  <Button >{options[selectedIndex]}</Button>
-                  <Button
-                    color="primary"
-                    size="small"
-                    aria-controls={open ? 'split-button-menu' : undefined}
-                    aria-expanded={open ? 'true' : undefined}
-                    aria-label="select merge strategy"
-                    aria-haspopup="menu"
-                    onClick={handleToggle}
-                  >
-                    <ArrowDropDownIcon />
-                  </Button>
-                </ButtonGroup>
-                <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
-                  {({ TransitionProps, placement }) => (
-                    <Grow
-                      {...TransitionProps}
-                      style={{
-                        transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
-                      }}
-                    >
-                      <Paper>
-                        <ClickAwayListener onClickAway={handleClose}>
-                          <MenuList
-                            id="menu"
-                            style={{ backgroundColor: 'transparent', fontSize: '10px' }}
-                          >
-                            {options.map((option, index) => (
-                              <MenuItem
-                                key={option}
-                                selected={index === selectedIndex}
-                                onClick={(event) => handleMenuItemClick(event, index)}
-                                style={{ color: 'black' }}
-                              >
-                                {option}
-                              </MenuItem>
-                            ))}
-                          </MenuList>
-                        </ClickAwayListener>
-                      </Paper>
-                    </Grow>
-                  )}
-                </Popper>
-              </div>
-              <div
-                className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`}
-              >
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox="account_header_search_bar"
-                  width="300px"
-                  value={search}
-                />
-
-
-                <div
-                  className={`${accountClass.account_header_add_btn_action_btn_group}`}
-                >
-                  {accountPermissions.isCreate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className={`${accountClass.account_header_add_btn}`}
-                      onClick={clickCreateNew}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button>
-                  )}
-
-                  {(accountPermissions.isDelete ||
-                    accountPermissions.approveAccount) && (
-                      <Button
-                        disabled={selectedRecords.length === 0}
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        className={`${accountClass.account_header_action_btn}`}
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                      >
-                        Actions <ExpandMore />
-                      </Button>
-                    )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {accountPermissions.isUpdate &&
-                      accountPermissions.approveAccount && (
-                        <MenuItem
-                          disabled={selectedRecords.filter((d) => !d.approved).length === 0}
-                          onClick={() => {
-                            closeActions();
-                            setMultipleApproveDisapproveAccount({
-                              show: true,
-                              approved: true,
-                              selectedRecords: selectedRecords.filter((d) => !d.approved).length,
-                            });
-                          }}
-                        >
-                          Approve Accounts &nbsp;{" "}
-                          <Chip
-                            size="small"
-                            label={selectedRecords.filter((d) => !d.approved).length}
-                          />
-                        </MenuItem>
-                      )}
-                    {accountPermissions.isUpdate &&
-                      accountPermissions.approveAccount && (
-                        <MenuItem
-                          disabled={selectedRecords.filter((d) => d.approved).length === 0}
-                          onClick={() => {
-                            closeActions();
-                            setMultipleApproveDisapproveAccount({
-                              show: true,
-                              approved: false,
-                              selectedRecords: selectedRecords.filter((d) => d.approved).length,
-                            });
-                          }}
-                        >
-                          Disapprove Accounts &nbsp;{" "}
-                          <Chip
-                            size="small"
-                            label={selectedRecords.filter((d) => d.approved).length}
-                          />
-                        </MenuItem>
-                      )}
-                    {accountPermissions.isDelete && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox(true);
-                          } else {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </div>
-              </div>
-            </CustomHeader>
+            </CustomHeader> */}
           </div>
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
@@ -759,7 +807,7 @@ export default function Account(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure, you want to delete selected account(s) ?`}
+              message={`Are you sure you want to delete the selected account(s) ?`}
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={handleDeleteAccounts}
             />
@@ -767,7 +815,7 @@ export default function Account(props) {
           {singleAccountDelete.show ? (
             <ConfirmationDialog
               open={singleAccountDelete.show}
-              message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
+              message={`Are you sure you want to delete the account: ${singleAccountDelete.accountName} ? `}
               onClose={() =>
                 setSingleAccountDelete({
                   id: null,
@@ -782,7 +830,7 @@ export default function Account(props) {
           {singleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
+              message={`Are you sure you want to ${singleApproveDisapproveAccount.approved
                 ? "approve"
                 : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
@@ -800,7 +848,7 @@ export default function Account(props) {
           {multipleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
+              message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved
                 ? "approve"
                 : "disapprove"
                 } selected ${multipleApproveDisapproveAccount.selectedRecords

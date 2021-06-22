@@ -21,6 +21,8 @@ const RoleHeader = (props) => {
     rolePermissions,
     showConfirmBox,
     canDelete,
+    selectedRecords,
+    userDialogOpen
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
@@ -47,7 +49,7 @@ const RoleHeader = (props) => {
 
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         <BsPersonBoundingBox /> <span className="listingHeader">Roles</span>
         {options && (
           <ToggleButtonGroup
@@ -59,7 +61,7 @@ const RoleHeader = (props) => {
             {options.map((k, index) => {
               return (
                 <ToggleButton value={k.key} key={index}>
-                  {k.key}
+                  {k.key === "Global" ? "Company wide role" : "Region wide functional role"}
                 </ToggleButton>
               );
             })}
@@ -89,9 +91,10 @@ const RoleHeader = (props) => {
             </Button>
           )}
 
-          {rolePermissions.isDelete && (
+          {(rolePermissions.isDelete || rolePermissions.isUpdate) && (
             <>
               <Button
+                disabled={selectedRecords.length == 0}
                 className={styles.action_submit_btn}
                 variant="outlined"
                 color="default"
@@ -116,10 +119,20 @@ const RoleHeader = (props) => {
                 <MenuItem
                   disabled={Boolean(!canDelete)}
                   onClick={() => {
+                    closeActions();
                     showConfirmBox(null);
                   }}
                 >
                   Delete
+                </MenuItem>
+                <MenuItem
+                  disabled={!rolePermissions.isUpdate}
+                  onClick={() => {
+                    closeActions();
+                    userDialogOpen();
+                  }}
+                >
+                  Assign users
                 </MenuItem>
               </Menu>
             </>

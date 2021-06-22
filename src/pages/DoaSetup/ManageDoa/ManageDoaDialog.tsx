@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
         // borderBottom: `1px solid #daf5ff`
     },
     currencyStyle: {
-        width: 200,
+        width: 400,
     },
     dialogTitle: {
         fontSize: "1.2rem"
@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose }) => {
+const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage" }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
@@ -81,9 +81,12 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             : null);
 
     const fetchDoa = useCallback(() => {
+
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: userSelected, name: userList.find(d => d.id === userSelected).name, amount: 0 }]))
+            from === "UserDetailPage" ?
+                setUsers(([{ id: userList.find(v => v.id == userSelected[0]).id, name: userList.find(v => v.id == userSelected[0]).name, amount: 0 }]))
+                : setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -107,9 +110,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                 };
             });
 
-        const userDoa = { _id: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
+        const userDoa = { _ids: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
         setLoading(true)
-        axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
+        axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
@@ -182,7 +185,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                     }
                                     options={currencyData}
                                     getOptionLabel={(option: any) =>
-                                        option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+                                        option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ""
                                     }
                                     getOptionSelected={(option: any, val) => option?.currencyCode === val}
                                     onChange={(e, val) => {
@@ -200,24 +203,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                         />
                                     )}
                                     renderOption={(option) => {
-                                        const { currencyCode, name, countryCode, symbolNative } = option;
-                                        return (
-                                            <Grid container alignItems="center">
-                                                <Grid item>
-                                                    <Avatar
-                                                        variant="rounded"
-                                                        src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                                                        style={{ marginRight: 20, width: "40px", height: "30px" }}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs>
-                                                    <Typography>{currencyCode} ({symbolNative})</Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {name}
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                        );
+                                        const { currencyCode, currencyName, symbolNative } = option;
+                                        return `${currencyCode} - ${currencyName} - (${symbolNative})`
                                     }}
                                 />
                             }
@@ -381,7 +368,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             variant="contained"
                                         >
                                             Cancel
-                                </Button>
+                                        </Button>
                                         <Button
                                             variant="contained"
                                             color="primary"
@@ -396,7 +383,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             }}
                                         >
                                             Save
-                                </Button>
+                                        </Button>
                                     </CustomDialogFooter>
                                 </>
                             )}

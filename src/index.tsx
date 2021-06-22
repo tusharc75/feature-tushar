@@ -16,9 +16,13 @@ import "./styles/material-component.scss";
 import "./styles/responsive-styles.scss"
 import "./styles/rbc-calender.scss";
 import "./styles/vis-network/vis-network.min.css"
+import "./styles/safari.scss";
+
 import { Integrations } from "@sentry/tracing";
 import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import "./components/Chatter/style.scss"
+import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+
 
 Sentry.init({
   dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
@@ -32,15 +36,19 @@ Sentry.init({
 
 
 
+
+
 ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Provider>
         <CustomToastProvider>
           <CustomNotificationCountProvider>
-            <MsalProvider instance={AzureInstance}>
-              <App />
-            </MsalProvider>
+            <CustomChatNotificationCountProvider>
+              <MsalProvider instance={AzureInstance}>
+                  <App />
+              </MsalProvider>
+            </CustomChatNotificationCountProvider>
           </CustomNotificationCountProvider>
         </CustomToastProvider>
       </Provider>

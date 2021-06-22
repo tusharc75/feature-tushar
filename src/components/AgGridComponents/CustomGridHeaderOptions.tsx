@@ -1,13 +1,17 @@
 import React, { useState } from 'react'
-import { Box, Button, Popover, FormControl, FormGroup, FormControlLabel, Tooltip, Switch } from '@material-ui/core'
+import {
+    Box, Button, Popover, FormControl, FormGroup, FormControlLabel, Tooltip,
+    Divider, Switch
+} from '@material-ui/core'
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
-export default function CustomGridHeaderOptions({ columns, setColumns, columnApi }) {
+export default function CustomGridHeaderOptions({ columns, setColumns, columnApi, refreshGrid = null }) {
 
     const [openColumnSelection, setOpenColumnSelection] = useState(false)
     const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-    return <Box className="ag-grid-listing-grid-header-options border px-2 py-1">
+    return <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2">
         <Button aria-describedby="columnSelection"
             size="small"
             className="px-2"
@@ -18,7 +22,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
                 setOpenColumnSelectionAnchorEl(event.currentTarget);
             }}>
             Columns
-      </Button>
+        </Button>
 
         <Popover
             id="columnSelection"
@@ -66,18 +70,32 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             </FormControl>
         </Popover>
 
-        {/* <Divider orientation="vertical" />
+        {
+            refreshGrid && <>
+                <Divider orientation="vertical" flexItem />
 
-    <Button aria-describedby="columnSelection"
-      size="small"
-      className="px-2"
-      startIcon={<FilterListIcon />}
-      color="primary"
-      onClick={() => {
-        setShowGridFilters(!showGridFilters)
-      }}>
-      {`${showGridFilters ? "Hide" : "Show"} filters`}
-    </Button> */}
+                <Button aria-describedby="columnSelection"
+                    size="small"
+                    className="px-2"
+                    startIcon={<RefreshIcon />}
+                    color="primary"
+                    onClick={() => {
+                        refreshGrid()
+                    }}>
+                    Reftesh
+                </Button>
+            </>
+        }
+
+        {/* <Button aria-describedby="columnSelection"
+            size="small"
+            className="px-2"
+            startIcon={<FilterListIcon />}
+            color="primary"
+            onClick={() => {
+                setShowGridFilters(!showGridFilters)
+            }}>
+            {`${showGridFilters ? "Hide" : "Show"} filters`}
+        </Button> */}
     </Box>
-
 }

@@ -348,7 +348,7 @@ export default function ManageOpportunityDialog({
                                           />
                                         </Grid>
                                         {permissions.customerAccount
-                                          .isCreate && accountId === null && (
+                                          .isCreate && !accountId && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
                                                 title="Create Account"
@@ -388,7 +388,20 @@ export default function ManageOpportunityDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={ownerData}
-                                        setFieldValue={setFieldValue}
+                                        onChange={(e, val) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            val && val.optionValue ? val.optionValue : ""
+                                          );
+
+                                          if (val && val.optionValue !== user?.user?._id) {
+                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
+                                            if (!checkOwnerAddedInCollaborator) {
+                                              setFieldValue("collaborator",
+                                                [...values["collaborator"], collaboratorData.find(d => d.optionValue === user?.user?._id).optionValue])
+                                            }
+                                          }
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={true}
@@ -495,7 +508,7 @@ export default function ManageOpportunityDialog({
                                           }
                                         }}
                                       />
-                                    ) : field.fieldName === "amount" ? (
+                                    ) : field.fieldName.trim() === "estimatedAmount" ? (
                                       <FormTypes
                                         // {...rest}
                                         startAdornment={

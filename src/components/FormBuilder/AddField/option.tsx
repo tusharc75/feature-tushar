@@ -83,12 +83,11 @@ export const Option = ({ values, setFieldValue }) => {
                 <Typography variant="body2">Options</Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={6} container justify="flex-end">
-                <label className={`cursor-pointer mr-3`} onClick={handleExportExcel} >Export to Excel</label>
-                <label htmlFor="importFromExcel" className={`cursor-pointer`}>Import from Excel</label>
+                <label htmlFor="optionimportFromExcel" className={`cursor-pointer mr-3`}>Import from Excel</label>
                 <input
                     onClick={(e: any) => (e.target.value = null)}
-                    id="importFromExcel"
-                    name="importFromExcel"
+                    id="optionimportFromExcel"
+                    name="optionimportFromExcel"
                     onChange={handleImportExcel}
                     accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     style={{
@@ -98,6 +97,7 @@ export const Option = ({ values, setFieldValue }) => {
                     }}
                     type="file"
                 />
+                <label className={`cursor-pointer`} onClick={handleExportExcel} >Export to Excel</label>
             </Grid>
         </Grid>
         <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" maxHeight={300} style={{ overflow: "auto" }}>

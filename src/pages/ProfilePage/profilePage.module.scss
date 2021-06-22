@@ -17,11 +17,17 @@
   background: #ececec;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.5rem;
   padding: 7% 11%;
   margin-right: 1rem;
   border-radius: 4px;
 }
+@supports not (gap: 0.5rem) {
+  .userDetail > *:not(:nth-child(1)) {
+      margin-left: 0.5rem !important;
+  }
+}
+
 
 .profileAvatarContainer {
   display: flex;

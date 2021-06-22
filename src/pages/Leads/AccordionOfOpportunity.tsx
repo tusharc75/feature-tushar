@@ -158,10 +158,10 @@ export default function AccordionOfOpportunity({
                                                                     }
                                                                 </Grid>
                                                                 {
-                                                                    opportunity?.amount &&
+                                                                    opportunity?.estimatedAmount &&
                                                                     <Grid item xs={12} sm={4}>
-                                                                        <Typography className="amount" title={formatAmountWithCurrency(opportunity["currency"], opportunity?.amount).fullFormatAmount}>
-                                                                            {formatAmountWithCurrency(opportunity["currency"], opportunity?.amount).shortFormatAmount}
+                                                                        <Typography className="amount" title={formatAmountWithCurrency(opportunity["currency"], opportunity?.estimatedAmount).fullFormatAmount}>
+                                                                            {formatAmountWithCurrency(opportunity["currency"], opportunity?.estimatedAmount).shortFormatAmount}
                                                                         </Typography>
                                                                     </Grid>
                                                                 }

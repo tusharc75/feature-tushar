@@ -21,6 +21,7 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import TrendingUpOutlinedIcon from "@material-ui/icons/TrendingUpOutlined";
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import axiosInstance from "../../axios/axiosInstance";
 import { Link } from "react-router-dom";
@@ -32,7 +33,8 @@ import { MoreVert, Delete } from "@material-ui/icons";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaArrowAltCircleDown } from "react-icons/fa";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { getUniqueCurrencies } from "../../constants/helpers";
+import { formatAmountWithCurrency, getUniqueCurrencies } from "../../constants/helpers";
+import routes from "../../components/Helpers/Routes";
 
 const Accordion = withStyles({
   root: {
@@ -272,7 +274,7 @@ export default function QuotesAccordionInProjectSale({
                                 {obj.entity === selectedEntity ? (
                                   <Link
                                     className="link"
-                                    to={`/quote-builder/${obj._id}`}
+                                    to={`${routes.quoteBuilder.path}/detail/${obj._id}`}
                                   >
                                     <Typography className="detailName text-truncate">
                                       {obj.quoteName}
@@ -292,22 +294,16 @@ export default function QuotesAccordionInProjectSale({
                                 )}
                               </Grid>
                               <Grid item xs={6}>
-                                <Box display="flex" alignItems="center">
-                                  {obj?.amount ? (
-                                    <Typography className="amount">
-                                      {
-                                        getUniqueCurrencies().find(
-                                          (d) =>
-                                            d.currencyCode == obj["currency"]
-                                        )?.symbolNative
-                                      }
-                                      &nbsp;{obj?.amount ?? ""}
+                                <Box display="flex" alignItems="center" justifyContent="flex-end">
+                                  {obj?.estimatedAmount ? (
+                                    <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
+                                      {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).shortFormatAmount}
                                     </Typography>
                                   ) : (
                                     ""
                                   )}
                                   {(permissions.isUpdate && isTeamMember) ||
-                                  isManager ? (
+                                    isManager ? (
                                     <>
                                       <Box ml={1} />
                                       <IconButton
@@ -328,16 +324,26 @@ export default function QuotesAccordionInProjectSale({
 
                             <Grid container>
                               <Grid item xs={12} sm={6} md={6}>
-                                {obj.closeDate ? (
+                                {obj.expiryDate ? (
                                   <DisplayData
                                     key={i}
                                     label="Closing Date"
-                                    value={displayDate(obj.closeDate)}
+                                    value={displayDate(obj.expiryDate)}
                                     icon={<IoCalendarOutline size={15} />}
                                   />
                                 ) : (
                                   ""
                                 )}
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={6}>
+                                {
+                                  obj.incoTerms ? (
+                                    <DisplayData
+                                      key={i} label='Inco Terms'
+                                      value={obj.incoTerms}
+                                      icon={< BusinessOutlinedIcon />}
+                                    />) : ''
+                                }
                               </Grid>
                               <Grid item xs={12} sm={6} md={6}>
                                 {obj.probability ? (

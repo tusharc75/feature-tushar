@@ -527,6 +527,7 @@ const ContactDetailsPage = (props) => {
                     isRedirect={false}
                     contactId={id}
                     contactResource={contactResource}
+                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
                   />
                 )}
                 {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
@@ -537,10 +538,11 @@ const ContactDetailsPage = (props) => {
                     fetchData={fetchRelatedData}
                     permissions={permissions}
                     isAddProjectSale={true}
+                    isAllowedToEdit={contactPermissions.isUpdate && canEdit}
                   />
                 )}
                 {
-                accountResource === customerAccount.accountResource &&
+                  accountResource === customerAccount.accountResource &&
                   permissions?.quoteBuilder?.isRead && (
                     <QuotesInAccordion
                       recordsPerLine={3}
@@ -552,6 +554,7 @@ const ContactDetailsPage = (props) => {
                       accountResource={accountResource}
                       isRenderedInCustomerContact={true}
                       isRenderedFromCustomerAccount={true}
+                      isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
                     />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
@@ -568,6 +571,7 @@ const ContactDetailsPage = (props) => {
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ["Attachment", "Case"]}
                     relatedTo={[
                       {
                         type: accountResource,
@@ -587,28 +591,7 @@ const ContactDetailsPage = (props) => {
                   />
                 </div>
               )}
-
-
               <QuickLinks quickLinks={quickLinks} />
-
-              {/* <div className={`${contactClass.detail_page_div2}`}>
-                    {quickLinks && quickLinks.length
-                      ? quickLinks.map((k, index) => {
-                        return (
-                          <Link key={index} className="link">
-                            {k.label || ""}({k.count || 0})
-                          </Link>
-                        );
-                      })
-                      : null}
-                  </div> */}
-              {/* <div className={`${contactClass.detail_page_div3}`}>
-                    <Typography color="primary" variant="h6">
-                      Related Accounts
-                    </Typography>
-                    <Box className={`${contactClass.custom_box1}`}></Box>
-                  </div> */}
-
               {contactData?.staticData?.lead && permissions &&
                 permissions.lead &&
                 permissions.lead.isRead && (

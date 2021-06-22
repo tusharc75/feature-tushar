@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [] } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [] } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -211,16 +211,19 @@ const Activity = (props) => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={4} container justify="flex-end">
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={(event) => handleCreateActivity(event, data)}
-                  >
-                    {" "}
-                    <FiPlusSquare />
-                  </IconButton>
-                </Grid>
+                {
+                  restrictedAddActivities.indexOf(data) >= 0 ? null :
+                    <Grid item xs={4} container justify="flex-end">
+                      <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={(event) => handleCreateActivity(event, data)}
+                      >
+                        {" "}
+                        <FiPlusSquare />
+                      </IconButton>
+                    </Grid>
+                }
               </Grid>
             </Box>
             <Box>

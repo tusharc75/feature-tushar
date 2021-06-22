@@ -371,11 +371,11 @@ export default function Attachment(props) {
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                    <Grid item xs={5} className="d-flex align-items-center gap-1">
                         <AiOutlinePaperClip className="headerLogo" />{" "}
                         <span className="listingHeader">Attachment ({rowCount})</span>
                     </Grid>
-                    <Grid item xs={10} className={styles.filter_side}>
+                    <Grid item xs={7} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: "100%" }} >
                             <SearchFilter handleChangeFilter={handleChangeFilter}
                                 filter={filter}
@@ -460,7 +460,7 @@ export default function Attachment(props) {
             {isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment ?' : "these attachments ?"}`}
+                    message={`Are you sure you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment?' : "these attachments?"}`}
                     onClose={() => {
                         if (deleteRecord) setDeleteRecord(null);
                         setIsConfirmDialogVisible(false);

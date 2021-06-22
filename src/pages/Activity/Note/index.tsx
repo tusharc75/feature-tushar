@@ -25,6 +25,8 @@ import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridCo
 import { displayDate } from "../../../constants/helpers"
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
+import { truncate } from "lodash";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 const Note = () => {
     const {
@@ -106,14 +108,14 @@ const Note = () => {
 
     const CreatedAtDateRenderer = params => (
         <span style={{ marginLeft: 5, fontSize: 12 }}>
-            { displayDate(params.value)}
+            {displayDate(params.value)}
         </span>
     )
 
     const UpdatedAtDateRenderer = params => (
-        <span style={{ marginLeft: 5, fontSize: 12 }}>
+        params.value ? <span style={{ marginLeft: 5, fontSize: 12 }}>
             {displayDate(params.value)}
-        </span>
+        </span> : <NoDataCell />
     )
 
     const ActionsRenderer = params => <>
@@ -151,7 +153,7 @@ const Note = () => {
                     let res = {
                         ...restProperties,
                         id: u._id,
-
+                        name: u.name,
                         createdBy: u.createdBy?.user,
                         createdByDate: u.createdBy?.date,
                         updatedBy: u.updatedBy?.user?.concatedName,
@@ -179,7 +181,7 @@ const Note = () => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
-                        message: data.message,
+                        message: "Note Deleted Succesfully",
                     });
                     setIsConformDialogVisible(false);
                     setOkButtonLoading(false);
@@ -214,7 +216,7 @@ const Note = () => {
         if (row) {
             setIsConformDialogVisible(true);
             if (row) {
-                setDeleteRecord({ id: row.id, name: row.concatedName });
+                setDeleteRecord({ id: row.id, name: row.name });
             }
         } else {
             if (
@@ -230,7 +232,7 @@ const Note = () => {
 
     return (<Layout>
         <Grid container className="headerbox">
-            <Grid item xs={12}>
+            <Grid item xs={6}>
                 <CustomBreadCrumbs routes={[{ title: "Note" }]} />
             </Grid>
         </Grid>
@@ -238,11 +240,11 @@ const Note = () => {
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                    <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <GoNote className="headerLogo" />{" "}
                         <span className="listingHeader">Note ({dataRows.length})</span>
                     </Grid>
-                    <Grid item xs={10} className={styles.filter_side}>
+                    <Grid item xs={6} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
                             <SearchFilter
                                 handleChangeFilter={handleChangeFilter}
@@ -261,7 +263,7 @@ const Note = () => {
                                 }}
                                 startIcon={<AddOutlined />}>
                                 Add
-                                </Button>
+                            </Button>
                             {/* </Box> */}
                             <Button
                                 className={styles.action_submit_btn}
@@ -287,12 +289,12 @@ const Note = () => {
                                 onClose={closeActions}>
                                 <MenuItem
                                     onClick={() => {
-                                        showConfirmBox(null);
+                                        showConfirmBox(selectedRecords);
                                         closeActions();
                                     }}
                                 >
                                     Delete
-                                    </MenuItem>
+                                </MenuItem>
                             </Menu>
                         </Box>
                     </Grid>
@@ -300,8 +302,8 @@ const Note = () => {
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
-                isClientSideGrid={true} />
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true} allowSelection={true}
+                actionWidth={100} isClientSideGrid={true} />
 
             {noteId !== undefined && <ActivityModelHandler
                 activityType="note"
@@ -313,7 +315,7 @@ const Note = () => {
             isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete Note ${deleteRecord.name || ""
+                    message={`Are you sure you want to delete ${deleteRecord.name || "Notes"
                         }?`}
                     onClose={() => {
                         if (deleteRecord.id) setDeleteRecord({ id: null, name: null });

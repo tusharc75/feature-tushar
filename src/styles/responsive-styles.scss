@@ -34,6 +34,7 @@
         }
     }
     .detail-container {
+        height: auto;
         top: 0;
         padding: 0;
         margin-top: 0 !important;
@@ -44,7 +45,6 @@
         align-items: normal;
         justify-content: center;
         flex-direction: column;
-        gap: 6px;
     }
 
     .listing-grid {
@@ -66,9 +66,15 @@
     }
     .chat-box {
         position: absolute;
+        top: 10px;
+        left: 2px;
         right: 10px;
         bottom: 14px;
     }
+    .bgbox, .profileBox{
+        background: transparent;
+    }
+
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -88,6 +94,9 @@
     .main-container {
         top: 0;
         margin: 0;
+    }
+    .headerbox {
+        width: 100% !important;
     }
 }
 

@@ -22,7 +22,7 @@ const MenuProps = {
     },
 };
 
-export const Formula = ({ fields, values, setFieldValue }) => {
+export const Formula = ({ fields, values, setFieldValue, _id }) => {
 
     const [formulaError, setFormulaError] = useState(null);
     const inputRef = useRef<any>();
@@ -45,26 +45,57 @@ export const Formula = ({ fields, values, setFieldValue }) => {
 
     const handleAddInputField = (field) => {
         let pushPosition = inputRef.current.selectionStart
+        if (!values["formula"]) {
+            values["formula"] = ""
+        }
         var new_formula = [values["formula"].slice(0, pushPosition), field, values["formula"].slice(pushPosition)].join('');
         setFieldValue("formula", new_formula)
         inputRef.current.focus();
     }
 
+    const convertLabeltoValue = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            if (fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v).length) {
+                result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldName)
+            }
+            else {
+                result.push(_v)
+            }
+        })
+        return result;
+    }
+
+    const convertValuetoLabel = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            if (fields.filter((data) => data.fieldName === _v).length) {
+                result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldLabel)
+            }
+            else {
+                result.push(_v)
+            }
+        })
+        return result;
+    }
+
+
     return (<Box>
         <FormControl variant="outlined" fullWidth margin="dense">
             <Autocomplete
                 multiple
+                disableCloseOnSelect={true}
                 id="tags-filled"
-                options={fields && fields.map((_field) => { return _field.fieldName })}
+                options={fields && (fields.filter((_f) => _f._id !== _id)).map((_field) => { return _field.fieldLabel })}
                 getOptionLabel={(option) => option}
-                value={values["inputFields"] ? values["inputFields"] : []}
+                value={values["inputFields"] ? convertValuetoLabel(values["inputFields"]) : []}
                 freeSolo
                 renderTags={(value: string[], getTagProps) =>
                     value.map((option: string, index: number) => (
                         <Chip variant="outlined" label={option} {...getTagProps({ index })} />
                     ))
                 }
-                onChange={(e, value) => setFieldValue("inputFields", value)}
+                onChange={(e, value) => setFieldValue("inputFields", convertLabeltoValue(value))}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -74,28 +105,6 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                         placeholder="Input Parameters" />
                 )}
             />
-            {/* <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
-            <Select
-                inputProps={{
-                    name: 'inputFields',
-                    id: "demo-simple-select-outlined"
-                }}
-                margin="dense"
-                label="Input Parameters"
-                multiple
-                name="inputFields"
-                value={values["inputFields"]}
-                onChange={(e) => setFieldValue("inputFields", e.target.value)}
-                renderValue={(selected: any) => selected.join(', ')}
-                MenuProps={MenuProps}
-            >
-                {fields && fields.map((_field) => (
-                    <MenuItem key={_field.fieldName} value={_field.fieldName}>
-                        <Checkbox color="primary" checked={values["inputFields"] && values["inputFields"].indexOf(_field.fieldName) > -1} />
-                        <ListItemText primary={_field.fieldLabel} />
-                    </MenuItem>
-                ))}
-            </Select> */}
         </FormControl>
         {(values["inputFields"] && values["inputFields"].length > 0) &&
             <Box pt={0.5} pb={0.5}>

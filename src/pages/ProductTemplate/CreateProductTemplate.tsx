@@ -16,7 +16,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
-import DefaultFields from './defaultFields';
 import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
 import queryString from "query-string";
@@ -45,7 +44,7 @@ const ProductTemplate = () => {
     const [section, setSection] = useState([]);
     const [deleteField, setDeleteField] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
-    const [productUnit, setProductUnit] = useState(null);
+    //const [productUnit, setProductUnit] = useState(null);
 
     useEffect(() => {
         fetchOneProductTemplate();
@@ -53,18 +52,21 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
-            const _data = []
-            const _section = uniq(map(DefaultFields, 'sectionName'));
-            _section.forEach((element: any, index: number) => {
-                _data.push({
-                    sectionId: index,
-                    sectionName: element,
-                    sectionType: "cost",
-                    field: DefaultFields.filter((el: any) => el.sectionName === element),
+            setInitialValues({ name: "", productCategory: "", isStandard: false });
+            axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
+                const _data = []
+                const _section = uniq(map(data.fields, 'sectionName'));
+                _section.forEach((element: any, index: number) => {
+                    _data.push({
+                        sectionId: index,
+                        sectionName: element,
+                        field: data.fields.filter((el: any) => el.sectionName === element),
+                    });
                 });
+                setSection(_data);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
-            setSection(_data);
         }
         else {
             axiosInstance().get(`/product-template/` + id).then(({ data: { data } }) => {
@@ -78,15 +80,15 @@ const ProductTemplate = () => {
             });
         }
         fetchProductCategory()
-        axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
-            let field = data.map((_f) => _f.fieldData)
-            if (field.filter((data) => data.fieldName === "unit").length) {
-                let unit = field.filter((data) => data.fieldName === "unit")[0].option
-                setProductUnit(unit);
-            }
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+        // axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
+        //     let field = data.map((_f) => _f.fieldData)
+        //     if (field.filter((data) => data.fieldName === "unit").length) {
+        //         let unit = field.filter((data) => data.fieldName === "unit")[0].option
+        //         setProductUnit(unit);
+        //     }
+        // }).catch((error) => {
+        //     toastConfig.setToastConfig(error);
+        // });
     };
 
     const fetchProductCategory = () => {
@@ -119,7 +121,6 @@ const ProductTemplate = () => {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
                 _field_data.sectionName = _section.sectionName
-                _field_data.sectionType = _section.sectionType
                 _field_data.order = ++order
                 fields.push(_field_data)
             })
@@ -154,13 +155,12 @@ const ProductTemplate = () => {
             if (!values.productCategory || values.productCategory === "") {
                 errors["productCategory"] = "Product category is required";
             }
-            if (!values.unit || values.unit === "") {
-                errors["unit"] = "Unit is required";
-            }
+            // if (!values.unit || values.unit === "") {
+            //     errors["unit"] = "Unit is required";
+            // }
         }
         return errors;
     }
-
 
     const handleExportFields = () => {
         var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(section));
@@ -188,12 +188,12 @@ const ProductTemplate = () => {
                 <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
             </Grid>
             <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
-                <label htmlFor="importFromExcel" style={{ color: "white" }} className="cursor-pointer mr-3">
+                <label htmlFor="importField" style={{ color: "white" }} className="cursor-pointer mr-3">
                     Import Fields
                     <input
                         onClick={(e: any) => (e.target.value = null)}
-                        id="importFromExcel"
-                        name="importFromExcel"
+                        id="importField"
+                        name="importField"
                         onChange={handleImportFields}
                         style={{
                             opacity: "0",
@@ -210,7 +210,7 @@ const ProductTemplate = () => {
             </Grid>
         </Grid>
         <CustomContainer>
-            {(initialValues && productCategory && productUnit) ?
+            {(initialValues && productCategory) ?
                 <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
@@ -220,7 +220,7 @@ const ProductTemplate = () => {
                                         <TextField
                                             variant="outlined"
                                             type="text"
-                                            label="Template Name"
+                                            label="Product Template Name"
                                             required={true}
                                             name="name"
                                             fullWidth
@@ -257,7 +257,12 @@ const ProductTemplate = () => {
                                                 ? productCategory.filter((data) => data._id === values["productCategory"])[0]
                                                 : ""
                                             }
-                                            onChange={(e, val) => setFieldValue("productCategory", val && val._id ? val._id : "")}
+                                            onChange={(e, val) => {
+                                                setFieldValue("productCategory", val && val._id ? val._id : "")
+                                                if (val && val.name) {
+                                                    setFieldValue("name", val.name);
+                                                } 
+                                            }}
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
@@ -274,7 +279,7 @@ const ProductTemplate = () => {
                                         />}
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
-                                        {!values["isStandard"] && <Autocomplete
+                                        {/* {!values["isStandard"] && <Autocomplete
                                             options={productUnit}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
                                             getOptionSelected={(option: any, val) => option.optionLabel === val}
@@ -296,7 +301,7 @@ const ProductTemplate = () => {
                                                     fullWidth
                                                 />
                                             )}
-                                        />}
+                                        />} */}
                                     </Grid>
                                     <Grid item xs={12} sm={2} container justify="flex-end">
                                         <Box>
@@ -317,7 +322,8 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
-                                    module="producttemplate"
+                                    extraFields={[]}
+                                    module="product-template"
                                 />
                             </Box>
                         </Form>)}

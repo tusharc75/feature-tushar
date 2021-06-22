@@ -9,7 +9,7 @@ import ProjectHeader from "./Header";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
-import CreateProjectStrategy from "./CreateProjectSales";
+import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -21,6 +21,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -399,7 +400,7 @@ const ProjectSales: FC = () => {
   return (
     <>
       {isOpen && (
-        <CreateProjectStrategy
+        <CreateProjectSales
           open={isOpen}
           close={handleClose}
           fetchData={fetchProjects}
@@ -407,7 +408,19 @@ const ProjectSales: FC = () => {
       )}
       <Layout>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[routes.projectSales]} />
+          <Grid item md={4} sm={11} xs={10}>
+            <CustomBreadCrumbs routes={[routes.projectSales]} />
+          </Grid>
+          <Grid item md={8} sm={1} xs={2}>
+            <ImportExportLinks
+              permissions={permissions.projectSales}
+              module="project-sale(s)"
+              api={"project-sales"}
+              afterImportCompleted={() => {
+                fetchProjects();
+              }}
+            />
+          </Grid>
         </Grid>
         <div className="main-container">
           <div className="header-panel">
@@ -449,9 +462,8 @@ const ProjectSales: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete this record ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure you want to delete this record ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

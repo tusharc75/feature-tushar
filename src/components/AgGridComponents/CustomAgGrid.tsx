@@ -6,6 +6,7 @@ import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridP
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import { orderBy } from 'lodash';
 
 export function reducer(state, action) {
     switch (action.type) {
@@ -106,19 +107,25 @@ export const intialState = {
 }
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
-    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200,
-    isClientSideGrid = false, handleGridReady = null }) {
+    setGridApi, refreshGrid = null, allowSelection = true, allowAction = true, actionWidth = 200,
+    isClientSideGrid = false, handleGridReady = null, allowPagination = true, selectedRecords = [] }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
 
     const [clientSideGridApi, setClientSideGridApi] = useState(null);
+    const enableRowDrag = columns.some(d => d.rowDrag);
 
     //  If you want to do something once grid binding done
     const onGridReady = (params) => {
         setGridApi(params.api);
         setColumnApi(params.columnApi);
         setClientSideGridApi(params.api);
+        if (selectedRecords.length) {
+            params.api.forEachNode(function (node) {
+                node.setSelected(selectedRecords.some(o => o === node.data._id));
+            });
+        }
         if (handleGridReady) handleGridReady(params)
     }
 
@@ -142,6 +149,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 cellRenderer={column.cellRenderer ?? null}
                 minWidth={column.width ?? 250}
                 flex={1}
+                rowDrag={column.rowDrag ?? false}
             // floatingFilterComponent={column.floatingFilterComponent ?? null}
             // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
             //   suppressFilterButton: true,
@@ -168,9 +176,9 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
 
     return (
         <>
-            <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
+            <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} refreshGrid={refreshGrid} />
 
-            <div className="ag-theme-material ag-grid-listing-grid" style={{zIndex:-500,position:'inherit'}}>
+            <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
                 <AgGridReact
                     rowData={dataRows}
                     onGridReady={onGridReady}
@@ -217,8 +225,8 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     loadingOverlayComponentParams={{
                         loadingMessage: 'Loading...',
                     }}
-                    animateRows={false}
-                    suppressAnimationFrame={true}
+                    animateRows={enableRowDrag ?? false}
+                    suppressAnimationFrame={!enableRowDrag}
                     suppressMaintainUnsortedOrder={true}
 
                     rowBuffer={limit}
@@ -234,14 +242,20 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     onSelectionChanged={(event: any) => {
                         dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
                     }}
+                    onRowDragEnd={(event: any) => {
+                        //  Did this for quote screen, as we need updated sequence and selected records
+                        dispatch({ type: "selection", selectedRecords: orderBy(event.api.getSelectedNodes(), "rowIndex", ["asc"]).map(d => d.data) })
+                    }}
                     immutableData={true}
                     getRowNodeId={(data) => {
                         return data._id ?? data.id;
                     }}
 
-                    pagination={true}
+                    pagination={allowPagination}
                     suppressPaginationPanel={true}
                     paginationPageSize={limit}
+
+                    rowDragManaged={enableRowDrag}
                 >
                     {
                         allowSelection && <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
@@ -267,29 +281,32 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 </AgGridReact>
             </div>
 
-            <TablePagination
-                component="div"
-                count={rowCount}
-                page={page}
-                className="agPagination"
-                onChangePage={(event, newPage) => {
-                    dispatch({ type: "pageChange", page: newPage });
+            {
+                allowPagination && <TablePagination
+                    component="div"
+                    count={rowCount}
+                    page={page}
+                    className="agPagination"
+                    onChangePage={(event, newPage) => {
+                        dispatch({ type: "pageChange", page: newPage });
 
-                    if (clientSideGridApi) {
-                        clientSideGridApi.paginationGoToPage(newPage);
-                    }
-                }}
-                rowsPerPage={limit}
-                onChangeRowsPerPage={(event) => {
-                    dispatch({ type: "pageSizeChange", limit: event.target.value });
+                        if (clientSideGridApi) {
+                            clientSideGridApi.paginationGoToPage(newPage);
+                        }
+                    }}
+                    rowsPerPage={limit}
+                    onChangeRowsPerPage={(event) => {
+                        dispatch({ type: "pageSizeChange", limit: event.target.value });
 
-                    if (clientSideGridApi) {
-                        clientSideGridApi.paginationGoToPage(0);
-                        clientSideGridApi.paginationSetPageSize(event.target.value);
-                    }
-                }}
-                rowsPerPageOptions={pageSizes}
-            />
+                        if (clientSideGridApi) {
+                            clientSideGridApi.paginationGoToPage(0);
+                            clientSideGridApi.paginationSetPageSize(event.target.value);
+                        }
+                    }}
+                    rowsPerPageOptions={pageSizes}
+                />
+            }
+
         </>
     )
 }

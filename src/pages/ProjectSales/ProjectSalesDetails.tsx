@@ -31,8 +31,13 @@ import AssignDataDialog from "./AssignDataDialog";
 import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import {
+  customerAccount,
+  customerContact,
   displayCardDate,
   formatAmountWithCurrency,
+  opportunity,
+  projectSales,
+  quote,
 } from "../../constants/helpers";
 import Activity from "../../components/Activity";
 
@@ -46,6 +51,7 @@ const ProjectSalesDetails = () => {
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
   const [projectSalesData, setProjectSalesData] = useState(null);
   const [projectSalesFields, setProjectSalesFields] = useState([]);
   const [teamUsers, setTeamUsers] = useState([]);
@@ -87,7 +93,7 @@ const ProjectSalesDetails = () => {
     if (currentTabIndex === 1) {
       setLoadingGraphData(true);
       axiosInstance()
-        .get(`/project-sales/nodal-structure/${id}`)
+        .get(`${projectSales.projectSalesApi}/nodal-structure/${id}`)
         .then(({ data }) => {
           setLoadingGraphData(false);
           setGraphData({
@@ -111,10 +117,10 @@ const ProjectSalesDetails = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().get(`/project-sales/${id}`);
+      } = await axiosInstance().get(`${projectSales.projectSalesApi}/${id}`);
 
-      data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
-      data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
+      // data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
+      // data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
 
       setProjectSalesData(data);
       setCurrentTabIndex(0);
@@ -129,6 +135,17 @@ const ProjectSalesDetails = () => {
       setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
+
+      let modifiedData: any = {};
+      Object.assign(modifiedData, data);
+
+      modifiedData["amount"] = formatAmountWithCurrency(
+        modifiedData.currency,
+        modifiedData.amount
+      ).shortFormatAmount;
+
+      setCopyOfProjectSalesData(modifiedData);
+
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -154,7 +171,9 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["Amount"]: data.amount || "",
+      ["Amount"]:
+        formatAmountWithCurrency(data.currency, data.amount)
+          .shortFormatAmount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
@@ -172,7 +191,7 @@ const ProjectSalesDetails = () => {
     setUpdating(true);
 
     axiosInstance()
-      .put(`/project-sales`, { ...values, _id: id })
+      .put(`${projectSales.projectSalesApi}`, { ...values, _id: id })
       .then(({ data }) => {
         getSalesData();
         toastConfig.setToastConfig({
@@ -214,7 +233,7 @@ const ProjectSalesDetails = () => {
     if (deleteRec) {
       setDeleting(true);
       axiosInstance()
-        .put(`/project-sales/remove`, { ids: [deleteRec] })
+        .put(`${projectSales.projectSalesApi}/remove`, { ids: [deleteRec] })
         .then(({ data }) => {
           setDeleting(false);
           setShowConfirmBox(false);
@@ -247,7 +266,7 @@ const ProjectSalesDetails = () => {
       };
       setDeleting(true);
       axiosInstance()
-        .put(`/project-sales/add-user`, dataObj)
+        .put(`${projectSales.projectSalesApi}/add-user`, dataObj)
         .then(() => {
           getSalesData();
           setDeleting(false);
@@ -407,15 +426,15 @@ const ProjectSalesDetails = () => {
                           id="a11y-tab-0"
                         />
                         <Tab
-                          label="3D Graph"
-                          aria-controls="a11y-tabpanel-1"
+                          label="OM-Neurons"
+                        aria-controls="a11y-tabpanel-1"
                           id="a11y-tab-1"
                         />
                       </Tabs>
                       {currentTabIndex === 0 && (
                         <Box>
                           <DetailsPage
-                            data={projectSalesData}
+                            data={copyOfProjectSalesData}
                             fields={projectSalesFields}
                           />
                         </Box>
@@ -511,10 +530,30 @@ const ProjectSalesDetails = () => {
                 <Activity
                   relatedTo={[
                     {
-                      type: "projectSales",
+                      type: projectSales.projectSalesResource,
                       referenceId: id,
                       access: true,
                     },
+                    ...opportunities?.map((op) => ({
+                      type: opportunity.opportunityResource,
+                      referenceId: op._id,
+                      access: false,
+                    })),
+                    ...customerAccounts?.map((ca) => ({
+                      type: customerAccount.accountResource,
+                      referenceId: ca._id,
+                      access: false,
+                    })),
+                    ...customerContacts?.map((cc) => ({
+                      type: customerContact.contactResource,
+                      referenceId: cc._id,
+                      access: false,
+                    })),
+                    ...quotes?.map((q) => ({
+                      type: quote.quoteResource,
+                      referenceId: q._id,
+                      access: false,
+                    })),
                   ]}
                   handleActivityRefresh={() => {}}
                   emails={[]}

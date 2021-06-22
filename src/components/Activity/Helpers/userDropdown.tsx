@@ -1,31 +1,11 @@
 import { useState, useEffect, Fragment, FormEvent } from "react";
 import PropTypes from "prop-types";
-import {
-  TextField,
-  Chip,
-  Box,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-} from "@material-ui/core";
-import Autocomplete, {
-  createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
-import { flatMap, map, } from "lodash";
+import { TextField, Chip } from "@material-ui/core";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { flatMap, map } from "lodash";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
-
-interface UserOptionType {
-  inputValue?: string;
-  userId?: string;
-  name?: string;
-}
-
-const filter = createFilterOptions<UserOptionType>();
 
 export const UserDropdown = ({
   email,
@@ -38,42 +18,11 @@ export const UserDropdown = ({
   setFieldValue,
   required,
 }) => {
-  const {
-    state: {
-      user: { user },
-    },
-  } = useData();
   const [users, setUsers] = useState(null);
-  const [open, toggleOpen] = useState(false);
-  const [dialogValue, setDialogValue] = useState({
-    userId: "",
-    name: "",
-  });
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const handleClose = () => {
-    setDialogValue({
-      userId: "",
-      name: "",
-    });
-    toggleOpen(false);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setUsers([
-      ...users,
-      {
-        userId: dialogValue.userId,
-        name: dialogValue.name,
-      },
-    ]);
-    setFieldValue(name, [...value, { userId: dialogValue.userId }]);
-    handleClose();
-  };
 
   const fetchUsers = async () => {
     await axiosInstance()
@@ -102,41 +51,51 @@ export const UserDropdown = ({
       .catch((err) => {});
   };
 
-  const setParticipants = (value, reason) => {
-    if (value) {
+  const setParticipants = (values, reason) => {
+    if (values) {
       if (multiple === true) {
         if (reason === "clear" || reason === "clear-option") {
           setFieldValue(name, []);
         }
 
-        value.forEach((val: any) => {
+        if (reason === "remove-option") {
+          if (value.length === 1) {
+            setFieldValue(name, []);
+          }
+        }
+
+        values.forEach((val: any) => {
           if (typeof val === "string") {
-            setTimeout(() => {
-              toggleOpen(true);
-              setDialogValue({
+            setUsers([
+              ...users,
+              {
                 userId: val,
-                name: "",
-              });
-            });
+                name: val,
+              },
+            ]);
+            setFieldValue(name, [...value, { userId: val }]);
           } else if (val && val.inputValue) {
-            toggleOpen(true);
-            setDialogValue({
-              userId: val.inputValue,
-              name: "",
-            });
+            setUsers([
+              ...users,
+              {
+                userId: val.inputValue,
+                name: val.inputValue,
+              },
+            ]);
+            setFieldValue(name, [...value, { userId: val.inputValue }]);
           } else {
-            const values = [];
-            value.forEach((val) => {
+            const nValues = [];
+            values.forEach((val) => {
               if (typeof val !== "string") {
-                values.push({ userId: val.userId });
+                nValues.push({ userId: val.userId });
               }
             });
 
-            setFieldValue(name, values);
+            setFieldValue(name, nValues);
           }
         });
       } else {
-        setFieldValue(name, value.userId);
+        setFieldValue(name, values.userId);
       }
     }
   };
@@ -145,6 +104,7 @@ export const UserDropdown = ({
     <Fragment>
       <Autocomplete
         multiple={multiple}
+        disableCloseOnSelect={multiple}
         options={users ? users : []}
         getOptionLabel={(option) => {
           if (typeof option === "string") {
@@ -159,17 +119,6 @@ export const UserDropdown = ({
         }}
         freeSolo
         limitTags={5}
-        filterOptions={(option, params) => {
-          const filtered = filter(option, params) as UserOptionType[];
-
-          if (params.inputValue !== "") {
-            filtered.push({
-              inputValue: params.inputValue,
-              name: `Add "${params.inputValue}"`,
-            });
-          }
-          return filtered;
-        }}
         getOptionSelected={(opt, val) => {
           return opt.userId === val.userId;
         }}
@@ -211,53 +160,6 @@ export const UserDropdown = ({
           />
         )}
       />
-
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="form-dialog-title"
-      >
-        <form onSubmit={handleSubmit}>
-          <DialogTitle style={{ color: "white" }}>
-            Add a new participant
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Please fill participant's email and name
-            </DialogContentText>
-            <TextField
-              required
-              autoFocus
-              margin="dense"
-              value={dialogValue.userId}
-              onChange={(event) =>
-                setDialogValue({ ...dialogValue, userId: event.target.value })
-              }
-              label="Participant Email"
-              type="email"
-            />
-            <Box component="span" mx={1} />
-            <TextField
-              required
-              margin="dense"
-              value={dialogValue.name}
-              onChange={(event) =>
-                setDialogValue({ ...dialogValue, name: event.target.value })
-              }
-              label="Participant Name"
-              type="text"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button size="small" onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button size="small" type="submit" color="primary">
-              Add
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
     </Fragment>
   );
 };

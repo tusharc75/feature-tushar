@@ -168,7 +168,7 @@ const Opportunities = () => {
 
   const SupplierAccountNameRenderer = params => params.value ? (
     <>
-      <h5 className="createBy">
+      <h5 className="createBy d-flex">
         <Link className="link" title={params.value}
           to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountId}`}
         >
@@ -419,6 +419,7 @@ const Opportunities = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
+                    permissions={opportunityPermissions}
                     module="opportunities"
                     api={opportunityApi}
                     afterImportCompleted={() => {
@@ -473,7 +474,7 @@ const Opportunities = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${deleteRecord?.opportunityName ? "Opportunity" : "Opportunities"
+              message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? "Opportunity" : "Opportunities"
                 }   ${deleteRecord.opportunityName || ""}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
@@ -496,7 +497,7 @@ const Opportunities = () => {
           {singleOpportunityDelete.show ? (
             <ConfirmationDialog
               open={singleOpportunityDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+              message={`Are you sure you want to delete contact: ${singleOpportunityDelete.opportunityName}?`}
               onClose={() =>
                 setSingleOpportunityDelete({
                   id: null,

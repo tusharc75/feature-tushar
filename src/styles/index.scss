@@ -46,7 +46,18 @@
   border: 1px solid #eeeaea;
   @include ag-theme-material(
     (
-      font-family:(Nunito,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"),
+      font-family: (
+        Nunito,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+      ),
       material-primary-color: var(--primary),
       material-accent-color: var(--primary-light),
       input-focus-border-color: red,
@@ -99,8 +110,8 @@ body {
 
 /* Let's get this party started */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 9px;
+  height: 9px;
 }
 
 /* Track */
@@ -334,11 +345,6 @@ body::-webkit-scrollbar-thumb {
   height: calc(100vh - 260px);
   margin: 0 6px 0;
 }
-.productAgGrid {
-  .ag-grid-listing-grid {
-    height: calc(100vh - 535px) !important;
-  }
-}
 
 .agPagination {
   margin: 0px 5px;
@@ -504,6 +510,13 @@ body::-webkit-scrollbar-thumb {
   background: #f5f5f5;
   min-height: auto !important;
 }
+
+.quote-tab {
+  border-bottom: 3px solid #163340;
+  background: #f5f5f5;
+  min-height: auto !important;
+}
+
 .detail-box {
   padding: 10px 20px;
 }
@@ -684,45 +697,50 @@ body::-webkit-scrollbar-thumb {
   justify-content: center;
   border-radius: 4px;
 }
-.quoteBox {
+.quoteHeader {
   display: flex;
-  align-items: center;
-  flex-direction: column;
-  background: #ffffff;
-  padding: 10px 10px;
-  border-radius: 4px;
-  margin: 10px 4px;
+  font-size: 12px;
+  gap: 0.25rem;
   font-weight: bold;
-  grid-row-gap: 6px;
-  row-gap: 6px;
-  box-shadow: 0px 3px 4px #d6d5d5;
+}
+
+@supports not (gap: 0.25rem) {
+  .quoteHeader > *:not(:nth-child(1)) {
+      margin-left: 0.25rem !important;
+  }
+}
+
+
+.quoteBox {
+  padding: 4px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid #c3bdbd;
 }
 .redQuoteBox {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  background: #ffcdcd;
-  padding: 10px 10px;
+  padding: 4px 15px;
   border-radius: 4px;
-  margin: 9px;
-  font-weight: bold;
-  row-gap: 6px;
-  box-shadow: 0px 3px 8px #636363;
-  color: #c20202;
-}
-
-.quoteAmount {
-  font-size: 30px;
-}
-.customDropdownBox {
+  background: #ffcdcd;
+  color: #650e0e;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: #047d1c !important;
-  padding: 0 9px 0px 0;
-  color: #ffffff;
+  border-right: 1px solid #c3bdbd;
 }
 
+.noBorder {
+  border: none !important;
+}
+
+.subDetailModule {
+  border-top: none !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+.quoteAmount {
+  // font-size: 30px;
+}
 .customSelect {
   padding: 6px 15px;
   border: none;
@@ -796,4 +814,9 @@ body::-webkit-scrollbar-thumb {
   flex-direction: column;
   padding: 16px 20px;
   width: 74%;
+}
+
+.signature_canvas {
+  width: 100%;
+  min-height: 500px;
 }

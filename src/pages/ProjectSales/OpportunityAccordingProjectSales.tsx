@@ -35,7 +35,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
-import { getUniqueCurrencies } from "../../constants/helpers";
+import { formatAmountWithCurrency, getUniqueCurrencies } from "../../constants/helpers";
 
 const Accordion = withStyles({
   root: {
@@ -228,13 +228,21 @@ export default function OpportunityAccordianProjectSales({
                 alignItems="center"
                 flexGrow={1}
               >
-                {expandOpportunity === true ? (
-                  <ExpandLessIcon />
-                ) : (
-                  <ExpandMoreIcon />
-                )}
-
-                <strong>Opportunity ({opportunities.length})</strong>
+                <IconButton
+                  size="small"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  {expandOpportunity === true ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </IconButton>
+                <Box>
+                  <Typography variant="subtitle2">
+                    Opportunity ({opportunities.length})
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
@@ -297,22 +305,16 @@ export default function OpportunityAccordianProjectSales({
                                   )}
                                 </Grid>
                                 <Grid item xs={5} sm={4}>
-                                  <Box display="flex" alignItems="center">
-                                    {obj?.amount ? (
-                                      <Typography className="amount">
-                                        {
-                                          getUniqueCurrencies().find(
-                                            (d) =>
-                                              d.currencyCode == obj["currency"]
-                                          )?.symbolNative
-                                        }
-                                        &nbsp;{obj?.amount ?? ""}
+                                  <Box display="flex" alignItems="center" justifyContent="flex-end">
+                                    {obj?.estimatedAmount ? (
+                                      <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
+                                        {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).shortFormatAmount}
                                       </Typography>
                                     ) : (
                                       ""
                                     )}
                                     {(permissions.isUpdate && isTeamMember) ||
-                                    isManager ? (
+                                      isManager ? (
                                       <>
                                         <Box ml={1} />
                                         <IconButton

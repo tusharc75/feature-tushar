@@ -14,10 +14,10 @@ import Loader from "../../components/Loader";
 var levalOrderBy = [
   "product",
   "product-custom",
-  "template",
-  "cost",
-  "builder",
-  "builder-custom",
+  "product-template",
+  "price-template",
+  "product-builder-custom",
+  "price-builder-custom",
 ];
 
 const ProductGrid = (props) => {
@@ -68,26 +68,8 @@ const ProductGrid = (props) => {
     }
   }, [columnsData]);
 
-  const ProductCategoryRenderer = params => <>
-    {
-      params.data.productCategory || params.data.productCategory === 0 ?
-        typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
-        : <NoDataCell />
-    }
-  </>
-  const ProductTemplateRenderer = params => <>
-    {
-      params.data.productTemplate || params.data.productTemplate === 0 ?
-        typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
-        : <NoDataCell />
-    }
-  </>
-
   const frameworkComponents = {
     commonRenderer: CommonRenderer,
-    productCategoryRenderer: ProductCategoryRenderer,
-    productTemplateRenderer: ProductTemplateRenderer,
-
   };
 
 
@@ -105,6 +87,8 @@ const ProductGrid = (props) => {
           ...u,
           id: u._id,
           srno: index + 1,
+          productTemplateDisplayValue: u.productTemplate?.optionLabel,
+          productCategoryDisplayValue: u.productCategory?.optionLabel,
         }));
         refreshProducts(data);
         setColumns([]);
@@ -123,7 +107,6 @@ const ProductGrid = (props) => {
           let _fields = row.fields;
           console.log(_fields);
           if (stage) {
-            //|| (t.leval === "template" && t.sectionType !== "cost")
             if (stage === "product") {
               _fields = row.fields.filter(
                 (t) => t.leval === "product" || t.leval === "product-custom"
@@ -222,23 +205,48 @@ const ProductGrid = (props) => {
                     _c.headerName === ele.fieldLabel
                 ).length === 0
               ) {
-                let col: any = {};
-                col.field = ele.fieldName;
-                col.headerName = ele.fieldLabel;
-                col.width = 180;
-                col.show = true
+                let col: any = {}
                 if (ele.fieldName === "productName") {
-                  col.cellRenderer = "commonRenderer"
+                  col.field = ele.fieldName
+                  col.headerName = ele.fieldLabel
+                  col.width = 180
+                  col.show = true
+                  col.cellRenderer = "productNameRenderer"
+                  col.order = ele.order
+                  col.leval = ele.leval
+                  column.push(col)
                 }
-                if (ele.fieldName === "productCategory") {
-                  col.cellRenderer = "productCategoryRenderer"
+                else if (ele.fieldName === "productCategory") {
+                  col.headerName = ele.fieldLabel
+                  col.width = 180
+                  col.show = true
+                  col.field = "productCategoryDisplayValue"
+                  col.order = ele.order
+                  col.leval = ele.leval
+                  if (!column.some(c => c.field === "productCategoryDisplayValue")) {
+                    column.push(col)
+                  }
                 }
-                if (ele.fieldName === "productTemplate") {
-                  col.cellRenderer = "productTemplateRenderer"
+                else if (ele.fieldName === "productTemplate") {
+                  col.headerName = ele.fieldLabel
+                  col.width = 180
+                  col.show = true
+                  col.field = "productTemplateDisplayValue"
+                  col.order = ele.order
+                  col.leval = ele.leval
+                  if (!column.some(c => c.field === "productTemplateDisplayValue")) {
+                    column.push(col)
+                  }
                 }
-                col.order = ele.order;
-                col.leval = ele.leval;
-                column.push(col);
+                else {
+                  col.field = ele.fieldName
+                  col.headerName = ele.fieldLabel
+                  col.width = 180
+                  col.show = true
+                  col.order = ele.order
+                  col.leval = ele.leval
+                  column.push(col)
+                }
               }
             }
           });
@@ -262,7 +270,7 @@ const ProductGrid = (props) => {
 
   return (
     <Box p={1} pt={0}>
-       <Box mt={1} className="productAgGrid">
+      <Box mt={1}>
         {(isAll && columns) || customColumns ? (
           <CustomAgGrid columns={isAll ? columns : customColumns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
             dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} />

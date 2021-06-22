@@ -12,7 +12,7 @@ import {
   ListItemIcon,
   Tooltip,
 } from "@material-ui/core";
-import { Link, withRouter } from "react-router-dom";
+import { Link, withRouter, useHistory } from "react-router-dom";
 import Header from "../Header/Header";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.scss";
@@ -59,6 +59,7 @@ const useStyles = makeStyles((theme) => ({
     width: "48px",
     [theme.breakpoints.down("sm")]: {
       width: 0,
+      borderRight: "none !important"
     },
   },
   toolbar: {
@@ -96,6 +97,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
     state: { user, selectedEntity },
   }: any = useData();
+
+  const history = useHistory();
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split("/").filter((x) => x);
@@ -235,12 +238,13 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             <ListItem button className="list-item">
               <ListItemIcon>
                 {toggleDrawer ? (
-                  <AccountCircle className="sidebar-icon" />
+                  <AccountCircle className="sidebar-icon" onClick={() => { history.push("/") }} />
                 ) : (
                   <ChevronRight className="sidebar-icon" />
                 )}
               </ListItemIcon>
               <ListItemText
+                onClick={() => { history.push("/") }}
                 primary={[user?.user?.firstName, user?.user?.lastName]
                   .filter((f) => f)
                   .join(" ")}

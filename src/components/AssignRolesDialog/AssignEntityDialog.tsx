@@ -9,6 +9,7 @@ import {
   ListItemIcon,
   ListItemText,
   makeStyles,
+  TextField,
   Typography,
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
@@ -55,7 +56,8 @@ const AssignEntityDialog = ({
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const steps = [`Select ${type}`, 'Select Regional Role']
+  const [checkAll, setCheckAll] = useState(false);
+  const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
   const classes = useStyles();
 
   const handleNext = () => {
@@ -73,10 +75,10 @@ const AssignEntityDialog = ({
       .get(`/${type}`)
       .then(({ data: { data } }) => {
         if (type == "user") {
-          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
+          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
         }
         else {
-          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
+          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
         }
         setLoadingData(false);
       })
@@ -109,40 +111,26 @@ const AssignEntityDialog = ({
       let entityArray = []
       if (type === "entity") {
         dataObj = {
-          user: ids[0],
+          users: ids,
           entities: selectedData,
           roles: selectedRole
         };
       }
 
       else {
-        const selectedUser = data.find(user => user._id === selectedData[0])
-        if (selectedUser) {
-          const selectedUserEntityArray = selectedUser.entities.filter(e => e.role.length !== 0 || e.entity !== undefined)
-          selectedUserEntityArray.push({
-            entity: ids[0],
-            role: selectedRole
-          })
-          dataObj = {
-            user: selectedData[0],
-            entities: selectedUserEntityArray
-          };
-        }
-        else {
-          dataObj = {
-            users: selectedData,
-            entity: ids[0],
-            roles: selectedRole
-          };
-        }
+        dataObj = {
+          users: selectedData,
+          entity: ids[0],
+          roles: selectedRole
+        };
 
       }
       await axiosInstance()
-        .put(type === "entity" ? `/user/assign-entities` : `/user/assign-users`, dataObj)
+        .put(type === "entity" ? `/user/assign-multiple-entities` : `/user/assign-users`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
-            message: ` ${type} assigned successfully`,
+            message: `${startCase(type)} assigned successfully`,
             type: "success",
             open: true,
           });
@@ -160,6 +148,32 @@ const AssignEntityDialog = ({
     switch (step) {
       case 0:
         return <List style={{ padding: 0 }}>
+
+          {/* <ListItem divider>
+            <ListItemIcon>
+              <Checkbox
+                edge="start"
+                onChange={(e) => {
+                  setCheckAll(e.target.checked);
+
+                  const newData = data.map(d => {
+                    return {
+                      ...d,
+                      isChecked: e.target.checked
+                    }
+                  });
+                  setData(newData);
+                  setSelectedData(newData.filter(d => d.isChecked).map(obj => obj._id))
+                }}
+                checked={checkAll}
+                inputProps={{
+                  "aria-labelledby": `checkbox-list-label-check-all-user`,
+                }}
+              />
+            </ListItemIcon>
+            <ListItemText primary="Select all" />
+          </ListItem> */}
+
           {data.map((d) => (
             <ListItem divider key={d._id}>
               <ListItemIcon>
@@ -168,6 +182,7 @@ const AssignEntityDialog = ({
                   onChange={(e) => {
                     d.isChecked = e.target.checked
                     setSelectedData(data.filter(d => d.isChecked).map(obj => obj._id))
+                    setCheckAll(!data.some(d => d.isChecked === false));
                   }
                   }
                   checked={d.isChecked}
@@ -222,7 +237,7 @@ const AssignEntityDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={regionalRole ? `Assign  Regional Role` : `Assign  ${startCase(type)}`} />
+      <CustomDialogHeader title={regionalRole ? `Assign  Region wide functional role` : `Assign  ${startCase(type)}`} />
       <CustomDialogContent>
         {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
@@ -242,7 +257,7 @@ const AssignEntityDialog = ({
                         className={classes.button}
                       >
                         Back
-                    </Button>
+                      </Button>
                       {(activeStep !== steps.length - 1) &&
                         <Button
                           variant="contained"
@@ -253,7 +268,7 @@ const AssignEntityDialog = ({
                           className={classes.button}
                         >
                           Next
-                      </Button>
+                        </Button>
                       }
                     </div>
                   </div>
@@ -287,7 +302,7 @@ const AssignEntityDialog = ({
             </ListItem>
           ))}
         </List>) : (
-          <Typography>{`All Regional Role has been assigned`}</Typography>
+          <Typography>{`All Region wide functional role has been assigned`}</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -304,6 +319,7 @@ const AssignEntityDialog = ({
           onClick={handleAssignEntity}
           color="primary"
           size="small"
+          variant="contained"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

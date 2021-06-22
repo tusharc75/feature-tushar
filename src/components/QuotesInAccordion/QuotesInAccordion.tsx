@@ -9,6 +9,7 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
 import { IoCalendarOutline } from 'react-icons/io5';
@@ -19,6 +20,7 @@ import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/Mana
 import { MoreVert } from "@material-ui/icons";
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
+import routes from '../Helpers/Routes';
 
 const Accordion = withStyles({
     root: {
@@ -77,7 +79,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -162,7 +164,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems='center'>
-                        {quoteBuilderPermission.isCreate ?
+                        {isAllowedToUpdate &&
                             <>
                                 <IconButton
                                     aria-haspopup="true"
@@ -180,15 +182,16 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                     onClose={handleCloseMenu}
                                 >
                                     <MenuItem
+                                        disabled={!quoteBuilderPermission.isCreate}
                                         onClick={() => {
                                             setShowCreateDialog(true);
                                             handleCloseMenu();
                                         }}
                                     >
                                         Create New
-                          </MenuItem>
+                                    </MenuItem>
                                     {isRenderedInCustomerContact && <MenuItem
-
+                                        disabled={!quoteBuilderPermission.isUpdate}
                                         onClick={() => {
                                             setShowAddExistingDialog(true)
                                             handleCloseMenu();
@@ -198,14 +201,10 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                     </MenuItem>}
                                 </Menu>
                             </>
-                            : <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => { setShowCreateDialog(true) }}
-                            >
-                                <ControlPointIcon />
-                            </IconButton>
                         }
+
+
+
                     </Grid>
                 </Grid>
             </AccordionSummary>
@@ -217,7 +216,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                             {
                                 quotes && quotes?.length ? (
                                     <Grid container spacing={1}>
-                                        {   quotes.map((obj, i) => (
+                                        {quotes.map((obj, i) => (
                                             <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
                                                 <Card className="detailCard">
                                                     <CardContent className="detailListing">
@@ -225,7 +224,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                                             <Grid item xs={7} sm={8}>
 
                                                                 {obj.entity === selectedEntity ? (
-                                                                    < Link className="link" to={`/quote-builder/${obj._id}`}>
+                                                                    < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
                                                                         <Typography className="detailName">{obj.quoteName}</Typography>
                                                                     </Link>) : (<span className="d-flex gap-2 align-items-center">
                                                                         <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
@@ -235,8 +234,8 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={5} sm={4}>
-                                                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.amount).fullFormatAmount}>
-                                                                    {formatAmountWithCurrency(obj["currency"], obj?.amount).shortFormatAmount}
+                                                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
+                                                                    {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).shortFormatAmount}
                                                                 </Typography>
                                                             </Grid>
                                                         </Grid>
@@ -244,7 +243,12 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 {
-                                                                    obj.closeDate ? <DisplayData key={i} label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                                    obj.expiryDate ? <DisplayData key={i} label='Expiry Date' value={displayDate(obj.expiryDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                                }
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    obj.incoTerms ? <DisplayData key={i} label='Inco Terms' value={obj.incoTerms} icon={< BusinessOutlinedIcon />} /> : ''
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={12} sm={6} md={6}>
@@ -271,7 +275,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
             </Box>
             <Box margin={1} /> */}
             <Box margin={1} className="btn-view gap-1" onClick={() =>
-                history.push(`/quote-builder`)}
+                history.push(routes.quoteBuilder.path)}
 
                 p={1} display="flex" justifyContent="center" alignItems="center">
                 <HiExternalLink size={25} />

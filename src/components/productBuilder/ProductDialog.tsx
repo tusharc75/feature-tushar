@@ -22,7 +22,18 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+import Tooltip from '@material-ui/core/Tooltip';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+
+
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 
 const CreateProduct = (props) => {
 
@@ -39,7 +50,7 @@ const CreateProduct = (props) => {
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
 
-    const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
+    const [isShowTemplate, setIsShowTemplate] = useState(false);
     const [fieldChanges, setFieldChanges] = useState([]);
 
 
@@ -47,7 +58,7 @@ const CreateProduct = (props) => {
         let _fields = [];
         productData.fields.forEach((_f) => {
             if (stage === "product") {
-                if (_f.leval === "product" || _f.leval === "product-custom" || (_f.leval === "template" && _f.sectionType !== "cost")) {
+                if (_f.leval === "product" || _f.leval === "product-custom" || _f.leval === "product-template" || _f.leval === "product-builder-custom") {
                     _fields.push(_f)
                 }
             }
@@ -64,11 +75,11 @@ const CreateProduct = (props) => {
         });
 
         setMasterFields(_fields.filter((_f) => _f.leval !== "cost"))
-        setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
+        setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
 
         let values = { ...productData }
         values.productCategory = values.productCategory.optionValue
-        values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue
+        values.priceTemplate = values.priceTemplate && values.priceTemplate.optionValue && values.priceTemplate.optionValue
         delete values.fields
 
         setInitialData({
@@ -138,7 +149,12 @@ const CreateProduct = (props) => {
 
     const handleAddField = (field) => {
         field.sectionName = sectionName;
-        field.leval = "builder-custom";
+        field.leval = "price-builder-custom";
+        if (productData.fields.filter((_f) => _f.sectionName === sectionName).length) {
+            if (productData.fields.filter((_f) => _f.sectionName === sectionName)[0].leval !== "price-template") {
+                field.leval = "product-builder-custom";
+            }
+        }
         fields.push(field)
         setFields(fields)
         let newField = initialData.fields;
@@ -152,44 +168,87 @@ const CreateProduct = (props) => {
         setIsAddField(false)
     }
 
+    const handleRemoveField = (field) => {
+        let newField = initialData.fields.filter((_f) => _f._id !== field._id);
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        setFields(fields.filter((_f) => _f._id !== field._id))
+        EvaluteproductFields(newField)
+    }
 
     const addDisplayType = (displayType, field, displayValue) => {
         let _fieldChanges = fieldChanges;
         if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
             if (displayType === "currency") {
-                _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: field.displayCurrency })
+                _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: [displayValue] })
             }
             else if (displayType === "converter") {
-                _fieldChanges.push({ fieldName: field.fieldName, displayUnits: field.displayUnits })
+                _fieldChanges.push({ fieldName: field.fieldName, displayUnits: [displayValue] })
             }
         }
         else {
             _fieldChanges.forEach(_f => {
                 if (_f.fieldName === field.fieldName) {
                     if (displayType === "currency") {
-                        _f.displayCurrency = field.displayCurrency;
+                        if (_f.displayCurrency) {
+                            _f.displayCurrency.push(displayValue);
+                        }
+                        else {
+                            _f.displayCurrency = [displayValue];
+                        }
                     }
                     else if (displayType === "converter") {
-                        _f.displayUnits = field.displayUnits;
+                        if (_f.displayUnits) {
+                            _f.displayUnits.push(displayValue);
+                        }
+                        else {
+                            _f.displayUnits = [displayValue];
+                        }
                     }
                 }
             })
         }
+        let newField = initialData.fields
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter((_f) => _f.fieldName === field.fieldName)[0]
+            }
+        })
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
         setFieldChanges(_fieldChanges)
-        // let newField = initialData.fields;
-        // let displayCurrency = []
-        // newField.forEach(_f => {
-        //     if (_f.fieldName === field.fieldName) {
-        //         _f.displayCurrency.push(currency)
-        //         displayCurrency = _f.displayCurrency;
-        //     }
-        // })
-        // setInitialData({
-        //     fields: newField,
-        //     values: { ...ref.current.values },
-        // });
     }
 
+    const removeDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        _fieldChanges.forEach(_f => {
+            if (_f.fieldName === field.fieldName) {
+                if (displayType === "currency") {
+                    _f.displayCurrency = _f.displayCurrency.filter(e => e !== displayValue)
+                }
+                else if (displayType === "converter") {
+                    _f.displayUnits = _f.displayUnits.filter(e => e !== displayValue)
+                }
+            }
+        })
+        let newField = initialData.fields
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter((_f) => _f.fieldName === field.fieldName)[0]
+            }
+        })
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
+        setFieldChanges(_fieldChanges)
+    }
 
     return (<Dialog
         maxWidth="md"
@@ -212,6 +271,7 @@ const CreateProduct = (props) => {
                     touched,
                     setFieldValue,
                     submitForm,
+                    setValues,
                 }) => (
                     <Fragment>
                         <CustomDialogHeader title={`Edit Product`} onClose={handleClose}></CustomDialogHeader>
@@ -230,18 +290,18 @@ const CreateProduct = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "productTemplate" && !isShowProductTemplate ?
+                                                        field.fieldName === "priceTemplate" && !isShowTemplate ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormControlLabel
                                                                     control={
                                                                         <Checkbox
-                                                                            checked={isShowProductTemplate}
-                                                                            onChange={() => setIsShowProductTemplate(true)}
-                                                                            name="isShowProductTemplate"
+                                                                            checked={isShowTemplate}
+                                                                            onChange={() => setIsShowTemplate(true)}
+                                                                            name="isShowTemplate"
                                                                             color="primary"
                                                                         />
                                                                     }
-                                                                    label="Show Product Template"
+                                                                    label="Show Template"
                                                                 />
                                                             </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
                                                                 <FormTypes
@@ -259,33 +319,50 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    doNotShowInfoTooltip={true}
                                                                     size="small"
                                                                     addDisplayType={addDisplayType}
-                                                                /> :
+                                                                    removeDisplayType={removeDisplayType}
+                                                                    setValues={setValues}
+                                                                />
+                                                                :
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    <FormTypes
-                                                                        fields={initialData.fields}
-                                                                        fieldData={field}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={setFieldValue}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field.isTooltip}
-                                                                        tooltipMessage={field.tooltipMessage}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        isvlookupReverse={field.isvlookupReverse}
-                                                                        size="small"
-                                                                        disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
-                                                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                                                            setUploadingImageOrFileProgress(completePercentage);
-                                                                        } : null}
-                                                                    />
+                                                                    <Box display="flex" >
+                                                                        <Box flexGrow={1}  >
+                                                                            <FormTypes
+                                                                                fields={initialData.fields}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={setFieldValue}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field.isTooltip}
+                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                decimalPlaces={field.decimalPlaces}
+                                                                                isvlookupReverse={field.isvlookupReverse}
+                                                                                size="small"
+                                                                                disabled={['unit', 'productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
+                                                                                imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                                                } : null}
+                                                                                setValues={setValues}
+                                                                            />
+                                                                        </Box>
+                                                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") &&
+                                                                            <Box>
+                                                                                <Tooltip title="Remove" className="mt-1">
+                                                                                    <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
+                                                                                        <HighlightOffIcon color="error" />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Box>}
+                                                                    </Box>
                                                                 </Grid>
                                                     ))}
                                                 </Grid>

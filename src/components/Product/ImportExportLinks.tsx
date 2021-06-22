@@ -12,6 +12,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import { downloadExcel } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import SelectionDialog from "./SelectionDialog";
+import { isEmpty } from "lodash";
+import { useEffect } from "react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,14 +65,14 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ module, api, refrenceId, onSuccessfulImport }) {
+export default function ImportExportLinks({ permissions, module, api, refrenceId, onSuccessfulImport }) {
 
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isSelection, setIsSelection] = useState(false);
-
+  const [isUpladDialog, setIsUploadDialog] = useState(false);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -79,7 +81,14 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
     setAnchorEl(null);
   };
 
-  const uploadData = (event) => {
+  useEffect(() => {
+    if (!isSelection) {
+      setIsUploadDialog(false)
+    }
+  }, [isSelection])
+
+  const uploadData = (event, data: any = null) => {
+    setIsSelection(false)
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         open: true,
@@ -87,22 +96,24 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         message: `Uploading ${module}, Please wait...`,
       });
       const file = event.target.files[0];
-
       let formData = new FormData();
       formData.append("file", file);
       formData.append("refrenceId", refrenceId);
+      if (!isEmpty(data)) {
+        formData.append('productCategory', data.productCategory)
+        formData.append('priceTemplate', data.priceTemplate)
+      }
       axiosInstance()
         .post(`${api}/import`, formData, {
           responseType: "blob",
           headers: { "Content-Type": "multipart/form-data" },
-
         })
         .then((response) => {
           if (!response.headers["content-disposition"]) {
             toastConfig.setToastConfig({
               open: true,
               type: "success",
-              message: "All Records Added Successfuly",
+              message: "All Records Added Successfully",
             });
             onSuccessfulImport(true);
           } else {
@@ -180,18 +191,26 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
   return (
     <div className={module !== "builder" ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>
-        <label
-          htmlFor="importFromExcel"
-          className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
-        >
-          {ImportInput}
-          Import from Excel
-        </label>
-        <Divider
-          orientation="vertical"
-          flexItem
-          className={classes.linkDivider}
-        />
+        {permissions?.isCreate && <>
+          <label
+            onClick={() => {
+              setIsSelection(true);
+              setIsUploadDialog(true);
+              handleClose();
+            }}
+            htmlFor="importFromExcel"
+            className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
+          >
+            {/* {ImportInput} */}
+            Import from Excel
+          </label>
+          <Divider
+            orientation="vertical"
+            flexItem
+            className={classes.linkDivider}
+          />
+        </>
+        }
         <label
           onClick={exportToExcel}
           className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
@@ -228,9 +247,13 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem>
+        <MenuItem onClick={() => {
+          setIsSelection(true);
+          setIsUploadDialog(true);
+          handleClose();
+        }}    >
           <label htmlFor="importFromExcel" className="cursor-pointer">
-            {ImportInput}
+            {/* {ImportInput} */}
             Import from Excel
           </label>
         </MenuItem>
@@ -257,7 +280,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
           <IoIosArrowDropdown className={module !== "builder" ? classes.expandIcon : classes.custom_expandIcon} />
         </IconButton>
       )}
-      {isSelection && <SelectionDialog refrenceId={refrenceId} handleClose={() => setIsSelection(false)} api={api} />}
+      {isSelection && <SelectionDialog uploadData={uploadData} isUpload={isUpladDialog} refrenceId={refrenceId} handleClose={() => { setIsSelection(false); setIsSelection(false) }} api={api} />}
     </div>
   );
 }

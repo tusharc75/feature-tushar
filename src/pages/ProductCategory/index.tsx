@@ -10,12 +10,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from 'react-icons/gi';
+import styles from "../Leads/Header.module.scss";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import CreateProductCategory from "./CreateProductCategory";
 import routes from "../../components/Helpers/Routes";
 import { ExpandMore } from "@material-ui/icons";
-import { Menu, MenuItem } from "@material-ui/core";
+import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import {
     gridPageSizes,
@@ -28,6 +29,7 @@ import {
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import { useData } from "../../StateProvider/Provider";
 
 
 function reducer(state, action) {
@@ -124,6 +126,9 @@ const intialState = {
 const ProductCategory = () => {
 
     const toastConfig = useContext(CustomToastContext)
+    const {
+        state: { user, permissions },
+      }: any = useData();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
@@ -287,6 +292,7 @@ const ProductCategory = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
+                    permissions={permissions.productCategory}
                     module="product category"
                     api={"product-category"}
                     afterImportCompleted={() => {
@@ -297,19 +303,22 @@ const ProductCategory = () => {
         </Grid>
         <CustomContainer>
             <div className="header-panel">
-                <Grid container>
-                    <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
+                <Grid container className={styles.filter_side_container}>
+                    <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
                         <GiAbstract055 /> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
-                    <Grid md={6} sm={12} xs={12} container justify="flex-end">
+                    <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+                    <Box className={styles.filter_side_header} component="div" >
                         <SearchBox
                             onSearch={handleSearch}
-                            searchbox="terms_header_search_bar"
-                            width="300px"
+                            searchbox={styles.search_box_input}
+                            width="242px"
+                            size="small"
                             value={search}
                         />
-                        <Button className="ml-2 mr-2" onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                         <Button
+                            className={styles.action_submit_btn}
                             variant="outlined"
                             color="default"
                             size="small"
@@ -332,6 +341,7 @@ const ProductCategory = () => {
                         >
                             <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                         </Menu>
+                        </Box>
                     </Grid>
                 </Grid>
             </div>
@@ -342,7 +352,7 @@ const ProductCategory = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete product category  ${deleteRecord?._id ? deleteRecord?.name : ""}  ?`}
+                    message={`Are you sure you want to delete product category  ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                 />

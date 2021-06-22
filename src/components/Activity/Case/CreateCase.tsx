@@ -206,11 +206,14 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                                   setId={setId}
                                 />
                               </Box>
-                              <Box mt={2}>
-                                <RelatedToDispay
-                                  relatedTo={initialValues.relatedTo}
-                                />
-                              </Box>
+                              {
+                                initialValues?.relatedTo && initialValues.relatedTo.length ?
+                                  <Box mt={2}>
+                                    <RelatedToDispay
+                                      relatedTo={initialValues.relatedTo}
+                                    />
+                                  </Box> : null
+                              }
                               <Box mt={2}>
                                 <Divider />
                                 <Box mt={1}>

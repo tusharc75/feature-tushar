@@ -78,8 +78,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const CreateEmail = ({ relatedTo, emailId, handleClose,
-    isQuoteBuilder = false, options = [], fetchData = null, id = null, version = null,
-    qouteBuilderAttachments = [] }) => {
+    isQuoteBuilder = false, options = [], fetchData = null, cc = [], id = null, version = null,
+    qouteBuilderAttachments = [], subject = "" }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
@@ -133,7 +133,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                 });
         }
         else {
-            setInitialValues({ name: "", file: "", content: RichTextEditor.createEmptyValue(), to: [], cc: [] })
+            setInitialValues({
+                name: subject ?? "", file: "",
+                content: RichTextEditor.createEmptyValue(),
+                to: isQuoteBuilder && options.length ? [options[0]] : [],
+                cc: isQuoteBuilder ? [...cc] : []
+            })
         }
     };
 
@@ -195,7 +200,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
             emailBody: values.content.toString('html'),
             emailSubject: values.name,
             cc: values.cc,
-            bcc: values.to,
+            bcc: [values.to.slice(-1)[0]],
             id: id,
             attachments: [...qouteBuilderAttachments]
         }
@@ -272,12 +277,38 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
         setFileImageAttachments(fileImageAttachments.filter(currentUrl => currentUrl !== url))
     }
     const getFileIconSrc = file => {
-        let extension = file.substring(file.lastIndexOf("."),).toLowerCase()
+        let extension = isQuoteBuilder ? file : file.substring(file.lastIndexOf("."),).toLowerCase()
         let data = fileIcons.find(o => (o.extensions.indexOf(extension) >= 0))
         if (data && data?.source) return data.source
     }
 
     const classes = useStyles();
+
+    const renderQuotesFileThumbnails = (
+        <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+            {
+                qouteBuilderAttachments && qouteBuilderAttachments.length > 0 ?
+                    <>
+                        {qouteBuilderAttachments.map((attachment, i) => {
+                            return <>
+                                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                                    <Paper className={emailStyles.fileContainer}>
+                                        <img src={getFileIconSrc(attachment?.contentType)}
+                                            className={emailStyles.file}
+                                            alt="attchment" />
+                                        <Typography noWrap variant="body2" >
+                                            {attachment && attachment?.name ? attachment?.name : "Quotation"}
+                                        </Typography>
+                                    </Paper>
+                                </Grid>
+                            </>
+                        })
+                        }
+                    </>
+                    : null
+            }
+        </Grid >
+    )
 
     const renderFileThumbnails = (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
@@ -362,6 +393,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                                     </Box>
                                                     {renderFileThumbnails}
+
                                                     <ImageAttachments
                                                         imageAttachments={imageAttachments}
                                                         onImageClick={(attachment) => {
@@ -371,9 +403,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         onDelete={handleDeleteImageAttachment}
                                                         emailId={emailId}
                                                     />
-                                                    <Box mt={2}>
-                                                        <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                                                    </Box>
+                                                    {
+                                                        initialValues?.relatedTo && initialValues.relatedTo.length ?
+                                                            <Box mt={2}>
+                                                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                                            </Box> : null
+                                                    }
                                                     <Box mt={1} color="text.secondary">
                                                         <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
                                                     </Box>
@@ -395,6 +430,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         />
                                                         <Autocomplete
                                                             multiple
+                                                            disableCloseOnSelect={true}
                                                             options={options.filter(option => values.cc.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>
@@ -411,27 +447,33 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                                     required={true}
                                                                     error={touched["to"] && Boolean(errors["to"])}
                                                                     helperText={touched["to"] && errors["to"]}
-                                                                    placeholder="Email" />
+                                                                    name="Email" />
                                                             )}
                                                             value={values["to"]}
                                                             onBlur={(e: any) => {
                                                                 if (e.target.value && e.target.value.trim() != "" && validations.email.test(e.target.value)) {
-                                                                    setFieldValue("to", [...values["to"], e.target.value])
+                                                                    setFieldValue("to", isQuoteBuilder ? [e.target.value] : [...values["to"], e.target.value])
                                                                 }
                                                             }}
                                                             onChange={(e, value) => {
-                                                                let val = []
-                                                                for (var email of value) {
-                                                                    if (validations.email.test(email)) {
-                                                                        val.push(email)
+                                                                if (isQuoteBuilder) {
+                                                                    if (value && value.length) {
+                                                                        value = [value.slice(-1)[0]]
                                                                     }
                                                                 }
-                                                                setFieldValue("to", val)
+                                                                let emails = []
+                                                                for (var email of value) {
+                                                                    if (validations.email.test(email)) {
+                                                                        emails.push(email)
+                                                                    }
+                                                                }
+                                                                setFieldValue("to", emails)
                                                             }}
                                                         />
                                                         <Autocomplete
                                                             multiple
-                                                            options={options.filter(option => values.to.indexOf(option) < 0)}
+                                                            disableCloseOnSelect={true}
+                                                            options={isQuoteBuilder ? cc : options.filter(option => values.to.indexOf(option) < 0)}
                                                             freeSolo
                                                             renderTags={(value, getTagProps) =>
                                                                 value.map((option, index) => (
@@ -446,7 +488,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                                     margin="dense"
                                                                     error={touched["cc"] && Boolean(errors["cc"])}
                                                                     helperText={touched["cc"] && errors["cc"]}
-                                                                    placeholder="Email" />
+                                                                    name="Email" />
                                                             )}
                                                             value={values["cc"]}
                                                             onBlur={(e: any) => {
@@ -491,6 +533,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                                 </Box>
                                                         }
                                                         {renderFileThumbnails}
+                                                        {isQuoteBuilder ? renderQuotesFileThumbnails : null}
                                                         <ImageAttachments
                                                             imageAttachments={fileImageAttachments}
                                                             onImageClick={(attachment) => {
@@ -567,7 +610,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                             submitForm()
                                         }}>
                                         {sending ? (<><CircularProgress color="inherit" size={14} style={{ marginRight: "10px" }} />
-                                Sending ... </>) : "send"}
+                                            Sending ... </>) : "send"}
                                     </Button>}
                             </CustomDialogFooter>
                         </>

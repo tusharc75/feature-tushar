@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles } from '@material-ui/core'
+import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles, Table, TableCell, TableContainer, TableHead, TableRow, TableBody } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -10,12 +10,15 @@ import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword'
 import { cloneDeep } from 'lodash'
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
-import { imageUploadMaxSize } from "../../../constants/helpers"
+import { displayDate, imageUploadMaxSize } from "../../../constants/helpers"
+import AddProxyDialog from './AddProxyDialog';
+import DeleteIcon from "@material-ui/icons/Delete";
+import routes from '../../../components/Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -37,6 +40,15 @@ const useStyles = makeStyles((theme) => ({
         border: "3px solid white",
         borderRadius: "50%"
     },
+    dataValue: {
+        fontWeight: 500,
+        color: theme.palette.primary.main,
+    },
+    detailLabel: {
+        fontSize: "0.8rem",
+        fontWeight: "normal",
+        color: "#656464",
+    }
 }));
 
 export default function ManageProfile(props) {
@@ -47,9 +59,11 @@ export default function ManageProfile(props) {
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
     const [isUploading, setUploading] = useState(false);
+    const [isDeleteProxy, setIsDeleteProxy] = useState(false);
     const [isEmailUpdate, setEmailUpdate] = useState(false)
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [showAddProxyDialog, setShowAddProxyDialog] = useState(false)
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
 
@@ -128,6 +142,24 @@ export default function ManageProfile(props) {
         }
     };
 
+    const handleDeleteProxy = () => {
+
+        axiosInstance()
+            .delete("/user/doa/proxy")
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
+                setShowDeleteConfirmBox(false)
+                onFetchUserData();
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
     const handleDeleteProfilePic = () => {
         let values = {
             firstName: userData.firstName,
@@ -138,6 +170,8 @@ export default function ManageProfile(props) {
         setShowDeleteConfirmBox(false)
     }
     let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image" && field?.fieldData?.fieldName !== "reportsTo") : []
+
+
 
     return <>
         {openUpdateDialog && (
@@ -222,8 +256,8 @@ export default function ManageProfile(props) {
                         <div>
                             {otherDetails && Object.keys(otherDetails).map((k, i) => (
                                 <span className="d-flex align-items-center gap-1">
-                                    { k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
-                                    { k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
+                                    {k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
+                                    {k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
                                 </span>
                             ))
                             }
@@ -235,6 +269,13 @@ export default function ManageProfile(props) {
                             variant="outlined"
                             size="small"
                             onClick={() => setPasswordUpdate(true)}>Change Password</Button>
+                        <Divider />
+
+                        <Button color="primary"
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setShowAddProxyDialog(true)}>Add DOA Proxy</Button>
                         <Divider />
                     </div>
                     : null
@@ -259,6 +300,91 @@ export default function ManageProfile(props) {
                                     : (
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
+
+
+                                <div className="detail-box">
+                                    <h3 className="form-label-style" title="DOA Proxy">
+                                        DOA Proxy
+                                    </h3>
+
+                                    {userData?.proxyDOA ?
+                                        (
+                                            <TableContainer>
+                                                <Table aria-label="DOA Proxy Table" size="small">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>
+                                                                <h4
+                                                                    title="assignedTo"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    Assigned To
+                                                                </h4>
+                                                            </TableCell>
+
+                                                            <TableCell align="center">
+                                                                <h4
+                                                                    title="startDate"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    Start Date
+                                                                </h4>
+                                                            </TableCell>
+
+                                                            <TableCell align="center">
+                                                                <h4
+                                                                    title="endDate"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    End Date
+                                                                </h4>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                Action
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        <TableRow key={userData.proxyDOA.user}>
+                                                            <TableCell>
+                                                                <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>{userData.proxyDOA.optionLabel}</Link>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    edge="end"
+                                                                    aria-label="delete"
+                                                                    onClick={() => {
+                                                                        setShowDeleteConfirmBox(true)
+                                                                        setIsDeleteProxy(true)
+                                                                    }
+                                                                    }
+                                                                >
+                                                                    <DeleteIcon
+                                                                        color="error"
+                                                                    />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        ) :
+                                        (
+                                            <Box textAlign="center" padding={2}>
+                                                <Typography>No proxy is assigned </Typography>
+                                            </Box>
+                                        )
+                                    }
+                                </div>
+
                             </Box>
                         </> : null
                 }
@@ -286,11 +412,36 @@ export default function ManageProfile(props) {
                 {showDeleteConfirmBox ? (
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
-                        message={`Are you sure you want to remove profile picture ?`}
+                        message={isDeleteProxy ?
+                            `Are you sure you want to delete DOA proxy ?`
+                            : `Are you sure you want to remove profile picture ?`}
                         onClose={() => setShowDeleteConfirmBox(false)}
-                        onOk={handleDeleteProfilePic}
+                        onOk={() => {
+                            isDeleteProxy ?
+                                handleDeleteProxy()
+                                : handleDeleteProfilePic()
+                        }}
                     />
                 ) : null}
+
+                {
+                    showAddProxyDialog && <AddProxyDialog
+                        open={showAddProxyDialog}
+                        onClose={() => {
+                            setShowAddProxyDialog(false)
+                        }}
+                        onSuccess={(data) => {
+                            axiosInstance().post("/user/doa/proxy", data).then(({ data }) => {
+                                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                                setShowAddProxyDialog(false);
+                                onFetchUserData();
+                            }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                            })
+                        }}
+                        userId={user?.user?._id}
+                    />
+                }
             </div>
         </>
     </>

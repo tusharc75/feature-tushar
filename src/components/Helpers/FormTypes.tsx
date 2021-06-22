@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect } from "react";
+import React, { Fragment, useContext, useEffect, useRef } from "react";
 import {
   Avatar,
   Box,
@@ -34,17 +34,21 @@ import parse from "autosuggest-highlight/parse";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
-import { getFormulaValue } from "../../constants/formulaUtility";
+import { getFormulaValue, handleAutoCalculation } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import {
   imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl,
-  getUniqueCurrencies
+  getUniqueCurrencies,
+  documentUploadSupportExtensions
 } from "../../constants/helpers"
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -58,12 +62,13 @@ const withValueLimit = (inputObj, limitVal) => {
 };
 
 const formatDecimal = (value, decimalPlaces) => {
-  if (value === "" && isNaN(value)) {
+  if (value === "") {
     return 0;
   }
-  else if (parseFloat(value) < 0) {
-    return 0;
-  }
+  // && isNaN(value)
+  // else if (parseFloat(value) < 0) {
+  //   return 0;
+  // }
   else {
     return parseFloat(value.toFixed(decimalPlaces));
   }
@@ -96,12 +101,12 @@ const InfoLabel = ({
     <>{children}</>
   ) : (
     <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
+      <Grid item xs={12} sm={12} md={12}>
         {children}
       </Grid>
-      <Grid item xs={1} sm={1} md={1}>
+      {/* <Grid item xs={1} sm={1} md={1}>
         <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 
@@ -163,6 +168,9 @@ const FormTypes = (props) => {
     isMultipleUpload = false,
     imageOrFileUploadCompletePercentage,
     addDisplayType,
+    removeDisplayType,
+    setValues,
+    customError = {},
     ...rest
   } = props;
 
@@ -176,6 +184,16 @@ const FormTypes = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [isExtraDispayType, setIsExtraDispayType] = React.useState(false);
+  const [displayType, setDisplayType] = React.useState(null);
+
+  const inputNumberRef = useRef(null);
+
+  useEffect(() => {
+    const ignoreScroll = (e) => {
+      e.preventDefault();
+    };
+    inputNumberRef.current && inputNumberRef.current.addEventListener("wheel", ignoreScroll);
+  }, [inputNumberRef]);
 
   const fetch = React.useMemo(
     () =>
@@ -345,312 +363,148 @@ const FormTypes = (props) => {
   };
 
   const handleChange = (name, value) => {
-    setFieldValue(name, value);
-    if (fieldData && fieldData.isMulitFormula) {
-      handleMulitFormula(fieldData, { [name]: value });
+    const result = handleAutoCalculation(fieldData, fields, values, name, "", "", value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
     }
-    if (type === "vlookupDropdown") {
-      handleVlookup(name, value);
-    }
-    handleFormula(name, value, { [name]: value });
-    handleCheckVlookupReverse(name, value);
-  };
-
-  const handleMulitFormula = (data, alredyDone) => {
-    data.formulaFields.forEach((_field) => {
-      let formulainputFields = {};
-      data.formulainputFields.forEach((_input) => {
-        formulainputFields[_input] = alredyDone[_input] || alredyDone[_input] === 0
-          ? alredyDone[_input]
-          : values[_input]
-            ? values[_input]
-            : 0;
-      });
-      let calValue = getFormulaValue(
-        data.formulaoption[_field],
-        formulainputFields,
-        "decimal",
-        2
-      );
-      setFieldValue(_field, calValue);
-      alredyDone[_field] = calValue;
-      handleFormula(_field, calValue, alredyDone);
-      if (data.displayUnits && data.displayUnits.length) {
-        handleConverter(data, data.fieldName, data.displayUnits[0], calValue);
-      }
-    });
-  };
-
-  const handleFormula = (name, value, alredyDone) => {
-    if (
-      fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length
-    ) {
-      fields
-        .filter((_f) => _f.type === "formula" || _f.isFormula === true)
-        .forEach((_data) => {
-          if (_data.inputFields.includes(name)) {
-            let inputFields = {};
-            _data.inputFields.forEach((_input) => {
-              if (name === _input) {
-                inputFields[_input] = value;
-              } else {
-                inputFields[_input] = alredyDone[_input]
-                  ? alredyDone[_input]
-                  : values[_input]
-                    ? values[_input]
-                    : 0;
-              }
-            });
-            let calValue = getFormulaValue(
-              _data.formula,
-              inputFields,
-              _data.returnType,
-              _data.decimalPlaces
-            );
-            calValue = formatDecimal(calValue, 2);
-            let _fieldName = _data.fieldName;
-            if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
-              if (_data.displayCurrency && _data.displayCurrency.length) {
-                _fieldName = _fieldName + "_" + (_data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency.toLowerCase() : _data.displayCurrency[0].toLowerCase())
-              }
-              if (_data.displayUnits && _data.displayUnits.length) {
-                _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
-              }
-              if (alredyDone[_fieldName] === undefined) {
-                setFieldValue(_fieldName, calValue);
-                alredyDone[_fieldName] = calValue;
-                handleFormula(_fieldName, calValue, alredyDone);
-                if (_data.displayCurrency && _data.displayCurrency.length && _data.displayUnits && _data.displayUnits.length) {
-                  handleCurrencyConverter(
-                    _data,
-                    _data.fieldName,
-                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
-                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
-                    calValue
-                  )
-                }
-                else if (_data.displayCurrency && _data.displayCurrency.length) {
-                  handleCurrency(
-                    _data,
-                    _data.fieldName,
-                    _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
-                    calValue
-                  );
-                }
-                else if (_data.displayUnits && _data.displayUnits.length) {
-                  handleConverter(
-                    _data,
-                    _data.fieldName,
-                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
-                    calValue
-                  );
-                }
-                if (_data.isMulitFormula) {
-                  handleMulitFormula(_data, alredyDone);
-                }
-              }
-            } else {
-              if (alredyDone[_fieldName] === undefined) {
-                setFieldValue(_fieldName, calValue);
-                alredyDone[_fieldName] = calValue;
-                handleFormula(_fieldName, calValue, alredyDone);
-                if (_data.isMulitFormula) {
-                  handleMulitFormula(_data, alredyDone);
-                }
-              }
-            }
-          }
-        });
-    }
-  };
-
-  const handleVlookup = (name, value) => {
-    if (options && options.length) {
-      let result = options.filter((data) => data.optionValue === value);
-      if (result.length) {
-        for (var x in result[0]) {
-          if (x !== "optionLabel" && x !== "optionValue") {
-            setFieldValue(x, result[0][x]);
-            handleFormula(x, result[0][x], {})
-          }
-        }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
       }
     }
-  };
-
-  const handleCheckVlookupReverse = (name, value) => {
-    if (fields && fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).length) {
-      fields.filter((_f) => _f.type === "vlookupDropdown" && !_f.isvlookupReverse).forEach((_data) => {
-        if (_data.inputFields.includes(name)) {
-          let result = _data.option && _data.option.filter(function (val) {
-            for (var i = 0; i < _data.inputFields.length; i++)
-              if ((_data.inputFields[i] === name ? value.toString() : values[_data.inputFields[i]].toString()) !== val[_data.inputFields[i].toString()])
-                return false;
-            return true;
-          });
-          if (result.length) {
-            setFieldValue(_data.fieldName, result[0].optionLabel);
-            handleFormula(_data.fieldName, result[0].optionLabel, {})
-          }
-        }
-      });
-    }
+    //setFieldValue(name, value);
+    // if (fieldData && fieldData.isMulitFormula) {
+    //   handleMulitFormula(fieldData, { [name]: value });
+    // }
+    // if (type === "vlookupDropdown") {
+    //   handleVlookup(name, value);
+    // }
+    // handleFormula(name, value, { [name]: value });
+    // handleCheckVlookupReverse(name, value);
   };
 
   const handleConverterChange = (name, _unit, value) => {
     let fieldName = name + "_" + _unit.toLowerCase();
-    setFieldValue(fieldName, value);
-    handleFormula(fieldName, value, { fieldName: value });
-    handleConverter(fieldData, name, _unit, value);
-  };
-
-  const handleConverter = (data, name, _unit, value) => {
-    let indexConverter = data.units.indexOf(_unit);
-    if (indexConverter >= 0) {
-      for (var x_unit in data.option[indexConverter]) {
-        if (x_unit !== _unit) {
-          let calValue = value * data.option[indexConverter][x_unit];
-          calValue = formatDecimal(calValue, 2);
-          setFieldValue(name + "_" + x_unit.toLowerCase(), calValue);
-          handleFormula(name + "_" + x_unit.toLowerCase(), calValue, {});
-        }
+    const result = handleAutoCalculation(fieldData, fields, values, fieldName, "", _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
+    }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
       }
     }
+    // setFieldValue(fieldName, value);
+    // handleFormula(fieldName, value, { fieldName: value });
+    // handleConverter(fieldData, name, _unit, value);
   };
 
   const handleCurrencyChange = (name, _currency, value) => {
     let fieldName = name + "_" + _currency.toLowerCase();
-    setFieldValue(fieldName, value);
-    handleFormula(fieldName, value, { fieldName: value });
-    handleCurrency(fieldData, name, _currency, value);
-  };
-
-  const handleCurrency = (data, name, _currency, value) => {
-    if (data.isMulitFormula) {
-      handleMulitFormula(data, {
-        [name + "_" + _currency.toLowerCase()]: value,
-      });
+    const result = handleAutoCalculation(fieldData, fields, values, fieldName, _currency, "", value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
     }
-    let indexCurrency = data.currency.indexOf(_currency);
-    if (indexCurrency >= 0) {
-      for (var x_currency in data.currencyoption[indexCurrency]) {
-        if (
-          data.displayCurrency.includes(x_currency) &&
-          x_currency !== _currency
-        ) {
-          let _fieldName = name + "_" + x_currency.toLowerCase();
-          let calValue = value * data.currencyoption[indexCurrency][x_currency];
-          calValue = formatDecimal(calValue, 2);
-          setFieldValue(_fieldName, calValue);
-          handleFormula(_fieldName, calValue, {});
-        }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
       }
     }
+    // setFieldValue(fieldName, value);
+    // handleFormula(fieldName, value, { fieldName: value });
+    // handleCurrency(fieldData, name, _currency, value);
   };
 
-  const handleCurrencyChangeWithConverter = (name, _currency, _unit, value) => {
-    setFieldValue(
-      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
-      value
-    );
-    handleFormula(
-      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
-      value,
-      {}
-    );
-    handleCurrencyConverter(fieldData, name, _currency, _unit, value);
-  };
-
-  const handleCurrencyConverter = (data, name, _currency, _unit, value) => {
-    if (data.isMulitFormula) {
-      handleMulitFormula(data, {
-        [name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]:
-          value,
-      });
+  const handleCurrencyChangeWithConverterChange = (name, _currency, _unit, value) => {
+    let fieldName = name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
+    const result = handleAutoCalculation(fieldData, fields, values, fieldName, _currency, _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result })
     }
-    let indexConverter = data.units.indexOf(_unit);
-    let indexCurrency = data.currency.indexOf(_currency);
-    if (indexConverter >= 0 && indexCurrency >= 0) {
-      for (var x_unit in data.option[indexConverter]) {
-        for (var x_currency in data.currencyoption[indexCurrency]) {
-          if (
-            data.displayUnits.includes(x_unit) &&
-            data.displayCurrency.includes(x_currency)
-          ) {
-            if (x_currency === _currency && x_unit === _unit) {
-            } else if (x_currency !== _currency && x_unit === _unit) {
-              let calValue =
-                value * data.currencyoption[indexCurrency][x_currency];
-              calValue = formatDecimal(calValue, 2);
-              setFieldValue(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue
-              );
-              handleFormula(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue,
-                {}
-              );
-            } else {
-              let calValue = value * data.option[indexConverter][x_unit];
-              calValue =
-                calValue * data.currencyoption[indexCurrency][x_currency];
-              calValue = formatDecimal(calValue, 2);
-              setFieldValue(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue
-              );
-              handleFormula(
-                name +
-                "_" +
-                x_currency.toLowerCase() +
-                "_" +
-                x_unit.toLowerCase(),
-                calValue,
-                {}
-              );
-            }
-          }
-        }
+    else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
       }
     }
+    //setFieldValue(fieldName, value);
+    //handleFormula(fieldName, value, {});
+    //handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
 
   const handleAddDisplayType = (displayType, field, displayValue) => {
+
     if (displayType === "currency") {
-      if (field.isConverter) {
-        let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
-        field.displayCurrency.push(displayValue)
-        handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
-      }
-      else {
-        let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
-        field.displayCurrency.push(displayValue)
-        handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
-      }
+      field.displayCurrency.push(displayValue)
     }
     else if (displayType === "converter") {
-      let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
       field.displayUnits.push(displayValue)
-      handleConverter(field, field.fieldName, field.displayUnits[0], values[_fieldName])
     }
 
+    if (field.type !== 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
+      let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
+      handleConverterChange(field.fieldName, field.displayUnits[0], values[_fieldName])
+    } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+      handleCurrencyChangeWithConverterChange(field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName])
+    }
+    else if (field.type === 'currencyAmount') {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+      handleCurrencyChange(field.fieldName, field.displayCurrency[0], values[_fieldName])
+    }
     if (addDisplayType) {
       addDisplayType(displayType, field, displayValue)
     }
     setIsExtraDispayType(false)
+
+    // if (displayType === "currency") {
+    //   if (field.isConverter) {
+    //     let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+    //     field.displayCurrency.push(displayValue)
+    //     handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    //   }
+    //   else {
+    //     let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+    //     field.displayCurrency.push(displayValue)
+    //     handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
+    //   }
+    // }
+    // else if (displayType === "converter") {
+    //   let _fieldName = field.fieldName + "_" + field.displayUnits[0].toLowerCase();
+    //   field.displayUnits.push(displayValue)
+    //   handleConverter(field, field.fieldName, field.displayUnits[0], values[_fieldName])
+    // }
+    // else if (displayType === "currencyConverter") {
+    //   let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+    //   if (displayValue.currency) {
+    //     field.displayCurrency.push(displayValue.currency)
+    //   }
+    //   if (displayValue.unit) {
+    //     field.displayUnits.push(displayValue.unit)
+    //   }
+    //   handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    // }
+  }
+
+  const handleRemoveDisplayType = (displayType, field, displayValue) => {
+    if (removeDisplayType) {
+      if (displayType === "currency") {
+        field.displayCurrency = field.displayCurrency.filter(e => e !== displayValue)
+        if (field.isConverter) {
+          let _fieldName = field.fieldName + "_" + displayValue.toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+          setFieldValue(_fieldName, 0);
+        }
+        else {
+          let _fieldName = field.fieldName + "_" + displayValue.toLowerCase();
+          setFieldValue(_fieldName, 0);
+        }
+      }
+      else if (displayType === "converter") {
+        field.displayUnits = field.displayUnits.filter(e => e !== displayValue)
+        let _fieldName = field.fieldName + "_" + displayValue.toLowerCase();
+        setFieldValue(_fieldName, 0);
+      }
+      removeDisplayType(displayType, field, displayValue)
+    }
   }
 
   return type === "singleLine" ? (
@@ -750,6 +604,7 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        ref={inputNumberRef}
         onChange={
           onChange
             ? onChange
@@ -933,7 +788,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "converter" ? (
-    fieldData.displayUnits.map((_unit, i) => (
+    fieldData.displayUnits && Array.isArray(fieldData.displayUnits) && fieldData.displayUnits.map((_unit, i) => (
       <Grid key={_unit} item xs={12} sm={6} md={6}>
         <Box display="flex" >
           <Box flexGrow={1}  >
@@ -968,9 +823,9 @@ const FormTypes = (props) => {
           </Box>
           {(i === 0 && fieldData.displayUnits.length !== fieldData.units.length) &&
             <Box>
-              <Tooltip title="Add Converter" className="mt-1">
+              <Tooltip title="Add Converter" className="formActionButton">
                 <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                  <ControlPointIcon />
+                  <SwapHorizIcon />
                 </IconButton>
               </Tooltip>
               {isExtraDispayType && <AddDisplayTypeDialog
@@ -979,17 +834,26 @@ const FormTypes = (props) => {
                 fieldData={fieldData}
                 handleClose={() => setIsExtraDispayType(false)} />}
             </Box>}
+          {(fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
+            && <Box>
+              <Tooltip title="Remove" className="formActionButton">
+                <IconButton onClick={() => handleRemoveDisplayType("converter", fieldData, _unit)} color="primary" size="small"  >
+                  <HighlightOffIcon color="error" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          }
         </Box>
       </Grid>
     ))
   ) : type === "currencyAmount" ? (
-    fieldData.displayCurrency.map((_currency, i) =>
+    fieldData.displayCurrency && Array.isArray(fieldData.displayCurrency) && fieldData.displayCurrency.map((_currency, i) =>
       fieldData.isConverter && fieldData.displayUnits.length ? (
         fieldData.displayUnits.map((_unit, j) => (
           <Grid key={_unit} item xs={12} sm={6} md={6}>
             <Box display="flex" >
               <Box flexGrow={1}  >
-                <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
                   <TextField
                     {...rest}
                     variant="outlined"
@@ -1050,7 +914,7 @@ const FormTypes = (props) => {
                       onChange
                         ? onChange
                         : (e) =>
-                          handleCurrencyChangeWithConverter(
+                          handleCurrencyChangeWithConverterChange(
                             name,
                             _currency,
                             _unit,
@@ -1068,26 +932,51 @@ const FormTypes = (props) => {
                           )}
                         </InputAdornment>
                       ),
-                      inputProps: { min: 0 },
+                      inputProps: { min: 0, max: 9999999999 },
                       readOnly: (fieldData && fieldData.isUneditable) ? true : false
                     }}
                   />
                 </InfoLabel>
               </Box>
-              {i === 0 &&
+              {(i === 0 && j === 0) &&
                 <Box>
-                  <Tooltip title="Add Currency" className="mt-1">
-                    <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                      <ControlPointIcon />
+                  <Tooltip title="Add Currency" className="formActionButton">
+                    <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("currency") }} color="primary" size="small"  >
+                      <AttachMoneyIcon />
                     </IconButton>
                   </Tooltip>
+                  {fieldData.displayUnits.length !== fieldData.units.length &&
+                    <Tooltip title="Add Converter" className="formActionButton">
+                      <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("converter") }} color="primary" size="small"  >
+                        <SwapHorizIcon />
+                      </IconButton>
+                    </Tooltip>}
                   {isExtraDispayType &&
                     <AddDisplayTypeDialog
                       handleAddDisplayType={handleAddDisplayType}
-                      displayType="currency"
+                      displayType={displayType}
                       fieldData={fieldData}
-                      handleClose={() => setIsExtraDispayType(false)} />}
-                </Box>}
+                      handleClose={() => { setIsExtraDispayType(false); setDisplayType(null) }} />}
+                </Box>
+              }
+              {(i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit))
+                && <Box>
+                  <Tooltip title="Remove" className="formActionButton">
+                    <IconButton onClick={() => handleRemoveDisplayType("converter", fieldData, _unit)} color="primary" size="small"  >
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              }
+              {(j === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency))
+                && <Box>
+                  <Tooltip title="Remove" className="formActionButton">
+                    <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              }
             </Box>
           </Grid>
         ))
@@ -1095,7 +984,7 @@ const FormTypes = (props) => {
         <Grid key={_currency} item xs={12} sm={6} md={6}>
           <Box display="flex" >
             <Box flexGrow={1}  >
-              <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
                 <TextField
                   {...rest}
                   variant="outlined"
@@ -1149,9 +1038,9 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 &&
               <Box>
-                <Tooltip title="Add Currency" className="mt-1">
+                <Tooltip title="Add Currency" className="formActionButton">
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                    <ControlPointIcon />
+                    <AttachMoneyIcon />
                   </IconButton>
                 </Tooltip>
                 {isExtraDispayType &&
@@ -1160,6 +1049,14 @@ const FormTypes = (props) => {
                     displayType="currency"
                     fieldData={fieldData}
                     handleClose={() => setIsExtraDispayType(false)} />}
+              </Box>}
+            {(fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency))
+              && <Box>
+                <Tooltip title="Remove" className="formActionButton">
+                  <IconButton onClick={() => handleRemoveDisplayType("currency", fieldData, _currency)} color="primary" size="small"  >
+                    <HighlightOffIcon color="error" />
+                  </IconButton>
+                </Tooltip>
               </Box>}
           </Box>
         </Grid>
@@ -1234,10 +1131,12 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "multiSelect" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}
+      isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         multiple
+        disableCloseOnSelect={true}
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
         value={
@@ -1526,7 +1425,7 @@ const FormTypes = (props) => {
           style={{ display: "none" }}
           onClick={(e: any) => (e.target.value = null)}
           type="file"
-          accept={accept || ""}
+          accept={accept || documentUploadSupportExtensions}
           multiple={isMultipleUpload}
         />
         <label htmlFor={name}>
@@ -1607,10 +1506,15 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={label}
-          onChange={(date) => setFieldValue(name, date ? date : "")}
+          onChange={
+            onChange
+              ? onChange
+              : (date) => setFieldValue(name, date ? date : "")
+          }
+          // onChange={(date) => setFieldValue(name, date ? date : "")}
+          error={customError[name] || (touched[name] && Boolean(errors[name]))}
+          helperText={customError[name] || (touched[name] && errors[name])}
           format={dateFormatForInputControl}
-          error={touched[name] && Boolean(errors[name])}
-          helperText={touched[name] && errors[name]}
           InputLabelProps={{
             shrink: true,
           }}

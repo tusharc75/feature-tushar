@@ -23,13 +23,14 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { camelCase } from "./../../../constants/helpers";
-import { Vlokup } from "./vlokup";
+import { Vlookup } from "./vlookup";
 import { Formula } from "./formula";
 import { Converter } from "./converter";
 import { Currency } from "./currency";
+import { Option } from "../AddField/option";
 import Divider from '@material-ui/core/Divider';
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const FieldSchema = Yup.object().shape({
   type: Yup.string()
@@ -53,16 +54,40 @@ export const AddField = (props) => {
 
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
-    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "" }], formula: "return ", isvlookupReverse: false,
+    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "Option 1", optionValue: "Option 1" }], formula: "return ", isvlookupReverse: false,
     units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false,
   });
+
+  let new_fields = []
+  fields && fields.forEach(_field => {
+    if (_field.type !== "currencyAmount" && (_field.type === "converter" || _field.isConverter === true)) {
+      _field.displayUnits && _field.displayUnits.forEach(_unit => {
+        new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + " " + _unit, fieldName: _field.fieldName + "_" + _unit.toLowerCase() })
+      })
+    }
+    else if (_field.type === "currencyAmount") {
+      _field.displayCurrency && _field.displayCurrency.forEach(_currency => {
+        if (_field.isConverter) {
+          _field.displayUnits && _field.displayUnits.forEach(_unit => {
+            new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + " " + _unit, fieldName: _field.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+          })
+        }
+        else {
+          new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + " " + _currency, fieldName: _field.fieldName + "_" + _currency.toLowerCase() })
+        }
+      })
+    }
+    else {
+      new_fields.push(_field)
+    }
+  })
 
   const ref = useRef(null);
 
   const handleSave = (values) => {
 
     let data: any = {}
-    data._id = values._id
+    data._id = fieldData && fieldData._id ? fieldData._id : parseInt((Math.random() * 100000).toString())
     if (refrence === "builder") {
       data.sectionName = values.sectionName
     }
@@ -70,9 +95,11 @@ export const AddField = (props) => {
     data.fieldLabel = values.fieldLabel
     data.fieldName = camelCase(values.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
 
-    if (fields.filter((t) => t.fieldName === data.fieldName).length) {
-      alert("Field name alredy exist")
-      return
+    if (refrence !== "custom") {
+      if (fields.filter((t) => t.fieldName === data.fieldName).length) {
+        alert("Field name alredy exist")
+        return
+      }
     }
 
     data.required = values.required
@@ -140,11 +167,12 @@ export const AddField = (props) => {
     return errors;
   }
 
+
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth
     fullScreen={isMobile || isTablet}
     TransitionComponent={CustomDialogTransition}
     maxWidth={"md"} open={true}>
-    <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}  validate={validate}>
+    <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
           <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
@@ -183,9 +211,10 @@ export const AddField = (props) => {
                 <MenuItem value={"decimal"}>Decimal</MenuItem>
                 <MenuItem value={"percent"}>Percent</MenuItem>
                 <MenuItem value={"formula"}>Formula</MenuItem>
+                <MenuItem value={"dropDown"}>Dropdown</MenuItem>
                 <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
                 <MenuItem value={"converter"}>Converter</MenuItem>
-                {refrence === "builder" && <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>}
+                {(refrence === "builder" || refrence === "custom") && <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>}
               </Select>
             </FormControl>
             <TextField
@@ -202,7 +231,7 @@ export const AddField = (props) => {
               onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
             />
 
-            {(values["type"] === "decimal" || values["type"] === "formula") &&
+            {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
               <Grid spacing={3} container>
                 {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
                   <FormControl fullWidth margin="dense" variant="outlined">
@@ -222,7 +251,7 @@ export const AddField = (props) => {
                   </FormControl>
                 </Grid>
                 }
-                {(values["type"] === "decimal" || values["returnType"] === "decimal") &&
+                {(values["type"] === "decimal" || values["type"] === "converter" || values["returnType"] === "decimal") &&
                   <Grid item xs={12} sm={6} md={6}>
                     <FormControl fullWidth margin="dense" variant="outlined">
                       <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
@@ -266,16 +295,18 @@ export const AddField = (props) => {
               />}
 
             {(values["type"] === "formula" || values["isFormula"]) && <Formula
-              fields={fields}
+              fields={new_fields}
               values={values}
               setFieldValue={setFieldValue}
+              _id={fieldData._id}
             />}
 
             {values["type"] === "vlookupDropdown" &&
-              <Vlokup
-                fields={fields}
+              <Vlookup
+                fields={new_fields}
                 values={values}
                 setFieldValue={setFieldValue}
+                _id={fieldData._id}
               />}
 
             {values["type"] === "currencyAmount" &&
@@ -297,10 +328,16 @@ export const AddField = (props) => {
               </Fragment>
             }
             {(values["type"] === "converter" || values["isConverter"]) && <Converter
-              fields={fields}
+              fields={new_fields}
               values={values}
               setFieldValue={setFieldValue}
             />}
+
+            {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
+              <Option
+                values={values}
+                setFieldValue={setFieldValue}
+              />}
 
             <Box pt={1} pb={1}>
               <FormControlLabel

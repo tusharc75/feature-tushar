@@ -1,5 +1,6 @@
 import React, { useState, FC, useEffect, useContext, useReducer } from "react";
 import {
+    Box,
     Button,
     Grid,
     IconButton,
@@ -14,6 +15,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
+import styles from "../Leads/Header.module.scss";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import AddIcon from "@material-ui/icons/Add";
 import { useData } from "../../StateProvider/Provider";
@@ -267,58 +269,48 @@ const ProductTemplate: FC = () => {
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.productTemplate]} />
                 </Grid>
-                <Grid
-                    item
-                    md={8}
-                    sm={1}
-                    xs={2}>
-                    <ImportExportLinks
-                        module="productTemplateApi(s)"
-                        api={productTemplateApi}
-                        afterImportCompleted={() => {
-                            fetchProductTemplate();
-                        }}
-                    />
-                </Grid>
             </Grid>
-
             <CustomContainer>
                 <div className="header-panel">
-                    <Grid container>
-                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                    <Grid container className={styles.filter_side_container}>
+                        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
                             <GiAbstract055 /> <span className="listingHeader">{routes.productTemplate.title}</span>
                         </Grid>
-                        <Grid md={6} sm={12} xs={12} container justify="flex-end">
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox="terms_header_search_bar"
-                                width="300px"
-                                value={search}
-                            />
-                            <Button className="ml-2 mr-2" onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                            <Button
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >Actions <ExpandMore />
-                            </Button>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu>
+                        <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+                            <Box className={styles.filter_side_header} component="div" >
+
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width="242px"
+                                    value={search}
+                                />
+                                <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                <Button
+                                    className={styles.action_submit_btn}
+                                    variant="outlined"
+                                    color="default"
+                                    size="small"
+                                    onClick={openActions}
+                                    disabled={selectedRecords.length ? false : true}
+                                    aria-controls="action-menu"
+                                >Actions <ExpandMore />
+                                </Button>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "left",
+                                    }}
+                                    id="action-menu"
+                                    open={Boolean(anchorEl)}
+                                    onClose={closeActions}
+                                >
+                                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                </Menu>
+                            </Box>
                         </Grid>
                     </Grid>
                 </div>
@@ -329,7 +321,7 @@ const ProductTemplate: FC = () => {
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
-                        message={`Are you sure, you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
+                        message={`Are you sure you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
                         onClose={() => setShowDeleteConfirmBox(false)}
                         onOk={handleDelete}
                     />

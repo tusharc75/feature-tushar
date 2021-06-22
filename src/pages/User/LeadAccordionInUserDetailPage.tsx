@@ -69,7 +69,11 @@ function DisplayData({ label, value, icon }) {
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value ? value : '-'} secondary={label} />
+                <ListItemText primary={<>
+                    <Grid container>
+                        <Grid item xs={12} md={11} sm={11} className="text-truncate">{value ? value : '-'} </Grid>
+                    </Grid> </>
+                } secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -77,7 +81,7 @@ function DisplayData({ label, value, icon }) {
 
 export default function LeadAccordionInUserDetailPage({
     leads,
-    expanded = true, recordsPerLine = 3, userId, onSuccess
+    expanded = true, recordsPerLine = 3, userId, onSuccess, isAllowedToEdit
 }) {
     const {
         state: { permissions, selectedEntity },
@@ -155,42 +159,44 @@ export default function LeadAccordionInUserDetailPage({
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems="center">
                         <Typography variant="subtitle2">
-                            {
-                                permissions?.lead?.isCreate &&
-                                // <IconButton
-                                //     color="primary"
-                                //     size="small"
-                                //     onClick={() => { setShowCreateLeadDialog(true) }}
-                                // >
-                                //     <ControlPointIcon />
-                                // </IconButton> 
-                                <>
-                                    <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={handleOpenMenu}
-                                    >
-                                        <MoreVert />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu"
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                setShowCreateLeadDialog(true);
-                                                handleCloseMenu();
-                                            }}
+                            {isAllowedToEdit && <>
+                                {
+                                    permissions?.lead?.isCreate &&
+                                    // <IconButton
+                                    //     color="primary"
+                                    //     size="small"
+                                    //     onClick={() => { setShowCreateLeadDialog(true) }}
+                                    // >
+                                    //     <ControlPointIcon />
+                                    // </IconButton> 
+                                    <>
+                                        <IconButton
+                                            aria-haspopup="true"
+                                            color="primary"
+                                            size="small"
+                                            onClick={handleOpenMenu}
                                         >
-                                            Create New
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            }
+                                            <MoreVert />
+                                        </IconButton>
+                                        <Menu
+                                            id="menu"
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={() => {
+                                                    setShowCreateLeadDialog(true);
+                                                    handleCloseMenu();
+                                                }}
+                                            >
+                                                Create New
+                                            </MenuItem>
+                                        </Menu>
+                                    </>
+                                }
+                            </>}
                         </Typography>
                     </Grid>
                 </Grid>

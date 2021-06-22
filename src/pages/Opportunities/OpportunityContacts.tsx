@@ -68,21 +68,23 @@ const AccordionDetails = withStyles((theme) => ({
 
 function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
-        <List>
+        <List >
             <ListItem key={key}>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value ? value : '-'} secondary={label} />
-                {
-                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
-                }
+                <ListItemText primary={<>
+                    <Grid container>
+                        <Grid item xs={12} md={10} sm={10} className="text-truncate">{value ? value : '-'} </Grid>
+                        <Grid item xs={12} md={2} sm={2} >{showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}</Grid>
+                    </Grid> </>
+                } secondary={label} />
             </ListItem>
         </List>
     </div>
 }
 export default function OpportunityContacts({ contacts, title, onAddContact,
-    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null, saveContactToOpportunity = null, accountId = null }) {
+    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null, saveContactToOpportunity = null, accountId = null, isAllowedToUpdate }) {
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -176,7 +178,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                         <ControlPointIcon />
                     </IconButton> */}
 
-                    <>
+                    {isAllowedToUpdate && <>
                         <IconButton
                             aria-haspopup="true"
                             color="primary"
@@ -207,10 +209,10 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                 }}
                             >
                                 Add Existing
-                          </MenuItem>
+                            </MenuItem>
 
                         </Menu>
-                    </>
+                    </>}
                 </Grid>
             </Grid>
         </AccordionSummary>

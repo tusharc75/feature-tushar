@@ -50,6 +50,19 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
     const handleChangeUnit = (value) => {
         setFieldValue("units", value)
         let data = values["option"] ? [...values["option"]] : []
+
+        if (data.length > value.length) {
+            let index = 0;
+            let deleteindex = 0;
+            for (var x in data[0]) {
+                if (!value.includes(x)) {
+                    deleteindex = index;
+                }
+                index = index + 1
+            }
+            data.splice(deleteindex, 1);
+        }
+
         let newOptions = []
         value.forEach((_unit, index) => {
             let row = {}
@@ -59,6 +72,16 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
             newOptions.push(row)
         });
         setFieldValue("option", newOptions)
+
+        if (values["displayUnits"]) {
+            const result = []
+            values["displayUnits"].forEach((_unit) => {
+                if (value.includes(_unit)) {
+                    result.push(_unit)
+                }
+            })
+            setFieldValue("displayUnits", result)
+        }
     }
 
 
@@ -67,6 +90,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
         <Box marginTop={2}>
             <Autocomplete
                 multiple
+                disableCloseOnSelect={true}
                 id="tags-filled"
                 options={[]}
                 value={values["units"] ? values["units"] : []}

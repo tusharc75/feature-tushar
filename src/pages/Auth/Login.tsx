@@ -16,6 +16,8 @@ import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
+import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+
 import {
   AuthenticatedTemplate,
   UnauthenticatedTemplate,
@@ -52,6 +54,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = () => {
   const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
   const classes = useStyles();
@@ -126,6 +130,15 @@ const Login = () => {
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
+
+        axiosInstance()
+          .get(`/user/user-notification/unseen`)
+          .then(({ data: { count } }) => {
+            chatNotification.setCount(count);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
       })
       .catch((error) => {
         setSubmitting(false);
@@ -154,7 +167,7 @@ const Login = () => {
     <div className="login-bg">
       <Paper elevation={10} className={classes.container}>
         <Grid container className={classes.grid}>
-          <Grid item sm={6} md={5}  className="loginSidebar">
+          <Grid item sm={6} md={5} className="loginSidebar">
             <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
               <img className="imgLogin" src={SVG("imgComputer")}></img>
             </Box>

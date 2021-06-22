@@ -22,8 +22,17 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import Tooltip from '@material-ui/core/Tooltip';
 
-var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+var levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 
 const BulkEditDialog = (props) => {
 
@@ -45,18 +54,22 @@ const BulkEditDialog = (props) => {
     useEffect(() => {
 
         const productData = productDataList[0]
+        const fieldAllowed = ["commissionPerUnit", "commissionPercentPerUnit", "profitPerUnit", "profitPercentPerUnit"]
 
         let _fields = [];
         productData.fields.forEach((_f) => {
             if (stage === "product") {
-                if (_f.fieldName === "qty") {
+                if (_f.fieldName === "qty" || (_f.leval === "product-template" || _f.leval === "product-builder-custom")) {
                     _fields.push(_f)
                 }
             }
             else {
-                if (_f.leval === "template" || _f.fieldName === "qty") {
+                if (_f.fieldName === "qty" || _f.leval === "product-template" || _f.leval === "price-template" || _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom") {
                     _fields.push(_f)
                 }
+                // if (fieldAllowed.includes(_f.fieldName)) {
+                //     _fields.push(_f)
+                // }
             }
         })
 
@@ -68,15 +81,17 @@ const BulkEditDialog = (props) => {
             return levalOrderBy.indexOf(item.leval)
         });
 
-        setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
-
+        setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
         let values = { ...productData }
         delete values.fields
-
         setInitialData({
             fields: _fields,
             values: { ...getObjKeysWithValues(values, _fields) },
         });
+        // setInitialData({
+        //     fields: _fields,
+        //     values: { ...getObjKeys(values, _fields) },
+        // });
         EvaluteproductFields(_fields)
     }, []);
 
@@ -85,7 +100,7 @@ const BulkEditDialog = (props) => {
         products.forEach((_product: any) => {
             _product = Object.assign(_product, values);
             _product.productCategory = _product.productCategory.optionValue
-            _product.productTemplate = _product.productTemplate && _product.productTemplate.optionValue && _product.productTemplate.optionValue
+            _product.priceTemplate = _product.priceTemplate && _product.priceTemplate.optionValue && _product.priceTemplate.optionValue
             _product.fields = fields;
             _product.fieldChanges = fieldChanges;
             delete _product.srno
@@ -115,7 +130,12 @@ const BulkEditDialog = (props) => {
 
     const handleAddField = (field) => {
         field.sectionName = sectionName;
-        field.leval = "builder-custom";
+        field.leval = "price-builder-custom";
+        if (initialData.fields.filter((_f) => _f.sectionName === sectionName).length) {
+            if (initialData.fields.filter((_f) => _f.sectionName === sectionName)[0].leval !== "price-template") {
+                field.leval = "product-builder-custom";
+            }
+        }
         fields.push(field)
         setFields(fields)
         let newField = initialData.fields;
@@ -129,28 +149,86 @@ const BulkEditDialog = (props) => {
         setIsAddField(false)
     }
 
+
+    const handleRemoveField = (field) => {
+        let newField = initialData.fields.filter((_f) => _f._id !== field._id);
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        setFields(fields.filter((_f) => _f._id !== field._id))
+        EvaluteproductFields(newField)
+    }
+
     const addDisplayType = (displayType, field, displayValue) => {
         let _fieldChanges = fieldChanges;
         if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
             if (displayType === "currency") {
-                _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: field.displayCurrency })
+                _fieldChanges.push({ fieldName: field.fieldName, displayCurrency: [displayValue] })
             }
             else if (displayType === "converter") {
-                _fieldChanges.push({ fieldName: field.fieldName, displayUnits: field.displayUnits })
+                _fieldChanges.push({ fieldName: field.fieldName, displayUnits: [displayValue] })
             }
         }
         else {
             _fieldChanges.forEach(_f => {
                 if (_f.fieldName === field.fieldName) {
                     if (displayType === "currency") {
-                        _f.displayCurrency = field.displayCurrency;
+                        if (_f.displayCurrency) {
+                            _f.displayCurrency.push(displayValue);
+                        }
+                        else {
+                            _f.displayCurrency = [displayValue];
+                        }
                     }
                     else if (displayType === "converter") {
-                        _f.displayUnits = field.displayUnits;
+                        if (_f.displayUnits) {
+                            _f.displayUnits.push(displayValue);
+                        }
+                        else {
+                            _f.displayUnits = [displayValue];
+                        }
                     }
                 }
             })
         }
+        let newField = initialData.fields
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter((_f) => _f.fieldName === field.fieldName)[0]
+            }
+        })
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
+        setFieldChanges(_fieldChanges)
+    }
+
+    const removeDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        _fieldChanges.forEach(_f => {
+            if (_f.fieldName === field.fieldName) {
+                if (displayType === "currency") {
+                    _f.displayCurrency = _f.displayCurrency.filter(e => e !== displayValue)
+                }
+                else if (displayType === "converter") {
+                    _f.displayUnits = _f.displayUnits.filter(e => e !== displayValue)
+                }
+            }
+        })
+        let newField = initialData.fields
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter((_f) => _f.fieldName === field.fieldName)[0]
+            }
+        })
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
         setFieldChanges(_fieldChanges)
     }
 
@@ -193,7 +271,7 @@ const BulkEditDialog = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "productTemplate" && !isShowProductTemplate ?
+                                                        field.fieldName === "priceTemplate" && !isShowProductTemplate ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormControlLabel
                                                                     control={
@@ -222,35 +300,49 @@ const BulkEditDialog = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    doNotShowInfoTooltip={true}
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
                                                                     addDisplayType={addDisplayType}
+                                                                    removeDisplayType={removeDisplayType}
                                                                 /> :
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    <FormTypes
-                                                                        fields={initialData.fields}
-                                                                        fieldData={field}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={setFieldValue}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field.isTooltip}
-                                                                        tooltipMessage={field.tooltipMessage}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        isvlookupReverse={field.isvlookupReverse}
-                                                                        size="small"
-                                                                        disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
-                                                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                                                            setUploadingImageOrFileProgress(completePercentage);
-                                                                        } : null}
-                                                                    />
+                                                                    <Box display="flex" >
+                                                                        <Box flexGrow={1}  >
+                                                                            <FormTypes
+                                                                                fields={initialData.fields}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={setFieldValue}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field.isTooltip}
+                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                decimalPlaces={field.decimalPlaces}
+                                                                                isvlookupReverse={field.isvlookupReverse}
+                                                                                size="small"
+                                                                                disabled={['unit', 'productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
+                                                                                imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                                                } : null}
+                                                                            />
+                                                                        </Box>
+                                                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") &&
+                                                                            <Box>
+                                                                                <Tooltip title="Remove" className="mt-1">
+                                                                                    <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
+                                                                                        <HighlightOffIcon color="error" />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Box>}
+                                                                    </Box>
                                                                 </Grid>
                                                     ))}
                                                 </Grid>

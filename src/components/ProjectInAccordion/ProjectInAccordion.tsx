@@ -80,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale=false }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale = false, isAllowedToEdit }) {
     ;
     const [
         showCreateProjectSalesDialog,
@@ -112,7 +112,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     const [
         showAddProjectSalesDialog,
         setShowAddProjectSalesDialog,
-      ] = useState(false);
+    ] = useState(false);
 
     useEffect(() => {
         setExpandProject(projectSales && projectSales?.length !== 0 ? true : false);
@@ -154,7 +154,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
-                        {permissions?.projectSales?.isCreate && isAddProjectSale ?
+                        {isAllowedToEdit &&
                             <>
                                 <IconButton
                                     aria-haspopup="true"
@@ -172,6 +172,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                     onClose={handleCloseMenu}
                                 >
                                     <MenuItem
+                                        disabled={!permissions.projectSales.isCreate}
                                         onClick={() => {
                                             setShowCreateProjectSalesDialog(true);
                                             handleCloseMenu();
@@ -180,6 +181,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                         Create New
                                     </MenuItem>
                                     <MenuItem
+                                        disabled={!permissions.projectSales.isUpdate}
                                         onClick={() => {
                                             setShowAddProjectSalesDialog(true)
                                             handleCloseMenu();
@@ -189,16 +191,6 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                     </MenuItem>
                                 </Menu>
                             </>
-                            :
-                            <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => {
-                                    setShowCreateProjectSalesDialog(true);
-                                }}
-                            >
-                                <ControlPointIcon />
-                            </IconButton>
                         }
                     </Grid>
                 </Grid>
@@ -268,15 +260,15 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
         )}
         {showAddProjectSalesDialog && (
             <AssignProjectSalesDialog
-            projectSalesDialogOpen={showAddProjectSalesDialog}
-            onSuccess={() => {
-                setShowAddProjectSalesDialog(false);
-                fetchData()
-            }}
-            handleCloseDialog={() => setShowAddProjectSalesDialog(false)}
-            assignedProjectSales={projectSales}
-            type={type}
-          />
+                projectSalesDialogOpen={showAddProjectSalesDialog}
+                onSuccess={() => {
+                    setShowAddProjectSalesDialog(false);
+                    fetchData()
+                }}
+                handleCloseDialog={() => setShowAddProjectSalesDialog(false)}
+                assignedProjectSales={projectSales}
+                type={type}
+            />
         )}
     </>
 }

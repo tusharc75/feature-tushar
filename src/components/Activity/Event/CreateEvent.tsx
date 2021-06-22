@@ -404,9 +404,16 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               mask="__:__ _M"
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
-                              onChange={(date) =>
-                                setFieldValue("startTime", date)
-                              }
+                              onChange={(date: any) => {
+                                console.log(date._d);
+                                setFieldValue("startTime", date);
+                                setFieldValue(
+                                  "endTime",
+                                  new Date(
+                                    new Date(date._d).getTime() + 30 * 60000
+                                  )
+                                );
+                              }}
                               error={
                                 Boolean(touched["startTime"]) &&
                                 Boolean(errors["startTime"])
@@ -544,7 +551,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                         </Fragment>
                       )}
 
-                      {eventId && (
+                      {eventId &&
+                      initialValues?.relatedTo &&
+                      initialValues.relatedTo.length ? (
                         <Fragment>
                           <Box mt={2}>
                             <RelatedToDispay
@@ -552,7 +561,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                             />
                           </Box>
                         </Fragment>
-                      )}
+                      ) : null}
                     </Box>
                   </MuiPickersUtilsProvider>
                 </Form>

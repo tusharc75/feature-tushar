@@ -17,6 +17,8 @@ import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty } from "../..
 import RoleHeader from "./RoleHeader";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
+import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -129,6 +131,7 @@ const Roles: FC = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+  const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -354,6 +357,14 @@ const Roles: FC = () => {
     setSelectedType(filteredValue);
   };
 
+  const userDialogOpen = () => {
+    setShowAssignUserDialog(true);
+  };
+
+  const userDialogClose = () => {
+    setShowAssignUserDialog(false);
+  };
+
   const disableDelete = selectedRecords.some(
     (o) => rolePermissionArray.indexOf(o?.permission) >= 0
   );
@@ -369,6 +380,29 @@ const Roles: FC = () => {
           setToastConfig={toastConfig.setToastConfig}
           selectedEntity={selectedEntity}
         />
+      )}
+      {showAssignUserDialog && (
+        selectedType === roleTypes.find((d) => d.key === "Global")?.value ?
+          <AssignUserDialog
+            usersDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            roleIds={selectedRecords.map((d) => d._id)}
+            assignedUsers={[]}
+            onSuccess={() => {
+              userDialogClose();
+            }}
+          />
+          :
+          <AssignRegionalRolesUserDialog
+            entitiesDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            ids={selectedRecords.map((d) => d._id)}
+            assignedUsers={[]}
+            onSuccess={() => {
+              userDialogClose();
+            }}
+          />
+
       )}
       <Layout>
 
@@ -389,6 +423,8 @@ const Roles: FC = () => {
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={!disableDelete}
+              selectedRecords={selectedRecords}
+              userDialogOpen={userDialogOpen}
             />
           </div>
 
@@ -406,7 +442,7 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${deleteRecord.name || ""
+            message={`Are you sure you want to delete role ${deleteRecord.name || ""
               }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});

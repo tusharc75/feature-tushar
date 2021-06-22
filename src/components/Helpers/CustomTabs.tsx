@@ -9,6 +9,7 @@ const AntTabs = withStyles((theme) => ({
   },
   indicator: {
     backgroundColor: theme.palette.primary.main, //  dargBg
+    display: "none",
   },
 }))(Tabs);
 

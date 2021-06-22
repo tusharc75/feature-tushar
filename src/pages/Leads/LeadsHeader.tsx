@@ -5,7 +5,8 @@ import {
     Grid,
     MenuItem,
     Button,
-    Menu
+    Menu,
+    Box
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import styles from "./Header.module.scss"
@@ -54,7 +55,7 @@ function LeadsHeader(props) {
     } = props;
 
     return <Grid className={styles.filter_side_container} container>
-        <Grid item xs={12} md={4} sm={5} className="d-flex align-items-center gap-1">
+        <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
             {icon} <span className="listingHeader">{heading}
             </span>
             {
@@ -71,93 +72,100 @@ function LeadsHeader(props) {
                 </ToggleButtonGroup>
             }
         </Grid>
-        <Grid item xs={12} md={8} sm={7} className="d-flex align-items-center gap-2" justify="flex-end">
-            <SearchBox
-                onSearch={onSearch}
-                searchbox={styles.search_box_input}
-                value={searchVal}
-                size="small"
-                placeholder="Search Leads"
-                width='242px'
-            />
-            {
-                leadPermissions.isCreate &&
-                <Button
-                    variant="contained"
-                    color="primary"
+        <Grid item xs={6} className={styles.filter_side}>
+            <Box className={styles.filter_side_header} component="div">
+
+                <SearchBox
+                    onSearch={onSearch}
+                    searchbox={styles.search_box_input}
+                    value={searchVal}
                     size="small"
-                    className={styles.add_submit_btn}
-                    onClick={onCreate}
-                    startIcon={<AddOutlined />}
-                >
-                    Add
-                </Button>
-            }
-
-            {
-                leadPermissions.isDelete && <>
+                    placeholder="Search Leads"
+                    width='242px'
+                />
+                {
+                    leadPermissions.isCreate &&
                     <Button
-                        variant="outlined"
-                        color="default"
+                        variant="contained"
+                        color="primary"
                         size="small"
-                        className={styles.action_submit_btn}
-                        onClick={openActions}
-                        aria-controls="action-menu"
+                        className={styles.add_submit_btn}
+                        onClick={onCreate}
+                        startIcon={<AddOutlined />}
                     >
-                        Actions <ExpandMore />
+                        Add
                     </Button>
-                    <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "left"
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                    >
-                        <MenuItem
-                            onClick={() => {
-                                closeActions();
-                                showConfirmBox(null)
-                            }}
-                            disabled={selectedLeads.length === 0 || selectedLeads.some(d => d.ownerId !== userId)}
-                        >Delete</MenuItem>
+                }
 
-                        {
-                            allowToConvertLeadToOpportunity && <MenuItem
-                                onClick={() => {
-                                    closeActions();
-                                    if (selectedLeads.some((d) => d.convertedToOpportunity)) {
-                                        setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
-                                    }
-                                    else if (selectedLeads.some((d) => (!d[processFieldName] || d[processFieldName].toLowerCase() !== "qualified"))) {
-                                        setMessageDialog({ open: true, message: `You have selected lead(s) which are not qualified yet to be converted into opportunity` })
-                                    }
-                                    else {
-                                        if (selectedLeads.some(d => d.isAllowedToUpdate === false)) {
-                                            setMessageDialog({ open: true, message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.` })
+                {
+                    (leadPermissions.isDelete || allowToConvertLeadToOpportunity) && <>
+                        <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            className={styles.action_submit_btn}
+                            onClick={openActions}
+                            aria-controls="action-menu"
+                        >
+                            Actions <ExpandMore />
+                        </Button>
+
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "left"
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}
+                        >
+                            {
+                                leadPermissions.isDelete && <MenuItem
+                                    onClick={() => {
+                                        closeActions();
+                                        showConfirmBox(null)
+                                    }}
+                                    disabled={selectedLeads.length === 0 || selectedLeads.some(d => d.ownerId !== userId)}
+                                >Delete</MenuItem>
+                            }
+
+                            {
+                                allowToConvertLeadToOpportunity && <MenuItem
+                                    disabled={selectedLeads.length === 0}
+                                    onClick={() => {
+                                        closeActions();
+                                        if (selectedLeads.some((d) => d.convertedToOpportunity)) {
+                                            setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
+                                        }
+                                        else if (selectedLeads.some((d) => (!d[processFieldName] || d[processFieldName].toLowerCase() !== "qualified"))) {
+                                            setMessageDialog({ open: true, message: `You have selected lead(s) which are not qualified yet to be converted into opportunity` })
                                         }
                                         else {
-                                            showLeadToOpportunityConfirmationDialog();
+                                            if (selectedLeads.some(d => d.isAllowedToUpdate === false)) {
+                                                setMessageDialog({ open: true, message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.` })
+                                            }
+                                            else {
+                                                showLeadToOpportunityConfirmationDialog();
+                                            }
                                         }
-                                    }
-                                }}
-                            >Convert To Opportunity</MenuItem>
-                        }
-                    </Menu>
-                </>
-            }
-            {
-                messageDialog.open ? (
-                    <MessageDialog
-                        open={messageDialog.open}
-                        message={messageDialog.message}
-                        onClose={() => setMessageDialog({ open: false, message: null })}
-                    />
-                ) : null}
+                                    }}
+                                >Convert To Opportunity</MenuItem>
+                            }
+                        </Menu>
+                    </>
+                }
+                {
+                    messageDialog.open ? (
+                        <MessageDialog
+                            open={messageDialog.open}
+                            message={messageDialog.message}
+                            onClose={() => setMessageDialog({ open: false, message: null })}
+                        />
+                    ) : null}
+            </Box>
         </Grid>
     </Grid>
 }

@@ -34,6 +34,11 @@ import CustomAgGrid, {
 } from "../../components/AgGridComponents/CustomAgGrid";
 import QuoteHeader from "./QuoteHeader";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
+import NoDataCell from "../../components/Helpers/NoDataCell";
+import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import { DataGrid } from "@material-ui/data-grid";
+import VersionStatus from "./VersionStatus";
 
 let quoteTimeout;
 const QuoteType = [
@@ -77,7 +82,11 @@ const QuoteBuilders = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   });
-
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [versionStatusData, setVersionStatusData] = useState({
+    columns: [],
+    data: [],
+  });
   const { qbResource, qbApi } = quoteBuilder;
 
   //  Grid Variables - Start
@@ -105,11 +114,25 @@ const QuoteBuilders = () => {
       cellRenderer: "quoteNameRenderer",
     },
     {
+      field: "status",
+      headerName: "Status",
+      show: true,
+      filter: false,
+      cellRenderer: "commonRenderer",
+    },
+    {
       field: "customerAccountName",
       headerName: "Customer Account Name",
       show: true,
       cellRenderer: "customerAccountNameRenderer",
     },
+    {
+      field: "relatedOpportunity",
+      headerName: "Related Opportunity",
+      show: true,
+      cellRenderer: "relatedOpportunityRenderer"
+    },
+
     {
       field: "createdBy",
       headerName: "Created By",
@@ -123,8 +146,8 @@ const QuoteBuilders = () => {
       cellRenderer: "updatedByRenderer",
     },
     {
-      field: "closeDate",
-      headerName: "Close Date",
+      field: "expiryDate",
+      headerName: "Expiry Date",
       show: true,
       filter: false,
       cellRenderer: "commonRenderer",
@@ -139,8 +162,8 @@ const QuoteBuilders = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    if (permissions && permissions[qbResource]) {
-      setQuotePermissions(permissions[qbResource]);
+    if (permissions && permissions.quoteBuilder) {
+      setQuotePermissions(permissions.quoteBuilder);
     }
 
     return () => {
@@ -201,7 +224,7 @@ const QuoteBuilders = () => {
     <Link
       className="link"
       title={params.value}
-      to={`${routes.quoteBuilder.path}/${params.data._id}`}
+      to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}
     >
       {params.value}
     </Link>
@@ -216,6 +239,16 @@ const QuoteBuilders = () => {
       {params.value}
     </Link>
   );
+
+  const RelatedOpportunityRenderer = params => <>
+    {
+      params.value ?
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+          {params.value}
+        </Link>
+        : <NoDataCell />
+    }
+  </>
 
   const ActionsRenderer = (params) => (
     <>
@@ -238,6 +271,7 @@ const QuoteBuilders = () => {
   const frameworkComponents = {
     quoteNameRenderer: QuoteNameRenderer,
     customerAccountNameRenderer: CustomerAccountNameRenderer,
+    relatedOpportunityRenderer: RelatedOpportunityRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
@@ -352,6 +386,16 @@ const QuoteBuilders = () => {
               ...restProperties
             } = u;
 
+            let tempStatus = "Building Quote"
+            let versionArray = []
+            Object.keys(u.versions).forEach(key => {
+              versionArray.push(u.versions[key])
+            })
+            const updatedVersion = versionArray.find(v => v.status !== tempStatus)
+            if (updatedVersion) {
+              tempStatus = updatedVersion.status
+            }
+
             let res = {
               ...restProperties,
               id: u._id,
@@ -360,10 +404,13 @@ const QuoteBuilders = () => {
               ownerId: u.owner?.optionValue,
 
               canDelete: u.owner?.optionValue === user?.user._id,
-              closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
+              expiryDate: u.expiryDate ? displayDate(u.expiryDate) : "",
 
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
+              status: tempStatus,
+              relatedOpportunity: u.opportunity?.optionLabel,
+              relatedOpportunityId: u.opportunity?.optionValue,
 
               createdBy: u.createdBy?.user?.concatedName,
               createdByDate: u.createdBy?.date,
@@ -461,6 +508,7 @@ const QuoteBuilders = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
+                    permissions={quotePermissions}
                     module="quotes"
                     api={qbApi}
                     afterImportCompleted={() => {
@@ -529,9 +577,8 @@ const QuoteBuilders = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${
-                deleteRecord?.quoteName ? "Quote" : "Quotes"
-              }   ${deleteRecord.quoteName || ""}?`}
+              message={`Are you sure you want to delete ${deleteRecord?.quoteName ? "Quote" : "Quotes"
+                }   ${deleteRecord.quoteName || ""}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
@@ -544,7 +591,7 @@ const QuoteBuilders = () => {
           {singleQuoteDelete.show ? (
             <ConfirmationDialog
               open={singleQuoteDelete.show}
-              message={`Are you sure, you want to delete Quote: ${singleQuoteDelete.quoteName} ?`}
+              message={`Are you sure you want to delete Quote: ${singleQuoteDelete.quoteName}?`}
               onClose={() =>
                 setSingleQuoteDelete({
                   id: null,
@@ -575,6 +622,19 @@ const QuoteBuilders = () => {
           contacts={null}
           isRenderedFromOpportunity={false}
         />
+      )}
+
+      {showVersionsDialog && (
+        <CustomDialogComponent
+          title="All Version Status"
+          open={showVersionsDialog}
+          onClose={() => {
+            setShowVersionsDialog(false);
+          }}
+        >
+          <VersionStatus loadingVersions={false} versionStatusData={versionStatusData}
+          />
+        </CustomDialogComponent>
       )}
     </>
   );

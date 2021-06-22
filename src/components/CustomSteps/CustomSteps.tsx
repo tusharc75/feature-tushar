@@ -4,6 +4,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { FaCheckCircle } from 'react-icons/fa';
+
 const useStyles = makeStyles((theme) => ({
     root: {
         // width: "98%",
@@ -19,14 +20,15 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
     },
-    completed: {
-        background: "#20789a !important",
-        border: "2px solid #04506d !important"
+    inActive: {
+        background: "#ebebeb",
     },
-    current: {
-        // background: "#50ad50",
-        border: "2px solid #003f57 !important"
-    }
+    currentStep: {
+        background: "#ffffff",
+    },
+    active: {
+        background: "#53ac65",
+    },
 }));
 
 
@@ -79,7 +81,7 @@ export default function CustomSteps({ steps, active }) {
 
     return (
         <div className={classes.root}>
-            <Stepper activeStep={active}>
+            <Stepper activeStep={active + 1}>
                 {steps.map((step, index) => {
                     const stepProps: any = {};
                     const labelProps: any = {};
@@ -90,8 +92,15 @@ export default function CustomSteps({ steps, active }) {
                         stepProps.completed = false;
                     }
                     return (
-                        <Step key={index} {...stepProps} className={active > index ? classes.completed : (index === active ? classes.current : "")}>
-                            <StepLabel {...labelProps}  icon={active > index ? <FaCheckCircle /> : (index === active ? index+1 : index+1)}>
+                        <Step
+                            key={index} {...stepProps}
+                            style={{ width: `${100 / steps.length}%` }}
+                            className={`${index <= active ? classes.active : (index === (active + 1)) ? classes.currentStep : classes.inActive}`}
+                        //className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}
+                        >
+                            <StepLabel
+                                {...labelProps}
+                                icon={active >= index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
                                 {step.text}</StepLabel>
                         </Step>
                     );
@@ -137,6 +146,6 @@ export default function CustomSteps({ steps, active }) {
                     </div>
                 )}
             </div> */}
-        </div>
+        </div >
     );
 }

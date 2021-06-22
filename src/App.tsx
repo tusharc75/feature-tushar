@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch } from "react-router-dom";
+import ReactGA from 'react-ga';
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -42,14 +43,13 @@ import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
 import TermsAndConditions from "./pages/TermsAndConditions";
 
-import ProductCost from "./pages/ProductCost";
-import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+import PriceTemplate from "./pages/PriceTemplate";
+import CreatePriceTemplate from "./pages/PriceTemplate/CreatePriceTemplate";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from "./pages/Quote-Approval";
 import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail";
-import QuoteBuilderPage from "./pages/QuoteBuilder";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 
@@ -82,14 +82,22 @@ import {
   SET_SELECTED_ENTITY,
 } from "./StateProvider/actionTypes";
 import NotFound from "./pages/NotFound";
+import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
+import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import { TRACKING_ID } from "./config";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+
   const {
     state: { user },
     dispatch,
   }: any = useData();
+  const history = useHistory();
+  ReactGA.initialize(TRACKING_ID);
+  
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -133,9 +141,27 @@ function App() {
     }
   };
 
+  const getChatNotification = async () => {
+    if (localStorage.getItem("token")) {
+      await axiosInstance()
+        .get(`/user/user-notification/unseen`)
+        .then(({ data: { count } }) => {
+          if (count > 0) {
+            chatNotification.setCount(count);
+          }
+        });
+    }
+  };
+
   useEffect(() => {
     try {
       getNotification();
+      getChatNotification();
+      history.listen((location, action) => {
+        ReactGA.set({ page: location.pathname });
+        ReactGA.pageview(location.pathname);
+    });
+    
       setInterval(async () => {
         await getNotification();
       }, 60000);
@@ -143,6 +169,8 @@ function App() {
       console.log(e);
     }
   }, []);
+
+  
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
@@ -390,11 +418,11 @@ function App() {
               termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path}>
-            <ProductCost />
+          <PrivateRoute exact path={routes.priceTemplate.path}>
+            <PriceTemplate />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path + "/:id"}>
-            <CreateProductCost />
+          <PrivateRoute exact path={routes.priceTemplate.path + "/:id"}>
+            <CreatePriceTemplate />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />
@@ -405,7 +433,7 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-          <PrivateRoute exact path={"/quote-builder/:id"}>
+          <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
             <QuoteDetail />
           </PrivateRoute>
           <Route exact path={"/dashboards"}>
@@ -421,15 +449,18 @@ function App() {
           <Route exact path={"/quote-approval/:id"}>
             <QuoteApproval />
           </Route>
-          <Route exact path={"/doa-request"}>
+          <PrivateRoute exact path={"/doa-request"}>
             <DOARequest />
-          </Route>
-          <Route exact path={"/doa-request/:id"}>
+          </PrivateRoute>
+          <PrivateRoute exact path={"/doa-request/:id"}>
             <DOAapproval />
-          </Route>
-          <PrivateRoute exact path={"/quote-builder"}>
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.quoteBuilder.path}>
             <QuoteBuilderCombined />
           </PrivateRoute>
+          <Route exact path="/inline-grid">
+            <CustomInlineEditableAgGrid />
+          </Route>
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

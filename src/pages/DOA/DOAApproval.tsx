@@ -6,14 +6,24 @@ import Layout from "../../components/Layout";
 
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { Button, Grid, Paper } from "@material-ui/core";
-import { GiAbstract055 } from "react-icons/gi";
+import { Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography } from "@material-ui/core";
+import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
 import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Activity from "../../components/Activity";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import { gridPageSizes } from "../../constants/helpers";
+import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
+import {
+  CustomDialogTransition,
+  formatAmountWithCurrency,
+  gridPageSizes,
+} from "../../constants/helpers";
 import { camelCase } from "lodash";
+import { useData } from "../../StateProvider/Provider";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import { isMobile, isTablet } from "react-device-detect";
+import DOAReasonDialog from "./DOAReasonDialog"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -107,7 +117,12 @@ const intialState = {
 };
 
 const DOAApproval = () => {
-  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: {
+      user: { user: currentUser },
+    },
+  } = useData();
+  const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
   const [columns, setColumns] = useState([]);
@@ -116,22 +131,22 @@ const DOAApproval = () => {
   const {
     dataRows,
     rowCount,
-    loading,
+
     page,
     limit,
     pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
   } = state;
   const [sellingPrice, setSellingPrice] = useState(0);
-  const [chatid, setChatid] = useState("");
-  const [QData, setQData] = useState({});
+  const [QData, setQData] = useState(null);
+  const [loadingData, setLoadingData] = useState(true);
   const [needDOA, setneedDOA] = useState(false);
   const [PDFName, setPDFName] = useState("");
   const [buttontext, setButton] = useState("Accept");
   const [QStatus, setQStatus] = useState(true);
+  const [doaName, setDoaName] = useState("");
+  const [showAIDialog, setShowAIDialog] = useState(false);
+  const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
+  const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
   var DOALimit = 0;
   var DOAsetup = false;
 
@@ -151,9 +166,10 @@ const DOAApproval = () => {
           setneedDOA(true);
           setButton("Send for DOA");
         }
+        setDoaName(data.data.doaName);
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
+        setToastConfig(err);
       });
   };
 
@@ -164,6 +180,8 @@ const DOAApproval = () => {
       gridApi.setRowData([]);
       gridApi.showLoadingOverlay();
     }
+
+    setLoadingData(true);
 
     axiosInstance()
       .get("/quote-builder/getQuotefromDOAId/" + id)
@@ -193,51 +211,21 @@ const DOAApproval = () => {
         setSellingPrice(data.TotalSellingPrice);
         fetchDOA(data.Quotedby);
         setPDFName(data.PDF);
-        setChatid(data.chatter);
 
         setQData(data);
         if (data.Quote_Status !== "Sent for DOA") {
           setQStatus(false);
         }
+        setLoadingData(false);
       })
       .catch((err) => {
         dispatch({ type: "loading", loading: false });
-        console.log(err);
+        setToastConfig(err);
+        setLoadingData(false);
       });
   };
 
-  const QuoteStatusChange = (accepted) => {
-    if (accepted) {
-      if (needDOA) {
-        axiosInstance()
-          .post("/doa-request/createParent/" + id)
-          .then(({ data }) => {
-            history.push("/doa-request");
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        axiosInstance()
-          .post("/doa-request/DOAResponse/" + id, { response: "Accepted " })
-          .then(({ data }) => {
-            history.push("/doa-request");
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-    } else {
-      axiosInstance()
-        .post("/doa-request/DOAResponse/" + id, { response: "Rejected" })
-        .then(({ data }) => {
-          history.push("/doa-request");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  };
+
 
   const ViewQuote = () => {
     axiosInstance()
@@ -252,8 +240,45 @@ const DOAApproval = () => {
         pdfWindow.location.href = fileURL;
       })
       .catch((err) => {
-        console.log(err);
+        setToastConfig(err);
       });
+  };
+
+
+  const QuoteStatusChange = (accepted, signature, comment) => {
+    if (accepted !== "Rejected") {
+      if (needDOA) {
+        axiosInstance()
+          .post("/doa-request/createParent/" + id)
+          .then(({ data }) => {
+            history.push("/doa-request");
+          })
+          .catch((err) => {
+            console.log(err);
+            setShowQuoteStatusChangeDialog(false)
+          });
+      } else {
+        axiosInstance()
+          .post("/doa-request/DOAResponse/" + id, { response: "Accepted" })
+          .then(({ data }) => {
+            history.push("/doa-request");
+          })
+          .catch((err) => {
+            setToastConfig(err);
+            setShowQuoteStatusChangeDialog(false)
+          });
+      }
+    } else {
+      axiosInstance()
+        .post("/doa-request/DOAResponse/" + id, { response: "Rejected", comment: comment })
+        .then(({ data }) => {
+          history.push("/doa-request");
+        })
+        .catch((err) => {
+          setToastConfig(err);
+          setShowQuoteStatusChangeDialog(false)
+        });
+    }
   };
 
   return (
@@ -262,7 +287,7 @@ const DOAApproval = () => {
         <CustomBreadCrumbs
           routes={[
             { title: "DOA Requests", path: "/doa-request" },
-            { title: id },
+            { title: doaName ?? id },
           ]}
         />
       </div>
@@ -298,10 +323,24 @@ const DOAApproval = () => {
                 >
                   View
                 </Button>
-                {QStatus ? (
+                <Tooltip title="AI Suggestion">
+                  <IconButton
+                    onClick={() => {
+                      setShowAIDialog(true);
+                    }}
+                  >
+                    <GiVintageRobot />
+                  </IconButton>
+                </Tooltip>
+                {QData &&
+                  QStatus &&
+                  QData?.DOA.approveBy.filter((u) => u.user === currentUser._id)
+                    .length === 0 ? (
                   <>
                     <Button
-                      onClick={() => QuoteStatusChange(true)}
+                      onClick={() => {
+                        QuoteStatusChange("Accepted", "", "")
+                      }}
                       variant="outlined"
                       size="small"
                       startIcon={<ThumbUpIcon />}
@@ -310,7 +349,10 @@ const DOAApproval = () => {
                       {buttontext}
                     </Button>
                     <Button
-                      onClick={() => QuoteStatusChange(false)}
+                      onClick={() => {
+                        setQuoteStatusChangeData("Rejected")
+                        setShowQuoteStatusChangeDialog(true)
+                      }}
                       startIcon={<ThumbDownIcon />}
                       variant="contained"
                       size="small"
@@ -331,32 +373,82 @@ const DOAApproval = () => {
                   sm={12}
                   className="d-flex align-items-center gap-1 quotePanel"
                 >
-                  <div className="quoteBox">
-                    <span>Total Profit</span>
-                    <span>
-                      {QData["TotalProfitamount"]} {QData["TotalProfitcurr"]}
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Cost Price</span>
-                    <span>
-                      {QData["TotalCostamount"]} {QData["TotalCostcurr"]}
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Selling Price</span>
-                    <span>
-                      {QData["TotalSellingPriceamount"]}{" "}
-                      {QData["TotalSellingPricecurr"]}
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Margin</span>
-                    <span>
-                      {" "}
-                      {QData["TotalMarginamount"]} {QData["TotalMargincurr"]}
-                    </span>
-                  </div>
+                  {QData && (
+                    <>
+                      <div className="quoteBox">
+                        <span>Total Profit</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalProfitcurr"],
+                              QData["TotalProfitamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalProfitcurr"],
+                              QData["TotalProfitamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                      <div className="quoteBox">
+                        <span>Total Cost Price</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalCostcurr"],
+                              QData["TotalCostamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalCostcurr"],
+                              QData["TotalCostamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                      <div className="quoteBox">
+                        <span>Total Selling Price</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalSellingPricecurr"],
+                              QData["TotalSellingPriceamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalSellingPricecurr"],
+                              QData["TotalSellingPriceamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div>
+                      {/* <div className="quoteBox">
+                        <span>Total Margin</span>
+                        <span
+                          title={
+                            formatAmountWithCurrency(
+                              QData["TotalMargincurr"],
+                              QData["TotalMarginamount"]
+                            ).fullFormatAmount
+                          }
+                        >
+                          {
+                            formatAmountWithCurrency(
+                              QData["TotalMargincurr"],
+                              QData["TotalMarginamount"]
+                            ).shortFormatAmount
+                          }
+                        </span>
+                      </div> */}
+                    </>
+                  )}
                   <div></div>
                 </Grid>
                 <div style={{ height: 500 }}>
@@ -384,14 +476,53 @@ const DOAApproval = () => {
             relatedTo={[
               {
                 type: "DOA",
-                referenceId: QData["quoteBuilderId"],
+                referenceId: QData?.quoteBuilderId,
                 access: true,
               },
             ]}
-            handleActivityRefresh={() => {}}
+            handleActivityRefresh={() => { }}
           />
         </Grid>
       </Grid>
+      {
+        showAIDialog && (
+          <Dialog
+            open={showAIDialog}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="sm"
+            onClose={() => {
+              setShowAIDialog(false);
+            }}
+            fullWidth
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            <CustomDialogHeader
+              title="AI Suggestion"
+              onClose={() => {
+                setShowAIDialog(false);
+              }}
+            />
+            <CustomDialogContent>
+              <div className="text-align-center">
+                <Typography variant="h4">Under Construction </Typography>
+                <img
+                  src={`${PerformanceTuningImg}`}
+                  style={{ height: "300px" }}
+                />
+              </div>
+            </CustomDialogContent>
+          </Dialog>
+        )
+      }
+      {showQuoteStatusChangeDialog && (
+        <DOAReasonDialog
+          reasonDialogOpen={showQuoteStatusChangeDialog}
+          handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+          QuoteStatusChange={QuoteStatusChange}
+          accepted={quoteStatusChangeData}
+        />
+      )}
     </Layout>
   );
 };

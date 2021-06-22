@@ -1,7 +1,7 @@
 import axios from 'axios';
+import { backendApi } from './../config';
 
 export default (history = null, passedHeaders = null) => {
-    const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
     let headers: any = passedHeaders ? passedHeaders : {};
 
     if (localStorage.token) {
@@ -14,7 +14,7 @@ export default (history = null, passedHeaders = null) => {
     }
 
     const axiosInstance = axios.create({
-        baseURL: baseURL,
+        baseURL: backendApi,
         headers
     });
 
@@ -41,6 +41,13 @@ export default (history = null, passedHeaders = null) => {
         new Promise((resolve, reject) => {
             resolve(response);
         }), (error) => {
+            if(error.request.responseType === 'blob' &&  error.response.data.type.toLowerCase().indexOf('json') != -1){
+                return new Promise(async (resolve, reject) => {
+                    const bufferArray = await error.response.data.text()
+                    const err = JSON.parse(bufferArray);
+                    reject({ open: true, type: "error", message: err.error });
+                })
+            }
             if (error.message == "Network Error") {
                 return new Promise((resolve, reject) => {
                     reject({ open: true, type: "error", message: "Api Not Working" });
