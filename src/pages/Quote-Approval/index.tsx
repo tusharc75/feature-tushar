@@ -303,6 +303,7 @@ const QuoteApproval = () => {
                         generateBase64forFile(pdfBlobFile, "pdf");
 
                         window.open(URL.createObjectURL(pdfBlobFile));
+                        setGeneratingPdf({ show: false, text: null })
                     }
                     if (send) {
                         let PDFtoAPIData = doc.output("blob");
@@ -322,6 +323,7 @@ const QuoteApproval = () => {
                             // .catch((err) => {
                             //     toastConfig.setToastConfig(err);
                             // });
+                            setGeneratingPdf({ show: false, text: null })
                     }
                 },
                 x: 20,
@@ -356,6 +358,7 @@ const QuoteApproval = () => {
                 generateBase64forFile(pdfBlobFile, "pdf");
 
                 window.open(URL.createObjectURL(pdfBlobFile));
+                setGeneratingPdf({ show: false, text: null })
             }
             if (send) {
                 let PDFtoAPIData = PdfDoc.output("blob");
@@ -372,14 +375,14 @@ const QuoteApproval = () => {
                     QuoteStatusChange(true, data.fileUrl, null);
                     // setPdf(data.fieldName);
                     // handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-                })
+                });
+
+                setGeneratingPdf({ show: false, text: null })
                 // .catch((err) => {
                 //     toastConfig.setToastConfig(err);
                 // });
             }
         }
-
-        setGeneratingPdf({ show: false, text: null })
     };
 
     return (
