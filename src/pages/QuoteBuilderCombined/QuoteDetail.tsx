@@ -443,6 +443,7 @@ function QuoteDetail() {
   const [buttonMessage, setButtonMessage] = useState("Send to Customer");
   const [columnView, setColumnView] = useState([]);
   const [PDF, setPdf] = useState("");
+  const [PDFAttachment, setPdfAttachment] = useState("");
   const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
@@ -1196,6 +1197,7 @@ function QuoteDetail() {
               .then(({ data }) => {
                 setPdf(data.fieldName);
                 handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
+                setPdfAttachment(data.fileName)
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -1243,7 +1245,9 @@ function QuoteDetail() {
             },
           })
           .then(({ data }) => {
+
             handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
+            setPdfAttachment(data.fileName)
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -1749,6 +1753,7 @@ function QuoteDetail() {
         createImagePDF(false, true);
       }
       setSendEmail(true);
+
     }
   };
 
@@ -1800,9 +1805,51 @@ function QuoteDetail() {
 
   const onSuccess = () => {
     setSendEmail(false);
-
     handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
+    handleAttachments()
     fetchQuoteData(currentVersion);
+  };
+
+  const handleAttachments = () => {
+    let request;
+
+    request = {
+      name: "Quotation V" + currentVersion,
+      fileUrl: "",
+      relatedTo: [
+        {
+          type: quote.quoteResource,
+          referenceId: quoteData?._id,
+          access: true,
+        },
+        {
+          type: quoteData?.customerAccountName
+            ? customerAccount?.accountResource
+            : supplierAccount?.accountResource,
+          referenceId: quoteData?.customerAccountName
+            ? quoteData?.customerAccountName?.optionValue
+            : quoteData?.supplierAccountName?.optionValue,
+          access: false,
+        },
+        {
+          type: opportunity.opportunityResource,
+          referenceId: quoteData.opportunity?.optionValue,
+          access: false,
+        },
+      ]
+    }
+
+    if (PDFAttachment !== "") {
+      request.fileUrl = PDFAttachment
+      axiosInstance()
+        .post(`/attachment`, request)
+        .then(({ data }) => {
+
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const getVersionStatus = () => {
