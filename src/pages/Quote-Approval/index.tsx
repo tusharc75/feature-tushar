@@ -171,7 +171,7 @@ const QuoteApproval = () => {
 
         const pagewidth = PdfDoc.internal.pageSize.width;
 
-        if (logo !== null) {
+        if (logo) {
             PdfDoc.addImage(logo, "JPEG", pagewidth - 65, 10, 40, 40);
         }
         PdfDoc.setFontSize(26);
@@ -255,7 +255,7 @@ const QuoteApproval = () => {
         });
         let finalY = (PdfDoc as any).lastAutoTable.finalY;
 
-        if (versionDetails.TNC.length) {
+        if (versionDetails?.TNC?.length) {
             PdfDoc.setDrawColor(0, 0, 0);
             PdfDoc.setFontSize(14);
             PdfDoc.setLineWidth(3);
@@ -263,7 +263,7 @@ const QuoteApproval = () => {
 
             let finalmarkup = "";
 
-            versionDetails.TNC.forEach((selectTNC) => {
+            versionDetails.TNC?.forEach((selectTNC) => {
                 finalmarkup =
                     finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
                 let state = convertFromRaw(JSON.parse(selectTNC.description));
@@ -297,7 +297,7 @@ const QuoteApproval = () => {
 
             signatureContent =
                 signatureContent +
-                `<span--style='color:lightgrey'>_____________________________</span>`;
+                `<span--style='color:lightgrey'>____________________________________________</span>`;
 
             signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
             signatureContent = signatureContent.replaceAll("--", " ");
@@ -399,9 +399,9 @@ const QuoteApproval = () => {
 
     const renderTermsAndConditions = () => {
         let finalmarkup = "";
-        versionDetails.TNC.forEach((selectTNC) => {
+        versionDetails?.TNC?.forEach((selectTNC) => {
             finalmarkup =
-                finalmarkup + `<h2><strong>${selectTNC.TACName}:</strong></h2>`;
+                finalmarkup + `<br><br><br><h2><strong>${selectTNC.TACName}:</strong></h2>`;
             let state = convertFromRaw(JSON.parse(selectTNC.description));
             let TNC = EditorState.createWithContent(state);
             let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
@@ -469,32 +469,6 @@ const QuoteApproval = () => {
 
                                 </Grid>
                             </Grid>
-
-                            <div className="mt-2 mx-4">
-                                <Grid container alignItems="center">
-                                    <Grid item xs={12} md={4} sm={4}>
-                                        <h2>Total : {sellingPrice} {currency}</h2>
-                                    </Grid>
-                                    <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
-                                        <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
-                                            setGeneratingPdf({ show: true, text: "Generating..." })
-                                            generatePdf(true, false)
-                                        }
-                                        }>
-                                            {generatingPdf.show === true ? "Generating..." : "View"}
-                                        </Button>
-                                        <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
-                                            Accept
-                                        </Button>
-                                        <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
-                                            setQuoteStatusChangeData("Rejected")
-                                            setShowQuoteStatusChangeDialog(true)
-                                        }} >
-                                            Reject
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </div>
 
                             {
                                 quoteData && <div className={styles.main}>
@@ -588,6 +562,36 @@ const QuoteApproval = () => {
                                                 getRowId={(row) => row.id} />
                                         </div>
                                     </div> */}
+
+                                    <div className="my-3">
+                                        <hr />
+                                    </div>
+
+                                    <div className="mt-1">
+                                        <Grid container alignItems="center">
+                                            <Grid item xs={12} md={4} sm={4}>
+                                                <h2>Total : {sellingPrice} {currency}</h2>
+                                            </Grid>
+                                            <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                                                <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
+                                                    setGeneratingPdf({ show: true, text: "Generating..." })
+                                                    generatePdf(true, false)
+                                                }
+                                                }>
+                                                    {generatingPdf.show === true ? "Generating..." : "View"}
+                                                </Button>
+                                                <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
+                                                    Accept
+                                                </Button>
+                                                <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
+                                                    setQuoteStatusChangeData("Rejected")
+                                                    setShowQuoteStatusChangeDialog(true)
+                                                }} >
+                                                    Reject
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
 
                                 </div>
                             }

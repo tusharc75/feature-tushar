@@ -4,6 +4,7 @@
     margin: 0 auto;
     width: 50%;
     font-weight: 700;
+    margin-top: 1rem;
 }
 
 .address {
@@ -27,12 +28,6 @@
 .bill_to {
     display: grid;
     grid-template-columns: 1fr 1fr;
-}
-
-.bill_to_left {
-}
-
-.bill_to_right {
 }
 
 @media (max-width: 768px) {
