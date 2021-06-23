@@ -3,9 +3,10 @@ import React, { useEffect, useState, useContext } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
 import Layout from "../../components/Layout";
 import { DataGrid } from "@material-ui/data-grid";
-import { Grid } from "@material-ui/core";
+import { Grid, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import {
     Button,
+    Table,
     makeStyles
 } from "@material-ui/core";
 import axios from 'axios'
@@ -20,7 +21,18 @@ import draftToHtml from "draftjs-to-html";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { displayDate } from "../../services/util";
 import { formatAmountWithCurrency } from "../../constants/helpers";
-import { AiOutlineEye } from 'react-icons/ai'
+import { AiOutlineEye } from 'react-icons/ai';
+import styles from './quote-approval.module.scss'
+import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
+
+const StyledTableCell = withStyles(() =>
+    createStyles({
+        head: {
+            backgroundColor: "#1abd9c",
+            color: "white",
+        }
+    }),
+)(TableCell);
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -159,7 +171,7 @@ const QuoteApproval = () => {
 
         const pagewidth = PdfDoc.internal.pageSize.width;
 
-        if (logo !== null) {
+        if (logo) {
             PdfDoc.addImage(logo, "JPEG", pagewidth - 65, 10, 40, 40);
         }
         PdfDoc.setFontSize(26);
@@ -243,7 +255,7 @@ const QuoteApproval = () => {
         });
         let finalY = (PdfDoc as any).lastAutoTable.finalY;
 
-        if (versionDetails.TNC.length) {
+        if (versionDetails?.TNC?.length) {
             PdfDoc.setDrawColor(0, 0, 0);
             PdfDoc.setFontSize(14);
             PdfDoc.setLineWidth(3);
@@ -251,7 +263,7 @@ const QuoteApproval = () => {
 
             let finalmarkup = "";
 
-            versionDetails.TNC.forEach((selectTNC) => {
+            versionDetails.TNC?.forEach((selectTNC) => {
                 finalmarkup =
                     finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
                 let state = convertFromRaw(JSON.parse(selectTNC.description));
@@ -276,7 +288,7 @@ const QuoteApproval = () => {
 
             if (signatureData) {
                 signatureContent =
-                    signatureContent + `<img--src='${signatureData}' height='30px' width='30px' />`
+                    signatureContent + `<img--src='${signatureData}'--style='max-height:50px;max-width:50px;margin-left:40px' />`
                 signatureContent =
                     signatureContent + "<br>"
             } else {
@@ -285,19 +297,20 @@ const QuoteApproval = () => {
 
             signatureContent =
                 signatureContent +
-                `<span--style='color:lightgrey'>_____________________________</span>`;
+                `<span--style='color:lightgrey'>_______________________________</span>`;
 
             signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
             signatureContent = signatureContent.replaceAll("--", " ");
             signatureContent = signatureContent.replaceAll("<img--src", "<img src");
+            signatureContent = signatureContent.replaceAll("--style", " style");
 
             finalmarkup = finalmarkup + signatureContent;
 
             PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
                 callback: function (doc) {
-                    if (view && !send) {
+                    if (view) {
                         doc.setProperties({
-                            title: `Quotation - v${quoteData.version}`,
+                            title: `Quotation-${quoteData?.name}-v${quoteData.version}`,
                         });
                         const pdfBlobFile = doc.output("blob");
                         generateBase64forFile(pdfBlobFile, "pdf");
@@ -311,19 +324,19 @@ const QuoteApproval = () => {
                         const formdata = new FormData();
                         formdata.append("file", PDFtoAPIData, versionDetails.PDF);
                         axios.post(backendApi + "/user/upload-public/", formdata, {
-                                headers: {
-                                    "content-type": "multipart/form-data",
-                                },
-                            })
+                            headers: {
+                                "content-type": "multipart/form-data",
+                            },
+                        })
                             .then(({ data }) => {
                                 QuoteStatusChange(true, data.fileUrl, null);
                                 // setPdf(data.fieldName);
                                 // handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
                             })
-                            // .catch((err) => {
-                            //     toastConfig.setToastConfig(err);
-                            // });
-                            setGeneratingPdf({ show: false, text: null })
+                        // .catch((err) => {
+                        //     toastConfig.setToastConfig(err);
+                        // });
+                        setGeneratingPdf({ show: false, text: null })
                     }
                 },
                 x: 20,
@@ -350,9 +363,9 @@ const QuoteApproval = () => {
             finalY = finalY + 30;
             PdfDoc.line(15, finalY, 260, finalY);
 
-            if (view && !send) {
+            if (view) {
                 PdfDoc.setProperties({
-                    title: `Quotation - ${quoteData.version}`,
+                    title: `Quotation-${quoteData?.name}-v${quoteData.version}`,
                 });
                 const pdfBlobFile = PdfDoc.output("blob");
                 generateBase64forFile(pdfBlobFile, "pdf");
@@ -371,11 +384,11 @@ const QuoteApproval = () => {
                         "content-type": "multipart/form-data",
                     },
                 })
-                .then(({ data }) => {
-                    QuoteStatusChange(true, data.fileUrl, null);
-                    // setPdf(data.fieldName);
-                    // handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-                });
+                    .then(({ data }) => {
+                        QuoteStatusChange(true, data.fileUrl, null);
+                        // setPdf(data.fieldName);
+                        // handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
+                    });
 
                 setGeneratingPdf({ show: false, text: null })
                 // .catch((err) => {
@@ -384,6 +397,34 @@ const QuoteApproval = () => {
             }
         }
     };
+
+    const renderTermsAndConditions = () => {
+        let finalmarkup = "";
+        versionDetails?.TNC?.forEach((selectTNC) => {
+            finalmarkup =
+                finalmarkup + `<br><h2><strong>${selectTNC.TACName}:</strong></h2>`;
+            let state = convertFromRaw(JSON.parse(selectTNC.description));
+            let TNC = EditorState.createWithContent(state);
+            let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+
+            finalmarkup = finalmarkup + markup + "<br>";
+        });
+
+        let signatureContent = "<br><br><span style='font-size:15px;'>Note:</span><br>";
+        signatureContent =
+            signatureContent +
+            `<span style='font-size:15px;'>Thanks for your business</span><br><br>`;
+
+        signatureContent =
+            signatureContent +
+            `<span style='font-size:15px'>Customer Signature</span><br><br><br><br>`;
+
+        signatureContent =
+            signatureContent +
+            `<span style='color:lightgrey'>______________________________________</span>`;
+
+        return <div dangerouslySetInnerHTML={{ __html: `${finalmarkup} ${signatureContent}` }}></div>
+    }
 
     return (
         <div>
@@ -426,55 +467,143 @@ const QuoteApproval = () => {
                                     <h1>Approve Quote: {quoteData?.name}</h1>
                                 </Grid>
                                 <Grid item xs={6} md={2} sm={2} className="pull-right">
-                                    {logo && (
-                                        <img
-                                            src={logo}
-                                            alt="brand"
-                                            className={classes.brandLogo}
-                                        />)}
+
                                 </Grid>
                             </Grid>
 
-                            <div className="mt-2 mx-4">
-                                <Grid container alignItems="center">
-                                    <Grid item xs={12} md={4} sm={4}>
-                                        <h2>Total : {sellingPrice} {currency}</h2>
-                                    </Grid>
-                                    <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
-                                        <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
-                                            setGeneratingPdf({ show: true, text: "Generating..." })
-                                            generatePdf(true, false)
-                                        }
-                                        }>
-                                            {generatingPdf.show === true ? "Generating..." : "View"}
-                                        </Button>
-                                        <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
-                                            Accept
-                                        </Button>
-                                        <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
-                                            setQuoteStatusChangeData("Rejected")
-                                            setShowQuoteStatusChangeDialog(true)
-                                        }} >
-                                            Reject
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </div>
+                            {
+                                quoteData && <div className={styles.main}>
 
-                            <div className={classes.gridContent}>
-                                <DataGrid
-                                    columns={columns}
-                                    rows={rows}
-                                    getRowId={(row) => row.id} />
-                            </div>
+                                    <div className="d-flex justify-content-space-between align-items-center">
+                                        <div>
+                                            <h1>{brandData?.name}</h1>
+                                            <span className={styles.address}>{brandData?.address}</span>
+                                        </div>
+                                        <div>
+                                            {logo && (
+                                                <img
+                                                    src={logo}
+                                                    alt="brand"
+                                                    className={classes.brandLogo}
+                                                />)}
+                                        </div>
+                                    </div>
 
+                                    <h1 className={styles.quotation_header}>
+                                        <span>Quotation</span>
+                                    </h1>
+
+                                    <div className={`${styles.bill_to} mt-2`}>
+                                        <div className={styles.bill_to_left}>
+                                            <h5>Bill To:</h5>
+                                            <h3>{quoteData.customerAccountName}</h3>
+                                        </div>
+                                        <div className={styles.bill_to_right}>
+                                            <div>Quote Id: {id}</div>
+                                            <div className="mt-1">Currency: {quoteData?.currency}</div>
+                                            <div className="mt-1">Date:{displayDate(versionDetails?.quoteDate)}</div>
+                                            <div className="mt-1">Quote Expiry Date: {displayDate(quoteData?.expiryDate)}</div>
+                                            <div className="mt-1">Inco Terms: {quoteData?.incoTerms}</div>
+                                        </div>
+                                    </div>
+
+                                    <h3 className="mt-5 mb-1">Please find the quotation below:</h3>
+                                    <TableContainer component={Paper}>
+                                        <Table aria-label="simple table" size="small">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <StyledTableCell align="center">S. No.</StyledTableCell>
+                                                    {
+                                                        columns.map((column, index) => (
+                                                            <StyledTableCell align="center" key={index}>{column.field}</StyledTableCell>
+                                                        ))
+                                                    }
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {
+                                                    rows.map((row, index1) => (
+                                                        <TableRow key={index1}>
+                                                            <TableCell align="center" component="th" scope="row">
+                                                                {index1 + 1}
+                                                            </TableCell>
+                                                            {
+                                                                columns.map((column, index2) => (
+                                                                    <TableCell align="center" style={{ borderLeft: "1px solid lightgray" }} key={index2} component="th" scope="row">
+                                                                        {row[column.field]}
+                                                                    </TableCell>
+                                                                ))
+                                                            }
+                                                        </TableRow>
+                                                    ))
+                                                }
+                                                <TableRow>
+                                                    <TableCell colSpan={columns.length + 1} align="right">
+                                                        <span>Quote Total: {sellingPrice} {currency}</span>
+                                                    </TableCell>
+                                                </TableRow>
+
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+
+                                    <h1 className={styles.quotation_header}></h1>
+
+                                    {
+                                        renderTermsAndConditions()
+                                    }
+
+                                    {/* <div className="mt-2">
+                                        <div className={classes.gridContent}>
+                                            <DataGrid
+                                                columns={columns}
+                                                rows={rows}
+                                                density="compact"
+                                                pagination={undefined}
+                                                getRowId={(row) => row.id} />
+                                        </div>
+                                    </div> */}
+
+                                    <div className="my-3">
+                                        <hr />
+                                    </div>
+
+                                    <div className="mt-1">
+                                        <Grid container alignItems="center">
+                                            <Grid item xs={12} md={4} sm={4}>
+                                                <h2>Total : {sellingPrice} {currency}</h2>
+                                            </Grid>
+                                            <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                                                <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
+                                                    setGeneratingPdf({ show: true, text: "Generating..." })
+                                                    generatePdf(true, false)
+                                                }
+                                                }>
+                                                    {generatingPdf.show === true ? "Generating..." : "View"}
+                                                </Button>
+                                                <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
+                                                    Accept
+                                                </Button>
+                                                <Button variant="outlined" startIcon={<GoThumbsdown />} color="default" onClick={() => {
+                                                    setQuoteStatusChangeData("Rejected")
+                                                    setShowQuoteStatusChangeDialog(true)
+                                                }} >
+                                                    Reject
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+
+                                </div>
+                            }
                         </div>)}
                 </div>
                 ) : (
                     <div>
                         <h1>Invalid URL, Please check the URL</h1>
                     </div>
-                )}
+                )
+            }
             {
                 showQuoteStatusChangeDialog && (
                     <DOAReasonDialog
@@ -488,9 +617,7 @@ const QuoteApproval = () => {
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    // QuoteStatusChange("Accepted", imageData, "");
                     generatePdf(false, true, imageData);
-                    // setShowSignatureDialog(false);
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
         </div >

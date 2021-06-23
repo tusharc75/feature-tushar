@@ -1150,7 +1150,7 @@ function QuoteDetail() {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
-              title: `Quotation - v${currentVersion}`,
+              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
             generateBase64forFile(pdfBlobFile, "pdf");
@@ -1205,7 +1205,7 @@ function QuoteDetail() {
 
       if (view && !send) {
         PdfDoc.setProperties({
-          title: `Quotation - ${currentVersion}`,
+          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
         generateBase64forFile(pdfBlobFile, "pdf");
