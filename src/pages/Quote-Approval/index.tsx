@@ -617,9 +617,7 @@ const QuoteApproval = () => {
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    // QuoteStatusChange("Accepted", imageData, "");
-                    generatePdf(true, false, imageData);
-                    // setShowSignatureDialog(false);
+                    generatePdf(false, true, imageData);
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
         </div >
