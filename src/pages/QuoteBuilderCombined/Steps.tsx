@@ -119,15 +119,16 @@ const Steps = (props) => {
     versionStatus,
     loading,
     approvedQuote,
+    generatePDF,
     DOAlimit,
     totalCost,
     handleSendReminder = null,
     reminderLoading = false,
     hideReminderButton = false,
-    DOAData = null
+    DOAData = null,
   } = props;
   const classes = useStyles();
-  var activeStep = currentStep;
+  let activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
 
   const ColorlibStepIcon = (props: StepIconProps) => {
@@ -212,6 +213,9 @@ const Steps = (props) => {
   };
 
   const handleNext = () => {
+    if (currentStep === 2) {
+      generatePDF(false, true);
+    }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
         processStatus: steps[activeStep + 1],
@@ -243,12 +247,11 @@ const Steps = (props) => {
       });
   };
 
-
   return (
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+        approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -270,10 +273,7 @@ const Steps = (props) => {
             )} */}
             {versionStatus === "Sent for DOA" && (
               <>
-                {DOAData && (<NewStepper
-                  heading={" "}
-                  quoteDOA={DOAData}
-                />)}
+                {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
 
                 <div className="d-flex align-items-center justify-content-center flex-column m-3">
                   <FcClock size={30} />
@@ -283,10 +283,7 @@ const Steps = (props) => {
             )}
             {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
               <>
-                {DOAData && (<NewStepper
-                  heading={" "}
-                  quoteDOA={DOAData}
-                />)}
+                {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
 
                 <div className="d-flex align-items-center justify-content-center flex-column m-3">
                   <FcApproval size={30} />
@@ -298,10 +295,7 @@ const Steps = (props) => {
             )}
             {versionStatus.split(" (")[0] === "Rejected by DOA" && (
               <>
-                {DOAData && (<NewStepper
-                  heading={" "}
-                  quoteDOA={DOAData}
-                />)}
+                {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
 
                 <div className="d-flex align-items-center justify-content-center flex-column m-3">
                   <FcCancel size={30} />
@@ -412,19 +406,23 @@ const Steps = (props) => {
                 <div>
                   {!approvedQuote.approved && (
                     <div className={classes.stepperNext}>
-                      {activeStep === 1 || activeStep === 2 ? (
-                        // <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleBack}
-                          disabled={loading}
-                          size="small"
-                          startIcon={<IoIosArrowDropleftCircle />}
-                        >
-                          Back
-                        </Button>
-                      ) : null}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={
+                          versionStatus.includes("Rejected by Customer") ||
+                          (steps.length === 5 && currentStep >= 3) ||
+                          versionStatus.includes("Sent to Customer") ||
+                          (steps.length === 6 && currentStep >= 4) ||
+                          versionStatus.includes("Sent to Customer") ||
+                          loading
+                        }
+                        onClick={handleBack}
+                        size="small"
+                        startIcon={<IoIosArrowDropleftCircle />}
+                      >
+                        Back
+                      </Button>
                     </div>
                   )}
                 </div>
