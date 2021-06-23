@@ -584,7 +584,7 @@ const QuoteApproval = () => {
                                                 <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
                                                     Accept
                                                 </Button>
-                                                <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
+                                                <Button variant="outlined" startIcon={<GoThumbsdown />} color="default" onClick={() => {
                                                     setQuoteStatusChangeData("Rejected")
                                                     setShowQuoteStatusChangeDialog(true)
                                                 }} >
