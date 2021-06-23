@@ -2687,8 +2687,7 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
-              brandQuoteDigitalSignature = {brandQuoteDigitalSignature}
-              isRenderedFromQuoteDetail = {true}
+              showESign = {true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}

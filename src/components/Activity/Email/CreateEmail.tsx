@@ -79,8 +79,11 @@ const useStyles = makeStyles((theme) => ({
 
 export const CreateEmail = ({ relatedTo, emailId, handleClose,
     isQuoteBuilder = false, options = [], fetchData = null, cc = [], id = null, version = null,
-    qouteBuilderAttachments = [], subject = "", brandQuoteDigitalSignature = false, isRenderedFromQuoteDetail = false }) => {
-
+    qouteBuilderAttachments = [], subject = "", showESign = false }) => {
+    const {
+        state: { user },
+    }: any = useData();
+    const isESign = user?.user?.brandQuoteDigitalSignature;
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
     const azureAccount = useAccount(accounts[0] || {});
@@ -94,13 +97,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-    const [isESign, setIsESign] = useState(brandQuoteDigitalSignature);
     const [toogle, setToogle] = useState({
-        "E-Sign": false,
+        "E-Sign": isESign,
     })
-    const {
-        state: { user },
-    }: any = useData();
+
+
+    
 
     useEffect(() => {
         fetchEmailDetail();
@@ -426,7 +428,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                     </Box>
                                                 </Fragment> :
                                                 <Grid container spacing={3}>
-                                                    {isRenderedFromQuoteDetail &&
+                                                    {showESign &&
                                                         <Grid item className="pull-right p-0" xs={12}>
                                                             <FormControlLabel
                                                                 key={1}
