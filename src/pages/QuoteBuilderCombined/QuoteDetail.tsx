@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -292,6 +292,8 @@ const ITEM_PADDING_TOP = 8;
 const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
+  const history = useHistory();
+  const location = useLocation();
   const [tabValue, setTabValue] = React.useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
@@ -316,7 +318,6 @@ function QuoteDetail() {
   ];
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -499,6 +500,16 @@ function QuoteDetail() {
           </Link>
         ),
       },
+      {
+        field: "comment", headerName: "Comment", flex: 1,
+        renderCell: (params: any) => (
+          <Typography
+            title={params.value}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
       { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
       {
         field: "totalSalesPrice",
@@ -592,8 +603,15 @@ function QuoteDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchQuoteData(0);
-      getQuoteFields();
+      if (location.state !== undefined) {
+        setTabValue(location.state?.tabValue);
+        fetchQuoteData(parseInt(location.state?.versionNumber));
+        setcurrentVersion(parseInt(location.state?.versionNumber));
+        getQuoteFields();
+      } else {
+        fetchQuoteData(0);
+        getQuoteFields();
+      }
     }
   }, [id]);
 
@@ -776,7 +794,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -809,7 +827,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -918,12 +936,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1760,7 +1778,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1785,6 +1803,7 @@ function QuoteDetail() {
           return {
             ...d,
             id: index + 1,
+            comment: d.comment ? d.comment : "",
             totalcost: formatAmountWithCurrency(
               quoteData?.currency,
               d.productData.totalCost
@@ -1962,9 +1981,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2081,10 +2100,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2326,7 +2345,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
+                              ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2405,8 +2424,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2426,7 +2445,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2491,7 +2510,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                      ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2588,7 +2607,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2660,9 +2679,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
