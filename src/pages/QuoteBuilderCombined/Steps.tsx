@@ -460,9 +460,9 @@ const Steps = (props) => {
                         disabled={
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
-                          versionStatus.includes("Sent to Customer") ||
-                          (steps.length === 6 && currentStep > 4) ||
                           versionStatus.includes("Sent for DOA") ||
+                          (steps.length === 6 && currentStep >= 4) ||
+                          versionStatus.includes("Sent to Customer") ||
                           loading
                         }
                         onClick={handleBack}
