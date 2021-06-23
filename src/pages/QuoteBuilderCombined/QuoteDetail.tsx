@@ -1530,40 +1530,60 @@ function QuoteDetail() {
       let MarginCurrency = "";
       let ProfitCurrency = "";
 
-      const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-      const withZeroAmt = BuilderData.filter(
-        (d) => d[`totalSalesPrice_${quoteData?.currency}`] === 0
-      );
+      BuilderData = BuilderData.map((data) => ({
+        ...data,
+        [`profitPercentPerUnit`]:
+          data["profitPercentPerUnit"] === null ||
+          data["profitPercentPerUnit"] === undefined
+            ? 0
+            : data["profitPercentPerUnit"],
+        [`commissionPercentPerUnit`]:
+          data["commissionPercentPerUnit"] === null ||
+          data["commissionPercentPerUnit"] === undefined
+            ? 0
+            : data["commissionPercentPerUnit"],
+        [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            null ||
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            undefined
+            ? 0
+            : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
+      }));
 
       if (ProcessStatus === "Price Builder") {
-        if (!withZeroAmt.length && !withZeroQty.length) {
+        let hasPrice = false;
+        BuilderData.forEach((data) => {
+          if (
+            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+              "undefined"
+          ) {
+            hasPrice = true;
+          } else {
+            hasPrice = false;
+          }
+        });
+        const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+        let withZeroAmt = [];
+        if (hasPrice) {
+          withZeroAmt = BuilderData.filter(
+            (d) =>
+              d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+          );
+        }
+
+        if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
           setNextStep(true);
         } else {
           setNextStep(false);
         }
       }
-
-      BuilderData = BuilderData.map((data) => ({
-        ...data,
-        [`profitPercentPerUnit`]:
-          data["profitPercentPerUnit"] === null
-            ? 0
-            : data["profitPercentPerUnit"],
-        [`commissionPercentPerUnit`]:
-          data["commissionPercentPerUnit"] === null
-            ? 0
-            : data["commissionPercentPerUnit"],
-        [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null
-            ? 0
-            : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
-      }));
-
       BuilderData.forEach((quoteRows: { [x: string]: any }) => {
         const quoteRowKeys = Object.keys(quoteRows);
 
         let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-        debugger;
+
         quoteRowKeys.forEach((key) => {
           if (ignoredKeys.indexOf(key) === -1) {
             let indexkey = key;
