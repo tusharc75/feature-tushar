@@ -324,6 +324,7 @@ const CreateProduct = (props) => {
                                                                     addDisplayType={addDisplayType}
                                                                     removeDisplayType={removeDisplayType}
                                                                     setValues={setValues}
+                                                                    handleRemoveField={handleRemoveField}
                                                                 />
                                                                 :
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
@@ -347,7 +348,7 @@ const CreateProduct = (props) => {
                                                                                 decimalPlaces={field.decimalPlaces}
                                                                                 isvlookupReverse={field.isvlookupReverse}
                                                                                 size="small"
-                                                                                disabled={['unit', 'productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
+                                                                                disabled={['productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
                                                                                 imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
                                                                                     setUploadingImageOrFileProgress(completePercentage);
                                                                                 } : null}
@@ -389,7 +390,7 @@ const CreateProduct = (props) => {
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
-        {isAddField && <AddField fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
+        {isAddField && <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
     </Dialog>
     );
 }
