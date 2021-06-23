@@ -58,7 +58,7 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user,permissions },
+    state: { user },
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
