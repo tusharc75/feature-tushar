@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -292,6 +292,8 @@ const ITEM_PADDING_TOP = 8;
 const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
+  const history = useHistory();
+  const location = useLocation();
   const [tabValue, setTabValue] = React.useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
@@ -316,7 +318,6 @@ function QuoteDetail() {
   ];
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -470,8 +471,9 @@ function QuoteDetail() {
             title={params.value}
             className="text-truncate link"
             onClick={() => {
-              setcurrentVersion(params.value);
               setTabValue(2);
+              fetchQuoteData(params.value);
+              setcurrentVersion(params.value);
               // setShowVersionsDialog(false);
             }}
           >
@@ -489,12 +491,21 @@ function QuoteDetail() {
             className="text-truncate link"
             onClick={() => {
               setcurrentVersion(params.row.versionNumber);
+              fetchQuoteData(params.row.versionNumber);
               setTabValue(2);
               // setShowVersionsDialog(false);
             }}
           >
             {params.value}
           </Link>
+        ),
+      },
+      {
+        field: "comment",
+        headerName: "Comment",
+        flex: 1,
+        renderCell: (params: any) => (
+          <Typography title={params.value}>{params.value}</Typography>
         ),
       },
       { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
@@ -517,7 +528,9 @@ function QuoteDetail() {
     text: null,
   });
   const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-
+  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(
+    user?.user?.brandQuoteDigitalSignature
+  );
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -590,8 +603,15 @@ function QuoteDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchQuoteData(0);
-      getQuoteFields();
+      if (location.state !== undefined) {
+        setTabValue(location.state?.tabValue);
+        fetchQuoteData(parseInt(location.state?.versionNumber));
+        setcurrentVersion(parseInt(location.state?.versionNumber));
+        getQuoteFields();
+      } else {
+        fetchQuoteData(0);
+        getQuoteFields();
+      }
     }
   }, [id]);
 
@@ -603,13 +623,13 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, []);
 
-  useEffect(() => {
-    if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
-      createImagePDF(false, true);
-    } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
-      createImagePDF(false, true);
-    }
-  }, [ProcessStatus]);
+  // useEffect(() => {
+  //   if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
+  //     createImagePDF(false, true);
+  //   } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
+  //     createImagePDF(false, true);
+  //   }
+  // }, [ProcessStatus]);
 
   /**
    *
@@ -961,7 +981,7 @@ function QuoteDetail() {
     productBuilderdatatoQuoteBuilderdata(data);
   };
 
-  const createImagePDF = (view, send) => {
+  const createImagePDF = (view, send, base64 = false) => {
     setGeneratingPdf({ show: true, text: "Generating..." });
     axiosInstance()
       .get("/user/brandInfo")
@@ -971,10 +991,10 @@ function QuoteDetail() {
         if (data.data.logo) {
           fetchImage(data.data.logo, function (dataUri) {
             logo = dataUri;
-            GeneratePdf(view, send);
+            GeneratePdf(view, send, base64);
           });
         } else {
-          GeneratePdf(view, send);
+          GeneratePdf(view, send, base64);
         }
       })
       .catch((err) => {
@@ -1005,7 +1025,7 @@ function QuoteDetail() {
     image.src = Url;
   };
 
-  const GeneratePdf = (view, send) => {
+  const GeneratePdf = (view, send, base64 = false) => {
     const PdfDoc = new jsPDF("p", "pt", "a4");
     let date = new Date();
     const excelHeader = [];
@@ -1026,45 +1046,23 @@ function QuoteDetail() {
     PdfDoc.line(330, 70, 580, 70);
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
-    var PDFData = [];
-    var PdfCol = ["S. No."];
-    var serialNumber = 1;
+    let PDFData = [];
+    let PdfCol = ["S. No."];
+    let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
-      var PdfRow = [serialNumber];
-      var ExcelRow = {};
-      ColumnName.forEach((ColName) => {
-        if (defaultSelectColumns.indexOf(ColName) !== -1) {
-          if (PdfCol.indexOf(ColName) == -1) {
+      let PdfRow = [serialNumber];
+      defaultSelectColumns.forEach((ColName) => {
+        if (ColumnName.indexOf(ColName) !== -1) {
+          if (PdfCol.indexOf(ColName) === -1) {
             PdfCol.push(ColName);
           }
           PdfRow.push(dataEntry[ColName]);
         }
-
-        if (visibleColumns.indexOf(ColName) !== -1) {
-          if (excelheaderName.indexOf(ColName !== -1)) {
-            excelheaderName.push(ColName);
-            excelHeader.push({
-              header: ColName,
-              key: ColName.replace(" ", ""),
-            });
-          }
-          ExcelRow[ColName.replace(" ", "")] = dataEntry[ColName];
-        }
       });
       PDFData.push(PdfRow);
-      excelData.push(ExcelRow);
       serialNumber = serialNumber + 1;
     });
 
-    // if(!view && !send){
-    //
-    //
-    //   const workbook = new excel.Workbook();
-    //   const worksheet: any = workbook.addWorksheet("Quotation");
-    //   worksheet.columns=excelHeader;
-    //   //worksheet.addRows(2,excelData);
-    //   downloadExcel(workbook.xlsx.writeBuffer(),"Quotation.xlsx");
-    // }
     PdfDoc.setFontSize(10);
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
@@ -1096,7 +1094,6 @@ function QuoteDetail() {
         },
       ],
     ];
-
     autoTable(PdfDoc, {
       margin: { top: 150 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -1153,14 +1150,20 @@ function QuoteDetail() {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
-              title: `Quotation - v${currentVersion}`,
+              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
             generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
-          } else if (!view && !send) {
+          } else if (!view && !send && !base64) {
             doc.save(`Quotation - v${currentVersion}`);
+          } else if (base64) {
+            doc.setProperties({
+              title: `Quotation - v${currentVersion}`,
+            });
+            const pdfBlobFile = doc.output("blob");
+            generateBase64forFile(pdfBlobFile, "pdf");
           }
           if (send) {
             let PDFtoAPIData = doc.output("blob");
@@ -1202,14 +1205,20 @@ function QuoteDetail() {
 
       if (view && !send) {
         PdfDoc.setProperties({
-          title: `Quotation - ${currentVersion}`,
+          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
         generateBase64forFile(pdfBlobFile, "pdf");
 
         window.open(URL.createObjectURL(pdfBlobFile));
-      } else if (!view && !send) {
+      } else if (!view && !send && !base64) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
+      } else if (base64) {
+        PdfDoc.setProperties({
+          title: `Quotation - v${currentVersion}`,
+        });
+        const pdfBlobFile = PdfDoc.output("blob");
+        generateBase64forFile(pdfBlobFile, "pdf");
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
@@ -1329,15 +1338,16 @@ function QuoteDetail() {
       dynamicTableData.forEach((d, i) => {
         let obj = {};
         visibleColumns.forEach((col) => {
-          obj[col] = d[col];
+          obj[col] = d[col] || "";
         });
 
         newTable.push(obj);
       });
 
       newTable.push({
-        "Product Name": "Total",
-        "Total Sales Price": totalcost.fullFormatAmount,
+        "Product Name": "Total:",
+        "Total Sales Price": totalsale.fullFormatAmount,
+        "Total Cost": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1347,8 +1357,6 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-
-      // console.log(data);
 
       if (send) {
         generateBase64forFile(data, "excel");
@@ -1504,195 +1512,214 @@ function QuoteDetail() {
   };
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
-    setOptions([]);
-    setRedCard(false);
-    let optionstoSet = [];
+    if (BuilderData.length) {
+      setOptions([]);
+      setRedCard(false);
+      let optionstoSet = [];
 
-    const inventory: { fieldName: string; fieldValue: any }[][] = [];
-    const ignoredKeys = [
-      "fields",
-      "_id",
-      "productId",
-      "templateFields",
-      "id",
-      "string",
-      "srno",
-    ];
-    let totalCost = 0;
-    let totalSellingPrice = 0;
-    let totalMargin = 0;
-    let totalProfit = 0;
-    let CostCurrency = "";
-    let SPCurrency = "";
-    let MarginCurrency = "";
-    let ProfitCurrency = "";
+      const inventory: { fieldName: string; fieldValue: any }[][] = [];
+      const ignoredKeys = [
+        "fields",
+        "_id",
+        "productId",
+        "templateFields",
+        "id",
+        "string",
+        "srno",
+      ];
+      let totalCost = 0;
+      let totalSellingPrice = 0;
+      let totalMargin = 0;
+      let totalProfit = 0;
+      let CostCurrency = "";
+      let SPCurrency = "";
+      let MarginCurrency = "";
+      let ProfitCurrency = "";
 
-    const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-    const withZeroAmt = BuilderData.filter(
-      (d) => d[`totalSalesPrice_${quoteData?.currency}`] === 0
-    );
+      BuilderData = BuilderData.map((data) => ({
+        ...data,
+        [`profitPercentPerUnit`]:
+          data["profitPercentPerUnit"] === null ||
+          data["profitPercentPerUnit"] === undefined
+            ? 0
+            : data["profitPercentPerUnit"],
+        [`commissionPercentPerUnit`]:
+          data["commissionPercentPerUnit"] === null ||
+          data["commissionPercentPerUnit"] === undefined
+            ? 0
+            : data["commissionPercentPerUnit"],
+        [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            null ||
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            undefined
+            ? 0
+            : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
+      }));
 
-    console.log(withZeroQty.length, withZeroAmt.length);
-
-    if (ProcessStatus === "Price Builder") {
-      if (!withZeroAmt.length && !withZeroQty.length) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
-    }
-
-    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
-      const quoteRowKeys = Object.keys(quoteRows);
-      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-      quoteRowKeys.forEach((key) => {
-        if (ignoredKeys.indexOf(key) === -1) {
-          let indexkey = key;
-          let currency = "";
-          if (key.includes("_")) {
-            let splitKey = key.split("_");
-            key = splitKey[0];
-            currency = splitKey[1];
+      if (ProcessStatus === "Price Builder") {
+        let hasPrice = false;
+        BuilderData.forEach((data) => {
+          if (
+            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+              "undefined"
+          ) {
+            hasPrice = true;
+          } else {
+            hasPrice = false;
           }
-          let fields = quoteRows["fields"];
-          let field = fields.filter(
-            (d: { fieldName: string }) => d.fieldName === key
+        });
+        const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+        let withZeroAmt = [];
+        if (hasPrice) {
+          withZeroAmt = BuilderData.filter(
+            (d) =>
+              d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
           );
+        }
 
-          if (typeof field[0] !== "undefined") {
-            if (typeof quoteRows[key] === "object") {
-              inventorydata.push({
-                fieldName: field[0].fieldLabel,
-                fieldValue: quoteRows[key][key],
-              });
-            } else {
-              inventorydata.push({
-                fieldName: field[0].fieldLabel,
-                fieldValue: quoteRows[indexkey],
-              });
+        if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
+          setNextStep(true);
+        } else {
+          setNextStep(false);
+        }
+      }
+      BuilderData.forEach((quoteRows: { [x: string]: any }) => {
+        const quoteRowKeys = Object.keys(quoteRows);
+
+        let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+
+        quoteRowKeys.forEach((key) => {
+          if (ignoredKeys.indexOf(key) === -1) {
+            let indexkey = key;
+            let currency = "";
+            if (key.includes("_")) {
+              let splitKey = key.split("_");
+              key = splitKey[0];
+              currency = splitKey[1];
             }
+            let fields = quoteRows["fields"];
+            let field = fields.filter(
+              (d: { fieldName: string }) => d.fieldName === key
+            );
 
-            if (
-              currency.toUpperCase() === quoteData?.currency &&
-              key === "totalCost"
-            ) {
-              totalCost = totalCost + quoteRows[indexkey];
-              CostCurrency = currency.toUpperCase();
-            } else if (
-              currency.toUpperCase() === quoteData?.currency &&
-              key === "totalSalesPrice"
-            ) {
-              totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-              SPCurrency = currency.toUpperCase();
-            } else if (
-              currency.toUpperCase() === quoteData?.currency &&
-              key === "totalProfit"
-            ) {
-              totalProfit = totalProfit + quoteRows[indexkey];
-              ProfitCurrency = currency.toUpperCase();
-            } else if (
-              currency.toUpperCase() === quoteData?.currency &&
-              key === "totalMargin"
-            ) {
-              totalMargin = totalMargin + quoteRows[indexkey];
-              MarginCurrency = currency.toUpperCase();
+            if (typeof field[0] !== "undefined") {
+              if (typeof quoteRows[key] === "object") {
+                inventorydata.push({
+                  fieldName: field[0].fieldLabel,
+                  fieldValue: quoteRows[key][key],
+                });
+              } else {
+                inventorydata.push({
+                  fieldName: field[0].fieldLabel,
+                  fieldValue:
+                    quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+                });
+              }
+
+              if (
+                currency.toUpperCase() === quoteData?.currency &&
+                key === "totalCost"
+              ) {
+                totalCost = totalCost + quoteRows[indexkey];
+                CostCurrency = currency.toUpperCase();
+              } else if (
+                currency.toUpperCase() === quoteData?.currency &&
+                key === "totalSalesPrice"
+              ) {
+                totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+                SPCurrency = currency.toUpperCase();
+              } else if (
+                currency.toUpperCase() === quoteData?.currency &&
+                key === "totalProfit"
+              ) {
+                totalProfit = totalProfit + quoteRows[indexkey];
+                ProfitCurrency = currency.toUpperCase();
+              } else if (
+                currency.toUpperCase() === quoteData?.currency &&
+                key === "totalMargin"
+              ) {
+                totalMargin = totalMargin + quoteRows[indexkey];
+                MarginCurrency = currency.toUpperCase();
+              }
             }
           }
-        }
+        });
+
+        inventory.push(inventorydata);
       });
 
-      inventory.push(inventorydata);
-    });
-
-    setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
-    setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
-    setTotalSale(
-      formatAmountWithCurrency(quoteData.currency, totalSellingPrice)
-    );
-    setTotalPrice(totalCost);
-    setTotalCost(formatAmountWithCurrency(quoteData.currency, totalCost));
-    if (totalSellingPrice < totalCost) {
-      setRedCard(true);
-    }
-
-    setButtonMessage("Send to Customer");
-    setDOAreq(false);
-    setCustomerreq(true);
-    if (DOAsetup && totalSellingPrice > DOAlimit && !lastUser) {
-      setDOAneeded(true);
-    } else {
-      setDOAneeded(false);
-    }
-    if (
-      DOAsetup &&
-      totalSellingPrice > DOAlimit &&
-      versionStatus === "Building Quote" &&
-      !lastUser
-    ) {
-      setDOAreq(true);
-      setCustomerreq(false);
-      setButtonMessage("Send for DOA");
-    } else if (versionStatus.includes("Rejected by DOA")) {
-      setDOAreq(true);
-      setCustomerreq(false);
-      setButtonMessage("Re-Send for DOA");
-    } else if (versionStatus === "Sent for DOA") {
-      setDOAreq(false);
-      setCustomerreq(false);
-    } else if (
-      versionStatus === "Sent to Customer" ||
-      versionStatus === "Accepted by Customer" ||
-      versionStatus === "Rejected by Customer"
-    ) {
-      setDOAreq(false);
-      setCustomerreq(false);
-    }
-    let TableData = [];
-    let Col = [];
-    let ColName = [];
-    let columnext = [];
-    let KeyValuePairs = [];
-    type Type = {
-      [key: string]: any;
-    };
-
-    for (let i = 0; i < inventory.length; i++) {
-      let KeyValue: Type = {};
-      for (let j = 0; j < inventory[i].length; j++) {
-        let DataSet = inventory[i][j];
-        if (ColName.indexOf(DataSet.fieldName) === -1) {
-          ColName = [...ColName, DataSet.fieldName];
-          Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
-          columnext = [
-            ...columnext,
-            { ColumnName: DataSet.fieldName, width: 100 },
-          ];
-        }
-        KeyValue[DataSet.fieldName] = DataSet.fieldValue;
+      setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
+      setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
+      setTotalSale(
+        formatAmountWithCurrency(quoteData.currency, totalSellingPrice)
+      );
+      setTotalPrice(totalCost);
+      setTotalCost(formatAmountWithCurrency(quoteData.currency, totalCost));
+      if (totalSellingPrice < totalCost) {
+        setRedCard(true);
       }
-      KeyValuePairs = [...KeyValuePairs, KeyValue];
-    }
-    setColName(ColName);
-    setOptions(optionstoSet);
-    if (columnView.length > 0) {
-      setVisibleColumnName(columnView);
-    } else {
-      setVisibleColumnName(defaultSelectColumns);
-    }
 
-    for (let j = 0; j < KeyValuePairs.length; j++) {
-      const DataSet = KeyValuePairs[j];
-      let DataRecord: Type = {};
-      for (let i = 0; i < ColName.length; i++) {
-        if (ColName[i] in DataSet) {
-          DataRecord[ColName[i]] = DataSet[ColName[i]];
-        } else {
-          DataRecord[ColName[i]] = "-";
-        }
+      setButtonMessage("Send to Customer");
+      setDOAreq(false);
+      setCustomerreq(true);
+      if (DOAsetup && totalSellingPrice > DOAlimit && !lastUser) {
+        setDOAneeded(true);
+      } else {
+        setDOAneeded(false);
       }
-      TableData = [...TableData, DataRecord];
+      if (
+        DOAsetup &&
+        totalSellingPrice > DOAlimit &&
+        versionStatus === "Building Quote" &&
+        !lastUser
+      ) {
+        setDOAreq(true);
+        setCustomerreq(false);
+        setButtonMessage("Send for DOA");
+      } else if (versionStatus.includes("Rejected by DOA")) {
+        setDOAreq(true);
+        setCustomerreq(false);
+        setButtonMessage("Re-Send for DOA");
+      } else if (versionStatus === "Sent for DOA") {
+        setDOAreq(false);
+        setCustomerreq(false);
+      } else if (
+        versionStatus === "Sent to Customer" ||
+        versionStatus === "Accepted by Customer" ||
+        versionStatus === "Rejected by Customer"
+      ) {
+        setDOAreq(false);
+        setCustomerreq(false);
+      }
+
+      const ColName = inventory[0].map((col) =>
+        col.fieldName === "Productname" ? "Product Name" : col.fieldName
+      );
+      const allData: any = [];
+      inventory.forEach((col) => {
+        let obj: { [key: string]: string | number } = {};
+
+        col.forEach((_col) => {
+          obj[
+            _col.fieldName === "Productname" ? "Product Name" : _col.fieldName
+          ] = _col.fieldValue || "";
+        });
+
+        allData.push(obj);
+      });
+
+      setColName(ColName);
+      setOptions(optionstoSet);
+      if (columnView.length > 0) {
+        setVisibleColumnName(columnView);
+      } else {
+        setVisibleColumnName(defaultSelectColumns);
+      }
+      console.log(allData);
+      setDynamicTableData(allData);
     }
-    setDynamicTableData(TableData);
   };
 
   const handleCases = () => {
@@ -1708,12 +1735,11 @@ function QuoteDetail() {
         });
     }
     if (Customerreq) {
-      createImagePDF(false, true);
-
       exportToCSV(true);
-      if (!PDF) {
-        createImagePDF(false, true);
+      if (!pdfFileBase64) {
+        GeneratePdf(false, false, true);
       }
+
       setSendEmail(true);
     }
   };
@@ -1783,6 +1809,7 @@ function QuoteDetail() {
           return {
             ...d,
             id: index + 1,
+            comment: d.comment ? d.comment : "",
             totalcost: formatAmountWithCurrency(
               quoteData?.currency,
               d.productData.totalCost
@@ -1842,7 +1869,6 @@ function QuoteDetail() {
     axiosInstance()
       .delete(`${qbApi}/${id}/${currentVersion}`)
       .then(() => {
-        console.log("Succfully Deleted.");
         setDeletingDOA(false);
         fetchQuoteData(0);
       })
@@ -1857,12 +1883,14 @@ function QuoteDetail() {
     let disapproved = false;
     let versionApproved = currentVersion;
     let versionDisapproved = currentVersion;
+    let manualApproval = false;
 
     if (quoteData) {
       versions.forEach((v) => {
         if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
           approved = true;
           versionApproved = v;
+          manualApproval = quoteData.versions[v]?.customerResponse;
         }
         if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
           disapproved = true;
@@ -1875,6 +1903,7 @@ function QuoteDetail() {
       versionApproved,
       disapproved,
       versionDisapproved,
+      manualApproval,
     };
   };
 
@@ -1939,7 +1968,9 @@ function QuoteDetail() {
                   mainPoints={{
                     ...mainPoints,
                     "Quote Status": ifQuoteApproved().approved
-                      ? "End (Accepted By Customer"
+                      ? ifQuoteApproved().manualApproval
+                        ? `End (Accepted By Customer Manually)`
+                        : `End (Accepted By Customer)`
                       : "In Progress",
                   }}
                   showHeading={true}
@@ -2263,6 +2294,7 @@ function QuoteDetail() {
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             allowedToEdit={allowedToEdit}
                             DOAData={DOAData}
+                            generatePDF={GeneratePdf}
                           />
                         ) : (
                           <Steps
@@ -2281,6 +2313,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            generatePDF={GeneratePdf}
                           />
                         )}
                       </div>
@@ -2650,6 +2683,7 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
+              showESign={true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}

@@ -86,7 +86,7 @@ const ProductBuilder = (props) => {
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, []);
+  }, [productBuilderId]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -135,10 +135,10 @@ const ProductBuilder = (props) => {
             setProductData(params.data);
           }}
         >
-          {params.data.description}
+          {params.data.srno}
         </Link>
       ) : (
-        <>{params.data.description}</>
+        <>{params.data.srno}</>
       )}
     </>
   );
@@ -163,7 +163,6 @@ const ProductBuilder = (props) => {
         productCategoryDisplayValue: u.productCategory?.optionLabel,
         priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
       }));
-      refreshProducts(data);
       setColumns(null);
       let column = [
         {
@@ -171,7 +170,7 @@ const ProductBuilder = (props) => {
           headerName: "Sr.",
           width: 70,
           show: true,
-          cellRenderer: "commonRenderer",
+          cellRenderer: "productNameRenderer",
         },
       ];
       data.forEach((row) => {
@@ -245,14 +244,7 @@ const ProductBuilder = (props) => {
             if (
               column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
               let col: any = {};
-              if (ele.fieldName === "description") {
-                col.field = ele.fieldName;
-                col.headerName = ele.fieldLabel;
-                col.width = 180;
-                col.cellRenderer = "productNameRenderer";
-                col.order = ele.ord;
-                column.push(col);
-              } else if (ele.fieldName === "productCategory") {
+              if (ele.fieldName === "productCategory") {
                 col.headerName = ele.fieldLabel;
                 col.width = 180;
                 col.field = "productCategoryDisplayValue";
@@ -294,6 +286,7 @@ const ProductBuilder = (props) => {
       dispatch({ type: "initialize", data: [], count: 0 });
       dispatch({ type: "initialize", data: data, count: data.length });
       dispatch({ type: "loading", loading: false });
+      refreshProducts(data);
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
