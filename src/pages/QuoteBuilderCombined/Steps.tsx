@@ -9,7 +9,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
-import { StepIconProps, Grid } from "@material-ui/core";
+import { StepIconProps, Grid, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText, ListItem, List, ListItemIcon, Checkbox } from "@material-ui/core";
 import {
   IoIosArrowDroprightCircle,
   IoIosArrowDropleftCircle,
@@ -22,6 +22,9 @@ import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
 import NewStepper from "../../components/Helpers/NewStepper";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -129,6 +132,9 @@ const Steps = (props) => {
   const classes = useStyles();
   var activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
+  const [selectedRec, setSelectedRec] = useState(null);
+  const options = ["Accepted", "Rejected", "Invalid"]
+  const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] = useState(false);
 
   const ColorlibStepIcon = (props: StepIconProps) => {
     const classes = useColorlibStepIconStyles();
@@ -225,6 +231,29 @@ const Steps = (props) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const manualSendToCustomer = () => {
+    if (selectedRec) {
+
+      let dataObj = {
+        status: selectedRec === "Accepted" ? "Accepted by Customer" : "Rejected by Customer",
+        manual: true
+      }
+      if (selectedRec === "Invalid") { dataObj["comment"] = "Invalid" }
+      axiosInstance()
+        .post(`quote-builder/updateStatusfromCustomer/${id}?version=${version}`, dataObj)
+        .then(({ data }) => {
+          const nextStep = activeStep + 1;
+
+          activeStep = activeStep + 1;
+          Refresh(version);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+
   };
 
   const handleBack = () => {
@@ -477,15 +506,22 @@ const Steps = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={handleNext}
+                          onClick={() => {
+                            if (versionStatus.includes("Sent to Customer") || steps[currentStep] === "Send To Customer" || versionStatus === "Sent to Customer") {
+                              setShowManualCustomerActionDialog(true)
+                            }
+                            else {
+                              handleNext()
+                            }
+                          }}
                           size="small"
                           disabled={
                             loading ||
                             !nextStep ||
-                            versionStatus.includes("Accepted  by DOA") ||
-                            versionStatus.includes("Sent to Customer") ||
-                            steps[currentStep] === "Send To Customer" ||
-                            versionStatus === "Sent to Customer"
+                            versionStatus.includes("Accepted  by DOA")
+                            // || versionStatus.includes("Sent to Customer") ||
+                            // steps[currentStep] === "Send To Customer" ||
+                            // versionStatus === "Sent to Customer"
                           }
                           endIcon={<IoIosArrowDroprightCircle />}
                         >
@@ -502,6 +538,60 @@ const Steps = (props) => {
           </Grid>
         </Grid>
       </div>
+
+      {showManualCustomerActionDialog && <Dialog
+        fullWidth
+        maxWidth="xs"
+        open={showManualCustomerActionDialog}
+        onClose={() => setShowManualCustomerActionDialog(false)}
+        aria-labelledby="assign-roles-dialog"
+      >
+        <CustomDialogHeader title={`Reason For Ending`} />
+        <CustomDialogContent>
+
+          <>
+            <List style={{ padding: 0 }}>
+              {options.map((option) => (
+                <ListItem divider >
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => {
+                        e.target.checked ? setSelectedRec(option) : setSelectedRec(null)
+                      }
+                      }
+                      checked={option === selectedRec}
+                      inputProps={{
+                        "aria-labelledby": `checkbox-list-label-${option}`,
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={option}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </>
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button
+            onClick={() => setShowManualCustomerActionDialog(false)}
+            color="primary"
+            size="small"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={manualSendToCustomer}
+            color="primary"
+            size="small"
+            variant="contained"
+          >
+            Save
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>}
     </div>
   );
 };
