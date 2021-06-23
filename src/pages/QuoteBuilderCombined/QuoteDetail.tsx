@@ -1347,7 +1347,7 @@ function QuoteDetail() {
       dynamicTableData.forEach((d, i) => {
         let obj = {};
         visibleColumns.forEach((col) => {
-          obj[col] = d[col];
+          obj[col] = d[col] || "";
         });
 
         newTable.push(obj);
@@ -1550,18 +1550,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
+          data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
+          data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1573,7 +1573,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
+              "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1896,7 +1896,7 @@ function QuoteDetail() {
         if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
           approved = true;
           versionApproved = v;
-          manualApproval = quoteData.versions[v]?.customerResponse
+          manualApproval = quoteData.versions[v]?.customerResponse;
         }
         if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
           disapproved = true;
@@ -1909,7 +1909,7 @@ function QuoteDetail() {
       versionApproved,
       disapproved,
       versionDisapproved,
-      manualApproval
+      manualApproval,
     };
   };
 
@@ -1974,7 +1974,9 @@ function QuoteDetail() {
                   mainPoints={{
                     ...mainPoints,
                     "Quote Status": ifQuoteApproved().approved
-                      ? ifQuoteApproved().manualApproval ? `End (Accepted By Customer Manually)` : `End (Accepted By Customer)`
+                      ? ifQuoteApproved().manualApproval
+                        ? `End (Accepted By Customer Manually)`
+                        : `End (Accepted By Customer)`
                       : "In Progress",
                   }}
                   showHeading={true}
