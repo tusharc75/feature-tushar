@@ -77,7 +77,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!ele.fieldName) {
         ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
       }
-      //if (fid._id.toString() !== fieldData._id.toString()) { }
       if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
         if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
           ele.displayUnits && ele.displayUnits.forEach(_unit => {
@@ -121,7 +120,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isUneditable = values.isUneditable
             ele.isVlookup = values.isVlookup
 
-            if (isChangeFieldName && (module === "product-template" || module === "price-template")) {
+            if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
               ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
             }
 
@@ -216,7 +215,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               name="fieldLabel"
               fullWidth
               margin="dense"
-              disabled={!values["editAble"]}
+              //disabled={!values["editAble"]}
               value={values["fieldLabel"]}
               error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
               helperText={touched["fieldLabel"] && errors["fieldLabel"]}
