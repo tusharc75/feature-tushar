@@ -1,0 +1,37 @@
+.main {
+    border: 1px solid lightgray;
+    padding: 1.5em;
+    margin: 0 auto;
+    width: 50%;
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+.address {
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+.quotation_header {
+    width: 100%;
+    text-align: center;
+    border-bottom: 4px solid #000;
+    line-height: 0.1em;
+    margin: 20px 0 20px;
+}
+
+.quotation_header span {
+    background: #fff;
+    padding: 0 10px;
+}
+
+.bill_to {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+    .main {
+        width: 100%;
+    }
+}
