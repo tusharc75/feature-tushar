@@ -501,13 +501,11 @@ function QuoteDetail() {
         ),
       },
       {
-        field: "comment", headerName: "Comment", flex: 1,
+        field: "comment",
+        headerName: "Comment",
+        flex: 1,
         renderCell: (params: any) => (
-          <Typography
-            title={params.value}
-          >
-            {params.value}
-          </Typography>
+          <Typography title={params.value}>{params.value}</Typography>
         ),
       },
       { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
@@ -530,7 +528,7 @@ function QuoteDetail() {
     text: null,
   });
   const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-
+  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(user?.user?.brandQuoteDigitalSignature);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -623,13 +621,13 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, []);
 
-  useEffect(() => {
-    if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
-      createImagePDF(false, true);
-    } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
-      createImagePDF(false, true);
-    }
-  }, [ProcessStatus]);
+  // useEffect(() => {
+  //   if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
+  //     createImagePDF(false, true);
+  //   } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
+  //     createImagePDF(false, true);
+  //   }
+  // }, [ProcessStatus]);
 
   /**
    *
@@ -794,7 +792,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -827,7 +825,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -936,12 +934,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1554,18 +1552,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-          data["profitPercentPerUnit"] === undefined
+            data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-          data["commissionPercentPerUnit"] === undefined
+            data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1577,7 +1575,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-              "undefined"
+            "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1744,11 +1742,11 @@ function QuoteDetail() {
         });
     }
     if (Customerreq) {
-      createImagePDF(false, true);
       exportToCSV(true);
-      if (!PDF) {
-        createImagePDF(false, true);
+      if (!pdfFileBase64) {
+        createImagePDF(true, false);
       }
+
       setSendEmail(true);
     }
   };
@@ -1793,7 +1791,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1893,12 +1891,14 @@ function QuoteDetail() {
     let disapproved = false;
     let versionApproved = currentVersion;
     let versionDisapproved = currentVersion;
+    let manualApproval = false;
 
     if (quoteData) {
       versions.forEach((v) => {
         if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
           approved = true;
           versionApproved = v;
+          manualApproval = quoteData.versions[v]?.customerResponse
         }
         if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
           disapproved = true;
@@ -1911,6 +1911,7 @@ function QuoteDetail() {
       versionApproved,
       disapproved,
       versionDisapproved,
+      manualApproval
     };
   };
 
@@ -1975,7 +1976,7 @@ function QuoteDetail() {
                   mainPoints={{
                     ...mainPoints,
                     "Quote Status": ifQuoteApproved().approved
-                      ? "End (Accepted By Customer"
+                      ? ifQuoteApproved().manualApproval ? `End (Accepted By Customer Manually)` : `End (Accepted By Customer)`
                       : "In Progress",
                   }}
                   showHeading={true}
@@ -1996,9 +1997,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2115,10 +2116,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                    (_f) =>
-                                      _f.fieldData.sectionName !==
-                                      "Post-Quote Information"
-                                  )
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
                                   : quoteFields
                               }
                             />
@@ -2299,6 +2300,7 @@ function QuoteDetail() {
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             allowedToEdit={allowedToEdit}
                             DOAData={DOAData}
+                            generatePDF={GeneratePdf}
                           />
                         ) : (
                           <Steps
@@ -2317,6 +2319,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            generatePDF={GeneratePdf}
                           />
                         )}
                       </div>
@@ -2360,7 +2363,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2439,8 +2442,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2460,7 +2463,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2525,7 +2528,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2622,7 +2625,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2686,6 +2689,7 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
+              showESign = {true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}
@@ -2694,8 +2698,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
