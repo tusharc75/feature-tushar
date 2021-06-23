@@ -530,7 +530,7 @@ function QuoteDetail() {
     text: null,
   });
   const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-
+  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(user?.user?.brandQuoteDigitalSignature);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -2671,6 +2671,8 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
+              brandQuoteDigitalSignature = {brandQuoteDigitalSignature}
+              isRenderedFromQuoteDetail = {true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}

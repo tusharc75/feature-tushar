@@ -33,7 +33,7 @@ import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ImagePreview from "./ImagePreview"
-import { Paper } from '@material-ui/core'
+import { Paper, FormControlLabel, Switch } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
 import ImageAttachments from './ImageAttachments'
 import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers"
@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const CreateEmail = ({ relatedTo, emailId, handleClose,
     isQuoteBuilder = false, options = [], fetchData = null, cc = [], id = null, version = null,
-    qouteBuilderAttachments = [], subject = "" }) => {
+    qouteBuilderAttachments = [], subject = "", brandQuoteDigitalSignature = false, isRenderedFromQuoteDetail = false }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
@@ -94,6 +94,10 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    const [isESign, setIsESign] = useState(brandQuoteDigitalSignature);
+    const [toogle, setToogle] = useState({
+        "E-Sign": false,
+    })
     const {
         state: { user },
     }: any = useData();
@@ -151,7 +155,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                 to: values.to,
                 cc: values.cc,
                 subject: values.name,
-                attachment: values["file"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
+                attachment: values["file"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments],
+
             }
             if (azureAccount && azureAccount?.username) {
                 payload["graphToken"] = await getAzureAcessToken(instance)
@@ -202,7 +207,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
             cc: values.cc,
             bcc: [values.to.slice(-1)[0]],
             id: id,
-            attachments: [...qouteBuilderAttachments]
+            attachments: [...qouteBuilderAttachments],
+            eSign: toogle["E-Sign"]
         }
         axiosInstance()
             .post(`/quote-builder/sendQuoteEmail`, body)
@@ -360,6 +366,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
         }
     }
 
+    const handleChangePermissions = (e) => {
+        setToogle((prevState) => ({ ...prevState, [e.target.name]: e.target.checked }));
+
+    };
+
     return <>
         <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
         {loading ?
@@ -381,6 +392,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                         <Box padding={1} >
                                             {emailId ?
                                                 <Fragment>
+
                                                     <Typography variant="subtitle1">Subject : {initialValues.name || initialValues.subject} </Typography>
                                                     <Box mt={1} mb={1}>
                                                         <Typography variant="subtitle1">To : {initialValues.to.join()} </Typography>
@@ -393,7 +405,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                                     </Box>
                                                     {renderFileThumbnails}
-
                                                     <ImageAttachments
                                                         imageAttachments={imageAttachments}
                                                         onImageClick={(attachment) => {
@@ -403,6 +414,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                         onDelete={handleDeleteImageAttachment}
                                                         emailId={emailId}
                                                     />
+
                                                     {
                                                         initialValues?.relatedTo && initialValues.relatedTo.length ?
                                                             <Box mt={2}>
@@ -414,7 +426,24 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                     </Box>
                                                 </Fragment> :
                                                 <Grid container spacing={3}>
+                                                    {isRenderedFromQuoteDetail &&
+                                                        <Grid item className="pull-right p-0" xs={12}>
+                                                            <FormControlLabel
+                                                                key={1}
+                                                                control={
+                                                                    <Switch
+                                                                        checked={toogle["E-Sign"]}
+                                                                        name="E-Sign"
+                                                                        onChange={handleChangePermissions}
+                                                                    />
+                                                                }
+                                                                label="E-Sign"
+                                                            />
+                                                        </Grid>}
                                                     <Grid item xs={12}>
+
+                                                        ̦
+
                                                         <TextField
                                                             variant="outlined"
                                                             type="text"
