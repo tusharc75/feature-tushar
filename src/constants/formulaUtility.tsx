@@ -15,14 +15,25 @@ const matchIf = (string) => {
 
 export const checkFormula = (formula, inputFields) => {
     let isValid = true
+    const replaceFieldName = []
     try {
         let argument = [];
         let values = [];
         for (var x in inputFields) {
-            argument.push(x)
+            if (x.includes("/")) {
+                argument.push(x.replace("/", ""))
+                replaceFieldName.push({ old: x, new: x.replace("/", "") })
+            }
+            else {
+                argument.push(x)
+            }
             values.push(inputFields[x])
         }
         var fs: any = [];
+        replaceFieldName.forEach((_f: any) => {
+            var old = new RegExp(_f.old, "g");
+            formula = formula.replace(old, _f.new);
+        })
         fs['f1'] = new Function(...argument, formula);
         let result = fs['f1'].apply(null, values);
     }
@@ -37,11 +48,22 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
     try {
         let argument = [];
         let values = [];
+        const replaceFieldName = []
         for (var x in inputFields) {
-            argument.push(x)
+            if (x.includes("/")) {
+                argument.push(x.replace("/", ""))
+                replaceFieldName.push({ old: x, new: x.replace("/", "") })
+            }
+            else {
+                argument.push(x)
+            }
             values.push(inputFields[x])
         }
         var fs: any = [];
+        replaceFieldName.forEach((_f: any) => {
+            var old = new RegExp(_f.old, "g");
+            formula = formula.replace(old, _f.new);
+        })
         fs['f1'] = new Function(...argument, formula);
         value = fs['f1'].apply(null, values);
         if (returnType === "decimal") {

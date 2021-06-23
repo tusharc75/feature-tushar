@@ -9,7 +9,19 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
-import { StepIconProps, Grid } from "@material-ui/core";
+import {
+  StepIconProps,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  ListItemText,
+  ListItem,
+  List,
+  ListItemIcon,
+  Checkbox,
+} from "@material-ui/core";
 import {
   IoIosArrowDroprightCircle,
   IoIosArrowDropleftCircle,
@@ -22,6 +34,9 @@ import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
 import NewStepper from "../../components/Helpers/NewStepper";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -119,16 +134,21 @@ const Steps = (props) => {
     versionStatus,
     loading,
     approvedQuote,
+    generatePDF,
     DOAlimit,
     totalCost,
     handleSendReminder = null,
     reminderLoading = false,
     hideReminderButton = false,
-    DOAData = null
+    DOAData = null,
   } = props;
   const classes = useStyles();
-  var activeStep = currentStep;
+  let activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const options = ["Accepted", "Rejected", "Invalid"];
+  const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] =
+    useState(false);
 
   const ColorlibStepIcon = (props: StepIconProps) => {
     const classes = useColorlibStepIconStyles();
@@ -212,6 +232,9 @@ const Steps = (props) => {
   };
 
   const handleNext = () => {
+    if (currentStep === 2) {
+      generatePDF(false, true);
+    }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
         processStatus: steps[activeStep + 1],
@@ -225,6 +248,35 @@ const Steps = (props) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const manualSendToCustomer = () => {
+    if (selectedOption) {
+      let dataObj = {
+        status:
+          selectedOption === "Accepted"
+            ? "Accepted by Customer"
+            : "Rejected by Customer",
+        manual: true,
+      };
+      if (selectedOption === "Invalid") {
+        dataObj["comment"] = "Invalid";
+      }
+      axiosInstance()
+        .post(
+          `quote-builder/updateStatusfromCustomer/${id}?version=${version}`,
+          dataObj
+        )
+        .then(({ data }) => {
+          const nextStep = activeStep + 1;
+
+          activeStep = activeStep + 1;
+          Refresh(version);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleBack = () => {
@@ -243,12 +295,11 @@ const Steps = (props) => {
       });
   };
 
-
   return (
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+        approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -270,10 +321,7 @@ const Steps = (props) => {
             )} */}
             {versionStatus === "Sent for DOA" && (
               <>
-                {DOAData && (<NewStepper
-                  heading={" "}
-                  quoteDOA={DOAData}
-                />)}
+                {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
 
                 <div className="d-flex align-items-center justify-content-center flex-column m-3">
                   <FcClock size={30} />
@@ -283,10 +331,7 @@ const Steps = (props) => {
             )}
             {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
               <>
-                {DOAData && (<NewStepper
-                  heading={" "}
-                  quoteDOA={DOAData}
-                />)}
+                {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
 
                 <div className="d-flex align-items-center justify-content-center flex-column m-3">
                   <FcApproval size={30} />
@@ -298,10 +343,7 @@ const Steps = (props) => {
             )}
             {versionStatus.split(" (")[0] === "Rejected by DOA" && (
               <>
-                {DOAData && (<NewStepper
-                  heading={" "}
-                  quoteDOA={DOAData}
-                />)}
+                {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
 
                 <div className="d-flex align-items-center justify-content-center flex-column m-3">
                   <FcCancel size={30} />
@@ -412,19 +454,23 @@ const Steps = (props) => {
                 <div>
                   {!approvedQuote.approved && (
                     <div className={classes.stepperNext}>
-                      {activeStep === 1 || activeStep === 2 ? (
-                        // <IoIosArrowDropleftCircle className="cursor-pointer" size={28} onClick={handleBack} />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleBack}
-                          disabled={loading}
-                          size="small"
-                          startIcon={<IoIosArrowDropleftCircle />}
-                        >
-                          Back
-                        </Button>
-                      ) : null}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={
+                          versionStatus.includes("Rejected by Customer") ||
+                          (steps.length === 5 && currentStep >= 3) ||
+                          versionStatus.includes("Sent for DOA") ||
+                          (steps.length === 6 && currentStep >= 4) ||
+                          versionStatus.includes("Sent to Customer") ||
+                          loading
+                        }
+                        onClick={handleBack}
+                        size="small"
+                        startIcon={<IoIosArrowDropleftCircle />}
+                      >
+                        Back
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -477,19 +523,31 @@ const Steps = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={handleNext}
+                          onClick={() => {
+                            if (
+                              versionStatus.includes("Sent to Customer") ||
+                              steps[currentStep] === "Send To Customer" ||
+                              versionStatus === "Sent to Customer"
+                            ) {
+                              setShowManualCustomerActionDialog(true);
+                            } else {
+                              handleNext();
+                            }
+                          }}
                           size="small"
                           disabled={
                             loading ||
                             !nextStep ||
-                            versionStatus.includes("Accepted  by DOA") ||
-                            versionStatus.includes("Sent to Customer") ||
-                            steps[currentStep] === "Send To Customer" ||
-                            versionStatus === "Sent to Customer"
+                            versionStatus.includes("Accepted  by DOA")
+                            // || versionStatus.includes("Sent to Customer") ||
+                            // steps[currentStep] === "Send To Customer" ||
+                            // versionStatus === "Sent to Customer"
                           }
                           endIcon={<IoIosArrowDroprightCircle />}
                         >
-                          {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                          {versionStatus.includes("Accepted  by DOA")
+                            ? "End"
+                            : "Next"}
                         </Button>
                       ) : (
                         <p>{versionStatus}</p>
@@ -502,6 +560,60 @@ const Steps = (props) => {
           </Grid>
         </Grid>
       </div>
+
+      {showManualCustomerActionDialog && (
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showManualCustomerActionDialog}
+          onClose={() => setShowManualCustomerActionDialog(false)}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <CustomDialogHeader title={`Reason For Ending`} />
+          <CustomDialogContent>
+            <>
+              <List style={{ padding: 0 }}>
+                {options.map((option) => (
+                  <ListItem divider>
+                    <ListItemIcon>
+                      <Checkbox
+                        edge="start"
+                        onChange={(e) => {
+                          e.target.checked
+                            ? setSelectedOption(option)
+                            : setSelectedOption(null);
+                        }}
+                        checked={option === selectedOption}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-${option}`,
+                        }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText primary={option} />
+                  </ListItem>
+                ))}
+              </List>
+            </>
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button
+              onClick={() => setShowManualCustomerActionDialog(false)}
+              color="primary"
+              size="small"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={manualSendToCustomer}
+              color="primary"
+              size="small"
+              variant="contained"
+            >
+              Save
+            </Button>
+          </CustomDialogFooter>
+        </Dialog>
+      )}
     </div>
   );
 };
