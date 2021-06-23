@@ -528,7 +528,7 @@ function QuoteDetail() {
     text: null,
   });
   const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-
+  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(user?.user?.brandQuoteDigitalSignature);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -1044,45 +1044,23 @@ function QuoteDetail() {
     PdfDoc.line(330, 70, 580, 70);
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
-    var PDFData = [];
-    var PdfCol = ["S. No."];
-    var serialNumber = 1;
+    let PDFData = [];
+    let PdfCol = ["S. No."];
+    let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
-      var PdfRow = [serialNumber];
-      var ExcelRow = {};
-      ColumnName.forEach((ColName) => {
-        if (defaultSelectColumns.indexOf(ColName) !== -1) {
-          if (PdfCol.indexOf(ColName) == -1) {
+      let PdfRow = [serialNumber];
+      defaultSelectColumns.forEach((ColName) => {
+        if (ColumnName.indexOf(ColName) !== -1) {
+          if (PdfCol.indexOf(ColName) === -1) {
             PdfCol.push(ColName);
           }
           PdfRow.push(dataEntry[ColName]);
         }
-
-        if (visibleColumns.indexOf(ColName) !== -1) {
-          if (excelheaderName.indexOf(ColName !== -1)) {
-            excelheaderName.push(ColName);
-            excelHeader.push({
-              header: ColName,
-              key: ColName.replace(" ", ""),
-            });
-          }
-          ExcelRow[ColName.replace(" ", "")] = dataEntry[ColName];
-        }
       });
       PDFData.push(PdfRow);
-      excelData.push(ExcelRow);
       serialNumber = serialNumber + 1;
     });
 
-    // if(!view && !send){
-    //
-    //
-    //   const workbook = new excel.Workbook();
-    //   const worksheet: any = workbook.addWorksheet("Quotation");
-    //   worksheet.columns=excelHeader;
-    //   //worksheet.addRows(2,excelData);
-    //   downloadExcel(workbook.xlsx.writeBuffer(),"Quotation.xlsx");
-    // }
     PdfDoc.setFontSize(10);
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
@@ -1114,7 +1092,6 @@ function QuoteDetail() {
         },
       ],
     ];
-
     autoTable(PdfDoc, {
       margin: { top: 150 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -1347,15 +1324,16 @@ function QuoteDetail() {
       dynamicTableData.forEach((d, i) => {
         let obj = {};
         visibleColumns.forEach((col) => {
-          obj[col] = d[col];
+          obj[col] = d[col] || "";
         });
 
         newTable.push(obj);
       });
 
       newTable.push({
-        "Product Name": "Total",
-        "Total Sales Price": totalcost.fullFormatAmount,
+        "Product Name": "Total:",
+        "Total Sales Price": totalsale.fullFormatAmount,
+        "Total Cost": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1365,8 +1343,6 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-
-      // console.log(data);
 
       if (send) {
         generateBase64forFile(data, "excel");
@@ -1550,18 +1526,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
+          data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
+          data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1573,7 +1549,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
+              "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1704,13 +1680,17 @@ function QuoteDetail() {
         setCustomerreq(false);
       }
 
-      const ColName = inventory[0].map((col) => col.fieldName);
+      const ColName = inventory[0].map((col) =>
+        col.fieldName === "Productname" ? "Product Name" : col.fieldName
+      );
       const allData: any = [];
       inventory.forEach((col) => {
         let obj: { [key: string]: string | number } = {};
 
         col.forEach((_col) => {
-          obj[_col.fieldName] = _col.fieldValue || "";
+          obj[
+            _col.fieldName === "Productname" ? "Product Name" : _col.fieldName
+          ] = _col.fieldValue || "";
         });
 
         allData.push(obj);
@@ -1723,6 +1703,7 @@ function QuoteDetail() {
       } else {
         setVisibleColumnName(defaultSelectColumns);
       }
+      console.log(allData);
       setDynamicTableData(allData);
     }
   };
@@ -1874,7 +1855,6 @@ function QuoteDetail() {
     axiosInstance()
       .delete(`${qbApi}/${id}/${currentVersion}`)
       .then(() => {
-        console.log("Succfully Deleted.");
         setDeletingDOA(false);
         fetchQuoteData(0);
       })
@@ -1896,7 +1876,7 @@ function QuoteDetail() {
         if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
           approved = true;
           versionApproved = v;
-          manualApproval = quoteData.versions[v]?.customerResponse
+          manualApproval = quoteData.versions[v]?.customerResponse;
         }
         if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
           disapproved = true;
@@ -1909,7 +1889,7 @@ function QuoteDetail() {
       versionApproved,
       disapproved,
       versionDisapproved,
-      manualApproval
+      manualApproval,
     };
   };
 
@@ -1974,7 +1954,9 @@ function QuoteDetail() {
                   mainPoints={{
                     ...mainPoints,
                     "Quote Status": ifQuoteApproved().approved
-                      ? ifQuoteApproved().manualApproval ? `End (Accepted By Customer Manually)` : `End (Accepted By Customer)`
+                      ? ifQuoteApproved().manualApproval
+                        ? `End (Accepted By Customer Manually)`
+                        : `End (Accepted By Customer)`
                       : "In Progress",
                   }}
                   showHeading={true}
@@ -2687,6 +2669,7 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
+              showESign = {true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}

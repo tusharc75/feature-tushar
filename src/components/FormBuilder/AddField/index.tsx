@@ -31,6 +31,7 @@ import { Option } from "../AddField/option";
 import Divider from '@material-ui/core/Divider';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
+import axiosInstance from "../../../axios/axiosInstance";
 
 const FieldSchema = Yup.object().shape({
   type: Yup.string()
@@ -55,7 +56,7 @@ export const AddField = (props) => {
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
     tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "Option 1", optionValue: "Option 1" }], formula: "return ", isvlookupReverse: false,
-    units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false,
+    units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false, displayCurrency: ["USD"]
   });
 
   let new_fields = []
@@ -119,7 +120,7 @@ export const AddField = (props) => {
       })
       data.option = values.option
     }
-    if (values.type === "decimal") {
+    if (values.type === "decimal" || values.type === "converter" || values.type === "currencyAmount") {
       data.decimalPlaces = values.decimalPlaces
     }
     if (values.lookup) {
@@ -148,7 +149,18 @@ export const AddField = (props) => {
     if (values.type === "currencyAmount") {
       data.displayCurrency = values.displayCurrency
     }
-    handleAddField(data)
+
+    if (values.type === "currencyAmount" && refrence === "formAdd") {
+      axiosInstance().get(`/converter?type=currency`).then((result: any) => {
+        data.currency = result.data.data.currency;
+        data.currencyoption = result.data.data.option;
+        handleAddField(data)
+      }).catch((error) => {
+      });
+    }
+    else {
+      handleAddField(data)
+    }
   }
 
   const onKeyPress = (event) => {
@@ -214,7 +226,7 @@ export const AddField = (props) => {
                 <MenuItem value={"dropDown"}>Dropdown</MenuItem>
                 <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
                 <MenuItem value={"converter"}>Converter</MenuItem>
-                {(refrence === "builder" || refrence === "custom") && <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>}
+                <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>
               </Select>
             </FormControl>
             <TextField
@@ -298,7 +310,7 @@ export const AddField = (props) => {
               fields={new_fields}
               values={values}
               setFieldValue={setFieldValue}
-              _id={fieldData._id}
+              _id={fieldData && fieldData._id ? fieldData._id : ""}
             />}
 
             {values["type"] === "vlookupDropdown" &&
@@ -306,7 +318,7 @@ export const AddField = (props) => {
                 fields={new_fields}
                 values={values}
                 setFieldValue={setFieldValue}
-                _id={fieldData._id}
+                _id={fieldData && fieldData._id ? fieldData._id : ""}
               />}
 
             {values["type"] === "currencyAmount" &&
