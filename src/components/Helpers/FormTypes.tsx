@@ -47,8 +47,8 @@ import {
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import CreditCardIcon from '@material-ui/icons/CreditCard';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -171,6 +171,7 @@ const FormTypes = (props) => {
     removeDisplayType,
     setValues,
     customError = {},
+    handleRemoveField,
     ...rest
   } = props;
 
@@ -828,6 +829,13 @@ const FormTypes = (props) => {
                   <SwapHorizIcon />
                 </IconButton>
               </Tooltip>
+              {(fieldData.leval === "product-custom" || fieldData.leval === "product-builder-custom" || fieldData.leval === "price-builder-custom") &&
+                <Tooltip title="Remove">
+                  <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small"  >
+                    <HighlightOffIcon color="error" />
+                  </IconButton>
+                </Tooltip>
+              }
               {isExtraDispayType && <AddDisplayTypeDialog
                 handleAddDisplayType={handleAddDisplayType}
                 displayType="converter"
@@ -942,9 +950,16 @@ const FormTypes = (props) => {
                 <Box>
                   <Tooltip title="Add Currency" className="formActionButton">
                     <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("currency") }} color="primary" size="small"  >
-                      <AttachMoneyIcon />
+                      <CreditCardIcon />
                     </IconButton>
                   </Tooltip>
+                  {(fieldData.leval === "product-custom" || fieldData.leval === "product-builder-custom" || fieldData.leval === "price-builder-custom") &&
+                    <Tooltip title="Remove">
+                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small"  >
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </Tooltip>
+                  }
                   {fieldData.displayUnits.length !== fieldData.units.length &&
                     <Tooltip title="Add Converter" className="formActionButton">
                       <IconButton onClick={() => { setIsExtraDispayType(true); setDisplayType("converter") }} color="primary" size="small"  >
@@ -1040,9 +1055,16 @@ const FormTypes = (props) => {
               <Box>
                 <Tooltip title="Add Currency" className="formActionButton">
                   <IconButton onClick={() => { setIsExtraDispayType(true) }} color="primary" size="small"  >
-                    <AttachMoneyIcon />
+                    <CreditCardIcon />
                   </IconButton>
                 </Tooltip>
+                {(fieldData.leval === "product-custom" || fieldData.leval === "product-builder-custom" || fieldData.leval === "price-builder-custom") &&
+                  <Tooltip title="Remove">
+                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small"  >
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                }
                 {isExtraDispayType &&
                   <AddDisplayTypeDialog
                     handleAddDisplayType={handleAddDisplayType}

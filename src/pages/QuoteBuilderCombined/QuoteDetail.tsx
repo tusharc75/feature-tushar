@@ -502,13 +502,11 @@ function QuoteDetail() {
         ),
       },
       {
-        field: "comment", headerName: "Comment", flex: 1,
+        field: "comment",
+        headerName: "Comment",
+        flex: 1,
         renderCell: (params: any) => (
-          <Typography
-            title={params.value}
-          >
-            {params.value}
-          </Typography>
+          <Typography title={params.value}>{params.value}</Typography>
         ),
       },
       { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
@@ -531,7 +529,7 @@ function QuoteDetail() {
     text: null,
   });
   const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-
+  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(user?.user?.brandQuoteDigitalSignature);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -624,13 +622,13 @@ function QuoteDetail() {
     fetchTermsAndConditions();
   }, []);
 
-  useEffect(() => {
-    if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
-      createImagePDF(false, true);
-    } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
-      createImagePDF(false, true);
-    }
-  }, [ProcessStatus]);
+  // useEffect(() => {
+  //   if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
+  //     createImagePDF(false, true);
+  //   } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
+  //     createImagePDF(false, true);
+  //   }
+  // }, [ProcessStatus]);
 
   /**
    *
@@ -795,7 +793,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -828,7 +826,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -937,12 +935,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -983,7 +981,9 @@ function QuoteDetail() {
   };
 
   const createImagePDF = (view, send) => {
-    setGeneratingPdf({ show: true, text: "Generating..." });
+    if (view) {
+      setGeneratingPdf({ show: true, text: "Generating..." });
+    }
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -1047,45 +1047,23 @@ function QuoteDetail() {
     PdfDoc.line(330, 70, 580, 70);
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
-    var PDFData = [];
-    var PdfCol = ["S. No."];
-    var serialNumber = 1;
+    let PDFData = [];
+    let PdfCol = ["S. No."];
+    let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
-      var PdfRow = [serialNumber];
-      var ExcelRow = {};
-      ColumnName.forEach((ColName) => {
-        if (defaultSelectColumns.indexOf(ColName) !== -1) {
-          if (PdfCol.indexOf(ColName) == -1) {
+      let PdfRow = [serialNumber];
+      defaultSelectColumns.forEach((ColName) => {
+        if (ColumnName.indexOf(ColName) !== -1) {
+          if (PdfCol.indexOf(ColName) === -1) {
             PdfCol.push(ColName);
           }
           PdfRow.push(dataEntry[ColName]);
         }
-
-        if (visibleColumns.indexOf(ColName) !== -1) {
-          if (excelheaderName.indexOf(ColName !== -1)) {
-            excelheaderName.push(ColName);
-            excelHeader.push({
-              header: ColName,
-              key: ColName.replace(" ", ""),
-            });
-          }
-          ExcelRow[ColName.replace(" ", "")] = dataEntry[ColName];
-        }
       });
       PDFData.push(PdfRow);
-      excelData.push(ExcelRow);
       serialNumber = serialNumber + 1;
     });
 
-    // if(!view && !send){
-    //
-    //
-    //   const workbook = new excel.Workbook();
-    //   const worksheet: any = workbook.addWorksheet("Quotation");
-    //   worksheet.columns=excelHeader;
-    //   //worksheet.addRows(2,excelData);
-    //   downloadExcel(workbook.xlsx.writeBuffer(),"Quotation.xlsx");
-    // }
     PdfDoc.setFontSize(10);
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
@@ -1117,7 +1095,6 @@ function QuoteDetail() {
         },
       ],
     ];
-
     autoTable(PdfDoc, {
       margin: { top: 150 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
@@ -1174,14 +1151,14 @@ function QuoteDetail() {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
-              title: `Quotation - v${currentVersion}`,
+              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
             generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
-            doc.save(`Quotation - v${currentVersion}`);
+            doc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}`);
           }
           if (send) {
             let PDFtoAPIData = doc.output("blob");
@@ -1224,14 +1201,14 @@ function QuoteDetail() {
 
       if (view && !send) {
         PdfDoc.setProperties({
-          title: `Quotation - ${currentVersion}`,
+          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
         generateBase64forFile(pdfBlobFile, "pdf");
 
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
-        PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
+        PdfDoc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
@@ -1353,15 +1330,16 @@ function QuoteDetail() {
       dynamicTableData.forEach((d, i) => {
         let obj = {};
         visibleColumns.forEach((col) => {
-          obj[col] = d[col];
+          obj[col] = d[col] || "";
         });
 
         newTable.push(obj);
       });
 
       newTable.push({
-        "Product Name": "Total",
-        "Total Sales Price": totalcost.fullFormatAmount,
+        "Product Name": "Total:",
+        "Total Sales Price": totalsale.fullFormatAmount,
+        "Total Cost": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1371,8 +1349,6 @@ function QuoteDetail() {
         type: "array",
       });
       const data = new Blob([excelBuffer], { type: fileType });
-
-      // console.log(data);
 
       if (send) {
         generateBase64forFile(data, "excel");
@@ -1556,18 +1532,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
+          data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
+          data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1579,7 +1555,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
+              "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1710,13 +1686,17 @@ function QuoteDetail() {
         setCustomerreq(false);
       }
 
-      const ColName = inventory[0].map((col) => col.fieldName);
+      const ColName = inventory[0].map((col) =>
+        col.fieldName === "Productname" ? "Product Name" : col.fieldName
+      );
       const allData: any = [];
       inventory.forEach((col) => {
         let obj: { [key: string]: string | number } = {};
 
         col.forEach((_col) => {
-          obj[_col.fieldName] = _col.fieldValue || "";
+          obj[
+            _col.fieldName === "Productname" ? "Product Name" : _col.fieldName
+          ] = _col.fieldValue || "";
         });
 
         allData.push(obj);
@@ -1729,6 +1709,7 @@ function QuoteDetail() {
       } else {
         setVisibleColumnName(defaultSelectColumns);
       }
+      console.log(allData);
       setDynamicTableData(allData);
     }
   };
@@ -1746,12 +1727,11 @@ function QuoteDetail() {
         });
     }
     if (Customerreq) {
-      createImagePDF(false, true);
-
       exportToCSV(true);
-      if (!PDF) {
-        createImagePDF(false, true);
+      if (!pdfFileBase64) {
+        createImagePDF(true, false);
       }
+
       setSendEmail(true);
 
     }
@@ -1797,7 +1777,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1924,7 +1904,6 @@ function QuoteDetail() {
     axiosInstance()
       .delete(`${qbApi}/${id}/${currentVersion}`)
       .then(() => {
-        console.log("Succfully Deleted.");
         setDeletingDOA(false);
         fetchQuoteData(0);
       })
@@ -1946,7 +1925,7 @@ function QuoteDetail() {
         if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
           approved = true;
           versionApproved = v;
-          manualApproval = quoteData.versions[v]?.customerResponse
+          manualApproval = quoteData.versions[v]?.customerResponse;
         }
         if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
           disapproved = true;
@@ -1959,7 +1938,7 @@ function QuoteDetail() {
       versionApproved,
       disapproved,
       versionDisapproved,
-      manualApproval
+      manualApproval,
     };
   };
 
@@ -2024,7 +2003,9 @@ function QuoteDetail() {
                   mainPoints={{
                     ...mainPoints,
                     "Quote Status": ifQuoteApproved().approved
-                      ? ifQuoteApproved().manualApproval ? `End (Accepted By Customer Manually)` : `End (Accepted By Customer)`
+                      ? ifQuoteApproved().manualApproval
+                        ? `End (Accepted By Customer Manually)`
+                        : `End (Accepted By Customer)`
                       : "In Progress",
                   }}
                   showHeading={true}
@@ -2045,9 +2026,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2164,10 +2145,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                    (_f) =>
-                                      _f.fieldData.sectionName !==
-                                      "Post-Quote Information"
-                                  )
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
                                   : quoteFields
                               }
                             />
@@ -2348,6 +2329,7 @@ function QuoteDetail() {
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             allowedToEdit={allowedToEdit}
                             DOAData={DOAData}
+                            generatePDF={GeneratePdf}
                           />
                         ) : (
                           <Steps
@@ -2366,6 +2348,7 @@ function QuoteDetail() {
                             reminderLoading={reminderLoading}
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                            generatePDF={GeneratePdf}
                           />
                         )}
                       </div>
@@ -2409,7 +2392,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2488,8 +2471,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2509,7 +2492,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2574,7 +2557,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2671,7 +2654,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2735,6 +2718,7 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
+              showESign = {true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}
@@ -2743,8 +2727,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
