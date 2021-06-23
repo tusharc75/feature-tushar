@@ -58,7 +58,7 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user },
+    state: { user,permissions },
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
@@ -381,7 +381,7 @@ export default function Contact(props) {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={contactPermission}
+            permissions={contactPermissions}
             module="contact(s)"
             api={contactApi}
             afterImportCompleted={() => {
