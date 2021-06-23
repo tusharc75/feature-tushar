@@ -34,7 +34,6 @@ export const CustomField = ({ }) => {
     }
 
     const handleAddField = (values) => {
-        console.log(values)
         if (values._id && !Number.isInteger(values._id)) {
             axiosInstance().put(`/sa-formbuilder/custom-field`, values).then(({ data: { data } }) => {
                 setIsAddField(false)
@@ -73,16 +72,53 @@ export const CustomField = ({ }) => {
         setIsAddField(true)
     }
 
+    const handleImportFields = (e) => {
+        e.preventDefault();
+        var files = e.target.files, f = files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var data: any = e.target.result;
+            data = JSON.parse(data)
+            delete data._id
+            handleAddField(data)
+        };
+        reader.readAsBinaryString(f)
+    }
+
     return (
         <Fragment>
             <Box mt={1} mb={1}>
                 <Divider />
             </Box>
-            <Button onClick={handleOpenAddField} size="small" color="primary">Add Custom Field</Button>
+
+            <Box>
+                <Grid spacing={3} container>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Button onClick={handleOpenAddField} size="small" color="primary">Add Custom Field</Button>
+                    </Grid>
+                    <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                        <label htmlFor="importcustomField" className="cursor-pointer mr-3">
+                            Import Custom Field
+                            <input
+                                onClick={(e: any) => (e.target.value = null)}
+                                id="importcustomField"
+                                name="importcustomField"
+                                onChange={handleImportFields}
+                                style={{
+                                    opacity: "0",
+                                    position: "absolute",
+                                    zIndex: -1,
+                                }}
+                                type="file"
+                            />
+                        </label>
+                    </Grid>
+                </Grid>
+            </Box>
             <Box mt={1} mb={1}>
                 <Grid container spacing={1} >
                     {fields && fields.map((data, i) => (
-                        <DragBox data={data} handleDelete={handleDelete} handleEdit={handleEdit} />
+                        <DragBox data={data} handleDelete={handleDelete} handleEdit={handleEdit} handleAddField={handleAddField} />
                     ))}
                 </Grid>
             </Box>

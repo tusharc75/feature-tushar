@@ -13,7 +13,7 @@ const style = {
 };
 
 
-export const DragBox = ({ data, handleEdit, handleDelete }) => {
+export const DragBox = ({ data, handleEdit, handleDelete, handleAddField }) => {
 
     const type = "field";
     const item = { data, type };
@@ -43,6 +43,23 @@ export const DragBox = ({ data, handleEdit, handleDelete }) => {
         setAnchorEl(null);
     };
 
+    const handleCloneCustomField = (data) => {
+        const sendData = data
+        sendData.fieldLabel = sendData.fieldLabel + " Clone"
+        delete sendData._id
+        handleAddField(sendData)
+    }
+
+    const handleExportFields = (data) => {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const link = document.createElement('a');
+        link.href = dataStr;
+        link.download =  data.fieldLabel  + ".json";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     return (<>
         <Grid ref={drag} style={{ ...style, opacity }} item xs={6} >
             <Box border={1} p={1} borderColor="grey.300">
@@ -62,6 +79,8 @@ export const DragBox = ({ data, handleEdit, handleDelete }) => {
                             onClose={handleClose}
                         >
                             <MenuItem onClick={() => { handleEdit(data); handleClose() }} >Edit</MenuItem>
+                            <MenuItem onClick={() => { handleCloneCustomField(data); handleClose() }} >Clone</MenuItem>
+                            <MenuItem onClick={() => { handleExportFields(data); handleClose() }} >Export</MenuItem>
                             <MenuItem onClick={() => { handleDelete(data._id); handleClose() }} >Delete</MenuItem>
                         </Menu>
                     </Grid>
