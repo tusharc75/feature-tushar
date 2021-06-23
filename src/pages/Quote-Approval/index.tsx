@@ -288,7 +288,7 @@ const QuoteApproval = () => {
 
             if (signatureData) {
                 signatureContent =
-                    signatureContent + `<img--src='${signatureData}' height='30px' width='30px' />`
+                    signatureContent + `<img--src='${signatureData}'--style='max-height:50px;max-width:50px;margin-left:40px' />`
                 signatureContent =
                     signatureContent + "<br>"
             } else {
@@ -297,11 +297,12 @@ const QuoteApproval = () => {
 
             signatureContent =
                 signatureContent +
-                `<span--style='color:lightgrey'>____________________________________________</span>`;
+                `<span--style='color:lightgrey'>_______________________________</span>`;
 
             signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
             signatureContent = signatureContent.replaceAll("--", " ");
             signatureContent = signatureContent.replaceAll("<img--src", "<img src");
+            signatureContent = signatureContent.replaceAll("--style", " style");
 
             finalmarkup = finalmarkup + signatureContent;
 
@@ -401,7 +402,7 @@ const QuoteApproval = () => {
         let finalmarkup = "";
         versionDetails?.TNC?.forEach((selectTNC) => {
             finalmarkup =
-                finalmarkup + `<br><br><br><h2><strong>${selectTNC.TACName}:</strong></h2>`;
+                finalmarkup + `<br><h2><strong>${selectTNC.TACName}:</strong></h2>`;
             let state = convertFromRaw(JSON.parse(selectTNC.description));
             let TNC = EditorState.createWithContent(state);
             let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
@@ -420,7 +421,7 @@ const QuoteApproval = () => {
 
         signatureContent =
             signatureContent +
-            `<span style='color:lightgrey'>___________________________________</span>`;
+            `<span style='color:lightgrey'>______________________________________</span>`;
 
         return <div dangerouslySetInnerHTML={{ __html: `${finalmarkup} ${signatureContent}` }}></div>
     }
@@ -546,7 +547,7 @@ const QuoteApproval = () => {
                                         </Table>
                                     </TableContainer>
 
-                                    <h1 className="quotation_header"></h1>
+                                    <h1 className={styles.quotation_header}></h1>
 
                                     {
                                         renderTermsAndConditions()
@@ -583,7 +584,7 @@ const QuoteApproval = () => {
                                                 <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
                                                     Accept
                                                 </Button>
-                                                <Button variant="contained" startIcon={<GoThumbsdown />} color="secondary" onClick={() => {
+                                                <Button variant="outlined" startIcon={<GoThumbsdown />} color="default" onClick={() => {
                                                     setQuoteStatusChangeData("Rejected")
                                                     setShowQuoteStatusChangeDialog(true)
                                                 }} >
@@ -616,9 +617,7 @@ const QuoteApproval = () => {
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    // QuoteStatusChange("Accepted", imageData, "");
                     generatePdf(false, true, imageData);
-                    // setShowSignatureDialog(false);
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
         </div >
