@@ -528,7 +528,9 @@ function QuoteDetail() {
     text: null,
   });
   const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(user?.user?.brandQuoteDigitalSignature);
+  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(
+    user?.user?.brandQuoteDigitalSignature
+  );
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -979,7 +981,7 @@ function QuoteDetail() {
     productBuilderdatatoQuoteBuilderdata(data);
   };
 
-  const createImagePDF = (view, send) => {
+  const createImagePDF = (view, send, base64 = false) => {
     setGeneratingPdf({ show: true, text: "Generating..." });
     axiosInstance()
       .get("/user/brandInfo")
@@ -989,10 +991,10 @@ function QuoteDetail() {
         if (data.data.logo) {
           fetchImage(data.data.logo, function (dataUri) {
             logo = dataUri;
-            GeneratePdf(view, send);
+            GeneratePdf(view, send, base64);
           });
         } else {
-          GeneratePdf(view, send);
+          GeneratePdf(view, send, base64);
         }
       })
       .catch((err) => {
@@ -1023,7 +1025,7 @@ function QuoteDetail() {
     image.src = Url;
   };
 
-  const GeneratePdf = (view, send) => {
+  const GeneratePdf = (view, send, base64 = false) => {
     const PdfDoc = new jsPDF("p", "pt", "a4");
     let date = new Date();
     const excelHeader = [];
@@ -1154,8 +1156,14 @@ function QuoteDetail() {
             generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
-          } else if (!view && !send) {
+          } else if (!view && !send && !base64) {
             doc.save(`Quotation - v${currentVersion}`);
+          } else if (base64) {
+            doc.setProperties({
+              title: `Quotation - v${currentVersion}`,
+            });
+            const pdfBlobFile = doc.output("blob");
+            generateBase64forFile(pdfBlobFile, "pdf");
           }
           if (send) {
             let PDFtoAPIData = doc.output("blob");
@@ -1203,8 +1211,14 @@ function QuoteDetail() {
         generateBase64forFile(pdfBlobFile, "pdf");
 
         window.open(URL.createObjectURL(pdfBlobFile));
-      } else if (!view && !send) {
+      } else if (!view && !send && !base64) {
         PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
+      } else if (base64) {
+        PdfDoc.setProperties({
+          title: `Quotation - v${currentVersion}`,
+        });
+        const pdfBlobFile = PdfDoc.output("blob");
+        generateBase64forFile(pdfBlobFile, "pdf");
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
@@ -1723,7 +1737,7 @@ function QuoteDetail() {
     if (Customerreq) {
       exportToCSV(true);
       if (!pdfFileBase64) {
-        createImagePDF(true, false);
+        GeneratePdf(false, false, true);
       }
 
       setSendEmail(true);
@@ -2669,7 +2683,7 @@ function QuoteDetail() {
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
-              showESign = {true}
+              showESign={true}
               version={currentVersion}
               // account={quoteData.customerAccountName}
               isQuoteBuilder={true}
