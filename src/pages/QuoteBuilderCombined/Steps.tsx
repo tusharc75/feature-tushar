@@ -132,7 +132,7 @@ const Steps = (props) => {
   const classes = useStyles();
   var activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
-  const [selectedRec, setSelectedRec] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
   const options = ["Accepted", "Rejected", "Invalid"]
   const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] = useState(false);
 
@@ -234,13 +234,13 @@ const Steps = (props) => {
   };
 
   const manualSendToCustomer = () => {
-    if (selectedRec) {
+    if (selectedOption) {
 
       let dataObj = {
-        status: selectedRec === "Accepted" ? "Accepted by Customer" : "Rejected by Customer",
+        status: selectedOption === "Accepted" ? "Accepted by Customer" : "Rejected by Customer",
         manual: true
       }
-      if (selectedRec === "Invalid") { dataObj["comment"] = "Invalid" }
+      if (selectedOption === "Invalid") { dataObj["comment"] = "Invalid" }
       axiosInstance()
         .post(`quote-builder/updateStatusfromCustomer/${id}?version=${version}`, dataObj)
         .then(({ data }) => {
@@ -557,10 +557,10 @@ const Steps = (props) => {
                     <Checkbox
                       edge="start"
                       onChange={(e) => {
-                        e.target.checked ? setSelectedRec(option) : setSelectedRec(null)
+                        e.target.checked ? setSelectedOption(option) : setSelectedOption(null)
                       }
                       }
-                      checked={option === selectedRec}
+                      checked={option === selectedOption}
                       inputProps={{
                         "aria-labelledby": `checkbox-list-label-${option}`,
                       }}
