@@ -295,9 +295,9 @@ const QuoteApproval = () => {
 
             PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
                 callback: function (doc) {
-                    if (view && !send) {
+                    if (view) {
                         doc.setProperties({
-                            title: `Quotation - v${quoteData.version}`,
+                            title: `Quotation-${quoteData?.name}-v${quoteData.version}`,
                         });
                         const pdfBlobFile = doc.output("blob");
                         generateBase64forFile(pdfBlobFile, "pdf");
@@ -350,9 +350,9 @@ const QuoteApproval = () => {
             finalY = finalY + 30;
             PdfDoc.line(15, finalY, 260, finalY);
 
-            if (view && !send) {
+            if (view) {
                 PdfDoc.setProperties({
-                    title: `Quotation - ${quoteData.version}`,
+                    title: `Quotation-${quoteData?.name}-v${quoteData.version}`,
                 });
                 const pdfBlobFile = PdfDoc.output("blob");
                 generateBase64forFile(pdfBlobFile, "pdf");
