@@ -62,10 +62,13 @@ const useQontoStepIconStyles = makeStyles((theme) => ({
     width: 22,
     height: 22,
     borderRadius: "50%",
-    backgroundColor: "currentColor",
     display: "grid",
     placeItems: "center",
     zIndex: 1,
+    border: "2px solid #163340",
+    padding: "5px 23px 23px 5px",
+    marginTop: "-6px",
+    background: "#f6f6f6"
   },
   completed: {
     color: theme.palette.primary.main,  //  darkBg
@@ -94,6 +97,10 @@ const useQontoStepIconStylesForQuote = makeStyles((theme) => ({
     display: "grid",
     placeItems: "center",
     zIndex: 1,
+    border: "2px solid #163340",
+    padding: "5px 23px 23px 5px",
+    marginTop: "-6px",
+    background: "#f6f6f6"
   },
   completed: {
     color: theme.palette.primary.main,  //  darkBg
@@ -184,7 +191,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
     <Paper elevation={0} className={classes.container}>
       <Typography variant="h6">{heading}</Typography>
 
-      <Grid container justify="space-between" alignItems="center">
+      <Grid container justify="center" alignItems="center">
         <Grid item xs={12} md={12} lg={7}>
           <Stepper
             activeStep={-1}
