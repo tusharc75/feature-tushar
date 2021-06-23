@@ -980,7 +980,9 @@ function QuoteDetail() {
   };
 
   const createImagePDF = (view, send) => {
-    setGeneratingPdf({ show: true, text: "Generating..." });
+    if (view) {
+      setGeneratingPdf({ show: true, text: "Generating..." });
+    }
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -1148,14 +1150,14 @@ function QuoteDetail() {
         callback: function (doc) {
           if (view && !send) {
             doc.setProperties({
-              title: `Quotation - v${currentVersion}`,
+              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
             generateBase64forFile(pdfBlobFile, "pdf");
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send) {
-            doc.save(`Quotation - v${currentVersion}`);
+            doc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}`);
           }
           if (send) {
             let PDFtoAPIData = doc.output("blob");
@@ -1197,14 +1199,14 @@ function QuoteDetail() {
 
       if (view && !send) {
         PdfDoc.setProperties({
-          title: `Quotation - ${currentVersion}`,
+          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
         generateBase64forFile(pdfBlobFile, "pdf");
 
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send) {
-        PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
+        PdfDoc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
       }
       if (send) {
         let PDFtoAPIData = PdfDoc.output("blob");
