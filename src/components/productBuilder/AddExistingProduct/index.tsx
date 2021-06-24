@@ -8,7 +8,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../../axios/axiosInstance'
-import { getObjKeys, isObjectEmpty, product, simplifyValues, yupSchema } from '../../../constants/helpers';
+import { getObjKeys, gridLoadingTimeout, isObjectEmpty, product, simplifyValues, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../Helpers/CustomButton'
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
@@ -39,7 +39,7 @@ const AddExistingProduct = (props) => {
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
 
     useEffect(() => {
@@ -99,13 +99,13 @@ const AddExistingProduct = (props) => {
     };
 
     const fetchProduct = () => {
+        dispatch({ type: "loading", loading: true });
+
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         const queryString = getQueryString();
-        dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
                 ...u,
@@ -193,9 +193,13 @@ const AddExistingProduct = (props) => {
             });
             setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
-            dispatch({ type: "loading", loading: false });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
+            
         }).catch((error) => {
             toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
         });
     };
 
@@ -259,6 +263,7 @@ const AddExistingProduct = (props) => {
                     pageSizes={pageSizes}
                     page={page}
                     allowAction={false}
+                    loading={loading}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

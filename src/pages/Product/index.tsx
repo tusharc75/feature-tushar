@@ -21,7 +21,7 @@ import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { product, isObjectEmpty } from '../../constants/helpers';
+import { product, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import {
     CommonRenderer,
@@ -56,7 +56,7 @@ const Product = () => {
     const [columns, setColumns] = useState(null);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const {
         state: { permissions },
@@ -69,14 +69,13 @@ const Product = () => {
 
 
     const fetchProduct = () => {
+        dispatch({ type: "loading", loading: true });
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         const queryString = getQueryString();
-        dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
                 ...u,
@@ -177,7 +176,10 @@ const Product = () => {
             }
             setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
-            dispatch({ type: "loading", loading: false });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -398,6 +400,7 @@ const Product = () => {
                     pageSizes={pageSizes}
                     page={page}
                     actionWidth={150}
+                    loading={loading}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
