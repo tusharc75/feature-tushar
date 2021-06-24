@@ -21,7 +21,8 @@ import CreateNewDialog from "./CreateNewDialog";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import {
     CreatedByRenderer,
-    UpdatedByRenderer
+    UpdatedByRenderer,
+    CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { isObjectEmpty } from "../../constants/helpers";
 import styles from "../../pages/Leads/Header.module.scss"
@@ -38,15 +39,20 @@ const KpiDashboard = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const { dataRows, rowCount, page, loading, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-
     const columns = [
         { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "Description", headerName: "description", show: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
+
     useEffect(() => {
         fetchDashboards();
     }, []);
+
+    useEffect(() => {
+        fetchDashboards()
+    }, [page, limit, filters, sorting]);
 
     const showConfirmBox = (row) => {
         if (row) {
@@ -67,7 +73,8 @@ const KpiDashboard = () => {
 
     const ActionsRenderer = params => <>
         <Tooltip title="Delete" >
-            <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setIsConformDialogVisible(true) }}  >
+            <IconButton aria-label="Delete"
+                onClick={() => { setDeleteRecord(params.data); setIsConformDialogVisible(true) }}  >
                 <DeleteIcon fontSize="small" color="error" />
             </IconButton>
         </Tooltip>
@@ -75,6 +82,7 @@ const KpiDashboard = () => {
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
+        commonRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
@@ -83,10 +91,10 @@ const KpiDashboard = () => {
     const replaceFieldName = (field) => {
         switch (field) {
             case "createdBy":
-                return "createdBy.user.firstName";
+                return "createdBy.user.concatedName";
 
             case "updatedBy":
-                return "updatedBy.user.firstName";
+                return "updatedBy.user.concatedName";
 
             default:
                 return field;
@@ -136,33 +144,36 @@ const KpiDashboard = () => {
             gridApi.showLoadingOverlay();
         }
 
-        axiosInstance().get(`/dashboard${queryString}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/dashboard${queryString}`).then(({ data: { data, count } }) => {
             data = data.map(u => {
                 const { createdBy, updatedBy, ...rest } = u
                 return {
                     ...rest,
-                    createdBy: u.createdBy?.user ? `${u.createdBy?.user?.firstName ?? ''} ${u.createdBy?.user?.lastName ?? ''}` : "",
-                    createdByDate: u.createdBy?.date ?? '',
+                    createdBy: u.createdBy?.user?.concatedName || "",
+                    createdByDate: u.createdBy?.date || '',
                 }
             })
-            dispatch({ type: "initialize", data: data, count: data.length });
+            dispatch({ type: "loading", loading: false });
+            dispatch({ type: "initialize", data: data, count: count });
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     };
-
     const handleDeleteDashboards = async () => {
         setDeleteLoading(true);
 
-        if (deleteRecord?.id || selectedRecords.length > 0) {
+        if (deleteRecord?._id || selectedRecords.length > 0) {
+            let req = deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map(d => d._id)
+
             axiosInstance()
-                .put('/email',
-                    { emails: deleteRecord?.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
+                .put('dashboard/remove',
+                    { _ids: deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map(d => d._id) })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
-                        message: data.message,
+                        message: "Deleted Successfully",
                     });
                     setIsConformDialogVisible(false);
                     setDeleteLoading(false);
@@ -242,8 +253,11 @@ const KpiDashboard = () => {
             {isConfirmDialogVisible &&
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure you want to delete dashboard ${deleteRecord?.name}?`}
-                    onClose={() => setIsConformDialogVisible(false)}
+                    message={`Are you sure you want to delete ${deleteRecord?.name || 'dashboards'}?`}
+                    onClose={() => {
+                        setDeleteLoading(false);
+                        setIsConformDialogVisible(false)
+                    }}
                     onOk={handleDeleteDashboards}
                     okBtnLoading={deleteLoading}
                 />
