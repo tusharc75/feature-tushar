@@ -41,7 +41,7 @@ const KpiDashboard = () => {
 
     const columns = [
         { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "Description", headerName: "description", show: true, cellRenderer: "commonRenderer" },
+        { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -170,7 +170,7 @@ const KpiDashboard = () => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
-                        message: "Deleted Successfully",
+                        message: data?.message || "Deleted Successfully",
                     });
                     setIsConformDialogVisible(false);
                     setDeleteLoading(false);
