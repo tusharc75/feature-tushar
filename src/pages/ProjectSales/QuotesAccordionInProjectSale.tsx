@@ -33,7 +33,7 @@ import { MoreVert, Delete } from "@material-ui/icons";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaArrowAltCircleDown } from "react-icons/fa";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { formatAmountWithCurrency, getUniqueCurrencies } from "../../constants/helpers";
+import { formatAmountWithCurrency } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 
 const Accordion = withStyles({
@@ -137,7 +137,6 @@ export default function QuotesAccordionInProjectSale({
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [removeRec, setRemoveRec] = useState(null);
-  const [showAddExistingDialog, setShowAddExistingDialog] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -174,10 +173,6 @@ export default function QuotesAccordionInProjectSale({
       .catch((error) => {
         setToastConfig(error);
       });
-  };
-
-  const handleOpenMenu = (event) => {
-    setAnchorEl(event.currentTarget);
   };
 
   const handleCloseMenu = () => {

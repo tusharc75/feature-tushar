@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   useContext,
-  useRef,
   useReducer,
   useMemo,
 } from "react";
@@ -25,7 +24,6 @@ import { Link } from "react-router-dom";
 
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
-  gridPageSizes,
   opportunity,
   quote,
   currencyCodeToSymbol,
@@ -41,9 +39,7 @@ import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
-import { DataGrid } from "@material-ui/data-grid";
 
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 import { AiFillPlusCircle } from "react-icons/ai";
 import { withStyles } from "@material-ui/core/styles";
@@ -51,8 +47,6 @@ import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
@@ -62,12 +56,7 @@ import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndConditi
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
 import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import Chip from "@material-ui/core/Chip";
 import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
 import { displayDate } from "../../services/util";
@@ -80,14 +69,12 @@ import {
   supplierAccount,
   yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity,
-  getObjKeysWithValues,
   processFieldName,
   formatAmountWithCurrency,
 } from "../../constants/helpers";
 import { quoteBuilder } from "../../constants/helpers";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import ProductBuilder from "../../components/productBuilder";
-import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import InfoIcon from "@material-ui/icons/Info";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { Box, Chip, Grid, Paper, Typography } from "@material-ui/core";
-import { CalendarToday } from "@material-ui/icons";
 import moment from "moment";
 
 import axiosInstance from "../../axios/axiosInstance";
