@@ -138,6 +138,7 @@ const Steps = (props) => {
     reminderLoading = false,
     hideReminderButton = false,
     DOAData = null,
+    selectedTNC,
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -235,6 +236,7 @@ const Steps = (props) => {
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
         processStatus: steps[activeStep + 1],
+        TNC: selectedTNC,
       })
       .then(({ data }) => {
         const nextStep = activeStep + 1;
