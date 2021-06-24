@@ -123,7 +123,6 @@ const QuoteApproval = () => {
                 }
             })
             .catch((err) => {
-                console.log(err);
                 setValidQuote(false);
             });
     }
@@ -143,7 +142,6 @@ const QuoteApproval = () => {
                 setShowSignatureDialog(false);
             })
             .catch((err) => {
-                console.log(err);
                 setShowQuoteStatusChangeDialog(false)
                 setShowSignatureDialog(false);
             });

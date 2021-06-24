@@ -190,7 +190,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                     })
                     .catch((err) => {
                         setSending(false)
-                        console.log(err);
                         toastConfig.setToastConfig(err);
                     });
             }

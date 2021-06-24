@@ -112,7 +112,6 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
     }
     catch (e) {
     }
-    console.log(resultValues)
     return resultValues
 }
 

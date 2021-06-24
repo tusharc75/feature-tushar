@@ -54,7 +54,6 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
       onSetCount("Email", emails.data.length)
     } catch (e) {
       setLoading(false)
-      console.log(e);
     }
   };
 
