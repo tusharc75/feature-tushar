@@ -1,10 +1,9 @@
-import { useState, useEffect, Fragment, useContext, useCallback, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import Box from "@material-ui/core/Box";
 import { orderBy, sortBy } from "lodash";
 
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import {
   CommonRenderer
@@ -38,7 +37,7 @@ const ProductGrid = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, page, limit, pageSizes } = state;
 
   useEffect(() => {
     fetchProduct(productBuilderId);
@@ -105,7 +104,6 @@ const ProductGrid = (props) => {
         ];
         data.forEach((row) => {
           let _fields = row.fields;
-          console.log(_fields);
           if (stage) {
             if (stage === "product") {
               _fields = row.fields.filter(

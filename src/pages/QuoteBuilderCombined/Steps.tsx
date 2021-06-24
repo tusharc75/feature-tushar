@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -13,9 +13,6 @@ import {
   StepIconProps,
   Grid,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   ListItemText,
   ListItem,
   List,
@@ -490,7 +487,7 @@ const Steps = (props) => {
                         currentStep > i ||
                         steps[currentStep] === "End" ||
                         approvedQuote.approved,
-                      [classes.currentStep]: currentStep == i,
+                      [classes.currentStep]: currentStep === i,
                       [classes.inActive]: currentStep !== i,
                     })}
                   >
@@ -521,7 +518,7 @@ const Steps = (props) => {
                 <div>
                   {!approvedQuote.approved && (
                     <div className={classes.stepperNext}>
-                      {versionStatus.split(" ")[0] != "Rejected" ? (
+                      {versionStatus.split(" ")[0] !== "Rejected" ? (
                         <Button
                           variant="contained"
                           color="primary"

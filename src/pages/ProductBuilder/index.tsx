@@ -31,12 +31,12 @@ const ProductBuilder = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     // const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [okButtonLoading, setOkButtonLoading] = useState(false);
+    const [okButtonLoading] = useState(false);
 
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columns = [
@@ -126,7 +126,6 @@ const ProductBuilder = () => {
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
-        console.log(selectedRecords)
     };
 
     const closeActions = () => {

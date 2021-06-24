@@ -68,7 +68,7 @@ export default function NewOpportunityProjectSales({
         const newFields = [];
         const filterData = data.filter((d) => d.isCreate);
 
-        filterData.map((_f) => {
+        filterData.forEach((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
           if (
@@ -141,7 +141,7 @@ export default function NewOpportunityProjectSales({
     >
       <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
 
-      {opportunityData.fields.length == 0 && (
+      {opportunityData.fields.length === 0 && (
         <CustomDialogContent>
           <CommonSkeleton lenArray={arr} />
         </CustomDialogContent>
@@ -179,7 +179,7 @@ export default function NewOpportunityProjectSales({
                                   sm={6}
                                   md={6}
                                 >
-                                  {field.fieldName == "owner" ? (
+                                  {field.fieldName === "owner" ? (
                                     <FormTypes
                                       values={values}
                                       errors={errors}
@@ -194,7 +194,7 @@ export default function NewOpportunityProjectSales({
                                       isTooltip={true}
                                       size="small"
                                     />
-                                  ) : field.fieldName == "collaborator" ? (
+                                  ) : field.fieldName === "collaborator" ? (
                                     <FormTypes
                                       values={values}
                                       errors={errors}
@@ -211,7 +211,7 @@ export default function NewOpportunityProjectSales({
                                       isTooltip={true}
                                       size="small"
                                     />
-                                  ) : field.fieldName == "probability" ? (
+                                  ) : field.fieldName === "probability" ? (
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -240,7 +240,7 @@ export default function NewOpportunityProjectSales({
                                         }
                                       }}
                                     />
-                                  ) : field.fieldName == "lostReason" ? (
+                                  ) : field.fieldName === "lostReason" ? (
                                     values["stage"] === "Closed Lost" ? (
                                       <FormTypes
                                         // {...rest}
@@ -258,7 +258,7 @@ export default function NewOpportunityProjectSales({
                                         size="small"
                                       />
                                     ) : null
-                                  ) : field.fieldName == "currency" ? (
+                                  ) : field.fieldName === "currency" ? (
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -286,7 +286,7 @@ export default function NewOpportunityProjectSales({
                                         }
                                       }}
                                     />
-                                  ) : field.fieldName == "amount" ? (
+                                  ) : field.fieldName === "amount" ? (
                                     <FormTypes
                                       // {...rest}
                                       startAdornment={

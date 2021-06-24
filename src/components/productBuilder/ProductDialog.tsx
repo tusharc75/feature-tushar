@@ -90,7 +90,6 @@ const CreateProduct = (props) => {
         // axiosInstance().get(`/field?resource=Product Builder`).then(({ data: { data } }) => {
         //     const _fields = [];
         //     productData.fields.map((_f) => _fields.push(_f));
-        //     console.log(productData)
         //     let values = { ...productData }
         //     values.productCategory = values.productCategory._id
         //     delete values.fields

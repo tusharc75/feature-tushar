@@ -149,7 +149,6 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
 
 const fetchKPIdata=(chartType,kpi,title)=>{
   //fetch KPI data as per kpi and convert in data formats
-    console.log("fetching KPI data");
     var data={}
     if(chartType==="Scatter"){
       data = {

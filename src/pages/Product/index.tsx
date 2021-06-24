@@ -21,7 +21,7 @@ import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { product, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { product, isObjectEmpty } from '../../constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import {
     CommonRenderer,
@@ -59,7 +59,7 @@ const Product = () => {
     const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const {
-        state: { user, permissions },
+        state: { permissions },
       }: any = useData();
       
     useEffect(() => {

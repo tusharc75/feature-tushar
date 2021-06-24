@@ -31,7 +31,6 @@ export default function ChatRender({ id, isLoaded }) {
 
   const fetchMessages = () => {
     axiosInstance().get(`/chatter/` + id).then(({ data: { data } }) => {
-      console.log(data);
       setMessages(data.Messages);
       setUser(data.currentUser)
     }).catch((error) => {
@@ -39,7 +38,6 @@ export default function ChatRender({ id, isLoaded }) {
   }
 
   const sendMessage = () => {
-    console.log("Sending message");
     const message = { message: newMessage }
     axiosInstance().put(`/chatter/` + id, message).then(({ data: { data } }) => {
       setNewMessage("");

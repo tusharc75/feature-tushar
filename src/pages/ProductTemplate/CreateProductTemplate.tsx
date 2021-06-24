@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
@@ -7,9 +7,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import Loader from "../../components/Loader";
 import { camelCase } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -18,9 +17,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
-import queryString from "query-string";
 import { uniq, map } from 'lodash';
-import { useLocation } from 'react-router-dom';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
@@ -38,7 +35,7 @@ const ProductTemplate = () => {
     const { id } = useParams();
     const toastConfig = useContext(CustomToastContext)
 
-    const [isClone, setisClone] = useState(history.location.state?.isClone ? true : false);
+    const [isClone] = useState(history.location.state?.isClone ? true : false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
     const [section, setSection] = useState([]);

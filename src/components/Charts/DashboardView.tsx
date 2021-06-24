@@ -33,7 +33,6 @@ export default function DashboardView({edit,handleSave,Charts}){
     const handleAddComponent= (values)=>{
         let order=1
         let id=""
-        console.log(values);
         if(charts.length===0){
             id=values.chartType+order.toString()
         }
@@ -49,23 +48,18 @@ export default function DashboardView({edit,handleSave,Charts}){
             id:id
         }
         var oldCharts=charts;
-        console.log(oldCharts);
         oldCharts.push(newChart);
-        console.log(oldCharts);
         setCharts(oldCharts);
         setAddComponent(false);
     }
 
     const handleDelete=(deleteId)=>{
         var newChart=[];
-        console.log(charts);
         for(var i=0;i<charts.length;i++){
-            console.log(i);
             if(charts[i].id!==deleteId){
                 newChart.push(charts[i]);
             }
         }
-        console.log(newChart);
         setCharts(newChart);
 
     }
@@ -86,7 +80,6 @@ export default function DashboardView({edit,handleSave,Charts}){
           }
           return chart;
         });
-        console.log(newChartState);
         newChartState=newChartState.sort(function(a,b){
             return (a.order-b.order);
         });
