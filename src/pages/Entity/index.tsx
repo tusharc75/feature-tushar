@@ -95,6 +95,9 @@ const Entity: FC = () => {
     if (selectedRecords.length === 1) {
       fetchEntityUser(selectedRecords[0].id);
     }
+    else{
+      setUsers([]);
+    }
   }, [selectedRecords]);
 
   const fetchEntityUser = async (entityId) => {
@@ -283,7 +286,7 @@ const Entity: FC = () => {
             entityPermissions={entityPermissions}
             onCreate={handleCreate}
             openUserDialog={handleOpenDialog}
-            userActionDiabled={selectedRecords.length !== 1} //single select entity can assign user
+            userActionDiabled={selectedRecords.length === 0} //single select entity can assign user
           />
         </div>
 
