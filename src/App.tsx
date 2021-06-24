@@ -97,7 +97,7 @@ function App() {
   }: any = useData();
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
-  
+
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -160,8 +160,8 @@ function App() {
       history.listen((location, action) => {
         ReactGA.set({ page: location.pathname });
         ReactGA.pageview(location.pathname);
-    });
-    
+      });
+
       setInterval(async () => {
         await getNotification();
       }, 60000);
@@ -169,7 +169,7 @@ function App() {
     }
   }, []);
 
-  
+
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
@@ -438,7 +438,7 @@ function App() {
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
-          <Route exact path={"/dashboard-edit/:id"}>
+          <Route exact path={"/dashboard/detail/:id"}>
             <EditDashboard edit={true} />
           </Route>
           <Route exact path={"/dashboard/:id"}>
