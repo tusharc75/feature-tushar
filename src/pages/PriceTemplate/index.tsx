@@ -10,7 +10,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { priceTemplate, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { priceTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -223,7 +223,6 @@ const PriceTemplate: FC = () => {
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         axiosInstance()
@@ -246,9 +245,10 @@ const PriceTemplate: FC = () => {
                 });
 
                 dispatch({ type: "initialize", data: rows, count: count });
-                // if (gridApi && rows.length > 0) {
-                //   gridApi.hideOverlay();
-                // }
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
+
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 dispatch({ type: "loading", loading: false });
@@ -315,7 +315,8 @@ const PriceTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+                    loading={loading} />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

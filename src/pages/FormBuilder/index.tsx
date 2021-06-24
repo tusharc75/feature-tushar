@@ -9,6 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomContainer from "../../components/CustomContainer";
 import { FaWpforms } from 'react-icons/fa';
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import { gridLoadingTimeout } from "../../constants/helpers";
 
 const FormBuilder = () => {
 
@@ -43,11 +44,13 @@ const FormBuilder = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance().get(`/sa-formbuilder/resource`).then(({ data: { data } }) => {
       dispatch({ type: "initialize", data: data, count: data.length });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
 
     }).catch((error) => {
       toastConfig.setToastConfig(error);
@@ -74,7 +77,7 @@ const FormBuilder = () => {
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
           dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
-          isClientSideGrid={true} />
+          isClientSideGrid={true} loading={loading} />
 
       </CustomContainer>
     </Layout>

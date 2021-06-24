@@ -27,6 +27,7 @@ import {
   opportunity,
   quote,
   currencyCodeToSymbol,
+  gridLoadingTimeout,
 } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -882,7 +883,6 @@ function QuoteDetail() {
 
     if (gridApi) {
       // gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -906,7 +906,9 @@ function QuoteDetail() {
         });
         dispatch({ type: "selection", selectedRecords: selectedRows });
         setDataTNC(data);
-        // dispatch({ type: "loading", loadingTNC: false });
+        setTimeout(() => {
+          dispatch({ type: "loading", loadingTNC: false });
+        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -2622,6 +2624,7 @@ function QuoteDetail() {
                                   isClientSideGrid={true}
                                   allowPagination={false}
                                   selectedRecords={[...prevVersionTNC]}
+                                  loading={loadingTNC}
                                 />
                               </Box>
                             ) : null}

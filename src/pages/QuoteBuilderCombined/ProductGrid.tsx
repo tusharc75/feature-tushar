@@ -9,6 +9,7 @@ import {
   CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import Loader from "../../components/Loader";
+import { gridLoadingTimeout } from "../../constants/helpers";
 
 var levalOrderBy = [
   "product",
@@ -37,7 +38,7 @@ const ProductGrid = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, pageSizes } = state;
+  const { dataRows, loading, rowCount, page, limit, pageSizes } = state;
 
   useEffect(() => {
     fetchProduct(productBuilderId);
@@ -77,7 +78,6 @@ const ProductGrid = (props) => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
     axiosInstance()
       .get(`/productbuilder/getproduct/` + id)
@@ -259,7 +259,9 @@ const ProductGrid = (props) => {
         setProduct(data);
 
         dispatch({ type: "initialize", data: data, count: data.length });
-        dispatch({ type: "loading", loading: false });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -271,7 +273,8 @@ const ProductGrid = (props) => {
       <Box mt={1}>
         {(isAll && columns) || customColumns ? (
           <CustomAgGrid columns={isAll ? columns : customColumns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} 
+            loading={loading} />
 
         ) : (
           <Loader style={{ height: 500 }} text="Loading..." />
