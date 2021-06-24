@@ -47,10 +47,6 @@ const KpiDashboard = () => {
     ];
 
     useEffect(() => {
-        fetchDashboards();
-    }, []);
-
-    useEffect(() => {
         fetchDashboards()
     }, [page, limit, filters, sorting]);
 

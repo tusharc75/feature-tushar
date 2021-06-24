@@ -31,7 +31,7 @@ const CreateNewDialog = (props) => {
 
     const handleSubmit = (values) => {
         setLoading(true)
-        values.Charts = [];
+        values.charts = [];
         axiosInstance().post(`/dashboard`, values).then(({ data: { data } }) => {
             setLoading(false);
             handleClose()
