@@ -555,7 +555,10 @@ function QuoteDetail() {
 
   const { qbResource, qbApi } = quoteBuilder;
 
-  const [companyDetails, setCompanyDetails] = useState({ name: "", address: "" });
+  const [companyDetails, setCompanyDetails] = useState({
+    name: "",
+    address: "",
+  });
   const [base64Logo, setBase64Logo] = useState(null);
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -596,7 +599,7 @@ function QuoteDetail() {
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
-        setCompanyDetails({ name: data.data.name, address: data.data.address })
+        setCompanyDetails({ name: data.data.name, address: data.data.address });
         if (data.data.logo) {
           fetchImage(data.data.logo, function (dataUri) {
             setBase64Logo(dataUri);
@@ -812,7 +815,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -845,7 +848,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -954,12 +957,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1048,9 +1051,6 @@ function QuoteDetail() {
   const GeneratePdf = (view, send, base64 = false) => {
     const PdfDoc = new jsPDF("p", "pt", "a4");
     let date = new Date();
-    const excelHeader = [];
-    const excelheaderName = [];
-    const excelData = [];
 
     const pagewidth = PdfDoc.internal.pageSize.width;
 
@@ -1123,7 +1123,8 @@ function QuoteDetail() {
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
 
-    if (selectedRecords.length) {
+    if (selectedRecords.length || TandC.length) {
+      let selecteTNCData = selectedRecords.length > 0 ? selectedRecords : TandC;
       PdfDoc.setDrawColor(0, 0, 0);
       PdfDoc.setFontSize(14);
       PdfDoc.setLineWidth(3);
@@ -1131,7 +1132,7 @@ function QuoteDetail() {
 
       let finalmarkup = "";
 
-      selectedRecords.forEach((selectTNC) => {
+      selecteTNCData.forEach((selectTNC) => {
         finalmarkup =
           finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
         let state = convertFromRaw(JSON.parse(selectTNC.description));
@@ -1199,7 +1200,7 @@ function QuoteDetail() {
               .then(({ data }) => {
                 setPdf(data.fieldName);
                 handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-                setPdfAttachment(data.fileName)
+                setPdfAttachment(data.fileName);
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -1253,9 +1254,8 @@ function QuoteDetail() {
             },
           })
           .then(({ data }) => {
-
             handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-            setPdfAttachment(data.fileName)
+            setPdfAttachment(data.fileName);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -1563,18 +1563,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
+          data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
+          data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1586,7 +1586,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
+              "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1740,7 +1740,6 @@ function QuoteDetail() {
       } else {
         setVisibleColumnName(defaultSelectColumns);
       }
-      console.log(allData);
       setDynamicTableData(allData);
     }
   };
@@ -1764,7 +1763,6 @@ function QuoteDetail() {
       }
 
       setSendEmail(true);
-
     }
   };
 
@@ -1808,7 +1806,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1817,7 +1815,7 @@ function QuoteDetail() {
   const onSuccess = () => {
     setSendEmail(false);
     handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
-    handleAttachments()
+    handleAttachments();
     fetchQuoteData(currentVersion);
   };
 
@@ -1847,16 +1845,14 @@ function QuoteDetail() {
           referenceId: quoteData.opportunity?.optionValue,
           access: false,
         },
-      ]
-    }
+      ],
+    };
 
     if (PDFAttachment !== "") {
-      request.fileUrl = PDFAttachment
+      request.fileUrl = PDFAttachment;
       axiosInstance()
         .post(`/attachment`, request)
-        .then(({ data }) => {
-
-        })
+        .then(({ data }) => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -2057,9 +2053,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id ? (
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2176,10 +2172,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                    (_f) =>
-                                      _f.fieldData.sectionName !==
-                                      "Post-Quote Information"
-                                  )
+                                      (_f) =>
+                                        _f.fieldData.sectionName !==
+                                        "Post-Quote Information"
+                                    )
                                   : quoteFields
                               }
                             />
@@ -2361,6 +2357,7 @@ function QuoteDetail() {
                             allowedToEdit={allowedToEdit}
                             DOAData={DOAData}
                             generatePDF={GeneratePdf}
+                            selectedTNC={selectedRecords}
                           />
                         ) : (
                           <Steps
@@ -2380,6 +2377,7 @@ function QuoteDetail() {
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             generatePDF={GeneratePdf}
+                            selectedTNC={selectedRecords}
                           />
                         )}
                       </div>
@@ -2423,7 +2421,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
+                            ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2502,8 +2500,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                              (ProcessStatus === "Send To Customer" &&
-                                versionStatus !== "Sent to Customer") ? (
+                            (ProcessStatus === "Send To Customer" &&
+                              versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2523,7 +2521,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                            ProcessStatus !== "Price Builder" ? (
+                          ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2564,7 +2562,8 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderID ? (
-                              ProcessStatus === "Quote Builder" ? (
+                              ProcessStatus === "Quote Builder" &&
+                              visibleColumns.length > 0 ? (
                                 <ProductGrid
                                   productBuilderId={productBuilderID}
                                   refreshProducts={refreshProducts}
@@ -2588,7 +2587,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2685,7 +2684,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2758,8 +2757,9 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
-                }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
+                quoteData?.quoteName ?? ""
+              }`}
             />
           </Dialog>
         )}
