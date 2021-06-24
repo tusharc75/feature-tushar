@@ -12,12 +12,12 @@ import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
 import {
-  gridPageSizes,
   isObjectEmpty,
   customerAccount,
   supplierAccount,
   quoteBuilder,
   formatAmountWithCurrency,
+  gridLoadingTimeout,
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -37,10 +37,7 @@ import QuoteHeader from "./QuoteHeader";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import { DataGrid } from "@material-ui/data-grid";
 import VersionStatus from "./VersionStatus";
-import { Console } from "console";
 
 let quoteTimeout;
 const QuoteType = [
@@ -66,8 +63,6 @@ const QuoteBuilders = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
-  const [currentVersion, setcurrentVersion] = useState(0);
-  const [tabValue, setTabValue] = React.useState(0);
   const [quotePermissions, setQuotePermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -153,7 +148,7 @@ const QuoteBuilders = () => {
     data: [],
   });
 
-  const { qbResource, qbApi } = quoteBuilder;
+  const { qbApi } = quoteBuilder;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -459,7 +454,7 @@ const QuoteBuilders = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map((field) => {
+      Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter,
@@ -485,12 +480,11 @@ const QuoteBuilders = () => {
 
   const fetchQuoteBuilder = async () => {
     if (selectedEntity) {
-      const queryString = getQueryString();
       dispatch({ type: "loading", loading: true });
+      const queryString = getQueryString();
 
       if (gridApi) {
         gridApi.setRowData([]);
-        gridApi.showLoadingOverlay();
       }
 
       axiosInstance()
@@ -512,7 +506,6 @@ const QuoteBuilders = () => {
             Object.keys(u.versions).forEach(key => {
               versionArray.push(u.versions[key])
             })
-            console.log(versionArray)
 
             const updatedVersion = versionArray.find(v => v.status !== tempStatus)
             if (updatedVersion) {
@@ -547,9 +540,9 @@ const QuoteBuilders = () => {
           });
 
           dispatch({ type: "initialize", data: rows, count: count });
-          // if (gridApi && rows.length > 0) {
-          //   gridApi.hideOverlay();
-          // }
+          setTimeout(() => {
+            dispatch({ type: "loading", loading: false });
+          }, gridLoadingTimeout);
         })
         .catch((error) => {
           dispatch({ type: "loading", loading: false });
@@ -691,6 +684,7 @@ const QuoteBuilders = () => {
             pageSizes={pageSizes}
             page={page}
             actionWidth={100}
+            loading={loading}
           />
 
           {showDeleteWarningConfirmBox ? (
@@ -758,7 +752,7 @@ const QuoteBuilders = () => {
             setShowVersionsDialog(false);
           }}
         >
-          <VersionStatus loadingVersions={false} versionStatusData={versionStatusData}
+          <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
           />
         </CustomDialogComponent>
       )}

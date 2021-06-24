@@ -84,7 +84,6 @@ const Board = ({ type, filter }) => {
     const activityIndex = filterdByStatus.findIndex(
       (a) => a._id === activityId
     );
-    console.log(activityIndex, newIndex);
 
     const updatedState = activities.map((activity: any) => {
       if (activity._id === activityId && activity.status !== status) {

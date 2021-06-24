@@ -22,6 +22,7 @@ import {
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { Menu, MenuItem } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
+import { gridLoadingTimeout } from "../../constants/helpers";
 
 const ProductBuilder = () => {
 
@@ -31,12 +32,12 @@ const ProductBuilder = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     // const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [okButtonLoading, setOkButtonLoading] = useState(false);
+    const [okButtonLoading] = useState(false);
 
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columns = [
@@ -67,7 +68,6 @@ const ProductBuilder = () => {
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         axiosInstance().get(`/productbuilder`).then(({ data: { data } }) => {
@@ -89,7 +89,9 @@ const ProductBuilder = () => {
             });
 
             dispatch({ type: "initialize", data: rows, count: data.length });
-
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -126,7 +128,6 @@ const ProductBuilder = () => {
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
-        console.log(selectedRecords)
     };
 
     const closeActions = () => {
@@ -197,7 +198,7 @@ const ProductBuilder = () => {
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={true} actionWidth={100}
-                isClientSideGrid={true} />
+                isClientSideGrid={true} loading={loading} />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

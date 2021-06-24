@@ -1,16 +1,15 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer } from "react";
 import {
     Box,
     Button,
     Grid,
     IconButton,
-    Link as MuiLink,
     Menu,
     MenuItem,
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { productTemplate, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { productTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -23,12 +22,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import {
     CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+    UpdatedByRenderer} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { GiAbstract055 } from 'react-icons/gi';
@@ -44,7 +39,7 @@ const ProductTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { user, permissions },
+        state: { permissions },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
@@ -197,7 +192,7 @@ const ProductTemplate: FC = () => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
@@ -218,12 +213,11 @@ const ProductTemplate: FC = () => {
     };
 
     const fetchProductTemplate = () => {
-        const queryString = getQueryString();
         dispatch({ type: "loading", loading: true });
+        const queryString = getQueryString();
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         axiosInstance()
@@ -246,9 +240,9 @@ const ProductTemplate: FC = () => {
                 });
 
                 dispatch({ type: "initialize", data: rows, count: count });
-                // if (gridApi && rows.length > 0) {
-                //   gridApi.hideOverlay();
-                // }
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 dispatch({ type: "loading", loading: false });
@@ -316,7 +310,8 @@ const ProductTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+                    loading={loading} />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

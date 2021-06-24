@@ -357,7 +357,6 @@ export default function ManageQuoteDialog({
     )
       values["supplierAccountName"] = [accountId];
     setLoading(true);
-    console.log(values);
     if (values.customerContactName === "") {
       values.customerContactName = [];
     }

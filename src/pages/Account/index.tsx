@@ -36,7 +36,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from "react-icons/md";
-import { sidebarResource } from "../../constants/helpers";
+import { gridLoadingTimeout, sidebarResource } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import routes from "./../../components/Helpers/Routes";
@@ -371,7 +371,6 @@ export default function Account(props) {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -412,6 +411,10 @@ export default function Account(props) {
         });
 
         dispatch({ type: "initialize", data: rows, count: count });
+
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -439,8 +442,8 @@ export default function Account(props) {
 
   const clickCreateNew = () => {
     ReactGa.event({
-      category:"Account Button",
-      action:"clicked"
+      category: "Account Button",
+      action: "clicked"
     });
     setIsAccDialogVisible(true);
   };
@@ -795,7 +798,7 @@ export default function Account(props) {
           </div>
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} loading={loading} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

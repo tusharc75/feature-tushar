@@ -1,15 +1,15 @@
-import { useState, useEffect, Fragment, useContext, useCallback, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import Box from "@material-ui/core/Box";
 import { orderBy, sortBy } from "lodash";
 
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import {
   CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import Loader from "../../components/Loader";
+import { gridLoadingTimeout } from "../../constants/helpers";
 
 var levalOrderBy = [
   "product",
@@ -38,7 +38,7 @@ const ProductGrid = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, loading, rowCount, page, limit, pageSizes } = state;
 
   useEffect(() => {
     fetchProduct(productBuilderId);
@@ -78,7 +78,6 @@ const ProductGrid = (props) => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
     axiosInstance()
       .get(`/productbuilder/getproduct/` + id)
@@ -105,7 +104,6 @@ const ProductGrid = (props) => {
         ];
         data.forEach((row) => {
           let _fields = row.fields;
-          console.log(_fields);
           if (stage) {
             if (stage === "product") {
               _fields = row.fields.filter(
@@ -261,7 +259,9 @@ const ProductGrid = (props) => {
         setProduct(data);
 
         dispatch({ type: "initialize", data: data, count: data.length });
-        dispatch({ type: "loading", loading: false });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -273,7 +273,8 @@ const ProductGrid = (props) => {
       <Box mt={1}>
         {(isAll && columns) || customColumns ? (
           <CustomAgGrid columns={isAll ? columns : customColumns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} allowAction={false} actionWidth={150} isClientSideGrid={true} 
+            loading={loading} />
 
         ) : (
           <Loader style={{ height: 500 }} text="Loading..." />
