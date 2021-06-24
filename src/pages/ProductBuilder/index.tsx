@@ -126,7 +126,6 @@ const ProductBuilder = () => {
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
-        console.log(selectedRecords)
     };
 
     const closeActions = () => {

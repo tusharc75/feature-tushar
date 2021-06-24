@@ -30,7 +30,6 @@ const CreateNewDialog = (props) => {
     const history = useHistory();
 
     const handleSubmit = (values) => {
-        console.log(values);
         values.Charts=[];
         axiosInstance().post(`/dashboard`, values).then(({ data: { data } }) => {
             setLoading(false);

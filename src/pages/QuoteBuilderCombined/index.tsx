@@ -506,7 +506,6 @@ const QuoteBuilders = () => {
             Object.keys(u.versions).forEach(key => {
               versionArray.push(u.versions[key])
             })
-            console.log(versionArray)
 
             const updatedVersion = versionArray.find(v => v.status !== tempStatus)
             if (updatedVersion) {

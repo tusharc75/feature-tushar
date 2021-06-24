@@ -104,7 +104,6 @@ const ProductGrid = (props) => {
         ];
         data.forEach((row) => {
           let _fields = row.fields;
-          console.log(_fields);
           if (stage) {
             if (stage === "product") {
               _fields = row.fields.filter(

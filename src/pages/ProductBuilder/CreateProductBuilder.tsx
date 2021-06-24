@@ -51,7 +51,6 @@ const CreateProductBuilder = () => {
     }
 
     const refreshProducts = (data) => {
-        console.log(data)
     }
 
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);

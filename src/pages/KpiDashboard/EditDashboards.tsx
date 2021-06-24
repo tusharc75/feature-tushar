@@ -23,11 +23,9 @@ const ProductBuilderSchema = Yup.object().shape({
 
 const EditDashboards = (props) => {
     const {edit}=props
-    console.log(edit);
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
-    console.log(id);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
@@ -45,7 +43,6 @@ const EditDashboards = (props) => {
         }
         else {
             axiosInstance().get(`/dashboard/` + id).then(({ data: { data } }) => {
-                console.log(data);
                 setInitialValues(data);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);

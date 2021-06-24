@@ -1727,7 +1727,6 @@ function QuoteDetail() {
       } else {
         setVisibleColumnName(defaultSelectColumns);
       }
-      console.log(allData);
       setDynamicTableData(allData);
     }
   };
