@@ -35,7 +35,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
-import { formatAmountWithCurrency, getUniqueCurrencies } from "../../constants/helpers";
+import { formatAmountWithCurrency } from "../../constants/helpers";
 
 const Accordion = withStyles({
   root: {
@@ -110,7 +110,6 @@ export default function OpportunityAccordianProjectSales({
   isManager,
   users,
 }) {
-  const history = useHistory();
   const {
     state: { selectedEntity },
   }: any = useData();

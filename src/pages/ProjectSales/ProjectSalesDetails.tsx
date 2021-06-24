@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { ControlPoint } from "@material-ui/icons";
-import { useParams, useHistory, useLocation } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 
@@ -45,7 +45,6 @@ const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
-  const { state } = useLocation();
   const {
     state: { user, permissions },
   }: any = useData();

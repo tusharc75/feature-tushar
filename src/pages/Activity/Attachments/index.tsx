@@ -19,7 +19,7 @@ import { AddOutlined } from "@material-ui/icons";
 import { Button, Tooltip, IconButton, MenuItem, Menu } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../../constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout } from "../../../constants/helpers";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
 import {
@@ -46,8 +46,7 @@ function reducer(state, action) {
             return {
                 ...state,
                 dataRows: action.data,
-                rowCount: action.count,
-                loading: false
+                rowCount: action.count
             }
 
         case "selection":
@@ -288,7 +287,6 @@ export default function Attachment(props) {
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
         let api = `/attachment?relatedTo=${JSON.stringify(filter)}${queryString}`
         axiosInstance().get(api)
@@ -302,6 +300,10 @@ export default function Attachment(props) {
                     }
                 })
                 dispatch({ type: "initialize", data: rows, count: count });
+
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -436,7 +438,8 @@ export default function Attachment(props) {
                 limit={limit}
                 pageSizes={pageSizes}
                 page={page}
-                actionWidth={150} />
+                actionWidth={150}
+                loading={loading} />
             {open ?
                 < Dialog
                     open={open}

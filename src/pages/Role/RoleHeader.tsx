@@ -94,7 +94,7 @@ const RoleHeader = (props) => {
           {(rolePermissions.isDelete || rolePermissions.isUpdate) && (
             <>
               <Button
-                disabled={selectedRecords.length == 0}
+                disabled={selectedRecords.length === 0}
                 className={styles.action_submit_btn}
                 variant="outlined"
                 color="default"

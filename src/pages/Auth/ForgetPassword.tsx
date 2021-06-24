@@ -129,7 +129,7 @@ const ForgetPassword = () => {
                             <Box textAlign="center">
                                 <img
                                     className={classes.logo}
-                                    src={SVG("Logo")}
+                                    src={SVG("LogoPng")}
                                     alt="equip logo"
                                     title="eQuipt Logo"
                                 />

@@ -405,7 +405,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
-                                console.log(date._d);
                                 setFieldValue("startTime", date);
                                 setFieldValue(
                                   "endTime",

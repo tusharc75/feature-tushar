@@ -8,11 +8,10 @@ import {
     Menu,
     MenuItem
 } from '@material-ui/core';
-import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { AiOutlineAccountBook, AiOutlineMail, AiOutlineUser } from 'react-icons/ai';
+import { AiOutlineMail, AiOutlineUser } from 'react-icons/ai';
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 import { BiPhone } from 'react-icons/bi';
 import MuiAccordion from "@material-ui/core/Accordion";

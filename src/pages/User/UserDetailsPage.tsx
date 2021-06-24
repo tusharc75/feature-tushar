@@ -80,7 +80,7 @@ const UserDetailsPage = () => {
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [rolesLoading, setRolesLoading] = useState(false);
+  const [rolesLoading] = useState(false);
   // const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [leadsRelatedData, setLeadsRelatedData] = useState(null);

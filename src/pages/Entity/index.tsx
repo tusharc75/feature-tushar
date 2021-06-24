@@ -6,7 +6,7 @@ import {
   Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { entity, isObjectEmpty } from "../../constants/helpers";
+import { entity, gridLoadingTimeout, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -94,6 +94,9 @@ const Entity: FC = () => {
   useEffect(() => {
     if (selectedRecords.length === 1) {
       fetchEntityUser(selectedRecords[0].id);
+    }
+    else{
+      setUsers([]);
     }
   }, [selectedRecords]);
 
@@ -199,7 +202,6 @@ const Entity: FC = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -222,9 +224,10 @@ const Entity: FC = () => {
         });
 
         dispatch({ type: "initialize", data: rows, count: count });
-        // if (gridApi && rows.length > 0) {
-        //   gridApi.hideOverlay();
-        // }
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+        
       }).catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: "loading", loading: false });
@@ -283,12 +286,13 @@ const Entity: FC = () => {
             entityPermissions={entityPermissions}
             onCreate={handleCreate}
             openUserDialog={handleOpenDialog}
-            userActionDiabled={selectedRecords.length !== 1} //single select entity can assign user
+            userActionDiabled={selectedRecords.length === 0} //single select entity can assign user
           />
         </div>
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+          loading={loading} />
 
         {isOpen && (
           <CreateEntity

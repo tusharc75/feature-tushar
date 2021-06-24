@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
   Chip
@@ -17,11 +17,11 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { GiHiveMind } from "react-icons/gi";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import {
-  gridPageSizes,
   opportunity,
   isObjectEmpty,
   customerAccount,
-  supplierAccount
+  supplierAccount,
+  gridLoadingTimeout
 } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
@@ -259,7 +259,7 @@ const Opportunities = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -286,7 +286,6 @@ const Opportunities = () => {
 
       if (gridApi) {
         gridApi.setRowData([]);
-        gridApi.showLoadingOverlay();
       }
 
       axiosInstance()
@@ -327,10 +326,10 @@ const Opportunities = () => {
           });
 
           dispatch({ type: "initialize", data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: "loading", loading: false });
+          }, gridLoadingTimeout);
 
-          // if (gridApi && rows.length > 0) {
-          //   gridApi.hideOverlay();
-          // }
         })
         .catch((error) => {
           dispatch({ type: "loading", loading: false });
@@ -462,7 +461,8 @@ const Opportunities = () => {
           </div>
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
+            loading={loading} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

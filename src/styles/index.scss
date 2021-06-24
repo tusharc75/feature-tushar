@@ -341,8 +341,48 @@ body::-webkit-scrollbar-thumb {
   }
 }
 
+.ag-grid-main {
+  position: relative;
+}
+
+.ag-grid-main .loader {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ag-grid-main .loader span {
+  padding: 15px 25px;
+  border: 1px solid lightgray;
+  background: white;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  width: 150px;
+  display: flex;
+  justify-content: center;
+}
+
+.ag-grid-main .loader span:after {
+  content: "";
+  animation: dot-animation 2s infinite;
+}
+
+@keyframes dot-animation {
+  0% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+}
+
 .ag-grid-listing-grid {
-  height: calc(100vh - 260px);
+  height: calc(100vh - 280px);
   margin: 0 6px 0;
 }
 
@@ -706,10 +746,9 @@ body::-webkit-scrollbar-thumb {
 
 @supports not (gap: 0.25rem) {
   .quoteHeader > *:not(:nth-child(1)) {
-      margin-left: 0.25rem !important;
+    margin-left: 0.25rem !important;
   }
 }
-
 
 .quoteBox {
   padding: 4px 15px;
@@ -819,4 +858,21 @@ body::-webkit-scrollbar-thumb {
 .signature_canvas {
   width: 100%;
   min-height: 500px;
+}
+
+.my-masonry-grid {
+  display: -webkit-box; /* Not needed if autoprefixing */
+  display: -ms-flexbox; /* Not needed if autoprefixing */
+  display: flex;
+  margin-left: -30px; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 30px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Style your items */
+.my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+  margin-bottom: 30px;
 }

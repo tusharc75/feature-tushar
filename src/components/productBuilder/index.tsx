@@ -19,7 +19,7 @@ import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import ImportExportLinks from "../Product/ImportExportLinks";
 import { orderBy, sortBy, uniq, map } from "lodash";
-import CustomAgGrid, {
+import CustomAgGridEditable, {
   reducer,
   intialState,
 } from "../../components/AgGridComponents/CustomAgGridEditable";
@@ -29,6 +29,7 @@ import _ from "lodash";
 import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import { handleAutoCalculation } from "../../constants/formulaUtility";
+import { gridLoadingTimeout } from "../../constants/helpers";
 
 var levalOrderBy = [
   "product",
@@ -153,7 +154,6 @@ const ProductBuilder = (props) => {
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
       data = data.data?.map((u, index) => ({
@@ -291,7 +291,9 @@ const ProductBuilder = (props) => {
       setProduct(data);
       dispatch({ type: "initialize", data: [], count: 0 });
       dispatch({ type: "initialize", data: data, count: data.length });
-      dispatch({ type: "loading", loading: false });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
       refreshProducts(data);
     })
       .catch((error) => {
@@ -578,7 +580,7 @@ const ProductBuilder = (props) => {
       </Grid>
       <Box mt={1}>
         {columns ? (
-          <CustomAgGrid
+          <CustomAgGridEditable
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -593,6 +595,7 @@ const ProductBuilder = (props) => {
             actionWidth={150}
             isClientSideGrid={true}
             onCellValueChanged={onCellValueChanged}
+            loading={loading}
           />
         ) : (
           <Loader style={{ minHeight: 300 }} text="Loading..." />
