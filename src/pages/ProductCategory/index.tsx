@@ -19,6 +19,7 @@ import { ExpandMore } from "@material-ui/icons";
 import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import {
+    gridLoadingTimeout,
     gridPageSizes,
     isObjectEmpty
 } from "../../constants/helpers";
@@ -44,8 +45,7 @@ function reducer(state, action) {
             return {
                 ...state,
                 dataRows: action.data,
-                rowCount: action.count,
-                loading: false
+                rowCount: action.count
             }
 
         case "selection":
@@ -219,13 +219,11 @@ const ProductCategory = () => {
 
 
     const fetchProductCategory = () => {
-
-        const queryString = getQueryString();
         dispatch({ type: "loading", loading: true });
+        const queryString = getQueryString();
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
@@ -247,7 +245,10 @@ const ProductCategory = () => {
             });
 
             dispatch({ type: "initialize", data: rows, count: count });
-
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
+            
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -347,7 +348,8 @@ const ProductCategory = () => {
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
+                loading={loading} />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

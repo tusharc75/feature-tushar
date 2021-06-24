@@ -11,7 +11,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import {
@@ -35,8 +35,7 @@ function reducer(state, action) {
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count,
-        loading: false,
+        rowCount: action.count
       };
 
     case "selection":
@@ -298,12 +297,11 @@ const ProjectSales: FC = () => {
   };
 
   const fetchProjects = async () => {
-    const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
+    const queryString = getQueryString();
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -320,6 +318,9 @@ const ProjectSales: FC = () => {
         }));
 
         dispatch({ type: "initialize", data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -448,6 +449,7 @@ const ProjectSales: FC = () => {
             pageSizes={pageSizes}
             page={page}
             actionWidth={150}
+            loading={loading}
           />
         </div>
 

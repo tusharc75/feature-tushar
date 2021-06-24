@@ -21,7 +21,7 @@ import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, isObjectEmpty } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { uniqBy } from "lodash";
@@ -295,7 +295,6 @@ const User: FC = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -342,6 +341,9 @@ const User: FC = () => {
         }
 
         dispatch({ type: "initialize", data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((error) => {
         dispatch({ type: "loading", loading: false });
@@ -576,6 +578,7 @@ const User: FC = () => {
             pageSizes={pageSizes}
             page={page}
             actionWidth={110}
+            loading={loading}
           />
 
         </CustomContainer>

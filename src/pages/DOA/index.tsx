@@ -9,7 +9,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import moment from "moment";
 import { GiAbstract055 } from "react-icons/gi";
 import CustomContainer from "../../components/CustomContainer";
-import { dateFormat, gridPageSizes } from "../../constants/helpers";
+import { dateFormat, gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 function reducer(state, action) {
@@ -24,8 +24,7 @@ function reducer(state, action) {
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count,
-        loading: false,
+        rowCount: action.count
       };
 
     case "selection":
@@ -208,7 +207,6 @@ const DOARequest = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -223,6 +221,9 @@ const DOARequest = () => {
           requestedById: doa.RequestedBy.id,
         }));
         dispatch({ type: "initialize", data: rows, count: data.length });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
         setProductBuilder(data);
       })
       .catch((error) => {
@@ -260,6 +261,7 @@ const DOARequest = () => {
             actionWidth={150}
             allowSelection={false}
             allowAction={false}
+            loading={loading}
           />
       </CustomContainer>
     </Layout>

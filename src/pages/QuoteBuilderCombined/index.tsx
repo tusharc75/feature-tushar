@@ -17,6 +17,7 @@ import {
   supplierAccount,
   quoteBuilder,
   formatAmountWithCurrency,
+  gridLoadingTimeout,
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -479,12 +480,11 @@ const QuoteBuilders = () => {
 
   const fetchQuoteBuilder = async () => {
     if (selectedEntity) {
-      const queryString = getQueryString();
       dispatch({ type: "loading", loading: true });
+      const queryString = getQueryString();
 
       if (gridApi) {
         gridApi.setRowData([]);
-        gridApi.showLoadingOverlay();
       }
 
       axiosInstance()
@@ -540,9 +540,9 @@ const QuoteBuilders = () => {
           });
 
           dispatch({ type: "initialize", data: rows, count: count });
-          // if (gridApi && rows.length > 0) {
-          //   gridApi.hideOverlay();
-          // }
+          setTimeout(() => {
+            dispatch({ type: "loading", loading: false });
+          }, gridLoadingTimeout);
         })
         .catch((error) => {
           dispatch({ type: "loading", loading: false });
@@ -684,6 +684,7 @@ const QuoteBuilders = () => {
             pageSizes={pageSizes}
             page={page}
             actionWidth={100}
+            loading={loading}
           />
 
           {showDeleteWarningConfirmBox ? (

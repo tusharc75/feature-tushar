@@ -17,7 +17,7 @@ import { ExpandMore } from "@material-ui/icons";
 import { Button, Dialog, Menu, MenuItem } from "@material-ui/core";
 import { AddOutlined } from "@material-ui/icons";
 import { CreateNote } from "../../../components/Activity/Note/CreateNote";
-import { CustomDialogTransition } from "../../../constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
 import styles from "../../Leads/Header.module.scss";
@@ -140,7 +140,6 @@ const Note = () => {
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         await GetNotes(JSON.stringify(filter))
@@ -162,6 +161,9 @@ const Note = () => {
                 });
 
                 dispatch({ type: "initialize", data: rows, count: data.length });
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -302,7 +304,7 @@ const Note = () => {
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true} allowSelection={true}
-                actionWidth={100} isClientSideGrid={true} />
+                actionWidth={100} isClientSideGrid={true} loading={loading} />
 
             {noteId !== undefined && <ActivityModelHandler
                 activityType="note"

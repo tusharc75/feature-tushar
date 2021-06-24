@@ -9,7 +9,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { productTemplate, isObjectEmpty } from "../../constants/helpers";
+import { productTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -55,7 +55,7 @@ const ProductTemplate: FC = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columns = [
@@ -213,12 +213,11 @@ const ProductTemplate: FC = () => {
     };
 
     const fetchProductTemplate = () => {
-        const queryString = getQueryString();
         dispatch({ type: "loading", loading: true });
+        const queryString = getQueryString();
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         axiosInstance()
@@ -241,9 +240,9 @@ const ProductTemplate: FC = () => {
                 });
 
                 dispatch({ type: "initialize", data: rows, count: count });
-                // if (gridApi && rows.length > 0) {
-                //   gridApi.hideOverlay();
-                // }
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 dispatch({ type: "loading", loading: false });
@@ -311,7 +310,8 @@ const ProductTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+                    loading={loading} />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

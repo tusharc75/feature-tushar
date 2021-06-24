@@ -37,8 +37,7 @@ function reducer(state, action) {
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count,
-        loading: false,
+        rowCount: action.count
       };
 
     case "selection":
@@ -131,7 +130,7 @@ const DOAApproval = () => {
   const {
     dataRows,
     rowCount,
-
+    loading,
     page,
     limit,
     pageSizes,
@@ -178,7 +177,6 @@ const DOAApproval = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     setLoadingData(true);
@@ -463,6 +461,7 @@ const DOAApproval = () => {
                     actionWidth={150}
                     allowAction={false}
                     allowSelection={false}
+                    loading={loading}
                   />
                 </div>
               </Grid>

@@ -13,7 +13,7 @@ import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateRole from "./CreateRole";
 import { PERMISSION } from "../../constants/Roles";
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -32,8 +32,7 @@ function reducer(state, action) {
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count,
-        loading: false
+        rowCount: action.count
       }
 
     case "selection":
@@ -261,7 +260,6 @@ const Roles: FC = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -285,7 +283,9 @@ const Roles: FC = () => {
         });
 
         dispatch({ type: "initialize", data: rows, count: count });
-
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -429,7 +429,8 @@ const Roles: FC = () => {
           </div>
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
+            loading={loading} />
 
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
