@@ -62,8 +62,8 @@ const KpiDashboard = () => {
     };
 
     const NameRenderer = params => (
-        <Link className="link" to={`/dashboard/detail/${params.data.id}`} >
-            {params.data.name}
+        <Link className="link" to={`/dashboard/detail/${params.data._id}`} >
+            {params.data?.name}
         </Link>
     )
 
@@ -145,6 +145,7 @@ const KpiDashboard = () => {
                 const { createdBy, updatedBy, ...rest } = u
                 return {
                     ...rest,
+                    id: u.id,
                     createdBy: u.createdBy?.user?.concatedName || "",
                     createdByDate: u.createdBy?.date || '',
                 }
@@ -196,7 +197,7 @@ const KpiDashboard = () => {
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <GiAbstract055 /> <span className="listingHeader">{'Dashboards'}</span>
                     </Grid>
-                    <Grid xs={6} container justify="flex-end">
+                    <Grid item xs={6} container justify="flex-end">
                         <Box component="div" className={styles.filter_side_header} >
                             <Button onClick={() => setIsCreate(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             <Button
