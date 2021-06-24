@@ -14,6 +14,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
+import { useData } from "../../StateProvider/Provider";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -36,6 +37,14 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateFormBuilder = (props) => {
 
+    const { state: { user, permissions } }: any = useData();
+    const [formBuilderPermissions, setFormBuilderPermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
+
     const history = useHistory();
     const parsed = queryString.parse(history.location.search);
     const toastConfig = useContext(CustomToastContext)
@@ -45,6 +54,12 @@ const CreateFormBuilder = (props) => {
     const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
+
+    useEffect(() => {
+        if (permissions && permissions.formBuilder) {
+            setFormBuilderPermissions(permissions.formBuilder);
+        }
+    }, [permissions]);
 
     useEffect(() => {
         fetchBrandResourceData()
@@ -97,7 +112,7 @@ const CreateFormBuilder = (props) => {
         <CustomContainer>
             {section ?
                 <Fragment>
-                    <Box p={1} pb={0} bgcolor="white" >
+                    <Box p={1} pb={0} ml={1} bgcolor="white" >
                         <Grid container spacing={1}>
                             <Grid item xs={3}>
                                 <Typography variant="caption">Brand </Typography>
