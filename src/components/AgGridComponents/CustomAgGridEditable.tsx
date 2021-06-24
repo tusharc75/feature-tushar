@@ -147,6 +147,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 flex={1}
                 rowDrag={column.rowDrag ?? false}
                 editable={column.editable ?? false}
+                cellEditor={column.cellEditor}
                 singleClickEdit={true}
             // floatingFilterComponent={column.floatingFilterComponent ?? null}
             // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
@@ -165,6 +166,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 filterParams={customFilterParams}
                 comparator={() => { return 0; }}
                 editable={column.editable ?? false}
+                cellEditor={column.cellEditor}
                 singleClickEdit={true}
             // floatingFilterComponent={column.floatingFilterComponent ?? null}
             // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {

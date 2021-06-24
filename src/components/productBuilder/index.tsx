@@ -189,9 +189,10 @@ const ProductBuilder = (props) => {
                   col.field = fieldName;
                   col.headerName = fieldLabel;
                   col.width = 180;
-                  if (!ele.isFormula && !ele.isUneditable) {
+                  if (!ele.isFormula && !ele.isUneditable && Editable) {
                     col.cellRenderer = "commonRenderer";
-                    //col.editable = true;
+                    col.cellEditor = "numericCellEditor";
+                    col.editable = true;
                   }
                   else {
                     col.cellRenderer = "commonRenderer";
@@ -209,9 +210,10 @@ const ProductBuilder = (props) => {
                     col.field = fieldName;
                     col.headerName = fieldLabel;
                     col.width = 180;
-                    if (!ele.isFormula && !ele.isUneditable) {
+                    if (!ele.isFormula && !ele.isUneditable && Editable) {
                       col.cellRenderer = "commonRenderer";
-                      //col.editable = true;
+                      col.cellEditor = "numericCellEditor";
+                      col.editable = true;
                     }
                     else {
                       col.cellRenderer = "commonRenderer";
@@ -229,9 +231,10 @@ const ProductBuilder = (props) => {
                   col.field = fieldName;
                   col.headerName = fieldLabel;
                   col.width = 180;
-                  if (!ele.isFormula && !ele.isUneditable) {
+                  if (!ele.isFormula && !ele.isUneditable && Editable) {
                     col.cellRenderer = "commonRenderer";
-                    //col.editable = true;
+                    col.cellEditor = "numericCellEditor";
+                    col.editable = true;
                   }
                   else {
                     col.cellRenderer = "commonRenderer";
@@ -262,10 +265,13 @@ const ProductBuilder = (props) => {
                 col.field = ele.fieldName;
                 col.headerName = ele.fieldLabel;
                 col.width = 180;
-                if (ele.type === "decimal") {
-                  if (!ele.isFormula && !ele.isUneditable) {
+                if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+                  if (!ele.isFormula && !ele.isUneditable && Editable) {
                     col.cellRenderer = "commonRenderer";
-                    //col.editable = true;
+                    if (ele.type === "decimal" || ele.type === "percent") {
+                      col.cellEditor = "numericCellEditor";
+                    }
+                    col.editable = true;
                   }
                   else {
                     col.cellRenderer = "commonRenderer";
@@ -459,9 +465,42 @@ const ProductBuilder = (props) => {
     const changeRow: any = product.filter((_p) => _p._id === row.data.id);
     if (changeRow.length) {
       const productRow: any = changeRow[0]
-      const fieldData = productRow.fields.filter((_f) => _f.fieldName === row.column.colId)
+      let fieldName = row.column.colId
+      if (row.column.colId.split("_").length) {
+        fieldName = row.column.colId.split("_")[0]
+      }
+      const fieldData = productRow.fields.filter((_f) => _f.fieldName === fieldName)
       if (fieldData.length) {
-        const result = handleAutoCalculation(fieldData[0], productRow.fields, productRow, row.column.colId, "", "", parseFloat(row.newValue));
+        let currency = ""
+        let unit = ""
+        if (row.column.colId.split("_").length) {
+          if (fieldData[0].type !== 'currencyAmount' && (fieldData[0].type === 'converter' || fieldData[0].isConverter === true)) {
+            if (row.column.colId.split("_").length === 2) {
+              unit = row.column.colId.split("_")[1]
+            }
+          }
+          else if (fieldData[0].type === 'currencyAmount' && (fieldData[0].type === 'converter' || fieldData[0].isConverter === true)) {
+            if (row.column.colId.split("_").length === 3) {
+              currency = row.column.colId.split("_")[1]
+              unit = row.column.colId.split("_")[2]
+            }
+          }
+          else if (fieldData[0].type === 'currencyAmount') {
+            if (row.column.colId.split("_").length === 2) {
+              currency = row.column.colId.split("_")[1]
+            }
+          }
+        }
+
+        let value: any
+        if (fieldData[0].type === "singleLine" || fieldData[0].type === "multiLine") {
+          value = row.newValue;
+        }
+        else {
+          value = parseFloat(row.newValue);
+        }
+
+        const result = handleAutoCalculation(fieldData[0], productRow.fields, productRow, row.column.colId, currency, unit, value);
         let data: any = {};
         data.values = result;
         data.id = row.data.id;
