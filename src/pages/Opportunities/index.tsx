@@ -20,7 +20,8 @@ import {
   opportunity,
   isObjectEmpty,
   customerAccount,
-  supplierAccount
+  supplierAccount,
+  gridLoadingTimeout
 } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
@@ -285,7 +286,6 @@ const Opportunities = () => {
 
       if (gridApi) {
         gridApi.setRowData([]);
-        gridApi.showLoadingOverlay();
       }
 
       axiosInstance()
@@ -326,10 +326,10 @@ const Opportunities = () => {
           });
 
           dispatch({ type: "initialize", data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: "loading", loading: false });
+          }, gridLoadingTimeout);
 
-          // if (gridApi && rows.length > 0) {
-          //   gridApi.hideOverlay();
-          // }
         })
         .catch((error) => {
           dispatch({ type: "loading", loading: false });
@@ -461,7 +461,8 @@ const Opportunities = () => {
           </div>
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
+            loading={loading} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
