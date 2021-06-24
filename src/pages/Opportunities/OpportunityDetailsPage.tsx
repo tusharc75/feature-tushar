@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -21,12 +21,11 @@ import {
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
   getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
-import { opportunity, sidebarResource, lead } from '../../constants/helpers'
+import { opportunity, sidebarResource } from '../../constants/helpers'
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
-import { BsCheckAll } from "react-icons/bs";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import LeadOpportunityProcess from "../../components/LeadOpportunityProcess"
@@ -90,7 +89,6 @@ function OpportunityDetailsPage() {
 
   const { opportunityResource, opportunityApi } = opportunity
   const [projectSales, setProjectSales] = useState([]);
-  const [parentLead, setParentLead] = useState([]);
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
 
   useEffect(() => {

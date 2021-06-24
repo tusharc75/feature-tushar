@@ -20,7 +20,7 @@ import CustomContainer from "../../components/CustomContainer";
 import styles from "../Leads/Header.module.scss";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';

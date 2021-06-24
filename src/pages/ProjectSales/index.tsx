@@ -145,7 +145,7 @@ const ProjectSales: FC = () => {
     selectedRecords,
   } = state;
 
-  const [columns, setColumns] = useState([
+  const [columns] = useState([
     {
       field: "projectName",
       headerName: "Name",
@@ -273,7 +273,7 @@ const ProjectSales: FC = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map((field) => {
+      Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter,

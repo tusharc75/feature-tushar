@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
   Chip
@@ -17,7 +17,6 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { GiHiveMind } from "react-icons/gi";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import {
-  gridPageSizes,
   opportunity,
   isObjectEmpty,
   customerAccount,
@@ -259,7 +258,7 @@ const Opportunities = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter

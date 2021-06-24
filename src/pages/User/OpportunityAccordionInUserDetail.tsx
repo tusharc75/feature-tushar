@@ -5,7 +5,6 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'

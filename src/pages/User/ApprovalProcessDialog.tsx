@@ -1,17 +1,10 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import {
     Box,
     Button,
-    Checkbox,
-    CircularProgress,
     Dialog,
     FormControl,
     FormGroup,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Typography,
     Grid,
     Paper,
     Tooltip,
@@ -20,12 +13,9 @@ import {
 } from "@material-ui/core";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import Loader from "../../components/Loader";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { roleTypes } from "../../constants/helpers";
-import { Skeleton } from "@material-ui/lab";
 import { startCase } from "lodash";
 
 const approvalProcessLabels = {

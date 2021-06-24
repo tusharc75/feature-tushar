@@ -1,26 +1,17 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { FormBuilder } from "../../components/FormBuilder";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { TextField } from "formik-material-ui";
-import Loader from "../../components/Loader";
-import { camelCase } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
-import routes from "../../components/Helpers/Routes";
 import DashboardView from '../../components/Charts/DashboardView'
-import ProductBuilder from "../../components/productBuilder";
-import axios from "axios";
-import { Dashboard } from "@material-ui/icons";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -40,7 +31,7 @@ const EditDashboards = (props) => {
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
-    const [deleteField, setDeleteField] = useState([]);
+    const [deleteField] = useState([]);
 
 
     useEffect(() => {

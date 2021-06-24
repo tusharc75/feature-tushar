@@ -3,15 +3,11 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { TextField } from "formik-material-ui";
-import Loader from "../../components/Loader";
-import { camelCase } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
@@ -19,7 +15,6 @@ import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
 import { BiArrowBack } from 'react-icons/bi';
-import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -31,14 +26,13 @@ const ProductBuilderSchema = Yup.object().shape({
         .required("name is required"),
 });
 
-
 const CreateProductBuilder = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
 
-    const [isUpdating, setIsUpdating] = useState(false);
+    const [isUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
 
     useEffect(() => {
@@ -53,7 +47,7 @@ const CreateProductBuilder = () => {
         });
     };
 
-    const handleSave = (values) => {
+    const handleSave = () => {
     }
 
     const refreshProducts = (data) => {

@@ -127,7 +127,7 @@ const ProductCategory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
-        state: { user, permissions },
+        state: { permissions },
       }: any = useData();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)

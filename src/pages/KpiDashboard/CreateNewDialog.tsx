@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
+import { useState, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -12,7 +12,6 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
-import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition} from "./../../constants/helpers";
 
@@ -27,7 +26,7 @@ const CreateNewDialog = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { handleClose } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ name: "" });
+    const [initialData] = useState({ name: "" });
     const history = useHistory();
 
     const handleSubmit = (values) => {
