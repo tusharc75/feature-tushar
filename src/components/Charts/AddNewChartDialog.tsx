@@ -40,7 +40,6 @@ const ChartDialog = (props) => {
     const [open, setOpen] = React.useState(false);
     const [openKpiMenu, setOpenKpiMenu] = React.useState(false);
     const anchorRef = React.useRef<HTMLDivElement>(null);
-    const history = useHistory();
 
 
     const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>,
@@ -55,7 +54,7 @@ const ChartDialog = (props) => {
 
     }
 
-    const handleToogleCommon = (menu: string) => {
+    const handleToogle = (menu: string) => {
         if (menu === "kpi") {
             setOpenKpiMenu((prevOpen) => !prevOpen);
         } else {
@@ -63,7 +62,7 @@ const ChartDialog = (props) => {
         }
     }
 
-    const handleDropDownCloseCommon = (event: React.MouseEvent<Document, MouseEvent>, menu: string) => {
+    const handleDropDownClose = (event: React.MouseEvent<Document, MouseEvent>, menu: string) => {
         if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
             return;
         }
@@ -115,36 +114,6 @@ const ChartDialog = (props) => {
                                 />
                             </Box>
                             <Box>
-                                {/* <label htmlFor="email" style={{ display: 'block' }}>
-                                KPI
-                            </label>
-                            <select
-                                name="KPI"
-                                value={values["kpi"]}
-                                style={{ display: 'block' }}
-                                onChange={(e) => setFieldValue("kpi", e.target.value)}
-                            >
-                                {KPIs.map((kpi) => <option key={kpi} value={kpi}>{kpi}</option>)}
-                            </select>
-                            </Box>
-                            <Box>
-                            <label htmlFor="email" style={{ display: 'block' }}>
-                                Chart Type
-                            </label>
-                            <select
-                                name="Chart Tyoe"
-                                value={values["chartType"]}
-                                style={{ display: 'block' }}
-                                onChange={(e) => setFieldValue("chartType", e.target.value.trimStart())}
-                            >
-                                <option value="HorizontalBar">Horizontal Bar</option>
-                                <option value="VerticalBar">Vertical Bar</option>
-                                <option value="Pie">Pie Chart</option>
-                                <option value="Polar">Polar Chart</option>
-                                <option value="Doughnut">Doughnut</option>
-                                <option value="Line">Line Chart</option>
-                                <option value="Scatter">Scatter Chart</option>
-                            </select> */}
                                 <div>
                                     <div className="m-2">
                                         <span>
@@ -158,7 +127,7 @@ const ChartDialog = (props) => {
                                                     aria-expanded={openKpiMenu ? 'true' : undefined}
                                                     aria-label="select merge strategy"
                                                     aria-haspopup="menu"
-                                                    onClick={() => { handleToogleCommon("kpi") }}
+                                                    onClick={() => { handleToogle("kpi") }}
                                                 >
                                                     <ArrowDropDownIcon />
                                                 </Button>
@@ -172,7 +141,7 @@ const ChartDialog = (props) => {
                                                         }}
                                                     >
                                                         <Paper>
-                                                            <ClickAwayListener onClickAway={(event) => { handleDropDownCloseCommon(event, "kpi") }}>
+                                                            <ClickAwayListener onClickAway={(event) => { handleDropDownClose(event, "kpi") }}>
                                                                 <MenuList
                                                                     id="menu"
                                                                     style={{ backgroundColor: 'transparent', fontSize: '10px' }}
@@ -210,7 +179,7 @@ const ChartDialog = (props) => {
                                                     aria-expanded={open ? 'true' : undefined}
                                                     aria-label="select merge strategy"
                                                     aria-haspopup="menu"
-                                                    onClick={() => { handleToogleCommon("chart") }}
+                                                    onClick={() => { handleToogle("chart") }}
                                                 >
                                                     <ArrowDropDownIcon />
                                                 </Button>
@@ -224,7 +193,7 @@ const ChartDialog = (props) => {
                                                         }}
                                                     >
                                                         <Paper>
-                                                            <ClickAwayListener onClickAway={(event) => { handleDropDownCloseCommon(event, "chart") }}>
+                                                            <ClickAwayListener onClickAway={(event) => { handleDropDownClose(event, "chart") }}>
                                                                 <MenuList
                                                                     id="menu"
                                                                     style={{ backgroundColor: 'transparent', fontSize: '10px' }}
