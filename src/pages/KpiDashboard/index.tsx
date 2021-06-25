@@ -157,7 +157,7 @@ const KpiDashboard = () => {
             toastConfig.setToastConfig(error);
         });
     };
-    const handleDeleteDashboards = async () => {
+    const handleDeleteDashboards = () => {
         setDeleteLoading(true);
 
         if (deleteRecord?._id || selectedRecords.length > 0) {
