@@ -86,8 +86,9 @@ const ProductGrid = (props) => {
           ...u,
           id: u._id,
           srno: index + 1,
-          productTemplateDisplayValue: u.productTemplate?.optionLabel,
+          // productTemplateDisplayValue: u.productTemplate?.optionLabel,
           productCategoryDisplayValue: u.productCategory?.optionLabel,
+          priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
         }));
         refreshProducts(data);
         setColumns([]);
@@ -227,21 +228,22 @@ const ProductGrid = (props) => {
                   ) {
                     column.push(col);
                   }
-                } else if (ele.fieldName === "productTemplate") {
+                } else if (ele.fieldName === "priceTemplate") {
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
                   col.show = true;
-                  col.field = "productTemplateDisplayValue";
+                  col.field = "priceTemplateDisplayValue";
                   col.order = ele.order;
                   col.leval = ele.leval;
                   if (
                     !column.some(
-                      (c) => c.field === "productTemplateDisplayValue"
+                      (c) => c.field === "priceTemplateDisplayValue"
                     )
                   ) {
                     column.push(col);
                   }
-                } else {
+                }
+                else {
                   col.field = ele.fieldName;
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
