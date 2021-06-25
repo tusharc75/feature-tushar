@@ -24,7 +24,7 @@ import {
     UpdatedByRenderer,
     CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { isObjectEmpty } from "../../constants/helpers";
+import { isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import styles from "../../pages/Leads/Header.module.scss"
 
 const KpiDashboard = () => {
@@ -137,7 +137,6 @@ const KpiDashboard = () => {
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
 
         axiosInstance().get(`/dashboard${queryString}`).then(({ data: { data, count } }) => {
@@ -150,8 +149,10 @@ const KpiDashboard = () => {
                     createdByDate: u.createdBy?.date || '',
                 }
             })
-            dispatch({ type: "loading", loading: false });
             dispatch({ type: "initialize", data: data, count: count });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
 
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -161,7 +162,6 @@ const KpiDashboard = () => {
         setDeleteLoading(true);
 
         if (deleteRecord?._id || selectedRecords.length > 0) {
-            let req = deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map(d => d._id)
 
             axiosInstance()
                 .put('dashboard/remove',
