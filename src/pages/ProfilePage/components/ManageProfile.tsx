@@ -19,6 +19,7 @@ import { displayDate, imageUploadMaxSize } from "../../../constants/helpers"
 import AddProxyDialog from './AddProxyDialog';
 import DeleteIcon from "@material-ui/icons/Delete";
 import routes from '../../../components/Helpers/Routes';
+import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -54,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ManageProfile(props) {
     const classes = useStyles();
     const { displayUserDetails, displayUserProfileImage, userFields,
-        userData, loading, userLoading, onFetchUserData, otherDetails } = props
+        userData, loading, userLoading, onFetchUserData, otherDetails, userProxy } = props
     const { state: { user }, dispatch }: any = useData();
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
@@ -170,6 +171,20 @@ export default function ManageProfile(props) {
         setShowDeleteConfirmBox(false)
     }
     let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image" && field?.fieldData?.fieldName !== "reportsTo") : []
+
+    const isActiveProxy = (startDate, endDate) => {
+        let result = false;
+        let parsedCurrentDate = new Date();
+        let parsedStartDate = new Date(startDate);
+        let parsedEndDate = new Date(endDate);
+
+        if (parsedCurrentDate >= parsedStartDate && parsedCurrentDate <= parsedEndDate) {
+            result = true;
+        } else {
+            result = false;
+        }
+        return result;
+    }
 
 
 
@@ -384,6 +399,92 @@ export default function ManageProfile(props) {
                                         )
                                     }
                                 </div>
+                                <div className="detail-box">
+                                    <h3 className="form-label-style" title="Me as a Proxy">
+                                        Me as a Proxy
+                                    </h3>
+
+                                    {userProxy.length > 0 ?
+                                        (
+                                            <TableContainer>
+                                                <Table aria-label="Me as a Proxy Table" size="small">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>
+                                                                <h4
+                                                                    title="assignedBy"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    {console.log(userProxy)}
+                                                                    Assigned By
+                                                                </h4>
+                                                            </TableCell>
+
+                                                            <TableCell align="center">
+                                                                <h4
+                                                                    title="startDate"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    Start Date
+                                                                </h4>
+                                                            </TableCell>
+
+                                                            <TableCell align="center">
+                                                                <h4
+                                                                    title="endDate"
+                                                                    className={classes.detailLabel}
+                                                                >
+                                                                    End Date
+                                                                </h4>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                Status
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {userProxy?.map((obj) => (
+                                                            <TableRow key={obj._id}>
+                                                                <TableCell>
+                                                                    <Link className="link" to={`${routes.userDetail.path}/${obj._id}`}>{`${obj.firstName} ${obj.lastName}`}</Link>
+                                                                </TableCell>
+                                                                <TableCell align="center">
+                                                                    <span className={classes.dataValue}>{displayDate(obj.startDate)}</span>
+                                                                </TableCell>
+                                                                <TableCell align="center">
+                                                                    <span className={classes.dataValue}>{displayDate(obj.endDate)}</span>
+                                                                </TableCell>
+                                                                <TableCell align="center">
+                                                                    {isActiveProxy(obj.startDate, obj.endDate) ? (
+                                                                        <Tooltip title="Active">
+                                                                            <IconButton>
+                                                                                <FaUserCheck className="text-success" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    ) : (
+                                                                        <Tooltip title="Inactive">
+                                                                            <IconButton>
+                                                                                <FaUserAltSlash className="text-error" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                        }
+
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        ) :
+                                        (
+                                            <Box textAlign="center" padding={2}>
+                                                <Typography>No proxy is assigned </Typography>
+                                            </Box>
+                                        )
+                                    }
+                                </div>
+
 
                             </Box>
                         </> : null
