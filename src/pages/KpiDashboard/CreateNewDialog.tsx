@@ -1,4 +1,4 @@
-import { useState, Fragment, useContext } from "react";
+import React, { useState, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from "formik";
@@ -13,11 +13,11 @@ import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
-        .required("please enter name"),
+        .required("Please enter name"),
 });
 
 
@@ -30,11 +30,12 @@ const CreateNewDialog = (props) => {
     const history = useHistory();
 
     const handleSubmit = (values) => {
-        values.Charts=[];
+        setLoading(true)
+        values.charts = [];
         axiosInstance().post(`/dashboard`, values).then(({ data: { data } }) => {
             setLoading(false);
             handleClose()
-            history.push({ pathname: "dashboard-edit/" + data._id })
+            history.push({ pathname: "dashboard/detail/" + data._id })
         }).catch((error) => {
             setLoading(false);
             toastConfig.setToastConfig(error);
@@ -53,7 +54,6 @@ const CreateNewDialog = (props) => {
             enableReinitialize={true}
             initialValues={initialData}
             validationSchema={ProductBuilderSchema}
-            validateOnMount
             onSubmit={handleSubmit}>
             {({ values,
                 errors,
@@ -62,7 +62,7 @@ const CreateNewDialog = (props) => {
                 submitForm,
             }) => (
                 <Fragment>
-                    <CustomDialogHeader title={"Create New"} onClose={handleClose}></CustomDialogHeader>
+                    <CustomDialogHeader title={"New Dashboard"} onClose={handleClose}></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
                             <Box p={1}>
@@ -80,15 +80,29 @@ const CreateNewDialog = (props) => {
                                     onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                 />
                             </Box>
+                            <Box p={1}>
+                                <TextField
+                                    variant="outlined"
+                                    type="text"
+                                    label="Description"
+                                    name="description"
+                                    fullWidth
+                                    margin="dense"
+                                    value={values["description"]}
+                                    error={touched["description"] && Boolean(errors["description"])}
+                                    helperText={touched["description"] && errors["description"]}
+                                    onChange={(e) => setFieldValue("description", e.target.value)}
+                                />
+                            </Box>
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>
                         <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
                             loading={loading}
+                            disabled={loading}
                             variant="contained"
                             color="primary"
-                            type="submit"
                             onClick={submitForm}
                         > Save</CustomButton>
                     </CustomDialogFooter>
