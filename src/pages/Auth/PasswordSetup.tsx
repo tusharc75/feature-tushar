@@ -91,14 +91,29 @@ const PasswordSetup = () => {
     const errors: any = {};
 
     if (!values.password) {
-      errors.password = "Required field";
-    } else if (
+      errors.password = 'Required field';
+    }
+    else if (!values.confirmPassword) {
+      errors.confirmPassword = 'Required field';
+    }
+    else if (
       !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
-        values.password
+        values.password,
       )
     ) {
       errors.password =
-        "Minimum eight characters, at least one uppercase, one lowercase, one number and one special character";
+        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    }
+    else if (
+      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
+        values.confirmPassword,
+      )
+    ) {
+      errors.confirmPassword =
+        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    }
+    else if (values.confirmPassword !== values.password) {
+      errors.confirmPassword = 'Password and confirm Password does not match';
     }
     return errors;
   };
@@ -142,11 +157,20 @@ const PasswordSetup = () => {
                       required
                     />
                     <br />
+                    <Field
+                      component={TextField}
+                      type='password'
+                      label='Confirm Password'
+                      name='confirmPassword'
+                      variant='outlined'
+                      required
+                    />
+                    <br />
                     {isSubmitting && <LinearProgress />}
                     <Button
                       variant="contained"
                       color="primary"
-                      size="small" 
+                      size="small"
                       disabled={isSubmitting}
                       onClick={submitForm}
                     >
