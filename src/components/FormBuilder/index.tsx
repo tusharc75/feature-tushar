@@ -60,6 +60,11 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
         setSection(data);
     }
 
+    var filterFieldType = []
+    if (module === "form-builder") {
+        filterFieldType = ["DECIMAL", "CURRENCYAMOUNT", "FORMULA", "VLOOKUPDROPDOWN", "CONVERTER"]
+    }
+
     const classes = useStyles();
     return (<Box p={2} bgcolor="white">
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
@@ -68,10 +73,10 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
                     <Box border={1} p={2} borderColor="grey.300" className={classes.screenHeightAuto}>
                         <Grid container spacing={1} >
                             {Object.keys(FieldList).map((type, index) => {
-                                return <DragBox key={index}
+                                return !filterFieldType.includes(type) ? <DragBox key={index}
                                     type="field" label={FieldList[type].label}
                                     name={FieldList[type].type} removeExtraField={removeExtraField}
-                                />
+                                /> : null
                             })}
                         </Grid>
                         <Box mt={2} mb={2}>

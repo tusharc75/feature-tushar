@@ -22,7 +22,7 @@ const ProductBuilderSchema = Yup.object().shape({
 
 
 const EditDashboards = (props) => {
-    const {edit}=props
+    const { edit } = props
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
@@ -50,11 +50,11 @@ const EditDashboards = (props) => {
         }
     };
 
-    
+
     const handleSave = (values) => {
         let data: any = {}
         data.name = initialValues.name;
-        data.Charts= values;
+        data.charts = values;
 
         setIsUpdating(true)
         if (id === "0") {
@@ -69,7 +69,7 @@ const EditDashboards = (props) => {
         else {
             data.BuilderId = id;
             data.deleteField = deleteField;
-            axiosInstance().put("/dashboard/"+id, data).then(({ data: { data } }) => {
+            axiosInstance().put("/dashboard/" + id, data).then(({ data: { data } }) => {
                 setIsUpdating(false)
                 history.push({ pathname: '/dashboards' });
             }).catch((error) => {
@@ -109,7 +109,7 @@ const EditDashboards = (props) => {
                                         </Box>
                                     </Grid>
                                 </Grid>
-                                <DashboardView edit={edit} handleSave={handleSave} Charts={initialValues.Charts}/>
+                                <DashboardView edit={edit} handleSave={handleSave} Charts={initialValues.charts || []} />
                             </Box>
                         </Form>)}
                 </Formik>

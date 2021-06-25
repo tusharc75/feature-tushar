@@ -250,17 +250,17 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   .join(" ")}
               />
             </ListItem>
-            <Link to="/">
-              <Tooltip title={!toggleDrawer ? "Dashboard" : ""}>
+            <Link to="/dashboards">
+              <Tooltip title={!toggleDrawer ? "Dashboards" : ""}>
                 <ListItem
                   button
-                  selected={location.pathname === "/"}
+                  selected={location.pathname === "/dashboards"}
                   className="list-item"
                 >
                   <ListItemIcon>
                     <MdDashboard size={15} className="sidebar-icon" />
                   </ListItemIcon>
-                  <ListItemText primary="Dashboard" />
+                  <ListItemText primary="Dashboards" />
                 </ListItem>
               </Tooltip>
             </Link>
