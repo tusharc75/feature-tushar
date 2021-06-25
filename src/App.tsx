@@ -447,7 +447,7 @@ function App() {
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
-          <Route exact path={"/dashboard-edit/:id"}>
+          <Route exact path={"/dashboard/detail/:id"}>
             <EditDashboard edit={true} />
           </Route>
           <Route exact path={"/dashboard/:id"}>

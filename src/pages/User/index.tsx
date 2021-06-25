@@ -231,7 +231,7 @@ const User: FC = () => {
   }
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
 
     if (entityRoleRedirectDetails?.id) {
       switch (entityRoleRedirectDetails?.type) {
@@ -480,6 +480,7 @@ const User: FC = () => {
           assignedRoles={null}
           onSuccess={() => {
             handleGlobalRolesCloseDialog();
+            fetchUsers();
           }}
         />
       )}
@@ -505,6 +506,7 @@ const User: FC = () => {
           regionalRole={false}
           onSuccess={() => {
             handleRegionalRolesCloseDialog();
+            fetchUsers();
           }}
         />
       )}

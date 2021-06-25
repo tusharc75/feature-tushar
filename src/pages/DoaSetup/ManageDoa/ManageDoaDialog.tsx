@@ -237,7 +237,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                     justify="flex-start"
                                                                     alignItems="center"
                                                                 >
-                                                                    <Grid item md={1}> Sr </Grid>
+                                                                    <Grid item md={1}> # </Grid>
                                                                     <Grid item md={5}> Users </Grid>
                                                                     {(selectedType === 2) && <Grid item md={4}> Amount </Grid>}
                                                                     <Grid item md={2}></Grid>
