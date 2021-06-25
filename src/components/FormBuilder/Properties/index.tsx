@@ -311,14 +311,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 values={values}
                 setFieldValue={setFieldValue}
               />}
-            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
+            {((values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") && module !== "form-builder") &&
               <FormControlLabel
                 control={
                   <Checkbox
                     name="isFormula"
                     checked={values["isFormula"]}
                     onChange={(e) => {
-                      //setFieldValue("isConverter", false);
                       setFieldValue("isFormula", e.target.checked)
                     }}
                     color="primary"
@@ -341,7 +340,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       name="isConverter"
                       checked={values["isConverter"]}
                       onChange={(e) => {
-                        //setFieldValue("isFormula", false);
                         setFieldValue("isConverter", e.target.checked)
                       }}
                       color="primary"
@@ -356,7 +354,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               values={values}
               setFieldValue={setFieldValue}
             />}
-            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
+            {((values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") && module !== "form-builder") &&
               <><br></br>
                 <FormControlLabel
                   control={
@@ -379,7 +377,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               _id={fieldData._id}
             />}
 
-            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
+            {((values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") && module !== "form-builder") &&
               <><br></br>
                 <FormControlLabel
                   control={

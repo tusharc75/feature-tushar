@@ -107,8 +107,9 @@ export const intialState = {
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
     loading, setGridApi, refreshGrid = null, allowSelection = true, allowAction = true, actionWidth = 200,
-    isClientSideGrid = false, handleGridReady = null, allowPagination = true, selectedRecords = [] }) {
-
+    isClientSideGrid = false, handleGridReady = null, allowPagination = true, selectedRecords = [],
+    onSelection = null
+}) {
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
 
@@ -185,7 +186,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
 
                 <div style={{ opacity: loading ? 0.5 : 1 }}>
                     <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} refreshGrid={refreshGrid} />
-                    
+
                     <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
                         <AgGridReact
                             rowData={dataRows}
@@ -249,6 +250,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                             suppressRowClickSelection={true}
                             rowSelection={'multiple'}
                             onSelectionChanged={(event: any) => {
+                                if (onSelection) onSelection(event.api.getSelectedRows())
                                 dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
                             }}
                             onRowDragEnd={(event: any) => {
