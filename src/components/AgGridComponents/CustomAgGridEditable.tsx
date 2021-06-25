@@ -108,7 +108,7 @@ export const intialState = {
 
 export default function CustomAgGridEditable({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
     loading, setGridApi, refreshGrid = null, allowSelection = true, allowAction = true, actionWidth = 200,
-    isClientSideGrid = false, handleGridReady = null, allowPagination = true, onCellValueChanged }) {
+    isClientSideGrid = false, handleGridReady = null, allowPagination = true, onCellValueChanged, className = "ag-grid-listing-grid" }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
@@ -188,7 +188,7 @@ export default function CustomAgGridEditable({ columns, dataRows, frameworkCompo
                 <div style={{ opacity: loading ? 0.5 : 1 }}>
                     <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} refreshGrid={refreshGrid} />
 
-                    <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
+                    <div className={`ag-theme-material ${className}`} style={{ zIndex: -500, position: 'inherit' }}>
                         <AgGridReact
                             rowData={dataRows}
                             onGridReady={onGridReady}
