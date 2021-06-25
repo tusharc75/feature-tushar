@@ -20,7 +20,7 @@ import CustomContainer from "../../components/CustomContainer";
 import styles from "../Leads/Header.module.scss";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
@@ -96,7 +96,6 @@ export default function TermsAndCondition(props) {
 
             if (gridApi) {
                 gridApi.setRowData([]);
-                gridApi.showLoadingOverlay();
             }
             const queryString = getQueryString();
             dispatch({ type: "loading", loading: true });
@@ -108,6 +107,9 @@ export default function TermsAndCondition(props) {
                         id: u._id,
                     }));
                     dispatch({ type: "initialize", data: rows, count: data.count });
+                    setTimeout(() => {
+                        dispatch({ type: "loading", loading: false });
+                    }, gridLoadingTimeout);
                 })
                 .catch((err) => {
                     toastConfig.setToastConfig(err);
@@ -260,7 +262,9 @@ export default function TermsAndCondition(props) {
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    actionWidth={150} />
+                    actionWidth={150} 
+                    loading={loading}
+                    />
 
                 {
                     showDeleteConfirmBox ?

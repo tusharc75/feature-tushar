@@ -37,8 +37,7 @@ function reducer(state, action) {
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count,
-        loading: false,
+        rowCount: action.count
       };
 
     case "selection":
@@ -131,7 +130,7 @@ const DOAApproval = () => {
   const {
     dataRows,
     rowCount,
-
+    loading,
     page,
     limit,
     pageSizes,
@@ -178,7 +177,6 @@ const DOAApproval = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     setLoadingData(true);
@@ -233,7 +231,6 @@ const DOAApproval = () => {
         responseType: "blob",
       })
       .then(({ data }) => {
-        console.log(data);
         const file = new Blob([data], { type: "application/pdf" });
         const fileURL = URL.createObjectURL(file);
         const pdfWindow = window.open();
@@ -254,7 +251,6 @@ const DOAApproval = () => {
             history.push("/doa-request");
           })
           .catch((err) => {
-            console.log(err);
             setShowQuoteStatusChangeDialog(false)
           });
       } else {
@@ -465,6 +461,7 @@ const DOAApproval = () => {
                     actionWidth={150}
                     allowAction={false}
                     allowSelection={false}
+                    loading={loading}
                   />
                 </div>
               </Grid>

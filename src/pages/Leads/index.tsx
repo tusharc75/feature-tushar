@@ -16,6 +16,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import { leadDetailPage } from "../../routes/Lead";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
+  gridLoadingTimeout,
   isObjectEmpty,
   processFieldName,
 } from "../../constants/helpers";
@@ -231,7 +232,6 @@ const Leads = () => {
 
       if (gridApi) {
         gridApi.setRowData([]);
-        gridApi.showLoadingOverlay();
       }
 
       axiosInstance()
@@ -265,10 +265,10 @@ const Leads = () => {
           });
 
           dispatch({ type: "initialize", data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: "loading", loading: false });
+          }, gridLoadingTimeout);
 
-          // if (gridApi && rows.length > 0) {
-          //   gridApi.hideOverlay();
-          // }
         }).catch((error) => {
           toastConfig.setToastConfig(error);
           dispatch({ type: "loading", loading: false });
@@ -497,7 +497,8 @@ const Leads = () => {
         </div>
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+          loading={loading} />
 
         {isOpen && (
           <ManageLeadDialog

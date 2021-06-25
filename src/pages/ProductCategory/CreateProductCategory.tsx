@@ -1,6 +1,6 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
 import Button from '@material-ui/core/Button';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -8,7 +8,6 @@ import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
-import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
@@ -24,7 +23,6 @@ const CreateProductCategory = (props) => {
     const { productCategoryId, handleClose } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
-    const history = useHistory();
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
