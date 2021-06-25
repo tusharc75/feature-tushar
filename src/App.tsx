@@ -98,6 +98,13 @@ function App() {
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
 
+  const getVersion = () => {
+    setTimeout(() => {
+      axiosInstance().get("/version").then(({ data }) => {
+
+      })
+    }, 30000);
+  }
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -167,6 +174,8 @@ function App() {
       }, 60000);
     } catch (e) {
     }
+
+    // getVersion();
   }, []);
 
 
