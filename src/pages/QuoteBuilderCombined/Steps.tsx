@@ -240,7 +240,6 @@ const Steps = (props) => {
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
         processStatus: steps[activeStep + 1],
-        TNC: selectedTNC,
       })
       .then(({ data }) => {
         const nextStep = activeStep + 1;
