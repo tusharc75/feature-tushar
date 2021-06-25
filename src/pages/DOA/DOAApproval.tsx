@@ -16,6 +16,7 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import {
   CustomDialogTransition,
   formatAmountWithCurrency,
+  gridLoadingTimeout,
   gridPageSizes,
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
@@ -206,6 +207,9 @@ const DOAApproval = () => {
           data: rows,
           count: data.Rows.length,
         });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
         setSellingPrice(data.TotalSellingPrice);
         fetchDOA(data.Quotedby);
         setPDFName(data.PDF);

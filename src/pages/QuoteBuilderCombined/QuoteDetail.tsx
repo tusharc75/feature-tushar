@@ -21,7 +21,8 @@ import {
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
   opportunity,
@@ -41,9 +42,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 
-
 import { AiFillPlusCircle } from "react-icons/ai";
-import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
@@ -51,8 +50,6 @@ import { FiDownloadCloud } from "react-icons/fi";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
-import MuiAccordion from "@material-ui/core/Accordion";
-import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -62,7 +59,6 @@ import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
-// import EmailDialog from "./EmailDialog";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import {
   customerAccount,
@@ -97,44 +93,12 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import ImportExportIcon from "@material-ui/icons/ImportExport";
 import VersionStatus from "./VersionStatus";
+import ColumnsDialog from "./ColumnsDialog";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-const Accordion = withStyles({
-  root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
-    "&:not(:last-child)": {
-      borderBottom: 0,
-    },
-    "&:before": {
-      display: "none",
-    },
-    "&$expanded": {
-      margin: "auto",
-    },
-  },
-  expanded: {},
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: "white",
-    borderBottom: "1px solid #f1ece8",
-    background: "#ffffff",
-    fontWeight: "bold",
-    padding: "0px",
-    "&$expanded": {
-      minHeight: 46,
-    },
-  },
-  content: {
-    "&$expanded": {
-      margin: "12px 0",
-    },
-  },
-  expanded: {},
-})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -274,10 +238,6 @@ const useStyles = makeStyles((theme) => ({
     right: "20px",
   },
 }));
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-
-const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
   const history = useHistory();
@@ -421,6 +381,7 @@ function QuoteDetail() {
   const [visibleColumns, setVisibleColumnName] = useState([]);
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
+  const [isRearrangeColumns, setRearrangeColumns] = useState(false);
 
   const [dataTNC, setDataTNC] = useState([]);
 
@@ -576,10 +537,6 @@ function QuoteDetail() {
       "aria-controls": `main-tabpanel-${index}`,
     };
   }
-
-  useEffect(() => {
-    setSelectedTnC(selectedRecords.map((o) => o._id));
-  }, [selectedRecords]);
 
   useEffect(() => {
     fetchDoaLimit();
@@ -803,7 +760,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -836,7 +793,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -946,12 +903,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1060,12 +1017,14 @@ function QuoteDetail() {
     let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
       let PdfRow = [serialNumber];
-      defaultSelectColumns.forEach((ColName) => {
-        if (ColumnName.indexOf(ColName) !== -1) {
-          if (PdfCol.indexOf(ColName) === -1) {
-            PdfCol.push(ColName);
+      visibleColumns.forEach((ColName, idx) => {
+        if (idx < 6) {
+          if (ColumnName.indexOf(ColName) !== -1) {
+            if (PdfCol.indexOf(ColName) === -1) {
+              PdfCol.push(ColName);
+            }
+            PdfRow.push(dataEntry[ColName]);
           }
-          PdfRow.push(dataEntry[ColName]);
         }
       });
       PDFData.push(PdfRow);
@@ -1552,18 +1511,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-          data["profitPercentPerUnit"] === undefined
+            data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-          data["commissionPercentPerUnit"] === undefined
+            data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1575,7 +1534,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-              "undefined"
+            "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1795,7 +1754,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1841,7 +1800,7 @@ function QuoteDetail() {
       request.fileUrl = PDFAttachment;
       axiosInstance()
         .post(`/attachment`, request)
-        .then(({ data }) => {})
+        .then(({ data }) => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -2042,9 +2001,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2161,10 +2120,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2410,7 +2369,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
+                              ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2439,8 +2398,12 @@ function QuoteDetail() {
                             ) : null}
 
                             {ProcessStatus === "Quote Builder" ? (
-                              <Grid container>
-                                <Grid item xs={12} md={12} sm={12}>
+                              <Grid
+                                container
+                                justify="space-between"
+                                alignItems="center"
+                              >
+                                <Grid item xs={11} md={11} sm={11}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
@@ -2485,12 +2448,21 @@ function QuoteDetail() {
                                     />
                                   </FormControl>
                                 </Grid>
+                                <Grid item xs={1} md={1} sm={1}>
+                                  <IconButton
+                                    title="Re-arrange columns"
+                                    color="inherit"
+                                    onClick={() => setRearrangeColumns(true)}
+                                  >
+                                    <ImportExportIcon />
+                                  </IconButton>
+                                </Grid>
                               </Grid>
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2510,7 +2482,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => createImagePDF(true, false)}
@@ -2552,7 +2524,7 @@ function QuoteDetail() {
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderID ? (
                               ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0 ? (
+                                visibleColumns.length > 0 ? (
                                 <ProductGrid
                                   productBuilderId={productBuilderID}
                                   refreshProducts={refreshProducts}
@@ -2576,7 +2548,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                      ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2593,9 +2565,9 @@ function QuoteDetail() {
                                 <div className="position-relative">
                                   <h4
                                     className="form-label-style"
-                                    title="Add Terms & Conditions"
+                                    title="Add Additional Data"
                                   >
-                                    Terms & Conditions
+                                    Additional Data
                                   </h4>
                                   <Button
                                     onClick={() => setShowCreateDialog(true)}
@@ -2605,7 +2577,7 @@ function QuoteDetail() {
                                     className={classes.termsBtn}
                                     startIcon={<AddIcon />}
                                   >
-                                    Add Terms & Conditions
+                                    Add Additional Data
                                   </Button>
                                 </div>
                                 <CustomAgGrid
@@ -2623,8 +2595,11 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={[...prevVersionTNC]}
+                                  selectedRecords={[...selectedTnC, ...prevVersionTNC]}
                                   loading={loadingTNC}
+                                  onSelection={(selectedRecords) => {
+                                    setSelectedTnC([...selectedRecords.map(o => o._id)])
+                                  }}
                                 />
                               </Box>
                             ) : null}
@@ -2674,7 +2649,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2724,6 +2699,19 @@ function QuoteDetail() {
           />
         )}
 
+        {isRearrangeColumns && (
+          <DndProvider backend={HTML5Backend}>
+            <ColumnsDialog
+              setColumns={setVisibleColumnName}
+              columns={visibleColumns}
+              setOpenDialog={setRearrangeColumns}
+              id={id}
+              version={currentVersion}
+              refresh={fetchQuoteData}
+            />
+          </DndProvider>
+        )}
+
         {sendEmail && (
           <Dialog
             open={sendEmail}
@@ -2747,9 +2735,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}

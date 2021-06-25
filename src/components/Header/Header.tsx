@@ -916,7 +916,7 @@ const Header = ({ toggleDrawer }) => {
             <Link to="/">
               <img
                 className={classes.logo}
-                src={SVG("Logo")}
+                src={SVG("LogoPng")}
                 alt="equip logo"
                 title="eQuipt Logo"
               />
