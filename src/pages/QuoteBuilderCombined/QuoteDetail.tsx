@@ -21,7 +21,8 @@ import {
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
   opportunity,
@@ -41,9 +42,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 
-
 import { AiFillPlusCircle } from "react-icons/ai";
-import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
@@ -51,8 +50,6 @@ import { FiDownloadCloud } from "react-icons/fi";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
-import MuiAccordion from "@material-ui/core/Accordion";
-import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -62,7 +59,6 @@ import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
-// import EmailDialog from "./EmailDialog";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import {
   customerAccount,
@@ -97,44 +93,12 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import ImportExportIcon from "@material-ui/icons/ImportExport";
 import VersionStatus from "./VersionStatus";
+import ColumnsDialog from "./ColumnsDialog";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-const Accordion = withStyles({
-  root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
-    "&:not(:last-child)": {
-      borderBottom: 0,
-    },
-    "&:before": {
-      display: "none",
-    },
-    "&$expanded": {
-      margin: "auto",
-    },
-  },
-  expanded: {},
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: "white",
-    borderBottom: "1px solid #f1ece8",
-    background: "#ffffff",
-    fontWeight: "bold",
-    padding: "0px",
-    "&$expanded": {
-      minHeight: 46,
-    },
-  },
-  content: {
-    "&$expanded": {
-      margin: "12px 0",
-    },
-  },
-  expanded: {},
-})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -274,10 +238,6 @@ const useStyles = makeStyles((theme) => ({
     right: "20px",
   },
 }));
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-
-const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
   const history = useHistory();
@@ -421,6 +381,7 @@ function QuoteDetail() {
   const [visibleColumns, setVisibleColumnName] = useState([]);
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
+  const [isRearrangeColumns, setRearrangeColumns] = useState(false);
 
   const [dataTNC, setDataTNC] = useState([]);
 
@@ -1056,12 +1017,14 @@ function QuoteDetail() {
     let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
       let PdfRow = [serialNumber];
-      defaultSelectColumns.forEach((ColName) => {
-        if (ColumnName.indexOf(ColName) !== -1) {
-          if (PdfCol.indexOf(ColName) === -1) {
-            PdfCol.push(ColName);
+      visibleColumns.forEach((ColName, idx) => {
+        if (idx < 6) {
+          if (ColumnName.indexOf(ColName) !== -1) {
+            if (PdfCol.indexOf(ColName) === -1) {
+              PdfCol.push(ColName);
+            }
+            PdfRow.push(dataEntry[ColName]);
           }
-          PdfRow.push(dataEntry[ColName]);
         }
       });
       PDFData.push(PdfRow);
@@ -2435,8 +2398,12 @@ function QuoteDetail() {
                             ) : null}
 
                             {ProcessStatus === "Quote Builder" ? (
-                              <Grid container>
-                                <Grid item xs={12} md={12} sm={12}>
+                              <Grid
+                                container
+                                justify="space-between"
+                                alignItems="center"
+                              >
+                                <Grid item xs={11} md={11} sm={11}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
@@ -2480,6 +2447,15 @@ function QuoteDetail() {
                                       )}
                                     />
                                   </FormControl>
+                                </Grid>
+                                <Grid item xs={1} md={1} sm={1}>
+                                  <IconButton
+                                    title="Re-arrange columns"
+                                    color="inherit"
+                                    onClick={() => setRearrangeColumns(true)}
+                                  >
+                                    <ImportExportIcon />
+                                  </IconButton>
                                 </Grid>
                               </Grid>
                             ) : null}
@@ -2721,6 +2697,19 @@ function QuoteDetail() {
             fetchData={fetchTermsAndConditions}
             editRecord={editRecordTNC}
           />
+        )}
+
+        {isRearrangeColumns && (
+          <DndProvider backend={HTML5Backend}>
+            <ColumnsDialog
+              setColumns={setVisibleColumnName}
+              columns={visibleColumns}
+              setOpenDialog={setRearrangeColumns}
+              id={id}
+              version={currentVersion}
+              refresh={fetchQuoteData}
+            />
+          </DndProvider>
         )}
 
         {sendEmail && (
