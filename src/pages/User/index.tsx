@@ -478,6 +478,7 @@ const User: FC = () => {
           assignedRoles={null}
           onSuccess={() => {
             handleGlobalRolesCloseDialog();
+            fetchUsers();
           }}
         />
       )}
@@ -503,6 +504,7 @@ const User: FC = () => {
           regionalRole={false}
           onSuccess={() => {
             handleRegionalRolesCloseDialog();
+            fetchUsers();
           }}
         />
       )}
