@@ -479,7 +479,7 @@ export default function ManageProfile(props) {
                                         ) :
                                         (
                                             <Box textAlign="center" padding={2}>
-                                                <Typography>No proxy is assigned </Typography>
+                                                <Typography>No assigned proxy</Typography>
                                             </Box>
                                         )
                                     }
