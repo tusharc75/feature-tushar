@@ -40,6 +40,7 @@ export default function ProfilePage(props) {
     const { profileBreadCrumbs } = props
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
+    const [proxyBy, setProxyBy] = useState([]);
     const [otherDetails, setOtherDetails] = useState(null)
     const [notificationPreferenceData, setNotificationPreferenceData] = useState([])
     const [loading, setLoading] = useState(false);
@@ -72,6 +73,9 @@ export default function ProfilePage(props) {
                     let { blocked, updatedBy, employeeNumber, ...userData } = data.user
                     setUserData(userData)
                     setNotificationPreferenceData(data.user.notificationPref)
+                }
+                if (data?.proxyBy) {
+                    setProxyBy(data.proxyBy);
                 }
                 setUserLoading(false)
             })
@@ -121,6 +125,7 @@ export default function ProfilePage(props) {
                             <ManageProfile displayUserDetails={true}
                                 userFields={userFields}
                                 userData={userData}
+                                userProxy={proxyBy}
                                 loading={loading}
                                 userLoading={userLoading}
                                 onFetchUserData={fetchUserData}

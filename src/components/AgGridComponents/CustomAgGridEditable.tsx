@@ -111,29 +111,29 @@ export const intialState = {
   selectedRecords: [],
 };
 
-export default function CustomAgGridEditable(props) {
-  const {
-    columns,
-    dataRows,
-    frameworkComponents,
-    dispatch,
-    rowCount,
-    limit,
-    pageSizes,
-    page,
-    loading,
-    setGridApi,
-    refreshGrid = null,
-    allowSelection = true,
-    allowAction = true,
-    actionWidth = 200,
-    isClientSideGrid = false,
-    handleGridReady = null,
-    allowPagination = true,
-    onCellValueChanged,
-    forProductBuilder,
-    currency,
-  } = props;
+export default function CustomAgGridEditable({
+  columns,
+  dataRows,
+  frameworkComponents,
+  dispatch,
+  rowCount,
+  limit,
+  pageSizes,
+  page,
+  loading,
+  setGridApi,
+  refreshGrid = null,
+  allowSelection = true,
+  allowAction = true,
+  actionWidth = 200,
+  isClientSideGrid = false,
+  handleGridReady = null,
+  allowPagination = true,
+  onCellValueChanged,
+  className = "ag-grid-listing-grid",
+  forProductBuilder = false,
+  currency = null,
+}) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
@@ -222,7 +222,7 @@ export default function CustomAgGridEditable(props) {
           />
 
           <div
-            className="ag-theme-material ag-grid-listing-grid"
+            className={`ag-theme-material ${className}`}
             style={{ zIndex: -500, position: "inherit" }}
           >
             <AgGridReact

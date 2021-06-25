@@ -177,7 +177,7 @@ const QuoteApproval = () => {
         PdfDoc.setFontSize(14);
         PdfDoc.text("Quotation", 265, 75);
         var PDFData = [];
-        var PdfCol = ["S. No."];
+        var PdfCol = ["#"];
         var serialNumber = 1;
 
         rows.forEach((dataEntry) => {
@@ -505,7 +505,7 @@ const QuoteApproval = () => {
                                         <Table aria-label="simple table" size="small">
                                             <TableHead>
                                                 <TableRow>
-                                                    <StyledTableCell align="center">S. No.</StyledTableCell>
+                                                    <StyledTableCell align="center">#</StyledTableCell>
                                                     {
                                                         columns.map((column, index) => (
                                                             <StyledTableCell align="center" key={index}>{column.field}</StyledTableCell>

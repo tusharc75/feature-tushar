@@ -171,7 +171,7 @@ const ProductBuilder = (props) => {
         let column = [
           {
             field: "srno",
-            headerName: "Sr.",
+            headerName: "#",
             width: 70,
             show: true,
             cellRenderer: "productNameRenderer",
@@ -697,6 +697,7 @@ const ProductBuilder = (props) => {
             isClientSideGrid={true}
             onCellValueChanged={onCellValueChanged}
             loading={loading}
+            className="product-builder-edit-grid"
           />
         ) : (
           <Loader style={{ minHeight: 300 }} text="Loading..." />

@@ -1013,7 +1013,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     let PDFData = [];
-    let PdfCol = ["S. No."];
+    let PdfCol = ["#"];
     let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
       let PdfRow = [serialNumber];
@@ -1126,10 +1126,10 @@ function QuoteDetail() {
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send && !base64) {
-            doc.save(`Quotation - v${currentVersion}`);
+            doc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}`);
           } else if (base64) {
             doc.setProperties({
-              title: `Quotation - v${currentVersion}`,
+              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
             generateBase64forFile(pdfBlobFile, "pdf");
@@ -1182,10 +1182,10 @@ function QuoteDetail() {
 
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send && !base64) {
-        PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
+        PdfDoc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
       } else if (base64) {
         PdfDoc.setProperties({
-          title: `Quotation - v${currentVersion}`,
+          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
         generateBase64forFile(pdfBlobFile, "pdf");
