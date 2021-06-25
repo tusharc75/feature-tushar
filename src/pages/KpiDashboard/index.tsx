@@ -155,6 +155,7 @@ const KpiDashboard = () => {
             }, gridLoadingTimeout);
 
         }).catch((error) => {
+            dispatch({ type: "loading", loading: false });
             toastConfig.setToastConfig(error);
         });
     };
