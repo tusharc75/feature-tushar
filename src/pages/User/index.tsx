@@ -231,7 +231,7 @@ const User: FC = () => {
   }
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
 
     if (entityRoleRedirectDetails?.id) {
       switch (entityRoleRedirectDetails?.type) {
