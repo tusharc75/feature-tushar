@@ -63,7 +63,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                         : obj.userType && obj.userType === userType.brandAdmin ? "Brand Admin Can not be deleted" : "Unassign User"
                     }
                   >
-                    {type == roleTypes.find((d) => d.key === "Global")?.value && (
+                    {type === roleTypes.find((d) => d.key === "Global")?.value && (
                       <IconButton
                         size="small"
                         disabled={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin)}

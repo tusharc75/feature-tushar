@@ -11,8 +11,6 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
     const events = {
         // select: function (event) {
         //     // var { nodes, edges } = event;
-        //     // console.log("Selected nodes: ", nodes);
-        //     // console.log("Selected edges: ", edges);
         // },
         hoverNode: function (event) {
             if (event?.node !== id) {
@@ -20,12 +18,10 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
             } else {
                 graphNetwork.canvas.body.container.style.cursor = "no-drop";
             }
-            // console.log("hoverNode", event);
             // this.neighbourhoodHighlight(event, this.props.searchData);
         },
         blurNode: function (event) {
             graphNetwork.canvas.body.container.style.cursor = "default";
-            // console.log("blurNode", event);
             // this.neighbourhoodHighlightHide(event);
         },
         click: function (event) {
@@ -33,7 +29,6 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
                 const node = graphData.nodes.find(d => d.id === event.nodes[0]);
                 onClick(node)
             }
-            // console.log("click", event);
             // this.redirectToLearn(event, this.props.searchData);
         }
     }
@@ -43,11 +38,9 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
     };
 
     const getEdges = data => {
-        // console.log("getEdges", data)
     };
 
     const getNodes = data => {
-        // console.log("getNodes", data)
     };
 
     return (

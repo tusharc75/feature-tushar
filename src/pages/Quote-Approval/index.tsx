@@ -1,8 +1,6 @@
 import { useParams, useLocation } from "react-router-dom";
-import React, { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
-import Layout from "../../components/Layout";
-import { DataGrid } from "@material-ui/data-grid";
 import { Grid, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import {
     Button,
@@ -10,7 +8,6 @@ import {
     makeStyles
 } from "@material-ui/core";
 import axios from 'axios'
-import { couldStartTrivia } from "typescript";
 import { backendApi } from './../../config';
 import DOAReasonDialog from "../DOA/DOAReasonDialog";
 import SignatureDialog from "../../components/Helpers/SignatureDialog";
@@ -18,12 +15,11 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
 import draftToHtml from "draftjs-to-html";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { displayDate } from "../../services/util";
 import { formatAmountWithCurrency } from "../../constants/helpers";
 import { AiOutlineEye } from 'react-icons/ai';
 import styles from './quote-approval.module.scss'
-import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { withStyles, createStyles } from '@material-ui/core/styles';
 
 const StyledTableCell = withStyles(() =>
     createStyles({
@@ -34,7 +30,7 @@ const StyledTableCell = withStyles(() =>
     }),
 )(TableCell);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     header: {
         background: "#163340",
         textAlign: "center",
@@ -68,7 +64,6 @@ const useStyles = makeStyles((theme) => ({
 
 const QuoteApproval = () => {
     let location = useLocation().search;
-    const toastConfig = useContext(CustomToastContext);
 
     const classes = useStyles();
     const { id } = useParams();
@@ -128,7 +123,6 @@ const QuoteApproval = () => {
                 }
             })
             .catch((err) => {
-                console.log(err);
                 setValidQuote(false);
             });
     }
@@ -148,7 +142,6 @@ const QuoteApproval = () => {
                 setShowSignatureDialog(false);
             })
             .catch((err) => {
-                console.log(err);
                 setShowQuoteStatusChangeDialog(false)
                 setShowSignatureDialog(false);
             });
@@ -184,7 +177,7 @@ const QuoteApproval = () => {
         PdfDoc.setFontSize(14);
         PdfDoc.text("Quotation", 265, 75);
         var PDFData = [];
-        var PdfCol = ["S. No."];
+        var PdfCol = ["#"];
         var serialNumber = 1;
 
         rows.forEach((dataEntry) => {
@@ -192,7 +185,7 @@ const QuoteApproval = () => {
             // var ExcelRow = {};
             columns.map(m => m.field).forEach((ColName) => {
                 // if (defaultSelectColumns.indexOf(ColName) !== -1) {
-                if (PdfCol.indexOf(ColName) == -1) {
+                if (PdfCol.indexOf(ColName) === -1) {
                     PdfCol.push(ColName);
                 }
                 PdfRow.push(dataEntry[ColName]);
@@ -512,7 +505,7 @@ const QuoteApproval = () => {
                                         <Table aria-label="simple table" size="small">
                                             <TableHead>
                                                 <TableRow>
-                                                    <StyledTableCell align="center">S. No.</StyledTableCell>
+                                                    <StyledTableCell align="center">#</StyledTableCell>
                                                     {
                                                         columns.map((column, index) => (
                                                             <StyledTableCell align="center" key={index}>{column.field}</StyledTableCell>

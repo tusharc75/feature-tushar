@@ -25,7 +25,8 @@ import { MdContacts } from "react-icons/md";
 import axiosInstance from "../../axios/axiosInstance";
 import {
   sidebarResource,
-  isObjectEmpty
+  isObjectEmpty,
+  gridLoadingTimeout
 } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
@@ -263,7 +264,6 @@ export default function Contact(props) {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -296,6 +296,9 @@ export default function Contact(props) {
         });
 
         dispatch({ type: "initialize", data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
 
       })
       .catch((err) => {
@@ -505,7 +508,8 @@ export default function Contact(props) {
         <Box component="div">
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
+            loading={loading} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

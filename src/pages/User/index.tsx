@@ -1,5 +1,5 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
-import { Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
+import { useState, FC, useEffect, useContext, useReducer } from "react";
+import { Tooltip, IconButton, Grid } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import {
@@ -21,10 +21,10 @@ import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
-import { startCase, uniqBy } from "lodash";
+import { uniqBy } from "lodash";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import ApprovalProcessDialog from "./ApprovalProcessDialog";
@@ -231,7 +231,7 @@ const User: FC = () => {
   }
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
 
     if (entityRoleRedirectDetails?.id) {
       switch (entityRoleRedirectDetails?.type) {
@@ -252,7 +252,7 @@ const User: FC = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -295,7 +295,6 @@ const User: FC = () => {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -342,6 +341,9 @@ const User: FC = () => {
         }
 
         dispatch({ type: "initialize", data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((error) => {
         dispatch({ type: "loading", loading: false });
@@ -478,6 +480,7 @@ const User: FC = () => {
           assignedRoles={null}
           onSuccess={() => {
             handleGlobalRolesCloseDialog();
+            fetchUsers();
           }}
         />
       )}
@@ -503,6 +506,7 @@ const User: FC = () => {
           regionalRole={false}
           onSuccess={() => {
             handleRegionalRolesCloseDialog();
+            fetchUsers();
           }}
         />
       )}
@@ -576,6 +580,7 @@ const User: FC = () => {
             pageSizes={pageSizes}
             page={page}
             actionWidth={110}
+            loading={loading}
           />
 
         </CustomContainer>

@@ -76,7 +76,7 @@ const useQontoStepIconStyles = makeStyles((theme) => ({
   check: {
     zIndex: 1,
     fontSize: 18,
-    color: "white",
+    color: "#09445A",
   },
 }));
 

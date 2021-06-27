@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   useContext,
-  useRef,
   useReducer,
   useMemo,
 } from "react";
@@ -22,13 +21,14 @@ import {
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import {
-  gridPageSizes,
   opportunity,
   quote,
   currencyCodeToSymbol,
+  gridLoadingTimeout,
 } from "../../constants/helpers";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -41,38 +41,24 @@ import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
-import { DataGrid } from "@material-ui/data-grid";
-
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 import { AiFillPlusCircle } from "react-icons/ai";
-import { withStyles } from "@material-ui/core/styles";
 import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
-import MuiAccordion from "@material-ui/core/Accordion";
-import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
 import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import Chip from "@material-ui/core/Chip";
 import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
-// import EmailDialog from "./EmailDialog";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import {
   customerAccount,
@@ -80,14 +66,12 @@ import {
   supplierAccount,
   yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity,
-  getObjKeysWithValues,
   processFieldName,
   formatAmountWithCurrency,
 } from "../../constants/helpers";
 import { quoteBuilder } from "../../constants/helpers";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import ProductBuilder from "../../components/productBuilder";
-import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import InfoIcon from "@material-ui/icons/Info";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
@@ -109,44 +93,12 @@ import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import Loader from "../../components/Loader";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import ImportExportIcon from "@material-ui/icons/ImportExport";
 import VersionStatus from "./VersionStatus";
+import ColumnsDialog from "./ColumnsDialog";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-const Accordion = withStyles({
-  root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
-    "&:not(:last-child)": {
-      borderBottom: 0,
-    },
-    "&:before": {
-      display: "none",
-    },
-    "&$expanded": {
-      margin: "auto",
-    },
-  },
-  expanded: {},
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: "white",
-    borderBottom: "1px solid #f1ece8",
-    background: "#ffffff",
-    fontWeight: "bold",
-    padding: "0px",
-    "&$expanded": {
-      minHeight: 46,
-    },
-  },
-  content: {
-    "&$expanded": {
-      margin: "12px 0",
-    },
-  },
-  expanded: {},
-})(MuiAccordionSummary);
 
 function reducer(state, action) {
   switch (action.type) {
@@ -286,10 +238,6 @@ const useStyles = makeStyles((theme) => ({
     right: "20px",
   },
 }));
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-
-const gettingVersionStatusText = "Getting Status...";
 
 function QuoteDetail() {
   const history = useHistory();
@@ -433,6 +381,7 @@ function QuoteDetail() {
   const [visibleColumns, setVisibleColumnName] = useState([]);
   const [versionStatus, setversionStatus] = useState("Building Quote");
   const [DOAneeded, setDOAneeded] = useState(false);
+  const [isRearrangeColumns, setRearrangeColumns] = useState(false);
 
   const [dataTNC, setDataTNC] = useState([]);
 
@@ -443,6 +392,7 @@ function QuoteDetail() {
   const [buttonMessage, setButtonMessage] = useState("Send to Customer");
   const [columnView, setColumnView] = useState([]);
   const [PDF, setPdf] = useState("");
+  const [PDFAttachment, setPdfAttachment] = useState("");
   const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
@@ -554,6 +504,11 @@ function QuoteDetail() {
 
   const { qbResource, qbApi } = quoteBuilder;
 
+  const [companyDetails, setCompanyDetails] = useState({
+    name: "",
+    address: "",
+  });
+  const [base64Logo, setBase64Logo] = useState(null);
   interface TabPanelProps {
     children?: React.ReactNode;
     index: any;
@@ -584,11 +539,22 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
-    setSelectedTnC(selectedRecords.map((o) => o._id));
-  }, [selectedRecords]);
-
-  useEffect(() => {
     fetchDoaLimit();
+
+    axiosInstance()
+      .get("/user/brandInfo")
+      .then(({ data }) => {
+        setCompanyDetails({ name: data.data.name, address: data.data.address });
+        if (data.data.logo) {
+          fetchImage(data.data.logo, function (dataUri) {
+            setBase64Logo(dataUri);
+          });
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setGeneratingPdf({ show: false, text: null });
+      });
   }, []);
 
   useEffect(() => {
@@ -794,7 +760,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -827,7 +793,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -877,7 +843,6 @@ function QuoteDetail() {
 
     if (gridApi) {
       // gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
     }
 
     axiosInstance()
@@ -901,7 +866,9 @@ function QuoteDetail() {
         });
         dispatch({ type: "selection", selectedRecords: selectedRows });
         setDataTNC(data);
-        // dispatch({ type: "loading", loadingTNC: false });
+        setTimeout(() => {
+          dispatch({ type: "loading", loadingTNC: false });
+        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -936,12 +903,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -983,24 +950,26 @@ function QuoteDetail() {
 
   const createImagePDF = (view, send, base64 = false) => {
     setGeneratingPdf({ show: true, text: "Generating..." });
-    axiosInstance()
-      .get("/user/brandInfo")
-      .then(({ data }) => {
-        companyName = data.data.name;
-        companyAddress = data.data.address;
-        if (data.data.logo) {
-          fetchImage(data.data.logo, function (dataUri) {
-            logo = dataUri;
-            GeneratePdf(view, send, base64);
-          });
-        } else {
-          GeneratePdf(view, send, base64);
-        }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setGeneratingPdf({ show: false, text: null });
-      });
+    GeneratePdf(view, send, base64);
+
+    // axiosInstance()
+    //   .get("/user/brandInfo")
+    //   .then(({ data }) => {
+    //     companyName = data.data.name;
+    //     companyAddress = data.data.address;
+    //     if (data.data.logo) {
+    //       fetchImage(data.data.logo, function (dataUri) {
+    //         logo = dataUri;
+    //         GeneratePdf(view, send, base64);
+    //       });
+    //     } else {
+    //       GeneratePdf(view, send, base64);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     toastConfig.setToastConfig(err);
+    //     setGeneratingPdf({ show: false, text: null });
+    //   });
   };
 
   const fetchImage = (Url, cb) => {
@@ -1028,35 +997,34 @@ function QuoteDetail() {
   const GeneratePdf = (view, send, base64 = false) => {
     const PdfDoc = new jsPDF("p", "pt", "a4");
     let date = new Date();
-    const excelHeader = [];
-    const excelheaderName = [];
-    const excelData = [];
 
     const pagewidth = PdfDoc.internal.pageSize.width;
 
-    if (logo !== null) {
-      PdfDoc.addImage(logo, "JPEG", pagewidth - 65, 10, 40, 40);
+    if (base64Logo !== null) {
+      PdfDoc.addImage(base64Logo, "JPEG", pagewidth - 65, 10, 40, 40);
     }
     PdfDoc.setFontSize(26);
-    PdfDoc.text(companyName, 20, 30);
+    PdfDoc.text(companyDetails.name, 20, 30);
     PdfDoc.setFontSize(12);
-    PdfDoc.text(companyAddress, 20, 50);
+    PdfDoc.text(companyDetails.address, 20, 50);
     PdfDoc.setLineWidth(3);
     PdfDoc.line(15, 70, 260, 70);
     PdfDoc.line(330, 70, 580, 70);
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     let PDFData = [];
-    let PdfCol = ["S. No."];
+    let PdfCol = ["#"];
     let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
       let PdfRow = [serialNumber];
-      defaultSelectColumns.forEach((ColName) => {
-        if (ColumnName.indexOf(ColName) !== -1) {
-          if (PdfCol.indexOf(ColName) === -1) {
-            PdfCol.push(ColName);
+      visibleColumns.forEach((ColName, idx) => {
+        if (idx < 6) {
+          if (ColumnName.indexOf(ColName) !== -1) {
+            if (PdfCol.indexOf(ColName) === -1) {
+              PdfCol.push(ColName);
+            }
+            PdfRow.push(dataEntry[ColName]);
           }
-          PdfRow.push(dataEntry[ColName]);
         }
       });
       PDFData.push(PdfRow);
@@ -1103,7 +1071,8 @@ function QuoteDetail() {
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
 
-    if (selectedRecords.length) {
+    if (selectedRecords.length || TandC.length) {
+      let selecteTNCData = selectedRecords.length > 0 ? selectedRecords : TandC;
       PdfDoc.setDrawColor(0, 0, 0);
       PdfDoc.setFontSize(14);
       PdfDoc.setLineWidth(3);
@@ -1111,7 +1080,7 @@ function QuoteDetail() {
 
       let finalmarkup = "";
 
-      selectedRecords.forEach((selectTNC) => {
+      selecteTNCData.forEach((selectTNC) => {
         finalmarkup =
           finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
         let state = convertFromRaw(JSON.parse(selectTNC.description));
@@ -1157,10 +1126,10 @@ function QuoteDetail() {
 
             window.open(URL.createObjectURL(pdfBlobFile));
           } else if (!view && !send && !base64) {
-            doc.save(`Quotation - v${currentVersion}`);
+            doc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}`);
           } else if (base64) {
             doc.setProperties({
-              title: `Quotation - v${currentVersion}`,
+              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
             });
             const pdfBlobFile = doc.output("blob");
             generateBase64forFile(pdfBlobFile, "pdf");
@@ -1179,6 +1148,7 @@ function QuoteDetail() {
               .then(({ data }) => {
                 setPdf(data.fieldName);
                 handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
+                setPdfAttachment(data.fileName);
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -1212,10 +1182,10 @@ function QuoteDetail() {
 
         window.open(URL.createObjectURL(pdfBlobFile));
       } else if (!view && !send && !base64) {
-        PdfDoc.save(`Quotation - v${currentVersion}.pdf`);
+        PdfDoc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
       } else if (base64) {
         PdfDoc.setProperties({
-          title: `Quotation - v${currentVersion}`,
+          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
         });
         const pdfBlobFile = PdfDoc.output("blob");
         generateBase64forFile(pdfBlobFile, "pdf");
@@ -1233,6 +1203,7 @@ function QuoteDetail() {
           })
           .then(({ data }) => {
             handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
+            setPdfAttachment(data.fileName);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -1540,18 +1511,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-          data["profitPercentPerUnit"] === undefined
+            data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-          data["commissionPercentPerUnit"] === undefined
+            data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1563,7 +1534,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-              "undefined"
+            "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1717,7 +1688,6 @@ function QuoteDetail() {
       } else {
         setVisibleColumnName(defaultSelectColumns);
       }
-      console.log(allData);
       setDynamicTableData(allData);
     }
   };
@@ -1784,7 +1754,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1792,9 +1762,49 @@ function QuoteDetail() {
 
   const onSuccess = () => {
     setSendEmail(false);
-
     handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
+    handleAttachments();
     fetchQuoteData(currentVersion);
+  };
+
+  const handleAttachments = () => {
+    let request;
+
+    request = {
+      name: "Quotation V" + currentVersion,
+      fileUrl: "",
+      relatedTo: [
+        {
+          type: quote.quoteResource,
+          referenceId: quoteData?._id,
+          access: true,
+        },
+        {
+          type: quoteData?.customerAccountName
+            ? customerAccount?.accountResource
+            : supplierAccount?.accountResource,
+          referenceId: quoteData?.customerAccountName
+            ? quoteData?.customerAccountName?.optionValue
+            : quoteData?.supplierAccountName?.optionValue,
+          access: false,
+        },
+        {
+          type: opportunity.opportunityResource,
+          referenceId: quoteData.opportunity?.optionValue,
+          access: false,
+        },
+      ],
+    };
+
+    if (PDFAttachment !== "") {
+      request.fileUrl = PDFAttachment;
+      axiosInstance()
+        .post(`/attachment`, request)
+        .then(({ data }) => { })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const getVersionStatus = () => {
@@ -2295,6 +2305,7 @@ function QuoteDetail() {
                             allowedToEdit={allowedToEdit}
                             DOAData={DOAData}
                             generatePDF={GeneratePdf}
+                            selectedTNC={selectedRecords}
                           />
                         ) : (
                           <Steps
@@ -2314,6 +2325,7 @@ function QuoteDetail() {
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             generatePDF={GeneratePdf}
+                            selectedTNC={selectedRecords}
                           />
                         )}
                       </div>
@@ -2386,8 +2398,12 @@ function QuoteDetail() {
                             ) : null}
 
                             {ProcessStatus === "Quote Builder" ? (
-                              <Grid container>
-                                <Grid item xs={12} md={12} sm={12}>
+                              <Grid
+                                container
+                                justify="space-between"
+                                alignItems="center"
+                              >
+                                <Grid item xs={11} md={11} sm={11}>
                                   <FormControl
                                     fullWidth
                                     className={classes.formControl}
@@ -2431,6 +2447,15 @@ function QuoteDetail() {
                                       )}
                                     />
                                   </FormControl>
+                                </Grid>
+                                <Grid item xs={1} md={1} sm={1}>
+                                  <IconButton
+                                    title="Re-arrange columns"
+                                    color="inherit"
+                                    onClick={() => setRearrangeColumns(true)}
+                                  >
+                                    <ImportExportIcon />
+                                  </IconButton>
                                 </Grid>
                               </Grid>
                             ) : null}
@@ -2498,7 +2523,8 @@ function QuoteDetail() {
                           ) : null}
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderID ? (
-                              ProcessStatus === "Quote Builder" ? (
+                              ProcessStatus === "Quote Builder" &&
+                              visibleColumns.length > 0 ? (
                                 <ProductGrid
                                   productBuilderId={productBuilderID}
                                   refreshProducts={refreshProducts}
@@ -2509,6 +2535,7 @@ function QuoteDetail() {
                                 />
                               ) : (
                                 <ProductBuilder
+                                  currency={quoteData?.currency.toLowerCase()}
                                   productBuilderId={productBuilderID}
                                   isAddNewProduct={isAddNewProduct}
                                   setIsAddNewProduct={setIsAddNewProduct}
@@ -2519,6 +2546,9 @@ function QuoteDetail() {
                                   refreshProducts={refreshProducts}
                                   stage={
                                     ProcessStatus === "New" ? "product" : "cost"
+                                  }
+                                  isPriceBuilder={
+                                    ProcessStatus === "Price Builder"
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
@@ -2539,9 +2569,9 @@ function QuoteDetail() {
                                 <div className="position-relative">
                                   <h4
                                     className="form-label-style"
-                                    title="Add Terms & Conditions"
+                                    title="Add Additional Data"
                                   >
-                                    Terms & Conditions
+                                    Additional Data
                                   </h4>
                                   <Button
                                     onClick={() => setShowCreateDialog(true)}
@@ -2551,7 +2581,7 @@ function QuoteDetail() {
                                     className={classes.termsBtn}
                                     startIcon={<AddIcon />}
                                   >
-                                    Add Terms & Conditions
+                                    Add Additional Data
                                   </Button>
                                 </div>
                                 <CustomAgGrid
@@ -2569,7 +2599,16 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={[...prevVersionTNC]}
+                                  selectedRecords={[
+                                    ...selectedTnC,
+                                    ...prevVersionTNC,
+                                  ]}
+                                  loading={loadingTNC}
+                                  onSelection={(selectedRecords) => {
+                                    setSelectedTnC([
+                                      ...selectedRecords.map((o) => o._id),
+                                    ]);
+                                  }}
                                 />
                               </Box>
                             ) : null}
@@ -2667,6 +2706,19 @@ function QuoteDetail() {
             fetchData={fetchTermsAndConditions}
             editRecord={editRecordTNC}
           />
+        )}
+
+        {isRearrangeColumns && (
+          <DndProvider backend={HTML5Backend}>
+            <ColumnsDialog
+              setColumns={setVisibleColumnName}
+              columns={visibleColumns}
+              setOpenDialog={setRearrangeColumns}
+              id={id}
+              version={currentVersion}
+              refresh={fetchQuoteData}
+            />
+          </DndProvider>
         )}
 
         {sendEmail && (

@@ -142,7 +142,6 @@ const EmailDialog = (props) => {
   };
 
   const fetchemailAddress = (event, value) => {
-    console.log(value);
     if (value !== null) {
       if (!value.email && value.email === "") {
         setValidEmail(false);

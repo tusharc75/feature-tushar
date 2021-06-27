@@ -53,8 +53,7 @@ function reducer(state, action) {
             return {
                 ...state,
                 dataRows: action.data,
-                rowCount: action.count,
-                loading: false
+                rowCount: action.count
             }
 
         case "selection":
@@ -203,7 +202,6 @@ const Email = () => {
 
         if (gridApi) {
             gridApi.setRowData([]);
-            gridApi.showLoadingOverlay();
         }
         await GetEmails(JSON.stringify(filter), queryString)
             .then(({ data, count }) => {
@@ -502,7 +500,9 @@ const Email = () => {
                 limit={limit}
                 pageSizes={pageSizes}
                 page={page}
-                actionWidth={150} />
+                actionWidth={150} 
+                loading={loading}
+            />
 
             {showDeleteWarningConfirmBox ? (
                 <MessageDialog

@@ -1,26 +1,17 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { FormBuilder } from "../../components/FormBuilder";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { TextField } from "formik-material-ui";
-import Loader from "../../components/Loader";
-import { camelCase } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
-import routes from "../../components/Helpers/Routes";
 import DashboardView from '../../components/Charts/DashboardView'
-import ProductBuilder from "../../components/productBuilder";
-import axios from "axios";
-import { Dashboard } from "@material-ui/icons";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -31,16 +22,14 @@ const ProductBuilderSchema = Yup.object().shape({
 
 
 const EditDashboards = (props) => {
-    const {edit}=props
-    console.log(edit);
+    const { edit } = props
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
-    console.log(id);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
-    const [deleteField, setDeleteField] = useState([]);
+    const [deleteField] = useState([]);
 
 
     useEffect(() => {
@@ -54,7 +43,6 @@ const EditDashboards = (props) => {
         }
         else {
             axiosInstance().get(`/dashboard/` + id).then(({ data: { data } }) => {
-                console.log(data);
                 setInitialValues(data);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -62,11 +50,11 @@ const EditDashboards = (props) => {
         }
     };
 
-    
+
     const handleSave = (values) => {
         let data: any = {}
         data.name = initialValues.name;
-        data.Charts= values;
+        data.charts = values;
 
         setIsUpdating(true)
         if (id === "0") {
@@ -81,7 +69,7 @@ const EditDashboards = (props) => {
         else {
             data.BuilderId = id;
             data.deleteField = deleteField;
-            axiosInstance().put("/dashboard/"+id, data).then(({ data: { data } }) => {
+            axiosInstance().put("/dashboard/" + id, data).then(({ data: { data } }) => {
                 setIsUpdating(false)
                 history.push({ pathname: '/dashboards' });
             }).catch((error) => {
@@ -121,7 +109,7 @@ const EditDashboards = (props) => {
                                         </Box>
                                     </Grid>
                                 </Grid>
-                                <DashboardView edit={edit} handleSave={handleSave} Charts={initialValues.Charts}/>
+                                <DashboardView edit={edit} handleSave={handleSave} Charts={initialValues.charts || []} />
                             </Box>
                         </Form>)}
                 </Formik>

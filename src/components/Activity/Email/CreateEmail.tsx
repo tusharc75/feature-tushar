@@ -190,7 +190,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                     })
                     .catch((err) => {
                         setSending(false)
-                        console.log(err);
                         toastConfig.setToastConfig(err);
                     });
             }
@@ -431,6 +430,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                     {showESign &&
                                                         <Grid item className="pull-right p-0" xs={12}>
                                                             <FormControlLabel
+                                                                disabled={!isESign}
                                                                 key={1}
                                                                 control={
                                                                     <Switch
