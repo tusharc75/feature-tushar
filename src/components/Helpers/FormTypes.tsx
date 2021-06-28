@@ -1504,6 +1504,69 @@ const FormTypes = (props) => {
           {
             doNotShowUploadedFile ? null : <>
               <Box marginX={1} />
+              <Box flex="1" className="text-truncate">
+                <Typography
+                  variant="body2"
+                  className="text-truncate"
+                  color={
+                    touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+                  }
+                >
+                  {isFileUploading
+                    ? `Uploading... ${fileUploadProgress}%`
+                    : values[name]
+                      ? values[name]
+                      : touched[name] && Boolean(errors[name])
+                        ? errors[name]
+                        : "No file choosen"}
+                </Typography>
+              </Box>
+              {
+                values[name] ?
+                  <IconButton
+                    disabled={Boolean(!values[name])}
+                    title="Remove File"
+                    size="small"
+                    aria-label="delete picture"
+                    component="span"
+                    onClick={() => setFieldValue(name, "")}
+                  >
+                    <DeleteIcon color="error" />
+                  </IconButton> : null
+              }
+
+            </>}
+        </Box>
+      </Fragment>
+    ) : type === "fileUpload" ? (
+      <Fragment>
+        <Box display="flex" alignItems="center">
+          <input
+            disabled={isFileUploading}
+            id={name}
+            name={name}
+            onChange={handleUploadFile}
+            style={{ display: "none" }}
+            onClick={(e: any) => (e.target.value = null)}
+            type="file"
+            accept={accept || documentUploadSupportExtensions}
+            multiple={isMultipleUpload}
+          />
+          <label htmlFor={name}>
+            <Button
+              disabled={isFileUploading}
+              variant="contained"
+              color="primary"
+              size="small"
+              component="span"
+              startIcon={isFileUploading && <CircularProgress size={15} />}
+            >
+              {isFileUploading ? "Uploading File" : "Upload File"}
+            </Button>
+          </label>
+          {
+            doNotShowUploadedFile ? null : <>
+              <Box marginX={1} />
               <Box flex="1">
                 <Typography
                   variant="body2"

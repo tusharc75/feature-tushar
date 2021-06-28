@@ -454,6 +454,7 @@ body::-webkit-scrollbar-thumb {
   font-weight: bold;
   color: var(--secondary);
   padding-right: 10px;
+  margin-left: 2px;
 
   &.single {
     padding: 2px;
@@ -746,10 +747,11 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   font-size: 12px;
   gap: 0.25rem;
+  -webkit-gap: 0.25rem;
   font-weight: bold;
 }
 
-@supports not (gap: 0.25rem) {
+@supports not (-webkit-gap: 0.25rem) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }

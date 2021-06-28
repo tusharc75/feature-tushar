@@ -139,7 +139,20 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 @include fixed-list-loop(".font-size-", "font-size", "rem");
 
 // Gap
-@include fixed-list-loop(".gap-", "gap", "rem");
+
+@mixin fixed-gap-loop($className, $styleName, $unit) {
+    $i: 0;
+    @each $size in $sizes {
+        #{$className + $i} {
+            #{$styleName}: #{$size} !important;
+            #{"-webkit-" + $styleName}: #{$size} !important;
+        }
+        $i: $i + $offset;
+    }
+}
+
+
+@include fixed-gap-loop(".gap-", "gap", "rem");
 
 // Margin on x axis
 .mx-0 {
