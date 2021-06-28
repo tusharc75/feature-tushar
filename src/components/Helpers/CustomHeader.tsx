@@ -26,7 +26,7 @@ const CustomHeader = (props) => {
         justify="space-between"
         alignContent="center"
       >
-        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
           {options && (
             <ToggleButtonGroup

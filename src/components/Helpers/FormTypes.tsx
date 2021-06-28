@@ -1465,7 +1465,7 @@ const FormTypes = (props) => {
         {
           doNotShowUploadedFile ? null : <>
             <Box marginX={1} />
-            <Box flex="1">
+            <Box flex="1" className="text-truncate">
               <Typography
                 variant="body2"
                 className="text-truncate"

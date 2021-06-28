@@ -147,7 +147,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 <CustomDialogHeader onClose={handleClose}
                     title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
                 <CustomDialogContent>
-                    <Form autoComplete="off" autoCorrect="off" noValidate >
+                    <Form autoComplete="off" autoCorrect="off" noValidate>
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
@@ -166,7 +166,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                     />
                                 </Grid>
                                 <Grid container item xs={12}>
-                                    <Grid item xs={10}>
+                                    <Grid item xs={10} sm={11} md={11}>
                                         <FormTypes
                                             label="File"
                                             name="fileUrl"
@@ -182,7 +182,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                             }}
                                         />
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item xs={2} sm={1} md={1}>
                                         {
                                             attachmentId && values?.fileUrl ?
                                                 (isDownloading ? (
