@@ -53,10 +53,11 @@ export const AddField = (props) => {
 
   const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
 
+
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
     tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "Option 1", optionValue: "Option 1" }], formula: "return ", isvlookupReverse: false,
-    units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false, displayCurrency: ["USD"]
+    units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false, displayCurrency: refrence !== "formAdd" ? ["CUR"] : ["USD"]
   });
 
   let new_fields = []
@@ -289,6 +290,7 @@ export const AddField = (props) => {
             {values["type"] === "currencyAmount" && <Currency
               values={values}
               setFieldValue={setFieldValue}
+              refrence={refrence}
             />}
 
             {(values["type"] === "currencyAmount" || values["type"] === "percent") &&
@@ -349,6 +351,8 @@ export const AddField = (props) => {
               <Option
                 values={values}
                 setFieldValue={setFieldValue}
+                fields={new_fields}
+                _id={fieldData && fieldData._id ? fieldData._id : ""}
               />}
 
             <Box pt={1} pb={1}>

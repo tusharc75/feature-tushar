@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { DecimalPlaces } from './decimalPlaces';
 
 
-export const Currency = ({ values, setFieldValue }) => {
+export const Currency = ({ values, setFieldValue, refrence }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [currency, setCurrency] = useState([]);
@@ -34,7 +34,7 @@ export const Currency = ({ values, setFieldValue }) => {
             multiple
             disableCloseOnSelect={true}
             id="tags-filled"
-            options={currency}
+            options={refrence !== "formAdd" ? [...["CUR"], ...currency] : currency}
             value={values["displayCurrency"] ? values["displayCurrency"] : []}
             renderTags={(value: string[], getTagProps) =>
                 value.map((option: string, index: number) => (
