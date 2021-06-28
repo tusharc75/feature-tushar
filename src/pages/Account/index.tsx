@@ -606,7 +606,7 @@ export default function Account(props) {
                 <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                   <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
                   <div
-                    className={`${accountClass.account_header_add_btn_action_btn_group}`} >
+                    className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`} >
                     {AccTypes && (
                       <ToggleButtonGroup
                         size="small"
@@ -680,7 +680,7 @@ export default function Account(props) {
                     value={search}
                   />
                   <div
-                    className={`${accountClass.account_header_add_btn_action_btn_group}`}
+                    className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}
                   >
                     {accountPermissions.isCreate && (
                       <Button
