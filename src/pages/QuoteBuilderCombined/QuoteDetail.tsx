@@ -609,6 +609,7 @@ function QuoteDetail() {
         setTNC(selectedRecords);
       }
       setLoading(true);
+      setNextStep(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
@@ -760,7 +761,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-        .shortFormatAmount
+          .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -793,7 +794,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+                processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -903,12 +904,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-              data[sidebarResource[customerContact.contactResource]][
+            data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-              ]
+            ]
               ? data[sidebarResource[customerContact.contactResource]][
-              "Account_Name"
-              ]
+                  "Account_Name"
+                ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1511,18 +1512,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
+          data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
+          data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1534,7 +1535,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
+              "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1754,7 +1755,7 @@ function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -1800,7 +1801,7 @@ function QuoteDetail() {
       request.fileUrl = PDFAttachment;
       axiosInstance()
         .post(`/attachment`, request)
-        .then(({ data }) => { })
+        .then(({ data }) => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -2305,7 +2306,6 @@ function QuoteDetail() {
                             allowedToEdit={allowedToEdit}
                             DOAData={DOAData}
                             generatePDF={GeneratePdf}
-                            selectedTNC={selectedRecords}
                           />
                         ) : (
                           <Steps
@@ -2325,7 +2325,6 @@ function QuoteDetail() {
                             hideReminderButton={isHideReminder}
                             openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                             generatePDF={GeneratePdf}
-                            selectedTNC={selectedRecords}
                           />
                         )}
                       </div>
