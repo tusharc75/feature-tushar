@@ -430,6 +430,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose,
                                                     {showESign &&
                                                         <Grid item className="pull-right p-0" xs={12}>
                                                             <FormControlLabel
+                                                                disabled={!isESign}
                                                                 key={1}
                                                                 control={
                                                                     <Switch

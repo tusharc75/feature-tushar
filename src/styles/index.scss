@@ -397,6 +397,11 @@ body::-webkit-scrollbar-thumb {
   background: #f0f2f3 !important;
 }
 
+.product-builder-edit-grid {
+  height: calc(100vh - 430px);
+  margin: 0 6px 0;
+}
+
 .form-label-style:nth-child(1) {
   margin-top: 0.5rem;
 }
@@ -485,7 +490,7 @@ body::-webkit-scrollbar-thumb {
   height: calc(100vh - 110px);
   position: relative;
   overflow: auto;
-  z-index: 11;
+  z-index: 1;
   margin: 10px;
   top: 36px;
   background: white;
@@ -875,4 +880,8 @@ body::-webkit-scrollbar-thumb {
 /* Style your items */
 .my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
   margin-bottom: 30px;
+}
+
+.red-data-row {
+  background-color: #ffcccb !important;
 }

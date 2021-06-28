@@ -139,7 +139,6 @@ const Steps = (props) => {
     reminderLoading = false,
     hideReminderButton = false,
     DOAData = null,
-    selectedTNC,
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -148,7 +147,7 @@ const Steps = (props) => {
   const options = ["Booked", "Not Booked", "Invalid"];
   const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] =
     useState(false);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setComment(event.target.value);
   };
@@ -183,7 +182,11 @@ const Steps = (props) => {
           rejected = true;
           completed = false;
         }
-      } else if (versionStatus.includes("Rejected by Customer") || versionStatus.includes("Not Booked by Customer") || versionStatus.includes("Invalid by Customer")) {
+      } else if (
+        versionStatus.includes("Rejected by Customer") ||
+        versionStatus.includes("Not Booked by Customer") ||
+        versionStatus.includes("Invalid by Customer")
+      ) {
         if (steps.length === 6) {
           if (props.icon > 4) {
             status = 4;
@@ -200,7 +203,11 @@ const Steps = (props) => {
       }
     }
     if (props.icon === steps.length && props.active) {
-      if (versionStatus.includes("Rejected") || versionStatus.includes("Not Booked") || versionStatus.includes("Invalid")) {
+      if (
+        versionStatus.includes("Rejected") ||
+        versionStatus.includes("Not Booked") ||
+        versionStatus.includes("Invalid")
+      ) {
         status = 4;
         active = false;
         completed = false;
@@ -298,7 +305,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+        approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -592,16 +599,17 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
-              {(selectedOption === "Invalid") && <TextField
-                id="outlined-multiline-static"
-                label="Comment"
-                multiline
-                value={comment}
-                onChange={handleChange}
-                rows={4}
-                variant="outlined"
-              />}
-
+              {selectedOption === "Invalid" && (
+                <TextField
+                  id="outlined-multiline-static"
+                  label="Comment"
+                  multiline
+                  value={comment}
+                  onChange={handleChange}
+                  rows={4}
+                  variant="outlined"
+                />
+              )}
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
