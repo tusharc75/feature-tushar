@@ -125,6 +125,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             }
 
             if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
+              if (fieldData.type === "dropDown") {
+                ele.isDependentDropdown = values.isDependentDropdown
+                ele.dropdowDependentOn = values.dropdowDependentOn
+              }
               values.option.forEach((ele, index) => {
                 ele.order = index + 1
                 ele.default = false
@@ -300,16 +304,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   </Box>}
               </Fragment>
             }
+
             {values["type"] === "currencyAmount" &&
               <Currency
                 values={values}
                 setFieldValue={setFieldValue}
+                refrence="form-builder"
               />
             }
             {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
               <Option
                 values={values}
                 setFieldValue={setFieldValue}
+                fields={fields}
+                _id={fieldData._id}
               />}
             {((values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") && module !== "form-builder") &&
               <FormControlLabel
