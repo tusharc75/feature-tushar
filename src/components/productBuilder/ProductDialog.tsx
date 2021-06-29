@@ -367,11 +367,11 @@ const CreateProduct = (props) => {
                                     <FormTypes
                                       fields={initialData.fields}
                                       style={{
-                                        borderColor:
+                                        background:
                                           field.sectionName ===
                                           "Total Price Calculation"
-                                            ? "#ffaa22"
-                                            : "",
+                                            ? "#bbb5"
+                                            : "none",
                                       }}
                                       fieldData={field}
                                       values={values}
