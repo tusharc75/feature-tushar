@@ -120,13 +120,13 @@ const AssignEntityDialog = ({
       else {
         dataObj = {
           users: selectedData,
-          entity: ids[0],
+          entities: ids,
           roles: selectedRole
         };
 
       }
       await axiosInstance()
-        .put(type === "entity" ? `/user/assign-multiple-entities` : `/user/assign-users`, dataObj)
+        .put(type === "entity" ? `/user/assign-multiple-entities` : `/user/assign-regional-role`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
