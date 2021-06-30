@@ -126,8 +126,8 @@ export default function ProductDetails() {
 
                             </div>
                         </div>
-                        <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
-                        <FrequentlyBought />
+                        {/* <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
+                        <FrequentlyBought /> */}
                         <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
                         <SimilarItems similarItems={similarItems} />
                     </div> : <span>Loading...</span>

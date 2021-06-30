@@ -34,7 +34,9 @@ export default function SimilarItems({ similarItems }) {
                                 </div>
                                 <div className={styles.item_details}>
                                     <div className="mb-3 product_name_link pr-2">
-                                        <strong>{product.productName},</strong><span>{product.description}</span>
+                                        <strong>{product.productName}, </strong>
+                                        <span>{product.productCategory.optionLabel}, </span>
+                                        <span>{product.description}</span>
                                     </div>
                                     <span className="item_alt p-1 d-flex justify-content-center flex-column border border-bottom-0 p-2">
                                         <div className="d-flex align-items-center"><Rating name="size-small" value={product.rating} readOnly size="small" /> <span className="ml-2 mt-1">({product.reviews})</span></div>
