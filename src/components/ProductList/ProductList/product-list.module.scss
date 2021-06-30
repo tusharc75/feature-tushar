@@ -1,0 +1,23 @@
+.product_list_container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+  .product_list_container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+@media only screen and (max-width: 560px) {
+  .product_list_container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media only screen and (max-width: 375px) {
+  .product_list_container {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
