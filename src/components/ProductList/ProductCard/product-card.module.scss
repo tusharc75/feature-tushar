@@ -2,10 +2,8 @@
   display: grid;
   margin: 1em;
   grid-template-columns: 4fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  grid-template-areas:
-    "price add_to_cart"
-    "rating add_to_cart";
+  grid-template-rows: 1fr;
+  grid-template-areas: "price add_to_cart";
 }
 .product_header {
   height: 40px;
@@ -23,7 +21,10 @@
 .product_discount_avatar {
   background-color: var(--error) !important;
 }
-
+.originalPrice {
+  margin-left: 1rem;
+  text-decoration: line-through;
+}
 .product_image {
   height: 245;
 }

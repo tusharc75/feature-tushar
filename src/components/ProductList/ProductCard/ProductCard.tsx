@@ -10,6 +10,7 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
+import { getUniqueCurrencies } from "../../../constants/helpers";
 
 const useStyles = makeStyles({
   root: {
@@ -26,13 +27,25 @@ const ProductCard = (props: { product: any; }) => {
   const { product } = props;
   const classes = useStyles();
   const history = useHistory()
+  const currencySymbol = getUniqueCurrencies().some((data) => data?.currencyCode === product.currency)
+    ? getUniqueCurrencies().find(
+      (data) => data?.currencyCode === product.currency
+    ).symbolNative
+    : null
+
+  const calculateNetPrice = (price: number, discount: number) => {
+    let netPrice = price;
+    netPrice = (price * discount) / 100;
+    return netPrice;
+
+  }
 
   return (
     <Card className={styles.product_card}>
       <div className={styles.product_header}>
         <div className={styles.product_name}>
           <Typography variant="body2" color="error">
-            {product.productName}
+            {`${product.productName} ,${product.productCategory.optionLabel} `}
           </Typography>
         </div>
         <div className={styles.product_discount}>
@@ -58,11 +71,12 @@ const ProductCard = (props: { product: any; }) => {
         <div className={styles.product_card_action_price}>
           <h4 className="d-flex align-items-left justify-content-left">
             <Typography variant="body2" color="error">
-              {product.price}
+              {`${currencySymbol} ${calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}`}
+              <span className={styles.originalPrice}>{`${currencySymbol} ${product.mrp}`}</span>
             </Typography>
           </h4>
         </div>
-        <div className={styles.product_card_action_rating}>
+        {/* <div className={styles.product_card_action_rating}>
           <h4 className="d-flex align-items-left justify-content-left flex-column ">
             <Rating name="size-small" value={product.rating} readOnly size="small" />
           </h4>
@@ -71,8 +85,7 @@ const ProductCard = (props: { product: any; }) => {
               {product.rating} out of 5
             </Typography>
           </h4>
-
-        </div>
+        </div> */}
         <div className={styles.product_card_action_add_to_cart}>
           <IconButton aria-label="AddShoppingCartIcon" onClick={() => { }}>
             <AddShoppingCartIcon color="primary" />
