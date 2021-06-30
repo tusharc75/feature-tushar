@@ -33,8 +33,8 @@ export const DragBox = ({ name, type, label, removeExtraField }) => {
 
     return (<>
         <Grid ref={drag} style={{ ...style, opacity }} item xs={type === "field" ? 6 : 12} >
-            <Box border={1} p={1} borderColor="grey.300">
-                <Typography variant="body2">{label}</Typography>
+            <Box border={1} p={1} borderColor="grey.300" className="text-truncate">
+                <Typography variant="body2" className="text-truncate">{label}</Typography>
             </Box>
         </Grid>
     </>
