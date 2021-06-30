@@ -48,13 +48,24 @@ function Dashboard() {
                       </Box>
                       <Box height="150px" style={{ overflowY: "auto" }}>
                         {section.items.map((item) => (
-                          <Box marginY={1} key={item.name} component="div">
-                            <Typography paragraph>
-                              <Link to={`/${kebabCase(item.name)}`}>
-                                {item.name}
-                              </Link>
-                            </Typography>
-                          </Box>
+                          <>
+                            <Box marginY={1} key={item.name} component="div">
+                              <Typography paragraph>
+                                <Link to={`/${kebabCase(item.name)}`}>
+                                  {item.name}
+                                </Link>
+                              </Typography>
+                            </Box>
+                            {
+                              item.name === "Product" && <Box marginY={1} key={item.name} component="div">
+                                <Typography paragraph>
+                                  <Link to={`/product-list`}>
+                                    Product List
+                                  </Link>
+                                </Typography>
+                              </Box>
+                            }
+                          </>
                         ))}
                       </Box>
                     </Box>
