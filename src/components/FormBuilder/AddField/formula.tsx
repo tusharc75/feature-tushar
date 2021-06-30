@@ -91,9 +91,9 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
     return result;
   };
 
-  const fullLabel = (label) => {
-    const fieldLabel = startCase(label.split("_")[0]);
-    return `${fieldLabel} - ${label}`;
+  const generateLabel = (label) => {
+    const data = fields?.find((d) => d.fieldName === label);
+    return `${data.fieldLabel} - ${label}`;
   };
 
   return (
@@ -147,7 +147,7 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
             <Chip
               className="ml-1 cursor-pointer"
               key={_field}
-              label={`${startCase(_field.split("_")[0])} - ${_field}`}
+              label={generateLabel(_field)}
               onClick={() => handleAddInputField(_field)}
             />
           ))}

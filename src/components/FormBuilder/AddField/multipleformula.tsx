@@ -78,6 +78,11 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
       );
   }
 
+  const generateLabel = (label) => {
+    const data = fields?.find((d) => d.fieldName === label);
+    return `${data.fieldLabel} - ${label}`;
+  };
+
   return (
     <Box>
       <FormControl variant="outlined" fullWidth margin="dense">
@@ -170,7 +175,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
             <Chip
               className="ml-1 cursor-pointer"
               key={_field}
-              label={`${startCase(_field.split("_")[0])} - ${_field}`}
+              label={generateLabel(_field)}
               onClick={() => handleAddInputField(_field)}
             />
           ))}
