@@ -673,6 +673,9 @@ function QuoteDetail() {
                 data.versions[keys[keys.length - 1]].acceptedColumns
               );
             }
+            if (data.versions[keys[keys.length - 1]].PDF) {
+              setPdf(data.versions[keys[keys.length - 1]].PDF);
+            }
 
             if (
               data.versions[keys[keys.length - 1]].status === "Building Quote"
@@ -1569,7 +1572,7 @@ function QuoteDetail() {
             if (key.includes("_")) {
               let splitKey = key.split("_");
               key = splitKey[0];
-              currency = splitKey[1];
+              currency = splitKey[1].toUpperCase();
             }
             let fields = quoteRows["fields"];
             let field = fields.filter(
@@ -1590,30 +1593,27 @@ function QuoteDetail() {
                 });
               }
 
-              if (
-                currency.toUpperCase() === quoteData?.currency &&
-                key === "totalCost"
-              ) {
+              if (currency === quoteData?.currency && key === "totalCost") {
                 totalCost = totalCost + quoteRows[indexkey];
-                CostCurrency = currency.toUpperCase();
+                CostCurrency = currency;
               } else if (
-                currency.toUpperCase() === quoteData?.currency &&
+                currency === quoteData?.currency &&
                 key === "totalSalesPrice"
               ) {
                 totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                SPCurrency = currency.toUpperCase();
+                SPCurrency = currency;
               } else if (
-                currency.toUpperCase() === quoteData?.currency &&
+                currency === quoteData?.currency &&
                 key === "totalProfit"
               ) {
                 totalProfit = totalProfit + quoteRows[indexkey];
-                ProfitCurrency = currency.toUpperCase();
+                ProfitCurrency = currency;
               } else if (
-                currency.toUpperCase() === quoteData?.currency &&
+                currency === quoteData?.currency &&
                 key === "totalMargin"
               ) {
                 totalMargin = totalMargin + quoteRows[indexkey];
-                MarginCurrency = currency.toUpperCase();
+                MarginCurrency = currency;
               }
             }
           }
@@ -2286,47 +2286,26 @@ function QuoteDetail() {
                         </Grid>
                       </Grid>
                       <div>
-                        {DOAneeded ? (
-                          <Steps
-                            steps={DOASteps}
-                            currentStep={DOASteps.indexOf(ProcessStatus)}
-                            id={id}
-                            version={currentVersion}
-                            Refresh={fetchQuoteData}
-                            nextStep={nextStep}
-                            versionStatus={versionStatus}
-                            loading={loading}
-                            approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAmaxLimit}
-                            totalCost={totalPrice}
-                            handleSendReminder={handleSendReminder}
-                            reminderLoading={reminderLoading}
-                            hideReminderButton={isHideReminder}
-                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            allowedToEdit={allowedToEdit}
-                            DOAData={DOAData}
-                            generatePDF={GeneratePdf}
-                          />
-                        ) : (
-                          <Steps
-                            steps={OtherSteps}
-                            currentStep={OtherSteps.indexOf(ProcessStatus)}
-                            id={id}
-                            version={currentVersion}
-                            Refresh={fetchQuoteData}
-                            nextStep={nextStep}
-                            versionStatus={versionStatus}
-                            loading={loading}
-                            approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAmaxLimit}
-                            totalCost={totalPrice}
-                            handleSendReminder={handleSendReminder}
-                            reminderLoading={reminderLoading}
-                            hideReminderButton={isHideReminder}
-                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            generatePDF={GeneratePdf}
-                          />
-                        )}
+                        <Steps
+                          steps={DOAneeded ? DOASteps : OtherSteps}
+                          currentStep={DOASteps.indexOf(ProcessStatus)}
+                          id={id}
+                          version={currentVersion}
+                          Refresh={fetchQuoteData}
+                          nextStep={nextStep}
+                          versionStatus={versionStatus}
+                          loading={loading}
+                          approvedQuote={ifQuoteApproved()}
+                          DOAlimit={DOAmaxLimit}
+                          totalCost={totalPrice}
+                          handleSendReminder={handleSendReminder}
+                          reminderLoading={reminderLoading}
+                          hideReminderButton={isHideReminder}
+                          openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                          allowedToEdit={allowedToEdit}
+                          DOAData={DOAData}
+                          generatePDF={GeneratePdf}
+                        />
                       </div>
                     </Paper>
                   </TabPanel>
