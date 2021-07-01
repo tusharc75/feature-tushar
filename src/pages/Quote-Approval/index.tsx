@@ -130,7 +130,7 @@ const QuoteApproval = () => {
     const QuoteStatusChange = (accepted, signedDocumentBase64, comment) => {
         let body;
         if (accepted !== "Rejected") {
-            body = { status: "Accepted by Customer", signedDocument: signedDocumentBase64 }
+            body = { status: "Accepted by Customer", signature: signedDocumentBase64 }
         }
         else {
             body = { status: "Rejected by Customer", comment: comment }
