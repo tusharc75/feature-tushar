@@ -10,13 +10,6 @@ import {
 } from "@azure/msal-react";
 import { SiMicrosoftoffice } from "react-icons/si";
 
-function ErrorComponent({ error }) {
-  return <p>An Error Occurred: {error}</p>;
-}
-
-function LoadingComponent() {
-  return <p>Authentication in progress...</p>;
-}
 const LogIn = (props) => {
   const { instance, accounts, inProgress } = useMsal();
   const account = useAccount(accounts[0] || {});
