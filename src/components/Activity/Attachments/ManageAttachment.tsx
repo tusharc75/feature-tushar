@@ -103,7 +103,6 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         setOtherAttachments([...otherAttachments, ...filteredAttachments])
                     }
                     setInitialValues(data)
-                    console.log(data)
                     setLoading(false);
                     // setInitialValues({ name: data?.name ?? '', fileUrl: data?.fileUrl ?? '' })
                 })
