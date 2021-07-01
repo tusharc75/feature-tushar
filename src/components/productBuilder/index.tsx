@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import Box from "@material-ui/core/Box";
 import CreateProduct from "../Product/CreateProduct";
 import AddExistingProduct from "./AddExistingProduct";
@@ -27,11 +27,10 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import BulkEditDialog from "./BulkEditDialog";
 import _ from "lodash";
 import Loader from "../Loader";
-import { useData } from "../../StateProvider/Provider";
 import { handleAutoCalculation } from "../../constants/formulaUtility";
 import { gridLoadingTimeout } from "../../constants/helpers";
 
-var levalOrderBy = [
+let levalOrderBy = [
   "product",
   "product-custom",
   "product-template",
@@ -52,12 +51,11 @@ const ProductBuilder = (props) => {
     stage,
     currency,
     isPriceBuilder,
+    createdBy,
+    permissions,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions },
-  }: any = useData();
 
   const [product, setProduct] = useState([]);
   const [columns, setColumns] = useState(null);
@@ -93,39 +91,45 @@ const ProductBuilder = (props) => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setProductData(params.data);
-            setIsClone(true);
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Edit">
-        <IconButton
-          aria-label="Edit"
-          onClick={() => {
-            setProductData(params.data);
-          }}
-        >
-          <EditIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Delete">
-        <IconButton
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <DeleteIcon fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>
+      {permissions.isUpdate && (
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setProductData(params.data);
+              setIsClone(true);
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {permissions.isUpdate && (
+        <Tooltip title="Edit">
+          <IconButton
+            aria-label="Edit"
+            onClick={() => {
+              setProductData(params.data);
+            }}
+          >
+            <EditIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {permissions.isUpdate && (
+        <Tooltip title="Delete">
+          <IconButton
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
@@ -622,18 +626,20 @@ const ProductBuilder = (props) => {
         <Grid item xs={2} className="d-flex align-items-center gap-1"></Grid>
         {Editable && (
           <Grid xs={10} container justify="flex-end">
-            <ImportExportLinks
-              permissions={permissions.productBuilder}
-              module="builder"
-              api={"productbuilder"}
-              refrenceId={productBuilderId}
-              onSuccessfulImport={(isImportedSuccessfully) => {
-                if (isImportedSuccessfully) {
-                  fetchProduct(productBuilderId);
-                }
-              }}
-            />
-            {stage === "cost" && (
+            {permissions.isUpdate && (
+              <ImportExportLinks
+                permissions={permissions}
+                module="builder"
+                api={"productbuilder"}
+                refrenceId={productBuilderId}
+                onSuccessfulImport={(isImportedSuccessfully) => {
+                  if (isImportedSuccessfully) {
+                    fetchProduct(productBuilderId);
+                  }
+                }}
+              />
+            )}
+            {stage === "cost" && permissions.isUpdate && (
               <Button
                 variant="contained"
                 color="primary"
@@ -646,17 +652,19 @@ const ProductBuilder = (props) => {
                 Bulk Edit
               </Button>
             )}
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              className="float-right"
-              onClick={openActions}
-              disabled={selectedRecords.length ? false : true}
-              aria-controls="action-menu"
-            >
-              Actions <ExpandMore />
-            </Button>
+            {permissions.isUpdate && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={openActions}
+                disabled={selectedRecords.length ? false : true}
+                aria-controls="action-menu"
+              >
+                Actions <ExpandMore />
+              </Button>
+            )}
             <Menu
               anchorEl={anchorEl}
               keepMounted
