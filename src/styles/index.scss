@@ -454,6 +454,7 @@ body::-webkit-scrollbar-thumb {
   font-weight: bold;
   color: var(--secondary);
   padding-right: 10px;
+  margin-left: 2px;
 
   &.single {
     padding: 2px;
@@ -746,10 +747,11 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   font-size: 12px;
   gap: 0.25rem;
+  -webkit-gap: 0.25rem;
   font-weight: bold;
 }
 
-@supports not (gap: 0.25rem) {
+@supports not (-webkit-gap: 0.25rem) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
@@ -884,4 +886,23 @@ body::-webkit-scrollbar-thumb {
 
 .red-data-row {
   background-color: #ffcccb !important;
+}
+.a_divider_inner {
+  height: 44px;
+  margin-bottom: -18px;
+  background: -webkit-linear-gradient(to bottom, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.03) 3px, transparent);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.03) 3px, transparent);
+  z-index: 0;
+  zoom: 1;
+}
+
+.a_divider_inner:after {
+  display: block;
+  width: 100%;
+  height: 44px;
+  background-color: transparent;
+  background: -webkit-linear-gradient(to right,#fff,rgba(255,255,255,0),#fff);
+  background: linear-gradient(to right,#fafafa,rgba(255,255,255,0),#fafafa);
+  z-index: 1;
+  content: "";
 }

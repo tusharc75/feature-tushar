@@ -96,7 +96,7 @@ const AssignRegionalRolesUserDialog = ({
         let dataObj = {
             users: selectedUser,
             entities: selectedEntity,
-            roles: ids[0],
+            roles: ids,
         };
 
         await axiosInstance()

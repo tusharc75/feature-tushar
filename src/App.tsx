@@ -86,6 +86,8 @@ import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
 import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import { TRACKING_ID } from "./config";
+import Products from "./pages/Products";
+import ProductDetails from "./pages/Products/ProductDetails";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -475,6 +477,12 @@ function App() {
           <Route exact path="/inline-grid">
             <CustomInlineEditableAgGrid />
           </Route>
+          <PrivateRoute exact path="/product-list">
+            <Products />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product/details/:id">
+            <ProductDetails />
+          </PrivateRoute>
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

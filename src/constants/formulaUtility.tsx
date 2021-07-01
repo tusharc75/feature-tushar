@@ -109,6 +109,11 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         else if (fieldData.type === 'currencyAmount') {
             resultValues = handleCurrency(fieldData, fields, values, fieldData.fieldName, currency, value, resultValues);
         }
+        if (fieldData.type === 'dropDown') {
+            fields && fields.filter((_f) => _f.type === "dropDown" && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach(_r => {
+                resultValues[_r.fieldName] = ""
+            });
+        }
     }
     catch (e) {
     }
@@ -133,6 +138,8 @@ const handleMulitFormula = (fieldData, fields, values, resultValues) => {
 
 const handleFormula = (fieldData, fields, values, name, value, resultValues) => {
     if (fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length) {
+
+        console.log(fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields && _f.inputFields.includes(name)))
         fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).forEach((_data) => {
             if (_data.inputFields.includes(name)) {
                 let inputFields = {};
@@ -195,6 +202,9 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues) => 
                             resultValues = handleMulitFormula(_data, fields, values, resultValues);
                         }
                     }
+                    else {
+                        resultValues[_fieldName] = calValue;
+                    }
                 } else {
                     if (resultValues[_fieldName] === undefined) {
                         resultValues[_fieldName] = calValue;
@@ -202,6 +212,9 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues) => 
                         if (_data.isMulitFormula) {
                             resultValues = handleMulitFormula(_data, fields, values, resultValues);
                         }
+                    }
+                    else {
+                        resultValues[_fieldName] = calValue;
                     }
                 }
             }
@@ -363,6 +376,41 @@ export const extractFields = (fields) => {
     return result
 }
 
+
+export const autoCalculate = (values: any, fieldList: any) => {
+    let returnvalues: any = values
+    fieldList.forEach((ele: any) => {
+        if (ele.lookup || ((ele.type === "vlookupDropdown" || ele.isVlookup) && !ele.isvlookupReverse) || ele.isFormula || ele.isUneditable) {
+        }
+        else {
+            let calValues: any = {}
+            if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+                if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                    let fieldName = ele.fieldName + "_" + ele.displayUnits[0].toLowerCase();
+                    calValues = handleAutoCalculation(ele, fieldList, returnvalues, fieldName, "", ele.displayUnits[0], values[fieldName] ? values[fieldName] : 0)
+                }
+                else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                    let fieldName = ele.fieldName + "_" + ele.displayCurrency[0].toLowerCase() + "_" + ele.displayUnits[0].toLowerCase();
+                    calValues = handleAutoCalculation(ele, fieldList, returnvalues, fieldName, ele.displayCurrency[0], ele.displayUnits[0], values[fieldName] ? values[fieldName] : 0)
+                }
+                else if (ele.type === 'currencyAmount') {
+                    let fieldName = ele.fieldName + "_" + ele.displayCurrency[0].toLowerCase();
+                    calValues = handleAutoCalculation(ele, fieldList, returnvalues, fieldName, ele.displayCurrency[0], "", values[fieldName] ? values[fieldName] : 0)
+                }
+            }
+            else {
+                calValues = handleAutoCalculation(ele, fieldList, returnvalues, ele.fieldName, "", "", values[ele.fieldName] || values[ele.fieldName] === 0 ? values[ele.fieldName] : "")
+            }
+            for (const x in calValues) {
+                if (calValues[x] === 0 || calValues[x] === "") {
+                    delete calValues[x]
+                }
+            }
+            Object.assign(returnvalues, calValues);
+        }
+    });
+    return returnvalues;
+}
 
 
 // export const checkFormula = (formula) => {

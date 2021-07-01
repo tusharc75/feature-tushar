@@ -50,6 +50,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "brand-configuration",
         "project-sales",
         "doa-request",
+        "product-list",
+        "product/details"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

@@ -473,6 +473,8 @@ function QuoteDetail() {
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showAiDialog, setShowAiDialog] = useState(false);
+  const [updatingVersion, setUpdatingVersion] = useState(false);
+  const [generatingPdfFile, setGeneratingFile] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState({
     show: false,
     text: null,
@@ -609,6 +611,7 @@ function QuoteDetail() {
         setTNC(selectedRecords);
       }
       setLoading(true);
+      setNextStep(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
@@ -671,6 +674,9 @@ function QuoteDetail() {
               setColumnView(
                 data.versions[keys[keys.length - 1]].acceptedColumns
               );
+            }
+            if (data.versions[keys[keys.length - 1]].PDF) {
+              setPdf(data.versions[keys[keys.length - 1]].PDF);
             }
 
             if (
@@ -1568,7 +1574,7 @@ function QuoteDetail() {
             if (key.includes("_")) {
               let splitKey = key.split("_");
               key = splitKey[0];
-              currency = splitKey[1];
+              currency = splitKey[1].toUpperCase();
             }
             let fields = quoteRows["fields"];
             let field = fields.filter(
@@ -1579,7 +1585,7 @@ function QuoteDetail() {
               if (typeof quoteRows[key] === "object") {
                 inventorydata.push({
                   fieldName: field[0].fieldLabel,
-                  fieldValue: quoteRows[key][key],
+                  fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
                 });
               } else {
                 inventorydata.push({
@@ -1589,30 +1595,27 @@ function QuoteDetail() {
                 });
               }
 
-              if (
-                currency.toUpperCase() === quoteData?.currency &&
-                key === "totalCost"
-              ) {
+              if (currency === quoteData?.currency && key === "totalCost") {
                 totalCost = totalCost + quoteRows[indexkey];
-                CostCurrency = currency.toUpperCase();
+                CostCurrency = currency;
               } else if (
-                currency.toUpperCase() === quoteData?.currency &&
+                currency === quoteData?.currency &&
                 key === "totalSalesPrice"
               ) {
                 totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                SPCurrency = currency.toUpperCase();
+                SPCurrency = currency;
               } else if (
-                currency.toUpperCase() === quoteData?.currency &&
+                currency === quoteData?.currency &&
                 key === "totalProfit"
               ) {
                 totalProfit = totalProfit + quoteRows[indexkey];
-                ProfitCurrency = currency.toUpperCase();
+                ProfitCurrency = currency;
               } else if (
-                currency.toUpperCase() === quoteData?.currency &&
+                currency === quoteData?.currency &&
                 key === "totalMargin"
               ) {
                 totalMargin = totalMargin + quoteRows[indexkey];
-                MarginCurrency = currency.toUpperCase();
+                MarginCurrency = currency;
               }
             }
           }
@@ -1706,11 +1709,25 @@ function QuoteDetail() {
     }
     if (Customerreq) {
       exportToCSV(true);
-      if (!pdfFileBase64) {
-        GeneratePdf(false, false, true);
-      }
-
       setSendEmail(true);
+      if (!pdfFileBase64) {
+        setGeneratingFile(true);
+        axiosInstance()
+          .get(
+            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            {
+              responseType: "blob",
+            }
+          )
+          .then(({ data }) => {
+            setGeneratingFile(false);
+            const file = new Blob([data], { type: "application/pdf" });
+            generateBase64forFile(file, "pdf");
+          })
+          .catch((err) => {
+            setGeneratingFile(false);
+          });
+      }
     }
   };
 
@@ -1733,7 +1750,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        dataTNC
+        TandC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1745,19 +1762,134 @@ function QuoteDetail() {
       });
   };
 
-  const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
+  const handleVersionUpdate = (
+    PDFfile,
+    Columns,
+    versionStatus,
+    TC,
+    view = false,
+    download = false
+  ) => {
     let body = {
-      PDF: PDFfile,
       acceptedColumns: Columns,
       status: versionStatus,
-      TNC: TC,
+      TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
     };
+
+    setUpdatingVersion(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data: { data } }) => {
+        setUpdatingVersion(false);
+
+        if (view && data.fileName) {
+          setUpdatingVersion(true);
+          axiosInstance()
+            .get(`user/download?fileName=${data.fileName}`, {
+              responseType: "blob",
+            })
+            .then(({ data }) => {
+              setUpdatingVersion(false);
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+            })
+            .catch((err) => {
+              setUpdatingVersion(true);
+            });
+        } else if (download && data.fileName) {
+          setUpdatingVersion(true);
+          axiosInstance()
+            .get(`user/download?fileName=${data.fileName}`, {
+              responseType: "blob",
+            })
+            .then(({ data }) => {
+              setUpdatingVersion(false);
+              const url = window.URL.createObjectURL(
+                new Blob([data], { type: "application/pdf" })
+              );
+              const link = document.createElement("a");
+              link.href = url;
+              link.setAttribute(
+                "download",
+                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+              );
+              document.body.appendChild(link);
+              link.click();
+            })
+            .catch((err) => {
+              setUpdatingVersion(true);
+            });
+        }
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setUpdatingVersion(false);
       });
+  };
+
+  const handleViewPdf = (view = false, download = false) => {
+    const pdfFileName = quoteData.versions[currentVersion].PDF;
+
+    if (!pdfFileName) {
+      handleVersionUpdate(
+        "",
+        visibleColumns,
+        versionStatus,
+        TandC,
+        view,
+        download
+      );
+    }
+    else {
+      if (view) {
+        setUpdatingVersion(true);
+        axiosInstance()
+          .get(
+            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            {
+              responseType: "blob",
+            }
+          )
+          .then(({ data }) => {
+            setUpdatingVersion(false);
+            const file = new Blob([data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            const pdfWindow = window.open();
+            pdfWindow.location.href = fileURL;
+          })
+          .catch((err) => {
+            setUpdatingVersion(true);
+          });
+      } else if (download) {
+        setUpdatingVersion(true);
+        axiosInstance()
+          .get(
+            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            {
+              responseType: "blob",
+            }
+          )
+          .then(({ data }) => {
+            setUpdatingVersion(false);
+            const url = window.URL.createObjectURL(
+              new Blob([data], { type: "application/pdf" })
+            );
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute(
+              "download",
+              `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+            );
+            document.body.appendChild(link);
+            link.click();
+          })
+          .catch((err) => {
+            setUpdatingVersion(true);
+          });
+      }
+    }
   };
 
   const onSuccess = () => {
@@ -1853,7 +1985,7 @@ function QuoteDetail() {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
       contentType: pdfFileBase64.split(";")[0].split(":")[1],
-      name: `Quotation v${currentVersion}`,
+      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
     });
   }
   if (excelFileBase64) {
@@ -1862,7 +1994,7 @@ function QuoteDetail() {
         parseInt(excelFileBase64.indexOf(",") + 1)
       ),
       contentType: excelFileBase64.split(";")[0].split(":")[1],
-      name: `Quotation v${currentVersion}`,
+      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
     });
   }
 
@@ -2001,9 +2133,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2120,10 +2252,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2285,49 +2417,33 @@ function QuoteDetail() {
                         </Grid>
                       </Grid>
                       <div>
-                        {DOAneeded ? (
-                          <Steps
-                            steps={DOASteps}
-                            currentStep={DOASteps.indexOf(ProcessStatus)}
-                            id={id}
-                            version={currentVersion}
-                            Refresh={fetchQuoteData}
-                            nextStep={nextStep}
-                            versionStatus={versionStatus}
-                            loading={loading}
-                            approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAmaxLimit}
-                            totalCost={totalPrice}
-                            handleSendReminder={handleSendReminder}
-                            reminderLoading={reminderLoading}
-                            hideReminderButton={isHideReminder}
-                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            allowedToEdit={allowedToEdit}
-                            DOAData={DOAData}
-                            generatePDF={GeneratePdf}
-                            selectedTNC={selectedRecords}
-                          />
-                        ) : (
-                          <Steps
-                            steps={OtherSteps}
-                            currentStep={OtherSteps.indexOf(ProcessStatus)}
-                            id={id}
-                            version={currentVersion}
-                            Refresh={fetchQuoteData}
-                            nextStep={nextStep}
-                            versionStatus={versionStatus}
-                            loading={loading}
-                            approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAmaxLimit}
-                            totalCost={totalPrice}
-                            handleSendReminder={handleSendReminder}
-                            reminderLoading={reminderLoading}
-                            hideReminderButton={isHideReminder}
-                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            generatePDF={GeneratePdf}
-                            selectedTNC={selectedRecords}
-                          />
-                        )}
+                        <Steps
+                          steps={DOAneeded ? DOASteps : OtherSteps}
+                          currentStep={DOASteps.indexOf(ProcessStatus)}
+                          id={id}
+                          version={currentVersion}
+                          Refresh={fetchQuoteData}
+                          nextStep={nextStep}
+                          versionStatus={versionStatus}
+                          loading={loading}
+                          approvedQuote={ifQuoteApproved()}
+                          DOAlimit={DOAmaxLimit}
+                          totalCost={totalPrice}
+                          handleSendReminder={handleSendReminder}
+                          reminderLoading={reminderLoading}
+                          hideReminderButton={isHideReminder}
+                          openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                          allowedToEdit={allowedToEdit}
+                          DOAData={DOAData}
+                          handleVersionUpdate={() => {
+                            handleVersionUpdate(
+                              "",
+                              visibleColumns,
+                              versionStatus,
+                              TandC
+                            );
+                          }}
+                        />
                       </div>
                     </Paper>
                   </TabPanel>
@@ -2369,7 +2485,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
+                              ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2461,8 +2577,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2482,24 +2598,25 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
-                                onClick={() => createImagePDF(true, false)}
+                                onClick={() => {
+                                  handleViewPdf(true, false);
+                                }}
                                 variant="outlined"
-                                disabled={generatingPdf.text}
+                                disabled={updatingVersion}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<AiOutlineEye />}
                                 color="primary"
                               >
-                                {generatingPdf.text === null
-                                  ? "View"
-                                  : "Generating..."}
+                                View
                               </Button>
                               <Button
+                                disabled={updatingVersion}
                                 onClick={() => {
-                                  createImagePDF(false, false);
+                                  handleViewPdf(false, true);
                                   exportToCSV();
                                 }}
                                 variant="outlined"
@@ -2524,7 +2641,7 @@ function QuoteDetail() {
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderID ? (
                               ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0 ? (
+                                visibleColumns.length > 0 ? (
                                 <ProductGrid
                                   productBuilderId={productBuilderID}
                                   refreshProducts={refreshProducts}
@@ -2535,6 +2652,9 @@ function QuoteDetail() {
                                 />
                               ) : (
                                 <ProductBuilder
+                                  fromQuote={true}
+                                  permissions={permissions?.quoteBuilder}
+                                  hasPermission={allowedToEdit}
                                   currency={quoteData?.currency.toLowerCase()}
                                   productBuilderId={productBuilderID}
                                   isAddNewProduct={isAddNewProduct}
@@ -2552,7 +2672,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                      ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2599,10 +2719,11 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={[
-                                    ...selectedTnC,
-                                    ...prevVersionTNC,
-                                  ]}
+                                  selectedRecords={
+                                    selectedRecords.length > 0
+                                      ? selectedRecords
+                                      : TandC
+                                  }
                                   loading={loadingTNC}
                                   onSelection={(selectedRecords) => {
                                     setSelectedTnC([
@@ -2658,7 +2779,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2732,6 +2853,7 @@ function QuoteDetail() {
             fullWidth
           >
             <CreateEmail
+              generatingFile={generatingPdfFile}
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
@@ -2744,9 +2866,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}

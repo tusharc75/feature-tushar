@@ -51,10 +51,10 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
             />
         </Grid>
         <Grid item sm={12} lg={12} md={12} className="profileBox">
-            <div className="d-flex flex-column gap-4 px-4 pt-2 pb-3" >
+            <div className="d-flex flex-column px-4 pt-2 pb-3" >
                 {
                     userMenu.map((k, index) => {
-                        return <div key={index} className={`font-size-3 link d-flex align-items-center gap-1 ${styles.profileSidebarLink}`}>
+                        return <div key={index} className={`font-size-3 link d-flex align-items-center gap-1 mb-3 ${styles.profileSidebarLink}`}>
                             <span className={`${styles.menuLink} ${activeLink === k.id ? styles.active : ""}`}>
                                 <Icon >{k.icon}</Icon>
                                 <Typography className={styles.linkLabel} align="left" key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>

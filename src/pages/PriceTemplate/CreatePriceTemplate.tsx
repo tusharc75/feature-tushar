@@ -55,7 +55,7 @@ const PriceTemplate = () => {
 
     const fetchOnePriceTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productTemplate: "", isCurrenctOverride: false });
+            setInitialValues({ name: "", productTemplate: "" });
             axiosInstance().get(`/price-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -86,7 +86,6 @@ const PriceTemplate = () => {
         let data: any = {}
         data.name = values.name;
         data.productTemplate = values.productTemplate;
-        data.isCurrenctOverride = values.isCurrenctOverride;
         
         const resultproductTemplate = productTemplate.filter((_f) => _f._id === values.productTemplate);
         if (resultproductTemplate.length) {
@@ -244,24 +243,7 @@ const PriceTemplate = () => {
                                             )}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <Box mt={0.5}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Checkbox
-                                                        name="isCurrenctOverride"
-                                                        checked={values["isCurrenctOverride"]}
-                                                        onChange={(e) => {
-                                                            setFieldValue("isCurrenctOverride", e.target.checked)
-                                                        }}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label="Currency Override"
-                                            />
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={12} sm={3} container justify="flex-end">
+                                    <Grid item xs={12} sm={6} container justify="flex-end">
                                         <Box>
                                             <Button disabled={isUpdating} size="small" color="primary" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}

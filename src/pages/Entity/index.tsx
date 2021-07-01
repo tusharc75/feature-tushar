@@ -306,7 +306,7 @@ const Entity: FC = () => {
             entitiesDialogOpen={usersDialogOpen}
             handleCloseDialog={handleCloseDialog}
             type="user"
-            ids={[singleSelectEntity]}
+            ids={selectedRecords.map(rec => rec._id)}
             assignedEntity={users}
             regionalRole={false}
             onSuccess={() => {

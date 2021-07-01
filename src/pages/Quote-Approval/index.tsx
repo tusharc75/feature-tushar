@@ -127,10 +127,10 @@ const QuoteApproval = () => {
             });
     }
 
-    const QuoteStatusChange = (accepted, signedDocumentUrl, comment) => {
+    const QuoteStatusChange = (accepted, signedDocumentBase64, comment) => {
         let body;
         if (accepted !== "Rejected") {
-            body = { status: "Accepted by Customer", signedDocument: signedDocumentUrl }
+            body = { status: "Accepted by Customer", signature: signedDocumentBase64 }
         }
         else {
             body = { status: "Rejected by Customer", comment: comment }
@@ -567,13 +567,13 @@ const QuoteApproval = () => {
                                                 <h2>Total : {sellingPrice} {currency}</h2>
                                             </Grid>
                                             <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
-                                                <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
+                                                {/* <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
                                                     setGeneratingPdf({ show: true, text: "Generating..." })
                                                     generatePdf(true, false)
                                                 }
                                                 }>
                                                     {generatingPdf.show === true ? "Generating..." : "View"}
-                                                </Button>
+                                                </Button> */}
                                                 <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
                                                     Accept
                                                 </Button>
@@ -610,7 +610,8 @@ const QuoteApproval = () => {
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    generatePdf(false, true, imageData);
+                    // generatePdf(false, true, imageData);
+                    QuoteStatusChange(true, imageData, null)
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
         </div >

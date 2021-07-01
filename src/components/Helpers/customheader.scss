@@ -24,10 +24,11 @@
 
 @media only screen and (max-width: 768px) {
   .customHeader {
-    grid-gap: 0.5rem;
+    gap: 0.5rem;
+    -webkit-gap: 0.5rem;
     flex-direction: column;
   }
-  @supports not (gap: 0.5rem) {
+  @supports not (-webkit-gap: 0.5rem) {
     .customHeader > *:not(:nth-child(1)) {
       margin-left: 0.5rem !important;
     }

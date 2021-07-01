@@ -6,14 +6,21 @@ import IconButton from '@material-ui/core/IconButton';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import * as XLSX from 'xlsx';
 
-export const Option = ({ values, setFieldValue }) => {
+export const Option = ({ values, setFieldValue, fields, _id }) => {
 
-    const onChangeValue = (index, value) => {
+    const onChangeValue = (index, field, value) => {
         let data = [...values["option"]]
-        data[index].optionLabel = value
-        data[index].optionValue = value
+        if (field === "optionLabel") {
+            data[index].optionLabel = value
+            data[index].optionValue = value
+        }
+        else {
+            data[index][field] = value
+        }
         setFieldValue("option", data)
     };
 
@@ -47,6 +54,9 @@ export const Option = ({ values, setFieldValue }) => {
                     let rowInsert = {}
                     rowInsert["optionLabel"] = row[0] ? row[0].toString() : ""
                     rowInsert["optionValue"] = row[0] ? row[0].toString() : ""
+                    if (values["isDependentDropdown"] && values["dropdowDependentOn"] !== "") {
+                        rowInsert[values["dropdowDependentOn"]] = row[1] ? row[1].toString() : ""
+                    }
                     option.push(rowInsert)
                 })
                 setFieldValue("option", option)
@@ -59,7 +69,12 @@ export const Option = ({ values, setFieldValue }) => {
         var export_json = [...values["option"]];
         let json_data = []
         export_json.forEach((_d) => {
-            json_data.push({ option: _d.optionLabel })
+            let ele: any = {}
+            ele.option = _d.optionLabel
+            if (values["isDependentDropdown"] && values["dropdowDependentOn"] !== "") {
+                ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]]
+            }
+            json_data.push(ele)
         })
         var ws = XLSX.utils.json_to_sheet(json_data);
         var wb = XLSX.utils.book_new();
@@ -67,7 +82,46 @@ export const Option = ({ values, setFieldValue }) => {
         XLSX.writeFile(wb, "dropdown options.xlsx");
     }
 
+
     return (<Box pt={2} pb={2}>
+        {values["type"] === "dropDown" &&
+            <Grid spacing={3} container>
+                <Grid item xs={12} sm={6} md={6}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                name="isDependentDropdown"
+                                checked={values["isDependentDropdown"]}
+                                onChange={(e) => setFieldValue("isDependentDropdown", e.target.checked)}
+                                color="primary"
+                            />
+                        }
+                        label="Dependent Dropdown"
+                    />
+                </Grid>
+                {values["isDependentDropdown"] &&
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Autocomplete
+                            id="tags-filled"
+                            options={fields && (fields.filter((_f) => _f._id !== _id && _f.type === "dropDown"))}
+                            getOptionLabel={(option: any) => (option ? option.fieldLabel : "")}
+                            getOptionSelected={(option: any, val) => option.fieldName === val}
+                            value={fields && fields.filter((data) => data.fieldName === values["dropdowDependentOn"]).length
+                                ? fields && fields.filter((data) => data.fieldName === values["dropdowDependentOn"])[0]
+                                : ""
+                            }
+                            onChange={(e, val) => { setFieldValue("dropdowDependentOn", val && val.fieldName ? val.fieldName : "") }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    margin="dense"
+                                    variant="outlined"
+                                    label="Dropdow Dependent On"
+                                    placeholder="Dropdow Dependent On" />
+                            )}
+                        />
+                    </Grid>}
+            </Grid>}
         <Grid spacing={3} container>
             <Grid item xs={12} sm={6} md={6}>
                 <Typography variant="body2">Options</Typography>
@@ -94,7 +148,7 @@ export const Option = ({ values, setFieldValue }) => {
             {values["option"] && values["option"].map((data, index) => (
                 <Box key={index} bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300" >
                     <Grid container spacing={1}>
-                        <Grid item xs={6}>
+                        <Grid item xs={5}>
                             <TextField
                                 id="standard-basic"
                                 variant="outlined"
@@ -102,10 +156,22 @@ export const Option = ({ values, setFieldValue }) => {
                                 fullWidth
                                 style={{ margin: 0 }}
                                 value={data.optionLabel}
-                                onChange={(e) => onChangeValue(index, e.target.value)}
+                                onChange={(e) => onChangeValue(index, "optionLabel", e.target.value)}
                             />
                         </Grid>
-                        <Grid item xs={6}>
+                        {values["isDependentDropdown"] && values["dropdowDependentOn"] !== "" &&
+                            <Grid item xs={5}>
+                                <TextField
+                                    id="standard-basic"
+                                    variant="outlined"
+                                    margin="dense"
+                                    fullWidth
+                                    style={{ margin: 0 }}
+                                    value={data[values["dropdowDependentOn"]]}
+                                    onChange={(e) => onChangeValue(index, values["dropdowDependentOn"], e.target.value)}
+                                />
+                            </Grid>}
+                        <Grid item xs={2}>
                             <IconButton aria-label="setting" onClick={() => AddRemoveValue("add", index)} >
                                 <AddCircleOutlineIcon fontSize="small" />
                             </IconButton>

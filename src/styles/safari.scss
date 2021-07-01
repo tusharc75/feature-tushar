@@ -1,25 +1,23 @@
-@supports not (gap: 0.25rem) {
+@supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
     .gap-1 > *:not(:nth-child(1)) {
         margin-left: 0.25rem !important;
     }
 }
 
-@supports not (gap: 0.5rem) {
+@supports (gap:0.50rem) and (not (-webkit-gap: 0.50rem)){
     .gap-2 > *:not(:nth-child(1)) {
-        margin-left: 0.5rem !important;
+        margin-left: 0.50rem !important;
+    }
+} 
+
+@supports (gap: 0.75rem) and (not (-webkit-gap: 0.75rem)){
+    .gap-3 > *:not(:nth-child(1)) {
+        margin-left: 0.75rem !important;
     }
 }
 
-@supports not (gap: 0.5rem) {
-    .gap-2 > *:not(:nth-child(1)) {
-        margin-left: 0.5rem !important;
-    }
-}
-
-@supports not (gap: 1rem) {
+@supports (not (gap: 1rem)) and (not (-webkit-gap: 1rem)){
     .gap-4 > *:not(:nth-child(1)) {
-        margin-left: 1 !important;
+        margin-left: 1rem !important;
     }
 }
-
-

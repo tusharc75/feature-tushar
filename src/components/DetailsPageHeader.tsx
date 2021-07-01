@@ -49,7 +49,7 @@ const DetailsPageHeader = (props) => {
     <>
       <Paper elevation={0}>
         <Grid container justify="space-between" className="detailHeader">
-          <Grid item className="d-flex align-items-center gap-1">
+          <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (
