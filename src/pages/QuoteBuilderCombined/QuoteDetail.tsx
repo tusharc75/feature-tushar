@@ -473,6 +473,8 @@ function QuoteDetail() {
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showAiDialog, setShowAiDialog] = useState(false);
+  const [updatingVersion, setUpdatingVersion] = useState(false);
+  const [generatingPdfFile, setGeneratingFile] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState({
     show: false,
     text: null,
@@ -1707,11 +1709,25 @@ function QuoteDetail() {
     }
     if (Customerreq) {
       exportToCSV(true);
-      if (!pdfFileBase64) {
-        GeneratePdf(false, false, true);
-      }
-
       setSendEmail(true);
+      if (!pdfFileBase64) {
+        setGeneratingFile(true);
+        axiosInstance()
+          .get(
+            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            {
+              responseType: "blob",
+            }
+          )
+          .then(({ data }) => {
+            setGeneratingFile(false);
+            const file = new Blob([data], { type: "application/pdf" });
+            generateBase64forFile(file, "pdf");
+          })
+          .catch((err) => {
+            setGeneratingFile(false);
+          });
+      }
     }
   };
 
@@ -1734,7 +1750,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        dataTNC
+        TandC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1746,19 +1762,133 @@ function QuoteDetail() {
       });
   };
 
-  const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
+  const handleVersionUpdate = (
+    PDFfile,
+    Columns,
+    versionStatus,
+    TC,
+    view = false,
+    download = false
+  ) => {
     let body = {
-      PDF: PDFfile,
       acceptedColumns: Columns,
       status: versionStatus,
-      TNC: TC,
+      TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
     };
+
+    setUpdatingVersion(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {})
+      .then(({ data: { data } }) => {
+        setUpdatingVersion(false);
+
+        if (view && data.fileName) {
+          setUpdatingVersion(true);
+          axiosInstance()
+            .get(`user/download?fileName=${data.fileName}`, {
+              responseType: "blob",
+            })
+            .then(({ data }) => {
+              setUpdatingVersion(false);
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+            })
+            .catch((err) => {
+              setUpdatingVersion(true);
+            });
+        } else if (download && data.fileName) {
+          setUpdatingVersion(true);
+          axiosInstance()
+            .get(`user/download?fileName=${data.fileName}`, {
+              responseType: "blob",
+            })
+            .then(({ data }) => {
+              setUpdatingVersion(false);
+              const url = window.URL.createObjectURL(
+                new Blob([data], { type: "application/pdf" })
+              );
+              const link = document.createElement("a");
+              link.href = url;
+              link.setAttribute(
+                "download",
+                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+              );
+              document.body.appendChild(link);
+              link.click();
+            })
+            .catch((err) => {
+              setUpdatingVersion(true);
+            });
+        }
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setUpdatingVersion(false);
       });
+  };
+
+  const handleViewPdf = (view = false, download = false) => {
+    const pdfFileName = quoteData.versions[currentVersion].PDF;
+
+    if (!pdfFileName) {
+      handleVersionUpdate(
+        "",
+        visibleColumns,
+        versionStatus,
+        TandC,
+        view,
+        download
+      );
+    }
+
+    if (view) {
+      setUpdatingVersion(true);
+      axiosInstance()
+        .get(
+          `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+          {
+            responseType: "blob",
+          }
+        )
+        .then(({ data }) => {
+          setUpdatingVersion(false);
+          const file = new Blob([data], { type: "application/pdf" });
+          const fileURL = URL.createObjectURL(file);
+          const pdfWindow = window.open();
+          pdfWindow.location.href = fileURL;
+        })
+        .catch((err) => {
+          setUpdatingVersion(true);
+        });
+    } else if (download) {
+      setUpdatingVersion(true);
+      axiosInstance()
+        .get(
+          `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+          {
+            responseType: "blob",
+          }
+        )
+        .then(({ data }) => {
+          setUpdatingVersion(false);
+          const url = window.URL.createObjectURL(
+            new Blob([data], { type: "application/pdf" })
+          );
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+          );
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch((err) => {
+          setUpdatingVersion(true);
+        });
+    }
   };
 
   const onSuccess = () => {
@@ -1854,7 +1984,7 @@ function QuoteDetail() {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
       contentType: pdfFileBase64.split(";")[0].split(":")[1],
-      name: `Quotation v${currentVersion}`,
+      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
     });
   }
   if (excelFileBase64) {
@@ -1863,7 +1993,7 @@ function QuoteDetail() {
         parseInt(excelFileBase64.indexOf(",") + 1)
       ),
       contentType: excelFileBase64.split(";")[0].split(":")[1],
-      name: `Quotation v${currentVersion}`,
+      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
     });
   }
 
@@ -2304,7 +2434,14 @@ function QuoteDetail() {
                           openInvoiceDialog={() => setOpenInvoiceDialog(true)}
                           allowedToEdit={allowedToEdit}
                           DOAData={DOAData}
-                          generatePDF={GeneratePdf}
+                          handleVersionUpdate={() => {
+                            handleVersionUpdate(
+                              "",
+                              visibleColumns,
+                              versionStatus,
+                              TandC
+                            );
+                          }}
                         />
                       </div>
                     </Paper>
@@ -2463,21 +2600,22 @@ function QuoteDetail() {
                           ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
-                                onClick={() => createImagePDF(true, false)}
+                                onClick={() => {
+                                  handleViewPdf(true, false);
+                                }}
                                 variant="outlined"
-                                disabled={generatingPdf.text}
+                                disabled={updatingVersion}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<AiOutlineEye />}
                                 color="primary"
                               >
-                                {generatingPdf.text === null
-                                  ? "View"
-                                  : "Generating..."}
+                                View
                               </Button>
                               <Button
+                                disabled={updatingVersion}
                                 onClick={() => {
-                                  createImagePDF(false, false);
+                                  handleViewPdf(false, true);
                                   exportToCSV();
                                 }}
                                 variant="outlined"
@@ -2513,6 +2651,9 @@ function QuoteDetail() {
                                 />
                               ) : (
                                 <ProductBuilder
+                                  fromQuote={true}
+                                  permissions={permissions?.quoteBuilder}
+                                  hasPermission={allowedToEdit}
                                   currency={quoteData?.currency.toLowerCase()}
                                   productBuilderId={productBuilderID}
                                   isAddNewProduct={isAddNewProduct}
@@ -2577,10 +2718,11 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={[
-                                    ...selectedTnC,
-                                    ...prevVersionTNC,
-                                  ]}
+                                  selectedRecords={
+                                    selectedRecords.length > 0
+                                      ? selectedRecords
+                                      : TandC
+                                  }
                                   loading={loadingTNC}
                                   onSelection={(selectedRecords) => {
                                     setSelectedTnC([
@@ -2710,6 +2852,7 @@ function QuoteDetail() {
             fullWidth
           >
             <CreateEmail
+              generatingFile={generatingPdfFile}
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
