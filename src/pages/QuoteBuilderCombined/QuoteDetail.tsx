@@ -1750,7 +1750,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        dataTNC
+        TandC
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
