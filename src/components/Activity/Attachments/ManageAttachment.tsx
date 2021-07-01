@@ -88,7 +88,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
             axiosInstance()
                 .get(`/attachment/${attachmentId}`)
                 .then(({ data: { data } }) => {
-                    setCanEdit(data?.canEdit);
+                    setCanEdit(data?.canEdit ? data.canEdit:true);
                     if (data.fileUrl && data.fileUrl.length) {
                         let otherAttachments = []
                         let filteredAttachments = data.fileUrl.filter(url => {
