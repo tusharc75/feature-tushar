@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styles from "./frequently_bought.module.scss";
-// import FracImage from "../../assets/images/fracimage.jpg";
 import Checkbox from "@material-ui/core/Checkbox";
 // import ButtonDesign from "../../components/Buttondesign/Buttondesign";
 import { IconButton } from "@material-ui/core";
@@ -26,23 +25,24 @@ function FrequentlyBought() {
     selected[event.target.name] = !selected[event.target.name];
     setSelected({ ...selected });
   };
+
+  const FracImage = "https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png";
   return (
     <div className={styles.outerbox}>
-      <h1>Frequently Bought Together</h1>
+      <h1 className="text-align-center">Frequently Bought Together</h1>
       <div className={styles.wrapper}>
         <div className={styles.card}>
           <div className={styles.card__checkbox}>
             <Checkbox
               color="primary"
+              size="small"
               inputProps={{ "aria-label": "secondary checkbox" }}
               checked
               disabled
             />
           </div>
           <div className={styles.card__img}>
-            <h2 className={styles.card__mainItem}>Main Item</h2>
-            {/* <img src={FracImage} /> */}
-            Image is missing
+            <img src={FracImage} className={styles.card__img} />
           </div>
           <div className={styles.card__body}>
             <p className={styles.card__desc}>
@@ -55,6 +55,7 @@ function FrequentlyBought() {
         <div className={styles.card}>
           <div className={styles.card__checkbox}>
             <Checkbox
+             size="small"
               color="primary"
               inputProps={{ "aria-label": "secondary checkbox" }}
               name="item1"
@@ -62,8 +63,7 @@ function FrequentlyBought() {
               onChange={handleChange}
             />
           </div>
-          {/* <img src={FracImage} className={styles.card__img} /> */}
-          Image is missing
+          <img src={FracImage} className={styles.card__img} />
           <div className={styles.card__body}>
             <p className={styles.card__desc}>
               Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature Class
@@ -75,6 +75,7 @@ function FrequentlyBought() {
         <div className={styles.card}>
           <div className={styles.card__checkbox}>
             <Checkbox
+              size="small"
               color="primary"
               inputProps={{ "aria-label": "secondary checkbox" }}
               name="item2"
@@ -82,8 +83,7 @@ function FrequentlyBought() {
               onChange={handleChange}
             />
           </div>
-          {/* <img src={FracImage} className={styles.card__img} /> */}
-          Image is missing
+          <img src={FracImage} className={styles.card__img} />
           <div className={styles.card__body}>
             <p className={styles.card__desc}>
               Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature Class

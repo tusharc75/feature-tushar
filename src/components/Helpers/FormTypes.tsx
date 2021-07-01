@@ -579,6 +579,7 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        ref={inputNumberRef}
         onChange={
           onChange ? onChange : (e) => handleChange(name, e.target.value)
         }
@@ -640,6 +641,7 @@ const FormTypes = (props) => {
           inputProps: { min: 0 },
           readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
+        ref={inputNumberRef}
         onChange={
           onChange
             ? onChange
@@ -850,6 +852,7 @@ const FormTypes = (props) => {
                     touched[name + "_" + _unit.toLowerCase()] &&
                     errors[name + "_" + _unit.toLowerCase()]
                   }
+                  ref={inputNumberRef}
                   onChange={
                     onChange
                       ? onChange
@@ -958,6 +961,7 @@ const FormTypes = (props) => {
                         _unit.toLowerCase()
                         ]
                       }
+                      ref={inputNumberRef}
                       onChange={
                         onChange
                           ? onChange
@@ -1056,6 +1060,7 @@ const FormTypes = (props) => {
                       touched[name + "_" + _currency.toLowerCase()] &&
                       errors[name + "_" + _currency.toLowerCase()]
                     }
+                    ref={inputNumberRef}
                     onChange={
                       onChange
                         ? onChange

@@ -6,7 +6,7 @@ import styles from './product-list.module.scss'
 
 const ProductList = ({ products }) => {
     return (
-        <div className={`gap-3 ${styles.product_list_container}`}>
+        <div className={`${styles.product_list_container}`}>
             {
                 products.map((product, index: number) => (
                     <Product key={index} product={product} />

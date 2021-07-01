@@ -17,6 +17,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from "react-icons/gi";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import CreateNewDialog from "./CreateNewDialog";
@@ -44,6 +45,8 @@ const ProductBuilder = () => {
   const [isCreate, setIsCreate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
+    useState(false);
   // const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [okButtonLoading] = useState(false);
@@ -94,19 +97,12 @@ const ProductBuilder = () => {
   );
 
   const ActionsRenderer = (params) => {
-    console.log();
+    const hasPermission =
+      permission?.isDelete && params.data.createdById === user?._id;
     return (
-      <span
-        title={
-          permission?.isDelete && params.data.createdById === user?.id
-            ? ""
-            : "You don't have permission to delete"
-        }
-      >
+      <span title={hasPermission ? "" : "You don't have permission to delete"}>
         <IconButton
-          disabled={
-            !permission?.isDelete || params.data.createdById !== user?.id
-          }
+          disabled={hasPermission ? false : true}
           size="small"
           aria-label="Delete"
           onClick={() => {
@@ -114,13 +110,7 @@ const ProductBuilder = () => {
             setShowDeleteConfirmBox(true);
           }}
         >
-          <DeleteIcon
-            color={
-              permission?.isDelete && params.data.createdById === user?.id
-                ? "error"
-                : "disabled"
-            }
-          />
+          <DeleteIcon color={hasPermission ? "error" : "disabled"} />
         </IconButton>
       </span>
     );
@@ -213,7 +203,13 @@ const ProductBuilder = () => {
         setDeleteRecord({ id: row.id, name: row.name });
       }
     } else {
-      setShowDeleteConfirmBox(true);
+      const notYou = selectedRecords.filter((d) => d.createdById !== user?._id);
+
+      if (notYou.length) {
+        setShowDeleteWarningConfirmBox(true);
+      } else {
+        setShowDeleteConfirmBox(true);
+      }
     }
   };
 
@@ -302,13 +298,23 @@ const ProductBuilder = () => {
           loading={loading}
         />
 
+        {showDeleteWarningConfirmBox ? (
+          <MessageDialog
+            open={showDeleteWarningConfirmBox}
+            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+            onClose={() => setShowDeleteWarningConfirmBox(false)}
+          />
+        ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${
               deleteRecord ? deleteRecord.name : "selected product(s)"
             }?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
             onOk={handleDelete}
             okBtnLoading={okButtonLoading}
           />
