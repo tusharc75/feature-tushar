@@ -170,6 +170,7 @@ const FormTypes = (props) => {
     addDisplayType,
     removeDisplayType,
     setValues,
+    canEdit=true,
     customError = {},
     handleRemoveField,
     ...rest
@@ -1479,7 +1480,7 @@ const FormTypes = (props) => {
       <Fragment>
         <Box display="flex" alignItems="center">
           <input
-            disabled={isFileUploading}
+            disabled={isFileUploading || !canEdit}
             id={name}
             name={name}
             onChange={handleUploadFile}
@@ -1491,7 +1492,7 @@ const FormTypes = (props) => {
           />
           <label htmlFor={name}>
             <Button
-              disabled={isFileUploading}
+              disabled={isFileUploading || !canEdit}
               variant="contained"
               color="primary"
               size="small"
@@ -1542,7 +1543,7 @@ const FormTypes = (props) => {
       <Fragment>
         <Box display="flex" alignItems="center">
           <input
-            disabled={isFileUploading}
+            disabled={isFileUploading || !canEdit}
             id={name}
             name={name}
             onChange={handleUploadFile}
@@ -1554,7 +1555,7 @@ const FormTypes = (props) => {
           />
           <label htmlFor={name}>
             <Button
-              disabled={isFileUploading}
+              disabled={isFileUploading || !canEdit}
               variant="contained"
               color="primary"
               size="small"
