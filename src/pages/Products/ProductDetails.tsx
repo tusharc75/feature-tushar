@@ -41,13 +41,13 @@ export default function ProductDetails() {
 
     const calculateNetPrice = (price: number, discount: any) => {
         let netPrice = price;
-        netPrice = (price * discount) / 100;
+        netPrice = price - (price * discount) / 100;
         return netPrice + " " + productDetails.currency;
 
     }
 
     const amountOfDiscount = (price: number, discount: any) => {
-        return (price * discount / discount) + " " + productDetails.currency;
+        return (price * discount / 100) + " " + productDetails.currency;
     }
 
     return (
@@ -65,19 +65,19 @@ export default function ProductDetails() {
                                 </div>
                                 <div className={styles.right_side}>
                                     <div className={styles.name}>{productDetails.productName}</div>
-                                    <div className={styles.availability}>Availability: <span>{productDetails.availability ? "In Stock" : "Out of Stock"}</span></div>
-                                    <div className={styles.seller}>Sold By: {productDetails.sellerName}</div>
+                                    <div className={styles.availability}>Availability: <span>{productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}</span></div>
+                                    <div className={styles.seller}>Sold By: {productDetails?.brand?.optionLabel}</div>
                                     <hr />
                                     <div className={styles.description}>
                                         <div className={styles.listItem}>
                                             <ul>
-                                                <li>Material class DD</li>
-                                                <li>7 1/6 run</li>
-                                                <li>10,000 rpm</li>
-                                                <li>Temperature proof</li>
+                                                <li>MFG Value - {productDetails?.mfg}</li>
+                                                <li>Product Number - {productDetails?.productNumber}</li>
+                                                <li>{productDetails?.description}</li>
+                                                <li>Measuring Unit - {productDetails?.unit}</li>
                                             </ul>
                                         </div>
-                                        <div className={styles.price}>{calculateNetPrice(parseInt(productDetails.mrp), productDetails.discount)}<span className={styles.originalPrice}>{productDetails.mrp}</span></div>
+                                        <div className={styles.price}>{calculateNetPrice(parseInt(productDetails.mrp), productDetails.discount)}<span className={styles.originalPrice}>{productDetails.mrp} {productDetails.currency}</span></div>
                                         <h4>You Save: <span>{amountOfDiscount(parseInt(productDetails.mrp), productDetails.discount)}</span> </h4>
                                         <div className={styles.rating}>
                                             <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} value={productDetails.rating} readOnly size="small" />
