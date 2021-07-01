@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Avatar, CardHeader, IconButton, makeStyles, Typography } from "@material-ui/core";
+import { Avatar, Box, Button, CardHeader, IconButton, makeStyles, Typography } from "@material-ui/core";
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
@@ -39,62 +39,84 @@ const ProductCard = (props: { product: any; }) => {
     return netPrice;
 
   }
-
   return (
-    <Card className={styles.product_card}>
-      <div className={styles.product_header}>
-        <div className={styles.product_name}>
-          <Typography variant="body2" color="error">
-            {`${product.productName} ,${product.productCategory.optionLabel} `}
-          </Typography>
-        </div>
+    <div className={styles.product_card}>
+      {(product.discount) && (product.discount !== "") &&
         <div className={styles.product_discount}>
-          {(product.discount) && (product.discount !== "") &&
-            <Avatar className={styles.product_discount_avatar}>
-              <Typography variant="body2" >
-                {product.discount}%
-              </Typography>
-            </Avatar>
-          }
+          -{product.discount}%
         </div>
+      }
+      <img onClick={() => { history.push(`product/details/${product._id}`) }} src={product.productImage} alt={product.productName} />
+      <div className={styles.text}>
+        <h4 onClick={() => { history.push(`product/details/${product._id}`) }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
+        <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <div>
+            <span className={styles.amount}>{currencySymbol}{calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}</span>
+            <span className={styles.amount_stricked}>{`${currencySymbol} ${product.mrp}`}</span>
+          </div>
+          <Button variant="outlined" color="secondary" size="small" onClick={() => { }} startIcon={<AddShoppingCartIcon />}>
+            Add to cart
+          </Button>
+        </Box>
       </div>
-      <CardActionArea onClick={() => { history.push(`product/details/${product._id}`) }}>
-        <CardMedia
-          className={classes.media}
-          image={product.productImage}
-          title="Product Image"
-        />
-
-      </CardActionArea>
-
-      <div className={styles.product_card_action}>
-        <div className={styles.product_card_action_price}>
-          <h4 className="d-flex align-items-left justify-content-left">
-            <Typography variant="body2" color="error">
-              {`${currencySymbol} ${calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}`}
-              <span className={styles.originalPrice}>{`${currencySymbol} ${product.mrp}`}</span>
-            </Typography>
-          </h4>
-        </div>
-        {/* <div className={styles.product_card_action_rating}>
-          <h4 className="d-flex align-items-left justify-content-left flex-column ">
-            <Rating name="size-small" value={product.rating} readOnly size="small" />
-          </h4>
-          <h4 className="d-flex align-items-left justify-content-left flex-column ">
-            <Typography variant="subtitle2" color="error">
-              {product.rating} out of 5
-            </Typography>
-          </h4>
-        </div> */}
-        <div className={styles.product_card_action_add_to_cart}>
-          <IconButton aria-label="AddShoppingCartIcon" onClick={() => { }}>
-            <AddShoppingCartIcon color="primary" />
-          </IconButton>
-        </div>
-      </div>
-
-    </Card>
+    </div>
   );
+  // return (
+  //   <Card className={styles.product_card}>
+  //     <div className={styles.product_header}>
+  //       <div className={styles.product_name}>
+  //         <Typography variant="body2" color="error">
+  //           {`${product.productName} ,${product.productCategory.optionLabel} `}
+  //         </Typography>
+  //       </div>
+  //       <div className={styles.product_discount}>
+  //         {(product.discount) && (product.discount !== "") &&
+  //           <Avatar className={styles.product_discount_avatar}>
+  //             <Typography variant="body2" >
+  //               {product.discount}%
+  //             </Typography>
+  //           </Avatar>
+  //         }
+  //       </div>
+  //     </div>
+  //     <CardActionArea onClick={() => { history.push(`product/details/${product._id}`) }}>
+  //       <CardMedia
+  //         className={classes.media}
+  //         image={product.productImage}
+  //         title="Product Image"
+  //       />
+
+  //     </CardActionArea>
+
+  //     <div className={styles.product_card_action}>
+  //       <div className={styles.product_card_action_price}>
+  //         <h4 className="d-flex align-items-left justify-content-left">
+  //           <Typography variant="body2" color="error">
+  //             {`${currencySymbol} ${calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}`}
+  //             <span className={styles.originalPrice}>{`${currencySymbol} ${product.mrp}`}</span>
+  //           </Typography>
+  //         </h4>
+  //       </div>
+  //       {/* <div className={styles.product_card_action_rating}>
+  //         <h4 className="d-flex align-items-left justify-content-left flex-column ">
+  //           <Rating name="size-small" value={product.rating} readOnly size="small" />
+  //         </h4>
+  //         <h4 className="d-flex align-items-left justify-content-left flex-column ">
+  //           <Typography variant="subtitle2" color="error">
+  //             {product.rating} out of 5
+  //           </Typography>
+  //         </h4>
+  //       </div> */}
+  //       <div className={styles.product_card_action_add_to_cart}>
+  //         <IconButton aria-label="AddShoppingCartIcon" onClick={() => { }}>
+  //           <AddShoppingCartIcon color="primary" />
+  //         </IconButton>
+  //       </div>
+  //     </div>
+
+  //   </Card>
+  // );
 }
 
 ProductCard.propTypes = {

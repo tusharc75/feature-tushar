@@ -16,8 +16,8 @@
   align-items: center;
   text-align: center;
   &__img {
-    width: 12rem;
-    height: 14rem;
+    width: 14rem;
+    height: 10rem;
     object-fit: cover;
   }
 
@@ -71,6 +71,7 @@
 @media screen and (min-width: 600px) {
   .wrapper {
     grid-template-columns: repeat(auto-fit, minmax(14rem, 16rem));
+    justify-content: center;
   }
   .card {
     flex-direction: column;
