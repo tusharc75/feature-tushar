@@ -50,7 +50,7 @@ const fileIcons = [
         source: pptIcon
     },
     {
-        extensions: [".tif", "tiff", ".bmp", ".jpg", "jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"],
+        extensions: [".tif", "tiff", ".bmp", ".jpg", ".jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"],
         source: imageIcon
     }
 ]
