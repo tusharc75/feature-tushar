@@ -12,46 +12,6 @@ const ProductList = ({ products }) => {
                     <Product key={index} product={product} />
                 ))
             }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
-            {
-                products.map((product, index: number) => (
-                    <Product key={index} product={product} />
-                ))
-            }
         </div>
     );
 }
