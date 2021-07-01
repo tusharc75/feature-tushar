@@ -132,7 +132,7 @@ const Steps = (props) => {
     versionStatus,
     loading,
     approvedQuote,
-    generatePDF,
+    handleVersionUpdate,
     DOAlimit,
     totalCost,
     handleSendReminder = null,
@@ -242,7 +242,7 @@ const Steps = (props) => {
 
   const handleNext = () => {
     if (currentStep === 2) {
-      generatePDF(false, true);
+      handleVersionUpdate();
     }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
