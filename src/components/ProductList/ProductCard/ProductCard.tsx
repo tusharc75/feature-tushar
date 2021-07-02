@@ -11,6 +11,7 @@ import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
 import { getUniqueCurrencies } from "../../../constants/helpers";
+import { BsImage } from 'react-icons/bs';
 
 const useStyles = makeStyles({
   root: {
@@ -46,7 +47,12 @@ const ProductCard = (props: { product: any; }) => {
           -{product.discount}%
         </div>
       }
-      <img onClick={() => { history.push(`product/details/${product._id}`) }} src={product.productImage} alt={product.productName} />
+      <Box display="flex" justifyContent="center" alignItems="center" onClick={() => { history.push(`product/details/${product._id}`) }}>
+        {product.productImage ?
+          <img src={product.productImage} alt={product.productName} />
+          : <BsImage className={styles.no_image} />
+        }
+      </Box>
       <div className={styles.text}>
         <h4 onClick={() => { history.push(`product/details/${product._id}`) }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>

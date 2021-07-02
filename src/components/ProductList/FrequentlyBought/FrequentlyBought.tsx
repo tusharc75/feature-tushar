@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./frequently_bought.module.scss";
 import Checkbox from "@material-ui/core/Checkbox";
 // import ButtonDesign from "../../components/Buttondesign/Buttondesign";
-import { IconButton } from "@material-ui/core";
+import { Button, IconButton } from "@material-ui/core";
 import ButtonDesign from "../Buttondesign/Buttondesign";
 
 function FrequentlyBought() {
@@ -99,7 +99,6 @@ function FrequentlyBought() {
         <div className={styles.card}>
           <div className={styles.card__pricesummary}>
             <h3 className={styles.card__pricesummaryheading}>Price Summary</h3>
-            <hr />
             <div className={styles.card__summary}>
               <p>Main Product Selected</p>
               <h3>Rs. 3000 /day</h3>
@@ -108,12 +107,13 @@ function FrequentlyBought() {
               <p>{count} Addon Selected</p>
               <h3>Rs. {totalPrice} /day</h3>
             </div>
-            <hr />
             <div className={styles.card__total}>
               <h3>Total</h3>
               <h3>Rs. {totalPrice + 3000} /day</h3>
             </div>
-            <ButtonDesign title="Rent All" />
+            <Button variant="contained" color="primary">
+              Rent All
+            </Button>
           </div>
         </div>
       </div>
