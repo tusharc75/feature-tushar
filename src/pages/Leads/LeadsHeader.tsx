@@ -51,7 +51,9 @@ function LeadsHeader(props) {
         heading,
         allowToConvertLeadToOpportunity,
         showLeadToOpportunityConfirmationDialog,
-        selectedLeads
+        selectedLeads,
+        showTransferEntityDialog
+
     } = props;
 
     return <Grid className={styles.filter_side_container} container>
@@ -153,6 +155,15 @@ function LeadsHeader(props) {
                                         }
                                     }}
                                 >Convert To Opportunity</MenuItem>
+                            }
+                            {
+                                leadPermissions.isUpdate && <MenuItem
+                                    onClick={() => {
+                                        closeActions();
+                                        showTransferEntityDialog();
+                                    }}
+                                    disabled={selectedLeads.length === 0 || selectedLeads.some(d => d.ownerId !== userId)}
+                                >Transfer Entity</MenuItem>
                             }
                         </Menu>
                     </>
