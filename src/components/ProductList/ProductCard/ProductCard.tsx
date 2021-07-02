@@ -41,7 +41,7 @@ const ProductCard = (props: { product: any; }) => {
   }
   return (
     <div className={styles.product_card}>
-      {(product.mrp && parseInt(product.mrp) !== 0) && (parseInt(product.discount) && parseInt(product.discount) !== 0) &&
+      {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
         <div className={styles.product_discount}>
           -{product.discount}%
         </div>
