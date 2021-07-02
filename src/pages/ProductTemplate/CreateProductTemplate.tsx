@@ -20,6 +20,7 @@ import TextField from '@material-ui/core/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { checkFormulaLoop } from "../../constants/formulaUtility";
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -123,6 +124,11 @@ const ProductTemplate = () => {
             })
         })
         data.fields = fields;
+        const result = checkFormulaLoop(data.fields)
+        if (result.error) {
+            toastConfig.setToastConfig({ open: true, type: "error", message: result.message });
+            return
+        }
         setIsUpdating(true)
         if (id === "0" || isClone) {
             axiosInstance().post("/product-template", data).then(({ data: { data } }) => {

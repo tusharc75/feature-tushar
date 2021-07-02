@@ -38,6 +38,7 @@ import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import VersionStatus from "./VersionStatus";
+import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 
 let quoteTimeout;
 const QuoteType = [
@@ -61,6 +62,7 @@ const QuoteBuilders = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [quotePermissions, setQuotePermissions] = useState({
@@ -100,13 +102,13 @@ const QuoteBuilders = () => {
         renderCell: (params: any) => (
           <span
             title={params.value}
-            className="text-truncate link"     
-            onClick={()=>{
-              history.push(`quotes/detail/${params.row._id}`,{
-                versionNumber:`${params.row.versionNumber}`,
-                tabValue:2
+            className="text-truncate link"
+            onClick={() => {
+              history.push(`quotes/detail/${params.row._id}`, {
+                versionNumber: `${params.row.versionNumber}`,
+                tabValue: 2
               })
-            }}        
+            }}
           >
             {params.value}
           </span>
@@ -265,12 +267,12 @@ const QuoteBuilders = () => {
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
         // setShowVersionsDialog(true);
-        let quoteId=id;
+        let quoteId = id;
         const newData = data.versions.map((d, index) => {
           return {
             ...d,
             id: index + 1,
-            versionNumber: index+1,
+            versionNumber: index + 1,
             _id: quoteId,
             totalCost: formatAmountWithCurrency(
               currency,
@@ -564,6 +566,10 @@ const QuoteBuilders = () => {
     fetchQuoteBuilder();
   };
 
+  const handleTransferEntityDialog = () => {
+    setShowTransferEntityDialog(true)
+  }
+
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
@@ -655,6 +661,8 @@ const QuoteBuilders = () => {
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading="Quotes"
+              showTransferEntityDialog={handleTransferEntityDialog}
+
             >
               {accountDetails.accountId && (
                 <Chip
@@ -755,6 +763,22 @@ const QuoteBuilders = () => {
           <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
           />
         </CustomDialogComponent>
+      )}
+      {showTransferEntityDialog && (
+        <TransferEntityDialog
+          TransferEntityDialogOpen={showTransferEntityDialog}
+          onSuccess={() => {
+            onSuccess()
+            setShowTransferEntityDialog(false);
+          }}
+          handleCloseDialog={() => {
+            setShowTransferEntityDialog(false);
+          }}
+          selectedRecs={selectedRecords.map(r => r._id)}
+          entities={user.entity.filter(e => e._id !== selectedEntity)}
+          type="quotes"
+          api="quote-builder"
+        />
       )}
     </>
   );
