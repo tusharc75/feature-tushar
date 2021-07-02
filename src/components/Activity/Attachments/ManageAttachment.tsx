@@ -423,11 +423,23 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 </CustomDialogContent>
                 <CustomDialogFooter>
                     <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
-                    <CustomButton
+                   {otherAttachments.length === 0 ? 
+                   <Tooltip
+                    className="cursor-stop"
+                    title="Upload atleast one attachment"
+                   >
+                       <CustomButton
+                        color="disabled"
+                        variant="contained"
+                       >
+                           Save
+                       </CustomButton>
+                   </Tooltip>:
+                   <CustomButton
                         type="button" color="primary"
                         disabled={loading || uploadingImageOrFileProgress > 0}
                         loading={loading}
-                        variant="contained" onClick={submitForm}>Save</CustomButton>
+                        variant="contained" onClick={submitForm}>Save</CustomButton>}
                 </CustomDialogFooter>
                 {
                     open ?
