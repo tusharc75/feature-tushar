@@ -1504,7 +1504,7 @@ const FormTypes = (props) => {
               component="span"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
-              {isFileUploading ? "Uploading File" : "Upload File(required)"}
+              {isFileUploading ? "Uploading File" : required ? "Upload File *":"Upload File"}
             </Button>
           </label>
           {
@@ -1567,7 +1567,7 @@ const FormTypes = (props) => {
               component="span"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
-              {isFileUploading ? "Uploading File" : "Upload File(required)"}
+              {isFileUploading ? "Uploading File" : "Upload File"}
             </Button>
           </label>
           {
