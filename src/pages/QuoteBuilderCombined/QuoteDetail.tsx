@@ -1019,7 +1019,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     let PDFData = [];
-    let PdfCol = ["#"];
+    let PdfCol = ["Item #"];
     let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
       let PdfRow = [serialNumber];
