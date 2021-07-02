@@ -58,13 +58,12 @@ export const Properties = ({
 }) => {
   const [initialValues, setInitialValues] = useState(fieldData);
 
-  const [isChangeFieldName, setIsChangeFieldName] = useState(true);
+  //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
     if (!fieldData.hiddenField) {
       setInitialValues({ ...initialValues, hiddenField: false });
     }
-
     if (fieldData.type === "dropDown" && !fieldData.lookup) {
       if (
         fieldData.option &&
@@ -168,15 +167,9 @@ export const Properties = ({
             ele.isVlookup = values.isVlookup;
             ele.hiddenField = values.hiddenField;
 
-            if (
-              isChangeFieldName &&
-              values["editAble"] &&
-              (module === "product-template" || module === "price-template")
-            ) {
-              ele.fieldName = camelCase(
-                ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")
-              );
-            }
+            // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
+            //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+            // }
 
             if (
               fieldData.type === "dropDown" ||
@@ -321,26 +314,23 @@ export const Properties = ({
                   setFieldValue("fieldLabel", e.target.value.trimStart())
                 }
               />
-              {(module === "product-template" || module === "price-template") &&
-                values["editAble"] && (
-                  <Box display="flex">
-                    <Box mb={1}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="isChangeFieldName"
-                            checked={isChangeFieldName}
-                            onChange={(e) =>
-                              setIsChangeFieldName(e.target.checked)
-                            }
-                            color="primary"
-                          />
-                        }
-                        label="Change Field Name"
+              {/* {((module === "product-template" || module === "price-template") && values["editAble"]) &&
+              <Box display="flex" >
+                <Box mb={1}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isChangeFieldName"
+                        checked={isChangeFieldName}
+                        onChange={(e) => setIsChangeFieldName(e.target.checked)}
+                        color="primary"
                       />
-                    </Box>
-                  </Box>
-                )}
+                    }
+                    label="Change Field Name"
+                  />
+                </Box>
+              </Box>
+            } */}
 
               {(values["type"] === "decimal" ||
                 values["type"] === "formula" ||
