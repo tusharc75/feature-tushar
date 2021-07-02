@@ -41,7 +41,7 @@ const ProductCard = (props: { product: any; }) => {
   }
   return (
     <div className={styles.product_card}>
-      {(product.discount) && (product.discount !== "") &&
+      {(product.mrp && parseInt(product.mrp) !== 0) && (parseInt(product.discount) !== 0) &&
         <div className={styles.product_discount}>
           -{product.discount}%
         </div>
@@ -52,8 +52,12 @@ const ProductCard = (props: { product: any; }) => {
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <div>
-            <span className={styles.amount}>{currencySymbol}{calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}</span>
-            <span className={styles.amount_stricked}>{`${currencySymbol} ${product.mrp}`}</span>
+            {(product.mrp && parseInt(product.mrp) !== 0) &&
+              <>
+                <span className={styles.amount}>{currencySymbol}{calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}</span>
+                {(parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{`${currencySymbol} ${product.mrp}`}</span>}
+              </>
+            }
           </div>
           <Button variant="outlined" color="secondary" size="small" onClick={() => { }} startIcon={<AddShoppingCartIcon />}>
             Add to cart
