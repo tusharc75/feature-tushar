@@ -18,6 +18,7 @@ import routes from "../../components/Helpers/Routes";
 import { Autocomplete } from "@material-ui/lab";
 import { uniq, map } from 'lodash';
 import { extractFields, checkFormulaLoop } from "../../constants/formulaUtility";
+import { useData } from "../../StateProvider/Provider";
 
 const PriceTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -41,6 +42,23 @@ const PriceTemplate = () => {
     const [deleteField, setDeleteField] = useState([]);
     const [productTemplate, setProductTemplate] = useState([]);
     const [templateField, setTemplateField] = useState([]);
+
+
+    const {
+        state: { permissions },
+    }: any = useData();
+    const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
+
+    useEffect(() => {
+        if (permissions && permissions.priceTemplate) {
+            setpriceTemplatePermissions(permissions.priceTemplate);
+        }
+    }, [permissions]);
 
     useEffect(() => {
         axiosInstance().get(`/product-template`).then(({ data }) => {
@@ -248,9 +266,10 @@ const PriceTemplate = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={6} container justify="flex-end">
                                         <Box>
-                                            <Button disabled={isUpdating} size="small" color="primary" onClick={submitForm} variant="contained" >
-                                                Save{isUpdating && <CircularProgress size={24} />}
-                                            </Button>
+                                            {(priceTemplatePermissions.isCreate || priceTemplatePermissions.isUpdate) &&
+                                                <Button disabled={isUpdating} size="small" color="primary" onClick={submitForm} variant="contained" >
+                                                    Save{isUpdating && <CircularProgress size={24} />}
+                                                </Button>}
                                         </Box>
                                         <Box ml={1} >
                                             <Button color="primary" size="small" variant="contained" onClick={() => history.push({ pathname: routes.priceTemplate.path })} >Close</Button>
