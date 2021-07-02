@@ -136,7 +136,7 @@ const QuoteApproval = () => {
             body = { status: "Rejected by Customer", comment: comment }
         }
         axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
-            .then(({ data }) => {
+            .then(() => {
                 setReplied(true);
                 setShowQuoteStatusChangeDialog(false)
                 setShowSignatureDialog(false);

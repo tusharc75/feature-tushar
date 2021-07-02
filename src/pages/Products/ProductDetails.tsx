@@ -6,10 +6,11 @@ import { formatAmountWithCurrency, product } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Rating } from '@material-ui/lab';
 import styles from './product-detail-page.module.scss'
-import { Button } from '@material-ui/core';
+import { Button, Box} from '@material-ui/core';
 import FrequentlyBought from '../../components/ProductList/FrequentlyBought/FrequentlyBought';
 import SimilarItems from '../../components/ProductList/SimilarItems/SimilarItems';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import { BsImage } from 'react-icons/bs';
 
 export default function ProductDetails() {
 
@@ -56,7 +57,12 @@ export default function ProductDetails() {
         <Layout>
             {productDetails ? <div className={styles.product_container}>
                 <div className={styles.product_image}>
-                    <img src={productDetails.productImage} alt={productDetails.productName} width="100%" />
+                    <Box display="flex" justifyContent="center" alignItems="center">
+                        {productDetails.productImage ?
+                             <img src={productDetails.productImage} alt={productDetails.productName} width="100%" />
+                            : <BsImage className={styles.product_no_image} />
+                        }
+                    </Box>
                 </div>
                 <div className={styles.product_details}>
                     <header>

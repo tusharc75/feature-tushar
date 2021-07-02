@@ -38,25 +38,30 @@
 
   &__pricesummary {
     background: var(--white);
-    min-width: 18rem;
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 3px 3px 4px #ddd;
+    padding: 10px;
   }
   &__summary {
     display: flex;
     justify-content: space-between;
-    margin: 3rem 1rem;
+    margin: 2rem 1rem;
     font-size: 0.8rem;
   }
 
   &__total {
     display: flex;
     justify-content: space-between;
-    margin: 0.8rem 1rem;
     font-size: 1rem;
+    border-top: 1px solid #ebebeb;
+    padding: 15px;
   }
 
   &__pricesummaryheading {
-    margin: 1rem;
     color: var(--grey);
+    border-bottom: 1px solid #ebebeb;
+    padding: 15px;
   }
 
   &__checkbox {
@@ -70,7 +75,7 @@
 
 @media screen and (min-width: 600px) {
   .wrapper {
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 16rem));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 20rem));
     justify-content: center;
   }
   .card {
