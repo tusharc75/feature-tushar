@@ -2827,6 +2827,8 @@ function QuoteDetail() {
             handleClose={handleCloseCreateDialog}
             fetchData={fetchTermsAndConditions}
             editRecord={editRecordTNC}
+            displayTitle={"Additional Data"}
+
           />
         )}
 
