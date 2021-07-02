@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from "react-router-dom";
 import axiosInstance from '../../axios/axiosInstance';
 import Layout from '../../components/Layout';
-import { product } from '../../constants/helpers';
+import { formatAmountWithCurrency, product } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Rating } from '@material-ui/lab';
 import styles from './product-detail-page.module.scss'
@@ -44,7 +44,7 @@ export default function ProductDetails() {
     const calculateNetPrice = (price: number, discount: any) => {
         let netPrice = price;
         netPrice = price - (price * discount) / 100;
-        return netPrice + " " + productDetails.currency;
+        return netPrice;
 
     }
 
@@ -69,8 +69,8 @@ export default function ProductDetails() {
                         <h1 className={styles.title}>{productDetails.productName}</h1>
                         <span className={styles.avaibility}>{productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}</span>
                         <div className={styles.price}>
-                            <span className={styles.current}>{calculateNetPrice(parseInt(productDetails.mrp), productDetails.discount)}</span>
-                            <span className={styles.before}>{productDetails.mrp} {productDetails.currency}</span>
+                            <span className={styles.current}>{formatAmountWithCurrency(productDetails.currency,calculateNetPrice(parseInt(productDetails.mrp), productDetails.discount)).fullFormatAmount}</span>
+                            <span className={styles.before}>{formatAmountWithCurrency(productDetails.currency,productDetails.mrp).fullFormatAmount}</span>
                         </div>
                         <div className={styles.rate}>
                             <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} value={productDetails.rating} readOnly size="small" />

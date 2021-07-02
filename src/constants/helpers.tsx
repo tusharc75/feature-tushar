@@ -92,7 +92,6 @@ export const sidebarResource = {
   supplierContact: "Supplier Contact",
   supplierAccount: "Supplier Account",
   pricing: "Pricing",
-  currencyConvertor: "Currency Convertor",
   priceBuilder: "Price Builder",
   quoteBuilder: "Quotes",
   reminder: "Reminder",
@@ -110,6 +109,8 @@ export const sidebarResource = {
   productCategory: "Product Category",
   priceTemplate: "Price Template",
   productBuilder: "Product Builder",
+  currencyConverter: "Currency Converter",
+  formBuilder: "Form Builder",
 };
 
 export const lead = {
