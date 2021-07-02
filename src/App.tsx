@@ -5,6 +5,7 @@ import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
+import AzureLogin from "./pages/Auth/AzureLogin";
 import Leads from "./pages/Leads";
 import LeadDetailsPage from "./pages/Leads/LeadDetailsPage";
 import NewLead from "./pages/Leads/NewLead";
@@ -212,6 +213,11 @@ function App() {
             // exact
             path="/login"
             render={({ location }) => conditionalRedirect(Login, location)}
+          />
+          <Route
+            // exact
+            path="/office365/login"
+            render={({ location }) => conditionalRedirect(AzureLogin, location)}
           />
           <Route
             exact

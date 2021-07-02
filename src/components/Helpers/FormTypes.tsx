@@ -170,6 +170,7 @@ const FormTypes = (props) => {
     addDisplayType,
     removeDisplayType,
     setValues,
+    canEdit=true,
     customError = {},
     handleRemoveField,
     ...rest
@@ -578,6 +579,7 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        ref={inputNumberRef}
         onChange={
           onChange ? onChange : (e) => handleChange(name, e.target.value)
         }
@@ -639,6 +641,7 @@ const FormTypes = (props) => {
           inputProps: { min: 0 },
           readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
+        ref={inputNumberRef}
         onChange={
           onChange
             ? onChange
@@ -849,6 +852,7 @@ const FormTypes = (props) => {
                     touched[name + "_" + _unit.toLowerCase()] &&
                     errors[name + "_" + _unit.toLowerCase()]
                   }
+                  ref={inputNumberRef}
                   onChange={
                     onChange
                       ? onChange
@@ -957,6 +961,7 @@ const FormTypes = (props) => {
                         _unit.toLowerCase()
                         ]
                       }
+                      ref={inputNumberRef}
                       onChange={
                         onChange
                           ? onChange
@@ -1055,6 +1060,7 @@ const FormTypes = (props) => {
                       touched[name + "_" + _currency.toLowerCase()] &&
                       errors[name + "_" + _currency.toLowerCase()]
                     }
+                    ref={inputNumberRef}
                     onChange={
                       onChange
                         ? onChange
@@ -1479,7 +1485,7 @@ const FormTypes = (props) => {
       <Fragment>
         <Box display="flex" alignItems="center">
           <input
-            disabled={isFileUploading}
+            disabled={isFileUploading || !canEdit}
             id={name}
             name={name}
             onChange={handleUploadFile}
@@ -1491,7 +1497,7 @@ const FormTypes = (props) => {
           />
           <label htmlFor={name}>
             <Button
-              disabled={isFileUploading}
+              disabled={isFileUploading || !canEdit}
               variant="contained"
               color="primary"
               size="small"
@@ -1542,7 +1548,7 @@ const FormTypes = (props) => {
       <Fragment>
         <Box display="flex" alignItems="center">
           <input
-            disabled={isFileUploading}
+            disabled={isFileUploading || !canEdit}
             id={name}
             name={name}
             onChange={handleUploadFile}
@@ -1554,7 +1560,7 @@ const FormTypes = (props) => {
           />
           <label htmlFor={name}>
             <Button
-              disabled={isFileUploading}
+              disabled={isFileUploading || !canEdit}
               variant="contained"
               color="primary"
               size="small"
