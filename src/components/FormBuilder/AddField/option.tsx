@@ -48,6 +48,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             const wsname = readedData.SheetNames[0];
             const ws = readedData.Sheets[wsname];
             const dataParse = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            dataParse.splice(0,1);
             if (dataParse.length) {
                 let option = []
                 dataParse.forEach((row) => {
