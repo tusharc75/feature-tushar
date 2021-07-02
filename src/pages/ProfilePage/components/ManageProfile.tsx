@@ -415,7 +415,6 @@ export default function ManageProfile(props) {
                                                                     title="assignedBy"
                                                                     className={classes.detailLabel}
                                                                 >
-                                                                    {console.log(userProxy)}
                                                                     Assigned By
                                                                 </h4>
                                                             </TableCell>
