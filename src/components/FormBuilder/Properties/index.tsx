@@ -52,7 +52,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   const [initialValues, setInitialValues] = useState(fieldData);
 
-  const [isChangeFieldName, setIsChangeFieldName] = useState(true);
+  //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
     if (fieldData.type === "dropDown" && !fieldData.lookup) {
@@ -120,9 +120,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isUneditable = values.isUneditable
             ele.isVlookup = values.isVlookup
 
-            if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
-              ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
-            }
+            // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
+            //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+            // }
 
             if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
               if (fieldData.type === "dropDown") {
@@ -225,7 +225,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               helperText={touched["fieldLabel"] && errors["fieldLabel"]}
               onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
             />
-            {((module === "product-template" || module === "price-template") && values["editAble"]) &&
+            {/* {((module === "product-template" || module === "price-template") && values["editAble"]) &&
               <Box display="flex" >
                 <Box mb={1}>
                   <FormControlLabel
@@ -241,7 +241,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   />
                 </Box>
               </Box>
-            }
+            } */}
 
             {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
               <Grid spacing={3} container>

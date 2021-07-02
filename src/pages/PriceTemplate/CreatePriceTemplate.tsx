@@ -17,9 +17,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import { Autocomplete } from "@material-ui/lab";
 import { uniq, map } from 'lodash';
-import { extractFields } from "../../constants/formulaUtility";
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import { extractFields, checkFormulaLoop } from "../../constants/formulaUtility";
 
 const PriceTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -86,7 +84,7 @@ const PriceTemplate = () => {
         let data: any = {}
         data.name = values.name;
         data.productTemplate = values.productTemplate;
-        
+
         const resultproductTemplate = productTemplate.filter((_f) => _f._id === values.productTemplate);
         if (resultproductTemplate.length) {
             data.isStandard = resultproductTemplate[0].isStandard;
@@ -108,6 +106,11 @@ const PriceTemplate = () => {
             })
         })
         data.fields = fields;
+        const result = checkFormulaLoop(data.fields)
+        if (result.error) {
+            toastConfig.setToastConfig({ open: true, type: "error", message: result.message });
+            return
+        }
         setIsUpdating(true)
         if (id === "0") {
             axiosInstance().post("/price-template", data).then(({ data: { data } }) => {
