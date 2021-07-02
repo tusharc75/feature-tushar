@@ -144,7 +144,9 @@ export default function CustomAgGrid({
     setClientSideGridApi(params.api);
     if (selectedRecords.length) {
       params.api.forEachNode(function (node) {
-        node.setSelected(selectedRecords.some((o) => o.id === node.data._id));
+        node.setSelected(
+          selectedRecords.some((o) => (o.id ? o.id : o._id === node.data._id))
+        );
       });
     }
     if (handleGridReady) handleGridReady(params);
