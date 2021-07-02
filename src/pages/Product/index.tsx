@@ -60,13 +60,24 @@ const Product = () => {
 
     const {
         state: { permissions },
-      }: any = useData();
-      
+    }: any = useData();
+
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
 
+    const [productPermissions, setProductPermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
 
+    useEffect(() => {
+        if (permissions && permissions.product) {
+            setProductPermissions(permissions.product);
+        }
+    }, [permissions]);
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -232,34 +243,40 @@ const Product = () => {
 
 
     const ProductNameRenderer = params => (
-        <Link className="link"
-            onClick={() => {
-                OpenProduct(params.data._id);
-                setIsClone(false)
-            }}>
-            <CustomRenderCell value={params?.value} />
-        </Link>
+        productPermissions.isUpdate ?
+            <Link className="link"
+                onClick={() => {
+                    OpenProduct(params.data._id);
+                    setIsClone(false)
+                }}>
+                <CustomRenderCell value={params?.value} />
+            </Link>
+            : params?.value
     )
 
     const ActionsRenderer = params => (
         <>
-            <Tooltip title="Clone">
-                <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
-                >
-                    <FileCopyIcon color="primary" />
-                </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete">
-                <IconButton size="small" aria-label="Delete" onClick={() => {
-                    setDeleteRecord(params.data);
-                    setShowDeleteConfirmBox(true)
-                }} >
-                    <DeleteIcon color="error" />
-                </IconButton>
-            </Tooltip >
+            {productPermissions.isCreate &&
+                <Tooltip title="Clone">
+                    <IconButton
+                        size="small"
+                        aria-label="Clone"
+                        onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
+                    >
+                        <FileCopyIcon color="primary" />
+                    </IconButton>
+                </Tooltip>
+            }
+            {productPermissions.isDelete &&
+                <Tooltip title="Delete">
+                    <IconButton size="small" aria-label="Delete" onClick={() => {
+                        setDeleteRecord(params.data);
+                        setShowDeleteConfirmBox(true)
+                    }} >
+                        <DeleteIcon color="error" />
+                    </IconButton>
+                </Tooltip >
+            }
         </>
     )
 
@@ -359,17 +376,21 @@ const Product = () => {
                                 size="small"
                                 value={search}
                             />
-                            <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                            <Button
-                                className={styles.action_submit_btn}
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >Actions <ExpandMore />
-                            </Button>
+                            {productPermissions.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            }
+                            {productPermissions.isDelete &&
+                                <Button
+                                    className={styles.action_submit_btn}
+                                    variant="outlined"
+                                    color="default"
+                                    size="small"
+                                    onClick={openActions}
+                                    disabled={selectedRecords.length ? false : true}
+                                    aria-controls="action-menu"
+                                >Actions <ExpandMore />
+                                </Button>
+                            }
                             <Menu
                                 anchorEl={anchorEl}
                                 keepMounted

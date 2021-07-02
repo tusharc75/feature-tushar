@@ -103,14 +103,14 @@ const PriceTemplate: FC = () => {
     </Link>;
 
     const ActionsRenderer = params => <>
-        {
+        {priceTemplatePermissions.isCreate &&
             <Tooltip title="Clone">
                 <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
                     <FileCopyIcon color="primary" />
                 </IconButton>
             </Tooltip>
         }
-        {priceTemplatePermissions.isUpdate ?
+        {priceTemplatePermissions.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -284,17 +284,21 @@ const PriceTemplate: FC = () => {
                                     width="242px"
                                     value={search}
                                 />
-                                <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                                <Button
-                                    className={styles.action_submit_btn}
-                                    variant="outlined"
-                                    color="default"
-                                    size="small"
-                                    onClick={openActions}
-                                    disabled={selectedRecords.length ? false : true}
-                                    aria-controls="action-menu"
-                                >Actions <ExpandMore />
-                                </Button>
+                                {priceTemplatePermissions.isCreate &&
+                                    <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                }
+                                {priceTemplatePermissions.isDelete &&
+                                    <Button
+                                        className={styles.action_submit_btn}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        disabled={selectedRecords.length ? false : true}
+                                        aria-controls="action-menu"
+                                    >Actions <ExpandMore />
+                                    </Button>
+                                }
                                 <Menu
                                     anchorEl={anchorEl}
                                     keepMounted
@@ -315,7 +319,7 @@ const PriceTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
                     loading={loading} />
 
                 {showDeleteConfirmBox &&
