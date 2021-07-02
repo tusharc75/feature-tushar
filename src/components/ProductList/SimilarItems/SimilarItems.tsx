@@ -7,8 +7,7 @@ export default function SimilarItems({ similarItems }) {
     return (
         <>
             <div className={styles.similar_items_outer}>
-                <div className="section_title">Compare with similar items</div>
-
+                <h1 className="text-align-center" >Compare with similar items</h1>
                 <div className={styles.similar_items_inner}>
                     <div className={styles.similar_items_child}>
                         <div></div>

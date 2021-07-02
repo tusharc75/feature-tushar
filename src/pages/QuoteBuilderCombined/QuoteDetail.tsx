@@ -1837,7 +1837,7 @@ function QuoteDetail() {
         "",
         visibleColumns,
         versionStatus,
-        TandC,
+        selectedRecords.length > 0 ? selectedRecords : TandC,
         view,
         download
       );
@@ -2439,7 +2439,9 @@ function QuoteDetail() {
                               "",
                               visibleColumns,
                               versionStatus,
-                              TandC
+                              selectedRecords.length > 0
+                                ? selectedRecords
+                                : TandC
                             );
                           }}
                         />
