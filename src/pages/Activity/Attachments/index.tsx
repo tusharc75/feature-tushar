@@ -380,10 +380,6 @@ export default function Attachment(props) {
         setAnchorEl(null);
     };
 
-    const allowMultipleDeletes = () => {
-        let result = selectedRecords.some((record)=>record.canEdit === true).length > 0 ? true:false
-        return result;
-    }
 
     return <Layout>
         
@@ -423,7 +419,6 @@ export default function Attachment(props) {
                             >
                                 Actions <ExpandMore />
                             </Button>
-                            {console.log(selectedRecords.some((records)=>records.canEdit))}
                             <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
