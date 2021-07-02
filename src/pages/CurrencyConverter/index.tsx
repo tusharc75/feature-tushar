@@ -21,6 +21,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CustomButton from '../../components/Helpers/CustomButton'
 import { getUniqueCurrencies } from "../../constants/helpers";
+import { useData } from "../../StateProvider/Provider";
 
 const useStyles = makeStyles((theme) => ({
   tdWidth: {
@@ -36,6 +37,21 @@ const CurrencyConverter = () => {
   const [isApiUpdate, setIsApiUpdate] = useState(false);
   const [option, setOption] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const { state: { user, permissions } }: any = useData();
+  const [currencyConverterPermissions, setCurrencyConverterPermissions] = useState({
+    isCreate: false,
+    isUpdate: false,
+    isRead: false,
+    isDelete: false,
+  });
+
+  useEffect(() => {
+    if (permissions && permissions.currencyConverter) {
+      setCurrencyConverterPermissions(permissions.currencyConverter);
+    }
+  }, [permissions]);
+
 
   useEffect(() => {
     fetchConverter();
@@ -162,7 +178,7 @@ const CurrencyConverter = () => {
     return result;
   }
 
-
+  console.log(permissions)
   return (
     <Layout>
       <Grid container className="headerbox">
@@ -177,7 +193,9 @@ const CurrencyConverter = () => {
               <FaWpforms /> <span className="listingHeader">{routes.currencyConverter.title}</span>
             </Grid>
             <Grid xs={6} md={6} sm={6} container justify="flex-end">
-              <Button onClick={handleUpdate} variant="contained" size="small" color="primary" >Update</Button>
+              {currencyConverterPermissions.isUpdate &&
+                <Button onClick={handleUpdate} variant="contained" size="small" color="primary" >Update</Button>
+              }
             </Grid>
           </Grid>
         </div>
