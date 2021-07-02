@@ -48,6 +48,8 @@ function QuoteHeader(props) {
     icon,
     heading,
     children,
+    showTransferEntityDialog
+
   } = props;
   return (
     <Grid className={styles.filter_side_container} container>
@@ -128,6 +130,14 @@ function QuoteHeader(props) {
                 >
                   Delete
                 </MenuItem>
+                {
+                  QuotePermissions.isUpdate && <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showTransferEntityDialog();
+                    }}
+                  >Transfer Entity</MenuItem>
+                }
               </Menu>
             </>
           )}
