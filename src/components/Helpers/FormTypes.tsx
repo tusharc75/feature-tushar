@@ -558,6 +558,7 @@ const FormTypes = (props) => {
         label={label}
         name={name}
         required={required}
+        rows={3}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
