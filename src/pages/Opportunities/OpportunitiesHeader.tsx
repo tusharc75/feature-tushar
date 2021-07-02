@@ -48,6 +48,7 @@ function OpportunitiesHeader(props) {
     icon,
     heading,
     children,
+    showTransferEntityDialog
   } = props;
   return (
     <Grid className={styles.filter_side_container} container>
@@ -127,6 +128,14 @@ function OpportunitiesHeader(props) {
                   }}
                 >
                   Delete
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showTransferEntityDialog();
+                  }}
+                >
+                  Transfer Entity
                 </MenuItem>
               </Menu>
             </>
