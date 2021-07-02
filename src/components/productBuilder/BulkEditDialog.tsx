@@ -111,7 +111,6 @@ const BulkEditDialog = (props) => {
             element.fieldChanges = fieldChanges;
             delete element.srno
         });
-        console.log(products)
         handleSaveProduct(products)
     };
 

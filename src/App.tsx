@@ -5,6 +5,7 @@ import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
+import AzureLogin from "./pages/Auth/AzureLogin";
 import Leads from "./pages/Leads";
 import LeadDetailsPage from "./pages/Leads/LeadDetailsPage";
 import NewLead from "./pages/Leads/NewLead";
@@ -85,6 +86,8 @@ import NotFound from "./pages/NotFound";
 import CustomInlineEditableAgGrid from "./components/AgGridComponents/CustomInlineEditableAgGrid";
 import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import { TRACKING_ID } from "./config";
+import Products from "./pages/Products";
+import ProductDetails from "./pages/Products/ProductDetails";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -210,6 +213,11 @@ function App() {
             // exact
             path="/login"
             render={({ location }) => conditionalRedirect(Login, location)}
+          />
+          <Route
+            // exact
+            path="/office365/login"
+            render={({ location }) => conditionalRedirect(AzureLogin, location)}
           />
           <Route
             exact
@@ -469,6 +477,12 @@ function App() {
           <Route exact path="/inline-grid">
             <CustomInlineEditableAgGrid />
           </Route>
+          <PrivateRoute exact path="/product-list">
+            <Products />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product/details/:id">
+            <ProductDetails />
+          </PrivateRoute>
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

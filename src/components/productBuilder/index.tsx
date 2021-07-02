@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import Box from "@material-ui/core/Box";
 import CreateProduct from "../Product/CreateProduct";
 import AddExistingProduct from "./AddExistingProduct";
@@ -27,11 +27,10 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import BulkEditDialog from "./BulkEditDialog";
 import _ from "lodash";
 import Loader from "../Loader";
-import { useData } from "../../StateProvider/Provider";
 import { handleAutoCalculation } from "../../constants/formulaUtility";
 import { gridLoadingTimeout } from "../../constants/helpers";
 
-var levalOrderBy = [
+let levalOrderBy = [
   "product",
   "product-custom",
   "product-template",
@@ -52,12 +51,12 @@ const ProductBuilder = (props) => {
     stage,
     currency,
     isPriceBuilder,
+    hasPermission,
+    permissions,
+    fromQuote,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions },
-  }: any = useData();
 
   const [product, setProduct] = useState([]);
   const [columns, setColumns] = useState(null);
@@ -91,10 +90,18 @@ const ProductBuilder = (props) => {
     fetchProduct(productBuilderId);
   }, [productBuilderId]);
 
-  const ActionsRenderer = (params) => (
-    <>
-      <Tooltip title="Clone">
+  const ActionsRenderer = (params) => {
+    const permission =
+      permissions?.isUpdate && fromQuote
+        ? hasPermission
+          ? true
+          : false
+        : true;
+
+    return (
+      <>
         <IconButton
+          disabled={permission ? false : true}
           size="small"
           aria-label="Clone"
           onClick={() => {
@@ -102,32 +109,41 @@ const ProductBuilder = (props) => {
             setIsClone(true);
           }}
         >
-          <FileCopyIcon fontSize="small" color="primary" />
+          <FileCopyIcon
+            fontSize="small"
+            color={permission ? "primary" : "disabled"}
+          />
         </IconButton>
-      </Tooltip>
-      <Tooltip title="Edit">
+
         <IconButton
+          disabled={permission ? false : true}
           aria-label="Edit"
           onClick={() => {
             setProductData(params.data);
           }}
         >
-          <EditIcon fontSize="small" color="primary" />
+          <EditIcon
+            fontSize="small"
+            color={permission ? "primary" : "disabled"}
+          />
         </IconButton>
-      </Tooltip>
-      <Tooltip title="Delete">
+
         <IconButton
+          disabled={permission ? false : true}
           aria-label="Delete"
           onClick={() => {
             setDeleteRecord(params.data);
             setShowDeleteConfirmBox(true);
           }}
         >
-          <DeleteIcon fontSize="small" color="error" />
+          <DeleteIcon
+            fontSize="small"
+            color={permission ? "error" : "disabled"}
+          />
         </IconButton>
-      </Tooltip>
-    </>
-  );
+      </>
+    );
+  };
 
   const ProductNameRenderer = (params) => (
     <>
@@ -622,18 +638,20 @@ const ProductBuilder = (props) => {
         <Grid item xs={2} className="d-flex align-items-center gap-1"></Grid>
         {Editable && (
           <Grid xs={10} container justify="flex-end">
-            <ImportExportLinks
-              permissions={permissions.productBuilder}
-              module="builder"
-              api={"productbuilder"}
-              refrenceId={productBuilderId}
-              onSuccessfulImport={(isImportedSuccessfully) => {
-                if (isImportedSuccessfully) {
-                  fetchProduct(productBuilderId);
-                }
-              }}
-            />
-            {stage === "cost" && (
+            {permissions.isUpdate && (
+              <ImportExportLinks
+                permissions={permissions}
+                module="builder"
+                api={"productbuilder"}
+                refrenceId={productBuilderId}
+                onSuccessfulImport={(isImportedSuccessfully) => {
+                  if (isImportedSuccessfully) {
+                    fetchProduct(productBuilderId);
+                  }
+                }}
+              />
+            )}
+            {stage === "cost" && permissions.isUpdate && (
               <Button
                 variant="contained"
                 color="primary"
@@ -646,17 +664,19 @@ const ProductBuilder = (props) => {
                 Bulk Edit
               </Button>
             )}
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              className="float-right"
-              onClick={openActions}
-              disabled={selectedRecords.length ? false : true}
-              aria-controls="action-menu"
-            >
-              Actions <ExpandMore />
-            </Button>
+            {permissions.isUpdate && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={openActions}
+                disabled={selectedRecords.length ? false : true}
+                aria-controls="action-menu"
+              >
+                Actions <ExpandMore />
+              </Button>
+            )}
             <Menu
               anchorEl={anchorEl}
               keepMounted

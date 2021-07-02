@@ -7,6 +7,22 @@ import axiosInstance from '../../../axios/axiosInstance'
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { DragBox } from "./DragBox";
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    acionBtn: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        borderRadius: "5px",
+        border: "2px solid #b6bec2",
+        color: "#163340",
+        fontWeight: "bold",
+        padding: "8px",
+        background: "#e6f1f5"
+    },
+}));
 
 
 export const CustomField = ({ }) => {
@@ -15,7 +31,7 @@ export const CustomField = ({ }) => {
     const [isAddField, setIsAddField] = useState(false);
     const [fieldData, setFieldData] = useState(null);
     const toastConfig = useContext(CustomToastContext)
-
+    const classes = useStyles();
     useEffect(() => {
         fetchCustomField();
     }, []);
@@ -92,12 +108,12 @@ export const CustomField = ({ }) => {
             </Box>
 
             <Box>
-                <Grid spacing={3} container>
+                <Grid spacing={1} container>
                     <Grid item xs={12} sm={6} md={6}>
-                        <Button onClick={handleOpenAddField} size="small" color="primary">Add Custom Field</Button>
+                        <label  className={classes.acionBtn} onClick={handleOpenAddField} >Add Custom Field</label>
                     </Grid>
                     <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
-                        <label htmlFor="importcustomField" className="cursor-pointer mr-3">
+                        <label htmlFor="importcustomField" className={`cursor-pointer ${classes.acionBtn}`}>
                             Import Custom Field
                             <input
                                 onClick={(e: any) => (e.target.value = null)}

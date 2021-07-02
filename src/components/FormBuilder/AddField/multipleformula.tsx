@@ -5,11 +5,29 @@ import FormControl from "@material-ui/core/FormControl";
 import Chip from "@material-ui/core/Chip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { startCase } from "lodash";
+import { Button, Typography } from "@material-ui/core";
+import { checkFormula } from "../../../constants/formulaUtility";
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
   let inputRef = useRef([]);
   const [isMyInputFocused, setIsMyInputFocused] = useState(null);
+  const [formulaError, setFormulaError] = useState(null);
 
+  const handleCheckSyntax = () => {
+    if (values["formulaoption"] && values["formulaoption"].length !== 0) {
+      let inputValues = {};
+      let invalidFormulas = " "
+      values["formulainputFields"] &&
+        values["formulainputFields"].forEach((_input) => {
+          inputValues[_input] = 1;
+        });
+      Object.keys(values["formulaoption"]).forEach((_formula) => {
+        if (!checkFormula(values["formulaoption"][_formula], inputValues))
+          invalidFormulas = invalidFormulas + `${_formula} `
+      });
+      invalidFormulas !== " " ? setFormulaError(" Invalid formulas are " + invalidFormulas) : setFormulaError(" All formulas are valid ")
+    }
+  };
   const onChangeValue = (index, fieldName, value) => {
     let data = values["formulaoption"] ? values["formulaoption"] : {};
     data[fieldName] = value;
@@ -77,6 +95,11 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
         (_field, index) => (inputRef.current[index] = React.createRef())
       );
   }
+
+  const generateLabel = (label) => {
+    const data = fields?.find((d) => d.fieldName === label);
+    return `${data.fieldLabel} - ${label}`;
+  };
 
   return (
     <Box>
@@ -170,7 +193,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
             <Chip
               className="ml-1 cursor-pointer"
               key={_field}
-              label={`${startCase(_field.split("_")[0])} - ${_field}`}
+              label={generateLabel(_field)}
               onClick={() => handleAddInputField(_field)}
             />
           ))}
@@ -187,44 +210,57 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
         >
           <table style={{ width: "100%" }}>
             <tbody>
-              {values["formulaFields"] &&
-                values["formulaFields"].map((_field, i) => (
-                  <tr key={i}>
-                    <td
-                      className="pt-2"
-                      style={{ paddingRight: 10, width: "50px" }}
-                    >
-                      {_field}
-                    </td>
-                    <td className="pt-2">
-                      <TextField
-                        id="standard-basic"
-                        variant="outlined"
-                        margin="dense"
-                        fullWidth
-                        multiline
-                        rows={2}
-                        placeholder="Formula (return field1 + field2)"
-                        style={{ margin: 0 }}
-                        name={_field}
-                        inputRef={inputRef.current[i]}
-                        //onBlur={() => setIsMyInputFocused(null)}
-                        onFocus={() => setIsMyInputFocused(i)}
-                        onKeyPress={(event) => {
-                          event.stopPropagation();
-                        }}
-                        value={
-                          values["formulaoption"] &&
-                          values["formulaoption"][_field] &&
-                          values["formulaoption"][_field]
-                        }
-                        onChange={(event) =>
-                          onChangeValue(i, _field, event.target.value)
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
+              <>
+                {values["formulaFields"] &&
+                  values["formulaFields"].map((_field, i) => (
+                    <tr key={i}>
+                      <td
+                        className="pt-2"
+                        style={{ paddingRight: 10, width: "50px" }}
+                      >
+                        {_field}
+                      </td>
+                      <td className="pt-2">
+                        <TextField
+                          id="standard-basic"
+                          variant="outlined"
+                          margin="dense"
+                          fullWidth
+                          multiline
+                          rows={2}
+                          placeholder="Formula (return field1 + field2)"
+                          style={{ margin: 0 }}
+                          name={_field}
+                          inputRef={inputRef.current[i]}
+                          //onBlur={() => setIsMyInputFocused(null)}
+                          onFocus={() => setIsMyInputFocused(i)}
+                          onKeyPress={(event) => {
+                            event.stopPropagation();
+                          }}
+                          value={
+                            values["formulaoption"] &&
+                            values["formulaoption"][_field] &&
+                            values["formulaoption"][_field]
+                          }
+                          onChange={(event) =>
+                            onChangeValue(i, _field, event.target.value)
+                          }
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                {<>
+                  {formulaError && (
+                    <Typography variant="caption" display="block">
+                      {formulaError}
+                    </Typography>
+                  )}
+                  <Button size="small" onClick={handleCheckSyntax} color="primary">
+                    Check Syntax
+                  </Button>
+                </>
+                }
+              </>
             </tbody>
           </table>
         </Box>

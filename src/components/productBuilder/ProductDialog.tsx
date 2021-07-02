@@ -282,6 +282,14 @@ const CreateProduct = (props) => {
     setFieldChanges(_fieldChanges);
   };
 
+  const replaceUnit = (label, unit) => {
+    if (label.includes("Unit") && unit) {
+      label = `${label.split(" Unit")[0]} ${unit}`;
+    }
+
+    return label;
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -320,9 +328,7 @@ const CreateProduct = (props) => {
                       productFields.map((section, i) => (
                         <div key={i}>
                           <h2 className="form-label-style">
-                            {section.name}{" "}
-                            {section.name === "Total Price Calculation" &&
-                              "(Auto Calculated Fields)"}
+                            {section.name}
                             <span
                               style={{ float: "right", marginTop: "-10px" }}
                             >
@@ -366,18 +372,21 @@ const CreateProduct = (props) => {
                                     field.type === "currencyAmount" ? (
                                     <FormTypes
                                       fields={initialData.fields}
-                                      style={{
-                                        borderColor:
-                                          field.sectionName ===
-                                          "Total Price Calculation"
-                                            ? "#ffaa22"
-                                            : "",
-                                      }}
                                       fieldData={field}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
-                                      label={field.fieldLabel}
+                                      label={
+                                        field.isFormula
+                                          ? `${replaceUnit(
+                                              field.fieldLabel,
+                                              values?.unit
+                                            )} (Auto Calculated Field)`
+                                          : replaceUnit(
+                                              field.fieldLabel,
+                                              values?.unit
+                                            )
+                                      }
                                       name={field.fieldName}
                                       type={field.type}
                                       options={field.option}
@@ -409,7 +418,17 @@ const CreateProduct = (props) => {
                                             values={values}
                                             errors={errors}
                                             touched={touched}
-                                            label={field.fieldLabel}
+                                            label={
+                                              field.isFormula
+                                                ? `${replaceUnit(
+                                                    field.fieldLabel,
+                                                    values?.unit
+                                                  )} (Auto Calculated Field)`
+                                                : replaceUnit(
+                                                    field.fieldLabel,
+                                                    values?.unit
+                                                  )
+                                            }
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
