@@ -96,7 +96,7 @@ const ProductGrid = (props) => {
           // { field: "id", headerName: "id", hide: true },
           {
             field: "srno",
-            headerName: "#",
+            headerName: "Item #",
             width: 70,
             filter: false,
             show: true,
