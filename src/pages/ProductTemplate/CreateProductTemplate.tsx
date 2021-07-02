@@ -20,6 +20,8 @@ import TextField from '@material-ui/core/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { checkFormulaLoop } from "../../constants/formulaUtility";
+import { useData } from "../../StateProvider/Provider";
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -43,9 +45,25 @@ const ProductTemplate = () => {
     const [productCategory, setProductCategory] = useState(null);
     //const [productUnit, setProductUnit] = useState(null);
 
+    const {
+        state: { permissions },
+    }: any = useData();
+    const [productTemplatePermissions, setProductTemplatePermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
+
     useEffect(() => {
         fetchOneProductTemplate();
     }, [id, isClone]);
+
+    useEffect(() => {
+        if (permissions && permissions.productTemplate) {
+            setProductTemplatePermissions(permissions.productTemplate);
+        }
+    }, [permissions]);
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
@@ -123,6 +141,11 @@ const ProductTemplate = () => {
             })
         })
         data.fields = fields;
+        const result = checkFormulaLoop(data.fields)
+        if (result.error) {
+            toastConfig.setToastConfig({ open: true, type: "error", message: result.message });
+            return
+        }
         setIsUpdating(true)
         if (id === "0" || isClone) {
             axiosInstance().post("/product-template", data).then(({ data: { data } }) => {
@@ -258,7 +281,7 @@ const ProductTemplate = () => {
                                                 setFieldValue("productCategory", val && val._id ? val._id : "")
                                                 if (val && val.name) {
                                                     setFieldValue("name", val.name);
-                                                } 
+                                                }
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -302,9 +325,11 @@ const ProductTemplate = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={2} container justify="flex-end">
                                         <Box>
-                                            <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
-                                                Save{isUpdating && <CircularProgress size={24} />}
-                                            </Button>
+                                            {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
+                                                <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
+                                                    Save{isUpdating && <CircularProgress size={24} />}
+                                                </Button>
+                                            }
                                         </Box>
                                         <Box ml={1} >
                                             <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/product-Template" })} >Close</Button>
