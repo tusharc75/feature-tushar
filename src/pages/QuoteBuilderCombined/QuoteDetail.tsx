@@ -2420,7 +2420,7 @@ function QuoteDetail() {
                       <div>
                         <Steps
                           steps={DOAneeded ? DOASteps : OtherSteps}
-                          currentStep={DOASteps.indexOf(ProcessStatus)}
+                          currentStep={DOAneeded ? DOASteps.indexOf(ProcessStatus) : OtherSteps.indexOf(ProcessStatus)}
                           id={id}
                           version={currentVersion}
                           Refresh={fetchQuoteData}
