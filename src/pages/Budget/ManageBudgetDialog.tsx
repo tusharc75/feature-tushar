@@ -31,6 +31,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
+import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -53,6 +54,10 @@ export default function ManageBudgetDialog({
     const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currencySymbol, setCurrencySymbol] = useState(null);
+
+    const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
+    const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
+    const [newProductCategoryId, setNewProductCategoryId] = useState(null);
 
     useEffect(() => {
         getBudgetFields();
@@ -104,6 +109,24 @@ export default function ManageBudgetDialog({
                         initialValues: getObjKeys("", filterData.map(m => m.fieldData)),
                     });
                 }
+
+                if (filterData.length > 0) {
+                    const productCategoryDropdownData = filterData.find(
+                        (d) => d.fieldName === "productCategory"
+                    );
+
+                    if (productCategoryDropdownData) {
+                        if (!budgetId) {
+                            setProductCategoryDataSource(productCategoryDropdownData.option);
+                        } else {
+                            let currentContactRemovedDataSource =
+                                productCategoryDropdownData.option.filter(
+                                    (d) => d.optionValue !== newProductCategoryId
+                                );
+                            setProductCategoryDataSource(currentContactRemovedDataSource);
+                        }
+                    }
+                }
             });
     };
 
@@ -141,6 +164,19 @@ export default function ManageBudgetDialog({
                 toastConfig.setToastConfig(error);
             });
         }
+    };
+
+    const initializeProductCategoryDropdown = (values, productCategorySource) => {
+        if (values && values.hasOwnProperty("productCategory")) {
+            const getNewAddedProductCategory = productCategorySource.find(
+                (d) => d.optionValue === newProductCategoryId
+            );
+            if (getNewAddedProductCategory) {
+                values["productCategory"] = getNewAddedProductCategory.optionValue;
+            }
+            return values;
+        }
+        return values;
     };
 
     return (
@@ -254,7 +290,95 @@ export default function ManageBudgetDialog({
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                 />
-                                                                            ) : (
+                                                                            ) : field.fieldName === "productCategory" ? <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                                <Grid container spacing={1}>
+                                                                                    <Grid
+                                                                                        item
+                                                                                        xs={
+                                                                                            //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
+                                                                                            // permissions.productCategory
+                                                                                            //     .isCreate
+                                                                                            true ? 10
+                                                                                                : 11
+                                                                                        }
+                                                                                        sm={
+                                                                                            // permissions.productCategory
+                                                                                            //     .isCreate
+                                                                                            true ? 10
+                                                                                                : 11
+                                                                                        }
+                                                                                        md={
+                                                                                            // permissions.productCategory
+                                                                                            //     .isCreate
+                                                                                            true ? 10
+                                                                                                : 11
+                                                                                        }
+                                                                                    >
+                                                                                        <FormTypes
+                                                                                            fields={entityData.fields}
+                                                                                            fieldData={field}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            setFieldValue={setFieldValue}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={field.isTooltip}
+                                                                                            tooltipMessage={field.tooltipMessage}
+                                                                                            disableClearable
+                                                                                            onChange={(e, val) => {
+                                                                                                setNewProductCategoryId(null);
+                                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                // handleChangeCategory(val && val.optionValue ? val.optionValue : "",
+                                                                                                //     val && val.optionLabel ? val.optionLabel : "", true)
+                                                                                            }}
+                                                                                            size="small"
+                                                                                            values={
+                                                                                                newProductCategoryId
+                                                                                                    ? initializeProductCategoryDropdown(
+                                                                                                        values,
+                                                                                                        productCategoryDataSource
+                                                                                                    )
+                                                                                                    : values
+                                                                                            }
+                                                                                            options={productCategoryDataSource}
+                                                                                            doNotShowInfoTooltip={true}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    {
+                                                                                        // permissions.productCategory
+                                                                                        //     .isCreate
+                                                                                        true && (
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip
+                                                                                                    title="Add Product Category"
+                                                                                                    className="mt-1"
+                                                                                                >
+                                                                                                    <IconButton
+                                                                                                        onClick={() => { setShowAddProductCategoryDialog(true); }}
+                                                                                                        size="small"
+                                                                                                    >
+                                                                                                        <AddIcon color="primary" />
+                                                                                                    </IconButton>
+                                                                                                </Tooltip>
+                                                                                            </Grid>
+                                                                                        )
+                                                                                    }
+                                                                                    {field?.tooltipMessage ? (
+                                                                                        <Grid item xs={1} sm={1} md={1}>
+                                                                                            <Tooltip
+                                                                                                title={
+                                                                                                    field?.tooltipMessage ?? ""
+                                                                                                }
+                                                                                            >
+                                                                                                <InfoIcon color="disabled" />
+                                                                                            </Tooltip>
+                                                                                        </Grid>
+                                                                                    ) : null}
+                                                                                </Grid>
+                                                                            </Grid> : (
                                                                                 <FormTypes
                                                                                     // {...rest}
                                                                                     values={values}
@@ -344,26 +468,31 @@ export default function ManageBudgetDialog({
                 )}
             </Dialog>
 
+            {
+                showAddProductCategoryDialog && <CreateProductCategory
+                    productCategoryId={null}
+                    handleClose={(data) => {
 
-            {/* {showAddCustomerAccountDialog && (
-                <ManageAccountDialog
-                    open={showAddCustomerAccountDialog}
-                    onClose={() => {
-                        setShowAddCustomerAccountDialog(false);
-                    }}
-                    id={null}
-                    accountResource={customerAccount.accountResource}
-                    accountApi={customerAccount.accountApi}
-                    isGetAccountData={true}
-                    onGetAddedAccount={({ data }) => {
-                        setNewAddedAccountId(data._id);
-                        updateAccountDropdown(data);
+                        if (data?._id) {
+                            setProductCategoryDataSource((prevState) => {
+                                return [
+                                    ...prevState,
+                                    {
+                                        optionValue: data._id,
+                                        optionLabel: data.name,
+                                        order: productCategoryDataSource.length,
+                                        default: false,
+                                    },
+                                ];
+                            });
+                            setNewProductCategoryId(data._id);
+                        }
+                        setShowAddProductCategoryDialog(false);
+                        // fetchProductCategory();
 
-                        setFieldValue("customerAccountName", data._id);
                     }}
-                    isRedirectToDetailPage={false}
                 />
-            )} */}
+            }
         </>
     );
 }
@@ -373,6 +502,5 @@ ManageBudgetDialog.propTypes = {
     open: PropTypes.bool,
     onSuccess: PropTypes.func,
     onClose: PropTypes.any,
-    isNew: PropTypes.bool,
-    dataToUpdate: PropTypes.any,
+    budgetId: PropTypes.string
 };
