@@ -136,7 +136,7 @@ const QuoteApproval = () => {
             body = { status: "Rejected by Customer", comment: comment }
         }
         axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
-            .then(({ data }) => {
+            .then(() => {
                 setReplied(true);
                 setShowQuoteStatusChangeDialog(false)
                 setShowSignatureDialog(false);
@@ -177,7 +177,7 @@ const QuoteApproval = () => {
         PdfDoc.setFontSize(14);
         PdfDoc.text("Quotation", 265, 75);
         var PDFData = [];
-        var PdfCol = ["#"];
+        var PdfCol = ["Item #"];
         var serialNumber = 1;
 
         rows.forEach((dataEntry) => {

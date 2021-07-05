@@ -282,6 +282,7 @@ export default function TermsAndCondition(props) {
                         handleClose={handleCloseCreateDialog}
                         fetchData={fetchTermsAndConditions}
                         editRecord={editRecord}
+                        displayTitle={"Terms & Conditions"}
                     />
                 ) : null}
             </CustomContainer>

@@ -187,7 +187,7 @@ const ProductBuilder = (props) => {
         let column = [
           {
             field: "srno",
-            headerName: "#",
+            headerName: "Item #",
             width: 70,
             show: true,
             cellRenderer: "productNameRenderer",
