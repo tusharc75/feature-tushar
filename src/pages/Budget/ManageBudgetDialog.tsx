@@ -111,7 +111,7 @@ export default function ManageBudgetDialog({
                 }
 
                 if (filterData.length > 0) {
-                    const productCategoryDropdownData = filterData.find(
+                    const productCategoryDropdownData = filterData.map(m => m.fieldData).find(
                         (d) => d.fieldName === "productCategory"
                     );
 
@@ -290,7 +290,7 @@ export default function ManageBudgetDialog({
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                 />
-                                                                            ) : field.fieldName === "productCategory" ? <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                            ) : field.fieldName === "productCategory" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                                                                 <Grid container spacing={1}>
                                                                                     <Grid
                                                                                         item
