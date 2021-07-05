@@ -7,6 +7,8 @@ function Budget() {
 
   const onSuccess = () => {
     // Add code of getting grid data again
+
+    setShowManageBudgetDialog({ show: false, id: null });
   }
 
   return <>
