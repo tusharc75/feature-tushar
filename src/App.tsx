@@ -88,7 +88,7 @@ import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNo
 import { TRACKING_ID } from "./config";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
-import MyCart from "./components/ProductList/My-Cart/MyCart";
+import MyCart from "./components/ProductList/MyCart/MyCart";
 
 function App() {
   const toast = useContext(CustomToastContext);

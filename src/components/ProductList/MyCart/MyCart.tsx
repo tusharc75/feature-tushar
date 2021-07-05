@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
-import Layout from "../../../components/Layout";
+import Layout from "../../Layout";
 import styles from "./my-cart.module.scss";
 import SecureIcon from "@material-ui/icons/VerifiedUserOutlined";
 
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import { Button, IconButton } from "@material-ui/core";
-import ButtonDesign from "../../../components/ProductList/Buttondesign/Buttondesign";
-import Product from "../../../components/ProductList/ProductCard/ProductCard";
+import ButtonDesign from "../Buttondesign/Buttondesign";
+import Product from "../ProductCard/ProductCard";
 import { product } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
