@@ -257,10 +257,10 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
               key.displayUnits.forEach((_unit) => {
                 obj[
                   key.fieldName +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
+                    "_" +
+                    _currency.toLowerCase() +
+                    "_" +
+                    _unit.toLowerCase()
                 ] = value && value !== "" ? parseFloat(value) : value;
               });
           } else {
@@ -284,8 +284,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -363,31 +363,31 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            "Enter valid URL"
-          )
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            )
+            .required(`${input.fieldLabel} is required`)
         : yup
-          .string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            "Enter valid URL"
-          );
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
@@ -419,13 +419,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
             input.displayUnits.forEach((_unit) => {
               schema[
                 input.fieldName +
-                "_" +
-                _currency.toLowerCase() +
-                "_" +
-                _unit.toLowerCase()
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
               ] = input.required
-                  ? yup.string().required(`${input.fieldLabel} is required`)
-                  : yup.string();
+                ? yup.string().required(`${input.fieldLabel} is required`)
+                : yup.string();
             });
           } else {
             schema[input.fieldName + "_" + _currency.toLowerCase()] =
