@@ -11,6 +11,7 @@ import FrequentlyBought from '../../components/ProductList/FrequentlyBought/Freq
 import SimilarItems from '../../components/ProductList/SimilarItems/SimilarItems';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { BsImage } from 'react-icons/bs';
+import RatingAndReviewChart from '../../components/ProductList/RatingAndReviewChart';
 
 export default function ProductDetails() {
 
@@ -121,6 +122,7 @@ export default function ProductDetails() {
             <FrequentlyBought />
             <div className="a_divider_inner"></div>
             <SimilarItems similarItems={similarItems} />
+            <RatingAndReviewChart/>
         </Layout>
     )
 }
