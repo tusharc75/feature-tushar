@@ -21,6 +21,7 @@ import {
 import { result, find, throttle } from "lodash";
 import DateUtils from "@date-io/date-fns";
 import {
+  DatePicker,
   KeyboardDatePicker,
   KeyboardDateTimePicker,
   MuiPickersUtilsProvider,
@@ -1797,70 +1798,6 @@ const FormTypes = (props) => {
         )}
       </Box>
     </Fragment>
-  ) : type === "fileUpload" ? (
-    <Fragment>
-      <Box display="flex" alignItems="center">
-        <input
-          disabled={isFileUploading || !canEdit}
-          id={name}
-          name={name}
-          onChange={handleUploadFile}
-          style={{ display: "none" }}
-          onClick={(e: any) => (e.target.value = null)}
-          type="file"
-          accept={accept || documentUploadSupportExtensions}
-          multiple={isMultipleUpload}
-        />
-        <label htmlFor={name}>
-          <Button
-            disabled={isFileUploading || !canEdit}
-            variant="contained"
-            color="primary"
-            size="small"
-            component="span"
-            startIcon={isFileUploading && <CircularProgress size={15} />}
-          >
-            {isFileUploading ? "Uploading File" : "Upload File"}
-          </Button>
-        </label>
-        {doNotShowUploadedFile ? null : (
-          <>
-            <Box marginX={1} />
-            <Box flex="1">
-              <Typography
-                variant="body2"
-                className="text-truncate"
-                color={
-                  touched[name] && Boolean(errors[name])
-                    ? "error"
-                    : "textPrimary"
-                }
-              >
-                {isFileUploading
-                  ? `Uploading... ${fileUploadProgress}%`
-                  : values[name]
-                  ? values[name]
-                  : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : "No file choosen"}
-              </Typography>
-            </Box>
-            {values[name] ? (
-              <IconButton
-                disabled={Boolean(!values[name])}
-                title="Remove File"
-                size="small"
-                aria-label="delete picture"
-                component="span"
-                onClick={() => setFieldValue(name, "")}
-              >
-                <DeleteIcon color="error" />
-              </IconButton>
-            ) : null}
-          </>
-        )}
-      </Box>
-    </Fragment>
   ) : type === "url" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
@@ -1922,6 +1859,29 @@ const FormTypes = (props) => {
           onError={console.log}
           disablePast
           format="yyyy/MM/dd HH:mm"
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </MuiPickersUtilsProvider>
+    </InfoLabel>
+  ) : type === "year" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
+        <DatePicker
+          {...rest}
+          clearable
+          required={required}
+          variant="inline"
+          inputVariant="outlined"
+          ampm={false}
+          value={values[name] || new Date()}
+          name={name}
+          label={label}
+          views={["year"]}
+          onChange={(date) => setFieldValue(name, date)}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           InputLabelProps={{
