@@ -128,7 +128,7 @@ function MyCart() {
             ))}
           </div>
           <div className={styles.price_card}>
-            <div className={styles.price_card_pricesummary}>
+            <div className={styles.price_card_price_summary}>
               <h3 className={styles.price_card_price_summary_heading}>
                 Price Summary
               </h3>
