@@ -59,7 +59,8 @@ export default function ManageLeadDialog({
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
+    useState(0);
 
   useEffect(() => {
     const ownerCollabOptions = leadData.fields.filter(
@@ -214,8 +215,8 @@ export default function ManageLeadDialog({
           isNew
             ? "Create Lead"
             : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName]
-              .filter((f) => f)
-              .join(" ")}`
+                .filter((f) => f)
+                .join(" ")}`
         }
         onClose={onClose}
       />
@@ -230,7 +231,7 @@ export default function ManageLeadDialog({
           initialValues={leadData.initialValues}
           validationSchema={yupSchema(leadData.fields)}
           validateOnMount
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({
             values,
@@ -272,20 +273,39 @@ export default function ManageLeadDialog({
                                         onChange={(e, val) => {
                                           setFieldValue(
                                             field.fieldName,
-                                            val && val.optionValue ? val.optionValue : ""
+                                            val && val.optionValue
+                                              ? val.optionValue
+                                              : ""
                                           );
 
-                                          if (val && val.optionValue !== user?.user?._id) {
-                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
-                                            if (!checkOwnerAddedInCollaborator) {
-                                              setFieldValue("collaborator",
-                                                [...values["collaborator"], collaboratorData.find(d => d.optionValue === user?.user?._id).optionValue])
+                                          if (
+                                            val &&
+                                            val.optionValue !== user?.user?._id
+                                          ) {
+                                            const checkOwnerAddedInCollaborator =
+                                              values["collaborator"].find(
+                                                (d) =>
+                                                  d.optionValue ===
+                                                  user?.user?._id
+                                              );
+                                            if (
+                                              !checkOwnerAddedInCollaborator
+                                            ) {
+                                              setFieldValue("collaborator", [
+                                                ...values["collaborator"],
+                                                collaboratorData.find(
+                                                  (d) =>
+                                                    d.optionValue ===
+                                                    user?.user?._id
+                                                ).optionValue,
+                                              ]);
                                             }
                                           }
                                         }}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         disabled={disableOwnerSelection}
                                         onOpen={() => {
@@ -306,7 +326,8 @@ export default function ManageLeadDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() => {
                                           onCollabOwnerMultiselectOpen(
@@ -327,11 +348,20 @@ export default function ManageLeadDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        } : null}
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                            : null
+                                        }
                                       />
                                     )}
                                   </Grid>
@@ -362,12 +392,14 @@ export default function ManageLeadDialog({
                   color="primary"
                   disabled={
                     // loading || Object.keys(errors).length > 0 ? true : false
-                    uploadingImageOrFileProgress > 0 || Object.values(
+                    uploadingImageOrFileProgress > 0 ||
+                    Object.values(
                       simplifyValues(leadData.initialValues, leadData.fields)
                     ).toString() ===
-                    Object.values(
-                      simplifyValues(values, leadData.fields)
-                    ).toString() || loading
+                      Object.values(
+                        simplifyValues(values, leadData.fields)
+                      ).toString() ||
+                    loading
                   }
                   onClick={(e) => {
                     e.preventDefault();
