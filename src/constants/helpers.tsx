@@ -111,6 +111,7 @@ export const sidebarResource = {
   productBuilder: "Product Builder",
   currencyConverter: "Currency Converter",
   formBuilder: "Form Builder",
+  marketSegment: "Market Segment"
 };
 
 export const lead = {
@@ -194,6 +195,11 @@ export const product = {
   api: "/product",
   route: "/product",
   permission: "product",
+};
+
+export const marketSegment = {
+  marketSegmentApi: "/market-segment",
+  marketSegmentResource: "marketSegment"
 };
 
 export const profileMenuItems = {
