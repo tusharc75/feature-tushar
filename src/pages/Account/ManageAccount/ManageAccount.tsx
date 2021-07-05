@@ -52,7 +52,8 @@ export default function ManageAccount(props) {
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
   const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
 
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
+    useState(0);
 
   useEffect(() => {
     let ownerCollaboratorDropdownData = accountData.fields.filter(
@@ -74,8 +75,8 @@ export default function ManageAccount(props) {
         isNew
           ? parentAccountDropdownData.option
           : parentAccountDropdownData.option.filter(
-            (d) => d.optionValue !== accountId
-          )
+              (d) => d.optionValue !== accountId
+            )
       );
     }
 
@@ -128,10 +129,11 @@ export default function ManageAccount(props) {
           title={
             isNew
               ? "Add Account"
-              : `Editing ${accountData.initialValues.accountName
-                ? accountData.initialValues.accountName
-                : ""
-              }`
+              : `Editing ${
+                  accountData.initialValues.accountName
+                    ? accountData.initialValues.accountName
+                    : ""
+                }`
           }
         />
         {accountData.fields.length > 0 ? (
@@ -175,29 +177,48 @@ export default function ManageAccount(props) {
                                         onChange={(e, val) => {
                                           setFieldValue(
                                             field.fieldName,
-                                            val && val.optionValue ? val.optionValue : ""
+                                            val && val.optionValue
+                                              ? val.optionValue
+                                              : ""
                                           );
 
-                                          if (val && val.optionValue !== user?.user?._id) {
-                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
-                                            if (!checkOwnerAddedInCollaborator) {
+                                          if (
+                                            val &&
+                                            val.optionValue !== user?.user?._id
+                                          ) {
+                                            const checkOwnerAddedInCollaborator =
+                                              values["collaborator"].find(
+                                                (d) =>
+                                                  d.optionValue ===
+                                                  user?.user?._id
+                                              );
+                                            if (
+                                              !checkOwnerAddedInCollaborator
+                                            ) {
+                                              const newCollaboratorDataSource =
+                                                fromProject
+                                                  ? collaborators.filter(
+                                                      (c) =>
+                                                        c.optionValue !==
+                                                        values["owner"]
+                                                    )
+                                                  : collaboratorDataSource;
 
-                                              const newCollaboratorDataSource = fromProject
-                                                ? collaborators.filter(
-                                                  (c) =>
-                                                    c.optionValue !==
-                                                    values["owner"]
-                                                )
-                                                : collaboratorDataSource
-
-                                              setFieldValue("collaborator",
-                                                [...values["collaborator"], newCollaboratorDataSource.find(d => d.optionValue === user?.user?._id).optionValue])
+                                              setFieldValue("collaborator", [
+                                                ...values["collaborator"],
+                                                newCollaboratorDataSource.find(
+                                                  (d) =>
+                                                    d.optionValue ===
+                                                    user?.user?._id
+                                                ).optionValue,
+                                              ]);
                                             }
                                           }
                                         }}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         disabled={disableOwnerSelection}
                                         onOpen={() =>
@@ -219,16 +240,17 @@ export default function ManageAccount(props) {
                                         options={
                                           fromProject
                                             ? collaborators.filter(
-                                              (c) =>
-                                                c.optionValue !==
-                                                values["owner"]
-                                            )
+                                                (c) =>
+                                                  c.optionValue !==
+                                                  values["owner"]
+                                              )
                                             : collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() =>
                                           !fromProject &&
@@ -249,7 +271,8 @@ export default function ManageAccount(props) {
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
                                           setFieldValue(
@@ -279,7 +302,8 @@ export default function ManageAccount(props) {
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(event, newValue) => {
                                           setFieldValue(
@@ -310,7 +334,8 @@ export default function ManageAccount(props) {
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         disabled={
                                           values.isShippingAddressSameAsBillingAddress ===
@@ -335,7 +360,8 @@ export default function ManageAccount(props) {
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
                                     ) : (
@@ -351,11 +377,20 @@ export default function ManageAccount(props) {
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        } : null}
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                            : null
+                                        }
                                       />
                                     )}
                                   </Grid>
@@ -380,16 +415,17 @@ export default function ManageAccount(props) {
                       color="primary"
                       loading={loading}
                       disabled={
-                        loading || uploadingImageOrFileProgress > 0 ||
+                        loading ||
+                        uploadingImageOrFileProgress > 0 ||
                         Object.values(
                           simplifyValues(
                             accountData.initialValues,
                             accountData.fields
                           )
                         ).toString() ===
-                        Object.values(
-                          simplifyValues(values, accountData.fields)
-                        ).toString()
+                          Object.values(
+                            simplifyValues(values, accountData.fields)
+                          ).toString()
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {

@@ -113,9 +113,9 @@ export default function ManageQuoteDialog({
 
   useEffect(() => {
     if (entityData.fields.length === 0 && Object.keys(customError).length > 0) {
-      setCustomError({})
+      setCustomError({});
     }
-  }, [entityData])
+  }, [entityData]);
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -473,24 +473,44 @@ export default function ManageQuoteDialog({
   };
 
   const handleErrors = (values) => {
-    let tempErrors = customError
+    let tempErrors = customError;
 
-    if (values?.quoteAcceptDate && values?.salesOrderCreationDate && new Date(values?.quoteAcceptDate) > new Date(values?.salesOrderCreationDate)) {
-      tempErrors["quoteAcceptDate"] = "Quote Accept Date should be less than Sales Order Creation Date"
+    if (
+      values?.quoteAcceptDate &&
+      values?.salesOrderCreationDate &&
+      new Date(values?.quoteAcceptDate) >
+        new Date(values?.salesOrderCreationDate)
+    ) {
+      tempErrors["quoteAcceptDate"] =
+        "Quote Accept Date should be less than Sales Order Creation Date";
+    } else if (tempErrors["quoteAcceptDate"]) {
+      delete tempErrors["quoteAcceptDate"];
     }
-    else if (tempErrors["quoteAcceptDate"]) { delete tempErrors["quoteAcceptDate"] }
 
-    if (values?.salesOrderCreationDate && values?.invoiceCreationDate && new Date(values?.salesOrderCreationDate) > new Date(values?.invoiceCreationDate)) {
-      tempErrors["salesOrderCreationDate"] = "Sales Order Creation Date should be less than Invoice Creation Date"
+    if (
+      values?.salesOrderCreationDate &&
+      values?.invoiceCreationDate &&
+      new Date(values?.salesOrderCreationDate) >
+        new Date(values?.invoiceCreationDate)
+    ) {
+      tempErrors["salesOrderCreationDate"] =
+        "Sales Order Creation Date should be less than Invoice Creation Date";
+    } else if (tempErrors["salesOrderCreationDate"]) {
+      delete tempErrors["salesOrderCreationDate"];
     }
-    else if (tempErrors["salesOrderCreationDate"]) { delete tempErrors["salesOrderCreationDate"] }
 
-    if (values?.invoiceCreationDate && values?.invoicedDate && new Date(values?.invoiceCreationDate) > new Date(values?.invoicedDate)) {
-      tempErrors["invoiceCreationDate"] = "Invoice Creation Date should be less than Invoiced Date"
+    if (
+      values?.invoiceCreationDate &&
+      values?.invoicedDate &&
+      new Date(values?.invoiceCreationDate) > new Date(values?.invoicedDate)
+    ) {
+      tempErrors["invoiceCreationDate"] =
+        "Invoice Creation Date should be less than Invoiced Date";
+    } else if (tempErrors["invoiceCreationDate"]) {
+      delete tempErrors["invoiceCreationDate"];
     }
-    else if (tempErrors["invoiceCreationDate"]) { delete tempErrors["invoiceCreationDate"] }
-    setCustomError({ ...tempErrors })
-  }
+    setCustomError({ ...tempErrors });
+  };
 
   return (
     <>
@@ -555,13 +575,14 @@ export default function ManageQuoteDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                      // doNotShowInfoTooltip={true}
-                                      // onChange={(e, value) => {
-                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                      //   setFieldValue("customerContactName", [])
-                                      // }}
+                                        // doNotShowInfoTooltip={true}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        //   setFieldValue("customerContactName", [])
+                                        // }}
                                       />
                                     ) : field.fieldName ==
                                       "customerAccountName" ? (
@@ -599,7 +620,12 @@ export default function ManageQuoteDialog({
                                             // setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={true}
+                                            isTooltip={
+                                              field?.isTooltip || false
+                                            }
+                                            tooltipMessage={
+                                              field?.tooltipMessage
+                                            }
                                             size="small"
                                             doNotShowInfoTooltip={true}
                                             onChange={(e, value) => {
@@ -690,10 +716,10 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                          // }}
+                                            // }}
                                           />
                                         </Grid>
                                         {permissions.customerContact.isCreate &&
@@ -734,19 +760,19 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.opportunity.isCreate &&
-                                              !isRenderedFromOpportunity
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           sm={
                                             permissions.opportunity.isCreate &&
-                                              !isRenderedFromOpportunity
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           md={
                                             permissions.opportunity.isCreate &&
-                                              !isRenderedFromOpportunity
+                                            !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
@@ -763,7 +789,12 @@ export default function ManageQuoteDialog({
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={true}
+                                            isTooltip={
+                                              field?.isTooltip || false
+                                            }
+                                            tooltipMessage={
+                                              field?.tooltipMessage
+                                            }
                                             doNotShowInfoTooltip={true}
                                             size="small"
                                             onOpen={() =>
@@ -771,14 +802,14 @@ export default function ManageQuoteDialog({
                                                 values.customerAccountName
                                               )
                                             }
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(
-                                          //     field.fieldName,
-                                          //     value && value.optionValue
-                                          //       ? value.optionValue
-                                          //       : ""
-                                          //   );
-                                          // }}
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(
+                                            //     field.fieldName,
+                                            //     value && value.optionValue
+                                            //       ? value.optionValue
+                                            //       : ""
+                                            //   );
+                                            // }}
                                           />
                                         </Grid>
                                         {permissions.opportunity.isCreate &&
@@ -856,7 +887,8 @@ export default function ManageQuoteDialog({
                                         }}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         disabled={disableOwnerDropDown}
                                         onOpen={() => {
@@ -877,7 +909,8 @@ export default function ManageQuoteDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() => {
                                           onCollabOwnerMultiselectOpen(
@@ -898,7 +931,8 @@ export default function ManageQuoteDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
                                           if (
@@ -928,7 +962,8 @@ export default function ManageQuoteDialog({
                                           setFieldValue={setFieldValue}
                                           required={field.required}
                                           fullWidth
-                                          isTooltip={true}
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                         />
                                       ) : null
@@ -945,7 +980,8 @@ export default function ManageQuoteDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e, val) => {
                                           if (val && val.currencyCode) {
@@ -983,70 +1019,80 @@ export default function ManageQuoteDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
-                                    ) : ["quoteAcceptDate", "salesOrderCreationDate", "invoiceCreationDate", "invoicedDate"].indexOf(field?.fieldName) >= 0 ?
-                                      (
-                                        <FormTypes
-                                          // {...rest}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ["imageUpload", "fileUpload"].some(
-                                              (s) => s === field.type
-                                            )
-                                              ? (completePercentage) => {
+                                    ) : [
+                                        "quoteAcceptDate",
+                                        "salesOrderCreationDate",
+                                        "invoiceCreationDate",
+                                        "invoicedDate",
+                                      ].indexOf(field?.fieldName) >= 0 ? (
+                                      <FormTypes
+                                        // {...rest}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
                                                 setUploadingImageOrFileProgress(
                                                   completePercentage
                                                 );
                                               }
-                                              : null
-                                          }
-                                          customError={customError}
-                                          onChange={(date) => {
-                                            setFieldValue(field.fieldName, date)
-                                            handleErrors({ ...values, [field.fieldName]: date })
-                                          }}
-                                        />
-                                      ) : (
-                                        <FormTypes
-                                          // {...rest}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={true}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ["imageUpload", "fileUpload"].some(
-                                              (s) => s === field.type
-                                            )
-                                              ? (completePercentage) => {
+                                            : null
+                                        }
+                                        customError={customError}
+                                        onChange={(date) => {
+                                          setFieldValue(field.fieldName, date);
+                                          handleErrors({
+                                            ...values,
+                                            [field.fieldName]: date,
+                                          });
+                                        }}
+                                      />
+                                    ) : (
+                                      <FormTypes
+                                        // {...rest}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
                                                 setUploadingImageOrFileProgress(
                                                   completePercentage
                                                 );
                                               }
-                                              : null
-                                          }
-                                        />
-                                      )}
+                                            : null
+                                        }
+                                      />
+                                    )}
                                   </Grid>
                                 ))}
                               </Grid>
@@ -1066,7 +1112,8 @@ export default function ManageQuoteDialog({
                               setFieldValue={setFieldValue}
                               required={field.required}
                               fullWidth
-                              isTooltip={true}
+                              isTooltip={field?.isTooltip || false}
+                              tooltipMessage={field?.tooltipMessage}
                               size="small"
                               style={{ visibility: "hidden" }}
                             />
@@ -1174,14 +1221,14 @@ export default function ManageQuoteDialog({
                           entityData.fields
                         )
                       ).toString() ===
-                      Object.values(
-                        simplifyValues(values, entityData.fields)
-                      ).toString()
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                     }
                     onClick={(e) => {
                       e.preventDefault();
                       if (Object.keys(customError).length > 0) {
-                        return
+                        return;
                       } else submitForm();
                     }}
                   >
