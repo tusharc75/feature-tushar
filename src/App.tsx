@@ -88,6 +88,7 @@ import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNo
 import { TRACKING_ID } from "./config";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
+import MarketSegment from "./pages/MarketSegment";
 import MyCart from "./components/ProductList/MyCart/MyCart";
 
 function App() {
@@ -483,6 +484,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/product/my-cart">
             <MyCart />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.marketSegment.path}>
+            <MarketSegment />
           </PrivateRoute>
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}

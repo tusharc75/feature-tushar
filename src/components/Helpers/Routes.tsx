@@ -176,6 +176,11 @@ const routes = {
     title: "Quotes",
     path: "/quotes"
   },
+  marketSegment: {
+    title: "Market Segment",
+    path: "/market-segment"
+  },
+
 };
 
 export default routes;
