@@ -10,7 +10,7 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
-import { getUniqueCurrencies } from "../../../constants/helpers";
+import { formatAmountWithCurrency, getUniqueCurrencies } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
 
 const useStyles = makeStyles({
@@ -28,11 +28,6 @@ const ProductCard = (props: { product: any; }) => {
   const { product } = props;
   const classes = useStyles();
   const history = useHistory()
-  const currencySymbol = getUniqueCurrencies().some((data) => data?.currencyCode === product.currency)
-    ? getUniqueCurrencies().find(
-      (data) => data?.currencyCode === product.currency
-    ).symbolNative
-    : null
 
   const calculateNetPrice = (price: number, discount: number) => {
     let netPrice = price;
@@ -60,8 +55,8 @@ const ProductCard = (props: { product: any; }) => {
           <div>
             {(product.mrp && parseInt(product.mrp) !== 0) &&
               <>
-                <span className={styles.amount}>{currencySymbol}{calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}</span>
-                {(parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{`${currencySymbol} ${product.mrp}`}</span>}
+                <span className={styles.amount}>{formatAmountWithCurrency(product.currency, calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))).fullFormatAmount}</span>
+                {(parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>}
               </>
             }
           </div>
