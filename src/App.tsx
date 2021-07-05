@@ -88,7 +88,9 @@ import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNo
 import { TRACKING_ID } from "./config";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
+import MarketSegment from "./pages/MarketSegment";
 import MyCart from "./components/ProductList/MyCart/MyCart";
+import Budget from "./pages/Budget";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -106,7 +108,7 @@ function App() {
     setTimeout(() => {
       axiosInstance()
         .get("/version")
-        .then(({ data }) => {});
+        .then(({ data }) => { });
     }, 30000);
   };
 
@@ -176,7 +178,7 @@ function App() {
       setInterval(async () => {
         await getNotification();
       }, 60000);
-    } catch (e) {}
+    } catch (e) { }
 
     // getVersion();
   }, []);
@@ -483,6 +485,12 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/product/my-cart">
             <MyCart />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.budget.path}>
+            <Budget />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.marketSegment.path}>
+            <MarketSegment />
           </PrivateRoute>
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
