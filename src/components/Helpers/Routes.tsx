@@ -176,6 +176,10 @@ const routes = {
     title: "Quotes",
     path: "/quotes"
   },
+  budget: {
+    title: "Budget",
+    path: "/budget"
+  },
   marketSegment: {
     title: "Market Segment",
     path: "/market-segment"
