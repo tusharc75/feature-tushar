@@ -63,7 +63,7 @@ export default function ManageOpportunityDialog({
   }: any = useData();
   const [disableOwnerSelection] = useState(
     (!isNew && user.user._id !== dataToUpdate.owner.optionValue) ||
-    disableOwnerAndAccount
+      disableOwnerAndAccount
   );
 
   const [entityData, setEntityData] = useState({
@@ -81,7 +81,8 @@ export default function ManageOpportunityDialog({
     useState(false);
   const [accountData, setAccountData] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
+    useState(0);
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -310,7 +311,7 @@ export default function ManageOpportunityDialog({
                                 {form.sectionFields.map((field, index2) => (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName ==
-                                      "customerAccountName" ? (
+                                    "customerAccountName" ? (
                                       <Grid container spacing={1}>
                                         <Grid
                                           item
@@ -342,13 +343,18 @@ export default function ManageOpportunityDialog({
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={true}
+                                            isTooltip={
+                                              field?.isTooltip || false
+                                            }
+                                            tooltipMessage={
+                                              field?.tooltipMessage
+                                            }
                                             size="small"
                                             doNotShowInfoTooltip={true}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount
-                                          .isCreate && !accountId && (
+                                        {permissions.customerAccount.isCreate &&
+                                          !accountId && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
                                                 title="Create Account"
@@ -391,20 +397,39 @@ export default function ManageOpportunityDialog({
                                         onChange={(e, val) => {
                                           setFieldValue(
                                             field.fieldName,
-                                            val && val.optionValue ? val.optionValue : ""
+                                            val && val.optionValue
+                                              ? val.optionValue
+                                              : ""
                                           );
 
-                                          if (val && val.optionValue !== user?.user?._id) {
-                                            const checkOwnerAddedInCollaborator = values["collaborator"].find(d => d.optionValue === user?.user?._id);
-                                            if (!checkOwnerAddedInCollaborator) {
-                                              setFieldValue("collaborator",
-                                                [...values["collaborator"], collaboratorData.find(d => d.optionValue === user?.user?._id).optionValue])
+                                          if (
+                                            val &&
+                                            val.optionValue !== user?.user?._id
+                                          ) {
+                                            const checkOwnerAddedInCollaborator =
+                                              values["collaborator"].find(
+                                                (d) =>
+                                                  d.optionValue ===
+                                                  user?.user?._id
+                                              );
+                                            if (
+                                              !checkOwnerAddedInCollaborator
+                                            ) {
+                                              setFieldValue("collaborator", [
+                                                ...values["collaborator"],
+                                                collaboratorData.find(
+                                                  (d) =>
+                                                    d.optionValue ===
+                                                    user?.user?._id
+                                                ).optionValue,
+                                              ]);
                                             }
                                           }
                                         }}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         disabled={disableOwnerSelection}
                                         onOpen={() => {
@@ -425,7 +450,8 @@ export default function ManageOpportunityDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() => {
                                           onCollabOwnerMultiselectOpen(
@@ -446,7 +472,8 @@ export default function ManageOpportunityDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
                                           if (
@@ -476,7 +503,8 @@ export default function ManageOpportunityDialog({
                                           setFieldValue={setFieldValue}
                                           required={field.required}
                                           fullWidth
-                                          isTooltip={true}
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                         />
                                       ) : null
@@ -493,7 +521,8 @@ export default function ManageOpportunityDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e, val) => {
                                           if (val && val.currencyCode) {
@@ -508,7 +537,8 @@ export default function ManageOpportunityDialog({
                                           }
                                         }}
                                       />
-                                    ) : field.fieldName.trim() === "estimatedAmount" ? (
+                                    ) : field.fieldName.trim() ===
+                                      "estimatedAmount" ? (
                                       <FormTypes
                                         // {...rest}
                                         startAdornment={
@@ -530,7 +560,8 @@ export default function ManageOpportunityDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
                                     ) : (
@@ -546,11 +577,20 @@ export default function ManageOpportunityDialog({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        } : null}
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                            : null
+                                        }
                                       />
                                     )}
                                   </Grid>
@@ -572,7 +612,8 @@ export default function ManageOpportunityDialog({
                               setFieldValue={setFieldValue}
                               required={field.required}
                               fullWidth
-                              isTooltip={true}
+                              isTooltip={field?.isTooltip || false}
+                              tooltipMessage={field?.tooltipMessage}
                               size="small"
                               style={{ visibility: "hidden" }}
                             />
@@ -618,15 +659,16 @@ export default function ManageOpportunityDialog({
                     variant="contained"
                     color="primary"
                     disabled={
-                      uploadingImageOrFileProgress > 0 || Object.values(
+                      uploadingImageOrFileProgress > 0 ||
+                      Object.values(
                         simplifyValues(
                           entityData.initialValues,
                           entityData.fields
                         )
                       ).toString() ===
-                      Object.values(
-                        simplifyValues(values, entityData.fields)
-                      ).toString()
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                     }
                     onClick={(e) => {
                       e.preventDefault();
