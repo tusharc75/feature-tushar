@@ -178,7 +178,7 @@ const routes = {
   },
   marketSegment: {
     title: "Market Segment",
-    path: "/market-Segment"
+    path: "/market-segment"
   },
 
 };

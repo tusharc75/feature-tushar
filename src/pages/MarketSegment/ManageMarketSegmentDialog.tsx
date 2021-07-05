@@ -10,14 +10,14 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, marketSegment } from "./../../constants/helpers";
+import { CustomDialogTransition, marketSegment } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box } from '@material-ui/core';
 
 
-const CreateMarketSegment = (props) => {
+const ManageMarketSegmentDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { marketSegmentId, handleClose } = props;
@@ -26,7 +26,7 @@ const CreateMarketSegment = (props) => {
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Market Segment`).then(({ data: { data } }) => {
-            const fieldsData = data.map((d: any) => d.fieldData);
+            const fieldsData = marketSegmentId ?  data.filter(d => d.isUpdate).map((d: any) => d.fieldData) : data.filter(d => d.isCreate).map((d: any) => d.fieldData);
             if (marketSegmentId) {
                 axiosInstance().get(`${marketSegment.marketSegmentApi}/` + marketSegmentId).then(({ data: { data } }) => {
                     setInitialData({
@@ -129,4 +129,4 @@ const CreateMarketSegment = (props) => {
     );
 }
 
-export default CreateMarketSegment;
+export default ManageMarketSegmentDialog;

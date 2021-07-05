@@ -13,7 +13,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import styles from "../Leads/Header.module.scss";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
-import CreateMarketSegment from "./CreateMarketSegment";
+import CreateMarketSegment from "./ManageMarketSegmentDialog";
 import routes from "../../components/Helpers/Routes";
 import { ExpandMore } from "@material-ui/icons";
 import { Box, Menu, MenuItem } from "@material-ui/core";
@@ -40,13 +40,6 @@ const MarketSegment = () => {
     const {
         state: { permissions },
     }: any = useData();
-    const [marketSegmentPermissions, setMarketSegmentPermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
-    });
-
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
@@ -69,12 +62,6 @@ const MarketSegment = () => {
     //  Grid Variables - End
 
     useEffect(() => {
-        if (permissions && permissions.marketSegment) {
-            setMarketSegmentPermissions(permissions.marketSegment);
-        }
-    }, [permissions]);
-
-    useEffect(() => {
         fetchMarketSegment()
     }, [page, limit, filters, sorting, search])
 
@@ -88,7 +75,7 @@ const MarketSegment = () => {
     </span>
 
     const ActionsRenderer = params => <Fragment>
-        {marketSegmentPermissions.isDelete ?
+        {permissions.marketSegment.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -252,10 +239,10 @@ const MarketSegment = () => {
                                 size="small"
                                 value={search}
                             />
-                            {marketSegmentPermissions.isCreate &&
+                            {permissions.marketSegment.isCreate &&
                                 <Button className={styles.add_submit_btn} onClick={() => { setMarketSegmentId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {marketSegmentPermissions.isDelete &&
+                            {permissions.marketSegment.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
