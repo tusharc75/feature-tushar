@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import ReactGA from 'react-ga';
+import ReactGA from "react-ga";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
@@ -88,6 +88,7 @@ import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNo
 import { TRACKING_ID } from "./config";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
+import MyCart from "./pages/Products/My-Cart/MyCart";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -103,11 +104,11 @@ function App() {
 
   const getVersion = () => {
     setTimeout(() => {
-      axiosInstance().get("/version").then(({ data }) => {
-
-      })
+      axiosInstance()
+        .get("/version")
+        .then(({ data }) => {});
     }, 30000);
-  }
+  };
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -175,13 +176,10 @@ function App() {
       setInterval(async () => {
         await getNotification();
       }, 60000);
-    } catch (e) {
-    }
+    } catch (e) {}
 
     // getVersion();
   }, []);
-
-
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
@@ -482,6 +480,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/product/details/:id">
             <ProductDetails />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product/my-cart">
+            <MyCart />
           </PrivateRoute>
           <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
