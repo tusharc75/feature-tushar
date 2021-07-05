@@ -1872,11 +1872,11 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <DatePicker
           {...rest}
+          autoOk
           clearable
           required={required}
           variant="inline"
           inputVariant="outlined"
-          ampm={false}
           value={values[name] || new Date()}
           name={name}
           label={label}

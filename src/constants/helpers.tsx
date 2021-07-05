@@ -31,12 +31,16 @@ export const validations = {
   email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
 };
 
-export const documentUploadSupportExtensions = ".odp,.ods,.odt,.docx,.doc,.csv,.pot,.pps,.ppt,.pptx,.pdf,.xls,.xlsx,.ico,.tif,.tiff,.jpe,.png,.jpg,.jpeg,.gif,.txt,.jflsn";
+export const documentUploadSupportExtensions =
+  ".odp,.ods,.odt,.docx,.doc,.csv,.pot,.pps,.ppt,.pptx,.pdf,.xls,.xlsx,.ico,.tif,.tiff,.jpe,.png,.jpg,.jpeg,.gif,.txt,.jflsn";
 
 //  1048576 = 1 MB
 export const imageUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
 export const documentUploadMaxSize = { size: 1048576 * 10, text: "10 MB" };
-export const termsAndConditionDocumentUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
+export const termsAndConditionDocumentUploadMaxSize = {
+  size: 1048576 * 2,
+  text: "2 MB",
+};
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -219,33 +223,38 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === "date") {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === "year") {
+      obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = value ? value : false;
     } else if (
       key.type !== "currencyAmount" &&
       (key.type === "converter" || key.isConverter === true)
     ) {
-      key.displayUnits && key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + "_" + _unit.toLowerCase()] =
-          value && value !== "" ? parseFloat(value) : value;
-      });
-    } else if (key.type === "currencyAmount") {
-      key.displayCurrency && key.displayCurrency.forEach((_currency) => {
-        if (key.isConverter && key.displayUnits.length) {
-          key.displayUnits && key.displayUnits.forEach((_unit) => {
-            obj[
-              key.fieldName +
-              "_" +
-              _currency.toLowerCase() +
-              "_" +
-              _unit.toLowerCase()
-            ] = value && value !== "" ? parseFloat(value) : value;
-          });
-        } else {
-          obj[key.fieldName + "_" + _currency.toLowerCase()] =
+      key.displayUnits &&
+        key.displayUnits.forEach((_unit) => {
+          obj[key.fieldName + "_" + _unit.toLowerCase()] =
             value && value !== "" ? parseFloat(value) : value;
-        }
-      });
+        });
+    } else if (key.type === "currencyAmount") {
+      key.displayCurrency &&
+        key.displayCurrency.forEach((_currency) => {
+          if (key.isConverter && key.displayUnits.length) {
+            key.displayUnits &&
+              key.displayUnits.forEach((_unit) => {
+                obj[
+                  key.fieldName +
+                    "_" +
+                    _currency.toLowerCase() +
+                    "_" +
+                    _unit.toLowerCase()
+                ] = value && value !== "" ? parseFloat(value) : value;
+              });
+          } else {
+            obj[key.fieldName + "_" + _currency.toLowerCase()] =
+              value && value !== "" ? parseFloat(value) : value;
+          }
+        });
     } else if (key.type === "decimal") {
       obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;
     } else {
@@ -262,8 +271,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -279,25 +288,42 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     } else if (key.type === "dropDown") {
       const value = filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : "";
-    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
-      key.displayUnits && key.displayUnits.forEach((_unit) => {
-        let fieldName = key.fieldName + "_" + _unit.toLowerCase();
-        obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
-      });
-    } else if (key.type === "currencyAmount") {
-      key.displayCurrency && key.displayCurrency.forEach((_currency) => {
-        if (key.isConverter && key.displayUnits.length) {
-          key.displayUnits.forEach((_unit) => {
-            let fieldName = key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
-            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
-          });
-        } else {
-          let fieldName = key.fieldName + "_" + _currency.toLowerCase()
+    } else if (
+      key.type !== "currencyAmount" &&
+      (key.type === "converter" || key.isConverter === true)
+    ) {
+      key.displayUnits &&
+        key.displayUnits.forEach((_unit) => {
+          let fieldName = key.fieldName + "_" + _unit.toLowerCase();
           obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
-        }
-      });
-    } else if (key.type === "decimal" || key.type === "percent" || key.type === "formula") {
-      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
+        });
+    } else if (key.type === "currencyAmount") {
+      key.displayCurrency &&
+        key.displayCurrency.forEach((_currency) => {
+          if (key.isConverter && key.displayUnits.length) {
+            key.displayUnits.forEach((_unit) => {
+              let fieldName =
+                key.fieldName +
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase();
+              obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+            });
+          } else {
+            let fieldName = key.fieldName + "_" + _currency.toLowerCase();
+            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+          }
+        });
+    } else if (
+      key.type === "decimal" ||
+      key.type === "percent" ||
+      key.type === "formula"
+    ) {
+      obj[key.fieldName] =
+        dataObj[key.fieldName] || dataObj[key.fieldName] === 0
+          ? dataObj[key.fieldName]
+          : 0;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : "";
     }
@@ -324,31 +350,31 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            "Enter valid URL"
-          )
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            )
+            .required(`${input.fieldLabel} is required`)
         : yup
-          .string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            "Enter valid URL"
-          );
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
@@ -367,32 +393,34 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.type !== "currencyAmount" &&
       (input.type === "converter" || input.isConverter === true)
     ) {
-      input.displayUnits && input.displayUnits.forEach((_unit) => {
-        schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
-          ? yup.string().required(`${input.fieldLabel} is required`)
-          : yup.string();
-      });
+      input.displayUnits &&
+        input.displayUnits.forEach((_unit) => {
+          schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
+            ? yup.string().required(`${input.fieldLabel} is required`)
+            : yup.string();
+        });
     } else if (input.type === "currencyAmount") {
-      input.displayCurrency && input.displayCurrency.forEach((_currency) => {
-        if (input.isConverter && input.displayUnits.length) {
-          input.displayUnits.forEach((_unit) => {
-            schema[
-              input.fieldName +
-              "_" +
-              _currency.toLowerCase() +
-              "_" +
-              _unit.toLowerCase()
-            ] = input.required
+      input.displayCurrency &&
+        input.displayCurrency.forEach((_currency) => {
+          if (input.isConverter && input.displayUnits.length) {
+            input.displayUnits.forEach((_unit) => {
+              schema[
+                input.fieldName +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+              ] = input.required
                 ? yup.string().required(`${input.fieldLabel} is required`)
                 : yup.string();
-          });
-        } else {
-          schema[input.fieldName + "_" + _currency.toLowerCase()] =
-            input.required
-              ? yup.string().required(`${input.fieldLabel} is required`)
-              : yup.string();
-        }
-      });
+            });
+          } else {
+            schema[input.fieldName + "_" + _currency.toLowerCase()] =
+              input.required
+                ? yup.string().required(`${input.fieldLabel} is required`)
+                : yup.string();
+          }
+        });
     } else if (input.type === "date") {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`).nullable()
@@ -673,13 +701,15 @@ export const simplifyValues = (obj, fields) => {
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, "currencyCode");
-}
+};
 
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
-      shortFormatAmount: "", fullFormatAmount: "", fullFormatAmountWithCurrencyName: ""
-    }
+      shortFormatAmount: "",
+      fullFormatAmount: "",
+      fullFormatAmountWithCurrencyName: "",
+    };
   }
 
   const filterCountries = currencies.filter(
@@ -694,14 +724,18 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       shortFormatAmount: new Intl.NumberFormat(language, {
         notation: "compact",
         compactDisplay: "short",
-      }).format(amount).replace(/^(\D+)/, "$1 "),
+      })
+        .format(amount)
+        .replace(/^(\D+)/, "$1 "),
       fullFormatAmount: new Intl.NumberFormat(language, {
         notation: "compact",
         compactDisplay: "short",
-      }).format(amount).replace(/^(\D+)/, "$1 "),
+      })
+        .format(amount)
+        .replace(/^(\D+)/, "$1 "),
       fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
-        style: 'currency',
-        currencyDisplay: "code"
+        style: "currency",
+        currencyDisplay: "code",
       }).format(amount),
     };
   }
@@ -710,47 +744,53 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   let combinedAllLanguages = filterCountries[0].languages;
 
   if (filterCountries.length > 1) {
-    combinedAllLanguages = [...new Set(filterCountries.map(m => m.languages).flat())];
+    combinedAllLanguages = [
+      ...new Set(filterCountries.map((m) => m.languages).flat()),
+    ];
 
     switch (currencyCode) {
       case "AUD":
-        currencyData = filterCountries.find(f => f.country === "Australia");
+        currencyData = filterCountries.find((f) => f.country === "Australia");
         break;
 
       case "CHF":
-        currencyData = filterCountries.find(f => f.country === "Switzerland");
+        currencyData = filterCountries.find((f) => f.country === "Switzerland");
         break;
 
       case "EUR":
-        currencyData = filterCountries.find(f => f.country === "France");
+        currencyData = filterCountries.find((f) => f.country === "France");
         break;
 
       case "GBP":
-        currencyData = filterCountries.find(f => f.country === "United Kingdom");
+        currencyData = filterCountries.find(
+          (f) => f.country === "United Kingdom"
+        );
         break;
 
       case "NOK":
-        currencyData = filterCountries.find(f => f.country === "Norway");
+        currencyData = filterCountries.find((f) => f.country === "Norway");
         break;
 
       case "NZD":
-        currencyData = filterCountries.find(f => f.country === "New Zeland");
+        currencyData = filterCountries.find((f) => f.country === "New Zeland");
         break;
 
       case "XAF":
-        currencyData = filterCountries.find(f => f.country === "Cameroon");
+        currencyData = filterCountries.find((f) => f.country === "Cameroon");
         break;
 
       case "XCD":
-        currencyData = filterCountries.find(f => f.country === "Dominica");
+        currencyData = filterCountries.find((f) => f.country === "Dominica");
         break;
 
       case "XOF":
-        currencyData = filterCountries.find(f => f.country === "Benin");
+        currencyData = filterCountries.find((f) => f.country === "Benin");
         break;
 
       case "XPF":
-        currencyData = filterCountries.find(f => f.country === "French Polynesia");
+        currencyData = filterCountries.find(
+          (f) => f.country === "French Polynesia"
+        );
         break;
     }
 
@@ -759,7 +799,9 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       currencyData = filterCountries[0];
     }
 
-    currencyData.languages = [...new Set(filterCountries.map(m => m.languages).flat())];
+    currencyData.languages = [
+      ...new Set(filterCountries.map((m) => m.languages).flat()),
+    ];
   }
 
   // Check if that currency's country has multiple language,
@@ -786,21 +828,29 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 
   return {
     shortFormatAmount: new Intl.NumberFormat(
-      `${language}-${currencyData.countryCode}`, {
-      notation: "compact",
-      compactDisplay: "short",
-      ...options
-    }).format(amount).replace(/^(\D+)/, "$1 "),
+      `${language}-${currencyData.countryCode}`,
+      {
+        notation: "compact",
+        compactDisplay: "short",
+        ...options,
+      }
+    )
+      .format(amount)
+      .replace(/^(\D+)/, "$1 "),
     fullFormatAmount: new Intl.NumberFormat(
       `${language}-${currencyData.countryCode}`,
       options
-    ).format(amount).replace(/^(\D+)/, "$1 "),
+    )
+      .format(amount)
+      .replace(/^(\D+)/, "$1 "),
     fullFormatAmountWithCurrencyName: new Intl.NumberFormat(
-      `${language}-${currencyData.countryCode}`, {
-      currencyDisplay: "code",
-      ...options
-    }).format(amount),
-  }
+      `${language}-${currencyData.countryCode}`,
+      {
+        currencyDisplay: "code",
+        ...options,
+      }
+    ).format(amount),
+  };
 };
 
 //  Currencies Short Form Symbols
@@ -835,7 +885,6 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 //   const filterCountries = currencies.filter(
 //     (data) => data?.currencyCode === currencyCode
 //   );
-
 
 //   //  Make default language "en"
 //   let language = "en";
@@ -945,7 +994,6 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 //     // `${currencyData.symbolNative} ${amount}`,
 //   };
 // }
-
 
 export const graphOptions = {
   layout: {
