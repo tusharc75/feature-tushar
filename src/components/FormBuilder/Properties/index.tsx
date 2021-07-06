@@ -453,6 +453,8 @@ export const Properties = ({
                 values["type"] === "percent" ||
                 values["type"] === "converter") &&
                 module !== "form-builder" && (
+                <>
+                  <br></br>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -466,6 +468,7 @@ export const Properties = ({
                     }
                     label="Formula"
                   />
+                </>
                 )}
               {(values["type"] === "formula" || values["isFormula"]) && (
                 <Formula
