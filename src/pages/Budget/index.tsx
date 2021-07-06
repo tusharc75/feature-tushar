@@ -38,18 +38,22 @@ import CustomAgGrid, {
   reducer,
   intialState,
 } from "../../components/AgGridComponents/CustomAgGrid";
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 function Budget() {
+
+  const {
+    state: { permissions },
+  }: any = useData();
+
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
   const [showManageBudgetDialog, setShowManageBudgetDialog] = useState({
     show: false,
     id: null,
   });
-
-  const onSuccess = () => {
-    // Add code of getting grid data again
-
-    setShowManageBudgetDialog({ show: false, id: null });
-  };
 
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -86,7 +90,7 @@ function Budget() {
           };
           return res;
         });
-        console.log(rows);
+
         dispatch({ type: "initialize", data: rows, count: res.data.count });
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
@@ -97,6 +101,49 @@ function Budget() {
         dispatch({ type: "loading", loading: false });
       });
   };
+
+  const NameRenderer = params => (
+    <>
+      {
+        permissions.budget.isUpdate ?
+          <Link className="link"
+            onClick={() => {
+              setShowManageBudgetDialog({ show: true, id: params.data.id });
+            }}>
+            <CustomRenderCell value={params?.value} />
+          </Link>
+          : params?.value
+      }
+    </>
+  )
+
+  const ActionsRenderer = params => (
+    <>
+      {
+        permissions.budget.isDelete &&
+        <Tooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            // setDeleteRecord(params.data);
+            // setShowDeleteConfirmBox(true)
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </Tooltip >
+      }
+    </>
+  )
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    actionsRenderer: ActionsRenderer
+  };
+
+
+  const onSuccess = () => {
+    // Add code of getting grid data again
+    fetchBudgetList();
+    setShowManageBudgetDialog({ show: false, id: null });
+  };
+
   const columns = [
     {
       field: "name",
@@ -109,37 +156,31 @@ function Budget() {
       field: "year",
       headerName: "Year",
       show: true,
-      cellRenderer: "yearRenderer",
     },
     {
       field: "entity",
       headerName: "Entity",
       show: true,
-      cellRenderer: "entityRenderer",
     },
     {
       field: "marketSegment",
       headerName: "Market Segment",
       show: true,
-      cellRenderer: "marketSegmentRenderer",
     },
     {
       field: "subMarketSegment",
       headerName: "Sub Market Segment",
       show: true,
-      cellRenderer: "subMarketSegmentRenderer",
     },
     {
       field: "productCategory",
       headerName: "Product Category",
       show: true,
-      cellRenderer: "productCategoryRenderer",
     },
     {
       field: "currency",
       headerName: "Currency",
       show: true,
-      cellRenderer: "currencyRenderer",
     },
   ];
 
@@ -189,6 +230,9 @@ function Budget() {
                       size="small"
                       startIcon={<AddIcon />}
                       className={styles.add_submit_btn}
+                      onClick={() => {
+                        setShowManageBudgetDialog({ show: true, id: null });
+                      }}
                     >
                       Add
                     </Button>
@@ -227,18 +271,27 @@ function Budget() {
             <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
-              frameworkComponents=""
+              frameworkComponents={frameworkComponents}
               setGridApi={setGridApi}
-              dispatch=""
-              rowCount=""
-              limit=""
-              pageSizes=""
-              page=""
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
               actionWidth={100}
-              loading=""
+              loading={loading}
             />
           </Box>
         </CustomContainer>
+
+        {/* {showDeleteConfirmBox &&
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete the product ${deleteRecord?._id ? deleteRecord?.productName : ""} ?`}
+            onClose={() => setShowDeleteConfirmBox(false)}
+            onOk={handleDelete}
+          />
+        } */}
       </Layout>
     </>
   );
