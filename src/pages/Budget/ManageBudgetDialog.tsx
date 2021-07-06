@@ -204,7 +204,7 @@ export default function ManageBudgetDialog({
     const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
         if (values && values.hasOwnProperty("subMarketSegment")) {
             const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-                (d) => d.optionValue === newMarketSegmentId
+                (d) => d.optionValue === newSubMarketSegmentId
             );
             if (getNewAddedSubMarketSegment) {
                 values["subMarketSegment"] = getNewAddedSubMarketSegment.optionValue;
