@@ -895,6 +895,7 @@ body::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.03) 3px, transparent);
   z-index: 0;
   zoom: 1;
+  margin-top: 14px;
 }
 
 .a_divider_inner:after {

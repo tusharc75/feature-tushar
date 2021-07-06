@@ -1,26 +1,40 @@
 .rating_and_review_chart_outer {
-  margin: 2rem auto;
-  width: 85%;
+  margin: 1rem auto;
+  width: 55%;
 }
 
 .rating_chart {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 2fr ;
+  grid-template-columns: 1fr 1.5fr 1.5fr ;
   gap: 0.25rem;
+  -webkit-gap: 0.25rem;
+}
+
+@supports not (-webkit-gap: 0.25rem) {
+  .rating_chart > *:not(:nth-child(1)) {
+      margin-left: 0.25rem !important;
+  }
+}
+
+.total_rating{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .custom_linear_progress_bar{
   display: grid;
-  grid-template-columns: 10px 10px 1fr 20px ;
+  grid-template-columns: 90px 1fr 40px;
 }
 .progress {
-  margin:5px auto;
-  padding:0;
-  width:70%;
-  height:10px;
-  overflow:hidden;
-  background: var(--lightgray) !important;
-  border-radius:6px;
+  margin: 6px 2%;
+  padding: 0;
+  width: 96%;
+  height: 14px;
+  overflow: hidden;
+  background: #e3e2e2 !important;
+  border-radius: 4px;
 }
 
 .bar {
@@ -28,4 +42,26 @@
   float:left;
   min-width:1%;
   height:100%;
+}
+
+.reviews{
+  font-weight: bold !important;
+  font-size: 14px !important;
+  color: #5b5a5a !important;
+  flex-direction: row;
+}
+
+.rating_category{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media only screen and (max-width: 768px) {
+  .rating_and_review_chart_outer {
+   width: 94%;
+  }
+  .rating_chart {
+    grid-template-rows: 1fr 1.5fr 1.5fr ;
+    grid-template-columns: none;
+  }
 }

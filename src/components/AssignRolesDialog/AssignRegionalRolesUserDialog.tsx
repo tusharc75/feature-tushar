@@ -4,6 +4,9 @@ import {
     Checkbox,
     CircularProgress,
     Dialog,
+    FormControl,
+    FormControlLabel,
+    Grid,
     List,
     ListItem,
     ListItemIcon,
@@ -23,6 +26,7 @@ import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
 import { roleTypes } from "../../constants/helpers";
+import SearchBox from "../Helpers/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -47,13 +51,16 @@ const AssignRegionalRolesUserDialog = ({
 }) => {
     const toastConfig = useContext(CustomToastContext);
     const [entity, setEntity] = useState([]);
+    const [entityConst, setEntityConst] = useState([]);
     const [user, setUser] = useState([]);
+    const [userConst, setUserConst] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
     const [selectedEntity, setSelectedEntity] = useState([]);
     const [selectedUser, setSelectedUser] = useState([]);
     const [isAssigning, setAssigning] = useState(false);
     const [activeStep, setActiveStep] = useState(0);
     const steps = [`Select User`, 'Select Entity']
+    const [search, setSearch] = useState("");
     const classes = useStyles();
 
     const handleNext = () => {
@@ -70,6 +77,7 @@ const AssignRegionalRolesUserDialog = ({
             .get(`/user`)
             .then(({ data: { data } }) => {
                 setUser(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
+                setUserConst(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })));
                 setLoadingData(false);
             })
             .catch((error) => {
@@ -81,6 +89,7 @@ const AssignRegionalRolesUserDialog = ({
             .get(`/entity`)
             .then(({ data: { data } }) => {
                 setEntity(data.map(obj => ({ ...obj, isChecked: false })));
+                setEntityConst(data.map(obj => ({ ...obj, isChecked: false })));
                 setLoadingData(false);
             })
             .catch((error) => {
@@ -90,6 +99,23 @@ const AssignRegionalRolesUserDialog = ({
         // eslint-disable-next-line
     }, []);
 
+
+    const handleSearch = (e) => {
+        let value = e.target.value.toLowerCase();
+        setSearch(value);
+        let resultUser = [];
+        let resultEntity = [];
+
+        resultUser = userConst.filter((data) => {
+            return data.concatedName?.search(value) != -1 || data.email?.search(value) != -1;
+
+        });
+        setUser(resultUser)
+        resultEntity = entityConst.filter((data) => {
+            return data.address?.search(value) != -1 || data.entityName?.search(value) != -1
+        });
+        setEntity(resultEntity)
+    };
 
     const handleAssignEntity = async () => {
 
@@ -138,7 +164,7 @@ const AssignRegionalRolesUserDialog = ({
                                 />
                             </ListItemIcon>
                             <ListItemText
-                                primary={`${d.firstName} ${d.lastName}` || ""}
+                                primary={d.concatedName}
                                 secondary={d.email || ""}
                             />
                         </ListItem>
@@ -188,40 +214,80 @@ const AssignRegionalRolesUserDialog = ({
                 {(loadingData ? (
                     <Loader text={`Loading User`} />
                 ) : user.length ? (
-                    <Stepper activeStep={activeStep} orientation="vertical">
-                        {steps.map((label, index) => (
-                            <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
-                                <StepContent>
-                                    <Typography>{getStepContent(index)}</Typography>
-                                    <div className={classes.actionsContainer}>
-                                        <div>
-                                            <Button
-                                                size="small"
-                                                disabled={activeStep === 0}
-                                                onClick={handleBack}
-                                                className={classes.button}
-                                            >
-                                                Back
-                                                </Button>
-                                            {(activeStep !== steps.length - 1) &&
+                    <>
+                        <Grid container>
+                            <Grid item xs={12} md={6} sm={6} >
+                                <FormControl component="fieldset">
+                                    <FormControlLabel
+                                        value="top"
+                                        control={
+                                            <Checkbox
+                                                edge="start"
+                                                onChange={(e) => {
+                                                    if (activeStep === 0) {
+                                                        user.forEach((d) => d.isChecked = e.target.checked)
+                                                        setSelectedUser(user.filter(r => r.isChecked).map(obj => obj._id))
+                                                    }
+                                                    else {
+                                                        entity.forEach((d) => d.isChecked = e.target.checked)
+                                                        setSelectedEntity(entity.filter(r => r.isChecked).map(obj => obj._id))
+                                                    }
+                                                }
+                                                }
+                                                checked={activeStep === 0 ? user.every(x => x.isChecked) : entity.every(x => x.isChecked)}
+                                                inputProps={{
+                                                    "aria-labelledby": `checkbox-list-label-select-all`,
+                                                }}
+                                            />}
+                                        label="Select all "
+                                    />
+                                </FormControl>
+
+                            </Grid>
+                            <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox="terms_header_search_bar"
+                                    width="300px"
+                                    value={search}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Stepper activeStep={activeStep} orientation="vertical">
+                            {steps.map((label, index) => (
+                                <Step key={label}>
+                                    <StepLabel>{label}</StepLabel>
+                                    <StepContent>
+                                        <Typography>{getStepContent(index)}</Typography>
+                                        <div className={classes.actionsContainer}>
+                                            <div>
                                                 <Button
-                                                    variant="contained"
-                                                    color="primary"
                                                     size="small"
-                                                    onClick={handleNext}
-                                                    disabled={selectedEntity.some(item => item?.isChecked)}
+                                                    disabled={activeStep === 0}
+                                                    onClick={handleBack}
                                                     className={classes.button}
                                                 >
-                                                    Next
-                      </Button>
-                                            }
+                                                    Back
+                                                </Button>
+                                                {(activeStep !== steps.length - 1) &&
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        size="small"
+                                                        onClick={handleNext}
+                                                        disabled={selectedEntity.some(item => item?.isChecked)}
+                                                        className={classes.button}
+                                                    >
+                                                        Next
+                                                    </Button>
+                                                }
+                                            </div>
                                         </div>
-                                    </div>
-                                </StepContent>
-                            </Step>
-                        ))}
-                    </Stepper>
+                                    </StepContent>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </>
                 ) : (
                     <Typography>{`All user has been assigned`}</Typography>
                 ))}
@@ -234,7 +300,7 @@ const AssignRegionalRolesUserDialog = ({
                     size="small"
                 >
                     Cancel
-        </Button>
+                </Button>
                 <Button
                     disabled={!selectedEntity?.length || !selectedUser?.length}
                     onClick={handleAssignEntity}

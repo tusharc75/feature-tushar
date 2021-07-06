@@ -5,7 +5,7 @@ import SecureIcon from "@material-ui/icons/VerifiedUserOutlined";
 
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
-import { Button, IconButton } from "@material-ui/core";
+import { Button, IconButton, Box, Grid} from "@material-ui/core";
 import ButtonDesign from "../Buttondesign/Buttondesign";
 import Product from "../ProductCard/ProductCard";
 import { product } from "../../../constants/helpers";
@@ -88,17 +88,12 @@ function MyCart() {
     "https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png";
   return (
     <Layout>
-      <div>
+      <Grid container className="headerbox">
+
+      </Grid>
+      <Box className="detail-container">
         <div className={styles.wrapper}>
           <div>
-            <h2>My Cart({totalCount})</h2>
-            <div className={styles.checkout_navbar}>
-              <Button color="primary">RENT IT</Button>
-              <Button color="primary">CONFIGURE IT</Button>
-              <Button color="primary">PLAN IT</Button>
-              <Button color="primary">BUY IT</Button>
-            </div>
-            <hr className={styles.checkout_line} />
             {items.map((item, index) => (
               <div key={item.id} className={styles.checkout_items}>
                 <div className={styles.card}>
@@ -132,7 +127,6 @@ function MyCart() {
               <h3 className={styles.price_card_price_summary_heading}>
                 Price Summary
               </h3>
-              <hr />
               <div className={styles.price_card_summary}>
                 <p>Price ({totalCount} items) </p>
                 <h3 className={styles.price_card_price}>Rs. {totalPrice}</h3>
@@ -145,18 +139,19 @@ function MyCart() {
                   </span>
                 </p>
               </div>
-              <hr />
               <div className={styles.price_card_total}>
                 <h3>Total Amount</h3>
                 <h3 className={styles.price_card_price}>Rs. {totalPrice}</h3>
               </div>
             </div>
-            <div className={styles.price_card_secure_text}>
+            {/* <div className={styles.price_card_secure_text}>
               <SecureIcon />
               <h3>Safe and Secure Payments.100% Authentic products.</h3>
-            </div>
+            </div> */}
             <div className={styles.price_card_checkout_button}>
-              <ButtonDesign title="Checkout" />
+                <Button variant="contained" color="secondary" onClick={() => { }}>
+                 Checkout
+              </Button>
             </div>
           </div>
         </div>
@@ -164,13 +159,11 @@ function MyCart() {
           <h1>Sponsored Products Related To This Item </h1>
           <div className={`gap-3 ${styles.sponsored_items_list}`}>
             {products.map((product, index: number) => (
-              <div className={styles.sponsored_items_card}>
                 <Product key={index} product={product} />
-              </div>
             ))}
           </div>
         </div>
-      </div>
+      </Box>
     </Layout>
   );
 }
