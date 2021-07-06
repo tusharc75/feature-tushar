@@ -61,9 +61,6 @@ export const Properties = ({
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
-    if (!fieldData.hiddenField) {
-      setInitialValues({ ...initialValues, hiddenField: false });
-    }
     if (fieldData.type === "dropDown" && !fieldData.lookup) {
       if (
         fieldData.option &&
@@ -75,6 +72,24 @@ export const Properties = ({
             (data) => data.default === true
           )[0].optionValue,
         });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialValues) {
+      const values = initialValues;
+
+      if (!values.hiddenField) {
+        values.hiddenField = false;
+      }
+
+      if (values.type === "process") {
+        if (!values.showAdditionalInfoPopup) {
+          values.showAdditionalInfoPopup = false;
+        }
+
+        setInitialValues(values);
       }
     }
   }, []);
@@ -632,22 +647,7 @@ export const Properties = ({
                   }
                   label="Uneditable"
                 />
-                <FormControlLabel
-                  disabled={values["required"]}
-                  control={
-                    <Checkbox
-                      name="ishiddenField"
-                      checked={
-                        values["required"] ? false : values["hiddenField"]
-                      }
-                      onChange={(e) =>
-                        setFieldValue("hiddenField", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Hidden Field"
-                />
+
                 {values["isDefaultValue"] && (
                   <TextField
                     variant="outlined"
@@ -667,6 +667,40 @@ export const Properties = ({
                     onChange={(e) =>
                       setFieldValue("defaultValue", e.target.value.trimStart())
                     }
+                  />
+                )}
+                <FormControlLabel
+                  disabled={values["required"]}
+                  control={
+                    <Checkbox
+                      name="ishiddenField"
+                      checked={
+                        values["required"] ? false : values["hiddenField"]
+                      }
+                      onChange={(e) =>
+                        setFieldValue("hiddenField", e.target.checked)
+                      }
+                      color="primary"
+                    />
+                  }
+                  label="Hidden Field"
+                />
+                {fieldData.fieldName === "process" && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="showAdditionalInfoPopup"
+                        checked={values["showAdditionalInfoPopup"]}
+                        onChange={(e) =>
+                          setFieldValue(
+                            "showAdditionalInfoPopup",
+                            e.target.checked
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                    label="Show Additional Information Popup On Close"
                   />
                 )}
               </Box>

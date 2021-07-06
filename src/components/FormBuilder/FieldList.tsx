@@ -34,6 +34,11 @@ const FieldList = {
     type: "date",
     icon: "far fa-calendar-check",
   },
+  YEAR: {
+    label: "Year",
+    type: "year",
+    icon: "far fa-calendar-check",
+  },
   DATETIME: {
     label: "Date Time",
     type: "dateTime",
