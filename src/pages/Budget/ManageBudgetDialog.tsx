@@ -32,6 +32,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
 import CreateProductCategory from "../ProductCategory/CreateProductCategory";
+import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -59,6 +60,14 @@ export default function ManageBudgetDialog({
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
 
+    const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
+    const [isSubMarketSegmentDialog, setIsSubMarketSegmentDialog] = useState(false);
+
+    const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
+    const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
+    const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
+    const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+
     useEffect(() => {
         getBudgetFields();
     }, [])
@@ -75,6 +84,14 @@ export default function ManageBudgetDialog({
                 const filterData = budgetId
                     ? data.filter((d) => d.isUpdate)
                     : data.filter((d) => d.isCreate);
+
+                //  Initialize market segment dropdown which have parentMarketSegment === ""
+                const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
+                    (d) => d.fieldName === "marketSegment"
+                );
+                if (marketSegmentDropdownData) {
+                    setMarketSegmentDataSource(marketSegmentDropdownData.option)
+                }
 
                 if (budgetId) {
                     let newFields = [];
@@ -94,6 +111,10 @@ export default function ManageBudgetDialog({
 
                             newFields.push(_f.fieldData);
                         });
+
+                        if (marketSegmentDropdownData) {
+                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+                        }
 
                         setEntityData({
                             fields: newFields,
@@ -116,22 +137,19 @@ export default function ManageBudgetDialog({
                     );
 
                     if (productCategoryDropdownData) {
-                        if (!budgetId) {
-                            setProductCategoryDataSource(productCategoryDropdownData.option);
-                        } else {
-                            let currentContactRemovedDataSource =
-                                productCategoryDropdownData.option.filter(
-                                    (d) => d.optionValue !== newProductCategoryId
-                                );
-                            setProductCategoryDataSource(currentContactRemovedDataSource);
-                        }
+                        setProductCategoryDataSource(productCategoryDropdownData.option);
                     }
                 }
             });
     };
 
+    const marketSegmentChange = (marketSegmentId: string) => {
+        setSubMarketSegmentDataSource(marketSegmentId ? marketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
+    }
+
     const onSubmit = (values) => {
         values.year = new Date(values.year).getFullYear();
+        setLoading(true);
 
         if (budgetId) {
             values._id = budgetId;
@@ -173,6 +191,32 @@ export default function ManageBudgetDialog({
             );
             if (getNewAddedProductCategory) {
                 values["productCategory"] = getNewAddedProductCategory.optionValue;
+            }
+            return values;
+        }
+        return values;
+    };
+
+    const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
+        if (values && values.hasOwnProperty("marketSegment")) {
+            const getNewAddedMarketSegment = marketSegmentSource.find(
+                (d) => d.optionValue === newMarketSegmentId
+            );
+            if (getNewAddedMarketSegment) {
+                values["marketSegment"] = getNewAddedMarketSegment.optionValue;
+            }
+            return values;
+        }
+        return values;
+    };
+
+    const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
+        if (values && values.hasOwnProperty("subMarketSegment")) {
+            const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
+                (d) => d.optionValue === newSubMarketSegmentId
+            );
+            if (getNewAddedSubMarketSegment) {
+                values["subMarketSegment"] = getNewAddedSubMarketSegment.optionValue;
             }
             return values;
         }
@@ -327,7 +371,6 @@ export default function ManageBudgetDialog({
                                                                                             fullWidth
                                                                                             isTooltip={field.isTooltip}
                                                                                             tooltipMessage={field.tooltipMessage}
-                                                                                            disableClearable
                                                                                             onChange={(e, val) => {
                                                                                                 setNewProductCategoryId(null);
                                                                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
@@ -378,25 +421,187 @@ export default function ManageBudgetDialog({
                                                                                         </Grid>
                                                                                     ) : null}
                                                                                 </Grid>
-                                                                            </Grid> : (
-                                                                                <FormTypes
-                                                                                    // {...rest}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={setFieldValue}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    imageOrFileUploadCompletePercentage={null}
-                                                                                />
-                                                                            )}
+                                                                            </Grid>
+                                                                                : field.fieldName === "marketSegment" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                                    <Grid container spacing={1}>
+                                                                                        <Grid
+                                                                                            item
+                                                                                            xs={
+                                                                                                true ? 10
+                                                                                                    : 11
+                                                                                            }
+                                                                                            sm={
+                                                                                                true ? 10
+                                                                                                    : 11
+                                                                                            }
+                                                                                            md={
+                                                                                                true ? 10
+                                                                                                    : 11
+                                                                                            }
+                                                                                        >
+                                                                                            <FormTypes
+                                                                                                fields={entityData.fields}
+                                                                                                fieldData={field}
+                                                                                                errors={errors}
+                                                                                                touched={touched}
+                                                                                                label={field.fieldLabel}
+                                                                                                name={field.fieldName}
+                                                                                                type={field.type}
+                                                                                                setFieldValue={setFieldValue}
+                                                                                                required={field.required}
+                                                                                                fullWidth
+                                                                                                isTooltip={field.isTooltip}
+                                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                                onChange={(e, val) => {
+                                                                                                    setNewMarketSegmentId(null);
+                                                                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                    setFieldValue("subMarketSegment", "")
+                                                                                                    marketSegmentChange(val && val.optionValue ? val.optionValue : "");
+                                                                                                }}
+                                                                                                size="small"
+                                                                                                values={
+                                                                                                    newMarketSegmentId
+                                                                                                        ? initializeMarketSegmentDropdown(
+                                                                                                            values,
+                                                                                                            marketSegmentDataSource
+                                                                                                        )
+                                                                                                        : values
+                                                                                                }
+                                                                                                options={marketSegmentDataSource}
+                                                                                                doNotShowInfoTooltip={true}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                        {
+                                                                                            // permissions.productCategory
+                                                                                            //     .isCreate
+                                                                                            true && (
+                                                                                                <Grid item xs={1} sm={1} md={1}>
+                                                                                                    <Tooltip
+                                                                                                        title="Add Market Segment"
+                                                                                                        className="mt-1"
+                                                                                                    >
+                                                                                                        <IconButton
+                                                                                                            onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                                                                            size="small"
+                                                                                                        >
+                                                                                                            <AddIcon color="primary" />
+                                                                                                        </IconButton>
+                                                                                                    </Tooltip>
+                                                                                                </Grid>
+                                                                                            )
+                                                                                        }
+                                                                                        {field?.tooltipMessage ? (
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip
+                                                                                                    title={
+                                                                                                        field?.tooltipMessage ?? ""
+                                                                                                    }
+                                                                                                >
+                                                                                                    <InfoIcon color="disabled" />
+                                                                                                </Tooltip>
+                                                                                            </Grid>
+                                                                                        ) : null}
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                    : field.fieldName === "subMarketSegment" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                                        <Grid container spacing={1}>
+                                                                                            <Grid
+                                                                                                item
+                                                                                                xs={
+                                                                                                    true ? 10
+                                                                                                        : 11
+                                                                                                }
+                                                                                                sm={
+                                                                                                    true ? 10
+                                                                                                        : 11
+                                                                                                }
+                                                                                                md={
+                                                                                                    true ? 10
+                                                                                                        : 11
+                                                                                                }
+                                                                                            >
+                                                                                                <FormTypes
+                                                                                                    fields={entityData.fields}
+                                                                                                    fieldData={field}
+                                                                                                    errors={errors}
+                                                                                                    touched={touched}
+                                                                                                    label={field.fieldLabel}
+                                                                                                    name={field.fieldName}
+                                                                                                    type={field.type}
+                                                                                                    setFieldValue={setFieldValue}
+                                                                                                    required={field.required}
+                                                                                                    fullWidth
+                                                                                                    isTooltip={field.isTooltip}
+                                                                                                    tooltipMessage={field.tooltipMessage}
+                                                                                                    onChange={(e, val) => {
+                                                                                                        setNewSubMarketSegmentId(null);
+                                                                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                    }}
+                                                                                                    size="small"
+                                                                                                    values={
+                                                                                                        newSubMarketSegmentId
+                                                                                                            ? initializeSubMarketSegmentDropdown(
+                                                                                                                values,
+                                                                                                                subMarketSegmentDataSource
+                                                                                                            )
+                                                                                                            : values
+                                                                                                    }
+                                                                                                    options={subMarketSegmentDataSource}
+                                                                                                    doNotShowInfoTooltip={true}
+                                                                                                />
+                                                                                            </Grid>
+                                                                                            {
+                                                                                                true && (
+                                                                                                    <Grid item xs={1} sm={1} md={1}>
+                                                                                                        <Tooltip
+                                                                                                            title="Add Sub Market Segment"
+                                                                                                            className="mt-1"
+                                                                                                        >
+                                                                                                            <IconButton
+                                                                                                                onClick={() => {
+                                                                                                                    setShowAddMarketSegmentDialog(true);
+                                                                                                                    setIsSubMarketSegmentDialog(true)
+                                                                                                                }}
+                                                                                                                size="small"
+                                                                                                            >
+                                                                                                                <AddIcon color="primary" />
+                                                                                                            </IconButton>
+                                                                                                        </Tooltip>
+                                                                                                    </Grid>
+                                                                                                )
+                                                                                            }
+                                                                                            {field?.tooltipMessage ? (
+                                                                                                <Grid item xs={1} sm={1} md={1}>
+                                                                                                    <Tooltip
+                                                                                                        title={
+                                                                                                            field?.tooltipMessage ?? ""
+                                                                                                        }
+                                                                                                    >
+                                                                                                        <InfoIcon color="disabled" />
+                                                                                                    </Tooltip>
+                                                                                                </Grid>
+                                                                                            ) : null}
+                                                                                        </Grid>
+                                                                                    </Grid>
+                                                                                        : (
+                                                                                            <FormTypes
+                                                                                                // {...rest}
+                                                                                                values={values}
+                                                                                                errors={errors}
+                                                                                                touched={touched}
+                                                                                                label={field.fieldLabel}
+                                                                                                name={field.fieldName}
+                                                                                                type={field.type}
+                                                                                                options={field.option}
+                                                                                                setFieldValue={setFieldValue}
+                                                                                                required={field.required}
+                                                                                                fullWidth
+                                                                                                isTooltip={field?.isTooltip || false}
+                                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                                size="small"
+                                                                                                imageOrFileUploadCompletePercentage={null}
+                                                                                            />
+                                                                                        )}
                                                                     </Grid>
                                                                 ))}
                                                             </Grid>
@@ -444,6 +649,7 @@ export default function ManageBudgetDialog({
                                         variant="contained"
                                         color="primary"
                                         disabled={
+                                            loading ||
                                             Object.values(
                                                 simplifyValues(
                                                     entityData.initialValues,
@@ -472,7 +678,6 @@ export default function ManageBudgetDialog({
                 showAddProductCategoryDialog && <CreateProductCategory
                     productCategoryId={null}
                     handleClose={(data) => {
-
                         if (data?._id) {
                             setProductCategoryDataSource((prevState) => {
                                 return [
@@ -488,6 +693,45 @@ export default function ManageBudgetDialog({
                             setNewProductCategoryId(data._id);
                         }
                         setShowAddProductCategoryDialog(false);
+                    }}
+                />
+            }
+            {
+                showAddMarketSegmentDialog && <ManageMarketSegmentDialog
+                    marketSegmentId={null}
+                    handleClose={(data) => {
+                        if (data?._id) {
+                            if (isSubMarketSegmentDialog) {
+                                setSubMarketSegmentDataSource((prevState) => {
+                                    return [
+                                        ...prevState,
+                                        {
+                                            optionValue: data._id,
+                                            optionLabel: data.name,
+                                            order: subMarketSegmentDataSource.length,
+                                            default: false,
+                                        },
+                                    ];
+                                });
+                                setNewSubMarketSegmentId(data._id);
+                                setIsSubMarketSegmentDialog(false)
+                            }
+                            else {
+                                setMarketSegmentDataSource((prevState) => {
+                                    return [
+                                        ...prevState,
+                                        {
+                                            optionValue: data._id,
+                                            optionLabel: data.name,
+                                            order: marketSegmentDataSource.length,
+                                            default: false,
+                                        },
+                                    ];
+                                });
+                                setNewMarketSegmentId(data._id);
+                            }
+                        }
+                        setShowAddMarketSegmentDialog(false);
                         // fetchProductCategory();
 
                     }}
