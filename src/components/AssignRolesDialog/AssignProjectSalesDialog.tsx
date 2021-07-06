@@ -4,6 +4,9 @@ import {
     Checkbox,
     CircularProgress,
     Dialog,
+    FormControl,
+    FormControlLabel,
+    Grid,
     List,
     ListItem,
     ListItemIcon,
@@ -17,7 +20,8 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { customerAccount, customerContact, opportunity } from "../../constants/helpers"
-import { kebabCase, startCase } from "lodash";
+import { startCase } from "lodash";
+import SearchBox from "../Helpers/SearchBox";
 const AssignProjectSalesDialog = ({
     projectSalesDialogOpen,
     onSuccess,
@@ -29,10 +33,12 @@ const AssignProjectSalesDialog = ({
     const [projectSales, setProjectSales] = useState([]);
     const [loadingProjectSales, setLoadingProjectSales] = useState(false);
     const [selectedProjectSales, setSelectedProjectSales] = useState([]);
+    const [projectSalesConst, setProjectSalesConst] = useState([]);
     const [isAssigning, setAssigning] = useState(false);
     const [resource, setResource] = useState(null);
     const [id, setId] = useState(null);
     const [addAPI, setAddAPI] = useState(null);
+    const [search, setSearch] = useState("");
 
 
     useEffect(() => {
@@ -60,6 +66,7 @@ const AssignProjectSalesDialog = ({
             .get(api)
             .then(({ data: { data } }) => {
                 setProjectSales(data.filter(projectSales => !assignedProjectSales.some(item => item?._id === projectSales?._id)).map(obj => ({ ...obj, isChecked: false })))
+                setProjectSalesConst(data.filter(projectSales => !assignedProjectSales.some(item => item?._id === projectSales?._id)).map(obj => ({ ...obj, isChecked: false })))
                 setLoadingProjectSales(false);
             })
             .catch((error) => {
@@ -97,6 +104,16 @@ const AssignProjectSalesDialog = ({
         }
     };
 
+    const handleSearch = (e) => {
+        let value = e.target.value.toLowerCase();
+        setSearch(value);
+        let result = [];
+        result = projectSalesConst.filter((data) => {
+            return data.projectName.toLowerCase().search(value) != -1 || data.projectManager?.optionLabel.toLowerCase().search(value) != -1;
+        });
+        setProjectSales(result)
+    };
+
     return (
         <Dialog
             fullWidth
@@ -109,31 +126,65 @@ const AssignProjectSalesDialog = ({
             <CustomDialogContent>
                 {loadingProjectSales ? (
                     <Loader text="Loading ProjectSales" />
-                ) : projectSales.length ? (
-                    <List style={{ padding: 0 }}>
-                        {projectSales.map((projectSale) => (
-                            <ListItem divider key={projectSale._id}>
-                                <ListItemIcon>
-                                    <Checkbox
-                                        edge="start"
-                                        onChange={(e) => {
-                                            projectSale.isChecked = e.target.checked
-                                            setSelectedProjectSales(projectSales.filter(r => r.isChecked).map(obj => obj._id))
-                                        }
-                                        }
-                                        checked={projectSale.isChecked}
-                                        inputProps={{
-                                            "aria-labelledby": `checkbox-list-label-${projectSale._id}`,
-                                        }}
+                ) : projectSalesConst.length ? (
+                    <>
+                        <Grid container>
+                            <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
+                                <FormControl component="fieldset">
+                                    <FormControlLabel
+                                        value="top"
+                                        control={
+                                            <Checkbox
+                                                // edge="start"
+                                                onChange={(e) => {
+                                                    projectSales.forEach((project) => project.isChecked = e.target.checked)
+                                                    setSelectedProjectSales(projectSales.filter(r => r.isChecked).map(obj => obj._id))
+                                                }
+                                                }
+                                                checked={projectSales.every(x => x.isChecked)}
+                                                inputProps={{
+                                                    "aria-labelledby": `checkbox-list-label-select-all`,
+                                                }}
+                                            />}
+                                        label="Select All"
                                     />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={projectSale.projectName}
-                                    secondary={projectSale.projectManager?.optionLabel}
+                                </FormControl>
+
+                            </Grid>
+                            <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox="terms_header_search_bar"
+                                    width="300px"
+                                    value={search}
                                 />
-                            </ListItem>
-                        ))}
-                    </List>
+                            </Grid>
+                        </Grid>
+                        <List style={{ padding: 0 }}>
+                            {projectSales.map((projectSale) => (
+                                <ListItem divider key={projectSale._id}>
+                                    <ListItemIcon>
+                                        <Checkbox
+                                            edge="start"
+                                            onChange={(e) => {
+                                                projectSale.isChecked = e.target.checked
+                                                setSelectedProjectSales(projectSales.filter(r => r.isChecked).map(obj => obj._id))
+                                            }
+                                            }
+                                            checked={projectSale.isChecked}
+                                            inputProps={{
+                                                "aria-labelledby": `checkbox-list-label-${projectSale._id}`,
+                                            }}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={projectSale.projectName}
+                                        secondary={projectSale.projectManager?.optionLabel}
+                                    />
+                                </ListItem>
+                            ))}
+                        </List>
+                    </>
                 ) : (
                     <Typography>All Project Sales has been assigned</Typography>
                 )}
@@ -146,7 +197,7 @@ const AssignProjectSalesDialog = ({
                     size="small"
                 >
                     Cancel
-        </Button>
+                </Button>
                 <Button
                     disabled={!selectedProjectSales.length || isAssigning}
                     onClick={handleAssignProjectSales}
