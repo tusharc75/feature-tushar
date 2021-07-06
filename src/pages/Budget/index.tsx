@@ -21,6 +21,7 @@ import {
   sidebarResource,
   isObjectEmpty,
   gridLoadingTimeout,
+  budget,
 } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
@@ -48,6 +49,10 @@ function Budget() {
   const {
     state: { permissions },
   }: any = useData();
+  const { budgetApi } = budget;
+
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
   const [showManageBudgetDialog, setShowManageBudgetDialog] = useState({
@@ -71,78 +76,6 @@ function Budget() {
     selectedRecords,
   } = state;
 
-  useEffect(() => {
-    fetchBudgetList();
-  }, [page, limit, filters, sorting, search]);
-
-  const fetchBudgetList = () => {
-    dispatch({ type: "loading", loading: true });
-    axiosInstance()
-      .get(`/budget`)
-      .then((res) => {
-        let rows = res.data.data.map((item) => {
-          const { createdBy, updatedBy, productCategory, ...restProperties } =
-            item;
-          let res = {
-            ...restProperties,
-            id: item._id,
-            productCategory: productCategory.optionLabel,
-          };
-          return res;
-        });
-
-        dispatch({ type: "initialize", data: rows, count: res.data.count });
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: "loading", loading: false });
-      });
-  };
-
-  const NameRenderer = params => (
-    <>
-      {
-        permissions.budget.isUpdate ?
-          <Link className="link"
-            onClick={() => {
-              setShowManageBudgetDialog({ show: true, id: params.data.id });
-            }}>
-            <CustomRenderCell value={params?.value} />
-          </Link>
-          : params?.value
-      }
-    </>
-  )
-
-  const ActionsRenderer = params => (
-    <>
-      {
-        permissions.budget.isDelete &&
-        <Tooltip title="Delete">
-          <IconButton size="small" aria-label="Delete" onClick={() => {
-            // setDeleteRecord(params.data);
-            // setShowDeleteConfirmBox(true)
-          }} >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </Tooltip >
-      }
-    </>
-  )
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    actionsRenderer: ActionsRenderer
-  };
-
-
-  const onSuccess = () => {
-    // Add code of getting grid data again
-    fetchBudgetList();
-    setShowManageBudgetDialog({ show: false, id: null });
-  };
 
   const columns = [
     {
@@ -183,6 +116,169 @@ function Budget() {
       show: true,
     },
   ];
+
+  useEffect(() => {
+    fetchBudgetList();
+  }, [page, limit, filters, sorting, search]);
+
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "marketSegment":
+        return "marketSegment.optionLabel";
+
+      case "subMarketSegment":
+        return "subMarketSegment.optionLabel";
+
+      case "entity":
+        return "entity.optionLabel";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    const updatedFilters = [];
+
+    if (!isObjectEmpty(filters)) {
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
+
+  const fetchBudgetList = () => {
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+
+    const queryString = getQueryString();
+    axiosInstance()
+      .get(`/budget${queryString}`)
+      .then(({ data }) => {
+        let rows = data.data.map((item) => {
+          const { createdBy, updatedBy, productCategory, marketSegment, subMarketSegment, entity, ...restProperties } =
+            item;
+          let res = {
+            ...restProperties,
+            id: item._id,
+            productCategory: productCategory?.optionLabel ?? "",
+            marketSegment: marketSegment?.optionLabel ?? "",
+            subMarketSegment: subMarketSegment?.optionLabel ?? "",
+            entity: entity?.optionLabel ?? ""
+          };
+          return res;
+        });
+
+        dispatch({ type: "initialize", data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: "loading", loading: false });
+      });
+  };
+
+  const NameRenderer = params => (
+    <>
+      {
+        permissions.budget.isUpdate ?
+          <Link className="link"
+            onClick={() => {
+              setShowManageBudgetDialog({ show: true, id: params.data.id });
+            }}>
+            <CustomRenderCell value={params?.value} />
+          </Link>
+          : params?.value
+      }
+    </>
+  )
+
+  const ActionsRenderer = params => (
+    <>
+      {
+        permissions.budget.isDelete &&
+        <Tooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            setDeleteRecord(params.data)
+            setShowDeleteConfirmBox(true)
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </Tooltip >
+      }
+    </>
+  )
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    actionsRenderer: ActionsRenderer
+  };
+
+  const onSuccess = () => {
+    // Add code of getting grid data again
+    fetchBudgetList();
+    setShowManageBudgetDialog({ show: false, id: null });
+  };
+
+  const handleDelete = () => {
+    let ids = []
+    if (deleteRecord) {
+      ids.push(deleteRecord._id)
+    }
+    else {
+      ids = selectedRecords.map(d => d._id);
+    }
+    axiosInstance().put(`${budgetApi}/remove`, { "ids": ids }).then(() => {
+      fetchBudgetList();
+      setShowDeleteConfirmBox(false)
+      setDeleteRecord(null)
+      setAnchorEl(null)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error)
+    });
+  }
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <>
@@ -240,18 +336,19 @@ function Budget() {
 
                   <>
                     <Button
-                      // disabled={Boolean(!selectedBrand)}
-
                       variant="outlined"
                       color="default"
                       size="small"
                       className={styles.action_submit_btn}
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
                     >
                       Actions <ExpandMore />
                     </Button>
+
                     <Menu
-                      open={Boolean(false)}
+                      anchorEl={anchorEl}
                       keepMounted
                       getContentAnchorEl={null}
                       anchorOrigin={{
@@ -259,8 +356,10 @@ function Budget() {
                         horizontal: "left",
                       }}
                       id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
                     >
-                      <MenuItem>Delete</MenuItem>
+                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                     </Menu>
                   </>
                 </Box>
@@ -284,14 +383,14 @@ function Budget() {
           </Box>
         </CustomContainer>
 
-        {/* {showDeleteConfirmBox &&
+        {showDeleteConfirmBox &&
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the product ${deleteRecord?._id ? deleteRecord?.productName : ""} ?`}
+            message={deleteRecord?._id ? `Are you sure you want to delete the budget ${deleteRecord?.name} ?` : "Are you sure you want to delete selected budget(s) ?"}
             onClose={() => setShowDeleteConfirmBox(false)}
             onOk={handleDelete}
           />
-        } */}
+        }
       </Layout>
     </>
   );
