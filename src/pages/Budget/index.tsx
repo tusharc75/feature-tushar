@@ -121,18 +121,81 @@ function Budget() {
     fetchBudgetList();
   }, [page, limit, filters, sorting, search]);
 
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "marketSegment":
+        return "marketSegment.optionLabel";
+
+      case "subMarketSegment":
+        return "subMarketSegment.optionLabel";
+
+      case "entity":
+        return "entity.optionLabel";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    const updatedFilters = [];
+
+    if (!isObjectEmpty(filters)) {
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+    }
+    deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
+
   const fetchBudgetList = () => {
     dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`/budget`)
+      .get(`/budget${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((item) => {
-          const { createdBy, updatedBy, productCategory, ...restProperties } =
+          const { createdBy, updatedBy, productCategory, marketSegment, subMarketSegment, entity, ...restProperties } =
             item;
           let res = {
             ...restProperties,
             id: item._id,
-            productCategory: productCategory.optionLabel
+            productCategory: productCategory.optionLabel,
+            marketSegment: marketSegment.optionLabel,
+            subMarketSegment: subMarketSegment.optionLabel,
+            entity: entity.optionLabel
           };
           return res;
         });
