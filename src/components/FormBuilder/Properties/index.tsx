@@ -10,6 +10,8 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import FieldList from "../FieldList";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
@@ -210,7 +212,10 @@ export const Properties = ({
                   }
                 }
               });
-              ele.option = values.option;
+              ele.option = values.option.map((item, idx) => ({
+                ...item,
+                order: idx + 1,
+              }));
             }
             if (
               fieldData.type === "decimal" ||
@@ -436,39 +441,41 @@ export const Properties = ({
                   refrence="form-builder"
                 />
               )}
-              {(values["type"] === "dropDown" ||
-                values["type"] === "multiSelect" ||
-                values["type"] === "radio" ||
-                values["type"] === "process") &&
-                !values["lookup"] && (
-                  <Option
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    fields={fields}
-                    _id={fieldData._id}
-                  />
-                )}
+              <DndProvider backend={HTML5Backend}>
+                {(values["type"] === "dropDown" ||
+                  values["type"] === "multiSelect" ||
+                  values["type"] === "radio" ||
+                  values["type"] === "process") &&
+                  !values["lookup"] && (
+                    <Option
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      fields={fields}
+                      _id={fieldData._id}
+                    />
+                  )}
+              </DndProvider>
               {(values["type"] === "currencyAmount" ||
                 values["type"] === "decimal" ||
                 values["type"] === "percent" ||
                 values["type"] === "converter") &&
                 module !== "form-builder" && (
-                <>
-                  <br></br>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isFormula"
-                        checked={values["isFormula"]}
-                        onChange={(e) => {
-                          setFieldValue("isFormula", e.target.checked);
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Formula"
-                  />
-                </>
+                  <>
+                    <br></br>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isFormula"
+                          checked={values["isFormula"]}
+                          onChange={(e) => {
+                            setFieldValue("isFormula", e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Formula"
+                    />
+                  </>
                 )}
               {(values["type"] === "formula" || values["isFormula"]) && (
                 <Formula
