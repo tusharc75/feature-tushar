@@ -8,7 +8,6 @@
 }
 
 .checkout_items {
-  margin: 2rem;
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr;
@@ -17,16 +16,18 @@
 }
 
 .card {
-  min-width: 14rem;
   background: var(--theme-text);
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  border-radius: 6px;
+  border-bottom: 1px solid #f4f4f4;
+  box-shadow:3px -1px 5px #afababdd;
+  margin-bottom: 6px;
 
   &_img {
-    width: 14rem;
-    height: 14rem;
+    width: 15rem;
+    height: 9rem;
     object-fit: cover;
   }
   &_body {
@@ -37,7 +38,7 @@
     line-height: 1.8rem;
     margin-bottom: 0.3rem;
     font-weight: 600;
-    font-size: 1.4rem;
+    font-size: 18px;
     color: var(--colorContact);
   }
   &_seller {
@@ -50,7 +51,7 @@
     font-size: 2rem;
     margin-top: 0.6rem;
     font-weight: 600;
-    color: var(--colorAccount);
+    color: var(--productRed);
   }
   &_controls {
     margin-top: 0.3rem;
@@ -61,18 +62,19 @@
 }
 
 .price_card {
-  max-width: 25rem;
   justify-content: center;
   text-align: center;
   background: var(--theme-text);
   align-items: center;
-  &_price_summary {
-    min-width: 18rem;
-  }
+  border-radius: 6px;
+  // position: fixed;
+  // right: 20px;
+  // width: 34%;
+  
   &_summary {
     display: flex;
     justify-content: space-between;
-    margin: 3rem 1rem;
+    margin: 1rem;
     font-size: 1rem;
   }
 
@@ -84,15 +86,20 @@
   }
 
   &_price_summary_heading {
-    margin: 1rem;
-    color: var(--grey);
+    color: #ffffff;
+    padding: 18px;
+    border-bottom: 1px solid #e9e6ec;
+    font-size: 24px;
+    background: #38aa47;
+    border-radius: 5px 5px 0 0;
+    font-weight: normal;
   }
 
   &_price {
     font-size: 1.3rem;
 
     font-weight: 600;
-    color: var(--colorAccount);
+    color: var(--productRed);
   }
   &_details {
     color: var(--colorContact);
@@ -103,12 +110,13 @@
   }
   &_checkout_button {
     margin-top: 0.8rem;
+    border-top: 1px solid #f2ecec;
+    padding: 15px;
   }
 }
 
 .sponsored_items {
-  margin: 1rem;
-
+  margin: 2rem 10rem;
   &_list {
     display: flex;
     flex-direction: column;
@@ -120,21 +128,25 @@
 @media screen and (min-width: 1000px) {
   .card {
     flex-direction: row;
-    max-width: 60rem;
   }
   .wrapper {
-    display: flex;
+    display: grid;
+    gap: 0.25rem;
+    -webkit-gap: 0.25rem;
+    grid-template-columns: 2fr 1fr;
+    margin: 0px 10rem;
+  }
+  @supports not (-webkit-gap: 0.25rem) {
+    .wrapper > *:not(:nth-child(1)) {
+        margin-left: 0.25rem !important;
+    }
   }
 }
 @media screen and (min-width: 426px) {
   .sponsored_items {
-    &_card {
-      width: 25rem;
-      height: 30rem;
-    }
+
     &_list {
       flex-direction: row;
-      overflow-x: scroll;
     }
   }
 }

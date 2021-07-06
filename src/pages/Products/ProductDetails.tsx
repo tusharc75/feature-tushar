@@ -6,7 +6,7 @@ import { formatAmountWithCurrency, product } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import styles from "./product-detail-page.module.scss";
-import { Button, Box } from "@material-ui/core";
+import { Button, Box, Grid } from "@material-ui/core";
 import FrequentlyBought from "../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import SimilarItems from "../../components/ProductList/SimilarItems/SimilarItems";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
@@ -58,126 +58,132 @@ export default function ProductDetails() {
 
   return (
     <Layout>
-      {productDetails ? (
-        <div className={styles.product_container}>
-          <div className={styles.product_image}>
-            <Box display="flex" justifyContent="center" alignItems="center">
-              {productDetails.productImage ? (
-                <img
-                  src={productDetails.productImage}
-                  alt={productDetails.productName}
-                  width="100%"
-                />
-              ) : (
-                <BsImage className={styles.product_no_image} />
-              )}
-            </Box>
-          </div>
-          <div className={styles.product_details}>
-            <header>
-              <h1 className={styles.title}>{productDetails.productName}</h1>
-              <span className={styles.avaibility}>
-                {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
-              </span>
-              <div className={styles.price}>
-                <span className={styles.current}>
-                  {
-                    formatAmountWithCurrency(
-                      productDetails.currency,
-                      calculateNetPrice(
-                        parseInt(productDetails.mrp),
-                        productDetails.discount
-                      )
-                    ).fullFormatAmount
-                  }
-                </span>
-                <span className={styles.before}>
-                  {
-                    formatAmountWithCurrency(
-                      productDetails.currency,
-                      productDetails.mrp
-                    ).fullFormatAmount
-                  }
-                </span>
-              </div>
-              <div className={styles.rate}>
-                <Rating
-                  name="half-rating-read"
-                  defaultValue={2.5}
-                  precision={0.5}
-                  value={productDetails.rating}
-                  readOnly
-                  size="small"
-                />
-              </div>
-            </header>
-            <article>
-              <h5>Description</h5>
-              <p>{productDetails?.description}</p>
-            </article>
-            <div className={styles.controls}>
-              <div>
-                <h5>MFG</h5>
-                <a className="option">(UK 8)</a>
-              </div>
-              <div>
-                <h5>Product Number</h5>
-                <a className="option">(1)</a>
-              </div>
-              <div>
-                <h5>Mesuring Unit</h5>
-                <a className="option">(1)</a>
-              </div>
+      <Grid container className="headerbox">
+
+      </Grid>
+      <Box className="detail-container">
+        {productDetails ? (
+          <div className={styles.product_container}>
+            <div className={styles.product_image}>
+              <Box display="flex" justifyContent="center" alignItems="center">
+                {productDetails.productImage ? (
+                  <img
+                    src={productDetails.productImage}
+                    alt={productDetails.productName}
+                    width="100%"
+                  />
+                ) : (
+                  <BsImage className={styles.product_no_image} />
+                )}
+              </Box>
             </div>
-            <div className="footer">
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="mr-2"
-                onClick={() => {}}
-                startIcon={<AddShoppingCartIcon />}
-              >
-                Add to cart
-              </Button>
-              <Link to="/product/my-cart">
+            <div className={styles.product_details}>
+              <header>
+                <h1 className={styles.title}>{productDetails.productName}</h1>
+                <span className={styles.avaibility}>
+                  {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
+                </span>
+                <div className={styles.price}>
+                  <span className={styles.current}>
+                    {
+                      formatAmountWithCurrency(
+                        productDetails.currency,
+                        calculateNetPrice(
+                          parseInt(productDetails.mrp),
+                          productDetails.discount
+                        )
+                      ).fullFormatAmount
+                    }
+                  </span>
+                  <span className={styles.before}>
+                    {
+                      formatAmountWithCurrency(
+                        productDetails.currency,
+                        productDetails.mrp
+                      ).fullFormatAmount
+                    }
+                  </span>
+                </div>
+                <div className={styles.rate}>
+                  <Rating
+                    name="half-rating-read"
+                    defaultValue={2.5}
+                    precision={0.5}
+                    value={productDetails.rating}
+                    readOnly
+                    size="small"
+                  />
+                </div>
+              </header>
+              <article>
+                <h5>Description</h5>
+                <p>{productDetails?.description}</p>
+              </article>
+              <div className={styles.controls}>
+                <div>
+                  <h5>MFG</h5>
+                  <a className="option">(UK 8)</a>
+                </div>
+                <div>
+                  <h5>Product Number</h5>
+                  <a className="option">(1)</a>
+                </div>
+                <div>
+                  <h5>Mesuring Unit</h5>
+                  <a className="option">(1)</a>
+                </div>
+              </div>
+              <div className="footer">
                 <Button
                   variant="contained"
                   color="primary"
                   size="small"
                   className="mr-2"
+                  onClick={() => { }}
                   startIcon={<AddShoppingCartIcon />}
                 >
-                  Checkout
+                  Add to cart
                 </Button>
-              </Link>
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="small"
-                className="mr-2"
-              >
-                Add to Configure
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="small"
-                className="mr-2"
-              >
-                Add to Planner
-              </Button>
+                <Link to="/product/my-cart">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="mr-2"
+                    startIcon={<AddShoppingCartIcon />}
+                  >
+                    Checkout
+                  </Button>
+                </Link>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  className="mr-2"
+                >
+                  Add to Configure
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  className="mr-2"
+                >
+                  Add to Planner
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <span>Loading...</span>
-      )}
-      <div className="a_divider_inner"></div>
-      <FrequentlyBought />
-      <div className="a_divider_inner"></div>
-      <SimilarItems similarItems={similarItems} />
-      <RatingAndReviewChart />
+        ) : (
+          <span>Loading...</span>
+        )}
+        <div className="a_divider_inner"></div>
+        <FrequentlyBought />
+        <div className="a_divider_inner"></div>
+        <SimilarItems similarItems={similarItems} />
+        <div className="a_divider_inner"></div>
+        <RatingAndReviewChart />
+      </Box>
     </Layout>
   );
 }
