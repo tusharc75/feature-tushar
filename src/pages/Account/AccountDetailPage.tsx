@@ -65,7 +65,7 @@ import { ListItemText } from "@material-ui/core";
 import { cloneDeep } from "lodash";
 import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
-import LeadOpportunityProcess from "../../components/LeadOpportunityProcess";
+import ProcessFlow from "../../components/ProcessFlow";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -623,7 +623,7 @@ export default function AccountDetailPage(props) {
                   ) : null}
                 </DetailsPageHeader>
               }
-              <LeadOpportunityProcess
+              <ProcessFlow
                 disableBackNext={
                   permissions &&
                   permissions[accountResource] &&
