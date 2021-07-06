@@ -38,7 +38,6 @@ import {
   sidebarResource,
   customerAccount,
   processFieldName,
-  stepsToIgnoreManualCompleteForOpportunity,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -364,10 +363,7 @@ export default function AccountDetailPage(props) {
             processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually:
-                  !stepsToIgnoreManualCompleteForOpportunity.some(
-                    (s) => s === m.optionValue.toLowerCase()
-                  ),
+                canCompleteManually: true,
               };
             })
           );
