@@ -85,6 +85,14 @@ export default function ManageBudgetDialog({
                     ? data.filter((d) => d.isUpdate)
                     : data.filter((d) => d.isCreate);
 
+                //  Initialize market segment dropdown which have parentMarketSegment === ""
+                const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
+                    (d) => d.fieldName === "marketSegment"
+                );
+                if (marketSegmentDropdownData) {
+                    setMarketSegmentDataSource(marketSegmentDropdownData.option)
+                }
+
                 if (budgetId) {
                     let newFields = [];
 
@@ -103,6 +111,10 @@ export default function ManageBudgetDialog({
 
                             newFields.push(_f.fieldData);
                         });
+
+                        if (marketSegmentDropdownData) {
+                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+                        }
 
                         setEntityData({
                             fields: newFields,
@@ -125,22 +137,19 @@ export default function ManageBudgetDialog({
                     );
 
                     if (productCategoryDropdownData) {
-                        if (!budgetId) {
-                            setProductCategoryDataSource(productCategoryDropdownData.option);
-                        } else {
-                            let currentContactRemovedDataSource =
-                                productCategoryDropdownData.option.filter(
-                                    (d) => d.optionValue !== newProductCategoryId
-                                );
-                            setProductCategoryDataSource(currentContactRemovedDataSource);
-                        }
+                        setProductCategoryDataSource(productCategoryDropdownData.option);
                     }
                 }
             });
     };
 
+    const marketSegmentChange = (marketSegmentId: string) => {
+        setSubMarketSegmentDataSource(marketSegmentId ? marketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
+    }
+
     const onSubmit = (values) => {
         values.year = new Date(values.year).getFullYear();
+        setLoading(true);
 
         if (budgetId) {
             values._id = budgetId;
@@ -362,7 +371,6 @@ export default function ManageBudgetDialog({
                                                                                             fullWidth
                                                                                             isTooltip={field.isTooltip}
                                                                                             tooltipMessage={field.tooltipMessage}
-                                                                                            disableClearable
                                                                                             onChange={(e, val) => {
                                                                                                 setNewProductCategoryId(null);
                                                                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
@@ -444,10 +452,11 @@ export default function ManageBudgetDialog({
                                                                                                 fullWidth
                                                                                                 isTooltip={field.isTooltip}
                                                                                                 tooltipMessage={field.tooltipMessage}
-                                                                                                disableClearable
                                                                                                 onChange={(e, val) => {
                                                                                                     setNewMarketSegmentId(null);
                                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                    setFieldValue("subMarketSegment", "")
+                                                                                                    marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                                                                                 }}
                                                                                                 size="small"
                                                                                                 values={
@@ -524,7 +533,6 @@ export default function ManageBudgetDialog({
                                                                                                     fullWidth
                                                                                                     isTooltip={field.isTooltip}
                                                                                                     tooltipMessage={field.tooltipMessage}
-                                                                                                    disableClearable
                                                                                                     onChange={(e, val) => {
                                                                                                         setNewSubMarketSegmentId(null);
                                                                                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
@@ -641,6 +649,7 @@ export default function ManageBudgetDialog({
                                         variant="contained"
                                         color="primary"
                                         disabled={
+                                            loading ||
                                             Object.values(
                                                 simplifyValues(
                                                     entityData.initialValues,
@@ -669,7 +678,6 @@ export default function ManageBudgetDialog({
                 showAddProductCategoryDialog && <CreateProductCategory
                     productCategoryId={null}
                     handleClose={(data) => {
-
                         if (data?._id) {
                             setProductCategoryDataSource((prevState) => {
                                 return [
@@ -685,8 +693,6 @@ export default function ManageBudgetDialog({
                             setNewProductCategoryId(data._id);
                         }
                         setShowAddProductCategoryDialog(false);
-                        // fetchProductCategory();
-
                     }}
                 />
             }
@@ -694,7 +700,6 @@ export default function ManageBudgetDialog({
                 showAddMarketSegmentDialog && <ManageMarketSegmentDialog
                     marketSegmentId={null}
                     handleClose={(data) => {
-                        debugger
                         if (data?._id) {
                             if (isSubMarketSegmentDialog) {
                                 setSubMarketSegmentDataSource((prevState) => {
