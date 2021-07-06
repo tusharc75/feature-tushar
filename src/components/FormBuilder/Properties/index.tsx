@@ -10,6 +10,8 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import FieldList from "../FieldList";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
@@ -61,9 +63,6 @@ export const Properties = ({
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
-    if (!fieldData.hiddenField) {
-      setInitialValues({ ...initialValues, hiddenField: false });
-    }
     if (fieldData.type === "dropDown" && !fieldData.lookup) {
       if (
         fieldData.option &&
@@ -75,6 +74,24 @@ export const Properties = ({
             (data) => data.default === true
           )[0].optionValue,
         });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialValues) {
+      const values = initialValues;
+
+      if (!values.hiddenField) {
+        values.hiddenField = false;
+      }
+
+      if (values.type === "process") {
+        if (!values.showAdditionalInfoPopup) {
+          values.showAdditionalInfoPopup = false;
+        }
+
+        setInitialValues(values);
       }
     }
   }, []);
@@ -195,7 +212,10 @@ export const Properties = ({
                   }
                 }
               });
-              ele.option = values.option;
+              ele.option = values.option.map((item, idx) => ({
+                ...item,
+                order: idx + 1,
+              }));
             }
             if (
               fieldData.type === "decimal" ||
@@ -421,39 +441,41 @@ export const Properties = ({
                   refrence="form-builder"
                 />
               )}
-              {(values["type"] === "dropDown" ||
-                values["type"] === "multiSelect" ||
-                values["type"] === "radio" ||
-                values["type"] === "process") &&
-                !values["lookup"] && (
-                  <Option
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    fields={fields}
-                    _id={fieldData._id}
-                  />
-                )}
+              <DndProvider backend={HTML5Backend}>
+                {(values["type"] === "dropDown" ||
+                  values["type"] === "multiSelect" ||
+                  values["type"] === "radio" ||
+                  values["type"] === "process") &&
+                  !values["lookup"] && (
+                    <Option
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      fields={fields}
+                      _id={fieldData._id}
+                    />
+                  )}
+              </DndProvider>
               {(values["type"] === "currencyAmount" ||
                 values["type"] === "decimal" ||
                 values["type"] === "percent" ||
                 values["type"] === "converter") &&
                 module !== "form-builder" && (
-                <>
-                  <br></br>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isFormula"
-                        checked={values["isFormula"]}
-                        onChange={(e) => {
-                          setFieldValue("isFormula", e.target.checked);
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Formula"
-                  />
-                </>
+                  <>
+                    <br></br>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isFormula"
+                          checked={values["isFormula"]}
+                          onChange={(e) => {
+                            setFieldValue("isFormula", e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Formula"
+                    />
+                  </>
                 )}
               {(values["type"] === "formula" || values["isFormula"]) && (
                 <Formula
@@ -632,22 +654,7 @@ export const Properties = ({
                   }
                   label="Uneditable"
                 />
-                <FormControlLabel
-                  disabled={values["required"]}
-                  control={
-                    <Checkbox
-                      name="ishiddenField"
-                      checked={
-                        values["required"] ? false : values["hiddenField"]
-                      }
-                      onChange={(e) =>
-                        setFieldValue("hiddenField", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Hidden Field"
-                />
+
                 {values["isDefaultValue"] && (
                   <TextField
                     variant="outlined"
@@ -667,6 +674,40 @@ export const Properties = ({
                     onChange={(e) =>
                       setFieldValue("defaultValue", e.target.value.trimStart())
                     }
+                  />
+                )}
+                <FormControlLabel
+                  disabled={values["required"]}
+                  control={
+                    <Checkbox
+                      name="ishiddenField"
+                      checked={
+                        values["required"] ? false : values["hiddenField"]
+                      }
+                      onChange={(e) =>
+                        setFieldValue("hiddenField", e.target.checked)
+                      }
+                      color="primary"
+                    />
+                  }
+                  label="Hidden Field"
+                />
+                {fieldData.fieldName === "process" && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="showAdditionalInfoPopup"
+                        checked={values["showAdditionalInfoPopup"]}
+                        onChange={(e) =>
+                          setFieldValue(
+                            "showAdditionalInfoPopup",
+                            e.target.checked
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                    label="Show Additional Information Popup On Close"
                   />
                 )}
               </Box>

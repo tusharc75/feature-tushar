@@ -1,20 +1,16 @@
-import React, { useContext, useEffect, useState, useReducer } from "react";
+import { useContext, useEffect, useState, useReducer } from "react";
 import ManageBudgetDialog from "./ManageBudgetDialog";
 import Layout from "../../components/Layout";
 import { Box, Button, Menu, MenuItem, Grid } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
-import { Link } from "react-router-dom";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import AddIcon from "@material-ui/icons/Add";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import SearchBox from "../../components/Helpers/SearchBox";
 import CustomContainer from "../../components/CustomContainer";
-import MessageDialog from "../../components/Helpers/MessageDialog";
 import styles from "../Leads/Header.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { MdContacts } from "react-icons/md";
 import axiosInstance from "../../axios/axiosInstance";
 import {
@@ -23,18 +19,10 @@ import {
   gridLoadingTimeout,
   budget,
 } from "../../constants/helpers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { useHistory } from "react-router-dom";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
 import {
   CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRendererWithCopy,
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, {
   reducer,
   intialState,
@@ -44,6 +32,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
+let timeout;
 function Budget() {
 
   const {
@@ -76,6 +65,21 @@ function Budget() {
     selectedRecords,
   } = state;
 
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(() => {
+      fetchBudgetList()
+    }, millisec);
+  }, [search]);
+
+  useEffect(() => {
+    fetchBudgetList();
+  }, [page, limit, filters, sorting]);
 
   const columns = [
     {
@@ -83,44 +87,82 @@ function Budget() {
       headerName: "Name",
       show: true,
       disabled: true,
-      cellRenderer: "nameRenderer",
+      cellRenderer: "nameRenderer"
     },
     {
       field: "year",
       headerName: "Year",
       show: true,
+      cellRenderer: "commonRenderer"
     },
     {
       field: "entity",
       headerName: "Entity",
       show: true,
+      cellRenderer: "commonRenderer"
     },
     {
       field: "marketSegment",
       headerName: "Market Segment",
       show: true,
+      cellRenderer: "commonRenderer"
     },
     {
       field: "subMarketSegment",
       headerName: "Sub Market Segment",
       show: true,
+      cellRenderer: "commonRenderer"
     },
     {
       field: "productCategory",
       headerName: "Product Category",
       show: true,
+      cellRenderer: "commonRenderer"
     },
     {
       field: "currency",
       headerName: "Currency",
       show: true,
+      cellRenderer: "commonRenderer"
     },
   ];
 
-  useEffect(() => {
-    fetchBudgetList();
-  }, [page, limit, filters, sorting, search]);
+  const NameRenderer = params => (
+    <>
+      {
+        permissions.budget.isUpdate ?
+          <span className="link"
+            onClick={() => {
+              setShowManageBudgetDialog({ show: true, id: params.data.id });
+            }}>
+            <CustomRenderCell value={params?.value} />
+          </span>
+          : params?.value
+      }
+    </>
+  )
 
+  const ActionsRenderer = params => (
+    <>
+      {
+        permissions.budget.isDelete &&
+        <Tooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            setDeleteRecord(params.data)
+            setShowDeleteConfirmBox(true)
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </Tooltip >
+      }
+    </>
+  )
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    commonRenderer: CommonRenderer,
+    actionsRenderer: ActionsRenderer
+  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -212,42 +254,6 @@ function Budget() {
       });
   };
 
-  const NameRenderer = params => (
-    <>
-      {
-        permissions.budget.isUpdate ?
-          <span className="link"
-            onClick={() => {
-              setShowManageBudgetDialog({ show: true, id: params.data.id });
-            }}>
-            <CustomRenderCell value={params?.value} />
-          </span>
-          : params?.value
-      }
-    </>
-  )
-
-  const ActionsRenderer = params => (
-    <>
-      {
-        permissions.budget.isDelete &&
-        <Tooltip title="Delete">
-          <IconButton size="small" aria-label="Delete" onClick={() => {
-            setDeleteRecord(params.data)
-            setShowDeleteConfirmBox(true)
-          }} >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </Tooltip >
-      }
-    </>
-  )
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    actionsRenderer: ActionsRenderer
-  };
-
   const onSuccess = () => {
     // Add code of getting grid data again
     fetchBudgetList();
@@ -278,6 +284,10 @@ function Budget() {
 
   const closeActions = () => {
     setAnchorEl(null);
+  };
+
+  const onSearch = (e) => {
+    dispatch({ type: "search", search: e.target.value });
   };
 
   return (
@@ -317,7 +327,14 @@ function Budget() {
               </Grid>
               <Grid className={styles.filter_side} item>
                 <Box className={styles.filter_side_header} component="div">
-                  <SearchBox size="small" />
+                  <SearchBox
+                    onSearch={onSearch}
+                    searchbox={styles.search_box_input}
+                    value={search}
+                    size="small"
+                    placeholder="Search Budget"
+                    width="242px"
+                  />
 
                   <>
                     <Button
