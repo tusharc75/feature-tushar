@@ -4,6 +4,9 @@ import {
   Checkbox,
   CircularProgress,
   Dialog,
+  FormControl,
+  FormControlLabel,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -16,6 +19,7 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import SearchBox from "../Helpers/SearchBox";
 
 const AssignUserDialog = ({
   usersDialogOpen,
@@ -29,6 +33,8 @@ const AssignUserDialog = ({
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
+  const [search, setSearch] = useState("");
+  const [usersConst, setUsersConst] = useState([]);
 
   useEffect(() => {
     setLoadingUsers(true);
@@ -36,6 +42,7 @@ const AssignUserDialog = ({
       .get(`/user`)
       .then(({ data: { data } }) => {
         setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })))
+        setUsersConst(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })))
         setLoadingUsers(false);
       })
       .catch((error) => {
@@ -74,6 +81,16 @@ const AssignUserDialog = ({
     }
   };
 
+  const handleSearch = (e) => {
+    let value = e.target.value.toLowerCase();
+    setSearch(value);
+    let result = [];
+    result = usersConst.filter((data) => {
+      return data.concatedName.search(value) != -1 || data.email.search(value) != -1;
+    });
+    setUsers(result)
+  };
+
   return (
     <Dialog
       fullWidth
@@ -86,31 +103,65 @@ const AssignUserDialog = ({
       <CustomDialogContent>
         {loadingUsers ? (
           <Loader text="Loading Users" />
-        ) : users.length ? (
-          <List style={{ padding: 0 }}>
-            {users.map((user) => (
-              <ListItem divider key={user._id}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    onChange={(e) => {
-                      user.isChecked = e.target.checked
-                      setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
-                    }
-                    }
-                    checked={user.isChecked}
-                    inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${user._id}`,
-                    }}
+        ) : usersConst.length ? (
+          <>
+            <Grid container>
+              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    value="top"
+                    control={
+                      <Checkbox
+                        edge="start"
+                        onChange={(e) => {
+                          users.forEach((user) => user.isChecked = e.target.checked)
+                          setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
+                        }
+                        }
+                        checked={users.every(x => x.isChecked)}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-select-all`,
+                        }}
+                      />}
+                    label="Select all users"
                   />
-                </ListItemIcon>
-                <ListItemText
-                  primary={`${user.firstName} ${user.lastName}`}
-                  secondary={user.email}
+                </FormControl>
+
+              </Grid>
+              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="terms_header_search_bar"
+                  width="300px"
+                  value={search}
                 />
-              </ListItem>
-            ))}
-          </List>
+              </Grid>
+            </Grid>
+            <List style={{ padding: 0 }}>
+              {users.map((user) => (
+                <ListItem divider key={user._id}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => {
+                        user.isChecked = e.target.checked
+                        setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
+                      }
+                      }
+                      checked={user.isChecked}
+                      inputProps={{
+                        "aria-labelledby": `checkbox-list-label-${user._id}`,
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={user.concatedName}
+                    secondary={user.email}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </>
         ) : (
           <Typography>All Users has been assigned</Typography>
         )}
@@ -120,7 +171,7 @@ const AssignUserDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
-          size="small" 
+          size="small"
         >
           Cancel
         </Button>
