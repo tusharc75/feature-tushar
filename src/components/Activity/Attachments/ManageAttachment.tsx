@@ -313,6 +313,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                         type="text"
                                         label="Name"
                                         required={true}
+                                        disabled={!canEdit}
                                         name="name"
                                         fullWidth
                                         margin="dense"

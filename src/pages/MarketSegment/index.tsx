@@ -13,7 +13,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import styles from "../Leads/Header.module.scss";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
-import CreateProductCategory from "./CreateProductCategory";
+import CreateMarketSegment from "./ManageMarketSegmentDialog";
 import routes from "../../components/Helpers/Routes";
 import { ExpandMore } from "@material-ui/icons";
 import { Box, Menu, MenuItem } from "@material-ui/core";
@@ -21,126 +21,30 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import {
     gridLoadingTimeout,
     gridPageSizes,
-    isObjectEmpty
+    isObjectEmpty,
+    marketSegment
 } from "../../constants/helpers";
 import {
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 
 
-function reducer(state, action) {
-    switch (action.type) {
-        case "loading":
-            return {
-                ...state,
-                loading: action.loading
-            }
-
-        case "initialize":
-            return {
-                ...state,
-                dataRows: action.data,
-                rowCount: action.count
-            }
-
-        case "selection":
-            return {
-                ...state,
-                selectedRecords: action.selectedRecords,
-            }
-
-        case "update":
-            return {
-                ...state,
-                dataRows: action.data,
-                loading: false
-            }
-
-        case "filter":
-            return {
-                ...state,
-                loading: true,
-                filters: action.filters,
-                page: 0
-            }
-
-        case "sort":
-            return {
-                ...state,
-                sorting: action.sorting,
-                loading: true
-            }
-
-        case "search":
-            return {
-                ...state,
-                search: action.search,
-                loading: true
-            }
-
-        case "pageChange":
-            return {
-                ...state,
-                page: action.page
-            }
-
-        case "pageSizeChange":
-            return {
-                ...state,
-                limit: action.limit,
-                page: 0,
-                loading: true
-            }
-
-        case "complete":
-            return {
-                ...state,
-                loading: false
-            }
-
-        default:
-            break;
-    }
-
-    return state;
-}
-
-const intialState = {
-    dataRows: [],
-    rowCount: 0,
-    loading: false,
-    page: 0,
-    limit: 25,
-    pageSizes: gridPageSizes,
-    search: "",
-    filters: {},
-    sorting: [],
-    selectedRecords: []
-}
-
-const ProductCategory = () => {
+const MarketSegment = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
         state: { permissions },
     }: any = useData();
-    const [productCategoryPermissions, setProductCategoryPermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
-    });
-
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
-    const [productCategoryId, setProductCategoryId] = useState(null);
+    const [marketSegmentId, setMarketSegmentId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -151,25 +55,19 @@ const ProductCategory = () => {
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columns = [
-        { field: "name", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "name", headerName: "Market Segment", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
     //  Grid Variables - End
 
     useEffect(() => {
-        if (permissions && permissions.productCategory) {
-            setProductCategoryPermissions(permissions.productCategory);
-        }
-    }, [permissions]);
-
-    useEffect(() => {
-        fetchProductCategory()
+        fetchMarketSegment()
     }, [page, limit, filters, sorting, search])
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
-            setProductCategoryId(params.data.id);
+            setMarketSegmentId(params.data.id);
             setOpen(true);
         }}>
             <CustomRenderCell value={params.value} />
@@ -177,7 +75,7 @@ const ProductCategory = () => {
     </span>
 
     const ActionsRenderer = params => <Fragment>
-        {productCategoryPermissions.isDelete ?
+        {permissions.marketSegment.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -242,7 +140,7 @@ const ProductCategory = () => {
     };
 
 
-    const fetchProductCategory = () => {
+    const fetchMarketSegment = () => {
         dispatch({ type: "loading", loading: true });
         const queryString = getQueryString();
 
@@ -250,7 +148,7 @@ const ProductCategory = () => {
             gridApi.setRowData([]);
         }
 
-        axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${marketSegment.marketSegmentApi}${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
                 const { createdBy, updatedBy, ...restProperties } = u;
@@ -287,8 +185,8 @@ const ProductCategory = () => {
         else {
             ids = selectedRecords.map(m => m._id);
         }
-        axiosInstance().put(`/product-category/remove`, { "ids": ids }).then(() => {
-            fetchProductCategory();
+        axiosInstance().put(`${marketSegment.marketSegmentApi}/remove`, { "ids": ids }).then(() => {
+            fetchMarketSegment();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
             // setSelectedCategory([])
@@ -313,15 +211,15 @@ const ProductCategory = () => {
     return (<Layout>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.productCategory.title }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.marketSegment.title }]} />
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    permissions={permissions.productCategory}
-                    module="product category"
-                    api={"product-category"}
+                    permissions={permissions.marketSegment}
+                    module="market segment"
+                    api={"market-segment"}
                     afterImportCompleted={() => {
-                        fetchProductCategory();
+                        fetchMarketSegment();
                     }}
                 />
             </Grid>
@@ -330,7 +228,7 @@ const ProductCategory = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">{routes.productCategory.title}</span>
+                        <GiAbstract055 /> <span className="listingHeader">{routes.marketSegment.title}</span>
                     </Grid>
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                         <Box className={styles.filter_side_header} component="div" >
@@ -341,10 +239,10 @@ const ProductCategory = () => {
                                 size="small"
                                 value={search}
                             />
-                            {productCategoryPermissions.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            {permissions.marketSegment.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => { setMarketSegmentId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {productCategoryPermissions.isDelete &&
+                            {permissions.marketSegment.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
@@ -382,15 +280,15 @@ const ProductCategory = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure you want to delete product category  ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
+                    message={`Are you sure you want to delete market segment  ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                 />
             }
-            {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
+            {open && <CreateMarketSegment marketSegmentId={marketSegmentId} handleClose={() => { setOpen(false); fetchMarketSegment() }} />}
         </CustomContainer>
     </Layout>
     );
 }
 
-export default ProductCategory;
+export default MarketSegment;

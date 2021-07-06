@@ -10,7 +10,8 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
-import { getUniqueCurrencies } from "../../../constants/helpers";
+import { formatAmountWithCurrency, getUniqueCurrencies } from "../../../constants/helpers";
+import { BsImage } from 'react-icons/bs';
 
 const useStyles = makeStyles({
   root: {
@@ -27,11 +28,6 @@ const ProductCard = (props: { product: any; }) => {
   const { product } = props;
   const classes = useStyles();
   const history = useHistory()
-  const currencySymbol = getUniqueCurrencies().some((data) => data?.currencyCode === product.currency)
-    ? getUniqueCurrencies().find(
-      (data) => data?.currencyCode === product.currency
-    ).symbolNative
-    : null
 
   const calculateNetPrice = (price: number, discount: number) => {
     let netPrice = price;
@@ -41,19 +37,28 @@ const ProductCard = (props: { product: any; }) => {
   }
   return (
     <div className={styles.product_card}>
-      {(product.discount) && (product.discount !== "") &&
+      {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
         <div className={styles.product_discount}>
           -{product.discount}%
         </div>
       }
-      <img onClick={() => { history.push(`product/details/${product._id}`) }} src={product.productImage} alt={product.productName} />
+      <Box display="flex" justifyContent="center" alignItems="center" onClick={() => { history.push(`product/details/${product._id}`) }}>
+        {product.productImage ?
+          <img src={product.productImage} alt={product.productName} />
+          : <BsImage className={styles.no_image} />
+        }
+      </Box>
       <div className={styles.text}>
         <h4 onClick={() => { history.push(`product/details/${product._id}`) }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <div>
-            <span className={styles.amount}>{currencySymbol}{calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))}</span>
-            <span className={styles.amount_stricked}>{`${currencySymbol} ${product.mrp}`}</span>
+            {(product.mrp && parseInt(product.mrp) !== 0) &&
+              <>
+                <span className={styles.amount}>{formatAmountWithCurrency(product.currency, calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))).fullFormatAmount}</span>
+                {(parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>}
+              </>
+            }
           </div>
           <Button variant="outlined" color="secondary" size="small" onClick={() => { }} startIcon={<AddShoppingCartIcon />}>
             Add to cart

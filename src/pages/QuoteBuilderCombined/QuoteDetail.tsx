@@ -766,7 +766,7 @@ function QuoteDetail() {
     mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Estimated Amount"] = data?.estimatedAmount
       ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount)
-          .shortFormatAmount
+        .shortFormatAmount
       : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -799,7 +799,7 @@ function QuoteDetail() {
             (d) =>
               d.isRead &&
               d.fieldData.fieldName.toLowerCase() ===
-                processFieldName.toLowerCase()
+              processFieldName.toLowerCase()
           );
           if (processSteps && processSteps.isRead) {
             setSteps(
@@ -909,12 +909,12 @@ function QuoteDetail() {
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] &&
-            data[sidebarResource[customerContact.contactResource]][
+              data[sidebarResource[customerContact.contactResource]][
               "Account_Name"
-            ]
+              ]
               ? data[sidebarResource[customerContact.contactResource]][
-                  "Account_Name"
-                ]
+              "Account_Name"
+              ]
               : [];
           if (relatedContacts.length) {
             toEmails = relatedContacts.map((o) => o?.email);
@@ -1019,7 +1019,7 @@ function QuoteDetail() {
     PdfDoc.setFontSize(14);
     PdfDoc.text("Quotation", 265, 75);
     let PDFData = [];
-    let PdfCol = ["#"];
+    let PdfCol = ["Item #"];
     let serialNumber = 1;
     dynamicTableData.forEach((dataEntry) => {
       let PdfRow = [serialNumber];
@@ -1517,18 +1517,18 @@ function QuoteDetail() {
         ...data,
         [`profitPercentPerUnit`]:
           data["profitPercentPerUnit"] === null ||
-          data["profitPercentPerUnit"] === undefined
+            data["profitPercentPerUnit"] === undefined
             ? 0
             : data["profitPercentPerUnit"],
         [`commissionPercentPerUnit`]:
           data["commissionPercentPerUnit"] === null ||
-          data["commissionPercentPerUnit"] === undefined
+            data["commissionPercentPerUnit"] === undefined
             ? 0
             : data["commissionPercentPerUnit"],
         [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
           data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
             undefined
             ? 0
             : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
@@ -1540,7 +1540,7 @@ function QuoteDetail() {
           if (
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
             data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-              "undefined"
+            "undefined"
           ) {
             hasPrice = true;
           } else {
@@ -1585,7 +1585,7 @@ function QuoteDetail() {
               if (typeof quoteRows[key] === "object") {
                 inventorydata.push({
                   fieldName: field[0].fieldLabel,
-                  fieldValue: quoteRows[key][key],
+                  fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
                 });
               } else {
                 inventorydata.push({
@@ -1842,53 +1842,55 @@ function QuoteDetail() {
         download
       );
     }
-
-    if (view) {
-      setUpdatingVersion(true);
-      axiosInstance()
-        .get(
-          `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
-          {
-            responseType: "blob",
-          }
-        )
-        .then(({ data }) => {
-          setUpdatingVersion(false);
-          const file = new Blob([data], { type: "application/pdf" });
-          const fileURL = URL.createObjectURL(file);
-          const pdfWindow = window.open();
-          pdfWindow.location.href = fileURL;
-        })
-        .catch((err) => {
-          setUpdatingVersion(true);
-        });
-    } else if (download) {
-      setUpdatingVersion(true);
-      axiosInstance()
-        .get(
-          `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
-          {
-            responseType: "blob",
-          }
-        )
-        .then(({ data }) => {
-          setUpdatingVersion(false);
-          const url = window.URL.createObjectURL(
-            new Blob([data], { type: "application/pdf" })
-          );
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute(
-            "download",
-            `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-          );
-          document.body.appendChild(link);
-          link.click();
-        })
-        .catch((err) => {
-          setUpdatingVersion(true);
-        });
+    else {
+      if (view) {
+        setUpdatingVersion(true);
+        axiosInstance()
+          .get(
+            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            {
+              responseType: "blob",
+            }
+          )
+          .then(({ data }) => {
+            setUpdatingVersion(false);
+            const file = new Blob([data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            const pdfWindow = window.open();
+            pdfWindow.location.href = fileURL;
+          })
+          .catch((err) => {
+            setUpdatingVersion(true);
+          });
+      } else if (download) {
+        setUpdatingVersion(true);
+        axiosInstance()
+          .get(
+            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            {
+              responseType: "blob",
+            }
+          )
+          .then(({ data }) => {
+            setUpdatingVersion(false);
+            const url = window.URL.createObjectURL(
+              new Blob([data], { type: "application/pdf" })
+            );
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute(
+              "download",
+              `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+            );
+            document.body.appendChild(link);
+            link.click();
+          })
+          .catch((err) => {
+            setUpdatingVersion(true);
+          });
+      }
     }
+
   };
 
   const onSuccess = () => {
@@ -1931,7 +1933,7 @@ function QuoteDetail() {
       request.fileUrl = PDFAttachment;
       axiosInstance()
         .post(`/attachment`, request)
-        .then(({ data }) => {})
+        .then(({ data }) => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -2132,9 +2134,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2251,10 +2253,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2418,7 +2420,7 @@ function QuoteDetail() {
                       <div>
                         <Steps
                           steps={DOAneeded ? DOASteps : OtherSteps}
-                          currentStep={DOASteps.indexOf(ProcessStatus)}
+                          currentStep={DOAneeded ? DOASteps.indexOf(ProcessStatus) : OtherSteps.indexOf(ProcessStatus)}
                           id={id}
                           version={currentVersion}
                           Refresh={fetchQuoteData}
@@ -2486,7 +2488,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
+                              ProcessStatus === "New" ? (
                               <span className="productPos m-2">
                                 <Button
                                   variant="outlined"
@@ -2578,8 +2580,8 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
@@ -2599,7 +2601,7 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
                                 onClick={() => {
@@ -2642,7 +2644,7 @@ function QuoteDetail() {
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderID ? (
                               ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0 ? (
+                                visibleColumns.length > 0 ? (
                                 <ProductGrid
                                   productBuilderId={productBuilderID}
                                   refreshProducts={refreshProducts}
@@ -2673,7 +2675,7 @@ function QuoteDetail() {
                                   }
                                   Editable={
                                     ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                      ProcessStatus === "New"
                                       ? true
                                       : false
                                   }
@@ -2780,7 +2782,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2827,6 +2829,8 @@ function QuoteDetail() {
             handleClose={handleCloseCreateDialog}
             fetchData={fetchTermsAndConditions}
             editRecord={editRecordTNC}
+            displayTitle={"Additional Data"}
+
           />
         )}
 
@@ -2867,9 +2871,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}

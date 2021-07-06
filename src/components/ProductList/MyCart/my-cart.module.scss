@@ -1,0 +1,140 @@
+.checkout_navbar {
+  display: flex;
+  max-width: 30rem;
+}
+
+.checkout_line {
+  width: 90%;
+}
+
+.checkout_items {
+  margin: 2rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  // background: var(--theme-text);
+}
+
+.card {
+  min-width: 14rem;
+  background: var(--theme-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  &_img {
+    width: 14rem;
+    height: 14rem;
+    object-fit: cover;
+  }
+  &_body {
+    margin: 1rem 0.4rem;
+    flex-grow: 1;
+  }
+  &_desc {
+    line-height: 1.8rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: var(--colorContact);
+  }
+  &_seller {
+    line-height: 1.4rem;
+    margin-bottom: 0.3rem;
+    color: var(--colorContact);
+    font-size: 1rem;
+  }
+  &_price {
+    font-size: 2rem;
+    margin-top: 0.6rem;
+    font-weight: 600;
+    color: var(--colorAccount);
+  }
+  &_controls {
+    margin-top: 0.3rem;
+    flex-direction: row;
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+}
+
+.price_card {
+  max-width: 25rem;
+  justify-content: center;
+  text-align: center;
+  background: var(--theme-text);
+  align-items: center;
+  &_price_summary {
+    min-width: 18rem;
+  }
+  &_summary {
+    display: flex;
+    justify-content: space-between;
+    margin: 3rem 1rem;
+    font-size: 1rem;
+  }
+
+  &_total {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+
+  &_price_summary_heading {
+    margin: 1rem;
+    color: var(--grey);
+  }
+
+  &_price {
+    font-size: 1.3rem;
+
+    font-weight: 600;
+    color: var(--colorAccount);
+  }
+  &_details {
+    color: var(--colorContact);
+  }
+  &_secure_text {
+    display: flex;
+    justify-content: space-between;
+  }
+  &_checkout_button {
+    margin-top: 0.8rem;
+  }
+}
+
+.sponsored_items {
+  margin: 1rem;
+
+  &_list {
+    display: flex;
+    flex-direction: column;
+    // overflow-x: scroll;
+    margin-bottom: 1rem;
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  .card {
+    flex-direction: row;
+    max-width: 60rem;
+  }
+  .wrapper {
+    display: flex;
+  }
+}
+@media screen and (min-width: 426px) {
+  .sponsored_items {
+    &_card {
+      width: 25rem;
+      height: 30rem;
+    }
+    &_list {
+      flex-direction: row;
+      overflow-x: scroll;
+    }
+  }
+}

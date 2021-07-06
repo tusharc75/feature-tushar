@@ -36,6 +36,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
+import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 
 const LeadTypes = [
   {
@@ -72,6 +73,7 @@ const Leads = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -283,6 +285,10 @@ const Leads = () => {
   const handleLeadTypeSel = (filteredValue) => {
     setSelectedType(filteredValue);
   };
+  
+  const handleTransferEntityDialog = () => {
+    setShowTransferEntityDialog(true)
+  }
 
   const handleCreate = () => {
     setIsOpen(true);
@@ -493,11 +499,13 @@ const Leads = () => {
                 message: `Are you sure you want to convert selected leads to opportunity?`,
               });
             }}
+            showTransferEntityDialog={handleTransferEntityDialog}
+
           />
         </div>
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
           loading={loading} />
 
         {isOpen && (
@@ -556,6 +564,22 @@ const Leads = () => {
             />
           ) : null
         }
+        {showTransferEntityDialog && (
+          <TransferEntityDialog
+            TransferEntityDialogOpen={showTransferEntityDialog}
+            onSuccess={() => {
+              fetchLeads()
+              setShowTransferEntityDialog(false);
+            }}
+            handleCloseDialog={() => {
+              setShowTransferEntityDialog(false);
+            }}
+            selectedRecs={selectedRecords.map(r => r._id)}
+            entities={user.entity.filter(e => e._id !== selectedEntity)}
+            type="leads"
+            api="lead"
+          />
+        )}
       </CustomContainer >
     </Layout >
   );

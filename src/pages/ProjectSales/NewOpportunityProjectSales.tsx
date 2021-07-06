@@ -51,7 +51,8 @@ export default function NewOpportunityProjectSales({
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
+    useState(0);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(opportunityData.fields));
@@ -151,7 +152,7 @@ export default function NewOpportunityProjectSales({
           initialValues={opportunityData.initialValues}
           validationSchema={yupSchema(opportunityData.fields)}
           validateOnMount
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({
             values,
@@ -191,7 +192,8 @@ export default function NewOpportunityProjectSales({
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
-                                      isTooltip={true}
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
                                   ) : field.fieldName === "collaborator" ? (
@@ -208,7 +210,8 @@ export default function NewOpportunityProjectSales({
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
-                                      isTooltip={true}
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
                                   ) : field.fieldName === "probability" ? (
@@ -224,7 +227,8 @@ export default function NewOpportunityProjectSales({
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
-                                      isTooltip={true}
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                       onChange={(e) => {
                                         if (
@@ -254,7 +258,8 @@ export default function NewOpportunityProjectSales({
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={true}
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
                                     ) : null
@@ -271,7 +276,8 @@ export default function NewOpportunityProjectSales({
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
-                                      isTooltip={true}
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                       onChange={(e, val) => {
                                         if (val && val.currencyCode) {
@@ -308,7 +314,8 @@ export default function NewOpportunityProjectSales({
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
-                                      isTooltip={true}
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
                                   ) : (
@@ -328,11 +335,20 @@ export default function NewOpportunityProjectSales({
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
-                                      isTooltip={true}
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
                                       size="small"
-                                      imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                        setUploadingImageOrFileProgress(completePercentage);
-                                      } : null}
+                                      imageOrFileUploadCompletePercentage={
+                                        ["imageUpload", "fileUpload"].some(
+                                          (s) => s === field.type
+                                        )
+                                          ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(
+                                                completePercentage
+                                              );
+                                            }
+                                          : null
+                                      }
                                     />
                                   )}
                                 </Grid>
@@ -354,7 +370,8 @@ export default function NewOpportunityProjectSales({
                             setFieldValue={setFieldValue}
                             required={field.required}
                             fullWidth
-                            isTooltip={true}
+                            isTooltip={field?.isTooltip || false}
+                            tooltipMessage={field?.tooltipMessage}
                             size="small"
                             style={{ visibility: "hidden" }}
                           />
@@ -380,15 +397,16 @@ export default function NewOpportunityProjectSales({
                   variant="contained"
                   color="primary"
                   disabled={
-                    uploadingImageOrFileProgress > 0 || Object.values(
+                    uploadingImageOrFileProgress > 0 ||
+                    Object.values(
                       simplifyValues(
                         opportunityData.initialValues,
                         opportunityData.fields
                       )
                     ).toString() ===
-                    Object.values(
-                      simplifyValues(values, opportunityData.fields)
-                    ).toString()
+                      Object.values(
+                        simplifyValues(values, opportunityData.fields)
+                      ).toString()
                   }
                   onClick={(e) => {
                     e.preventDefault();
