@@ -4,6 +4,9 @@ import {
   Checkbox,
   CircularProgress,
   Dialog,
+  FormControl,
+  FormControlLabel,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -24,6 +27,7 @@ import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
 import { roleTypes } from "../../constants/helpers";
+import SearchBox from "../Helpers/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -50,7 +54,9 @@ const AssignEntityDialog = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
+  const [dataConst, setDataConst] = useState([]);
   const [role, setRole] = useState([]);
+  const [roleConst, setRoleConst] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []); //for regional role assignment only in entity ids[1] has the value of selected entity
   const [selectedRole, setSelectedRole] = useState([]);
@@ -58,6 +64,7 @@ const AssignEntityDialog = ({
   const [activeStep, setActiveStep] = useState(0);
   const [checkAll, setCheckAll] = useState(false);
   const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
+  const [search, setSearch] = useState("");
   const classes = useStyles();
 
   const handleNext = () => {
@@ -76,9 +83,11 @@ const AssignEntityDialog = ({
       .then(({ data: { data } }) => {
         if (type == "user") {
           setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
+          setDataConst(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
         }
         else {
           setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
+          setDataConst(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
         }
         setLoadingData(false);
       })
@@ -91,9 +100,14 @@ const AssignEntityDialog = ({
       .get(`/role?type=${roleTypes.find((d) => d.key === "Regional")?.value}`)
       .then(({ data: { data } }) => {
 
-        regionalRole ?
+        if (regionalRole) {
           setRole(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
-          : setRole(data.map(obj => ({ ...obj, isChecked: false })))
+          setRoleConst(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
+        }
+        else {
+          setRole(data.map(obj => ({ ...obj, isChecked: false })))
+          setRoleConst(data.map(obj => ({ ...obj, isChecked: false })))
+        }
         setLoadingData(false);
       })
       .catch((error) => {
@@ -144,6 +158,27 @@ const AssignEntityDialog = ({
     }
   };
 
+  const handleSearch = (e) => {
+    let value = e.target.value.toLowerCase();
+    setSearch(value);
+    let resultData = [];
+    let resultRole = [];
+    resultData = dataConst.filter((data) => {
+      if (type === "entity") {
+        return data.address?.search(value) != -1 || data.entityName?.search(value) != -1
+      }
+      else {
+        return data.concatedName?.search(value) != -1 || data.email?.search(value) != -1;
+      }
+    });
+    setData(resultData)
+    resultRole = roleConst.filter((data) => {
+      return data.name.search(value) != -1 || data.description.search(value) != -1;
+    });
+    setRole(resultRole)
+  };
+
+
   function getStepContent(step: number) {
     switch (step) {
       case 0:
@@ -192,7 +227,7 @@ const AssignEntityDialog = ({
                 />
               </ListItemIcon>
               <ListItemText
-                primary={type === "entity" ? d.entityName : `${d.firstName} ${d.lastName}` || ""}
+                primary={type === "entity" ? d.entityName : d.concatedName}
                 secondary={type === "user" ? d.email : d.address || ""}
               />
             </ListItem>
@@ -241,44 +276,84 @@ const AssignEntityDialog = ({
       <CustomDialogContent>
         {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
-        ) : data.length ? (
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-                <StepContent>
-                  <Typography>{getStepContent(index)}</Typography>
-                  <div className={classes.actionsContainer}>
-                    <div>
-                      <Button
-                        size="small"
-                        disabled={activeStep === 0}
-                        onClick={handleBack}
-                        className={classes.button}
-                      >
-                        Back
-                      </Button>
-                      {(activeStep !== steps.length - 1) &&
+        ) : dataConst.length ? (
+          <>
+            <Grid container>
+              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    value="top"
+                    control={
+                      <Checkbox
+                        edge="start"
+                        onChange={(e) => {
+                          if (activeStep === 0 && !regionalRole) {
+                            data.forEach((d) => d.isChecked = e.target.checked)
+                            setSelectedData(data.filter(r => r.isChecked).map(obj => obj._id))
+                          }
+                          else {
+                            role.forEach((d) => d.isChecked = e.target.checked)
+                            setSelectedRole(role.filter(r => r.isChecked).map(obj => obj._id))
+                          }
+                        }
+                        }
+                        checked={activeStep === 0 && !regionalRole ? data.every(x => x.isChecked) : role.every(x => x.isChecked)}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-select-all`,
+                        }}
+                      />}
+                    label="Select all "
+                  />
+                </FormControl>
+
+              </Grid>
+              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="terms_header_search_bar"
+                  width="300px"
+                  value={search}
+                />
+              </Grid>
+            </Grid>
+            <Stepper activeStep={activeStep} orientation="vertical">
+              {steps.map((label, index) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                  <StepContent>
+                    <Typography>{getStepContent(index)}</Typography>
+                    <div className={classes.actionsContainer}>
+                      <div>
                         <Button
-                          variant="contained"
-                          color="primary"
                           size="small"
-                          onClick={handleNext}
-                          disabled={selectedData.some(item => item?.isChecked)}
+                          disabled={activeStep === 0}
+                          onClick={handleBack}
                           className={classes.button}
                         >
-                          Next
+                          Back
                         </Button>
-                      }
+                        {(activeStep !== steps.length - 1) &&
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={handleNext}
+                            disabled={selectedData.some(item => item?.isChecked)}
+                            className={classes.button}
+                          >
+                            Next
+                          </Button>
+                        }
+                      </div>
                     </div>
-                  </div>
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
+                  </StepContent>
+                </Step>
+              ))}
+            </Stepper>
+          </>
         ) : (
           <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
-        )) : role.length ? (<List style={{ padding: 0 }}>
+        )) : roleConst.length ? (<List style={{ padding: 0 }}>
           {role.map((d) => (
             <ListItem divider key={d._id}>
               <ListItemIcon>
