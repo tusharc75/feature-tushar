@@ -50,7 +50,7 @@ import { FiStar } from "react-icons/fi";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import LeadOpportunityProcess from "../../components/LeadOpportunityProcess";
+import ProcessFlow from "../../components/ProcessFlow";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 
 const ContactDetailsPage = (props) => {
@@ -541,7 +541,7 @@ const ContactDetailsPage = (props) => {
                   />
                 ) : null}
               </DetailsPageHeader>
-              <LeadOpportunityProcess
+              <ProcessFlow
                 disableBackNext={
                   contactPermissions.isUpdate && canEdit ? false : true
                 }
