@@ -124,7 +124,7 @@ const AssignQuoteDialog = ({
                           "aria-labelledby": `checkbox-list-label-select-all`,
                         }}
                       />}
-                    label="Select all Quotes"
+                    label="Select All"
                   />
                 </FormControl>
 
