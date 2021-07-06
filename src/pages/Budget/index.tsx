@@ -216,12 +216,12 @@ function Budget() {
     <>
       {
         permissions.budget.isUpdate ?
-          <Link className="link"
+          <span className="link"
             onClick={() => {
               setShowManageBudgetDialog({ show: true, id: params.data.id });
             }}>
             <CustomRenderCell value={params?.value} />
-          </Link>
+          </span>
           : params?.value
       }
     </>
