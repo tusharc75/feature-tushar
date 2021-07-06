@@ -37,6 +37,8 @@ import {
   isObjectEmpty,
   sidebarResource,
   customerAccount,
+  processFieldName,
+  stepsToIgnoreManualCompleteForOpportunity,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -64,6 +66,7 @@ import { ListItemText } from "@material-ui/core";
 import { cloneDeep } from "lodash";
 import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
+import LeadOpportunityProcess from "../../components/LeadOpportunityProcess";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -110,10 +113,13 @@ export default function AccountDetailPage(props) {
   const [accountHierarchyData, setAccountHierarchyData] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [relatedContactsLoading, setRelatedContactsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] =
     useState(false);
   const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+  const [steps, setSteps] = useState([]);
+  const [activeStep, setActiveStep] = useState(0);
   const [
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
@@ -150,6 +156,22 @@ export default function AccountDetailPage(props) {
     };
   }, [currentTabIndex]);
 
+  useEffect(() => {
+    if (steps.length > 0) {
+      const processSteps = accountFields.find(
+        (d) =>
+          d.isRead &&
+          d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase()
+      );
+      if (processSteps && processSteps.isRead && accountData) {
+        const currentStepToShow = processSteps.fieldData.option.findIndex(
+          (d) => d.optionLabel === accountData[processFieldName]
+        );
+        if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
+      }
+    }
+  }, [steps]);
+
   const initializeGraphData = () => {
     if (currentTabIndex === 2) {
       setLoadingGraphData(true);
@@ -185,33 +207,33 @@ export default function AccountDetailPage(props) {
         setOpportunities(
           data.Opportunity &&
             data.Opportunity[
-            sidebarResource[accountResource].replaceAll(" ", "_")
+              sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data.Opportunity[
-            sidebarResource[accountResource].replaceAll(" ", "_")
-            ]
+                sidebarResource[accountResource].replaceAll(" ", "_")
+              ]
             : []
         );
         setProjectSales(
           data[sidebarResource.projectSales] &&
             data[sidebarResource.projectSales][
-            sidebarResource[accountResource].replaceAll(" ", "_")
+              sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data[sidebarResource.projectSales][
-            sidebarResource[accountResource].replaceAll(" ", "_")
-            ]
+                sidebarResource[accountResource].replaceAll(" ", "_")
+              ]
             : []
         );
         setQuotes(
           data[sidebarResource.quoteBuilder] &&
             data[sidebarResource.quoteBuilder][
-            sidebarResource[accountResource].replaceAll(" ", "_")
+              sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data[sidebarResource.quoteBuilder][
-            sidebarResource[accountResource].replaceAll(" ", "_")
-            ]
+                sidebarResource[accountResource].replaceAll(" ", "_")
+              ]
             : []
-        )
+        );
         initializeGraphData();
         setRelatedContactsLoading(false);
       });
@@ -247,9 +269,9 @@ export default function AccountDetailPage(props) {
               current: true,
               parentAccount: data.parentAccount
                 ? {
-                  _id: data.parentAccount.optionValue,
-                  accountName: data.parentAccount.optionLabel,
-                }
+                    _id: data.parentAccount.optionValue,
+                    accountName: data.parentAccount.optionLabel,
+                  }
                 : null,
               // parentAccountName: data.parentAccount?.optionLabel,
               // parentAccount: data.parentAccount?.optionValue
@@ -297,12 +319,13 @@ export default function AccountDetailPage(props) {
           ]);
         }
 
-        if (accountFields.length === 0) {
-          getAccountFields();
-        } else {
-          setLoading(false);
-        }
-
+        // if (accountFields.length === 0) {
+        //   getAccountFields();
+        // } else {
+        //   setLoading(false);
+        // }
+        getAccountFields();
+        setLoading(false);
         initializeGraphData();
       })
       .catch(() => {
@@ -329,6 +352,26 @@ export default function AccountDetailPage(props) {
       .then(({ data: { data } }) => {
         setAccountFields(data.filter((d) => d.isUpdate || d.isRead));
         setLoading(false);
+
+        const processSteps = data.find(
+          (d) =>
+            d.isRead &&
+            d.fieldData.fieldName.toLowerCase() ===
+              processFieldName.toLowerCase()
+        );
+        if (processSteps && processSteps.isRead) {
+          setSteps(
+            processSteps.fieldData.option.map((m) => {
+              return {
+                text: m.optionLabel,
+                canCompleteManually:
+                  !stepsToIgnoreManualCompleteForOpportunity.some(
+                    (s) => s === m.optionValue.toLowerCase()
+                  ),
+              };
+            })
+          );
+        }
       });
   };
 
@@ -483,6 +526,38 @@ export default function AccountDetailPage(props) {
     setShowCreateContactDialog(true);
   };
 
+  const handleMarkAsCompleted = (data) => {
+    setIsProcessing(true);
+    let tempActiveStep =
+      data && data?.isSetBackStep
+        ? activeStep - 1
+        : activeStep < steps.length - 1
+        ? activeStep + 1
+        : activeStep;
+    const updatedData = {
+      ...getObjKeysWithValues(
+        accountData,
+        accountFields.map((f) => {
+          return f.fieldData;
+        })
+      ),
+      process: steps[tempActiveStep].text,
+      _id: accountData._id,
+    };
+
+    axiosInstance()
+      .put(`${accountApi}`, updatedData)
+      .then(() => {
+        fetchAccountData();
+        // setActiveStep(activeStep + 1)
+        setIsProcessing(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsProcessing(false);
+      });
+  };
+
   return (
     <>
       <Layout>
@@ -540,11 +615,11 @@ export default function AccountDetailPage(props) {
                     )}
 
                   {permissions &&
-                    permissions[accountResource] &&
-                    permissions[accountResource].isDelete &&
-                    accountData?.owner?.optionValue &&
-                    user?.user?._id &&
-                    accountData.owner.optionValue === user.user._id ? (
+                  permissions[accountResource] &&
+                  permissions[accountResource].isDelete &&
+                  accountData?.owner?.optionValue &&
+                  user?.user?._id &&
+                  accountData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -552,6 +627,19 @@ export default function AccountDetailPage(props) {
                   ) : null}
                 </DetailsPageHeader>
               }
+              <LeadOpportunityProcess
+                disableBackNext={
+                  permissions &&
+                  permissions[accountResource] &&
+                  permissions[accountResource].isUpdate &&
+                  canEdit
+                    ? false
+                    : true
+                }
+                steps={steps}
+                activeStep={activeStep}
+                handleMarkAsCompleted={handleMarkAsCompleted}
+              />
               <Box>
                 {loading ? (
                   <Grid container spacing={2}>
@@ -619,8 +707,9 @@ export default function AccountDetailPage(props) {
                           onClick={(node) => {
                             if (node && routes[node.route]) {
                               history.push({
-                                pathname: `${routes[node.route].path}/${node.id
-                                  }`,
+                                pathname: `${routes[node.route].path}/${
+                                  node.id
+                                }`,
                               });
                             }
                           }}
@@ -643,29 +732,33 @@ export default function AccountDetailPage(props) {
                     recordsPerLine={3}
                     resource={accountResource}
                     isRedirect={false}
-                    isAllowedToUpdate={permissions &&
+                    isAllowedToUpdate={
+                      permissions &&
                       permissions[accountResource] &&
                       permissions[accountResource].isUpdate &&
-                      canEdit}
+                      canEdit
+                    }
                   />
                 )}
-                {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
-                  <ProjectInAccordion
-                    recordsPerLine={3}
-                    projectSales={projectSales}
-                    type={typeCreateProjectSalesDialog}
-                    fetchData={fetchRelatedData}
-                    permissions={permissions}
-                    isAddProjectSale={true}
-                    isAllowedToEdit={permissions &&
-                      permissions[accountResource] &&
-                      permissions[accountResource].isUpdate &&
-                      canEdit}
-                  />
-                )}
-                {
-                  permissions?.quoteBuilder?.isRead && accountResource == customerAccount.accountResource &&
-                  (
+                {permissions?.projectSales?.isRead &&
+                  accountResource == customerAccount.accountResource && (
+                    <ProjectInAccordion
+                      recordsPerLine={3}
+                      projectSales={projectSales}
+                      type={typeCreateProjectSalesDialog}
+                      fetchData={fetchRelatedData}
+                      permissions={permissions}
+                      isAddProjectSale={true}
+                      isAllowedToEdit={
+                        permissions &&
+                        permissions[accountResource] &&
+                        permissions[accountResource].isUpdate &&
+                        canEdit
+                      }
+                    />
+                  )}
+                {permissions?.quoteBuilder?.isRead &&
+                  accountResource == customerAccount.accountResource && (
                     <QuotesInAccordion
                       recordsPerLine={3}
                       quotes={quotes}
@@ -674,13 +767,14 @@ export default function AccountDetailPage(props) {
                       accountId={id}
                       accountResource={accountResource}
                       isRenderedFromCustomerAccount={true}
-                      isAllowedToUpdate={permissions &&
+                      isAllowedToUpdate={
+                        permissions &&
                         permissions[accountResource] &&
                         permissions[accountResource].isUpdate &&
-                        canEdit}
+                        canEdit
+                      }
                     />
-                  )
-                }
+                  )}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
                   <LeadInAccordion
@@ -698,10 +792,14 @@ export default function AccountDetailPage(props) {
                   {accountData && (
                     <div>
                       <Activity
-                        restrictedAddActivities={permissions &&
+                        restrictedAddActivities={
+                          permissions &&
                           permissions[accountResource] &&
                           permissions[accountResource].isUpdate &&
-                          canEdit ? [] : ["Attachment", "Case"]}
+                          canEdit
+                            ? []
+                            : ["Attachment", "Case"]
+                        }
                         relatedTo={[
                           {
                             type: accountResource,
@@ -709,17 +807,17 @@ export default function AccountDetailPage(props) {
                             access: true,
                           },
                         ]}
-                        handleActivityRefresh={() => { }}
+                        handleActivityRefresh={() => {}}
                         emails={
                           relatedContacts && relatedContacts.length > 0
                             ? cloneDeep(relatedContacts).reduce(
-                              (emails, contact) => {
-                                if (contact?.email)
-                                  emails.push(contact.email);
-                                return emails;
-                              },
-                              []
-                            )
+                                (emails, contact) => {
+                                  if (contact?.email)
+                                    emails.push(contact.email);
+                                  return emails;
+                                },
+                                []
+                              )
                             : []
                         }
                       />
@@ -850,8 +948,9 @@ export default function AccountDetailPage(props) {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Account ${accountData.accountName || ""
-                }`}
+              message={`Are you sure you want to delete this Account ${
+                accountData.accountName || ""
+              }`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteAcc}
             />
@@ -859,8 +958,9 @@ export default function AccountDetailPage(props) {
           {showApproveDisapproveConfirmBox ? (
             <ConfirmationDialog
               open={showApproveDisapproveConfirmBox}
-              message={`Are you sure you want to ${accountData.staticData?.approved ? "disapprove" : "approve"
-                } this Account ?`}
+              message={`Are you sure you want to ${
+                accountData.staticData?.approved ? "disapprove" : "approve"
+              } this Account ?`}
               onClose={() => setShowApproveDisapproveConfirmBox(false)}
               onOk={handleApproveDisapprove}
             />
