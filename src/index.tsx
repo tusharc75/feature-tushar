@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
-// import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
@@ -17,26 +16,25 @@ import "./styles/responsive-styles.scss"
 import "./styles/rbc-calender.scss";
 import "./styles/vis-network/vis-network.min.css"
 import "./styles/safari.scss";
-
 import { Integrations } from "@sentry/tracing";
 import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 
+// @ts-ignore
+if(process.env.REACT_APP_ENV !== 'local'){
+  Sentry.init({
+    environment: process.env.REACT_APP_ENV,
+    release: process.env.REACT_APP_RELEASE,
+    dsn: "https://42514b3242b14f7d8c5b8dbacd0c4237@o718098.ingest.sentry.io/5850347",
+    integrations: [new Integrations.BrowserTracing()],
 
-Sentry.init({
-  dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
-  integrations: [new Integrations.BrowserTracing()],
-
-  // Set tracesSampleRate to 1.0 to capture 100%
-  // of transactions for performance monitoring.
-  // We recommend adjusting this value in production
-  tracesSampleRate: 1.0,
-});
-
-
-
-
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: ['production', 'staging'].includes(process.env.REACT_APP_ENV) ? 0.2 : 0.6,
+  });
+}
 
 ReactDOM.render(
   <React.StrictMode>
@@ -56,8 +54,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-// reportWebVitals();
