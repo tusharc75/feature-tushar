@@ -162,8 +162,9 @@ function Budget() {
           term: filters[field].filter
         })
       });
+
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
     }
-    deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
@@ -192,10 +193,10 @@ function Budget() {
           let res = {
             ...restProperties,
             id: item._id,
-            productCategory: productCategory.optionLabel,
-            marketSegment: marketSegment.optionLabel,
-            subMarketSegment: subMarketSegment.optionLabel,
-            entity: entity.optionLabel
+            productCategory: productCategory?.optionLabel ?? "",
+            marketSegment: marketSegment?.optionLabel ?? "",
+            subMarketSegment: subMarketSegment?.optionLabel ?? "",
+            entity: entity?.optionLabel ?? ""
           };
           return res;
         });
