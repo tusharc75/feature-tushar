@@ -109,7 +109,7 @@ const AssignProjectSalesDialog = ({
         setSearch(value);
         let result = [];
         result = projectSalesConst.filter((data) => {
-            return data.projectName.search(value) != -1 || data.projectManager?.optionLabel.search(value) != -1;
+            return data.projectName.toLowerCase().search(value) != -1 || data.projectManager?.optionLabel.toLowerCase().search(value) != -1;
         });
         setProjectSales(result)
     };
@@ -129,13 +129,13 @@ const AssignProjectSalesDialog = ({
                 ) : projectSalesConst.length ? (
                     <>
                         <Grid container>
-                            <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                            <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
                                 <FormControl component="fieldset">
                                     <FormControlLabel
                                         value="top"
                                         control={
                                             <Checkbox
-                                                edge="start"
+                                                // edge="start"
                                                 onChange={(e) => {
                                                     projectSales.forEach((project) => project.isChecked = e.target.checked)
                                                     setSelectedProjectSales(projectSales.filter(r => r.isChecked).map(obj => obj._id))
@@ -146,7 +146,7 @@ const AssignProjectSalesDialog = ({
                                                     "aria-labelledby": `checkbox-list-label-select-all`,
                                                 }}
                                             />}
-                                        label="Select all Project"
+                                        label="Select All"
                                     />
                                 </FormControl>
 
