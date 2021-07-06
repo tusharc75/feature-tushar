@@ -4,6 +4,9 @@ import {
   Checkbox,
   CircularProgress,
   Dialog,
+  FormControl,
+  FormControlLabel,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -17,6 +20,7 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { opportunity, quoteBuilder } from "../../constants/helpers"
+import SearchBox from "../Helpers/SearchBox";
 const AssignQuoteDialog = ({
   quoteDialogOpen,
   onSuccess,
@@ -29,7 +33,9 @@ const AssignQuoteDialog = ({
   const [quotes, setQuotes] = useState([]);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [selectedQuotes, setSelectedQuotes] = useState([]);
+  const [quotesConst, setQuotesConst] = useState([]);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     setLoadingQuotes(true);
@@ -37,6 +43,7 @@ const AssignQuoteDialog = ({
       .get(`${quoteBuilder.qbApi}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`)
       .then(({ data: { data } }) => {
         setQuotes(data.filter(quote => !assignedQuotes.some(item => item?._id === quote?._id)).map(obj => ({ ...obj, isChecked: false })))
+        setQuotesConst(data.filter(quote => !assignedQuotes.some(item => item?._id === quote?._id)).map(obj => ({ ...obj, isChecked: false })))
         setLoadingQuotes(false);
       })
       .catch((error) => {
@@ -75,6 +82,16 @@ const AssignQuoteDialog = ({
     }
   };
 
+  const handleSearch = (e) => {
+    let value = e.target.value.toLowerCase();
+    setSearch(value);
+    let result = [];
+    result = quotesConst.filter((data) => {
+      return data.quoteName.search(value) != -1;
+    });
+    setQuotes(result)
+  };
+
   return (
     <Dialog
       fullWidth
@@ -87,7 +104,40 @@ const AssignQuoteDialog = ({
       <CustomDialogContent>
         {loadingQuotes ? (
           <Loader text="Loading Quotes" />
-        ) : quotes.length ? (
+        ) : quotesConst.length ? (
+          <>
+          <Grid container>
+              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    value="top"
+                    control={
+                      <Checkbox
+                        edge="start"
+                        onChange={(e) => {
+                          quotes.forEach((quote) => quote.isChecked = e.target.checked)
+                          setSelectedQuotes(quotes.filter(r => r.isChecked).map(obj => obj._id))
+                        }
+                        }
+                        checked={quotes.every(x => x.isChecked)}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-select-all`,
+                        }}
+                      />}
+                    label="Select all Quotes"
+                  />
+                </FormControl>
+
+              </Grid>
+              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="terms_header_search_bar"
+                  width="300px"
+                  value={search}
+                />
+              </Grid>
+            </Grid>
           <List style={{ padding: 0 }}>
             {quotes.map((quote) => (
               <ListItem divider key={quote._id}>
@@ -111,6 +161,7 @@ const AssignQuoteDialog = ({
               </ListItem>
             ))}
           </List>
+          </>
         ) : (
           <Typography>All Quotes has been assigned</Typography>
         )}
