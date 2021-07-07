@@ -87,10 +87,10 @@ export default function AssignContactsDialog({
         setSearch(value);
         let result = [];
         result = currentContactsConst.filter((data) => {
-          return data.firstName.search(value) != -1 || data.middleName.search(value) != -1 || data.lastName.search(value) != -1;
+            return data.firstName.search(value) != -1 || data.middleName.search(value) != -1 || data.lastName.search(value) != -1;
         });
         setCurrentContacts(result)
-      };
+    };
 
     return (
         <Dialog
@@ -106,64 +106,64 @@ export default function AssignContactsDialog({
                     <Loader text="Loading Contacts" />
                 ) : currentContactsConst.length ? (
                     <>
-                    <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    value="top"
-                    control={
-                      <Checkbox
-                        edge="start"
-                        onChange={(e) => {
-                          currentContacts.forEach((contact) => contact.isChecked = e.target.checked)
-                          setSelectedContacts(currentContacts.filter(r => r.isChecked).map(obj => obj._id))
-                        }
-                        }
-                        checked={currentContacts.every(x => x.isChecked)}
-                        inputProps={{
-                          "aria-labelledby": `checkbox-list-label-select-all`,
-                        }}
-                      />}
-                    label="Select All"
-                  />
-                </FormControl>
-
-              </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox="terms_header_search_bar"
-                  width="300px"
-                  value={search}
-                />
-              </Grid>
-            </Grid>
-                    <List style={{ padding: 0 }}>
-                        {currentContacts.map((contact) => {
-                            return <ListItem divider key={contact._id}>
-                                <ListItemIcon>
-                                    <Checkbox
-                                        edge="start"
-                                        disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
-                                        onChange={(e) => {
-                                            handleContactSelection(e, contact._id)
-                                            // contact.isChecked = e.target.checked
-                                            // setCurrentContacts(currentContacts.filter(r => r.isChecked).map(obj => obj._id))}
-                                        }}
-                                        checked={contact.isChecked}
-                                        inputProps={{
-                                            "aria-labelledby": `checkbox-list-label-${contact._id}`,
-                                        }}
+                        <Grid container>
+                            <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                                <FormControl component="fieldset">
+                                    <FormControlLabel
+                                        value="top"
+                                        control={
+                                            <Checkbox
+                                                edge="start"
+                                                onChange={(e) => {
+                                                    currentContacts.forEach((contact) => contact.isChecked = e.target.checked)
+                                                    setSelectedContacts(currentContacts.filter(r => r.isChecked).map(obj => obj._id))
+                                                }
+                                                }
+                                                checked={currentContacts.every(x => x.isChecked)}
+                                                inputProps={{
+                                                    "aria-labelledby": `checkbox-list-label-select-all`,
+                                                }}
+                                            />}
+                                        label="Select All"
                                     />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={[contact.firstName, contact.middleName, contact.lastName].filter(f => f).join(" ")}
-                                // secondary={role.email}
+                                </FormControl>
+
+                            </Grid>
+                            <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox="terms_header_search_bar"
+                                    width="300px"
+                                    value={search}
                                 />
-                            </ListItem>
-                        }
-                        )}
-                    </List>
+                            </Grid>
+                        </Grid>
+                        <List style={{ padding: 0 }}>
+                            {currentContacts.map((contact) => {
+                                return <ListItem divider key={contact._id}>
+                                    <ListItemIcon>
+                                        <Checkbox
+                                            edge="start"
+                                            disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
+                                            onChange={(e) => {
+                                                handleContactSelection(e, contact._id)
+                                                // contact.isChecked = e.target.checked
+                                                // setCurrentContacts(currentContacts.filter(r => r.isChecked).map(obj => obj._id))}
+                                            }}
+                                            checked={contact.isChecked}
+                                            inputProps={{
+                                                "aria-labelledby": `checkbox-list-label-${contact._id}`,
+                                            }}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={[contact.firstName, contact.middleName, contact.lastName].filter(f => f).join(" ")}
+                                    // secondary={role.email}
+                                    />
+                                </ListItem>
+                            }
+                            )}
+                        </List>
                     </>
                 ) : (
                     <Typography>No Contacts found to add</Typography>
@@ -174,7 +174,7 @@ export default function AssignContactsDialog({
                     disabled={isAssigning}
                     onClick={handleCloseDialog}
                     color="primary"
-                    size="small" 
+                    size="small"
                 >
                     Cancel
                 </Button>
@@ -182,7 +182,7 @@ export default function AssignContactsDialog({
                     onClick={handleAssignContacts}
                     color="primary"
                     variant="contained"
-                    size="small" 
+                    size="small"
                 >
                     {isAssigning ? <CircularProgress size={22} /> : "Save"}
                 </Button>
