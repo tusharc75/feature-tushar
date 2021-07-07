@@ -92,8 +92,8 @@ export const Properties = ({
           values.showAdditionalInfoPopup = false;
         }
 
-        if (!values.addtionalInfoSection) {
-          values.addtionalInfoSection = "";
+        if (!values.additionalInfoSection) {
+          values.additionalInfoSection = "";
         }
 
         setInitialValues(values);
@@ -721,14 +721,14 @@ export const Properties = ({
                     options={section.map((s) => s.sectionName)}
                     getOptionLabel={(option) => option}
                     onChange={(event: any, newValue: string | null) => {
-                      setFieldValue("addtionalInfoSection", newValue);
+                      setFieldValue("additionalInfoSection", newValue);
                     }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Additional Info Section"
                         variant="outlined"
-                        name="addtionalInfoSection"
+                        name="additionalInfoSection"
                       />
                     )}
                   />
