@@ -99,7 +99,7 @@ export const Properties = ({
         setInitialValues(values);
       }
     }
-  }, []);
+  }, [fieldData]);
 
   const fields = [];
   if (module === "product-template" || module === "price-template") {
@@ -699,7 +699,7 @@ export const Properties = ({
                   }
                   label="Hidden Field"
                 />
-                {fieldData.fieldName === "process" && (
+                {fieldData.type === "process" && (
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -719,6 +719,7 @@ export const Properties = ({
                 )}
                 {values["showAdditionalInfoPopup"] && (
                   <Autocomplete
+                    value={values["additionalInfoSection"]}
                     size="small"
                     options={section.map((s) => s.sectionName)}
                     getOptionLabel={(option) => option}
