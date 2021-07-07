@@ -92,14 +92,14 @@ export const Properties = ({
           values.showAdditionalInfoPopup = false;
         }
 
-        if (!values.addtionalInfoSection) {
-          values.addtionalInfoSection = "";
+        if (!values.additionalInfoSection) {
+          values.additionalInfoSection = "";
         }
 
         setInitialValues(values);
       }
     }
-  }, []);
+  }, [fieldData]);
 
   const fields = [];
   if (module === "product-template" || module === "price-template") {
@@ -188,6 +188,8 @@ export const Properties = ({
             ele.isUneditable = values.isUneditable;
             ele.isVlookup = values.isVlookup;
             ele.hiddenField = values.hiddenField;
+            ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
+            ele.additionalInfoSection = values.additionalInfoSection;
 
             // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
             //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
@@ -697,7 +699,7 @@ export const Properties = ({
                   }
                   label="Hidden Field"
                 />
-                {fieldData.fieldName === "process" && (
+                {fieldData.type === "process" && (
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -717,18 +719,19 @@ export const Properties = ({
                 )}
                 {values["showAdditionalInfoPopup"] && (
                   <Autocomplete
+                    value={values["additionalInfoSection"]}
                     size="small"
                     options={section.map((s) => s.sectionName)}
                     getOptionLabel={(option) => option}
                     onChange={(event: any, newValue: string | null) => {
-                      setFieldValue("addtionalInfoSection", newValue);
+                      setFieldValue("additionalInfoSection", newValue);
                     }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Additional Info Section"
                         variant="outlined"
-                        name="addtionalInfoSection"
+                        name="additionalInfoSection"
                       />
                     )}
                   />
