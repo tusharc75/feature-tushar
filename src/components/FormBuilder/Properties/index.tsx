@@ -34,19 +34,24 @@ const FieldSchema = Yup.object().shape({
 });
 
 const LookupResource = [
-  { name: "Supplier Account", value: "Supplier Account" },
-  { name: "Customer Account", value: "Customer Account" },
-  { name: "User", value: "User" },
-  { name: "Supplier Contact", value: "Supplier Contact" },
-  { name: "Customer Contact", value: "Customer Contact" },
-  { name: "Brand", value: "Brand" },
-  { name: "Entity", value: "Entity" },
-  { name: "Role", value: "Role" },
-  { name: "Lead", value: "Lead" },
-  { name: "Opportunity", value: "Opportunity" },
-  { name: "Product Category", value: "Product Category" },
-  { name: "Product Template", value: "Product Template" },
-  { name: "Price Template", value: "Price Template" },
+  { name: 'Supplier Account', value: 'Supplier Account' },
+  { name: 'Customer Account', value: 'Customer Account' },
+  { name: 'User', value: 'User' },
+  { name: 'Supplier Contact', value: 'Supplier Contact' },
+  { name: 'Customer Contact', value: 'Customer Contact' },
+  { name: 'Brand', value: 'Brand' },
+  { name: 'Entity', value: 'Entity' },
+  { name: 'Role', value: 'Role' },
+  { name: 'Lead', value: 'Lead' },
+  { name: 'Opportunity', value: 'Opportunity' },
+  { name: 'Product Category', value: 'Product Category' },
+  { name: 'Project Sales', value: 'Project Sales' },
+  { name: 'Quotes', value: 'Quotes' },
+  { name: 'Price Template', value: 'Price Template' },
+  { name: 'Product Template', value: 'Product Template' },
+  { name: 'Quote Pdf Template', value: 'Quote Pdf Template' },
+  { name: 'Budget', value: 'Budget' },
+  { name: 'Market Segment', value: 'Market Segment' },
 ];
 
 export const Properties = ({
