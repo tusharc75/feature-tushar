@@ -44,7 +44,7 @@ const QuotePdfTemplate: FC = () => {
         state: { user, permissions },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
-    const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
+    const [quotePdfTemplatePermissions, setquotePdfTemplatePermissions] = useState({
         isCreate: false,
         isUpdate: false,
         isRead: false,
@@ -71,8 +71,8 @@ const QuotePdfTemplate: FC = () => {
     const { quotePdfTemplateApi } = quotePdfTemplate;
 
     useEffect(() => {
-        if (permissions && permissions.priceTemplate) {
-            setpriceTemplatePermissions(permissions.priceTemplate);
+        if (permissions && permissions.quotePdfTemplate) {
+            setquotePdfTemplatePermissions(permissions.quotePdfTemplate);
         }
     }, [permissions]);
 
@@ -81,7 +81,6 @@ const QuotePdfTemplate: FC = () => {
         if (quotePdfTemplateTimeout) {
             clearTimeout(quotePdfTemplateTimeout);
         }
-
         quotePdfTemplateTimeout = setTimeout(() => {
             fetchQuotePdfTemplate();
         }, millisec);
@@ -100,14 +99,14 @@ const QuotePdfTemplate: FC = () => {
     </Link>;
 
     const ActionsRenderer = params => <>
-        {priceTemplatePermissions.isCreate &&
+        {quotePdfTemplatePermissions.isCreate &&
             <Tooltip title="Clone">
                 <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
                     <FileCopyIcon color="primary" />
                 </IconButton>
             </Tooltip>
         }
-        {priceTemplatePermissions.isDelete ?
+        {quotePdfTemplatePermissions.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -228,7 +227,7 @@ const QuotePdfTemplate: FC = () => {
 
                 let rows = data.map((u) => {
 
-                    const { createdBy, updatedBy, staticData, ...restProperties } = u;
+                    const { createdBy, updatedBy, ...restProperties } = u;
 
                     let res = {
                         ...restProperties,
@@ -281,10 +280,10 @@ const QuotePdfTemplate: FC = () => {
                                     width="242px"
                                     value={search}
                                 />
-                                {priceTemplatePermissions.isCreate &&
+                                {quotePdfTemplatePermissions.isCreate &&
                                     <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                                 }
-                                {priceTemplatePermissions.isDelete &&
+                                {quotePdfTemplatePermissions.isDelete &&
                                     <Button
                                         className={styles.action_submit_btn}
                                         variant="outlined"
@@ -322,7 +321,7 @@ const QuotePdfTemplate: FC = () => {
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
-                        message={`Are you sure, you want to delete price template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
+                        message={`Are you sure, you want to delete Quote Pdf template ${deleteRecord?._id ? deleteRecord?.name : ""} ?`}
                         onClose={() => setShowDeleteConfirmBox(false)}
                         onOk={handleDelete}
                     />

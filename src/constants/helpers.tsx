@@ -116,7 +116,8 @@ export const sidebarResource = {
   currencyConverter: "Currency Converter",
   formBuilder: "Form Builder",
   budget: "Budget",
-  marketSegment: "Market Segment"
+  marketSegment: "Market Segment",
+  quotePdfTemplate:"Quote Pdf Template"
 };
 
 export const lead = {
