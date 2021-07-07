@@ -13,13 +13,17 @@ import routes from "../../components/Helpers/Routes";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import { getObjKeysWithValues, lead, processFieldName } from "../../constants/helpers";
+import {
+  getObjKeysWithValues,
+  lead,
+  processFieldName,
+} from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
-import LeadOpportunityProcess from "../../components/LeadOpportunityProcess"
+import ProcessFlow from "../../components/ProcessFlow";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,8 +48,14 @@ const LeadDetailsPage = () => {
     isDelete: false,
   });
 
-  const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
-  const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
+  const [
+    hasPermissionToConvertToOpportunity,
+    setHasPermissionToConvertToOpportunity,
+  ] = useState(false);
+  const [
+    isLeadAlreadyConvertedToOpportunity,
+    setIsLeadAlreadyConvertedToOpportunity,
+  ] = useState(false);
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -53,8 +63,8 @@ const LeadDetailsPage = () => {
   ] = useState({ open: false, id: null, leadName: null, message: null });
 
   const [steps, setSteps] = useState([]);
-  const [activeStep, setActiveStep] = useState(0)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [activeStep, setActiveStep] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
@@ -73,18 +83,24 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
+      const processSteps = leadFields.find(
+        (d) =>
+          d.isRead &&
+          d.fieldData.fieldName.toLowerCase() ===
+            processFieldName.toLocaleLowerCase()
+      );
       if (processSteps && processSteps.isRead && leadData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === leadData[processFieldName])
+        const currentStepToShow = processSteps.fieldData.option.findIndex(
+          (d) => d.optionLabel === leadData[processFieldName]
+        );
         setActiveStep(currentStepToShow);
       }
     }
-  }, [steps])
+  }, [steps]);
 
   useEffect(() => {
     fetchLeadData();
   }, [user, selectedEntity]);
-
 
   const fetchLeadData = async () => {
     setLoading(true);
@@ -110,13 +126,23 @@ const LeadDetailsPage = () => {
             dontHavePermissions.push("Opportunity");
           }
 
-          const isAllowedToUpdate = [...data.collaborator ?? [], data.owner].some(
-            (d) => d?.optionValue === userId
-          );
+          const isAllowedToUpdate = [
+            ...(data.collaborator ?? []),
+            data.owner,
+          ].some((d) => d?.optionValue === userId);
 
-          setHasPermissionToConvertToOpportunity(dontHavePermissions.length === 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate &&
-            data[processFieldName] && data[processFieldName].toLowerCase() === "qualified");
-          setIsLeadAlreadyConvertedToOpportunity(data.staticData && data.staticData["convertedToOpportunity"] ? data.staticData["convertedToOpportunity"] : false);
+          setHasPermissionToConvertToOpportunity(
+            dontHavePermissions.length === 0 &&
+              user?.user?.permissions?.convertLeadToOpportunity &&
+              isAllowedToUpdate &&
+              data[processFieldName] &&
+              data[processFieldName].toLowerCase() === "qualified"
+          );
+          setIsLeadAlreadyConvertedToOpportunity(
+            data.staticData && data.staticData["convertedToOpportunity"]
+              ? data.staticData["convertedToOpportunity"]
+              : false
+          );
 
           if (data?.salutation?.optionLabel) {
             name = data.salutation.optionLabel + name;
@@ -124,7 +150,7 @@ const LeadDetailsPage = () => {
           setHeadingLbl(name);
 
           setAllowedToEdit(
-            [...data.collaborator ?? [], data.owner].some(
+            [...(data.collaborator ?? []), data.owner].some(
               (d) => d?.optionValue === userId
             )
           );
@@ -154,14 +180,21 @@ const LeadDetailsPage = () => {
       .then(({ data: { data } }) => {
         setLeadFields(data);
 
-        const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+        const processSteps = data.find(
+          (d) =>
+            d.isRead &&
+            d.fieldData.fieldName.toLowerCase() ===
+              processFieldName.toLowerCase()
+        );
         if (processSteps && processSteps.isRead) {
-          setSteps(processSteps.fieldData.option.map(m => {
-            return {
-              text: m.optionLabel,
-              canCompleteManually: true //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
-            }
-          }));
+          setSteps(
+            processSteps.fieldData.option.map((m) => {
+              return {
+                text: m.optionLabel,
+                canCompleteManually: true, //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+              };
+            })
+          );
         }
 
         setLoading(false);
@@ -221,7 +254,7 @@ const LeadDetailsPage = () => {
           leadName: null,
           message: null,
         });
-        history.push(`${routes.opportunityDetail.path}/${data.data[0]}`)
+        history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -229,26 +262,39 @@ const LeadDetailsPage = () => {
   };
 
   const handleMarkAsCompleted = (data) => {
-    setIsProcessing(true)
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep
+    setIsProcessing(true);
+    let tempActiveStep =
+      data && data?.isSetBackStep
+        ? activeStep - 1
+        : activeStep < steps.length - 1
+        ? activeStep + 1
+        : activeStep;
 
     const updatedData = {
-      ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
+      ...getObjKeysWithValues(
+        leadData,
+        leadFields.map((f) => {
+          return f.fieldData;
+        })
+      ),
       [processFieldName]: steps[tempActiveStep].text,
-      _id: leadData._id
+      _id: leadData._id,
     };
 
-    axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
-      // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
-      setIsProcessing(false)
-      // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
-      // }
-      fetchLeadData();
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setIsProcessing(false)
-    })
-  }
+    axiosInstance()
+      .put(`/lead?entity=${selectedEntity}`, updatedData)
+      .then(() => {
+        // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
+        setIsProcessing(false);
+        // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
+        // }
+        fetchLeadData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsProcessing(false);
+      });
+  };
 
   return (
     <>
@@ -273,7 +319,6 @@ const LeadDetailsPage = () => {
         />
       ) : null}
       <Layout>
-
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -315,26 +360,33 @@ const LeadDetailsPage = () => {
                       Edit
                     </Button>
                   )}
-                  {
-                    !isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && <>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter(d => d).join(" ")
-                          setConvertLeadToOpportunityConfirmationDialog({
-                            open: true,
-                            id: leadData._id,
-                            leadName: leadName,
-                            message: `Are you sure you want to convert ${leadName} to opportunity?`,
-                          });
-                        }}
-                      >
-                        Convert Lead To Opportunity
-                      </Button>
-                    </>
-                  }
+                  {!isLeadAlreadyConvertedToOpportunity &&
+                    hasPermissionToConvertToOpportunity && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            const leadName = [
+                              leadData.firstName,
+                              leadData.middleName,
+                              leadData.lastName,
+                            ]
+                              .filter((d) => d)
+                              .join(" ");
+                            setConvertLeadToOpportunityConfirmationDialog({
+                              open: true,
+                              id: leadData._id,
+                              leadName: leadName,
+                              message: `Are you sure you want to convert ${leadName} to opportunity?`,
+                            });
+                          }}
+                        >
+                          Convert Lead To Opportunity
+                        </Button>
+                      </>
+                    )}
                   {leadsPermissions.isDelete && allowedToDelete && (
                     <DeleteButton
                       text="Delete"
@@ -344,8 +396,10 @@ const LeadDetailsPage = () => {
                 </DetailsPageHeader>
               )}
 
-              <LeadOpportunityProcess
-                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
+              <ProcessFlow
+                disableBackNext={
+                  leadsPermissions.isUpdate && allowedToEdit ? false : true
+                }
                 steps={steps}
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
@@ -357,11 +411,7 @@ const LeadDetailsPage = () => {
                   {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
                     (i, index) => (
                       <Grid key={index} item sm={6} md={6}>
-                        <Skeleton
-                          variant="text"
-                          width="100px"
-                          height="16px"
-                        />
+                        <Skeleton variant="text" width="100px" height="16px" />
                         <Box marginY={1} />
                         <Skeleton width="100%" height="50px" />
                       </Grid>
@@ -405,7 +455,11 @@ const LeadDetailsPage = () => {
               ) : (
                 <div>
                   <Activity
-                    restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ["Attachment", "Case"]}
+                    restrictedAddActivities={
+                      leadsPermissions.isUpdate && allowedToEdit
+                        ? []
+                        : ["Attachment", "Case"]
+                    }
                     relatedTo={[
                       {
                         type: leadResource,
@@ -413,10 +467,8 @@ const LeadDetailsPage = () => {
                         access: true,
                       },
                     ]}
-                    handleActivityRefresh={() => { }}
-                    emails={
-                      [leadData?.email ?? '']
-                    }
+                    handleActivityRefresh={() => {}}
+                    emails={[leadData?.email ?? ""]}
                   />
                 </div>
               )}
@@ -424,17 +476,22 @@ const LeadDetailsPage = () => {
           </Grid>
         </Grid>
 
-        {
-          convertLeadToOpportunityConfirmationDialog.open ? (
-            <ConfirmationDialog
-              open={convertLeadToOpportunityConfirmationDialog.open}
-              message={convertLeadToOpportunityConfirmationDialog.message}
-              onClose={() => setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null, })}
-              onOk={convertLeadToOpportunity}
-            />
-          ) : null
-        }
-      </Layout >
+        {convertLeadToOpportunityConfirmationDialog.open ? (
+          <ConfirmationDialog
+            open={convertLeadToOpportunityConfirmationDialog.open}
+            message={convertLeadToOpportunityConfirmationDialog.message}
+            onClose={() =>
+              setConvertLeadToOpportunityConfirmationDialog({
+                open: false,
+                id: null,
+                leadName: null,
+                message: null,
+              })
+            }
+            onOk={convertLeadToOpportunity}
+          />
+        ) : null}
+      </Layout>
     </>
   );
 };

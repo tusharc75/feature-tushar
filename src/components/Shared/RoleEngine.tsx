@@ -34,6 +34,10 @@ const RoleEngine = (props) => {
           }
         })
         isAnyReadFoundUnchecked = true
+      } else if (isAnyReadFoundUnchecked === false) {
+        isAnyReadFoundUnchecked = field.filter(d => d.fieldData.resource === _resource.name).some((_field) => {
+          return _field.isRead === false;
+        })
       }
 
       if (_resource.isCreate === false && isAnyCreateFoundUnchecked === false) {
@@ -43,6 +47,10 @@ const RoleEngine = (props) => {
           }
         })
         isAnyCreateFoundUnchecked = true
+      } else if (isAnyCreateFoundUnchecked === false) {
+        isAnyCreateFoundUnchecked = field.filter(d => d.fieldData.resource === _resource.name).some((_field) => {
+          return _field.isCreate === false;
+        })
       }
 
       if (_resource.isUpdate === false && isAnyUpdateFoundUnchecked === false) {
@@ -52,6 +60,10 @@ const RoleEngine = (props) => {
           }
         })
         isAnyUpdateFoundUnchecked = true
+      } else if (isAnyUpdateFoundUnchecked === false) {
+        isAnyUpdateFoundUnchecked = field.filter(d => d.fieldData.resource === _resource.name).some((_field) => {
+          return _field.isUpdate === false;
+        })
       }
 
       if (_resource.isDelete === false && isAnyDeleteFoundUnchecked === false) {
