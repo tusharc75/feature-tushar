@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
-import { Box, Tooltip, Grid, Button } from '@material-ui/core';
+import { Box, Tooltip, Grid, Button, InputAdornment } from '@material-ui/core';
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import { Formik, Form, Field } from "formik";
@@ -10,7 +10,7 @@ import Dialog from '@material-ui/core/Dialog'
 import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import { uniq, map, orderBy } from 'lodash';
-import { getObjKeys, simplifyValues, yupSchema } from '../../constants/helpers';
+import { getObjKeys, getUniqueCurrencies, simplifyValues, yupSchema } from '../../constants/helpers';
 import CustomButton from '../Helpers/CustomButton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -49,6 +49,8 @@ const CreateProduct = (props) => {
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
     const [isShowTemplate, setIsShowTemplate] = useState(false);
 
+    const [currencySymbol, setCurrencySymbol] = useState(null);
+
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
             const _productField: any = []
@@ -75,6 +77,18 @@ const CreateProduct = (props) => {
                     if (isClone) {
                         data.productData.productName = ""
                     }
+
+                    newField.map((_f) => {
+                        if (_f.fieldName === "currency") {
+                            setCurrencySymbol(
+                                getUniqueCurrencies().find(
+                                    (d) => d.currencyCode === data.productData["currency"]
+                                )?.symbolNative
+                            );
+                        }
+                    });
+
+
                     setInitialData({
                         fields: newField,
                         values: data.productData
@@ -397,7 +411,66 @@ const CreateProduct = (props) => {
                                                                     ) : null}
                                                                 </Grid>
                                                             </Grid> :
-                                                            field.fieldName === "priceTemplate" ?
+                                                            field.fieldName === "currency" ? (
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        // {...rest}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        onChange={(e, val) => {
+                                                                            if (val && val.currencyCode) {
+                                                                                setFieldValue(
+                                                                                    field.fieldName,
+                                                                                    val.currencyCode
+                                                                                );
+                                                                                setCurrencySymbol(val.symbolNative);
+                                                                            } else {
+                                                                                setFieldValue(field.fieldName, "");
+                                                                                setCurrencySymbol(null);
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </Grid>
+                                                            ) : field.fieldName === "mrp" ? (
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        // {...rest}
+                                                                        startAdornment={
+                                                                            currencySymbol ? (
+                                                                                <InputAdornment position="start">
+                                                                                    {currencySymbol}
+                                                                                </InputAdornment>
+                                                                            ) : (
+                                                                                ""
+                                                                            )
+                                                                        }
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                    />
+                                                                </Grid>
+                                                            ) : field.fieldName === "priceTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     {!isShowTemplate ?
                                                                         <FormControlLabel
