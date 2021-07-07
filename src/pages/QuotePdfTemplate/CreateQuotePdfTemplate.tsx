@@ -1,125 +1,133 @@
-import { useState, useEffect, useContext } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Layout from "../../components/Layout";
-import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  TextField,
+  Grid,
+  Box,
+  Button,
+  CircularProgress,
+  FormControlLabel,
+  Checkbox,
+} from "@material-ui/core";
+
 import { useParams, useHistory } from "react-router-dom";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { FormBuilder } from "../../components/FormBuilder";
+
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import TextField from "@material-ui/core/TextField";
-import { camelCase } from "../../constants/helpers";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
-import routes from "../../components/Helpers/Routes";
-import { Autocomplete } from "@material-ui/lab";
-import { uniq, map } from "lodash";
-import {
-  extractFields,
-  checkFormulaLoop,
-} from "../../constants/formulaUtility";
-import { useData } from "../../StateProvider/Provider";
 
-const QuotePdfTemplateSchema = Yup.object().shape({
+import { FormBuilder } from "../../components/FormBuilder";
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import Layout from "../../components/Layout";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import { camelCase, map, uniq } from "lodash";
+import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import routes from "../../components/Helpers/Routes";
+
+const PdfTemplateSchema = Yup.object().shape({
   name: Yup.string()
     .min(3, "Too Short!")
     .max(50, "Too Long")
-    .required("Template Name is required")
+    .required("name is required"),
+  showPageNumberInFooter: Yup.boolean(),
 });
 
-const QuotePdfTemplate = () => {
-  const toastConfig = useContext(CustomToastContext);
+const seedData = [
+  {
+    _id: "60e57ae7801802b66486e326",
+    fieldLabel: "Header Column 1",
+    type: "singleLine",
+    option: [],
+    required: false,
+    isTooltip: false,
+    tooltipMessage: "",
+    editAble: true,
+    order: 4,
+    hiddenField: false,
+    isDefaultValue: true,
+    defaultValue: "Project Europe",
+    fieldName: "headerColumn1",
+    sectionName: "Header",
+  },
+  {
+    _id: "60e57ae7801802b66486e327",
+    fieldLabel: "Header Column 2",
+    type: "imageUpload",
+    option: [],
+    required: false,
+    isTooltip: false,
+    tooltipMessage: "",
+    editAble: true,
+    order: 5,
+    hiddenField: false,
+    isDefaultValue: true,
+    defaultValue:
+      " https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/ArcelorMittal.svg/1200px-ArcelorMittal.svg.png",
+    fieldName: "headerColumn2",
+    sectionName: "Header",
+  },
+  {
+    _id: "60e57ae7801802b66486e328",
+    fieldLabel: "Footer Column 1",
+    type: "multiLine",
+    option: [],
+    required: false,
+    isTooltip: false,
+    tooltipMessage: "",
+    editAble: true,
+    order: 6,
+    hiddenField: false,
+    isDefaultValue: true,
+    defaultValue: "VAT/GST will be applicable extra",
+    fieldName: "footerColumn1",
+    sectionName: "Footer",
+  },
+  {
+    _id: "60e57ae7801802b66486e329",
+    fieldLabel: "Footer Column 2",
+    type: "singleLine",
+    option: [],
+    required: false,
+    isTooltip: false,
+    tooltipMessage: "",
+    editAble: true,
+    order: 7,
+    hiddenField: false,
+    isDefaultValue: true,
+    defaultValue: "Arcelor Mittal USA",
+    fieldName: "footerColumn2",
+    sectionName: "Footer",
+  },
+];
+
+const CreateQuotePdfTemplate = () => {
   const history = useHistory();
   const { id } = useParams();
-  const [isClone] = useState(history.location.state?.isClone ? true : false);
+  const toastConfig = useContext(CustomToastContext);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [initialValues, setInitialValues] = useState({ name: "", productTemplate: "" });
+  const [initialValues, setInitialValues] = useState({
+    name: "",
+    showPageNumberInFooter: false,
+  });
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
-  const [productTemplate, setProductTemplate] = useState([]);
-  const [templateField, setTemplateField] = useState([]);
-
-  const {
-    state: { permissions },
-  }: any = useData();
-  const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
 
   useEffect(() => {
-    if (permissions && permissions.priceTemplate) {
-      setpriceTemplatePermissions(permissions.priceTemplate);
-    }
-  }, [permissions]);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/quote-pdf-template`)
-      .then(({ data }) => {
-        setProductTemplate(data.data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    const _data = [];
+    const _section = uniq(map(seedData, "sectionName"));
+    _section.forEach((element: any, index: number) => {
+      _data.push({
+        sectionId: index,
+        sectionName: element,
+        field: seedData.filter((el: any) => el.sectionName === element),
       });
-    fetchOneQuotePdfTemplate();
-  }, [id]);
-
-  const fetchOneQuotePdfTemplate = () => {
-    if (id === "0") {
-      return;
-      setInitialValues({ name: "", productTemplate: "" });
-      axiosInstance()
-        .get(`/price-template/default-field`)
-        .then(({ data: { data } }) => {
-          const _data = [];
-          const _section = uniq(map(data.fields, "sectionName"));
-          _section.forEach((element: any, index: number) => {
-            _data.push({
-              sectionId: index,
-              sectionName: element,
-              field: data.fields.filter(
-                (el: any) => el.sectionName === element
-              ),
-            });
-          });
-          setSection(_data);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    } else {
-      axiosInstance()
-        .get(`/quote-pdf-template/` + id)
-        .then(({ data: { data } }) => {
-          setInitialValues(data);
-          handleProductTemplateField(data.productTemplate);
-          setSection(data.section);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
+    });
+    setSection(_data);
+  }, []);
 
   const handleSave = (values) => {
-    let data: any = {};
+    const data: any = {};
     data.name = values.name;
-    
-    // data.productTemplate = values.productTemplate;
-
-    // const resultproductTemplate = productTemplate.filter(
-    //   (_f) => _f._id === values.productTemplate
-    // );
-    // if (resultproductTemplate.length) {
-    //   data.isStandard = resultproductTemplate[0].isStandard;
-    //   data.productCategory = resultproductTemplate[0].productCategory;
-    // }
+    data.showPageNumberInFooter = values.showPageNumberInFooter;
 
     let fields: any = [];
     let order = 0;
@@ -138,17 +146,11 @@ const QuotePdfTemplate = () => {
       });
     });
     data.fields = fields;
-    const result = checkFormulaLoop(data.fields);
-    if (result.error) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: "error",
-        message: result.message,
-      });
-      return;
-    }
+
+    console.log(data);
     setIsUpdating(true);
-    if (id === "0" || isClone) {
+
+    if (id === "0") {
       axiosInstance()
         .post("/quote-pdf-template", data)
         .then(({ data: { data } }) => {
@@ -175,21 +177,6 @@ const QuotePdfTemplate = () => {
     }
   };
 
-  const handleProductTemplateField = (productTemplate_id) => {
-    if (productTemplate_id && productTemplate_id !== "") {
-      axiosInstance()
-        .get(`/quote-pdf-template/fields/` + productTemplate_id)
-        .then(({ data: { data } }) => {
-          setTemplateField([...extractFields(data.fields)]);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    } else {
-      setTemplateField([]);
-    }
-  };
-
   return (
     <Layout>
       <Grid container className="headerbox">
@@ -197,32 +184,30 @@ const QuotePdfTemplate = () => {
           <CustomBreadCrumbs
             routes={[
               {
-                title: routes.quotePdfTemplate.title,
-                path: routes.quotePdfTemplate.path,
-              },
-              {
-                title: id === "0" ? "New" : initialValues && initialValues.name,
+                title: "Quote Pdf Template",
+                path: "",
               },
             ]}
           />
         </Grid>
+        <Grid container justify="flex-end" item md={8} sm={1} xs={2}></Grid>
       </Grid>
       <div className="main-container">
         {initialValues ? (
           <Formik
             initialValues={initialValues}
-            validationSchema={QuotePdfTemplateSchema}
+            validationSchema={PdfTemplateSchema}
             onSubmit={handleSave}
           >
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form>
                 <Box p={1} ml={1} bgcolor="white">
-                  <Grid container spacing={1} justify="space-between">
+                  <Grid container spacing={4} alignItems="center">
                     <Grid item xs={12} sm={3}>
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Quote PDF Template Name"
+                        label="Price Template Name"
                         required={true}
                         name="name"
                         fullWidth
@@ -235,31 +220,43 @@ const QuotePdfTemplate = () => {
                         }
                       />
                     </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <FormControlLabel
+                        value={values["showPageNumberInFooter"]}
+                        control={
+                          <Checkbox
+                            name="showPageNumberInFooter"
+                            checked={values["showPageNumberInFooter"]}
+                            onChange={(e) =>
+                              setFieldValue(
+                                "showPageNumberInFooter",
+                                e.target.checked
+                              )
+                            }
+                            color="primary"
+                          />
+                        }
+                        label="Show page number in footer"
+                      />
+                    </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
                       <Box>
-                        {(priceTemplatePermissions.isCreate ||
-                          priceTemplatePermissions.isUpdate) && (
-                          <Button
-                            disabled={isUpdating}
-                            size="small"
-                            color="primary"
-                            onClick={submitForm}
-                            variant="contained"
-                          >
-                            Save{isUpdating && <CircularProgress size={24} />}
-                          </Button>
-                        )}
+                        <Button
+                          disabled={isUpdating}
+                          size="small"
+                          color="primary"
+                          onClick={submitForm}
+                          variant="contained"
+                        >
+                          Save{isUpdating && <CircularProgress size={24} />}
+                        </Button>
                       </Box>
                       <Box ml={1}>
                         <Button
                           color="primary"
                           size="small"
                           variant="contained"
-                          onClick={() =>
-                            history.push({
-                              pathname: routes.priceTemplate.path,
-                            })
-                          }
+                          onClick={() => {}}
                         >
                           Close
                         </Button>
@@ -273,9 +270,9 @@ const QuotePdfTemplate = () => {
                     setSection={setSection}
                     deleteField={deleteField}
                     setDeleteField={setDeleteField}
-                    isCustomField={false}
+                    isCustomField={true}
                     extraFields={[]}
-                    module=""
+                    module="pdf-template"
                   />
                 </Box>
               </Form>
@@ -291,4 +288,4 @@ const QuotePdfTemplate = () => {
   );
 };
 
-export default QuotePdfTemplate;
+export default CreateQuotePdfTemplate;

@@ -150,44 +150,44 @@ const routes = {
   },
   priceTemplate: {
     title: "Price Template",
-    path: "/price-template"
+    path: "/price-template",
   },
   productBuilder: {
     title: "Product Builder",
-    path: "/product-builder"
+    path: "/product-builder",
   },
   brandConfiguration: {
     title: "Brand Configuration",
-    path: "/brand-configuration"
+    path: "/brand-configuration",
   },
   currencyConverter: {
     title: "Currency Converter",
-    path: "/currency-converter"
+    path: "/currency-converter",
   },
   productCategory: {
     title: "Product Category",
-    path: "/product-category"
+    path: "/product-category",
   },
   productTemplate: {
     title: "Product Template",
-    path: "/product-template"
+    path: "/product-template",
   },
   quoteBuilder: {
     title: "Quotes",
-    path: "/quotes"
+    path: "/quotes",
   },
   budget: {
     title: "Budget",
-    path: "/budget"
+    path: "/budget",
   },
   marketSegment: {
     title: "Market Segment",
-    path: "/market-segment"
+    path: "/market-segment",
   },
   quotePdfTemplate: {
     title: "Quote PDF Template",
-    path: "/quote-pdf-template"
-  },
+    path: "/quote-pdf-template",
+  }
 };
 
 export default routes;
