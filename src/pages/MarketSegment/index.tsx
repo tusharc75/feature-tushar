@@ -51,7 +51,7 @@ const MarketSegment = () => {
     const [marketSegmentId, setMarketSegmentId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [loadingChildData, setLoadingChildData] = useState(false);
-    const [childColumn, setChildColumn] = useState({
+    const [childData, setChildData] = useState({
         columns: [
             {
                 field: "serialNumber", headerName: "Serial #", flex: .75,
@@ -236,7 +236,7 @@ const MarketSegment = () => {
                     };
                 });
 
-                setChildColumn((prevState) => {
+                setChildData((prevState) => {
                     return {
                         ...prevState,
                         data: newData,
@@ -366,7 +366,7 @@ const MarketSegment = () => {
                         setShowChildDialog(false);
                     }}
                 >
-                    <ChildHierarchy loading={loadingChildData} childData={childColumn} />
+                    <ChildHierarchy loading={loadingChildData} childData={childData} />
 
                 </CustomDialogComponent>
             )}

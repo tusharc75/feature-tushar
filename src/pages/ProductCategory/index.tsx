@@ -147,7 +147,7 @@ const ProductCategory = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [showChildDialog, setShowChildDialog] = useState(false)
     const [loadingChildData, setLoadingChildData] = useState(false);
-    const [childColumn, setChildColumn] = useState({
+    const [childData, setChildData] = useState({
         columns: [
             {
                 field: "serialNumber", headerName: "Serial #", flex: .75,
@@ -333,7 +333,7 @@ const ProductCategory = () => {
                     };
                 });
 
-                setChildColumn((prevState) => {
+                setChildData((prevState) => {
                     return {
                         ...prevState,
                         data: newData,
@@ -468,7 +468,7 @@ const ProductCategory = () => {
                     setShowChildDialog(false);
                 }}
                 >
-                <ChildHierarchy loading={loadingChildData} childData={childColumn} />
+                <ChildHierarchy loading={loadingChildData} childData={childData} />
                 
             </CustomDialogComponent>
       )}
