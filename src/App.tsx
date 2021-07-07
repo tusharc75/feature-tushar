@@ -92,6 +92,7 @@ import MarketSegment from "./pages/MarketSegment";
 import MyCart from "./components/ProductList/MyCart/MyCart";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
+import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 
 function App() {
   const toast = useContext(CustomToastContext);
