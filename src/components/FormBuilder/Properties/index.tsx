@@ -719,6 +719,7 @@ export const Properties = ({
                 )}
                 {values["showAdditionalInfoPopup"] && (
                   <Autocomplete
+                    value={values["additionalInfoSection"]}
                     size="small"
                     options={section.map((s) => s.sectionName)}
                     getOptionLabel={(option) => option}
