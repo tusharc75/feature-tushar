@@ -1,4 +1,10 @@
-import React, { useState, Fragment, useRef, useEffect } from "react";
+import React, {
+  useState,
+  Fragment,
+  useRef,
+  useEffect,
+  useContext,
+} from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import TextField from "@material-ui/core/TextField";
@@ -29,6 +35,8 @@ import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { Autocomplete } from "@material-ui/lab";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import FormTypes from "../../Helpers/FormTypes";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required("please enter field label"),
@@ -60,6 +68,9 @@ export const Properties = ({
   extraFields,
 }) => {
   const [initialValues, setInitialValues] = useState(fieldData);
+  const [isImgUploading, setImgUploading] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
+  const { setToastConfig } = useContext(CustomToastContext);
 
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
@@ -662,13 +673,16 @@ export const Properties = ({
                   label="Uneditable"
                 />
 
-                {values["isDefaultValue"] && (
+                {fieldData.type !== "imageUpload" &&
+                values["isDefaultValue"] ? (
                   <TextField
                     variant="outlined"
                     type="text"
                     label="Default Value"
                     required={true}
+                    multiline={fieldData.type === "multiLine"}
                     name="defaultValue"
+                    rows={4}
                     fullWidth
                     margin="dense"
                     value={values["defaultValue"]}
@@ -681,6 +695,17 @@ export const Properties = ({
                     onChange={(e) =>
                       setFieldValue("defaultValue", e.target.value.trimStart())
                     }
+                  />
+                ) : (
+                  <FormTypes
+                    values={{ defaultValue: values["defaultValue"] }}
+                    errors={errors}
+                    touched={touched}
+                    label={""}
+                    name={"defaultValue"}
+                    type={fieldData.type}
+                    setFieldValue={setFieldValue}
+                    isTooltip={false}
                   />
                 )}
                 <FormControlLabel
