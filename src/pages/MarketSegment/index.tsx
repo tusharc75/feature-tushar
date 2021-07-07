@@ -4,6 +4,7 @@ import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
+import ChildCareIcon from '@material-ui/icons/ChildCare';
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -32,6 +33,8 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
+import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
+import ChildHierarchy from "../../components/ChildHierarchy";
 
 
 const MarketSegment = () => {
@@ -42,10 +45,38 @@ const MarketSegment = () => {
     }: any = useData();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [showChildDialog, setShowChildDialog] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [marketSegmentId, setMarketSegmentId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [loadingChildData, setLoadingChildData] = useState(false);
+    const [childColumn, setChildColumn] = useState({
+        columns: [
+            {
+                field: "serialNumber", headerName: "Serial #", flex: .75,
+                renderCell: (params: any) => (
+                    <span
+                        title={params.value}
+                    >
+                        {params.value}
+                    </span>
+                ),
+            },
+            {
+                field: "childName", headerName: "Child Name", flex: 1,
+                renderCell: (params: any) => (
+                    <span
+                        title={params.value}
+                    >
+                        {params.value}
+                    </span>
+                ),
+            },
+
+        ],
+        data: []
+    });
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -65,14 +96,21 @@ const MarketSegment = () => {
         fetchMarketSegment()
     }, [page, limit, filters, sorting, search])
 
-    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
+    const NameRenderer = params => <div className="d-flex align-items-center">
         <span className="link" onClick={() => {
             setMarketSegmentId(params.data.id);
             setOpen(true);
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-    </span>
+        <Tooltip
+            title="Show Childs"
+            className="link"
+            onClick={() => handleDialogOpen(params.data.id)}
+        >
+            <ChildCareIcon color="primary" className="ml-2" fontSize="small" />
+        </Tooltip>
+    </div>
 
     const ActionsRenderer = params => <Fragment>
         {permissions.marketSegment.isDelete ?
@@ -99,6 +137,11 @@ const MarketSegment = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
     };
+
+    const handleDialogOpen = (id) => {
+        fetchChildData(id);
+        setShowChildDialog(true);
+    }
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -177,6 +220,36 @@ const MarketSegment = () => {
         });
     };
 
+    const fetchChildData = (id) => {
+        setLoadingChildData(true);
+        axiosInstance()
+            .get(`${marketSegment.marketSegmentApi}/hierarchy/` + id)
+            .then(({ data: { data } }) => {
+                const newData = data.parentHierarchy.map((d, index) => {
+                    const { createdBy, ...restProperties } = d;
+                    return {
+                        ...restProperties,
+                        id: d._id,
+                        serialNumber: index + 1,
+                        _id: d._id,
+                        childName: d.name,
+                    };
+                });
+
+                setChildColumn((prevState) => {
+                    return {
+                        ...prevState,
+                        data: newData,
+                    }
+                });
+
+                setLoadingChildData(false);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoadingChildData(false);
+            })
+
+    }
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -285,6 +358,18 @@ const MarketSegment = () => {
                     onOk={handleDelete}
                 />
             }
+            {showChildDialog && (
+                <CustomDialogComponent
+                    title="All Children"
+                    open={showChildDialog}
+                    onClose={() => {
+                        setShowChildDialog(false);
+                    }}
+                >
+                    <ChildHierarchy loading={loadingChildData} childData={childColumn} />
+
+                </CustomDialogComponent>
+            )}
             {open && <CreateMarketSegment marketSegmentId={marketSegmentId} handleClose={() => { setOpen(false); fetchMarketSegment() }} />}
         </CustomContainer>
     </Layout>

@@ -7,6 +7,7 @@ import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ChildCareIcon from '@material-ui/icons/ChildCare';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from 'react-icons/gi';
@@ -31,6 +32,8 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
+import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
+import ChildHierarchy from "../../components/ChildHierarchy";
 
 
 function reducer(state, action) {
@@ -142,6 +145,34 @@ const ProductCategory = () => {
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [showChildDialog, setShowChildDialog] = useState(false)
+    const [loadingChildData, setLoadingChildData] = useState(false);
+    const [childColumn, setChildColumn] = useState({
+        columns: [
+            {
+                field: "serialNumber", headerName: "Serial #", flex: .75,
+                renderCell: (params: any) => (
+                    <span
+                        title={params.value}
+                    >
+                        {params.value}
+                    </span>
+                ),
+            },
+            {
+                field: "childName", headerName: "Child Name", flex: 1,
+                renderCell: (params: any) => (
+                    <span
+                        title={params.value}
+                    >
+                        {params.value}
+                    </span>
+                ),
+            },
+            
+        ],
+        data: []
+    });
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -167,14 +198,21 @@ const ProductCategory = () => {
         fetchProductCategory()
     }, [page, limit, filters, sorting, search])
 
-    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
+    const NameRenderer = params => <div className="d-flex align-items-center">
         <span className="link" onClick={() => {
             setProductCategoryId(params.data.id);
             setOpen(true);
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-    </span>
+        <Tooltip
+                title="Show Childs"
+                className="link"
+                onClick={() => handleDialogOpen(params.data.id)}
+            >
+                <ChildCareIcon color="primary" className="ml-2" fontSize="small" />
+            </Tooltip>
+    </div>
 
     const ActionsRenderer = params => <Fragment>
         {productCategoryPermissions.isDelete ?
@@ -279,6 +317,41 @@ const ProductCategory = () => {
         });
     };
 
+    const fetchChildData = (id) => {
+        setLoadingChildData(true);
+        axiosInstance()
+            .get(`/product-category/hierarchy/` + id)
+            .then(({ data: { data } }) => {
+                const newData = data.parentHierarchy.map((d, index) => {
+                    const { createdBy, ...restProperties } = d;
+                    return {
+                        ...restProperties,
+                        id:d._id,
+                        serialNumber: index + 1,
+                        _id: d._id,
+                        childName: d.name,
+                    };
+                });
+
+                setChildColumn((prevState) => {
+                    return {
+                        ...prevState,
+                        data: newData,
+                    }
+                });
+
+                setLoadingChildData(false);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoadingChildData(false);
+            })
+
+    }
+
+    const handleDialogOpen = (id) => {
+        fetchChildData(id);
+        setShowChildDialog(true);
+    }
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -387,6 +460,18 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
+        {showChildDialog && (
+            <CustomDialogComponent
+                title="All Children"
+                open={showChildDialog}
+                onClose={() => {
+                    setShowChildDialog(false);
+                }}
+                >
+                <ChildHierarchy loading={loadingChildData} childData={childColumn} />
+                
+            </CustomDialogComponent>
+      )}
             {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
         </CustomContainer>
     </Layout>
