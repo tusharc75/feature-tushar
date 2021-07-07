@@ -104,10 +104,7 @@ const CreateQuotePdfTemplate = () => {
   const { id } = useParams();
   const toastConfig = useContext(CustomToastContext);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [initialValues, setInitialValues] = useState({
-    name: "",
-    showPageNumberInFooter: false,
-  });
+  const [initialValues, setInitialValues] = useState(null);
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
 
@@ -123,6 +120,25 @@ const CreateQuotePdfTemplate = () => {
     });
     setSection(_data);
   }, []);
+  useEffect(()=>{
+    if(id && id != 0){
+     (async ()=>{
+       try{
+         const res = await axiosInstance().get(`/quote-pdf-template/${id}`)
+         const {data:{data}} = res;
+         setInitialValues(data);
+         setSection(data.section);
+       }catch(e){
+        toastConfig.setToastConfig(e);
+       }
+      })()
+    }else{
+      setInitialValues({
+        name: "",
+        showPageNumberInFooter: false,
+      })
+    }
+  },[id])
 
   const handleSave = (values) => {
     const data: any = {};
@@ -147,7 +163,6 @@ const CreateQuotePdfTemplate = () => {
     });
     data.fields = fields;
 
-    console.log(data);
     setIsUpdating(true);
 
     if (id === "0") {
@@ -184,8 +199,11 @@ const CreateQuotePdfTemplate = () => {
           <CustomBreadCrumbs
             routes={[
               {
-                title: "Quote Pdf Template",
-                path: "",
+                title: routes.quotePdfTemplate.title,
+                path: routes.quotePdfTemplate.path,
+              },
+              {
+                title: id === "0" ? "New" : initialValues && initialValues.name,
               },
             ]}
           />
@@ -256,7 +274,11 @@ const CreateQuotePdfTemplate = () => {
                           color="primary"
                           size="small"
                           variant="contained"
-                          onClick={() => {}}
+                          onClick={() => {
+                            history.push({
+                              pathname: routes.quotePdfTemplate.path,
+                            })
+                          }}
                         >
                           Close
                         </Button>
