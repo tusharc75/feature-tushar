@@ -208,6 +208,12 @@ export const budget = {
   budgetPermission: "budget",
 }
 
+export const quotePdfTemplate = {
+  quotePdfTemplateApi: "/quote-pdf-template",
+  quotePdfTemplateRoute: "/quote-pdf-template",
+  quotePdfTemplateTimeoutPermission: "quotePdfTmeplate",
+}
+
 export const marketSegment = {
   marketSegmentApi: "/market-segment",
   marketSegmentResource: "marketSegment"

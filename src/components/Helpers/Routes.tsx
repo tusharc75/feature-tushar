@@ -184,7 +184,10 @@ const routes = {
     title: "Market Segment",
     path: "/market-segment"
   },
-
+  quotePdfTemplate: {
+    title: "Quote PDF Template",
+    path: "/quote-pdf-template"
+  },
 };
 
 export default routes;

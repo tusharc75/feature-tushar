@@ -51,7 +51,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "project-sales",
         "doa-request",
         "product-list",
-        "product/details"
+        "product/details",
+        "quote-pdf-template"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
