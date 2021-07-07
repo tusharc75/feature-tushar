@@ -21,6 +21,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { camelCase, map, uniq } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import routes from "../../components/Helpers/Routes";
 
 const PdfTemplateSchema = Yup.object().shape({
   name: Yup.string()
@@ -98,7 +99,7 @@ const seedData = [
   },
 ];
 
-const PdfTemplate = () => {
+const CreateQuotePdfTemplate = () => {
   const history = useHistory();
   const { id } = useParams();
   const toastConfig = useContext(CustomToastContext);
@@ -154,7 +155,7 @@ const PdfTemplate = () => {
         .post("/quote-pdf-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          //   history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: routes.quotePdfTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -167,7 +168,7 @@ const PdfTemplate = () => {
         .put("/quote-pdf-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          //   history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: routes.quotePdfTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -287,4 +288,4 @@ const PdfTemplate = () => {
   );
 };
 
-export default PdfTemplate;
+export default CreateQuotePdfTemplate;

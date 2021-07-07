@@ -91,7 +91,7 @@ import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import MyCart from "./components/ProductList/MyCart/MyCart";
 import Budget from "./pages/Budget";
-import PdfTemplate from "./pages/PdfTemplate/PdfTemplate";
+import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -480,8 +480,8 @@ function App() {
           <Route exact path="/inline-grid">
             <CustomInlineEditableAgGrid />
           </Route>
-          <Route exact path="/pdf-template">
-            <PdfTemplate />
+          <Route exact path={`${routes.quotePdfTemplate.path}/:id`}>
+            <CreateQuotePdfTemplate />
           </Route>
           <PrivateRoute exact path="/product-list">
             <Products />
