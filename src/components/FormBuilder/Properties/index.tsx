@@ -1,4 +1,10 @@
-import React, { useState, Fragment, useRef, useEffect } from "react";
+import React, {
+  useState,
+  Fragment,
+  useRef,
+  useEffect,
+  useContext,
+} from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import TextField from "@material-ui/core/TextField";
@@ -29,25 +35,32 @@ import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { Autocomplete } from "@material-ui/lab";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import FormTypes from "../../Helpers/FormTypes";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required("please enter field label"),
 });
 
 const LookupResource = [
-  { name: "Supplier Account", value: "Supplier Account" },
-  { name: "Customer Account", value: "Customer Account" },
-  { name: "User", value: "User" },
-  { name: "Supplier Contact", value: "Supplier Contact" },
-  { name: "Customer Contact", value: "Customer Contact" },
-  { name: "Brand", value: "Brand" },
-  { name: "Entity", value: "Entity" },
-  { name: "Role", value: "Role" },
-  { name: "Lead", value: "Lead" },
-  { name: "Opportunity", value: "Opportunity" },
-  { name: "Product Category", value: "Product Category" },
-  { name: "Product Template", value: "Product Template" },
-  { name: "Price Template", value: "Price Template" },
+  { name: 'Supplier Account', value: 'Supplier Account' },
+  { name: 'Customer Account', value: 'Customer Account' },
+  { name: 'User', value: 'User' },
+  { name: 'Supplier Contact', value: 'Supplier Contact' },
+  { name: 'Customer Contact', value: 'Customer Contact' },
+  { name: 'Brand', value: 'Brand' },
+  { name: 'Entity', value: 'Entity' },
+  { name: 'Role', value: 'Role' },
+  { name: 'Lead', value: 'Lead' },
+  { name: 'Opportunity', value: 'Opportunity' },
+  { name: 'Product Category', value: 'Product Category' },
+  { name: 'Project Sales', value: 'Project Sales' },
+  { name: 'Quotes', value: 'Quotes' },
+  { name: 'Price Template', value: 'Price Template' },
+  { name: 'Product Template', value: 'Product Template' },
+  { name: 'Quote Pdf Template', value: 'Quote Pdf Template' },
+  { name: 'Budget', value: 'Budget' },
+  { name: 'Market Segment', value: 'Market Segment' },
 ];
 
 export const Properties = ({
@@ -60,6 +73,9 @@ export const Properties = ({
   extraFields,
 }) => {
   const [initialValues, setInitialValues] = useState(fieldData);
+  const [isImgUploading, setImgUploading] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
+  const { setToastConfig } = useContext(CustomToastContext);
 
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
@@ -662,13 +678,16 @@ export const Properties = ({
                   label="Uneditable"
                 />
 
-                {values["isDefaultValue"] && (
+                {fieldData.type !== "imageUpload" &&
+                values["isDefaultValue"] ? (
                   <TextField
                     variant="outlined"
                     type="text"
                     label="Default Value"
                     required={true}
+                    multiline={fieldData.type === "multiLine"}
                     name="defaultValue"
+                    rows={4}
                     fullWidth
                     margin="dense"
                     value={values["defaultValue"]}
@@ -681,6 +700,17 @@ export const Properties = ({
                     onChange={(e) =>
                       setFieldValue("defaultValue", e.target.value.trimStart())
                     }
+                  />
+                ) : (
+                  <FormTypes
+                    values={{ defaultValue: values["defaultValue"] }}
+                    errors={errors}
+                    touched={touched}
+                    label={""}
+                    name={"defaultValue"}
+                    type={fieldData.type}
+                    setFieldValue={setFieldValue}
+                    isTooltip={false}
                   />
                 )}
                 <FormControlLabel

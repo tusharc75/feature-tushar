@@ -91,6 +91,8 @@ import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import MyCart from "./components/ProductList/MyCart/MyCart";
 import Budget from "./pages/Budget";
+import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
+import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -104,13 +106,13 @@ function App() {
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
 
-  console.log(process.env.REACT_APP_ENV)
+  console.log(process.env.REACT_APP_ENV);
 
   const getVersion = () => {
     setTimeout(() => {
       axiosInstance()
         .get("/version")
-        .then(({ data }) => { });
+        .then(({ data }) => {});
     }, 30000);
   };
 
@@ -180,7 +182,7 @@ function App() {
       setInterval(async () => {
         await getNotification();
       }, 60000);
-    } catch (e) { }
+    } catch (e) {}
 
     // getVersion();
   }, []);
@@ -422,6 +424,12 @@ function App() {
           <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
             <CreateProductTemplate />
           </PrivateRoute>
+          <PrivateRoute exact path={routes.quotePdfTemplate.path}>
+            <QuotePdfTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.quotePdfTemplate.path + "/:id"}>
+            <CreateQuotePdfTemplate />
+          </PrivateRoute>
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
           </PrivateRoute>
@@ -478,6 +486,9 @@ function App() {
           </PrivateRoute>
           <Route exact path="/inline-grid">
             <CustomInlineEditableAgGrid />
+          </Route>
+          <Route exact path={`${routes.quotePdfTemplate.path}/:id`}>
+            <CreateQuotePdfTemplate />
           </Route>
           <PrivateRoute exact path="/product-list">
             <Products />
