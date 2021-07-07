@@ -11,6 +11,11 @@ import {
   Typography,
   List,
 } from "@material-ui/core";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { isMobile, isTablet } from "react-device-detect";
+import { Dialog } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -74,6 +79,9 @@ const ContactDetailsPage = (props) => {
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [showAdditionalField, setShowAdditionalField] = useState(false);
+  const [sectionFields, setSectionFields] = useState([]);
+  const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [contactPermissions, setContactPermissions] = useState({
     isCreate: false,
@@ -332,10 +340,7 @@ const ContactDetailsPage = (props) => {
         setContactFields(data.filter((d) => d.isUpdate || d.isRead));
         setLoading(false);
         const processSteps = data.find(
-          (d) =>
-            d.isRead &&
-            d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
+          (d) => d.isRead && d.fieldData.type.toLowerCase() === "process"
         );
         if (processSteps && processSteps.isRead) {
           setSteps(
@@ -346,7 +351,21 @@ const ContactDetailsPage = (props) => {
               };
             })
           );
+          setShowAdditionalField(
+            processSteps.fieldData.showAdditionalInfoPopup
+          );
         }
+        data.map((d) => {
+          if (
+            d.fieldData.sectionName ==
+              processSteps.fieldData.additionalInfoSection &&
+            sectionFields.length == 0
+          ) {
+            setSectionFields((prevItems) => {
+              return [...prevItems, d.fieldData.fieldLabel];
+            });
+          }
+        });
       });
   };
 
@@ -409,8 +428,9 @@ const ContactDetailsPage = (props) => {
     setOpenUpdateDialog(false);
   };
 
-  const handleMarkAsCompleted = (data) => {
+  const handleSave = (data) => {
     setIsProcessing(true);
+    setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
         ? activeStep - 1
@@ -439,6 +459,42 @@ const ContactDetailsPage = (props) => {
         toastConfig.setToastConfig(error);
         setIsProcessing(false);
       });
+  };
+
+  const handleMarkAsCompleted = (data) => {
+    setIsProcessing(true);
+    let tempActiveStep =
+      data && data?.isSetBackStep
+        ? activeStep - 1
+        : activeStep < steps.length - 1
+        ? activeStep + 1
+        : activeStep;
+    if (tempActiveStep == steps.length - 1 && showAdditionalField) {
+      setOpenAdditionalDialog(true);
+    } else {
+      const updatedData = {
+        ...getObjKeysWithValues(
+          contactData,
+          contactFields.map((f) => {
+            return f.fieldData;
+          })
+        ),
+        process: steps[tempActiveStep].text,
+        _id: contactData._id,
+      };
+
+      axiosInstance()
+        .put(`${contactApi}`, updatedData)
+        .then(() => {
+          fetchContactData();
+          // setActiveStep(activeStep + 1)
+          setIsProcessing(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsProcessing(false);
+        });
+    }
   };
 
   const handleUpdateContact = (values) => {
@@ -823,6 +879,38 @@ const ContactDetailsPage = (props) => {
             />
           </FullScreenDialog>
         )}
+        {openAdditionalDialog ? (
+          <Dialog
+            disableBackdropClick={true}
+            fullWidth
+            maxWidth="sm"
+            open={openAdditionalDialog}
+            onClose={() => setOpenAdditionalDialog(false)}
+            aria-labelledby="form-dialog-title"
+            fullScreen={isMobile || isTablet}
+          >
+            <CustomDialogHeader
+              title="Additonal Information"
+              onClose={() => setOpenAdditionalDialog(false)}
+            ></CustomDialogHeader>
+            {sectionFields.map((item) => (
+              <CustomDialogContent>{item}</CustomDialogContent>
+            ))}
+
+            <CustomDialogFooter>
+              <Button
+                color="primary"
+                size="small"
+                onClick={() => setOpenAdditionalDialog(false)}
+              >
+                Close
+              </Button>
+              <Button color="primary" size="small" onClick={handleSave}>
+                Save
+              </Button>
+            </CustomDialogFooter>
+          </Dialog>
+        ) : null}
       </Layout>
     </>
   );
