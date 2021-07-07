@@ -28,6 +28,7 @@ import { DecimalPlaces } from "../AddField/decimalPlaces";
 import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
+import { Autocomplete } from "@material-ui/lab";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required("please enter field label"),
@@ -89,6 +90,10 @@ export const Properties = ({
       if (values.type === "process") {
         if (!values.showAdditionalInfoPopup) {
           values.showAdditionalInfoPopup = false;
+        }
+
+        if (!values.addtionalInfoSection) {
+          values.addtionalInfoSection = "";
         }
 
         setInitialValues(values);
@@ -708,6 +713,24 @@ export const Properties = ({
                       />
                     }
                     label="Show Additional Information Popup On Close"
+                  />
+                )}
+                {values["showAdditionalInfoPopup"] && (
+                  <Autocomplete
+                    size="small"
+                    options={section.map((s) => s.sectionName)}
+                    getOptionLabel={(option) => option}
+                    onChange={(event: any, newValue: string | null) => {
+                      setFieldValue("addtionalInfoSection", newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Additional Info Section"
+                        variant="outlined"
+                        name="addtionalInfoSection"
+                      />
+                    )}
                   />
                 )}
               </Box>
