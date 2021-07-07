@@ -4,6 +4,9 @@ import {
     Checkbox,
     CircularProgress,
     Dialog,
+    FormControl,
+    FormControlLabel,
+    Grid,
     List,
     ListItem,
     ListItemIcon,
@@ -17,6 +20,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import Loader from "../../components/Loader";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { cloneDeep } from 'lodash'
+import SearchBox from "../../components/Helpers/SearchBox";
 
 export default function AssignContactsDialog({
     opportunityId,
@@ -33,9 +37,10 @@ export default function AssignContactsDialog({
     const toastConfig = useContext(CustomToastContext);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [isAssigning, setAssigning] = useState(false);
-
+    const [currentContactsConst, setCurrentContactsConst] = useState(contacts.customerContacts);
+    const [selectedContacts, setSelectedContacts] = useState([]);
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
-
+    const [search, setSearch] = useState("");
     const handleContactSelection = (e, id) => {
         const indexOfContactToChange = currentContacts.findIndex(d => d._id === id);
         currentContacts[indexOfContactToChange].isChecked = e.target.checked;
@@ -77,6 +82,16 @@ export default function AssignContactsDialog({
             });
     };
 
+    const handleSearch = (e) => {
+        let value = e.target.value.toLowerCase();
+        setSearch(value);
+        let result = [];
+        result = currentContactsConst.filter((data) => {
+          return data.firstName.search(value) != -1 || data.middleName.search(value) != -1 || data.lastName.search(value) != -1;
+        });
+        setCurrentContacts(result)
+      };
+
     return (
         <Dialog
             fullWidth
@@ -89,7 +104,40 @@ export default function AssignContactsDialog({
             <CustomDialogContent>
                 {loadingUsers ? (
                     <Loader text="Loading Contacts" />
-                ) : currentContacts.length ? (
+                ) : currentContactsConst.length ? (
+                    <>
+                    <Grid container>
+              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    value="top"
+                    control={
+                      <Checkbox
+                        edge="start"
+                        onChange={(e) => {
+                          currentContacts.forEach((contact) => contact.isChecked = e.target.checked)
+                          setSelectedContacts(currentContacts.filter(r => r.isChecked).map(obj => obj._id))
+                        }
+                        }
+                        checked={currentContacts.every(x => x.isChecked)}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-select-all`,
+                        }}
+                      />}
+                    label="Select All"
+                  />
+                </FormControl>
+
+              </Grid>
+              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="terms_header_search_bar"
+                  width="300px"
+                  value={search}
+                />
+              </Grid>
+            </Grid>
                     <List style={{ padding: 0 }}>
                         {currentContacts.map((contact) => {
                             return <ListItem divider key={contact._id}>
@@ -97,7 +145,11 @@ export default function AssignContactsDialog({
                                     <Checkbox
                                         edge="start"
                                         disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
-                                        onChange={(e) => handleContactSelection(e, contact._id)}
+                                        onChange={(e) => {
+                                            handleContactSelection(e, contact._id)
+                                            // contact.isChecked = e.target.checked
+                                            // setCurrentContacts(currentContacts.filter(r => r.isChecked).map(obj => obj._id))}
+                                        }}
                                         checked={contact.isChecked}
                                         inputProps={{
                                             "aria-labelledby": `checkbox-list-label-${contact._id}`,
@@ -112,6 +164,7 @@ export default function AssignContactsDialog({
                         }
                         )}
                     </List>
+                    </>
                 ) : (
                     <Typography>No Contacts found to add</Typography>
                 )}
