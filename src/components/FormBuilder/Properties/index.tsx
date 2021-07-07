@@ -188,6 +188,8 @@ export const Properties = ({
             ele.isUneditable = values.isUneditable;
             ele.isVlookup = values.isVlookup;
             ele.hiddenField = values.hiddenField;
+            ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
+            ele.additionalInfoSection = values.additionalInfoSection;
 
             // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
             //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
