@@ -28,6 +28,7 @@ import { DecimalPlaces } from "../AddField/decimalPlaces";
 import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
+import { Autocomplete } from "@material-ui/lab";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required("please enter field label"),
@@ -91,10 +92,14 @@ export const Properties = ({
           values.showAdditionalInfoPopup = false;
         }
 
+        if (!values.additionalInfoSection) {
+          values.additionalInfoSection = "";
+        }
+
         setInitialValues(values);
       }
     }
-  }, []);
+  }, [fieldData]);
 
   const fields = [];
   if (module === "product-template" || module === "price-template") {
@@ -183,6 +188,8 @@ export const Properties = ({
             ele.isUneditable = values.isUneditable;
             ele.isVlookup = values.isVlookup;
             ele.hiddenField = values.hiddenField;
+            ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
+            ele.additionalInfoSection = values.additionalInfoSection;
 
             // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
             //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
@@ -692,7 +699,7 @@ export const Properties = ({
                   }
                   label="Hidden Field"
                 />
-                {fieldData.fieldName === "process" && (
+                {fieldData.type === "process" && (
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -708,6 +715,25 @@ export const Properties = ({
                       />
                     }
                     label="Show Additional Information Popup On Close"
+                  />
+                )}
+                {values["showAdditionalInfoPopup"] && (
+                  <Autocomplete
+                    value={values["additionalInfoSection"]}
+                    size="small"
+                    options={section.map((s) => s.sectionName)}
+                    getOptionLabel={(option) => option}
+                    onChange={(event: any, newValue: string | null) => {
+                      setFieldValue("additionalInfoSection", newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Additional Info Section"
+                        variant="outlined"
+                        name="additionalInfoSection"
+                      />
+                    )}
                   />
                 )}
               </Box>

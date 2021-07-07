@@ -14,6 +14,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { XYCoord } from "dnd-core";
 import update from "immutability-helper";
+import { DragIndicator } from "@material-ui/icons";
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
   const [options, setOptions] = useState(values.option || []);
@@ -342,6 +343,11 @@ const Card = (props) => {
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
       <Box bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300">
         <Grid container spacing={1}>
+          <Grid item xs={1}>
+            <IconButton>
+              <DragIndicator />
+            </IconButton>
+          </Grid>
           <Grid item xs={5}>
             <TextField
               id="standard-basic"
