@@ -177,13 +177,6 @@ const QuoteBuilders = () => {
       cellRenderer: "quoteNameRenderer",
     },
     {
-      field: "status",
-      headerName: "Status",
-      show: true,
-      filter: false,
-      cellRenderer: "commonRenderer",
-    },
-    {
       field: "customerAccountName",
       headerName: "Customer Account Name",
       show: true,
