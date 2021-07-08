@@ -2036,7 +2036,7 @@ function QuoteDetail() {
         if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
           approved = true;
           versionApproved = v;
-          manualApproval = quoteData.versions[v]?.customerResponse;
+          manualApproval = quoteData.versions[v]?.customerResponse?.manual;
         }
         if (quoteData.versions[v]?.status.includes("Rejected by Customer") || quoteData.versions[v]?.status.includes("Not Booked by Customer") || quoteData.versions[v]?.status.includes("Invalid by Customer")) {
           disapproved = true;
