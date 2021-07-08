@@ -1061,7 +1061,6 @@ function QuoteDetail() {
       newTable.push({
         "Product Name": "Total:",
         "Total Sales Price": totalsale.fullFormatAmount,
-        "Total Cost": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);

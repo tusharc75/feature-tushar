@@ -42,10 +42,12 @@ const MarketSegment = () => {
     }: any = useData();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [showChildDialog, setShowChildDialog] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [marketSegmentId, setMarketSegmentId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
+    
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -72,6 +74,7 @@ const MarketSegment = () => {
         }}>
             <CustomRenderCell value={params.value} />
         </span>
+        
     </span>
 
     const ActionsRenderer = params => <Fragment>
@@ -99,6 +102,8 @@ const MarketSegment = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
     };
+
+    
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -176,6 +181,9 @@ const MarketSegment = () => {
             dispatch({ type: "loading", loading: false });
         });
     };
+
+
+
 
     const handleDelete = () => {
         let ids = []
