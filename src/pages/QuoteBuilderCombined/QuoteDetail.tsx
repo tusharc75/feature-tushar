@@ -1061,7 +1061,6 @@ function QuoteDetail() {
       newTable.push({
         "Product Name": "Total:",
         "Total Sales Price": totalsale.fullFormatAmount,
-        "Total Cost": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1399,7 +1398,10 @@ function QuoteDetail() {
       } else if (
         versionStatus === "Sent to Customer" ||
         versionStatus === "Accepted by Customer" ||
-        versionStatus === "Rejected by Customer"
+        versionStatus === "Rejected by Customer" ||
+        versionStatus === "Not Booked by Customer" ||
+        versionStatus === "Invalid by Customer" ||
+        versionStatus === "Booked by Customer" 
       ) {
         setDOAreq(false);
         setCustomerreq(false);
@@ -1767,12 +1769,12 @@ function QuoteDetail() {
 
     if (quoteData) {
       versions.forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
           approved = true;
           versionApproved = v;
           manualApproval = quoteData.versions[v]?.customerResponse;
         }
-        if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Rejected by Customer") || quoteData.versions[v]?.status.includes("Not Booked by Customer") || quoteData.versions[v]?.status.includes("Invalid by Customer")) {
           disapproved = true;
           versionDisapproved = v;
         }

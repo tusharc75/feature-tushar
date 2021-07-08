@@ -54,7 +54,8 @@ const CreateProduct = (props) => {
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
             const _productField: any = []
-            data.forEach((_f) => {
+            const filteredData = data.filter((obj) => obj.isCreate);
+            filteredData.forEach((_f) => {
                 if (openFrom === "builder") {
                     _productField.push(_f.fieldData)
                 }

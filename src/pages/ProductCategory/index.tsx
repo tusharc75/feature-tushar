@@ -142,6 +142,7 @@ const ProductCategory = () => {
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
+    
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -174,6 +175,7 @@ const ProductCategory = () => {
         }}>
             <CustomRenderCell value={params.value} />
         </span>
+       
     </span>
 
     const ActionsRenderer = params => <Fragment>
@@ -279,6 +281,7 @@ const ProductCategory = () => {
         });
     };
 
+   
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -387,6 +390,7 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
+        
             {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
         </CustomContainer>
     </Layout>
