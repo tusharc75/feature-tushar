@@ -26,12 +26,14 @@ const CreateProductCategory = (props) => {
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
-            const fieldsData = data.map((d: any) => d.fieldData);
+            const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+            const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
             if (productCategoryId) {
                 axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
                     setInitialData({
-                        fields: fieldsData,
-                        values: getObjKeysWithValues(data, fieldsData),
+                        fields: fieldsDataForUpdate,
+                        values: getObjKeysWithValues(data, fieldsDataForUpdate),
                     });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -39,8 +41,8 @@ const CreateProductCategory = (props) => {
             }
             else {
                 setInitialData({
-                    fields: fieldsData,
-                    values: getObjKeys("", fieldsData),
+                    fields: fieldsDataForCreate,
+                    values: getObjKeys("", fieldsDataForCreate),
                 });
             }
         })
