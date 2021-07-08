@@ -556,14 +556,18 @@ export default function AccountDetailPage(props) {
         : activeStep < steps.length - 1
         ? activeStep + 1
         : activeStep;
+
+    let processFieldName = "";
+    const accountFieldData = accountFields.map((f) => {
+      if (f.fieldData.type == "process") {
+        processFieldName = f.fieldData.fieldName;
+      }
+      return f.fieldData;
+    });
+
     const updatedData = {
-      ...getObjKeysWithValues(
-        accountData,
-        accountFields.map((f) => {
-          return f.fieldData;
-        })
-      ),
-      process: steps[tempActiveStep].text,
+      ...getObjKeysWithValues(accountData, accountFieldData),
+      [processFieldName]: steps[tempActiveStep].text,
       _id: accountData._id,
     };
 
@@ -591,14 +595,17 @@ export default function AccountDetailPage(props) {
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
+      let processFieldName = "";
+      const accountFieldData = accountFields.map((f) => {
+        if (f.fieldData.type == "process") {
+          processFieldName = f.fieldData.fieldName;
+        }
+        return f.fieldData;
+      });
+
       const updatedData = {
-        ...getObjKeysWithValues(
-          accountData,
-          accountFields.map((f) => {
-            return f.fieldData;
-          })
-        ),
-        process: steps[tempActiveStep].text,
+        ...getObjKeysWithValues(accountData, accountFieldData),
+        [processFieldName]: steps[tempActiveStep].text,
         _id: accountData._id,
       };
 
