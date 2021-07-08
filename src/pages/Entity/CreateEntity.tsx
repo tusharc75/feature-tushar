@@ -43,7 +43,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
     axiosInstance()
       .get("/field?resource=Entity")
       .then(({ data: { data } }) => {
-        const fieldsData = data.map((d: any) => d.fieldData);
+        const fieldsData = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         setInitialData({
           fields: fieldsData,
           values: getObjKeys("", fieldsData),

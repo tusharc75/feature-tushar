@@ -223,6 +223,8 @@ const EntityDetailsPage = () => {
     setShowAssignUserDialog(false);
   };
 
+  const fieldsToShowInDetailPage = entityFields.filter((field)=>field.isRead);
+  const fieldsToShowInUpdateDialog = entityFields.filter((field)=>field.isUpdate);
   return (
     <>
       {showAssignUserDialog && (
@@ -245,7 +247,7 @@ const EntityDetailsPage = () => {
           openDialog={openUpdateDialog}
           onClose={closeUpdateDIalog}
           data={entityData}
-          fields={entityFields}
+          fields={fieldsToShowInUpdateDialog}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateEntity}
         />
@@ -330,7 +332,7 @@ const EntityDetailsPage = () => {
                         Entity Detail
                   </Typography>
                     </Box>
-                    <DetailsPage data={entityData} fields={entityFields} />
+                    <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
                   </>
                 )}
               </Box>
