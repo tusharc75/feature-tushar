@@ -17,8 +17,6 @@ $bgt: #e2e2e2;
     justify-content: center;
     flex-direction: column;
     align-items: center;
-    box-shadow: 4px 3px 6px #b7b7b7;
-    border-radius: 22px;
 
     h5 {
         text-transform: uppercase;
@@ -154,7 +152,6 @@ $bgt: #e2e2e2;
         margin: auto;
     }
     .product_image {
-        border-radius: 20px 0 0 20px;
         max-width: 470px;
         min-height: 500px;
         align-items: center;
@@ -176,4 +173,9 @@ $bgt: #e2e2e2;
         width: 98 !important;
         box-shadow: none;
     }
+}
+
+.container_box{
+    background: white;
+    border-radius: 8px;
 }
