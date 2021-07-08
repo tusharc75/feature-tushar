@@ -50,33 +50,7 @@ const MarketSegment = () => {
     const [open, setOpen] = useState(false);
     const [marketSegmentId, setMarketSegmentId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [loadingChildData, setLoadingChildData] = useState(false);
-    const [childData, setChildData] = useState({
-        columns: [
-            {
-                field: "serialNumber", headerName: "Serial #", flex: .75,
-                renderCell: (params: any) => (
-                    <span
-                        title={params.value}
-                    >
-                        {params.value}
-                    </span>
-                ),
-            },
-            {
-                field: "childName", headerName: "Child Name", flex: 1,
-                renderCell: (params: any) => (
-                    <span
-                        title={params.value}
-                    >
-                        {params.value}
-                    </span>
-                ),
-            },
-
-        ],
-        data: []
-    });
+    
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -96,21 +70,15 @@ const MarketSegment = () => {
         fetchMarketSegment()
     }, [page, limit, filters, sorting, search])
 
-    const NameRenderer = params => <div className="d-flex align-items-center">
+    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
             setMarketSegmentId(params.data.id);
             setOpen(true);
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-        <Tooltip
-            title="Show Childs"
-            className="link"
-            onClick={() => handleDialogOpen(params.data.id)}
-        >
-            <ChildCareIcon color="primary" className="ml-2" fontSize="small" />
-        </Tooltip>
-    </div>
+        
+    </span>
 
     const ActionsRenderer = params => <Fragment>
         {permissions.marketSegment.isDelete ?
@@ -138,10 +106,7 @@ const MarketSegment = () => {
         actionsRenderer: ActionsRenderer
     };
 
-    const handleDialogOpen = (id) => {
-        fetchChildData(id);
-        setShowChildDialog(true);
-    }
+    
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -220,36 +185,9 @@ const MarketSegment = () => {
         });
     };
 
-    const fetchChildData = (id) => {
-        setLoadingChildData(true);
-        axiosInstance()
-            .get(`${marketSegment.marketSegmentApi}/hierarchy/` + id)
-            .then(({ data: { data } }) => {
-                const newData = data.parentHierarchy.map((d, index) => {
-                    const { createdBy, ...restProperties } = d;
-                    return {
-                        ...restProperties,
-                        id: d._id,
-                        serialNumber: index + 1,
-                        _id: d._id,
-                        childName: d.name,
-                    };
-                });
 
-                setChildData((prevState) => {
-                    return {
-                        ...prevState,
-                        data: newData,
-                    }
-                });
 
-                setLoadingChildData(false);
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-                setLoadingChildData(false);
-            })
 
-    }
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -358,18 +296,6 @@ const MarketSegment = () => {
                     onOk={handleDelete}
                 />
             }
-            {showChildDialog && (
-                <CustomDialogComponent
-                    title="All Children"
-                    open={showChildDialog}
-                    onClose={() => {
-                        setShowChildDialog(false);
-                    }}
-                >
-                    <ChildHierarchy loading={loadingChildData} childData={childData} />
-
-                </CustomDialogComponent>
-            )}
             {open && <CreateMarketSegment marketSegmentId={marketSegmentId} handleClose={() => { setOpen(false); fetchMarketSegment() }} />}
         </CustomContainer>
     </Layout>

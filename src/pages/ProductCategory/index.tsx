@@ -145,34 +145,7 @@ const ProductCategory = () => {
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [showChildDialog, setShowChildDialog] = useState(false)
-    const [loadingChildData, setLoadingChildData] = useState(false);
-    const [childData, setChildData] = useState({
-        columns: [
-            {
-                field: "serialNumber", headerName: "Serial #", flex: .75,
-                renderCell: (params: any) => (
-                    <span
-                        title={params.value}
-                    >
-                        {params.value}
-                    </span>
-                ),
-            },
-            {
-                field: "childName", headerName: "Child Name", flex: 1,
-                renderCell: (params: any) => (
-                    <span
-                        title={params.value}
-                    >
-                        {params.value}
-                    </span>
-                ),
-            },
-            
-        ],
-        data: []
-    });
+    
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -198,21 +171,15 @@ const ProductCategory = () => {
         fetchProductCategory()
     }, [page, limit, filters, sorting, search])
 
-    const NameRenderer = params => <div className="d-flex align-items-center">
+    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
             setProductCategoryId(params.data.id);
             setOpen(true);
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-        <Tooltip
-                title="Show Childs"
-                className="link"
-                onClick={() => handleDialogOpen(params.data.id)}
-            >
-                <ChildCareIcon color="primary" className="ml-2" fontSize="small" />
-            </Tooltip>
-    </div>
+       
+    </span>
 
     const ActionsRenderer = params => <Fragment>
         {productCategoryPermissions.isDelete ?
@@ -317,41 +284,7 @@ const ProductCategory = () => {
         });
     };
 
-    const fetchChildData = (id) => {
-        setLoadingChildData(true);
-        axiosInstance()
-            .get(`/product-category/hierarchy/` + id)
-            .then(({ data: { data } }) => {
-                const newData = data.parentHierarchy.map((d, index) => {
-                    const { createdBy, ...restProperties } = d;
-                    return {
-                        ...restProperties,
-                        id:d._id,
-                        serialNumber: index + 1,
-                        _id: d._id,
-                        childName: d.name,
-                    };
-                });
-
-                setChildData((prevState) => {
-                    return {
-                        ...prevState,
-                        data: newData,
-                    }
-                });
-
-                setLoadingChildData(false);
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-                setLoadingChildData(false);
-            })
-
-    }
-
-    const handleDialogOpen = (id) => {
-        fetchChildData(id);
-        setShowChildDialog(true);
-    }
+   
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -460,18 +393,7 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
-        {showChildDialog && (
-            <CustomDialogComponent
-                title="All Children"
-                open={showChildDialog}
-                onClose={() => {
-                    setShowChildDialog(false);
-                }}
-                >
-                <ChildHierarchy loading={loadingChildData} childData={childData} />
-                
-            </CustomDialogComponent>
-      )}
+        
             {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
         </CustomContainer>
     </Layout>
