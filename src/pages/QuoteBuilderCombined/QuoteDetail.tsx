@@ -47,17 +47,12 @@ import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
-import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
 import FormControl from "@material-ui/core/FormControl";
-import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
-import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import {
@@ -286,15 +281,12 @@ function QuoteDetail() {
     page,
     limit,
     pageSizes,
-    search,
-    filters,
-    sorting,
     selectedRecords,
   } = state;
 
   const [gridApi, setTNCGridApi] = useState(null);
 
-  const [columnsTNC, setColumnsTNC] = useState([
+  const [columnsTNC] = useState([
     {
       field: "name",
       rowDrag: true,
@@ -328,7 +320,6 @@ function QuoteDetail() {
   const [activeStep, setActiveStep] = useState(0);
   const [versions, setVersions] = useState([]);
   const [productBuilderID, setProductBuilderID] = useState("");
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] =
@@ -590,14 +581,6 @@ function QuoteDetail() {
   useEffect(() => {
     fetchTermsAndConditions();
   }, []);
-
-  // useEffect(() => {
-  //   if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
-  //     createImagePDF(false, true);
-  //   } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
-  //     createImagePDF(false, true);
-  //   }
-  // }, [ProcessStatus]);
 
   /**
    *
@@ -954,30 +937,6 @@ function QuoteDetail() {
     productBuilderdatatoQuoteBuilderdata(data);
   };
 
-  const createImagePDF = (view, send, base64 = false) => {
-    setGeneratingPdf({ show: true, text: "Generating..." });
-    GeneratePdf(view, send, base64);
-
-    // axiosInstance()
-    //   .get("/user/brandInfo")
-    //   .then(({ data }) => {
-    //     companyName = data.data.name;
-    //     companyAddress = data.data.address;
-    //     if (data.data.logo) {
-    //       fetchImage(data.data.logo, function (dataUri) {
-    //         logo = dataUri;
-    //         GeneratePdf(view, send, base64);
-    //       });
-    //     } else {
-    //       GeneratePdf(view, send, base64);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     toastConfig.setToastConfig(err);
-    //     setGeneratingPdf({ show: false, text: null });
-    //   });
-  };
-
   const fetchImage = (Url, cb) => {
     var image = new Image();
     image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
@@ -998,228 +957,6 @@ function QuoteDetail() {
     };
 
     image.src = Url;
-  };
-
-  const GeneratePdf = (view, send, base64 = false) => {
-    const PdfDoc = new jsPDF("p", "pt", "a4");
-    let date = new Date();
-
-    const pagewidth = PdfDoc.internal.pageSize.width;
-
-    if (base64Logo !== null) {
-      PdfDoc.addImage(base64Logo, "JPEG", pagewidth - 65, 10, 40, 40);
-    }
-    PdfDoc.setFontSize(26);
-    PdfDoc.text(companyDetails.name, 20, 30);
-    PdfDoc.setFontSize(12);
-    PdfDoc.text(companyDetails.address, 20, 50);
-    PdfDoc.setLineWidth(3);
-    PdfDoc.line(15, 70, 260, 70);
-    PdfDoc.line(330, 70, 580, 70);
-    PdfDoc.setFontSize(14);
-    PdfDoc.text("Quotation", 265, 75);
-    let PDFData = [];
-    let PdfCol = ["Item #"];
-    let serialNumber = 1;
-    dynamicTableData.forEach((dataEntry) => {
-      let PdfRow = [serialNumber];
-      visibleColumns.forEach((ColName, idx) => {
-        if (idx < 6) {
-          if (ColumnName.indexOf(ColName) !== -1) {
-            if (PdfCol.indexOf(ColName) === -1) {
-              PdfCol.push(ColName);
-            }
-            PdfRow.push(dataEntry[ColName]);
-          }
-        }
-      });
-      PDFData.push(PdfRow);
-      serialNumber = serialNumber + 1;
-    });
-
-    PdfDoc.setFontSize(10);
-    PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
-    PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
-    PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
-    PdfDoc.text(
-      `Quote Expiry Date: ${displayDate(quoteData.expiryDate)}`,
-      285,
-      145
-    );
-    PdfDoc.text(`Inco Terms: ${quoteData.incoTerms}`, 285, 160);
-    PdfDoc.setFontSize(8);
-    PdfDoc.text("Bill To:", 20, 100);
-    PdfDoc.setFontSize(12);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel, 20, 115);
-
-    var text = "Please find the quotation below:";
-    var lineHeight = PdfDoc.getLineHeight();
-    var splittedText = PdfDoc.splitTextToSize(text, 50);
-    PdfDoc.text(text, 20, 200);
-    var lines = splittedText.length;
-    var blockHeight = lines * lineHeight;
-    PDFData = [
-      ...PDFData,
-      [
-        {
-          content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
-          styles: { halign: "right", valign: "middle" },
-        },
-      ],
-    ];
-    autoTable(PdfDoc, {
-      margin: { top: 150 + blockHeight, left: 20, right: 20 },
-      head: [PdfCol],
-      body: PDFData,
-      styles: { halign: "center", cellWidth: "auto", overflow: "linebreak" },
-      theme: "grid",
-    });
-    let finalY = (PdfDoc as any).lastAutoTable.finalY;
-
-    if (selectedRecords.length || TandC.length) {
-      let selecteTNCData = selectedRecords.length > 0 ? selectedRecords : TandC;
-      PdfDoc.setDrawColor(0, 0, 0);
-      PdfDoc.setFontSize(14);
-      PdfDoc.setLineWidth(3);
-      PdfDoc.line(15, finalY + 20, 580, finalY + 20);
-
-      let finalmarkup = "";
-
-      selecteTNCData.forEach((selectTNC) => {
-        finalmarkup =
-          finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
-        let state = convertFromRaw(JSON.parse(selectTNC.description));
-        let TNC = EditorState.createWithContent(state);
-        let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
-
-        finalmarkup = finalmarkup + markup + "<br>";
-      });
-
-      // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
-      finalmarkup = finalmarkup.replaceAll(
-        "<p>",
-        "<p style='overflow-wrap:break-word;word-wrap:break-word;'>"
-      );
-      // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
-
-      let signatureContent =
-        "<br><br><span--style='font-size:10px;'>Note:</span><br>";
-      signatureContent =
-        signatureContent +
-        `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
-
-      signatureContent =
-        signatureContent +
-        `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
-      signatureContent =
-        signatureContent +
-        `<span--style='color:lightgrey'>__________________________</span>`;
-
-      signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
-      signatureContent = signatureContent.replaceAll("--", " ");
-
-      finalmarkup = finalmarkup + signatureContent;
-
-      PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
-        callback: function (doc) {
-          if (view && !send) {
-            doc.setProperties({
-              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-            });
-            const pdfBlobFile = doc.output("blob");
-            generateBase64forFile(pdfBlobFile, "pdf");
-
-            window.open(URL.createObjectURL(pdfBlobFile));
-          } else if (!view && !send && !base64) {
-            doc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}`);
-          } else if (base64) {
-            doc.setProperties({
-              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-            });
-            const pdfBlobFile = doc.output("blob");
-            generateBase64forFile(pdfBlobFile, "pdf");
-          }
-          if (send) {
-            let PDFtoAPIData = doc.output("blob");
-
-            const formdata = new FormData();
-            formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-            axiosInstance()
-              .post("/user/upload/", formdata, {
-                headers: {
-                  "content-type": "multipart/form-data",
-                },
-              })
-              .then(({ data }) => {
-                setPdf(data.fieldName);
-                handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-                setPdfAttachment(data.fileName);
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-              });
-          }
-        },
-        x: 20,
-        y: finalY + 50,
-        margin: [20, 10, 20, 10],
-      });
-    } else {
-      finalY = finalY + 40;
-      PdfDoc.setFontSize(10);
-      PdfDoc.text("Note:", 20, finalY);
-
-      finalY = finalY + 15;
-      PdfDoc.text("Thanks for your business", 20, finalY);
-
-      finalY = finalY + 50;
-      PdfDoc.text("Customer Signature", 20, finalY);
-
-      finalY = finalY + 75;
-      PdfDoc.line(15, finalY, 260, finalY);
-
-      if (view && !send) {
-        PdfDoc.setProperties({
-          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-        });
-        const pdfBlobFile = PdfDoc.output("blob");
-        generateBase64forFile(pdfBlobFile, "pdf");
-
-        window.open(URL.createObjectURL(pdfBlobFile));
-      } else if (!view && !send && !base64) {
-        PdfDoc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
-      } else if (base64) {
-        PdfDoc.setProperties({
-          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-        });
-        const pdfBlobFile = PdfDoc.output("blob");
-        generateBase64forFile(pdfBlobFile, "pdf");
-      }
-      if (send) {
-        let PDFtoAPIData = PdfDoc.output("blob");
-        generateBase64forFile(PDFtoAPIData, "pdf");
-        const formdata = new FormData();
-        formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-        axiosInstance()
-          .post("/user/upload/", formdata, {
-            headers: {
-              "content-type": "multipart/form-data",
-            },
-          })
-          .then(({ data }) => {
-            handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-            setPdfAttachment(data.fileName);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      }
-    }
-
-    setTimeout(() => {
-      setGeneratingPdf({ show: false, text: null });
-    }, 1500);
   };
 
   const generateBase64forFile = (blobData, type) => {
@@ -2537,13 +2274,13 @@ function QuoteDetail() {
                                       multiple
                                       value={visibleColumns}
                                       onChange={(e, val) => {
-                                        setVisibleColumnName(val);
-                                        handleVersionUpdate(
-                                          PDF,
-                                          val,
-                                          versionStatus,
-                                          TandC
-                                        );
+                                          setVisibleColumnName(val);
+                                          handleVersionUpdate(
+                                            PDF,
+                                            val,
+                                            versionStatus,
+                                            TandC
+                                          );
                                       }}
                                       options={ColumnName}
                                       disableCloseOnSelect
