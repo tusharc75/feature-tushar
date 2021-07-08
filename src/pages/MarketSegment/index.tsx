@@ -4,7 +4,6 @@ import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
-import ChildCareIcon from '@material-ui/icons/ChildCare';
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -33,8 +32,6 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
-import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
-import ChildHierarchy from "../../components/ChildHierarchy";
 
 
 const MarketSegment = () => {
