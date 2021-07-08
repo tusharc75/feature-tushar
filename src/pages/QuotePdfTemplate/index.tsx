@@ -44,12 +44,6 @@ const QuotePdfTemplate: FC = () => {
         state: { user, permissions },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
-    const [quotePdfTemplatePermissions, setquotePdfTemplatePermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
-    });
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -69,12 +63,6 @@ const QuotePdfTemplate: FC = () => {
 
 
     const { quotePdfTemplateApi } = quotePdfTemplate;
-
-    useEffect(() => {
-        if (permissions && permissions.quotePdfTemplate) {
-            setquotePdfTemplatePermissions(permissions.quotePdfTemplate);
-        }
-    }, [permissions]);
 
     useEffect(() => {
         let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -99,14 +87,14 @@ const QuotePdfTemplate: FC = () => {
     </Link>;
 
     const ActionsRenderer = params => <>
-        {quotePdfTemplatePermissions.isCreate &&
+        {permissions.quotePdfTemplate.isCreate &&
             <Tooltip title="Clone">
                 <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
                     <FileCopyIcon color="primary" />
                 </IconButton>
             </Tooltip>
         }
-        {quotePdfTemplatePermissions.isDelete ?
+        {permissions.quotePdfTemplate.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -280,10 +268,10 @@ const QuotePdfTemplate: FC = () => {
                                     width="242px"
                                     value={search}
                                 />
-                                {quotePdfTemplatePermissions.isCreate &&
+                                {permissions.quotePdfTemplate.isCreate &&
                                     <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                                 }
-                                {quotePdfTemplatePermissions.isDelete &&
+                                {permissions.quotePdfTemplate.isDelete &&
                                     <Button
                                         className={styles.action_submit_btn}
                                         variant="outlined"
