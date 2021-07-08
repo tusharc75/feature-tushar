@@ -678,8 +678,17 @@ export const Properties = ({
                   label="Uneditable"
                 />
 
-                {fieldData.type !== "imageUpload" &&
-                values["isDefaultValue"] ? (
+                {fieldData.type === "imageUpload" &&
+                values["isDefaultValue"] ? <FormTypes
+                    values={{ defaultValue: values["defaultValue"] }}
+                    errors={errors}
+                    touched={touched}
+                    label={""}
+                    name={"defaultValue"}
+                    type={fieldData.type}
+                    setFieldValue={setFieldValue}
+                    isTooltip={false}
+                /> : values["isDefaultValue"] ? (
                   <TextField
                     variant="outlined"
                     type="text"
@@ -701,18 +710,7 @@ export const Properties = ({
                       setFieldValue("defaultValue", e.target.value.trimStart())
                     }
                   />
-                ) : (
-                  <FormTypes
-                    values={{ defaultValue: values["defaultValue"] }}
-                    errors={errors}
-                    touched={touched}
-                    label={""}
-                    name={"defaultValue"}
-                    type={fieldData.type}
-                    setFieldValue={setFieldValue}
-                    isTooltip={false}
-                  />
-                )}
+                ) : null}
                 <FormControlLabel
                   disabled={values["required"]}
                   control={
