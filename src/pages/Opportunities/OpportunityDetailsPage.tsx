@@ -27,6 +27,11 @@ import {
   processFieldName,
   formatAmountWithCurrency,
 } from "../../constants/helpers";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { isMobile, isTablet } from "react-device-detect";
+import { Dialog } from "@material-ui/core";
 import { opportunity, sidebarResource } from "../../constants/helpers";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
@@ -80,6 +85,10 @@ function OpportunityDetailsPage() {
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
   const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([]);
+
+  const [showAdditionalField, setShowAdditionalField] = useState(false);
+  const [sectionFields, setSectionFields] = useState([]);
+  const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -453,7 +462,22 @@ function OpportunityDetailsPage() {
                 };
               })
             );
+            setShowAdditionalField(
+              processSteps.fieldData.showAdditionalInfoPopup
+            );
           }
+
+          data.map((d) => {
+            if (
+              d.fieldData.sectionName ==
+                processSteps.fieldData.additionalInfoSection &&
+              sectionFields.length == 0
+            ) {
+              setSectionFields((prevItems) => {
+                return [...prevItems, d.fieldData.fieldLabel];
+              });
+            }
+          });
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -574,22 +598,27 @@ function OpportunityDetailsPage() {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
+  const handleSave = (data) => {
     setIsProcessing(true);
+    setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
         ? activeStep - 1
         : activeStep < steps.length - 1
         ? activeStep + 1
         : activeStep;
+
+    let processFieldName = "";
+    const opportunityFieldData = opportunityFields.map((f) => {
+      if (f.fieldData.type == "process") {
+        processFieldName = f.fieldData.fieldName;
+      }
+      return f.fieldData;
+    });
+
     const updatedData = {
-      ...getObjKeysWithValues(
-        opportunityData,
-        opportunityFields.map((f) => {
-          return f.fieldData;
-        })
-      ),
-      process: steps[tempActiveStep].text,
+      ...getObjKeysWithValues(opportunityData, opportunityFieldData),
+      [processFieldName]: steps[tempActiveStep].text,
       _id: opportunityData._id,
     };
 
@@ -604,6 +633,47 @@ function OpportunityDetailsPage() {
         toastConfig.setToastConfig(error);
         setIsProcessing(false);
       });
+  };
+
+  const handleMarkAsCompleted = (data) => {
+    setIsProcessing(true);
+    let tempActiveStep =
+      data && data?.isSetBackStep
+        ? activeStep - 1
+        : activeStep < steps.length - 1
+        ? activeStep + 1
+        : activeStep;
+        if (tempActiveStep == steps.length - 1 && showAdditionalField) {
+          setOpenAdditionalDialog(true);
+        } else {
+          let processFieldName = "";
+          const opportunityFieldData = opportunityFields.map((f) => {
+            if (f.fieldData.type == "process") {
+              processFieldName = f.fieldData.fieldName;
+            }
+            return f.fieldData;
+          });
+          const updatedData = {
+            ...getObjKeysWithValues(opportunityData, opportunityFieldData),
+            [processFieldName]: steps[tempActiveStep].text,
+            _id: opportunityData._id,
+          };
+          axiosInstance()
+          .put(`/opportunity?entity=${selectedEntity}`, updatedData)
+          .then(() => {
+            fetchOpportunityData();
+            // setActiveStep(activeStep + 1)
+            setIsProcessing(false);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+            setIsProcessing(false);
+          });
+
+        }
+   
+
+   
   };
 
   let selectedSupplierAccounts = [];
@@ -940,6 +1010,38 @@ function OpportunityDetailsPage() {
             message={messageDialog.message}
           />
         )}
+          {openAdditionalDialog ? (
+            <Dialog
+              disableBackdropClick={true}
+              fullWidth
+              maxWidth="sm"
+              open={openAdditionalDialog}
+              onClose={() => setOpenAdditionalDialog(false)}
+              aria-labelledby="form-dialog-title"
+              fullScreen={isMobile || isTablet}
+            >
+              <CustomDialogHeader
+                title="Additonal Information"
+                onClose={() => setOpenAdditionalDialog(false)}
+              ></CustomDialogHeader>
+              {sectionFields.map((item) => (
+                <CustomDialogContent>{item}</CustomDialogContent>
+              ))}
+
+              <CustomDialogFooter>
+                <Button
+                  color="primary"
+                  size="small"
+                  onClick={() => setOpenAdditionalDialog(false)}
+                >
+                  Close
+                </Button>
+                <Button color="primary" size="small" onClick={handleSave}>
+                  Save
+                </Button>
+              </CustomDialogFooter>
+            </Dialog>
+          ) : null}
       </Layout>
     </>
   );
