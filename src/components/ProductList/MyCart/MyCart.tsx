@@ -156,7 +156,7 @@ function MyCart() {
           </div>
         </div>
         <div className={styles.sponsored_items}>
-          <h1>Sponsored Products Related To This Item </h1>
+          <h2>Sponsored Products Related To This Item </h2>
           <div className={`gap-3 ${styles.sponsored_items_list}`}>
             {products.map((product, index: number) => (
                 <Product key={index} product={product} />

@@ -54,7 +54,7 @@ function FrequentlyBought() {
     "https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png";
   return (
     <div className={styles.outerbox}>
-      <h1 className="text-align-center">Frequently Bought Together</h1>
+      <h2 className="text-align-center" color="textSecondary">Frequently Bought Together</h2>
       <div className={styles.wrapper}>
         <div className={styles.card}>
           <div className={styles.card__checkbox}>
