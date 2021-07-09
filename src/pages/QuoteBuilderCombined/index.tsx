@@ -253,7 +253,7 @@ const QuoteBuilders = () => {
     accountDetails,
   ]);
 
-  const getVersionStatus = (id, currency) => {
+  const getVersionStatus =  (id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
     setLoadingVersions(true)
     axiosInstance()
@@ -278,13 +278,15 @@ const QuoteBuilders = () => {
             comment: d.comment ? d.comment : "",
           };
         });
-
+        
         setVersionStatusData((prevState) => {
           return {
             ...prevState,
             data: newData,
           }
         });
+
+        setShowVersionsDialog(true);
 
         setLoadingVersions(false);
         // setAllVersionStatusButtonText("All Version Status");
@@ -333,7 +335,6 @@ const QuoteBuilders = () => {
         <span
           className="cursor-pointer link ml-1"
           onClick={() => {
-            setShowVersionsDialog(true)
             getVersionStatus(params.data._id, params.data.currency)
           }}>({params.data.versionCount})</span>
       </Tooltip>
