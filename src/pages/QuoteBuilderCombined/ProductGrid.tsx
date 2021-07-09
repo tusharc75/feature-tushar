@@ -100,6 +100,7 @@ const ProductGrid = (props) => {
             width: 70,
             filter: false,
             show: true,
+            disabled: true,
             cellRenderer: "commonRenderer",
           },
         ];
@@ -210,6 +211,7 @@ const ProductGrid = (props) => {
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
                   col.show = true;
+                  col.disabled = true;
                   col.cellRenderer = "productNameRenderer";
                   col.order = ele.order;
                   col.leval = ele.leval;
