@@ -105,6 +105,12 @@ const LeadDetailsPage = () => {
           (d) => d.optionLabel === leadData[processFieldName]
         );
         setActiveStep(currentStepToShow);
+        if(currentStepToShow == steps.length -1){
+          setShowAtLast(true)
+        }
+        else{
+          setShowAtLast(false)
+        }
       }
     }
   }, [steps]);

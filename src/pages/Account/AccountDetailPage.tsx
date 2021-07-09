@@ -210,6 +210,12 @@ export default function AccountDetailPage(props) {
           (d) => d.optionLabel === accountData[processFieldName]
         );
         if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
+        if(currentStepToShow == steps.length -1){
+          setShowAtLast(true)
+        }
+        else{
+          setShowAtLast(false)
+        }
       }
     }
   }, [steps]);

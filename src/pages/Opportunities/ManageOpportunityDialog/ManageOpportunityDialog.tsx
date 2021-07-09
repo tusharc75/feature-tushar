@@ -100,6 +100,24 @@ export default function ManageOpportunityDialog({
         }
       });
     }
+    if(!isNew){
+      const processSteps = entityData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
+      );
+      if(processSteps){
+        let len = processSteps.option.length;
+        if(dataToUpdate.process !== processSteps.option[len-1]["optionValue"]){
+          entityData.fields.map((d) => {
+            if (
+              d.sectionName ==processSteps.additionalInfoSection ) {
+             
+              setAdditionalFieldName(d.sectionName)
+            }
+          });
+        }
+        
+      }
+    }
     let ownerCollaboratorOptions = entityData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );

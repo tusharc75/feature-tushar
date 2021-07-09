@@ -13,6 +13,7 @@ import {
   simplifyValues,
   initializeDropdownById,
   setFieldsInAscendingOrder,
+  processFieldName,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -51,7 +52,7 @@ export default function ManageLeadDialog({
     fields: [],
     initialValues: {},
   });
-
+ 
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
@@ -75,6 +76,24 @@ export default function ManageLeadDialog({
           setAdditionalFieldName(d.sectionName)
         }
       });
+    }
+    if(!isNew){
+      const processSteps = leadData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
+      );
+      if(processSteps){
+        let len = processSteps.option.length;
+        if(dataToUpdate.process !== processSteps.option[len-1]["optionValue"]){
+          leadData.fields.map((d) => {
+            if (
+              d.sectionName ==processSteps.additionalInfoSection ) {
+             
+              setAdditionalFieldName(d.sectionName)
+            }
+          });
+        }
+        
+      }
     }
    
     const ownerCollabOptions = leadData.fields.filter(
