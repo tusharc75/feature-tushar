@@ -53,6 +53,7 @@ export default function ManageOpportunityDialog({
   contactId = null,
   contactResource = null,
   disableOwnerAndAccount = false,
+ 
 }) {
   const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
@@ -80,11 +81,43 @@ export default function ManageOpportunityDialog({
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] =
     useState(false);
   const [accountData, setAccountData] = useState([]);
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [newAddedAccountId, setNewAddedAccountId] = useState(null);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
   useEffect(() => {
+    if(isNew){
+      const processSteps = entityData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
+      );
+    
+      entityData.fields.map((d) => {
+        if (
+          d.sectionName ==processSteps.additionalInfoSection ) {
+         
+          setAdditionalFieldName(d.sectionName)
+        }
+      });
+    }
+    if(!isNew){
+      const processSteps = entityData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
+      );
+      if(processSteps){
+        let len = processSteps.option.length;
+        if(dataToUpdate.process !== processSteps.option[len-1]["optionValue"]){
+          entityData.fields.map((d) => {
+            if (
+              d.sectionName ==processSteps.additionalInfoSection ) {
+             
+              setAdditionalFieldName(d.sectionName)
+            }
+          });
+        }
+        
+      }
+    }
     let ownerCollaboratorOptions = entityData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
@@ -302,7 +335,7 @@ export default function ManageOpportunityDialog({
                 <CustomDialogContent>
                   <Form>
                     {formsData &&
-                      formsData.map((form, index1) => {
+                      formsData.filter((item)=>item.name!==additionalFieldName).map((form, index1) => {
                         return form.name ? (
                           <div key={index1}>
                             <h2 className="form-label-style">{form.name}</h2>

@@ -50,6 +50,8 @@ const LeadDetailsPage = () => {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
+  const [showAtLast, setShowAtLast] = useState(false)
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -103,6 +105,12 @@ const LeadDetailsPage = () => {
           (d) => d.optionLabel === leadData[processFieldName]
         );
         setActiveStep(currentStepToShow);
+        if(currentStepToShow == steps.length -1){
+          setShowAtLast(true)
+        }
+        else{
+          setShowAtLast(false)
+        }
       }
     }
   }, [steps]);
@@ -217,6 +225,7 @@ const LeadDetailsPage = () => {
             setSectionFields((prevItems) => {
               return [...prevItems, d];
             });
+            setAdditionalFieldName(d.fieldData.sectionName)
           }
         });
 
@@ -259,6 +268,9 @@ const LeadDetailsPage = () => {
   };
 
   const handleOpneUpdateDialog = () => {
+    if(activeStep === steps.length - 1 ){
+      setShowAtLast(true)
+    }
     setOpenUpdateDialog(true);
   };
 
@@ -286,6 +298,7 @@ const LeadDetailsPage = () => {
 
   const handleSave = (data) => {
     setIsProcessing(true);
+    setShowAtLast(true)
     setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -327,6 +340,7 @@ const LeadDetailsPage = () => {
   };
 
   const handleMarkAsCompleted = (data) => {
+    setShowAtLast(false)
     setIsProcessing(true);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -369,6 +383,7 @@ const LeadDetailsPage = () => {
    
   };
 
+  let filteredLeadFields = leadFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
   return (
     <>
       {openUpdateDialog && (
@@ -502,7 +517,9 @@ const LeadDetailsPage = () => {
                   <img src={SVG("Contacts Placeholder")} alt="No Data" />
                 </Box>
               ) : (
-                <DetailsPage data={leadData} fields={leadFields} />
+                showAtLast ? ( <DetailsPage data={leadData} fields={leadFields} />) :  
+                <DetailsPage data={leadData} fields={filteredLeadFields} />
+               
               )}
               <AccordionOfOpportunity
                 recordsPerLine={3}

@@ -83,6 +83,8 @@ const ContactDetailsPage = (props) => {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
+  const [showAtLast, setShowAtLast] = useState(false)
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [isProcessing, setIsProcessing] = useState(false);
   const [contactPermissions, setContactPermissions] = useState({
     isCreate: false,
@@ -140,6 +142,12 @@ const ContactDetailsPage = (props) => {
           (d) => d.optionLabel === contactData[processFieldName]
         );
         if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
+        if(currentStepToShow == steps.length -1){
+          setShowAtLast(true)
+        }
+        else{
+          setShowAtLast(false)
+        }
       }
     }
   }, [steps]);
@@ -338,7 +346,6 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource[contactResource]}`)
       .then(({ data: { data } }) => {
-        // console.log(data);
         setContactFields(data.filter((d) => d.isUpdate || d.isRead));
         setLoading(false);
         const processSteps = data.find(
@@ -366,6 +373,7 @@ const ContactDetailsPage = (props) => {
             setSectionFields((prevItems) => {
               return [...prevItems, d];
             });
+            setAdditionalFieldName(d.fieldData.sectionName)
           }
         });
       });
@@ -423,6 +431,9 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleOpneUpdateDialog = () => {
+    if(activeStep === steps.length - 1 ){
+      setShowAtLast(true)
+    }
     setOpenUpdateDialog(true);
   };
 
@@ -432,6 +443,7 @@ const ContactDetailsPage = (props) => {
 
   const handleSave = (data) => {
     setIsProcessing(true);
+    setShowAtLast(true)
     setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -472,6 +484,7 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleMarkAsCompleted = (data) => {
+    setShowAtLast(false)
     setIsProcessing(true);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -534,10 +547,12 @@ const ContactDetailsPage = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  let filteredContactFields = contactFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
   return (
     <>
       <Layout>
-        {openUpdateDialog && (
+        {openUpdateDialog && showAtLast ? (
           // <UpdateDetailsDialog
           //     title={`Editing  ${contactData.firstName}`}
           //     openDialog={openUpdateDialog}
@@ -571,7 +586,30 @@ const ContactDetailsPage = (props) => {
             contactResource={contactResource}
             // contactApi={contactApi}
           />
-        )}
+        ): openUpdateDialog ? ( <ManageContact
+          isNew={false}
+          open={openUpdateDialog}
+          onClose={closeUpdateDialog}
+          contactData={{
+            fields: filteredContactFields.map((f) => {
+              return f.fieldData;
+            }),
+            initialValues: getObjKeysWithValues(
+              contactData,
+              filteredContactFields.map((f) => {
+                return f.fieldData;
+              })
+            ),
+          }}
+          loading={loading}
+          handleSubmit={handleUpdateContact}
+          contactId={contactData._id}
+          account={props?.account}
+          // contactResource={contactResource}
+          accountResource={accountResource}
+          contactResource={contactResource}
+          // contactApi={contactApi}
+        />): null}
 
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -653,7 +691,11 @@ const ContactDetailsPage = (props) => {
                       />
                     </Tabs>
                     <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage data={contactData} fields={contactFields} />
+                      
+                      {showAtLast? (<DetailsPage data={contactData} fields={contactFields} />): 
+                        <DetailsPage data={contactData} fields={filteredContactFields} />
+                      }
+                      {/* <DetailsPage data={contactData} fields={contactFields} /> */}
                     </Box>
                     <Box hidden={currentTabIndex !== 1}>
                       <OrgChartContainer
