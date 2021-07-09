@@ -93,7 +93,12 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
 
   const generateLabel = (label) => {
     const data = fields?.find((d) => d.fieldName === label);
-    return `${data.fieldLabel} - ${label}`;
+    if (data) {
+      return `${data.fieldLabel} - ${label}`;
+    }
+    else {
+      return `${label}`;
+    }
   };
 
   return (
