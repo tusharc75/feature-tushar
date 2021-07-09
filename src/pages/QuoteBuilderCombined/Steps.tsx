@@ -62,12 +62,24 @@ const useStyles = makeStyles((theme) => ({
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
     borderRadius: "4px",
+    [theme.breakpoints.down("xs")]: {
+      padding: "4px",
+    },
+  },
+  pbStepper: {
+    overflow: "none",
+    [theme.breakpoints.down("xs")]: {
+      overflow: "auto"
+    },
   },
   step: {
     paddingLeft: "8px",
     paddingRight: "8px",
     padding: "5px 8px",
     width: "20%",
+    [theme.breakpoints.down("xs")]: {
+      width: "50%",
+    },
     textAlign: "center",
     display: "flex",
     alignItems: "center",
@@ -454,7 +466,7 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center mt-2"
           >
             {activeStep !== steps.length - 1 && (
               <>
@@ -487,7 +499,7 @@ const Steps = (props) => {
           </Grid>
           <Grid item xs={12} sm={8} md={10}>
             <div className={classes.pStepper}>
-              <Stepper className="pbStepper" activeStep={activeStep}>
+              <Stepper className={classes.pbStepper} activeStep={activeStep}>
                 {steps.map((label, i) => (
                   <Step
                     key={label}

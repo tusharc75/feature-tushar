@@ -91,6 +91,7 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import VersionStatus from "./VersionStatus";
 import ColumnsDialog from "./ColumnsDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -232,6 +233,16 @@ const useStyles = makeStyles((theme) => ({
     top: "4px",
     right: "20px",
   },
+  productPos: {
+    position: "absolute",
+    top: "1px",
+    left: "6px",
+    [theme.breakpoints.down("xs")]: {
+      position: "static",
+      display: "flex",
+      alignItems: "center"
+    },
+  }
 }));
 
 function QuoteDetail() {
@@ -1968,7 +1979,7 @@ function QuoteDetail() {
                         color: tabValue === 0 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <InfoIcon className="mr-1" fontSize="inherit" /> All
                           Version Status
                         </div>
@@ -1981,7 +1992,7 @@ function QuoteDetail() {
                         color: tabValue === 1 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
                           Details
                         </div>
@@ -1994,7 +2005,7 @@ function QuoteDetail() {
                         color: tabValue === 2 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
                           Quote Versions
                         </div>
@@ -2138,7 +2149,7 @@ function QuoteDetail() {
                           xs={ProcessStatus === "New" ? 12 : 12}
                           sm={ProcessStatus === "New" ? 12 : 5}
                           md={ProcessStatus === "New" ? 12 : 5}
-                          className="d-flex justify-content-end"
+                          className="d-flex align-items-center justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
                             <Button
@@ -2164,7 +2175,7 @@ function QuoteDetail() {
                           </select>
                           {ifQuoteApproved().approved === false && (
                             <>
-                              {currentVersion !== 1 && (
+                                {currentVersion !== 1 && (
                                 <Button
                                   variant="outlined"
                                   size="small"
@@ -2176,7 +2187,7 @@ function QuoteDetail() {
                                   }
                                   onClick={deleteVersion}
                                 >
-                                  Delete Version
+                                  Delete
                                 </Button>
                               )}
                               <Button
@@ -2203,7 +2214,7 @@ function QuoteDetail() {
                                 {isCloning ? (
                                   <>Cloning v{currentVersion}</>
                                 ) : (
-                                  `Clone Version ${currentVersion}`
+                                  `Clone ${currentVersion}`
                                 )}
                               </Button>{" "}
                             </>
@@ -2280,7 +2291,7 @@ function QuoteDetail() {
                           >
                             {!ifQuoteApproved().approved &&
                               ProcessStatus === "New" && allowedToEdit ? (
-                              <span className="productPos m-2">
+                              <span className={`${classes.productPos} m-2`}>
                                 <Button
                                   variant="outlined"
                                   size="small"
