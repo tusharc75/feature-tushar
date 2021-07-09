@@ -16,7 +16,7 @@
     }
 }
 
-@supports (not (not (gap: 1rem))) and (not (-webkit-gap: 1rem)){
+@supports (not (gap: 1rem)) and (not (-webkit-gap: 1rem)){
     .gap-4 > *:not(:nth-child(1)) {
         margin-left: 1rem !important;
     }
