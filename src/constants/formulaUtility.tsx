@@ -1,6 +1,5 @@
 import { Parser as FormulaParser } from 'hot-formula-parser';
 
-
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
 }
@@ -125,160 +124,34 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
 
 const handleMulitFormula = (fieldData, fields, values, resultValues) => {
     fieldData.formulaFields.forEach((_field) => {
-        let formulainputFields = {};
-        fieldData.formulainputFields.forEach((_input) => {
-            formulainputFields[_input] = resultValues[_input] || resultValues[_input] === 0 ? resultValues[_input] : values[_input] ? values[_input] : 0;
-        });
-        let calValue = getFormulaValue(fieldData.formulaoption[_field], formulainputFields, "decimal", fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
-        resultValues[_field] = calValue;
-        resultValues = handleFormula(fieldData, fields, values, _field, calValue, resultValues, false);
-        if (fieldData.displayUnits && fieldData.displayUnits.length) {
-            resultValues = handleConverter(fieldData, fields, values, fieldData.fieldName, fieldData.displayUnits[0], calValue, resultValues);
+        if (resultValues[_field] === undefined) {
+            let formulainputFields = {};
+            fieldData.formulainputFields.forEach((_input) => {
+                formulainputFields[_input] = resultValues[_input] || resultValues[_input] === 0 ? resultValues[_input] : values[_input] ? values[_input] : 0;
+            });
+            let calValue = getFormulaValue(fieldData.formulaoption[_field], formulainputFields, "decimal", fieldData.decimalPlaces ? fieldData.decimalPlaces : 2);
+            resultValues[_field] = calValue;
+            let _field_result = fields.filter((_f) => _f.fieldName === _field.split("_")[0])
+            if (_field_result.length) {
+                resultValues = handleFormula(_field_result[0], fields, values, _field, calValue, resultValues, false);
+                if (_field_result[0].type !== 'currencyAmount' && (_field_result[0].type === 'converter' || _field_result[0].isConverter === true)) {
+                    resultValues = handleConverter(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), calValue, resultValues);
+
+                } else if (_field_result[0].type === 'currencyAmount' && (_field_result[0].type === 'converter' || _field_result[0].isConverter === true)) {
+                    resultValues = handleCurrencyConverter(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), _field.split("_")[2].toUpperCase(), calValue, resultValues);
+                }
+                else if (_field_result[0].type === 'currencyAmount') {
+                    resultValues = handleCurrency(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), calValue, resultValues);
+                }
+                if (_field_result[0].isMulitFormula) {
+                    resultValues = handleMulitFormula(_field_result[0], fields, values, resultValues);
+                }
+
+            }
         }
     });
     return resultValues
 };
-
-// const fieldArray = (fields, name, result) => {
-//     fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields && _f.inputFields.includes(name)).forEach(element => {
-//         result.push(element)
-//     })
-//     fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields && _f.inputFields.includes(name)).forEach(element => {
-//         let fieldName = element.fieldName;
-//         if (element.type === "currencyAmount" || element.type === "converter" || element.isConverter) {
-//             if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-//                 fieldName = fieldName + "_" + (element.formulaOnConverter && element.formulaOnConverter !== "" ? element.formulaOnConverter.toLowerCase() : element.displayUnits[0].toLowerCase())
-//             } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-//                 fieldName = fieldName + "_" + (element.formulaOnCurrency && element.formulaOnCurrency !== "" ? element.formulaOnCurrency.toLowerCase() : element.displayCurrency[0].toLowerCase())
-//                     + "_" + (element.formulaOnConverter && element.formulaOnConverter !== "" ? element.formulaOnConverter.toLowerCase() : element.displayUnits[0].toLowerCase())
-//             }
-//             else if (element.type === 'currencyAmount') {
-//                 fieldName = fieldName + "_" + (element.formulaOnCurrency && element.formulaOnCurrency !== "" ? element.formulaOnCurrency.toLowerCase() : element.displayCurrency[0].toLowerCase())
-//             }
-//         }
-//         fieldArray(fields, fieldName, result)
-//     })
-//     return result
-// }
-
-// const handleFormula = (fieldData, fields, values, name, value, resultValues) => {
-
-//     if (fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length) {
-//         const result = fieldArray(fields, name, [])
-//         console.log(result)
-
-//         result.forEach(element => {
-//             let inputFields = {};
-//             element.inputFields.forEach((_input) => {
-//                 if (name === _input) {
-//                     inputFields[_input] = value;
-//                 } else {
-//                     inputFields[_input] = resultValues[_input] ? resultValues[_input] : values[_input] ? values[_input] : 0;
-//                 }
-//             });
-//             let calValue = getFormulaValue(element.formula, inputFields, element.returnType, element.decimalPlaces);
-//             calValue = formatDecimal(calValue, element.decimalPlaces ? element.decimalPlaces : 2);
-//             let fieldName = element.fieldName;
-//             if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-//                 fieldName = fieldName + "_" + (element.formulaOnConverter && element.formulaOnConverter !== "" ? element.formulaOnConverter.toLowerCase() : element.displayUnits[0].toLowerCase())
-//             } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-//                 fieldName = fieldName + "_" + (element.formulaOnCurrency && element.formulaOnCurrency !== "" ? element.formulaOnCurrency.toLowerCase() : element.displayCurrency[0].toLowerCase())
-//                     + "_" + (element.formulaOnConverter && element.formulaOnConverter !== "" ? element.formulaOnConverter.toLowerCase() : element.displayUnits[0].toLowerCase())
-//             }
-//             else if (element.type === 'currencyAmount') {
-//                 fieldName = fieldName + "_" + (element.formulaOnCurrency && element.formulaOnCurrency !== "" ? element.formulaOnCurrency.toLowerCase() : element.displayCurrency[0].toLowerCase())
-//             }
-//             resultValues[fieldName] = calValue;
-//             if (element.isMulitFormula) {
-//                 resultValues = handleMulitFormula(element, fields, values, resultValues);
-//             }
-//         });
-//         console.log(resultValues)
-
-
-//         // fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).forEach((_data) => {
-//         //     if (_data.inputFields.includes(name)) {
-//         //         let inputFields = {};
-//         //         _data.inputFields.forEach((_input) => {
-//         //             if (name === _input) {
-//         //                 inputFields[_input] = value;
-//         //             } else {
-//         //                 inputFields[_input] = resultValues[_input] ? resultValues[_input] : values[_input] ? values[_input] : 0;
-//         //             }
-//         //         });
-//         //         let calValue = getFormulaValue(_data.formula, inputFields, _data.returnType, _data.decimalPlaces);
-//         //         calValue = formatDecimal(calValue, _data.decimalPlaces ? _data.decimalPlaces : 2);
-//         //         let _fieldName = _data.fieldName;
-//         //         if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
-//         //             if (_data.displayCurrency && _data.displayCurrency.length) {
-//         //                 _fieldName = _fieldName + "_" + (_data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency.toLowerCase() : _data.displayCurrency[0].toLowerCase())
-//         //             }
-//         //             if (_data.displayUnits && _data.displayUnits.length) {
-//         //                 _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
-//         //             }
-
-//         //             if (resultValues[_fieldName] === undefined) {
-//         //                 resultValues[_fieldName] = calValue;
-//         //                 resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues);
-//         //                 if (_data.displayCurrency && _data.displayCurrency.length && _data.displayUnits && _data.displayUnits.length) {
-//         //                     resultValues = handleCurrencyConverter(
-//         //                         _data,
-//         //                         fields,
-//         //                         values,
-//         //                         _data.fieldName,
-//         //                         _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
-//         //                         _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
-//         //                         calValue,
-//         //                         resultValues
-//         //                     )
-//         //                 }
-//         //                 else if (_data.displayCurrency && _data.displayCurrency.length) {
-//         //                     resultValues = handleCurrency(
-//         //                         _data,
-//         //                         fields,
-//         //                         values,
-//         //                         _data.fieldName,
-//         //                         _data.formulaOnCurrency && _data.formulaOnCurrency !== "" ? _data.formulaOnCurrency : _data.displayCurrency[0],
-//         //                         calValue,
-//         //                         resultValues
-//         //                     );
-//         //                 }
-//         //                 else if (_data.displayUnits && _data.displayUnits.length) {
-//         //                     resultValues = handleConverter(
-//         //                         _data,
-//         //                         fields,
-//         //                         values,
-//         //                         _data.fieldName,
-//         //                         _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
-//         //                         calValue,
-//         //                         resultValues
-//         //                     );
-//         //                 }
-//         //                 if (_data.isMulitFormula) {
-//         //                     resultValues = handleMulitFormula(_data, fields, values, resultValues);
-//         //                 }
-//         //             }
-//         //             else {
-//         //                 resultValues[_fieldName] = calValue;
-//         //             }
-//         //         } else {
-//         //             if (resultValues[_fieldName] === undefined) {
-//         //                 resultValues[_fieldName] = calValue;
-//         //                 resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues);
-//         //                 if (_data.isMulitFormula) {
-//         //                     resultValues = handleMulitFormula(_data, fields, values, resultValues);
-//         //                 }
-//         //             }
-//         //             else {
-//         //                 resultValues[_fieldName] = calValue;
-//         //             }
-//         //         }
-//         //     }
-//         // });
-//     }
-//     return resultValues;
-// };
-
 
 const handleFormula = (fieldData, fields, values, name, value, resultValues, isOverride) => {
     if (fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length) {
@@ -366,7 +239,6 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
             }
         });
     }
-
     return resultValues;
 };
 
@@ -438,10 +310,10 @@ const handleConverter = (fieldData, fields, values, name, _unit, value, resultVa
 };
 
 const handleCurrency = (fieldData, fields, values, name, _currency, value, resultValues) => {
-    if (fieldData.isMulitFormula) {
-        resultValues[name + "_" + _currency.toLowerCase()] = value;
-        resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
-    }
+    // if (fieldData.isMulitFormula) {
+    //     resultValues[name + "_" + _currency.toLowerCase()] = value;
+    //     resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
+    // }
     let indexCurrency = fieldData.currency.indexOf(_currency);
     if (indexCurrency >= 0) {
         for (var x_currency in fieldData.currencyoption[indexCurrency]) {
@@ -458,10 +330,10 @@ const handleCurrency = (fieldData, fields, values, name, _currency, value, resul
 };
 
 const handleCurrencyConverter = (fieldData, fields, values, name, _currency, _unit, value, resultValues) => {
-    if (fieldData.isMulitFormula) {
-        resultValues[name + "_" + _unit.toLowerCase()] = value;
-        resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
-    }
+    // if (fieldData.isMulitFormula) {
+    //     resultValues[name + "_" + _unit.toLowerCase()] = value;
+    //     resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
+    // }
     let indexConverter = fieldData.units.indexOf(_unit);
     let indexCurrency = fieldData.currency.indexOf(_currency);
     if (indexConverter >= 0 && indexCurrency >= 0) {

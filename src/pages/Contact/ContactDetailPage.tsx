@@ -57,6 +57,7 @@ import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProcessFlow from "../../components/ProcessFlow";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
+import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -364,7 +365,7 @@ const ContactDetailsPage = (props) => {
             sectionFields.length == 0
           ) {
             setSectionFields((prevItems) => {
-              return [...prevItems, d.fieldData.fieldLabel];
+              return [...prevItems, d];
             });
             setAdditionalFieldName(d.fieldData.sectionName)
           }
@@ -452,8 +453,13 @@ const ContactDetailsPage = (props) => {
       return f.fieldData;
     });
 
+    const updatedContactData = {
+      ...contactData,
+      ...data
+    }
+
     const updatedData = {
-      ...getObjKeysWithValues(contactData, contactFieldData),
+      ...getObjKeysWithValues(updatedContactData, contactFieldData),
       [processFieldName]: steps[tempActiveStep].text,
       _id: contactData._id,
     };
@@ -922,38 +928,46 @@ const ContactDetailsPage = (props) => {
             />
           </FullScreenDialog>
         )}
-        {openAdditionalDialog ? (
-          <Dialog
-            disableBackdropClick={true}
-            fullWidth
-            maxWidth="sm"
-            open={openAdditionalDialog}
-            onClose={() => setOpenAdditionalDialog(false)}
-            aria-labelledby="form-dialog-title"
-            fullScreen={isMobile || isTablet}
-          >
-            <CustomDialogHeader
-              title="Additonal Information"
-              onClose={() => setOpenAdditionalDialog(false)}
-            ></CustomDialogHeader>
-            {sectionFields.map((item) => (
-              <CustomDialogContent>{item}</CustomDialogContent>
-            ))}
+        {openAdditionalDialog && (
+          // <Dialog
+          //   disableBackdropClick={true}
+          //   fullWidth
+          //   maxWidth="sm"
+          //   open={openAdditionalDialog}
+          //   onClose={() => setOpenAdditionalDialog(false)}
+          //   aria-labelledby="form-dialog-title"
+          //   fullScreen={isMobile || isTablet}
+          // >
+          //   <CustomDialogHeader
+          //     title="Additonal Information"
+          //     onClose={() => setOpenAdditionalDialog(false)}
+          //   ></CustomDialogHeader>
+          //   {sectionFields.map((item) => (
+          //     <CustomDialogContent>{item}</CustomDialogContent>
+          //   ))}
 
-            <CustomDialogFooter>
-              <Button
-                color="primary"
-                size="small"
-                onClick={() => setOpenAdditionalDialog(false)}
-              >
-                Close
-              </Button>
-              <Button color="primary" size="small" onClick={handleSave}>
-                Save
-              </Button>
-            </CustomDialogFooter>
-          </Dialog>
-        ) : null}
+          //   <CustomDialogFooter>
+          //     <Button
+          //       color="primary"
+          //       size="small"
+          //       onClick={() => setOpenAdditionalDialog(false)}
+          //     >
+          //       Close
+          //     </Button>
+          //     <Button color="primary" size="small" onClick={handleSave}>
+          //       Save
+          //     </Button>
+          //   </CustomDialogFooter>
+          // </Dialog>
+          <AdditionalDialogPopUp 
+            open={openAdditionalDialog}
+            close={() => setOpenAdditionalDialog(false)}
+            handleSave={handleSave}
+            title="Additional Information"
+            fieldData={sectionFields}
+          />
+
+        )}
       </Layout>
     </>
   );
