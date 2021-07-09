@@ -43,6 +43,7 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from "../../components/ProcessFlow";
 import FormTypes from "../../components/Helpers/FormTypes";
 
+import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -482,7 +483,7 @@ function OpportunityDetailsPage() {
               sectionFields.length == 0
             ) {
               setSectionFields((prevItems) => {
-                return [...prevItems, d.fieldData.fieldLabel];
+                return [...prevItems, d];
               });
               setAdditionalFieldName(d.fieldData.sectionName)
             }
@@ -625,9 +626,12 @@ function OpportunityDetailsPage() {
       }
       return f.fieldData;
     });
-
+    const updatedOpportunityData = {
+      ...opportunityData,
+      ...data
+    }
     const updatedData = {
-      ...getObjKeysWithValues(opportunityData, opportunityFieldData),
+      ...getObjKeysWithValues(updatedOpportunityData, opportunityFieldData),
       [processFieldName]: steps[tempActiveStep].text,
       _id: opportunityData._id,
     };
@@ -1033,7 +1037,9 @@ function OpportunityDetailsPage() {
             message={messageDialog.message}
           />
         )}
-          {openAdditionalDialog ? (
+          {openAdditionalDialog && (
+            
+            /* {console.log(sectionFields)}
             <Dialog
               disableBackdropClick={true}
               fullWidth
@@ -1048,7 +1054,7 @@ function OpportunityDetailsPage() {
                 onClose={() => setOpenAdditionalDialog(false)}
               ></CustomDialogHeader>
               {sectionFields.map((item) => (
-                <CustomDialogContent>{item}</CustomDialogContent>
+                <CustomDialogContent>{item.fields}</CustomDialogContent>
               ))}
               {/* <Formik
                initialValues={opportunityData.initialValues} 
@@ -1118,7 +1124,16 @@ function OpportunityDetailsPage() {
                 </Button>
               </CustomDialogFooter>
             </Dialog>
-          ) : null}
+            </> */
+            <AdditionalDialogPopUp  
+              open={openAdditionalDialog}
+              close={()=>setOpenAdditionalDialog(false)}
+              title="Additional Information"
+              fieldData={sectionFields}
+              handleSave={handleSave}
+            />
+          )
+          }
       </Layout>
     </>
   );
