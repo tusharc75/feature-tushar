@@ -306,6 +306,7 @@ function QuoteDetail() {
         rowDrag: allowedToEdit,
         headerName: "Name",
         cellRenderer: "nameRenderer",
+        show: true,
       },
     ])
   }, [allowedToEdit]);
@@ -474,14 +475,7 @@ function QuoteDetail() {
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [updatingVersion, setUpdatingVersion] = useState(false);
   const [generatingPdfFile, setGeneratingFile] = useState(false);
-  const [generatingPdf, setGeneratingPdf] = useState({
-    show: false,
-    text: null,
-  });
-  const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(
-    user?.user?.brandQuoteDigitalSignature
-  );
+  // const [prevVersionTNC, setPrevVersionTNC] = useState([]);
 
   const [pdfFileName, setPdfFileName] = useState("");
   // const [TandC, setTNC] = useState([]);
@@ -559,7 +553,6 @@ function QuoteDetail() {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setGeneratingPdf({ show: false, text: null });
       });
   }, []);
 
@@ -615,12 +608,12 @@ function QuoteDetail() {
 
           // handleAllowToEditList(data);
           setQuoteData(data);
-          if (data?.versions) {
-            let lastVersionData = data?.versions[currentVersion - 1];
-            if (lastVersionData && lastVersionData.TNC) {
-              setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
-            }
-          }
+          // if (data?.versions) {
+          //   let lastVersionData = data?.versions[currentVersion - 1];
+          //   if (lastVersionData && lastVersionData.TNC) {
+          //     setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
+          //   }
+          // }
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -841,7 +834,7 @@ function QuoteDetail() {
    * @TNC HANDLER
    */
 
-  const fetchTermsAndConditions = (selectedTermsAndConstions = null) => {
+  const fetchTermsAndConditions = (selectedTermsAndConstions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
@@ -869,6 +862,16 @@ function QuoteDetail() {
           data: rows,
           count: count,
         });
+
+        if (updateVersionStatus) {
+          handleVersionUpdate(
+            "",
+            visibleColumns,
+            versionStatus,
+            selectedRows
+          );
+        }
+
         dispatch({ type: "selection", selectedRecords: selectedRows });
         // setDataTNC(data);
         setTimeout(() => {
@@ -2175,7 +2178,7 @@ function QuoteDetail() {
                           </select>
                           {ifQuoteApproved().approved === false && (
                             <>
-                                {currentVersion !== 1 && (
+                              {currentVersion !== 1 && (
                                 <Button
                                   variant="outlined"
                                   size="small"
@@ -2537,7 +2540,19 @@ function QuoteDetail() {
                                       versionStatus,
                                       newSelectedRecords
                                     );
-                                    // setSelectedTnC([...selectedRecords.map((o) => o._id)]);
+                                  }}
+                                  onRowDragEnd={(newSequence) => {
+                                    dispatch({
+                                      type: "selection",
+                                      newSequence: newSequence,
+                                    });
+
+                                    handleVersionUpdate(
+                                      "",
+                                      visibleColumns,
+                                      versionStatus,
+                                      newSequence
+                                    );
                                   }}
                                 />
                               </Box>
@@ -2633,7 +2648,9 @@ function QuoteDetail() {
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
             handleClose={handleCloseCreateDialog}
-            fetchData={fetchTermsAndConditions}
+            fetchData={() => {
+              fetchTermsAndConditions(null, true);
+            }}
             editRecord={editRecordTNC}
             displayTitle={"Additional Data"}
 
