@@ -211,6 +211,7 @@ const ProductGrid = (props) => {
                   col.headerName = ele.fieldLabel;
                   col.width = 180;
                   col.show = true;
+                  col.disabled = true;
                   col.cellRenderer = "productNameRenderer";
                   col.order = ele.order;
                   col.leval = ele.leval;
