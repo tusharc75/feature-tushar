@@ -73,6 +73,7 @@ import { cloneDeep } from "lodash";
 import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import ProcessFlow from "../../components/ProcessFlow";
+import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -418,7 +419,7 @@ export default function AccountDetailPage(props) {
             sectionFields.length == 0
           ) {
             setSectionFields((prevItems) => {
-              return [...prevItems, d.fieldData.fieldLabel];
+              return [...prevItems, d];
             });
           }
         });
@@ -593,6 +594,11 @@ export default function AccountDetailPage(props) {
       }
       return f.fieldData;
     });
+
+    const updatedAccountData = {
+      ...accountData,
+      ...data
+    }
 
     const updatedData = {
       ...getObjKeysWithValues(accountData, accountFieldData),
@@ -1121,38 +1127,46 @@ export default function AccountDetailPage(props) {
               />
             </FullScreenDialog>
           )}
-          {openAdditionalDialog ? (
-            <Dialog
-              disableBackdropClick={true}
-              fullWidth
-              maxWidth="sm"
-              open={openAdditionalDialog}
-              onClose={() => setOpenAdditionalDialog(false)}
-              aria-labelledby="form-dialog-title"
-              fullScreen={isMobile || isTablet}
-            >
-              <CustomDialogHeader
-                title="Additonal Information"
-                onClose={() => setOpenAdditionalDialog(false)}
-              ></CustomDialogHeader>
-              {sectionFields.map((item) => (
-                <CustomDialogContent>{item}</CustomDialogContent>
-              ))}
+          {openAdditionalDialog && (
+            // <Dialog
+            //   disableBackdropClick={true}
+            //   fullWidth
+            //   maxWidth="sm"
+            //   open={openAdditionalDialog}
+            //   onClose={() => setOpenAdditionalDialog(false)}
+            //   aria-labelledby="form-dialog-title"
+            //   fullScreen={isMobile || isTablet}
+            // >
+            //   <CustomDialogHeader
+            //     title="Additonal Information"
+            //     onClose={() => setOpenAdditionalDialog(false)}
+            //   ></CustomDialogHeader>
+            //   {sectionFields.map((item) => (
+            //     <CustomDialogContent>{item}</CustomDialogContent>
+            //   ))}
 
-              <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
-                  onClick={() => setOpenAdditionalDialog(false)}
-                >
-                  Close
-                </Button>
-                <Button color="primary" size="small" onClick={handleSave}>
-                  Save
-                </Button>
-              </CustomDialogFooter>
-            </Dialog>
-          ) : null}
+            //   <CustomDialogFooter>
+            //     <Button
+            //       color="primary"
+            //       size="small"
+            //       onClick={() => setOpenAdditionalDialog(false)}
+            //     >
+            //       Close
+            //     </Button>
+            //     <Button color="primary" size="small" onClick={handleSave}>
+            //       Save
+            //     </Button>
+            //   </CustomDialogFooter>
+            // </Dialog>
+            <AdditionalDialogPopUp
+              open={openAdditionalDialog}
+              close={() => setOpenAdditionalDialog(false)}
+              title="Additional Dialog"
+              handleSave={handleSave}
+              fieldData={sectionFields}
+              
+            />
+          ) }
         </div>
       </Layout>
     </>
