@@ -1039,77 +1039,7 @@ function OpportunityDetailsPage() {
         )}
           {openAdditionalDialog && (
             
-            /* {console.log(sectionFields)}
-            <Dialog
-              disableBackdropClick={true}
-              fullWidth
-              maxWidth="sm"
-              open={openAdditionalDialog}
-              onClose={() => setOpenAdditionalDialog(false)}
-              aria-labelledby="form-dialog-title"
-              fullScreen={isMobile || isTablet}
-            >
-              <CustomDialogHeader
-                title="Additonal Information"
-                onClose={() => setOpenAdditionalDialog(false)}
-              ></CustomDialogHeader>
-              {sectionFields.map((item) => (
-                <CustomDialogContent>{item.fields}</CustomDialogContent>
-              ))}
-              {/* <Formik
-               initialValues={opportunityData.initialValues} 
-              onSubmit={handleSave}  >
-              {
-                ({
-                  submitForm,
-              values,
-              errors,
-              touched,
-              setFieldValue,
-              setFieldTouched,
-              setErrors,
-              setValues,
-                })=> (
-                  <>
-                  <CustomDialogContent>
-                   <Form>
-                   <Box marginY={2}>
-                   <Grid spacing={3} container>
-                     {sectionFields.map((field, index2)=>(
-                        <Grid>
-                        <FormTypes
-                          
-                          values={values}
-                          errors={errors}
-                          touched={touched}
-                          label={field.fieldLabel}
-                          name={field.fieldName}
-                          type={field.type}
-                         
-                          setFieldValue={setFieldValue}
-                          required={field.required}
-                          fullWidth
-                          isTooltip={
-                            field?.isTooltip || false
-                          }
-                          tooltipMessage={
-                            field?.tooltipMessage
-                          }
-                          size="small"
-                          doNotShowInfoTooltip={true}
-                        />
-                      </Grid>
-                     ))}
-                   </Grid>
-                   </Box>
-                   </Form>
-                  </CustomDialogContent>
-                  </>
-                )
-              }
-             
-                 
-                  </Formik> */}
+          <>
 
               <CustomDialogFooter>
                 <Button
@@ -1123,8 +1053,7 @@ function OpportunityDetailsPage() {
                   Save
                 </Button>
               </CustomDialogFooter>
-            </Dialog>
-            </> */
+           
             <AdditionalDialogPopUp  
               open={openAdditionalDialog}
               close={()=>setOpenAdditionalDialog(false)}
@@ -1132,8 +1061,10 @@ function OpportunityDetailsPage() {
               fieldData={sectionFields}
               handleSave={handleSave}
             />
+            </>
           )
           }
+          
       </Layout>
     </>
   );
