@@ -73,6 +73,7 @@ import { cloneDeep } from "lodash";
 import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import ProcessFlow from "../../components/ProcessFlow";
+import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -115,7 +116,6 @@ export default function AccountDetailPage(props) {
   const [accountFields, setAccountFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [accountHierarchyData, setAccountHierarchyData] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [relatedContactsLoading, setRelatedContactsLoading] = useState(false);
@@ -150,9 +150,39 @@ export default function AccountDetailPage(props) {
       type: accountResource,
     },
   ];
+
+  const [tabValue, setTabValue] = useState(0);
+  const handleMainTabChange = (
+    event: React.ChangeEvent<{}>,
+    newValue: number
+  ) => {
+    setTabValue(newValue);
+  };
+  interface TabPanelProps {
+    children?: React.ReactNode;
+    index: any;
+    value: any;
+  }
+
+  function TabPanel(props: TabPanelProps) {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`main-tabpanel-${index}`}
+        aria-labelledby={`main-tab-${index}`}
+        {...other}
+      >
+        {children}
+      </div>
+    );
+  }
+
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
-    setCurrentTabIndex(0);
+    setTabValue(0);
     fetchAccountData();
     fetchRelatedData();
   }, [id]);
@@ -164,7 +194,7 @@ export default function AccountDetailPage(props) {
     return () => {
       setGraphData({ edges: [], nodes: [], colorPalette: null });
     };
-  }, [currentTabIndex]);
+  }, [tabValue]);
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -183,7 +213,7 @@ export default function AccountDetailPage(props) {
   }, [steps]);
 
   const initializeGraphData = () => {
-    if (currentTabIndex === 2) {
+    if (tabValue === 2) {
       setLoadingGraphData(true);
       setGraphData({ nodes: [], edges: [], colorPalette: null });
 
@@ -217,31 +247,31 @@ export default function AccountDetailPage(props) {
         setOpportunities(
           data.Opportunity &&
             data.Opportunity[
-              sidebarResource[accountResource].replaceAll(" ", "_")
+            sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data.Opportunity[
-                sidebarResource[accountResource].replaceAll(" ", "_")
-              ]
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
             : []
         );
         setProjectSales(
           data[sidebarResource.projectSales] &&
             data[sidebarResource.projectSales][
-              sidebarResource[accountResource].replaceAll(" ", "_")
+            sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data[sidebarResource.projectSales][
-                sidebarResource[accountResource].replaceAll(" ", "_")
-              ]
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
             : []
         );
         setQuotes(
           data[sidebarResource.quoteBuilder] &&
             data[sidebarResource.quoteBuilder][
-              sidebarResource[accountResource].replaceAll(" ", "_")
+            sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data[sidebarResource.quoteBuilder][
-                sidebarResource[accountResource].replaceAll(" ", "_")
-              ]
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
             : []
         );
         initializeGraphData();
@@ -279,9 +309,9 @@ export default function AccountDetailPage(props) {
               current: true,
               parentAccount: data.parentAccount
                 ? {
-                    _id: data.parentAccount.optionValue,
-                    accountName: data.parentAccount.optionLabel,
-                  }
+                  _id: data.parentAccount.optionValue,
+                  accountName: data.parentAccount.optionLabel,
+                }
                 : null,
               // parentAccountName: data.parentAccount?.optionLabel,
               // parentAccount: data.parentAccount?.optionValue
@@ -385,11 +415,11 @@ export default function AccountDetailPage(props) {
         data.map((d) => {
           if (
             d.fieldData.sectionName ==
-              processSteps.fieldData.additionalInfoSection &&
+            processSteps.fieldData.additionalInfoSection &&
             sectionFields.length == 0
           ) {
             setSectionFields((prevItems) => {
-              return [...prevItems, d.fieldData.fieldLabel];
+              return [...prevItems, d];
             });
           }
         });
@@ -554,8 +584,8 @@ export default function AccountDetailPage(props) {
       data && data?.isSetBackStep
         ? activeStep - 1
         : activeStep < steps.length - 1
-        ? activeStep + 1
-        : activeStep;
+          ? activeStep + 1
+          : activeStep;
 
     let processFieldName = "";
     const accountFieldData = accountFields.map((f) => {
@@ -565,8 +595,13 @@ export default function AccountDetailPage(props) {
       return f.fieldData;
     });
 
+    const updatedAccountData = {
+      ...accountData,
+      ...data
+    }
+
     const updatedData = {
-      ...getObjKeysWithValues(accountData, accountFieldData),
+      ...getObjKeysWithValues(updatedAccountData, accountFieldData),
       [processFieldName]: steps[tempActiveStep].text,
       _id: accountData._id,
     };
@@ -590,8 +625,8 @@ export default function AccountDetailPage(props) {
       data && data?.isSetBackStep
         ? activeStep - 1
         : activeStep < steps.length - 1
-        ? activeStep + 1
-        : activeStep;
+          ? activeStep + 1
+          : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
@@ -685,11 +720,11 @@ export default function AccountDetailPage(props) {
                     )}
 
                   {permissions &&
-                  permissions[accountResource] &&
-                  permissions[accountResource].isDelete &&
-                  accountData?.owner?.optionValue &&
-                  user?.user?._id &&
-                  accountData.owner.optionValue === user.user._id ? (
+                    permissions[accountResource] &&
+                    permissions[accountResource].isDelete &&
+                    accountData?.owner?.optionValue &&
+                    user?.user?._id &&
+                    accountData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -700,9 +735,9 @@ export default function AccountDetailPage(props) {
               <ProcessFlow
                 disableBackNext={
                   permissions &&
-                  permissions[accountResource] &&
-                  permissions[accountResource].isUpdate &&
-                  canEdit
+                    permissions[accountResource] &&
+                    permissions[accountResource].isUpdate &&
+                    canEdit
                     ? false
                     : true
                 }
@@ -726,10 +761,8 @@ export default function AccountDetailPage(props) {
                   <>
                     <Tabs
                       className="oms-tab"
-                      value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
+                      value={tabValue}
+                      onChange={handleMainTabChange}
                       indicatorColor="primary"
                       textColor="primary"
                       aria-label="icon tabs example"
@@ -750,16 +783,15 @@ export default function AccountDetailPage(props) {
                         id="a11y-tab-1"
                       />
                     </Tabs>
-                    {currentTabIndex === 0 && (
+                    <TabPanel value={tabValue} index={0}>
                       <Box>
                         <DetailsPage
                           data={accountData}
                           fields={accountFields}
                         />
                       </Box>
-                    )}
-
-                    {currentTabIndex === 1 && (
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={1}>
                       <Box>
                         <AccountHierarchy
                           data={accountHierarchyData}
@@ -767,9 +799,8 @@ export default function AccountDetailPage(props) {
                           accountRoute={accountRoute}
                         />
                       </Box>
-                    )}
-
-                    {currentTabIndex === 2 && (
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={2}>
                       <Box>
                         <CustomNodalStructure
                           id={id}
@@ -778,15 +809,14 @@ export default function AccountDetailPage(props) {
                           onClick={(node) => {
                             if (node && routes[node.route]) {
                               history.push({
-                                pathname: `${routes[node.route].path}/${
-                                  node.id
-                                }`,
+                                pathname: `${routes[node.route].path}/${node.id
+                                  }`,
                               });
                             }
                           }}
                         />
                       </Box>
-                    )}
+                    </TabPanel>
                   </>
                 )}
               </Box>
@@ -865,9 +895,9 @@ export default function AccountDetailPage(props) {
                       <Activity
                         restrictedAddActivities={
                           permissions &&
-                          permissions[accountResource] &&
-                          permissions[accountResource].isUpdate &&
-                          canEdit
+                            permissions[accountResource] &&
+                            permissions[accountResource].isUpdate &&
+                            canEdit
                             ? []
                             : ["Attachment", "Case"]
                         }
@@ -878,17 +908,17 @@ export default function AccountDetailPage(props) {
                             access: true,
                           },
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                         emails={
                           relatedContacts && relatedContacts.length > 0
                             ? cloneDeep(relatedContacts).reduce(
-                                (emails, contact) => {
-                                  if (contact?.email)
-                                    emails.push(contact.email);
-                                  return emails;
-                                },
-                                []
-                              )
+                              (emails, contact) => {
+                                if (contact?.email)
+                                  emails.push(contact.email);
+                                return emails;
+                              },
+                              []
+                            )
                             : []
                         }
                       />
@@ -1019,9 +1049,8 @@ export default function AccountDetailPage(props) {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Account ${
-                accountData.accountName || ""
-              }`}
+              message={`Are you sure you want to delete this Account ${accountData.accountName || ""
+                }`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteAcc}
             />
@@ -1029,9 +1058,8 @@ export default function AccountDetailPage(props) {
           {showApproveDisapproveConfirmBox ? (
             <ConfirmationDialog
               open={showApproveDisapproveConfirmBox}
-              message={`Are you sure you want to ${
-                accountData.staticData?.approved ? "disapprove" : "approve"
-              } this Account ?`}
+              message={`Are you sure you want to ${accountData.staticData?.approved ? "disapprove" : "approve"
+                } this Account ?`}
               onClose={() => setShowApproveDisapproveConfirmBox(false)}
               onOk={handleApproveDisapprove}
             />
@@ -1099,38 +1127,46 @@ export default function AccountDetailPage(props) {
               />
             </FullScreenDialog>
           )}
-          {openAdditionalDialog ? (
-            <Dialog
-              disableBackdropClick={true}
-              fullWidth
-              maxWidth="sm"
-              open={openAdditionalDialog}
-              onClose={() => setOpenAdditionalDialog(false)}
-              aria-labelledby="form-dialog-title"
-              fullScreen={isMobile || isTablet}
-            >
-              <CustomDialogHeader
-                title="Additonal Information"
-                onClose={() => setOpenAdditionalDialog(false)}
-              ></CustomDialogHeader>
-              {sectionFields.map((item) => (
-                <CustomDialogContent>{item}</CustomDialogContent>
-              ))}
+          {openAdditionalDialog && (
+            // <Dialog
+            //   disableBackdropClick={true}
+            //   fullWidth
+            //   maxWidth="sm"
+            //   open={openAdditionalDialog}
+            //   onClose={() => setOpenAdditionalDialog(false)}
+            //   aria-labelledby="form-dialog-title"
+            //   fullScreen={isMobile || isTablet}
+            // >
+            //   <CustomDialogHeader
+            //     title="Additonal Information"
+            //     onClose={() => setOpenAdditionalDialog(false)}
+            //   ></CustomDialogHeader>
+            //   {sectionFields.map((item) => (
+            //     <CustomDialogContent>{item}</CustomDialogContent>
+            //   ))}
 
-              <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
-                  onClick={() => setOpenAdditionalDialog(false)}
-                >
-                  Close
-                </Button>
-                <Button color="primary" size="small" onClick={handleSave}>
-                  Save
-                </Button>
-              </CustomDialogFooter>
-            </Dialog>
-          ) : null}
+            //   <CustomDialogFooter>
+            //     <Button
+            //       color="primary"
+            //       size="small"
+            //       onClick={() => setOpenAdditionalDialog(false)}
+            //     >
+            //       Close
+            //     </Button>
+            //     <Button color="primary" size="small" onClick={handleSave}>
+            //       Save
+            //     </Button>
+            //   </CustomDialogFooter>
+            // </Dialog>
+            <AdditionalDialogPopUp
+              open={openAdditionalDialog}
+              close={() => setOpenAdditionalDialog(false)}
+              title="Additional Dialog"
+              handleSave={handleSave}
+              fieldData={sectionFields}
+              
+            />
+          ) }
         </div>
       </Layout>
     </>

@@ -29,6 +29,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { isMobile, isTablet } from "react-device-detect";
 import { Dialog } from "@material-ui/core";
+import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -214,7 +215,7 @@ const LeadDetailsPage = () => {
             sectionFields.length == 0
           ) {
             setSectionFields((prevItems) => {
-              return [...prevItems, d.fieldData.fieldLabel];
+              return [...prevItems, d];
             });
           }
         });
@@ -301,8 +302,13 @@ const LeadDetailsPage = () => {
       return f.fieldData;
     });
 
+    const updatedLeadData = {
+      ...leadData,
+      ...data
+    }
+
     const updatedData = {
-      ...getObjKeysWithValues(leadData, leadFieldData),
+      ...getObjKeysWithValues(updatedLeadData, leadFieldData),
       [processFieldName]: steps[tempActiveStep].text,
       _id: leadData._id,
     };
@@ -559,38 +565,45 @@ const LeadDetailsPage = () => {
           />
         ) : null}
 
-{openAdditionalDialog ? (
-            <Dialog
-              disableBackdropClick={true}
-              fullWidth
-              maxWidth="sm"
-              open={openAdditionalDialog}
-              onClose={() => setOpenAdditionalDialog(false)}
-              aria-labelledby="form-dialog-title"
-              fullScreen={isMobile || isTablet}
-            >
-              <CustomDialogHeader
-                title="Additonal Information"
-                onClose={() => setOpenAdditionalDialog(false)}
-              ></CustomDialogHeader>
-              {sectionFields.map((item) => (
-                <CustomDialogContent>{item}</CustomDialogContent>
-              ))}
+{openAdditionalDialog && (
+            // <Dialog
+            //   disableBackdropClick={true}
+            //   fullWidth
+            //   maxWidth="sm"
+            //   open={openAdditionalDialog}
+            //   onClose={() => setOpenAdditionalDialog(false)}
+            //   aria-labelledby="form-dialog-title"
+            //   fullScreen={isMobile || isTablet}
+            // >
+            //   <CustomDialogHeader
+            //     title="Additonal Information"
+            //     onClose={() => setOpenAdditionalDialog(false)}
+            //   ></CustomDialogHeader>
+            //   {sectionFields.map((item) => (
+            //     <CustomDialogContent>{item}</CustomDialogContent>
+            //   ))}
 
-              <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
-                  onClick={() => setOpenAdditionalDialog(false)}
-                >
-                  Close
-                </Button>
-                <Button color="primary" size="small" onClick={handleSave}>
-                  Save
-                </Button>
-              </CustomDialogFooter>
-            </Dialog>
-          ) : null}
+            //   <CustomDialogFooter>
+            //     <Button
+            //       color="primary"
+            //       size="small"
+            //       onClick={() => setOpenAdditionalDialog(false)}
+            //     >
+            //       Close
+            //     </Button>
+            //     <Button color="primary" size="small" onClick={handleSave}>
+            //       Save
+            //     </Button>
+            //   </CustomDialogFooter>
+            // </Dialog>
+            <AdditionalDialogPopUp 
+                open={openAdditionalDialog}
+                close={() => setOpenAdditionalDialog(false)}
+                handleSave={handleSave}
+                title="Additional Information"
+                fieldData={sectionFields}
+            />
+          ) }
       </Layout>
     </>
   );
