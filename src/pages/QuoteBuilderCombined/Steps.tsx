@@ -133,6 +133,7 @@ const Steps = (props) => {
     loading,
     approvedQuote,
     handleVersionUpdate,
+    allowedToEdit,
     DOAlimit,
     totalCost,
     handleSendReminder = null,
@@ -305,7 +306,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-        approvedQuote.approved ? (
+          approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -464,6 +465,7 @@ const Steps = (props) => {
                         variant="contained"
                         color="primary"
                         disabled={
+                          !allowedToEdit ||
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
                           versionStatus.includes("Sent for DOA") ||
@@ -542,6 +544,7 @@ const Steps = (props) => {
                           }}
                           size="small"
                           disabled={
+                            !allowedToEdit ||
                             loading ||
                             !nextStep ||
                             versionStatus.includes("Accepted  by DOA")
