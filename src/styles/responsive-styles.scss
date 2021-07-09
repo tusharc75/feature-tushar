@@ -1,5 +1,11 @@
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
+    .tab-font {
+        font-size: 12px;
+    }
+    .detailHeader {
+        padding: 0;
+    }
     .MuiMenuItem-root {
         font-size: 0.8rem;
         min-height: 34px;
@@ -71,10 +77,10 @@
         right: 10px;
         bottom: 14px;
     }
-    .bgbox, .profileBox{
+    .bgbox,
+    .profileBox {
         background: transparent;
     }
-
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
