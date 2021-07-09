@@ -86,7 +86,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
               pathname: "/login",
               search: `${
                 location && location.pathname
-                  ? `?redirect=${location.pathname}`
+                  ? `?redirect=${location.pathname}${location.search}`
                   : null
               }`,
               state: { from: location },
