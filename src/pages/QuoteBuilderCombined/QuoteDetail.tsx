@@ -306,7 +306,6 @@ function QuoteDetail() {
     },
   ]);
 
-  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -356,7 +355,7 @@ function QuoteDetail() {
 
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [TandC, setTNC] = useState([]);
+
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
@@ -385,7 +384,6 @@ function QuoteDetail() {
   const [DOAneeded, setDOAneeded] = useState(false);
   const [isRearrangeColumns, setRearrangeColumns] = useState(false);
 
-  const [dataTNC, setDataTNC] = useState([]);
 
   const [editRecordTNC, setEditRecordTNC] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
@@ -395,7 +393,6 @@ function QuoteDetail() {
   const [columnView, setColumnView] = useState([]);
   const [PDF, setPdf] = useState("");
   const [PDFAttachment, setPdfAttachment] = useState("");
-  const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
 
@@ -403,9 +400,6 @@ function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
 
-  let logo = null;
-  let companyName = "";
-  let companyAddress = "";
   const [DOAData, setDOAData] = useState(null);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
@@ -485,6 +479,13 @@ function QuoteDetail() {
   const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(
     user?.user?.brandQuoteDigitalSignature
   );
+
+  const [pdfFileName, setPdfFileName] = useState("");
+  // const [TandC, setTNC] = useState([]);
+  // const [selectedTnC, setSelectedTnC] = useState([]);
+  // const [dataTNC, setDataTNC] = useState([]);
+
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -589,10 +590,6 @@ function QuoteDetail() {
     getVersionStatus();
   }, [quoteData]);
 
-  useEffect(() => {
-    fetchTermsAndConditions();
-  }, []);
-
   /**
    *
    * @param version
@@ -601,9 +598,9 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
-      if (selectedRecords.length > 0) {
-        setTNC(selectedRecords);
-      }
+      // if (selectedRecords.length > 0) {
+      //   setTNC(selectedRecords);
+      // }
       setLoading(true);
       setNextStep(true);
       axiosInstance()
@@ -662,7 +659,9 @@ function QuoteDetail() {
             );
             setversionStatus(data.versions[keys[keys.length - 1]].status);
             if (data.versions[keys[keys.length - 1]].TNC) {
-              setTNC(data.versions[keys[keys.length - 1]].TNC);
+              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
+              fetchTermsAndConditions(data.versions[keys[keys.length - 1]].TNC);
+              // setTNC(data.versions[keys[keys.length - 1]].TNC);
             }
             if (data.versions[keys[keys.length - 1]].acceptedColumns) {
               setColumnView(
@@ -686,7 +685,9 @@ function QuoteDetail() {
             setProductBuilderID(data.versions[version].productBuilderId);
             setversionStatus(data.versions[version].status);
             if (data.versions[version].TNC) {
-              setTNC(data.versions[version].TNC);
+              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
+              fetchTermsAndConditions(data.versions[version].TNC);
+              // setTNC(data.versions[version].TNC);
             }
             if (data.versions[version].acceptedColumns) {
               setColumnView(data.versions[version].acceptedColumns);
@@ -838,7 +839,7 @@ function QuoteDetail() {
    * @TNC HANDLER
    */
 
-  const fetchTermsAndConditions = () => {
+  const fetchTermsAndConditions = (selectedTermsAndConstions = null) => {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
@@ -849,8 +850,10 @@ function QuoteDetail() {
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         let selectedRows = [];
+        const onlyTermsAndConditionsIds = selectedTermsAndConstions ? selectedTermsAndConstions.map(d => d._id) : selectedRecords.map(d => d._id);
+
         let rows = data.map((tnc, i) => {
-          if (selectedTnC.indexOf(tnc._id) >= 0) {
+          if (onlyTermsAndConditionsIds.indexOf(tnc._id) >= 0) {
             selectedRows.push(tnc);
           }
           return {
@@ -865,7 +868,7 @@ function QuoteDetail() {
           count: count,
         });
         dispatch({ type: "selection", selectedRecords: selectedRows });
-        setDataTNC(data);
+        // setDataTNC(data);
         setTimeout(() => {
           dispatch({ type: "loading", loadingTNC: false });
         }, gridLoadingTimeout);
@@ -993,17 +996,19 @@ function QuoteDetail() {
   };
 
   const fetchDoaLimit = () => {
-    axiosInstance()
-      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
-      .then(({ data: { data } }) => {
-        setDOAsetup(data.doasetup);
-        setDOALimit(data.limit ? data.limit : 0);
-        setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
-        setLastUser(data.lastUser);
-      })
-      .catch((err) => {
-        // toastConfig.setToastConfig(err);
-      });
+    if (quoteData) {
+      axiosInstance()
+        .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
+        .then(({ data: { data } }) => {
+          setDOAsetup(data.doasetup);
+          setDOALimit(data.limit ? data.limit : 0);
+          setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
+          setLastUser(data.lastUser);
+        })
+        .catch((err) => {
+          // toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   const fetchDOAData = () => {
@@ -1450,7 +1455,7 @@ function QuoteDetail() {
       axiosInstance()
         .post(`/doa-request/create/${id}?version=${currentVersion}`)
         .then(({ data }) => {
-          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", selectedRecords);
           fetchQuoteData(currentVersion);
         })
         .catch((err) => {
@@ -1464,7 +1469,7 @@ function QuoteDetail() {
         setGeneratingFile(true);
         axiosInstance()
           .get(
-            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            `user/download?fileName=${pdfFileName}`,
             {
               responseType: "blob",
             }
@@ -1483,7 +1488,7 @@ function QuoteDetail() {
 
   const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
-    handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
+    handleVersionUpdate(PDF, event.target.value, versionStatus, selectedRecords);
   };
 
   function getStyles(name, personName, theme) {
@@ -1500,7 +1505,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        TandC
+        selectedRecords
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1516,14 +1521,16 @@ function QuoteDetail() {
     PDFfile,
     Columns,
     versionStatus,
-    TC,
+    selectedTermsAndConditions,
     view = false,
     download = false
   ) => {
     let body = {
       acceptedColumns: Columns,
       status: versionStatus,
-      TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
+      //  Old
+      //  TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
+      TNC: selectedTermsAndConditions,
     };
 
     setUpdatingVersion(true);
@@ -1532,6 +1539,7 @@ function QuoteDetail() {
       .then(({ data: { data } }) => {
         setUpdatingVersion(false);
 
+        setPdfFileName(data.fileName)
         if (view && data.fileName) {
           setUpdatingVersion(true);
           axiosInstance()
@@ -1580,14 +1588,13 @@ function QuoteDetail() {
   };
 
   const handleViewPdf = (view = false, download = false) => {
-    const pdfFileName = quoteData.versions[currentVersion].PDF;
 
     if (!pdfFileName) {
       handleVersionUpdate(
         "",
         visibleColumns,
         versionStatus,
-        selectedRecords.length > 0 ? selectedRecords : TandC,
+        selectedRecords,
         view,
         download
       );
@@ -1597,7 +1604,7 @@ function QuoteDetail() {
         setUpdatingVersion(true);
         axiosInstance()
           .get(
-            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            `user/download?fileName=${pdfFileName}`,
             {
               responseType: "blob",
             }
@@ -1616,7 +1623,7 @@ function QuoteDetail() {
         setUpdatingVersion(true);
         axiosInstance()
           .get(
-            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            `user/download?fileName=${pdfFileName}`,
             {
               responseType: "blob",
             }
@@ -1645,7 +1652,7 @@ function QuoteDetail() {
 
   const onSuccess = () => {
     setSendEmail(false);
-    handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
+    handleVersionUpdate("", visibleColumns, "Sent to Customer", selectedRecords);
     handleAttachments();
     fetchQuoteData(currentVersion);
   };
@@ -2191,9 +2198,7 @@ function QuoteDetail() {
                               "",
                               visibleColumns,
                               versionStatus,
-                              selectedRecords.length > 0
-                                ? selectedRecords
-                                : TandC
+                              selectedRecords
                             );
                           }}
                         />
@@ -2289,7 +2294,7 @@ function QuoteDetail() {
                                           PDF,
                                           val,
                                           versionStatus,
-                                          TandC
+                                          selectedRecords
                                         );
                                       }}
                                       options={ColumnName}
@@ -2472,16 +2477,17 @@ function QuoteDetail() {
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={
-                                    selectedRecords.length > 0
-                                      ? selectedRecords
-                                      : TandC
-                                  }
+                                  selectedRecords={selectedRecords}
                                   loading={loadingTNC}
-                                  onSelection={(selectedRecords) => {
-                                    setSelectedTnC([
-                                      ...selectedRecords.map((o) => o._id),
-                                    ]);
+                                  onSelection={(newSelectedRecords) => {
+                                    dispatch({ type: "selection", selectedRecords: newSelectedRecords });
+                                    handleVersionUpdate(
+                                      "",
+                                      visibleColumns,
+                                      versionStatus,
+                                      newSelectedRecords
+                                    );
+                                    // setSelectedTnC([...selectedRecords.map((o) => o._id)]);
                                   }}
                                 />
                               </Box>
