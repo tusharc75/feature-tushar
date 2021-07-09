@@ -253,13 +253,25 @@ const QuoteBuilders = () => {
     accountDetails,
   ]);
 
-  const getVersionStatus =  (id, currency) => {
+  const getVersionStatus =  (event,id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
+    if(event){
+      toastConfig.setToastConfig({
+        open: true,
+        type: "info",
+        message: `Please wait...`,
+    });
+    }
     setLoadingVersions(true)
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        // setShowVersionsDialog(true);
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: "Data Retreived successfully",
+      });
+        setShowVersionsDialog(true);
         let quoteId = id;
         const newData = data.versions.map((d, index) => {
           return {
@@ -284,9 +296,9 @@ const QuoteBuilders = () => {
             ...prevState,
             data: newData,
           }
+          
         });
 
-        setShowVersionsDialog(true);
 
         setLoadingVersions(false);
         // setAllVersionStatusButtonText("All Version Status");
@@ -334,8 +346,8 @@ const QuoteBuilders = () => {
         title="Versions">
         <span
           className="cursor-pointer link ml-1"
-          onClick={() => {
-            getVersionStatus(params.data._id, params.data.currency)
+          onClick={(event) => {
+            getVersionStatus(event,params.data._id, params.data.currency)
           }}>({params.data.versionCount})</span>
       </Tooltip>
     </span>
