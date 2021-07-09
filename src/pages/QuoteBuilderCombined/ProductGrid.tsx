@@ -100,6 +100,7 @@ const ProductGrid = (props) => {
             width: 70,
             filter: false,
             show: true,
+            disabled: true,
             cellRenderer: "commonRenderer",
           },
         ];

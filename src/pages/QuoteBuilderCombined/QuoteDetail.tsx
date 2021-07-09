@@ -296,15 +296,19 @@ function QuoteDetail() {
   } = state;
 
   const [gridApi, setTNCGridApi] = useState(null);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [columnsTNC, setColumnsTNC] = useState([]);
 
-  const [columnsTNC] = useState([
-    {
-      field: "name",
-      rowDrag: true,
-      headerName: "Name",
-      cellRenderer: "nameRenderer",
-    },
-  ]);
+  useEffect(() => {
+    setColumnsTNC([
+      {
+        field: "name",
+        rowDrag: allowedToEdit,
+        headerName: "Name",
+        cellRenderer: "nameRenderer",
+      },
+    ])
+  }, [allowedToEdit]);
 
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
@@ -321,7 +325,6 @@ function QuoteDetail() {
   const [quoteFields, setQuoteFields] = useState([]);
 
   const [mainPoints, setMainPoints] = useState(null);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
@@ -404,7 +407,7 @@ function QuoteDetail() {
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
-  const [lastUser, setLastUser] = useState(true);
+  // const [lastUser, setLastUser] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(true);
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
@@ -544,8 +547,6 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
-    fetchDoaLimit();
-
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -588,6 +589,7 @@ function QuoteDetail() {
 
   useEffect(() => {
     getVersionStatus();
+    fetchDoaLimit();
   }, [quoteData]);
 
   /**
@@ -819,8 +821,8 @@ function QuoteDetail() {
   };
 
   const NameRenderer = (params) => (
-    <p
-      className="cursor-pointer"
+    allowedToEdit ? <p
+      className="cursor-pointer link"
       title={params.value}
       onClick={() => {
         setEditRecordTNC(params.data);
@@ -828,7 +830,7 @@ function QuoteDetail() {
       }}
     >
       {params.value}
-    </p>
+    </p> : params.value
   );
 
   const frameworkComponents = {
@@ -1003,7 +1005,7 @@ function QuoteDetail() {
           setDOAsetup(data.doasetup);
           setDOALimit(data.limit ? data.limit : 0);
           setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
-          setLastUser(data.lastUser);
+          // setLastUser(data.lastUser);
         })
         .catch((err) => {
           // toastConfig.setToastConfig(err);
@@ -1012,15 +1014,17 @@ function QuoteDetail() {
   };
 
   const fetchDOAData = () => {
-    axiosInstance()
-      .get(`doa-request/doaFlow/${id}/${currentVersion}`)
-      .then(({ data: { data } }) => {
-        setDOAData(data.reverse());
-      })
-      .catch((err) => {
-        setDOAData(null);
-        // toastConfig.setToastConfig(err);
-      });
+    if (ProcessStatus === "DOA Process") {
+      axiosInstance()
+        .get(`doa-request/doaFlow/${id}/${currentVersion}`)
+        .then(({ data: { data } }) => {
+          setDOAData(data.reverse());
+        })
+        .catch((err) => {
+          setDOAData(null);
+          // toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   useEffect(() => {
@@ -1040,6 +1044,35 @@ function QuoteDetail() {
     )
       fetchSupplierContactData(false);
   }, [quoteData]);
+
+
+  //  Reason of this useEffect:
+  //  When we have doa setup already defined and refresh the screen, DOA Process is not visible in steps
+  //  When we click on next, then that step is getting visible
+  //  The variable which is being used to hide/show that step is written in refreshProduct function
+  useEffect(() => {
+    if (DOAsetup) {
+      axiosInstance()
+        .get(`/productbuilder/getproduct/` + productBuilderID)
+        .then(({ data: { data } }) => {
+          data = data.data?.map((u, index) => ({
+            ...u,
+            id: u._id,
+            srno: index + 1,
+            // productTemplateDisplayValue: u.productTemplate?.optionLabel,
+            productCategoryDisplayValue: u.productCategory?.optionLabel,
+            priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
+          }));
+          const { totalSellingPrice } = productCalculationForDoa(data);
+
+          if (DOAsetup && totalSellingPrice > DOAlimit) {
+            setDOAneeded(true);
+          } else {
+            setDOAneeded(false);
+          }
+        })
+    }
+  }, [DOAsetup])
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -1240,141 +1273,155 @@ function QuoteDetail() {
       });
   };
 
+  const productCalculationForDoa = (BuilderData) => {
+
+    const inventory: { fieldName: string; fieldValue: any }[][] = [];
+    const ignoredKeys = [
+      "fields",
+      "_id",
+      "productId",
+      "templateFields",
+      "id",
+      "string",
+      "srno",
+    ];
+
+    let totalCost = 0;
+    let totalSellingPrice = 0;
+    let totalMargin = 0;
+    let totalProfit = 0;
+    let CostCurrency = "";
+    let SPCurrency = "";
+    let MarginCurrency = "";
+    let ProfitCurrency = "";
+
+    BuilderData = BuilderData.map((data) => ({
+      ...data,
+      [`profitPercentPerUnit`]:
+        data["profitPercentPerUnit"] === null ||
+          data["profitPercentPerUnit"] === undefined
+          ? 0
+          : data["profitPercentPerUnit"],
+      [`commissionPercentPerUnit`]:
+        data["commissionPercentPerUnit"] === null ||
+          data["commissionPercentPerUnit"] === undefined
+          ? 0
+          : data["commissionPercentPerUnit"],
+      [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          null ||
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          undefined
+          ? 0
+          : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
+    }));
+
+    if (ProcessStatus === "Price Builder") {
+      let hasPrice = false;
+      BuilderData.forEach((data) => {
+        if (
+          data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+          data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+          "undefined"
+        ) {
+          hasPrice = true;
+        } else {
+          hasPrice = false;
+        }
+      });
+      const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+      let withZeroAmt = [];
+      if (hasPrice) {
+        withZeroAmt = BuilderData.filter(
+          (d) =>
+            d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+        );
+      }
+
+      if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
+      const quoteRowKeys = Object.keys(quoteRows);
+
+      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+
+      quoteRowKeys.forEach((key) => {
+        if (ignoredKeys.indexOf(key) === -1) {
+          let indexkey = key;
+          let currency = "";
+          if (key.includes("_")) {
+            let splitKey = key.split("_");
+            key = splitKey[0];
+            currency = splitKey[1].toUpperCase();
+          }
+          let fields = quoteRows["fields"];
+          let field = fields.filter(
+            (d: { fieldName: string }) => d.fieldName === key
+          );
+
+          if (typeof field[0] !== "undefined") {
+            if (typeof quoteRows[key] === "object") {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
+              });
+            } else {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue:
+                  quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+              });
+            }
+
+            if (currency === quoteData?.currency && key === "totalCost") {
+              totalCost = totalCost + quoteRows[indexkey];
+              CostCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalSalesPrice"
+            ) {
+              totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+              SPCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalProfit"
+            ) {
+              totalProfit = totalProfit + quoteRows[indexkey];
+              ProfitCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalMargin"
+            ) {
+              totalMargin = totalMargin + quoteRows[indexkey];
+              MarginCurrency = currency;
+            }
+          }
+        }
+      });
+
+      inventory.push(inventorydata);
+    });
+
+    return {
+      inventory: inventory,
+      totalMargin: totalMargin,
+      totalSellingPrice: totalSellingPrice,
+      totalCost: totalCost,
+      totalProfit: totalProfit
+    };
+  }
+
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     if (BuilderData.length) {
       setOptions([]);
       setRedCard(false);
       let optionstoSet = [];
 
-      const inventory: { fieldName: string; fieldValue: any }[][] = [];
-      const ignoredKeys = [
-        "fields",
-        "_id",
-        "productId",
-        "templateFields",
-        "id",
-        "string",
-        "srno",
-      ];
-      let totalCost = 0;
-      let totalSellingPrice = 0;
-      let totalMargin = 0;
-      let totalProfit = 0;
-      let CostCurrency = "";
-      let SPCurrency = "";
-      let MarginCurrency = "";
-      let ProfitCurrency = "";
-
-      BuilderData = BuilderData.map((data) => ({
-        ...data,
-        [`profitPercentPerUnit`]:
-          data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
-            ? 0
-            : data["profitPercentPerUnit"],
-        [`commissionPercentPerUnit`]:
-          data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
-            ? 0
-            : data["commissionPercentPerUnit"],
-        [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
-            null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
-            undefined
-            ? 0
-            : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
-      }));
-
-      if (ProcessStatus === "Price Builder") {
-        let hasPrice = false;
-        BuilderData.forEach((data) => {
-          if (
-            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
-          ) {
-            hasPrice = true;
-          } else {
-            hasPrice = false;
-          }
-        });
-        const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-        let withZeroAmt = [];
-        if (hasPrice) {
-          withZeroAmt = BuilderData.filter(
-            (d) =>
-              d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-          );
-        }
-
-        if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-          setNextStep(true);
-        } else {
-          setNextStep(false);
-        }
-      }
-      BuilderData.forEach((quoteRows: { [x: string]: any }) => {
-        const quoteRowKeys = Object.keys(quoteRows);
-
-        let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-
-        quoteRowKeys.forEach((key) => {
-          if (ignoredKeys.indexOf(key) === -1) {
-            let indexkey = key;
-            let currency = "";
-            if (key.includes("_")) {
-              let splitKey = key.split("_");
-              key = splitKey[0];
-              currency = splitKey[1].toUpperCase();
-            }
-            let fields = quoteRows["fields"];
-            let field = fields.filter(
-              (d: { fieldName: string }) => d.fieldName === key
-            );
-
-            if (typeof field[0] !== "undefined") {
-              if (typeof quoteRows[key] === "object") {
-                inventorydata.push({
-                  fieldName: field[0].fieldLabel,
-                  fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-                });
-              } else {
-                inventorydata.push({
-                  fieldName: field[0].fieldLabel,
-                  fieldValue:
-                    quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-                });
-              }
-
-              if (currency === quoteData?.currency && key === "totalCost") {
-                totalCost = totalCost + quoteRows[indexkey];
-                CostCurrency = currency;
-              } else if (
-                currency === quoteData?.currency &&
-                key === "totalSalesPrice"
-              ) {
-                totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                SPCurrency = currency;
-              } else if (
-                currency === quoteData?.currency &&
-                key === "totalProfit"
-              ) {
-                totalProfit = totalProfit + quoteRows[indexkey];
-                ProfitCurrency = currency;
-              } else if (
-                currency === quoteData?.currency &&
-                key === "totalMargin"
-              ) {
-                totalMargin = totalMargin + quoteRows[indexkey];
-                MarginCurrency = currency;
-              }
-            }
-          }
-        });
-
-        inventory.push(inventorydata);
-      });
+      const { inventory, totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
 
       setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
       setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
@@ -1390,7 +1437,7 @@ function QuoteDetail() {
       setButtonMessage("Send to Customer");
       setDOAreq(false);
       setCustomerreq(true);
-      if (DOAsetup && totalSellingPrice > DOAlimit && !lastUser) {
+      if (DOAsetup && totalSellingPrice > DOAlimit) {
         setDOAneeded(true);
       } else {
         setDOAneeded(false);
@@ -1398,8 +1445,7 @@ function QuoteDetail() {
       if (
         DOAsetup &&
         totalSellingPrice > DOAlimit &&
-        versionStatus === "Building Quote" &&
-        !lastUser
+        versionStatus === "Building Quote"
       ) {
         setDOAreq(true);
         setCustomerreq(false);
@@ -2134,9 +2180,10 @@ function QuoteDetail() {
                                   variant="outlined"
                                   size="small"
                                   disabled={
-                                    deletingDOA || loading || DOAneeded
+                                    !allowedToEdit ||
+                                    deletingDOA || loading || (DOAneeded
                                       ? DOASteps.indexOf(ProcessStatus) > 1
-                                      : OtherSteps.indexOf(ProcessStatus) > 1
+                                      : OtherSteps.indexOf(ProcessStatus) > 1)
                                   }
                                   onClick={deleteVersion}
                                 >
@@ -2144,7 +2191,7 @@ function QuoteDetail() {
                                 </Button>
                               )}
                               <Button
-                                disabled={isCloning || loading}
+                                disabled={!allowedToEdit || isCloning || loading}
                                 variant="contained"
                                 type="button"
                                 size="small"
@@ -2243,7 +2290,7 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
+                              ProcessStatus === "New" && allowedToEdit ? (
                               <span className={`${classes.productPos} m-2`}>
                                 <Button
                                   variant="outlined"
@@ -2284,6 +2331,7 @@ function QuoteDetail() {
                                   >
                                     <Autocomplete
                                       id="demo-mutiple-chip"
+                                      disabled={!allowedToEdit}
                                       fullWidth
                                       size="small"
                                       multiple
@@ -2324,6 +2372,7 @@ function QuoteDetail() {
                                 </Grid>
                                 <Grid item xs={1} md={1} sm={1}>
                                   <IconButton
+                                    disabled={!allowedToEdit}
                                     title="Re-arrange columns"
                                     color="inherit"
                                     onClick={() => setRearrangeColumns(true)}
@@ -2342,7 +2391,7 @@ function QuoteDetail() {
                                   <Button
                                     onClick={() => handleCases()}
                                     disabled={
-                                      (!DOAreq && !Customerreq) || loading
+                                      !allowedToEdit || (!DOAreq && !Customerreq) || loading
                                     }
                                     startIcon={<BiMailSend />}
                                     variant="contained"
@@ -2429,8 +2478,8 @@ function QuoteDetail() {
                                     ProcessStatus === "Price Builder"
                                   }
                                   Editable={
-                                    ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    allowedToEdit && (ProcessStatus === "Price Builder" ||
+                                      ProcessStatus === "New")
                                       ? true
                                       : false
                                   }
@@ -2452,6 +2501,7 @@ function QuoteDetail() {
                                     Additional Data
                                   </h4>
                                   <Button
+                                    disabled={!allowedToEdit}
                                     onClick={() => setShowCreateDialog(true)}
                                     variant="contained"
                                     size="small"
@@ -2473,7 +2523,7 @@ function QuoteDetail() {
                                   pageSizes={pageSizes}
                                   page={page}
                                   actionWidth={150}
-                                  allowSelection={true}
+                                  allowSelection={allowedToEdit}
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
