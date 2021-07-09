@@ -178,7 +178,6 @@ const CurrencyConverter = () => {
     return result;
   }
 
-  console.log(permissions)
   return (
     <Layout>
       <Grid container className="headerbox">
