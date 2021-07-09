@@ -469,7 +469,9 @@ const QuoteApproval = () => {
                             </Grid>
 
                             {
-                                pdf ? <object style={{ height: "calc(100vh - 200px)", width: "100vw" }} data={`data:application/pdf;base64,${pdf}`} type="application/pdf"></object>
+                                pdf ? <object style={{ height: "calc(100vh - 200px)", width: "100vw" }} data={`data:application/pdf;base64,${pdf}`} type="application/pdf">
+                                    <span className="d-flex align-items-center">This browser does not support PDF preview. Try with another browser.</span>
+                                </object>
                                     : ""
                             }
 

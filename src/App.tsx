@@ -106,8 +106,6 @@ function App() {
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
 
-  console.log(process.env.REACT_APP_ENV);
-
   const getVersion = () => {
     setTimeout(() => {
       axiosInstance()
