@@ -15,6 +15,7 @@ import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
+import { Formik, Form } from "formik";
 import { cloneDeep } from "lodash";
 import {
   customerAccount,
@@ -40,6 +41,8 @@ import AssignSupplierContactsDialog from "./AssignSupplierContactsDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProcessFlow from "../../components/ProcessFlow";
+import FormTypes from "../../components/Helpers/FormTypes";
+
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -89,8 +92,13 @@ function OpportunityDetailsPage() {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
+  const [showAtLast, setShowAtLast] = useState(false)
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
 
   const handleOpenUpdateDialog = () => {
+    if(activeStep === steps.length - 1 ){
+      setShowAtLast(true)
+    }
     setOpenUpdateDialog(true);
   };
 
@@ -476,6 +484,7 @@ function OpportunityDetailsPage() {
               setSectionFields((prevItems) => {
                 return [...prevItems, d.fieldData.fieldLabel];
               });
+              setAdditionalFieldName(d.fieldData.sectionName)
             }
           });
         })
@@ -600,6 +609,7 @@ function OpportunityDetailsPage() {
 
   const handleSave = (data) => {
     setIsProcessing(true);
+    setShowAtLast(true)
     setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -636,6 +646,7 @@ function OpportunityDetailsPage() {
   };
 
   const handleMarkAsCompleted = (data) => {
+    setShowAtLast(false)
     setIsProcessing(true);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -685,6 +696,8 @@ function OpportunityDetailsPage() {
       (s) => s.optionValue
     );
   }
+
+  let filteredOpportunityFields = opportunityFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
 
   return (
     <>
@@ -767,14 +780,24 @@ function OpportunityDetailsPage() {
                 <>
                   <TabPanel value={currentTabIndex} index={0}>
                     <Box padding="16px">
-                      <DetailsPage
+                      {showAtLast ? (<DetailsPage
                         data={copyOfOpportunityData}
                         fields={opportunityFields.filter(
                           (currentField) =>
                             currentField.fieldData?.fieldName !==
                             "supplierAccountName"
                         )}
+                      />): (
+                        <DetailsPage
+                        data={copyOfOpportunityData}
+                        fields={filteredOpportunityFields.filter(
+                          (currentField) =>
+                            currentField.fieldData?.fieldName !==
+                            "supplierAccountName"
+                        )}
                       />
+                      )}
+                      
                     </Box>
                     <div className="p-3">
                       {opportunityData && (
@@ -929,7 +952,7 @@ function OpportunityDetailsPage() {
               handleSubmit={handleUpdateOpportunity}
             />
           ): null} */}
-
+        
         {openUpdateDialog && (
           <ManageOpportunityDialog
             open={openUpdateDialog}
@@ -1027,6 +1050,60 @@ function OpportunityDetailsPage() {
               {sectionFields.map((item) => (
                 <CustomDialogContent>{item}</CustomDialogContent>
               ))}
+              {/* <Formik
+               initialValues={opportunityData.initialValues} 
+              onSubmit={handleSave}  >
+              {
+                ({
+                  submitForm,
+              values,
+              errors,
+              touched,
+              setFieldValue,
+              setFieldTouched,
+              setErrors,
+              setValues,
+                })=> (
+                  <>
+                  <CustomDialogContent>
+                   <Form>
+                   <Box marginY={2}>
+                   <Grid spacing={3} container>
+                     {sectionFields.map((field, index2)=>(
+                        <Grid>
+                        <FormTypes
+                          
+                          values={values}
+                          errors={errors}
+                          touched={touched}
+                          label={field.fieldLabel}
+                          name={field.fieldName}
+                          type={field.type}
+                         
+                          setFieldValue={setFieldValue}
+                          required={field.required}
+                          fullWidth
+                          isTooltip={
+                            field?.isTooltip || false
+                          }
+                          tooltipMessage={
+                            field?.tooltipMessage
+                          }
+                          size="small"
+                          doNotShowInfoTooltip={true}
+                        />
+                      </Grid>
+                     ))}
+                   </Grid>
+                   </Box>
+                   </Form>
+                  </CustomDialogContent>
+                  </>
+                )
+              }
+             
+                 
+                  </Formik> */}
 
               <CustomDialogFooter>
                 <Button

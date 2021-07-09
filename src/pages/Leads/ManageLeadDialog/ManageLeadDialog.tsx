@@ -58,11 +58,25 @@ export default function ManageLeadDialog({
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
   useEffect(() => {
+    if(isNew){
+      const processSteps = leadData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
+      );
+    
+      leadData.fields.map((d) => {
+        if (
+          d.sectionName ==processSteps.additionalInfoSection ) {
+         
+          setAdditionalFieldName(d.sectionName)
+        }
+      });
+    }
+   
     const ownerCollabOptions = leadData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
@@ -246,7 +260,7 @@ export default function ManageLeadDialog({
               <CustomDialogContent>
                 <Form>
                   {formsData &&
-                    formsData.map((form, i) => {
+                    formsData.filter((item)=>item.name!==additionalFieldName).map((form, i) => {
                       return (
                         form.name && (
                           <div key={i}>

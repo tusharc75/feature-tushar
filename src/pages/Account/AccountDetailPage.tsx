@@ -129,6 +129,8 @@ export default function AccountDetailPage(props) {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
+  const [showAtLast, setShowAtLast] = useState(false)
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [processLast, setProcessLast] = useState(false);
   const [
     showAccountHierarchyInFullScreenDialog,
@@ -391,6 +393,7 @@ export default function AccountDetailPage(props) {
             setSectionFields((prevItems) => {
               return [...prevItems, d.fieldData.fieldLabel];
             });
+            setAdditionalFieldName(d.fieldData.sectionName)
           }
         });
       });
@@ -536,6 +539,9 @@ export default function AccountDetailPage(props) {
   };
 
   const handleOpneUpdateDialog = () => {
+    if(activeStep === steps.length - 1 ){
+      setShowAtLast(true)
+    }
     setOpenUpdateDialog(true);
   };
 
@@ -549,6 +555,7 @@ export default function AccountDetailPage(props) {
 
   const handleSave = (data) => {
     setIsProcessing(true);
+    setShowAtLast(true)
     setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -585,6 +592,7 @@ export default function AccountDetailPage(props) {
   };
 
   const handleMarkAsCompleted = (data) => {
+    setShowAtLast(false)
     setIsProcessing(true);
     let tempActiveStep =
       data && data?.isSetBackStep
@@ -627,6 +635,8 @@ export default function AccountDetailPage(props) {
     //   setOpenAdditionalDialog(true);
     // }
   };
+
+  let filteredAccountFields = accountFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
 
   return (
     <>
@@ -752,10 +762,9 @@ export default function AccountDetailPage(props) {
                     </Tabs>
                     {currentTabIndex === 0 && (
                       <Box>
-                        <DetailsPage
-                          data={accountData}
-                          fields={accountFields}
-                        />
+                        {showAtLast? (<DetailsPage data={accountData} fields={accountFields} />): 
+                        <DetailsPage data={accountData} fields={filteredAccountFields} />
+                      }
                       </Box>
                     )}
 
@@ -1036,7 +1045,7 @@ export default function AccountDetailPage(props) {
               onOk={handleApproveDisapprove}
             />
           ) : null}
-          {openUpdateDialog && (
+          {openUpdateDialog &&  showAtLast ?(
             <ManageAccount
               isNew={false}
               open={openUpdateDialog}
@@ -1056,7 +1065,27 @@ export default function AccountDetailPage(props) {
               handleSubmit={onUpdateAccount}
               accountId={accountData?._id}
             />
-          )}
+          ): openUpdateDialog ? (
+            <ManageAccount
+            isNew={false}
+            open={openUpdateDialog}
+            onClose={closeUpdateDIalog}
+            accountData={{
+              fields: filteredAccountFields.map((f) => {
+                return f.fieldData;
+              }),
+              initialValues: getObjKeysWithValues(
+                accountData,
+                filteredAccountFields.map((f) => {
+                  return f.fieldData;
+                })
+              ),
+            }}
+            loading={loading}
+            handleSubmit={onUpdateAccount}
+            accountId={accountData?._id}
+          />
+          ): null}
 
           {showCreateOpportunityDialog && (
             <ManageOpportunityDialog
