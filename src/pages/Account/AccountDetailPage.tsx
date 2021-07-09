@@ -601,7 +601,7 @@ export default function AccountDetailPage(props) {
     }
 
     const updatedData = {
-      ...getObjKeysWithValues(accountData, accountFieldData),
+      ...getObjKeysWithValues(updatedAccountData, accountFieldData),
       [processFieldName]: steps[tempActiveStep].text,
       _id: accountData._id,
     };
