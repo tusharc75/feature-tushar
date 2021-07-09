@@ -91,6 +91,7 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import VersionStatus from "./VersionStatus";
 import ColumnsDialog from "./ColumnsDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -232,6 +233,16 @@ const useStyles = makeStyles((theme) => ({
     top: "4px",
     right: "20px",
   },
+  productPos: {
+    position: "absolute",
+    top: "1px",
+    left: "6px",
+    [theme.breakpoints.down("xs")]: {
+      position: "static",
+      display: "flex",
+      alignItems: "center"
+    },
+  }
 }));
 
 function QuoteDetail() {
@@ -285,17 +296,21 @@ function QuoteDetail() {
   } = state;
 
   const [gridApi, setTNCGridApi] = useState(null);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [columnsTNC, setColumnsTNC] = useState([]);
 
-  const [columnsTNC] = useState([
-    {
-      field: "name",
-      rowDrag: true,
-      headerName: "Name",
-      cellRenderer: "nameRenderer",
-    },
-  ]);
+  useEffect(() => {
+    setColumnsTNC([
+      {
+        field: "name",
+        rowDrag: allowedToEdit,
+        headerName: "Name",
+        cellRenderer: "nameRenderer",
+        show: true,
+      },
+    ])
+  }, [allowedToEdit]);
 
-  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -311,7 +326,6 @@ function QuoteDetail() {
   const [quoteFields, setQuoteFields] = useState([]);
 
   const [mainPoints, setMainPoints] = useState(null);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
@@ -345,7 +359,7 @@ function QuoteDetail() {
 
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [TandC, setTNC] = useState([]);
+
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
@@ -374,7 +388,6 @@ function QuoteDetail() {
   const [DOAneeded, setDOAneeded] = useState(false);
   const [isRearrangeColumns, setRearrangeColumns] = useState(false);
 
-  const [dataTNC, setDataTNC] = useState([]);
 
   const [editRecordTNC, setEditRecordTNC] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
@@ -384,7 +397,6 @@ function QuoteDetail() {
   const [columnView, setColumnView] = useState([]);
   const [PDF, setPdf] = useState("");
   const [PDFAttachment, setPdfAttachment] = useState("");
-  const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
 
@@ -392,14 +404,11 @@ function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
 
-  let logo = null;
-  let companyName = "";
-  let companyAddress = "";
   const [DOAData, setDOAData] = useState(null);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
-  const [lastUser, setLastUser] = useState(true);
+  // const [lastUser, setLastUser] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(true);
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
@@ -466,14 +475,14 @@ function QuoteDetail() {
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [updatingVersion, setUpdatingVersion] = useState(false);
   const [generatingPdfFile, setGeneratingFile] = useState(false);
-  const [generatingPdf, setGeneratingPdf] = useState({
-    show: false,
-    text: null,
-  });
-  const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(
-    user?.user?.brandQuoteDigitalSignature
-  );
+  // const [prevVersionTNC, setPrevVersionTNC] = useState([]);
+
+  const [pdfFileName, setPdfFileName] = useState("");
+  // const [TandC, setTNC] = useState([]);
+  // const [selectedTnC, setSelectedTnC] = useState([]);
+  // const [dataTNC, setDataTNC] = useState([]);
+
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -532,8 +541,6 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
-    fetchDoaLimit();
-
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -546,7 +553,6 @@ function QuoteDetail() {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setGeneratingPdf({ show: false, text: null });
       });
   }, []);
 
@@ -576,11 +582,8 @@ function QuoteDetail() {
 
   useEffect(() => {
     getVersionStatus();
+    fetchDoaLimit();
   }, [quoteData]);
-
-  useEffect(() => {
-    fetchTermsAndConditions();
-  }, []);
 
   /**
    *
@@ -590,9 +593,9 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
-      if (selectedRecords.length > 0) {
-        setTNC(selectedRecords);
-      }
+      // if (selectedRecords.length > 0) {
+      //   setTNC(selectedRecords);
+      // }
       setLoading(true);
       setNextStep(true);
       axiosInstance()
@@ -605,12 +608,12 @@ function QuoteDetail() {
 
           // handleAllowToEditList(data);
           setQuoteData(data);
-          if (data?.versions) {
-            let lastVersionData = data?.versions[currentVersion - 1];
-            if (lastVersionData && lastVersionData.TNC) {
-              setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
-            }
-          }
+          // if (data?.versions) {
+          //   let lastVersionData = data?.versions[currentVersion - 1];
+          //   if (lastVersionData && lastVersionData.TNC) {
+          //     setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
+          //   }
+          // }
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -651,7 +654,9 @@ function QuoteDetail() {
             );
             setversionStatus(data.versions[keys[keys.length - 1]].status);
             if (data.versions[keys[keys.length - 1]].TNC) {
-              setTNC(data.versions[keys[keys.length - 1]].TNC);
+              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
+              fetchTermsAndConditions(data.versions[keys[keys.length - 1]].TNC);
+              // setTNC(data.versions[keys[keys.length - 1]].TNC);
             }
             if (data.versions[keys[keys.length - 1]].acceptedColumns) {
               setColumnView(
@@ -675,7 +680,9 @@ function QuoteDetail() {
             setProductBuilderID(data.versions[version].productBuilderId);
             setversionStatus(data.versions[version].status);
             if (data.versions[version].TNC) {
-              setTNC(data.versions[version].TNC);
+              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
+              fetchTermsAndConditions(data.versions[version].TNC);
+              // setTNC(data.versions[version].TNC);
             }
             if (data.versions[version].acceptedColumns) {
               setColumnView(data.versions[version].acceptedColumns);
@@ -807,8 +814,8 @@ function QuoteDetail() {
   };
 
   const NameRenderer = (params) => (
-    <p
-      className="cursor-pointer"
+    allowedToEdit ? <p
+      className="cursor-pointer link"
       title={params.value}
       onClick={() => {
         setEditRecordTNC(params.data);
@@ -816,7 +823,7 @@ function QuoteDetail() {
       }}
     >
       {params.value}
-    </p>
+    </p> : params.value
   );
 
   const frameworkComponents = {
@@ -827,7 +834,7 @@ function QuoteDetail() {
    * @TNC HANDLER
    */
 
-  const fetchTermsAndConditions = () => {
+  const fetchTermsAndConditions = (selectedTermsAndConstions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
@@ -838,8 +845,10 @@ function QuoteDetail() {
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         let selectedRows = [];
+        const onlyTermsAndConditionsIds = selectedTermsAndConstions ? selectedTermsAndConstions.map(d => d._id) : selectedRecords.map(d => d._id);
+
         let rows = data.map((tnc, i) => {
-          if (selectedTnC.indexOf(tnc._id) >= 0) {
+          if (onlyTermsAndConditionsIds.indexOf(tnc._id) >= 0) {
             selectedRows.push(tnc);
           }
           return {
@@ -853,8 +862,18 @@ function QuoteDetail() {
           data: rows,
           count: count,
         });
+
+        if (updateVersionStatus) {
+          handleVersionUpdate(
+            "",
+            visibleColumns,
+            versionStatus,
+            selectedRows
+          );
+        }
+
         dispatch({ type: "selection", selectedRecords: selectedRows });
-        setDataTNC(data);
+        // setDataTNC(data);
         setTimeout(() => {
           dispatch({ type: "loading", loadingTNC: false });
         }, gridLoadingTimeout);
@@ -982,29 +1001,33 @@ function QuoteDetail() {
   };
 
   const fetchDoaLimit = () => {
-    axiosInstance()
-      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
-      .then(({ data: { data } }) => {
-        setDOAsetup(data.doasetup);
-        setDOALimit(data.limit ? data.limit : 0);
-        setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
-        setLastUser(data.lastUser);
-      })
-      .catch((err) => {
-        // toastConfig.setToastConfig(err);
-      });
+    if (quoteData) {
+      axiosInstance()
+        .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
+        .then(({ data: { data } }) => {
+          setDOAsetup(data.doasetup);
+          setDOALimit(data.limit ? data.limit : 0);
+          setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
+          // setLastUser(data.lastUser);
+        })
+        .catch((err) => {
+          // toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   const fetchDOAData = () => {
-    axiosInstance()
-      .get(`doa-request/doaFlow/${id}/${currentVersion}`)
-      .then(({ data: { data } }) => {
-        setDOAData(data.reverse());
-      })
-      .catch((err) => {
-        setDOAData(null);
-        // toastConfig.setToastConfig(err);
-      });
+    if (ProcessStatus === "DOA Process") {
+      axiosInstance()
+        .get(`doa-request/doaFlow/${id}/${currentVersion}`)
+        .then(({ data: { data } }) => {
+          setDOAData(data.reverse());
+        })
+        .catch((err) => {
+          setDOAData(null);
+          // toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   useEffect(() => {
@@ -1024,6 +1047,35 @@ function QuoteDetail() {
     )
       fetchSupplierContactData(false);
   }, [quoteData]);
+
+
+  //  Reason of this useEffect:
+  //  When we have doa setup already defined and refresh the screen, DOA Process is not visible in steps
+  //  When we click on next, then that step is getting visible
+  //  The variable which is being used to hide/show that step is written in refreshProduct function
+  useEffect(() => {
+    if (DOAsetup) {
+      axiosInstance()
+        .get(`/productbuilder/getproduct/` + productBuilderID)
+        .then(({ data: { data } }) => {
+          data = data.data?.map((u, index) => ({
+            ...u,
+            id: u._id,
+            srno: index + 1,
+            // productTemplateDisplayValue: u.productTemplate?.optionLabel,
+            productCategoryDisplayValue: u.productCategory?.optionLabel,
+            priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
+          }));
+          const { totalSellingPrice } = productCalculationForDoa(data);
+
+          if (DOAsetup && totalSellingPrice > DOAlimit) {
+            setDOAneeded(true);
+          } else {
+            setDOAneeded(false);
+          }
+        })
+    }
+  }, [DOAsetup])
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -1224,141 +1276,155 @@ function QuoteDetail() {
       });
   };
 
+  const productCalculationForDoa = (BuilderData) => {
+
+    const inventory: { fieldName: string; fieldValue: any }[][] = [];
+    const ignoredKeys = [
+      "fields",
+      "_id",
+      "productId",
+      "templateFields",
+      "id",
+      "string",
+      "srno",
+    ];
+
+    let totalCost = 0;
+    let totalSellingPrice = 0;
+    let totalMargin = 0;
+    let totalProfit = 0;
+    let CostCurrency = "";
+    let SPCurrency = "";
+    let MarginCurrency = "";
+    let ProfitCurrency = "";
+
+    BuilderData = BuilderData.map((data) => ({
+      ...data,
+      [`profitPercentPerUnit`]:
+        data["profitPercentPerUnit"] === null ||
+          data["profitPercentPerUnit"] === undefined
+          ? 0
+          : data["profitPercentPerUnit"],
+      [`commissionPercentPerUnit`]:
+        data["commissionPercentPerUnit"] === null ||
+          data["commissionPercentPerUnit"] === undefined
+          ? 0
+          : data["commissionPercentPerUnit"],
+      [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          null ||
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          undefined
+          ? 0
+          : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
+    }));
+
+    if (ProcessStatus === "Price Builder") {
+      let hasPrice = false;
+      BuilderData.forEach((data) => {
+        if (
+          data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+          data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+          "undefined"
+        ) {
+          hasPrice = true;
+        } else {
+          hasPrice = false;
+        }
+      });
+      const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+      let withZeroAmt = [];
+      if (hasPrice) {
+        withZeroAmt = BuilderData.filter(
+          (d) =>
+            d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+        );
+      }
+
+      if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
+      const quoteRowKeys = Object.keys(quoteRows);
+
+      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+
+      quoteRowKeys.forEach((key) => {
+        if (ignoredKeys.indexOf(key) === -1) {
+          let indexkey = key;
+          let currency = "";
+          if (key.includes("_")) {
+            let splitKey = key.split("_");
+            key = splitKey[0];
+            currency = splitKey[1].toUpperCase();
+          }
+          let fields = quoteRows["fields"];
+          let field = fields.filter(
+            (d: { fieldName: string }) => d.fieldName === key
+          );
+
+          if (typeof field[0] !== "undefined") {
+            if (typeof quoteRows[key] === "object") {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
+              });
+            } else {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue:
+                  quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+              });
+            }
+
+            if (currency === quoteData?.currency && key === "totalCost") {
+              totalCost = totalCost + quoteRows[indexkey];
+              CostCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalSalesPrice"
+            ) {
+              totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+              SPCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalProfit"
+            ) {
+              totalProfit = totalProfit + quoteRows[indexkey];
+              ProfitCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalMargin"
+            ) {
+              totalMargin = totalMargin + quoteRows[indexkey];
+              MarginCurrency = currency;
+            }
+          }
+        }
+      });
+
+      inventory.push(inventorydata);
+    });
+
+    return {
+      inventory: inventory,
+      totalMargin: totalMargin,
+      totalSellingPrice: totalSellingPrice,
+      totalCost: totalCost,
+      totalProfit: totalProfit
+    };
+  }
+
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     if (BuilderData.length) {
       setOptions([]);
       setRedCard(false);
       let optionstoSet = [];
 
-      const inventory: { fieldName: string; fieldValue: any }[][] = [];
-      const ignoredKeys = [
-        "fields",
-        "_id",
-        "productId",
-        "templateFields",
-        "id",
-        "string",
-        "srno",
-      ];
-      let totalCost = 0;
-      let totalSellingPrice = 0;
-      let totalMargin = 0;
-      let totalProfit = 0;
-      let CostCurrency = "";
-      let SPCurrency = "";
-      let MarginCurrency = "";
-      let ProfitCurrency = "";
-
-      BuilderData = BuilderData.map((data) => ({
-        ...data,
-        [`profitPercentPerUnit`]:
-          data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
-            ? 0
-            : data["profitPercentPerUnit"],
-        [`commissionPercentPerUnit`]:
-          data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
-            ? 0
-            : data["commissionPercentPerUnit"],
-        [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
-            null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
-            undefined
-            ? 0
-            : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
-      }));
-
-      if (ProcessStatus === "Price Builder") {
-        let hasPrice = false;
-        BuilderData.forEach((data) => {
-          if (
-            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
-          ) {
-            hasPrice = true;
-          } else {
-            hasPrice = false;
-          }
-        });
-        const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-        let withZeroAmt = [];
-        if (hasPrice) {
-          withZeroAmt = BuilderData.filter(
-            (d) =>
-              d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-          );
-        }
-
-        if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-          setNextStep(true);
-        } else {
-          setNextStep(false);
-        }
-      }
-      BuilderData.forEach((quoteRows: { [x: string]: any }) => {
-        const quoteRowKeys = Object.keys(quoteRows);
-
-        let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-
-        quoteRowKeys.forEach((key) => {
-          if (ignoredKeys.indexOf(key) === -1) {
-            let indexkey = key;
-            let currency = "";
-            if (key.includes("_")) {
-              let splitKey = key.split("_");
-              key = splitKey[0];
-              currency = splitKey[1].toUpperCase();
-            }
-            let fields = quoteRows["fields"];
-            let field = fields.filter(
-              (d: { fieldName: string }) => d.fieldName === key
-            );
-
-            if (typeof field[0] !== "undefined") {
-              if (typeof quoteRows[key] === "object") {
-                inventorydata.push({
-                  fieldName: field[0].fieldLabel,
-                  fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-                });
-              } else {
-                inventorydata.push({
-                  fieldName: field[0].fieldLabel,
-                  fieldValue:
-                    quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-                });
-              }
-
-              if (currency === quoteData?.currency && key === "totalCost") {
-                totalCost = totalCost + quoteRows[indexkey];
-                CostCurrency = currency;
-              } else if (
-                currency === quoteData?.currency &&
-                key === "totalSalesPrice"
-              ) {
-                totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                SPCurrency = currency;
-              } else if (
-                currency === quoteData?.currency &&
-                key === "totalProfit"
-              ) {
-                totalProfit = totalProfit + quoteRows[indexkey];
-                ProfitCurrency = currency;
-              } else if (
-                currency === quoteData?.currency &&
-                key === "totalMargin"
-              ) {
-                totalMargin = totalMargin + quoteRows[indexkey];
-                MarginCurrency = currency;
-              }
-            }
-          }
-        });
-
-        inventory.push(inventorydata);
-      });
+      const { inventory, totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
 
       setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
       setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
@@ -1374,7 +1440,7 @@ function QuoteDetail() {
       setButtonMessage("Send to Customer");
       setDOAreq(false);
       setCustomerreq(true);
-      if (DOAsetup && totalSellingPrice > DOAlimit && !lastUser) {
+      if (DOAsetup && totalSellingPrice > DOAlimit) {
         setDOAneeded(true);
       } else {
         setDOAneeded(false);
@@ -1382,8 +1448,7 @@ function QuoteDetail() {
       if (
         DOAsetup &&
         totalSellingPrice > DOAlimit &&
-        versionStatus === "Building Quote" &&
-        !lastUser
+        versionStatus === "Building Quote"
       ) {
         setDOAreq(true);
         setCustomerreq(false);
@@ -1401,7 +1466,7 @@ function QuoteDetail() {
         versionStatus === "Rejected by Customer" ||
         versionStatus === "Not Booked by Customer" ||
         versionStatus === "Invalid by Customer" ||
-        versionStatus === "Booked by Customer" 
+        versionStatus === "Booked by Customer"
       ) {
         setDOAreq(false);
         setCustomerreq(false);
@@ -1439,7 +1504,7 @@ function QuoteDetail() {
       axiosInstance()
         .post(`/doa-request/create/${id}?version=${currentVersion}`)
         .then(({ data }) => {
-          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", selectedRecords);
           fetchQuoteData(currentVersion);
         })
         .catch((err) => {
@@ -1453,7 +1518,7 @@ function QuoteDetail() {
         setGeneratingFile(true);
         axiosInstance()
           .get(
-            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            `user/download?fileName=${pdfFileName}`,
             {
               responseType: "blob",
             }
@@ -1472,7 +1537,7 @@ function QuoteDetail() {
 
   const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
-    handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
+    handleVersionUpdate(PDF, event.target.value, versionStatus, selectedRecords);
   };
 
   function getStyles(name, personName, theme) {
@@ -1489,7 +1554,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        TandC
+        selectedRecords
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1505,14 +1570,16 @@ function QuoteDetail() {
     PDFfile,
     Columns,
     versionStatus,
-    TC,
+    selectedTermsAndConditions,
     view = false,
     download = false
   ) => {
     let body = {
       acceptedColumns: Columns,
       status: versionStatus,
-      TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
+      //  Old
+      //  TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
+      TNC: selectedTermsAndConditions,
     };
 
     setUpdatingVersion(true);
@@ -1521,6 +1588,7 @@ function QuoteDetail() {
       .then(({ data: { data } }) => {
         setUpdatingVersion(false);
 
+        setPdfFileName(data.fileName)
         if (view && data.fileName) {
           setUpdatingVersion(true);
           axiosInstance()
@@ -1569,14 +1637,13 @@ function QuoteDetail() {
   };
 
   const handleViewPdf = (view = false, download = false) => {
-    const pdfFileName = quoteData.versions[currentVersion].PDF;
 
     if (!pdfFileName) {
       handleVersionUpdate(
         "",
         visibleColumns,
         versionStatus,
-        selectedRecords.length > 0 ? selectedRecords : TandC,
+        selectedRecords,
         view,
         download
       );
@@ -1586,7 +1653,7 @@ function QuoteDetail() {
         setUpdatingVersion(true);
         axiosInstance()
           .get(
-            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            `user/download?fileName=${pdfFileName}`,
             {
               responseType: "blob",
             }
@@ -1605,7 +1672,7 @@ function QuoteDetail() {
         setUpdatingVersion(true);
         axiosInstance()
           .get(
-            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+            `user/download?fileName=${pdfFileName}`,
             {
               responseType: "blob",
             }
@@ -1634,7 +1701,7 @@ function QuoteDetail() {
 
   const onSuccess = () => {
     setSendEmail(false);
-    handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
+    handleVersionUpdate("", visibleColumns, "Sent to Customer", selectedRecords);
     handleAttachments();
     fetchQuoteData(currentVersion);
   };
@@ -1915,7 +1982,7 @@ function QuoteDetail() {
                         color: tabValue === 0 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <InfoIcon className="mr-1" fontSize="inherit" /> All
                           Version Status
                         </div>
@@ -1928,7 +1995,7 @@ function QuoteDetail() {
                         color: tabValue === 1 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
                           Details
                         </div>
@@ -1941,7 +2008,7 @@ function QuoteDetail() {
                         color: tabValue === 2 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
                           Quote Versions
                         </div>
@@ -2085,7 +2152,7 @@ function QuoteDetail() {
                           xs={ProcessStatus === "New" ? 12 : 12}
                           sm={ProcessStatus === "New" ? 12 : 5}
                           md={ProcessStatus === "New" ? 12 : 5}
-                          className="d-flex justify-content-end"
+                          className="d-flex align-items-center justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
                             <Button
@@ -2116,17 +2183,18 @@ function QuoteDetail() {
                                   variant="outlined"
                                   size="small"
                                   disabled={
-                                    deletingDOA || loading || DOAneeded
+                                    !allowedToEdit ||
+                                    deletingDOA || loading || (DOAneeded
                                       ? DOASteps.indexOf(ProcessStatus) > 1
-                                      : OtherSteps.indexOf(ProcessStatus) > 1
+                                      : OtherSteps.indexOf(ProcessStatus) > 1)
                                   }
                                   onClick={deleteVersion}
                                 >
-                                  Delete Version
+                                  Delete
                                 </Button>
                               )}
                               <Button
-                                disabled={isCloning || loading}
+                                disabled={!allowedToEdit || isCloning || loading}
                                 variant="contained"
                                 type="button"
                                 size="small"
@@ -2149,7 +2217,7 @@ function QuoteDetail() {
                                 {isCloning ? (
                                   <>Cloning v{currentVersion}</>
                                 ) : (
-                                  `Clone Version ${currentVersion}`
+                                  `Clone ${currentVersion}`
                                 )}
                               </Button>{" "}
                             </>
@@ -2180,9 +2248,7 @@ function QuoteDetail() {
                               "",
                               visibleColumns,
                               versionStatus,
-                              selectedRecords.length > 0
-                                ? selectedRecords
-                                : TandC
+                              selectedRecords
                             );
                           }}
                         />
@@ -2227,8 +2293,8 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                              ProcessStatus === "New" ? (
-                              <span className="productPos m-2">
+                              ProcessStatus === "New" && allowedToEdit ? (
+                              <span className={`${classes.productPos} m-2`}>
                                 <Button
                                   variant="outlined"
                                   size="small"
@@ -2268,18 +2334,19 @@ function QuoteDetail() {
                                   >
                                     <Autocomplete
                                       id="demo-mutiple-chip"
+                                      disabled={!allowedToEdit}
                                       fullWidth
                                       size="small"
                                       multiple
                                       value={visibleColumns}
                                       onChange={(e, val) => {
-                                          setVisibleColumnName(val);
-                                          handleVersionUpdate(
-                                            PDF,
-                                            val,
-                                            versionStatus,
-                                            TandC
-                                          );
+                                        setVisibleColumnName(val);
+                                        handleVersionUpdate(
+                                          PDF,
+                                          val,
+                                          versionStatus,
+                                          selectedRecords
+                                        );
                                       }}
                                       options={ColumnName}
                                       disableCloseOnSelect
@@ -2308,6 +2375,7 @@ function QuoteDetail() {
                                 </Grid>
                                 <Grid item xs={1} md={1} sm={1}>
                                   <IconButton
+                                    disabled={!allowedToEdit}
                                     title="Re-arrange columns"
                                     color="inherit"
                                     onClick={() => setRearrangeColumns(true)}
@@ -2326,7 +2394,7 @@ function QuoteDetail() {
                                   <Button
                                     onClick={() => handleCases()}
                                     disabled={
-                                      (!DOAreq && !Customerreq) || loading
+                                      !allowedToEdit || (!DOAreq && !Customerreq) || loading
                                     }
                                     startIcon={<BiMailSend />}
                                     variant="contained"
@@ -2413,8 +2481,8 @@ function QuoteDetail() {
                                     ProcessStatus === "Price Builder"
                                   }
                                   Editable={
-                                    ProcessStatus === "Price Builder" ||
-                                      ProcessStatus === "New"
+                                    allowedToEdit && (ProcessStatus === "Price Builder" ||
+                                      ProcessStatus === "New")
                                       ? true
                                       : false
                                   }
@@ -2436,6 +2504,7 @@ function QuoteDetail() {
                                     Additional Data
                                   </h4>
                                   <Button
+                                    disabled={!allowedToEdit}
                                     onClick={() => setShowCreateDialog(true)}
                                     variant="contained"
                                     size="small"
@@ -2457,20 +2526,33 @@ function QuoteDetail() {
                                   pageSizes={pageSizes}
                                   page={page}
                                   actionWidth={150}
-                                  allowSelection={true}
+                                  allowSelection={allowedToEdit}
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={
-                                    selectedRecords.length > 0
-                                      ? selectedRecords
-                                      : TandC
-                                  }
+                                  selectedRecords={selectedRecords}
                                   loading={loadingTNC}
-                                  onSelection={(selectedRecords) => {
-                                    setSelectedTnC([
-                                      ...selectedRecords.map((o) => o._id),
-                                    ]);
+                                  onSelection={(newSelectedRecords) => {
+                                    dispatch({ type: "selection", selectedRecords: newSelectedRecords });
+                                    handleVersionUpdate(
+                                      "",
+                                      visibleColumns,
+                                      versionStatus,
+                                      newSelectedRecords
+                                    );
+                                  }}
+                                  onRowDragEnd={(newSequence) => {
+                                    dispatch({
+                                      type: "selection",
+                                      newSequence: newSequence,
+                                    });
+
+                                    handleVersionUpdate(
+                                      "",
+                                      visibleColumns,
+                                      versionStatus,
+                                      newSequence
+                                    );
                                   }}
                                 />
                               </Box>
@@ -2566,7 +2648,9 @@ function QuoteDetail() {
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
             handleClose={handleCloseCreateDialog}
-            fetchData={fetchTermsAndConditions}
+            fetchData={() => {
+              fetchTermsAndConditions(null, true);
+            }}
             editRecord={editRecordTNC}
             displayTitle={"Additional Data"}
 
