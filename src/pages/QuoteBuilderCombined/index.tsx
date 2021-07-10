@@ -656,7 +656,7 @@ const QuoteBuilders = () => {
         <CustomContainer>
           <div className="header-panel">
             <QuoteHeader
-              selectedType={selectedType}
+              selectedRecords={selectedRecords}
               onTypeChange={handleQuoteBuilderTypeSel}
               options={QuoteType}
               onSearch={handleSearch}

@@ -36,7 +36,7 @@ function QuoteHeader(props) {
   };
 
   const {
-    selectedType,
+    selectedRecords,
     onTypeChange,
     options,
     onSearch,
@@ -132,6 +132,7 @@ function QuoteHeader(props) {
                 </MenuItem>
                 {
                   QuotePermissions.isUpdate && <MenuItem
+                  disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
                       closeActions();
                       showTransferEntityDialog();
