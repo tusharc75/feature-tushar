@@ -48,7 +48,7 @@ export const UserDropdown = ({
           setUsers(userData);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const setParticipants = (values, reason) => {
@@ -66,14 +66,16 @@ export const UserDropdown = ({
 
         values.forEach((val: any) => {
           if (typeof val === "string") {
-            setUsers([
-              ...users,
-              {
-                userId: val,
-                name: val,
-              },
-            ]);
-            setFieldValue(name, [...value, { userId: val }]);
+            if (val && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val)) {
+              setUsers([
+                ...users,
+                {
+                  userId: val,
+                  name: val,
+                },
+              ]);
+              setFieldValue(name, [...value, { userId: val }]);
+            }
           } else if (val && val.inputValue) {
             setUsers([
               ...users,
@@ -127,17 +129,17 @@ export const UserDropdown = ({
         value={
           users && multiple === true
             ? users.filter((data) =>
-                flatMap(value, (nameObj) =>
-                  map(nameObj, (userId) => {
-                    return userId;
-                  })
-                ).includes(data.userId)
-              )
+              flatMap(value, (nameObj) =>
+                map(nameObj, (userId) => {
+                  return userId;
+                })
+              ).includes(data.userId)
+            )
             : users
-            ? users.filter((data) => data.userId === value).length > 0
-              ? users.filter((data) => data.userId === value)[0]
+              ? users.filter((data) => data.userId === value).length > 0
+                ? users.filter((data) => data.userId === value)[0]
+                : []
               : []
-            : []
         }
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
