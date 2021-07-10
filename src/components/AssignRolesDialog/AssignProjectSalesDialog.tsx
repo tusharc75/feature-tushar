@@ -105,11 +105,11 @@ const AssignProjectSalesDialog = ({
     };
 
     const handleSearch = (e) => {
-        let value = e.target.value.toLowerCase();
+        let value = e.target.value;
         setSearch(value);
         let result = [];
         result = projectSalesConst.filter((data) => {
-            return data.projectName.toLowerCase().search(value) != -1 || data.projectManager?.optionLabel.toLowerCase().search(value) != -1;
+            return data.projectName.toLowerCase().search(value.toLowerCase()) != -1 || data.projectManager?.optionLabel.toLowerCase().search(value.toLowerCase()) != -1;
         });
         setProjectSales(result)
     };
