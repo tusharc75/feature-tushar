@@ -834,7 +834,7 @@ function QuoteDetail() {
    * @TNC HANDLER
    */
 
-  const fetchTermsAndConditions = (selectedTermsAndConstions = null, updateVersionStatus = false) => {
+  const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
@@ -845,9 +845,9 @@ function QuoteDetail() {
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         let selectedRows = [];
-        const onlyTermsAndConditionsIds = selectedTermsAndConstions ? selectedTermsAndConstions.map(d => d._id) : selectedRecords.map(d => d._id);
+        const onlyTermsAndConditionsIds = selectedTermsAndConditions ? selectedTermsAndConditions.map(d => d._id) : selectedRecords.map(d => d._id);
 
-        let rows = data.map((tnc, i) => {
+        let rows = data.map((tnc) => {
           if (onlyTermsAndConditionsIds.indexOf(tnc._id) >= 0) {
             selectedRows.push(tnc);
           }
@@ -862,6 +862,7 @@ function QuoteDetail() {
           data: rows,
           count: count,
         });
+        dispatch({ type: "selection", selectedRecords: selectedRows });
 
         if (updateVersionStatus) {
           handleVersionUpdate(
@@ -872,8 +873,6 @@ function QuoteDetail() {
           );
         }
 
-        dispatch({ type: "selection", selectedRecords: selectedRows });
-        // setDataTNC(data);
         setTimeout(() => {
           dispatch({ type: "loading", loadingTNC: false });
         }, gridLoadingTimeout);
