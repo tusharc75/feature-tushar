@@ -367,7 +367,7 @@ const ContactDetailsPage = (props) => {
         data.map((d) => {
           if (
             d.fieldData.sectionName ==
-              processSteps.fieldData.additionalInfoSection &&
+              processSteps?.fieldData.additionalInfoSection &&
             sectionFields.length == 0
           ) {
             setSectionFields((prevItems) => {

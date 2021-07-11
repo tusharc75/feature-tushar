@@ -79,7 +79,7 @@ export default function ManageContact(props) {
     
       contactData.fields.map((d) => {
         if (
-          d.sectionName ==processSteps.additionalInfoSection ) {
+          d.sectionName ==processSteps?.additionalInfoSection ) {
          
             setAdditionalFieldName(d.sectionName)
 
