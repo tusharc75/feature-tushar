@@ -95,6 +95,7 @@ const CreateQuotePdfTemplate = () => {
   const [initialValues, setInitialValues] = useState(null);
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
+  const [isClone] = useState(history.location.state?.isClone ? true : false);
 
   useEffect(() => {
     const _data = [];
@@ -116,8 +117,16 @@ const CreateQuotePdfTemplate = () => {
           const {
             data: { data }
           } = res;
-          setInitialValues(data);
-          setSection(data.section);
+
+          if (isClone) {
+            const { _id, name, createdBy, updatedBy, ...rest } = data;
+            setInitialValues(rest);
+            setSection(data.section);
+          }
+          else {
+            setInitialValues(data);
+            setSection(data.section);
+          }
         } catch (e) {
           toastConfig.setToastConfig(e);
         }
@@ -153,7 +162,7 @@ const CreateQuotePdfTemplate = () => {
 
     setIsUpdating(true);
 
-    if (id === '0') {
+    if (id === '0' || isClone === true) {
       axiosInstance()
         .post('/quote-pdf-template', data)
         .then(({ data: { data } }) => {
@@ -191,7 +200,7 @@ const CreateQuotePdfTemplate = () => {
                 path: routes.quotePdfTemplate.path
               },
               {
-                title: id === '0' ? 'New' : initialValues && initialValues.name
+                title: (id === '0' || isClone === true) ? 'New' : initialValues && initialValues.name
               }
             ]}
           />
