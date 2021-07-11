@@ -76,7 +76,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
           option.push(rowInsert);
         });
         setFieldValue("option", option);
-        setOptions(data);
+        setOptions(option);
       }
     };
     reader.readAsBinaryString(f);

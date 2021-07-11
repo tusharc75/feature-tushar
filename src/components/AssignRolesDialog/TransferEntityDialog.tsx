@@ -16,6 +16,7 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { camelCase } from "../../constants/helpers";
 
 const TransferEntityDialog = ({
     TransferEntityDialogOpen,
@@ -93,7 +94,7 @@ const TransferEntityDialog = ({
                             </ListItem>
                         ))}
                     </List>
-                ) : null}
+                ) : <Typography>{`Selected ${camelCase(type)} already exist in all entities`}</Typography>}
             </CustomDialogContent>
             <CustomDialogFooter>
                 <Button

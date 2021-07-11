@@ -32,7 +32,7 @@ import emailStyles from './email.module.scss'
 import './email.scss'
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
-import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { AddOutlined } from "@material-ui/icons";
 import { displayDate } from "../../../constants/helpers"
 
@@ -41,95 +41,6 @@ const tabs = {
     Sent: 2
 }
 
-function reducer(state, action) {
-    switch (action.type) {
-        case "loading":
-            return {
-                ...state,
-                loading: action.loading
-            }
-
-        case "initialize":
-            return {
-                ...state,
-                dataRows: action.data,
-                rowCount: action.count
-            }
-
-        case "selection":
-            return {
-                ...state,
-                selectedRecords: action.selectedRecords,
-            }
-
-        case "update":
-            return {
-                ...state,
-                dataRows: action.data,
-                loading: false
-            }
-
-        case "filter":
-            return {
-                ...state,
-                loading: true,
-                filters: action.filters,
-                page: 0
-            }
-
-        case "sort":
-            return {
-                ...state,
-                sorting: action.sorting,
-                loading: true
-            }
-
-        case "search":
-            return {
-                ...state,
-                search: action.search,
-                loading: true
-            }
-
-        case "pageChange":
-            return {
-                ...state,
-                page: action.page
-            }
-
-        case "pageSizeChange":
-            return {
-                ...state,
-                limit: action.limit,
-                page: 0,
-                loading: true
-            }
-
-        case "complete":
-            return {
-                ...state,
-                loading: false
-            }
-
-        default:
-            break;
-    }
-
-    return state;
-}
-
-const intialState = {
-    dataRows: [],
-    rowCount: 0,
-    loading: false,
-    page: 0,
-    limit: 25,
-    pageSizes: gridPageSizes,
-    search: "",
-    filters: {},
-    sorting: [],
-    selectedRecords: []
-}
 const Email = () => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -226,6 +137,7 @@ const Email = () => {
                 });
                 setSentEmails(sentEmails)
                 setInboxEmails(inboxEmailsData)
+                dispatch({ type: "loading", loading: false });
             })
             .catch((error) => {
                 dispatch({ type: "loading", loading: false });

@@ -36,7 +36,7 @@ function OpportunitiesHeader(props) {
   };
 
   const {
-    selectedType,
+    selectedRecords,
     onTypeChange,
     options,
     onSearch,
@@ -130,6 +130,7 @@ function OpportunitiesHeader(props) {
                   Delete
                 </MenuItem>
                 <MenuItem
+                  disabled={selectedRecords.find((d) => d.canDelete === false)}
                   onClick={() => {
                     closeActions();
                     showTransferEntityDialog();
