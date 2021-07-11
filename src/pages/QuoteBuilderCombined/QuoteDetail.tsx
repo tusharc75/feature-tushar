@@ -818,8 +818,13 @@ function QuoteDetail() {
       className="cursor-pointer link"
       title={params.value}
       onClick={() => {
-        setEditRecordTNC(params.data);
-        setShowCreateDialog(true);
+        axiosInstance().get(`${termsAndCondition.api}/${params.data._id}`)
+          .then(({ data: { data } }) => {
+            setEditRecordTNC(data);
+            setShowCreateDialog(true);
+          }).catch(error => {
+            toastConfig.setToastConfig(error);
+          });
       }}
     >
       {params.value}
