@@ -97,9 +97,18 @@ const PriceTemplate = () => {
       axiosInstance()
         .get(`/price-template/` + id)
         .then(({ data: { data } }) => {
-          setInitialValues(data);
-          handleProductTemplateField(data.productTemplate);
-          setSection(data.section);
+
+          if (isClone) {
+            const { _id, name, createdBy, updatedBy, isSystem, ...rest } = data;
+            setInitialValues(rest);
+            handleProductTemplateField(data.productTemplate);
+            setSection(data.section);
+          }
+          else {
+            setInitialValues(data);
+            handleProductTemplateField(data.productTemplate);
+            setSection(data.section);
+          }
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -299,8 +308,8 @@ const PriceTemplate = () => {
                             (data) => data._id === values["productTemplate"]
                           ).length
                             ? productTemplate.filter(
-                                (data) => data._id === values["productTemplate"]
-                              )[0]
+                              (data) => data._id === values["productTemplate"]
+                            )[0]
                             : ""
                         }
                         onChange={(e, val) => {
@@ -340,16 +349,16 @@ const PriceTemplate = () => {
                       <Box>
                         {(priceTemplatePermissions.isCreate ||
                           priceTemplatePermissions.isUpdate) && (
-                          <Button
-                            disabled={isUpdating}
-                            size="small"
-                            color="primary"
-                            onClick={submitForm}
-                            variant="contained"
-                          >
-                            Save{isUpdating && <CircularProgress size={24} />}
-                          </Button>
-                        )}
+                            <Button
+                              disabled={isUpdating}
+                              size="small"
+                              color="primary"
+                              onClick={submitForm}
+                              variant="contained"
+                            >
+                              Save{isUpdating && <CircularProgress size={24} />}
+                            </Button>
+                          )}
                       </Box>
                       <Box ml={1}>
                         <Button
