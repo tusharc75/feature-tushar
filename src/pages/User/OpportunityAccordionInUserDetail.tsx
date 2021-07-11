@@ -8,6 +8,7 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
+import {useHistory} from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
@@ -17,6 +18,7 @@ import { useData } from '../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { MoreVert } from '@material-ui/icons';
 import { formatAmountWithCurrency } from '../../constants/helpers';
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const Accordion = withStyles({
     root: {
@@ -79,8 +81,11 @@ export default function OpportunityAccordionInUserDetail({
     opportunities,
     expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit
 }) {
+
+    const history = useHistory();
+
     const {
-        state: { permissions, selectedEntity },
+        state: { permissions, selectedEntity, user }, dispatch
     }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -123,6 +128,15 @@ export default function OpportunityAccordionInUserDetail({
     const handleCloseMenu = () => {
         setAnchorEl(null);
     };
+
+    const handleEntityChange = (id) => {
+        dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    }
+
+    const hasAccessToEntity = (id) => {
+        const entityList = user.entity?.map((entity) => entity._id);
+        return entityList.includes(id);
+    }
 
     return <>
         <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
@@ -211,10 +225,16 @@ export default function OpportunityAccordionInUserDetail({
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={7} sm={8}>
-                                                                    {
+                                                                    {hasAccessToEntity(obj.entity) ?
                                                                         obj.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
                                                                             <Typography className="detailName">{obj?.opportunityName}</Typography>
-                                                                        </Link> : <span className="d-flex gap-2 align-items-center">
+                                                                        </Link> : <Link className="link" onClick={() => {
+                                                                            handleEntityChange(obj.entity)
+                                                                            history.push(`${routes.opportunityDetail.path}/${obj._id}`)
+                                                                        }}>
+                                                                            <Typography className="detailName">{obj?.opportunityName}</Typography>
+                                                                        </Link>
+                                                                        : <span className="d-flex gap-2 align-items-center">
                                                                             <Typography className="detailName">{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
                                                                                 <InfoOutlinedIcon fontSize="small" />
                                                                             </Tooltip>

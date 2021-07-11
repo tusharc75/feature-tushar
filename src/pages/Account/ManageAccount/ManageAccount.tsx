@@ -66,7 +66,7 @@ export default function ManageAccount(props) {
     
       accountData.fields.map((d) => {
         if (
-          d.sectionName ==processSteps.additionalInfoSection ) {
+          d.sectionName ==processSteps?.additionalInfoSection ) {
          
           setAdditionalFieldName(d.sectionName)
         }

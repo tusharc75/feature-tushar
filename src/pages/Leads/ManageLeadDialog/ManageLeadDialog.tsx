@@ -71,7 +71,7 @@ export default function ManageLeadDialog({
     
       leadData.fields.map((d) => {
         if (
-          d.sectionName ==processSteps.additionalInfoSection ) {
+          d.sectionName ==processSteps?.additionalInfoSection ) {
          
           setAdditionalFieldName(d.sectionName)
         }

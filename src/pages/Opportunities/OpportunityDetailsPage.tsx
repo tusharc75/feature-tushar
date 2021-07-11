@@ -483,6 +483,9 @@ function OpportunityDetailsPage() {
           }
 
           data.map((d) => {
+            console.log("field",d.fieldData);
+            console.log("process",processSteps);
+            console.log(sectionFields);
             if (
               d.fieldData.sectionName ==
                 processSteps.fieldData.additionalInfoSection &&
@@ -1047,7 +1050,7 @@ function OpportunityDetailsPage() {
             
           <>
 
-              <CustomDialogFooter>
+              {/* <CustomDialogFooter>
                 <Button
                   color="primary"
                   size="small"
@@ -1058,7 +1061,7 @@ function OpportunityDetailsPage() {
                 <Button color="primary" size="small" onClick={handleSave}>
                   Save
                 </Button>
-              </CustomDialogFooter>
+              </CustomDialogFooter> */}
            
             <AdditionalDialogPopUp  
               open={openAdditionalDialog}
