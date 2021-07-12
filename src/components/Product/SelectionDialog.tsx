@@ -19,8 +19,8 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from "@material-ui/icons/AddCircle";
 
 const ProductBuilderSchema = Yup.object().shape({
-    priceTemplate: Yup.string()
-        .required("please select price template"),
+    productTemplate: Yup.string()
+        .required("please select product template"),
 });
 
 const SelectionDialog = (props) => {
@@ -29,14 +29,15 @@ const SelectionDialog = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { handleClose, api, refrenceId, isUpload, uploadData } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ productCategory: "", priceTemplate: "" });
+    const [initialData, setInitialData] = useState({});
     const [productCategory, setProductCategory] = useState([]);
+    const [productTemplate, setProductTemplate] = useState([]);
     const [priceTemplate, setPriceTemplate] = useState([]);
     const [fileError, setFileError] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null)
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
-    // const [productCategory, setProductCategory] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
+    const ref = useRef(null);
 
     useEffect(() => {
         axiosInstance().get(`/product-category`).then(({ data }) => {
@@ -46,10 +47,18 @@ const SelectionDialog = (props) => {
             }));
             setProductCategory(data.data)
         });
-        axiosInstance().get(`/price-template/template/standard`).then(({ data: { data } }) => {
-            setPriceTemplate(data.data)
+        axiosInstance().get(`/product-template/template/standard`).then(({ data: { data } }) => {
+            setProductTemplate(data.data)
             if (data.data.length) {
-                setInitialData({ ...initialData, priceTemplate: data.data[0].optionValue })
+                let defaultproductTemplate: any = data.data[0].optionValue
+                axiosInstance().get(`/price-template/product-template/` + data.data[0].optionValue).then(({ data: { data } }) => {
+                    setPriceTemplate(data.data)
+                    if (data.data.length) {
+                        if (data.data.length) {
+                            setInitialData({ productCategory: "", productTemplate: defaultproductTemplate, priceTemplate: data.data[0].optionValue })
+                        }
+                    }
+                });
             }
         });
     }, []);
@@ -57,37 +66,51 @@ const SelectionDialog = (props) => {
 
     const handleChangeCategory = (value, label) => {
         if (value && value !== "") {
-            axiosInstance().get(`/price-template/template/` + value).then(({ data: { data } }) => {
-                setPriceTemplate(data.data)
+            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
+                setProductTemplate(data.data)
                 if (data.data.length) {
-                    var defaultpriceTemplate = data.data[0].optionValue
+                    var defaultproductTemplate = data.data[0].optionValue
                     data.data.forEach((_f) => {
                         let re = new RegExp(_f.optionLabel);
                         if (label.match(re)) {
-                            defaultpriceTemplate = _f.optionValue
+                            defaultproductTemplate = _f.optionValue
                             return
                         }
                     })
-                    setInitialData({ productCategory: value, priceTemplate: defaultpriceTemplate })
+                    handleChangeProductTemplate(defaultproductTemplate);
+                    setInitialData({ ...ref.current.values, productTemplate: defaultproductTemplate })
                 }
             });
         } else {
-            axiosInstance().get(`/price-template/template/standard`).then(({ data: { data } }) => {
-                setPriceTemplate(data.data)
+            axiosInstance().get(newFunction()).then(({ data: { data } }) => {
+                setProductTemplate(data.data)
                 if (data.data.length) {
-                    setInitialData({ ...initialData, priceTemplate: data.data[0].optionValue })
+                    setInitialData({ ...ref.current.values, productTemplate: data.data[0].optionValue })
+                    handleChangeProductTemplate(data.data[0].optionValue);
                 }
             });
         }
     }
 
+    const handleChangeProductTemplate = (value) => {
+        axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+            setPriceTemplate(data.data)
+            if (data.data.length) {
+                if (data.data.length) {
+                    setInitialData({ ...ref.current.values, priceTemplate: data.data[0].optionValue })
+                }
+            }
+        });
+    }
+
+
     const handleSubmit = (values) => {
         if (isUpload) {
             if (!selectedFile) setFileError("Please Select File")
-            else uploadData(selectedFile, { productCategory: values.productCategory, priceTemplate: values.priceTemplate });
+            else uploadData(selectedFile, { productCategory: values.productCategory, productTemplate: values.productTemplate, priceTemplate: values.priceTemplate });
         }
 
-        else axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&priceTemplate=" + values.priceTemplate
+        else axiosInstance().get(`${api}/template?productCategory=` + values.productCategory + "&productTemplate=" + values.productTemplate + "&priceTemplate=" + values.priceTemplate
             + "&refrenceId=" + refrenceId,
             { responseType: "arraybuffer" }).then((response) => {
                 const fileName = response.headers["content-disposition"].split("filename=")[1];
@@ -111,6 +134,8 @@ const SelectionDialog = (props) => {
         return values;
     };
 
+
+
     return (<Dialog
         maxWidth="xs"
         fullScreen={isMobile || isTablet}
@@ -120,6 +145,7 @@ const SelectionDialog = (props) => {
         fullWidth
     >
         <Formik
+            innerRef={ref}
             enableReinitialize={true}
             initialValues={initialData}
             validationSchema={ProductBuilderSchema}
@@ -173,6 +199,7 @@ const SelectionDialog = (props) => {
                                             onChange={(e, val) => {
                                                 setFieldValue("productCategory", val && val.optionValue ? val.optionValue : "")
                                                 handleChangeCategory(val && val.optionValue ? val.optionValue : "", val && val.optionLabel ? val.optionLabel : "")
+                                                setFieldValue("productTemplate", "")
                                                 setFieldValue("priceTemplate", "")
                                             }}
                                             size="small"
@@ -211,19 +238,40 @@ const SelectionDialog = (props) => {
                                         values={values}
                                         errors={errors}
                                         touched={touched}
-                                        label={"Price Template"}
-                                        name={"priceTemplate"}
+                                        label={"Product Template"}
+                                        name={"productTemplate"}
                                         type={"dropDown"}
-                                        options={priceTemplate}
+                                        options={productTemplate}
                                         setFieldValue={setFieldValue}
                                         required={true}
                                         fullWidth
                                         onChange={(e, val) => {
-                                            setFieldValue("priceTemplate", val && val.optionValue ? val.optionValue : "")
+                                            setFieldValue("productTemplate", val && val.optionValue ? val.optionValue : "")
+                                            handleChangeProductTemplate(val && val.optionValue ? val.optionValue : "")
                                         }}
                                         size="small"
                                     />
                                 </Box>
+                                {api !== "product" &&
+                                    <Box mt={1}>
+                                        <FormTypes
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={"Price Template"}
+                                            name={"priceTemplate"}
+                                            type={"dropDown"}
+                                            options={priceTemplate}
+                                            setFieldValue={setFieldValue}
+                                            required={true}
+                                            fullWidth
+                                            onChange={(e, val) => {
+                                                setFieldValue("priceTemplate", val && val.optionValue ? val.optionValue : "")
+                                            }}
+                                            size="small"
+                                        />
+                                    </Box>
+                                }
                                 {isUpload &&
                                     <Box mt={1}>
                                         <label htmlFor="btn-upload">
@@ -296,3 +344,7 @@ const SelectionDialog = (props) => {
 }
 
 export default SelectionDialog;
+function newFunction(): string {
+    return `/product-template/template/standard`;
+}
+
