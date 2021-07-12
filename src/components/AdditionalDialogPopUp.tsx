@@ -84,7 +84,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                                                                             type={field.type}
                                                                             options={field.option}
                                                                             setFieldValue={setFieldValue}
-                                                                            required={field.required}
+                                                                            required={true}
                                                                             fullWidth
                                                                             isTooltip={field?.isTooltip || false}
                                                                             tooltipMessage={field?.tooltipMessage}
