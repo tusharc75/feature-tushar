@@ -67,6 +67,12 @@ export const UserDropdown = ({
         values.forEach((val: any) => {
           if (typeof val === "string") {
             if (val && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val)) {
+              if (users.map((u)=>u.name).includes(val)) {
+                setUsers([
+                  ...users,
+                ]);
+                setFieldValue(name, [...value, { userId: val }]);
+              }else{
               setUsers([
                 ...users,
                 {
@@ -75,6 +81,7 @@ export const UserDropdown = ({
                 },
               ]);
               setFieldValue(name, [...value, { userId: val }]);
+            }
             }
           } else if (val && val.inputValue) {
             setUsers([
@@ -104,6 +111,7 @@ export const UserDropdown = ({
 
   return (
     <Fragment>
+      {console.log("user",users)}
       <Autocomplete
         multiple={multiple}
         disableCloseOnSelect={multiple}
