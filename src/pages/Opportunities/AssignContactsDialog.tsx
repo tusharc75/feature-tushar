@@ -83,11 +83,11 @@ export default function AssignContactsDialog({
     };
 
     const handleSearch = (e) => {
-        let value = e.target.value.toLowerCase();
+        let value = e.target.value;
         setSearch(value);
         let result = [];
         result = currentContactsConst.filter((data) => {
-            return data.firstName.search(value) != -1 || data.middleName.search(value) != -1 || data.lastName.search(value) != -1;
+            return data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.middleName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1;
         });
         setCurrentContacts(result)
     };

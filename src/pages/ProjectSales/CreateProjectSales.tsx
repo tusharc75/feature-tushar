@@ -51,7 +51,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
     axiosInstance()
       .get("/field?resource=Project Sales")
       .then(({ data: { data } }) => {
-        const fieldsData = data.map((d: any) => d.fieldData);
+        const fieldsData = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         setInitialData({
           fields: fieldsData,
           values: getObjKeys("", fieldsData),

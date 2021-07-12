@@ -121,6 +121,7 @@ export default function CustomAgGrid({
   page,
   loading,
   setGridApi,
+  onRowDragEnd = null,
   refreshGrid = null,
   allowSelection = true,
   allowAction = true,
@@ -145,7 +146,7 @@ export default function CustomAgGrid({
     if (selectedRecords.length) {
       params.api.forEachNode(function (node) {
         node.setSelected(
-          selectedRecords.some((o) => (o.id ? o.id : o._id === node.data._id))
+          selectedRecords.some((o) => o._id === node.data._id)
         );
       });
     }
@@ -173,10 +174,10 @@ export default function CustomAgGrid({
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -192,10 +193,10 @@ export default function CustomAgGrid({
         comparator={() => {
           return 0;
         }}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });
@@ -300,15 +301,13 @@ export default function CustomAgGrid({
                 });
               }}
               onRowDragEnd={(event: any) => {
-                //  Did this for quote screen, as we need updated sequence and selected records
-                dispatch({
-                  type: "selection",
-                  selectedRecords: orderBy(
+                if (onRowDragEnd) {
+                  onRowDragEnd(orderBy(
                     event.api.getSelectedNodes(),
                     "rowIndex",
                     ["asc"]
-                  ).map((d) => d.data),
-                });
+                  ).map((d) => d.data));
+                }
               }}
               immutableData={true}
               getRowNodeId={(data) => {

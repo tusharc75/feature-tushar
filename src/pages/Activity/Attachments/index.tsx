@@ -308,7 +308,7 @@ export default function Attachment(props) {
                     const { createdBy, updatedBy, ...rest } = u
                     return {
                         ...rest,
-                        canEdit: u.canEdit ? u.canEdit:true,
+                        canEdit: u.canEdit,
                         createdByDate: u.createdBy.date ?? "",
                         updatedByDate: u?.updatedBy?.date ?? ""
                     }

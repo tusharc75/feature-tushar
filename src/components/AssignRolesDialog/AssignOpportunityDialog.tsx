@@ -83,11 +83,11 @@ const AssignOpportunityDialog = ({
   };
 
   const handleSearch = (e) => {
-    let value = e.target.value.toLowerCase();
+    let value = e.target.value;
     setSearch(value);
     let result = [];
     result = opportunitiesConst.filter((data) => {
-      return data.opportunityName.search(value) != -1 || data.stage.toLowerCase().search(value) != -1 ;
+      return data.opportunityName.toLowerCase().search(value.toLowerCase()) != -1 || data.stage.toLowerCase().search(value.toLowerCase()) != -1 ;
     });
     setOpportunities(result)
   };

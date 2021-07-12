@@ -4,6 +4,9 @@ import {
   Checkbox,
   CircularProgress,
   Dialog,
+  FormControl,
+  FormControlLabel,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -17,6 +20,7 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { roleTypes } from "../../constants/helpers";
+import SearchBox from "../Helpers/SearchBox";
 
 const AssignRolesDialog = ({
   rolesDialogOpen,
@@ -27,19 +31,24 @@ const AssignRolesDialog = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [roles, setRoles] = useState([]);
+  const [rolesConst, setRolesConst] = useState([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
+  const [search, setSearch] = useState("");
   const globalRole = roleTypes.filter((obj) => obj.key === "Global")[0].value;
   useEffect(() => {
     setLoadingRoles(true);
     axiosInstance()
       .get(`/role`)
       .then(({ data: { data } }) => {
-        assignedRoles ?
+        if (assignedRoles) {
           setRoles(data.filter(role => role?.type === globalRole && !assignedRoles.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
-          :
+          setRolesConst(data.filter(role => role?.type === globalRole && !assignedRoles.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
+        } else {
           setRoles(data.filter(role => role?.type === globalRole).map(obj => ({ ...obj, isChecked: false })))
+          setRolesConst(data.filter(role => role?.type === globalRole).map(obj => ({ ...obj, isChecked: false })))
+        }
         setLoadingRoles(false)
       })
       .catch((error) => {
@@ -77,6 +86,16 @@ const AssignRolesDialog = ({
     }
   };
 
+  const handleSearch = (e) => {
+    let value = e.target.value;
+    setSearch(value);
+    let result = [];
+    result = rolesConst.filter((data) => {
+      return data.name.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
+    });
+    setRoles(result)
+  };
+
   return (
     <Dialog
       fullWidth
@@ -89,31 +108,65 @@ const AssignRolesDialog = ({
       <CustomDialogContent>
         {loadingRoles ? (
           <Loader text="Loading Roles" />
-        ) : roles.length ? (
-          <List style={{ padding: 0 }}>
-            {roles.map((role) => (
-              <ListItem divider key={role._id}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    onChange={(e) => {
-                      role.isChecked = e.target.checked
-                      setSelectedRoles(roles.filter(r => r.isChecked).map(obj => obj._id))
-                    }
-                    }
-                    checked={role.isChecked}
-                    inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${role._id}`,
-                    }}
+        ) : rolesConst.length ? (
+          <>
+            <Grid container>
+              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    value="top"
+                    control={
+                      <Checkbox
+                        // edge="start"
+                        onChange={(e) => {
+                          roles.forEach((data) => data.isChecked = e.target.checked)
+                          setSelectedRoles(roles.filter(r => r.isChecked).map(obj => obj._id))
+                        }
+                        }
+                        checked={roles.every(x => x.isChecked)}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-select-all`,
+                        }}
+                      />}
+                    label="Select All"
                   />
-                </ListItemIcon>
-                <ListItemText
-                  primary={role.name}
-                  secondary={role.description}
+                </FormControl>
+
+              </Grid>
+              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="terms_header_search_bar"
+                  width="300px"
+                  value={search}
                 />
-              </ListItem>
-            ))}
-          </List>
+              </Grid>
+            </Grid>
+            <List style={{ padding: 0 }}>
+              {roles.map((role) => (
+                <ListItem divider key={role._id}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => {
+                        role.isChecked = e.target.checked
+                        setSelectedRoles(roles.filter(r => r.isChecked).map(obj => obj._id))
+                      }
+                      }
+                      checked={role.isChecked}
+                      inputProps={{
+                        "aria-labelledby": `checkbox-list-label-${role._id}`,
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={role.name}
+                    secondary={role.description}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </>
         ) : (
           <Typography>All Roles has been assigned</Typography>
         )}
@@ -123,7 +176,7 @@ const AssignRolesDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
-          size="small" 
+          size="small"
         >
           Cancel
         </Button>
@@ -131,7 +184,7 @@ const AssignRolesDialog = ({
           disabled={!selectedRoles.length || isAssigning}
           onClick={handleAssignRoles}
           color="primary"
-          size="small" 
+          size="small"
           variant="contained"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}

@@ -196,7 +196,7 @@ const AddExistingProduct = (props) => {
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-            
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -234,7 +234,8 @@ const AddExistingProduct = (props) => {
         <div className="listing-grid p-3">
             <Box mb={2}>
                 <Grid container >
-                    <Grid item xs={12} sm={6}  >
+                    <Grid item xs={12} sm={6}>
+
                     </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
                         <SearchBox
@@ -243,7 +244,7 @@ const AddExistingProduct = (props) => {
                             width="300px"
                             value={search}
                         />
-                        <Box ml={1} >
+                        <Box ml={1} mt={1} >
                             <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
                                 {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                 Add</Button>

@@ -8,7 +8,7 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { withStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes'
-import { Link } from 'react-router-dom'
+import { Link, useHistory} from 'react-router-dom'
 import { BiCustomize } from 'react-icons/bi';
 import { HiOutlineUser } from 'react-icons/hi';
 import { BiPhone } from 'react-icons/bi';
@@ -17,6 +17,7 @@ import { useData } from '../../StateProvider/Provider';
 import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import { MoreVert } from '@material-ui/icons';
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const Accordion = withStyles({
     root: {
@@ -82,8 +83,9 @@ export default function LeadAccordionInUserDetailPage({
     leads,
     expanded = true, recordsPerLine = 3, userId, onSuccess, isAllowedToEdit
 }) {
+    const history = useHistory();
     const {
-        state: { permissions, selectedEntity },
+        state: { permissions, selectedEntity, user }, dispatch
     }: any = useData();
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -127,6 +129,15 @@ export default function LeadAccordionInUserDetailPage({
     const handleCloseMenu = () => {
         setAnchorEl(null);
     };
+
+    const handleEntityChange = (id) => {
+        dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    }
+
+    const hasAccessToEntity = (id) => {
+        const entityList = user.entity?.map((entity) => entity._id);
+        return entityList.includes(id);
+    }
     return <>
         <Accordion expanded={expandLead} className="omsAccordian accordLead">
             <AccordionSummary
@@ -160,14 +171,7 @@ export default function LeadAccordionInUserDetailPage({
                         <Typography variant="subtitle2">
                             {isAllowedToEdit && <>
                                 {
-                                    permissions?.lead?.isCreate &&
-                                    // <IconButton
-                                    //     color="primary"
-                                    //     size="small"
-                                    //     onClick={() => { setShowCreateLeadDialog(true) }}
-                                    // >
-                                    //     <ControlPointIcon />
-                                    // </IconButton> 
+                                    permissions?.lead?.isCreate && 
                                     <>
                                         <IconButton
                                             aria-haspopup="true"
@@ -214,13 +218,20 @@ export default function LeadAccordionInUserDetailPage({
                                                         <CardContent className="detailListing">
 
                                                             <Grid item xs={12} sm={8}>
-                                                                {
+                                                                {hasAccessToEntity(obj.entity) ?
                                                                     obj.entity === selectedEntity ? (
                                                                         <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
                                                                             <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
                                                                         </Link>
 
-                                                                    ) : <span className="d-flex gap-2 align-items-center">
+                                                                    ) : (
+                                                                        <Link className="link" onClick={() => {
+                                                                            handleEntityChange(obj.entity)
+                                                                            history.push(`${routes.leadDetail.path}/${obj._id}`)}}>
+                                                                            <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
+                                                                        </Link>
+                                                                    ):
+                                                                    <span className="d-flex gap-2 align-items-center">
                                                                         <Typography>{obj.firstName} {obj.lastName}</Typography> <Tooltip title={`${obj.firstName} ${obj.lastName} belongs to different entity`}>
                                                                             <InfoOutlinedIcon fontSize="small" />
                                                                         </Tooltip>

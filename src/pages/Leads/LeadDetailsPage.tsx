@@ -24,6 +24,12 @@ import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
 import ProcessFlow from "../../components/ProcessFlow";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { isMobile, isTablet } from "react-device-detect";
+import { Dialog } from "@material-ui/core";
+import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -41,6 +47,11 @@ const LeadDetailsPage = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.lead]);
+  const [showAdditionalField, setShowAdditionalField] = useState(false);
+  const [sectionFields, setSectionFields] = useState([]);
+  const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
+  const [showAtLast, setShowAtLast] = useState(false)
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -94,6 +105,12 @@ const LeadDetailsPage = () => {
           (d) => d.optionLabel === leadData[processFieldName]
         );
         setActiveStep(currentStepToShow);
+        if(currentStepToShow == steps.length -1){
+          setShowAtLast(true)
+        }
+        else{
+          setShowAtLast(false)
+        }
       }
     }
   }, [steps]);
@@ -195,7 +212,22 @@ const LeadDetailsPage = () => {
               };
             })
           );
+          setShowAdditionalField(
+            processSteps.fieldData.showAdditionalInfoPopup
+          );
         }
+        data.map((d) => {
+          if (
+            d.fieldData.sectionName ==
+              processSteps.fieldData.additionalInfoSection &&
+            sectionFields.length == 0
+          ) {
+            setSectionFields((prevItems) => {
+              return [...prevItems, d];
+            });
+            setAdditionalFieldName(d.fieldData.sectionName)
+          }
+        });
 
         setLoading(false);
       });
@@ -236,6 +268,9 @@ const LeadDetailsPage = () => {
   };
 
   const handleOpneUpdateDialog = () => {
+    if(activeStep === steps.length - 1 ){
+      setShowAtLast(true)
+    }
     setOpenUpdateDialog(true);
   };
 
@@ -261,8 +296,10 @@ const LeadDetailsPage = () => {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
+  const handleSave = (data) => {
     setIsProcessing(true);
+    setShowAtLast(true)
+    setOpenAdditionalDialog(false);
     let tempActiveStep =
       data && data?.isSetBackStep
         ? activeStep - 1
@@ -270,13 +307,21 @@ const LeadDetailsPage = () => {
         ? activeStep + 1
         : activeStep;
 
+    let processFieldName = "";
+    const leadFieldData = leadFields.map((f) => {
+      if (f.fieldData.type == "process") {
+        processFieldName = f.fieldData.fieldName;
+      }
+      return f.fieldData;
+    });
+
+    const updatedLeadData = {
+      ...leadData,
+      ...data
+    }
+
     const updatedData = {
-      ...getObjKeysWithValues(
-        leadData,
-        leadFields.map((f) => {
-          return f.fieldData;
-        })
-      ),
+      ...getObjKeysWithValues(updatedLeadData, leadFieldData),
       [processFieldName]: steps[tempActiveStep].text,
       _id: leadData._id,
     };
@@ -284,11 +329,9 @@ const LeadDetailsPage = () => {
     axiosInstance()
       .put(`/lead?entity=${selectedEntity}`, updatedData)
       .then(() => {
-        // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
-        setIsProcessing(false);
-        // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
-        // }
         fetchLeadData();
+        // setActiveStep(activeStep + 1)
+        setIsProcessing(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -296,6 +339,51 @@ const LeadDetailsPage = () => {
       });
   };
 
+  const handleMarkAsCompleted = (data) => {
+    setShowAtLast(false)
+    setIsProcessing(true);
+    let tempActiveStep =
+      data && data?.isSetBackStep
+        ? activeStep - 1
+        : activeStep < steps.length - 1
+        ? activeStep + 1
+        : activeStep;
+        if (tempActiveStep == steps.length - 1 && showAdditionalField) {
+          setOpenAdditionalDialog(true);
+        } 
+        else {
+          let processFieldName = "";
+          const leadFieldData = leadFields.map((f) => {
+            if (f.fieldData.type == "process") {
+              processFieldName = f.fieldData.fieldName;
+            }
+            return f.fieldData;
+          });
+
+          const updatedData = {
+            ...getObjKeysWithValues(leadData, leadFieldData),
+            [processFieldName]: steps[tempActiveStep].text,
+            _id: leadData._id,
+          };
+      
+          axiosInstance()
+            .put(`/lead?entity=${selectedEntity}`, updatedData)
+            .then(() => {
+              // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
+              setIsProcessing(false);
+              // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
+              // }
+              fetchLeadData();
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+              setIsProcessing(false);
+            });
+        }
+   
+  };
+
+  let filteredLeadFields = leadFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
   return (
     <>
       {openUpdateDialog && (
@@ -429,7 +517,9 @@ const LeadDetailsPage = () => {
                   <img src={SVG("Contacts Placeholder")} alt="No Data" />
                 </Box>
               ) : (
-                <DetailsPage data={leadData} fields={leadFields} />
+                showAtLast ? ( <DetailsPage data={leadData} fields={leadFields} />) :  
+                <DetailsPage data={leadData} fields={filteredLeadFields} />
+               
               )}
               <AccordionOfOpportunity
                 recordsPerLine={3}
@@ -491,6 +581,46 @@ const LeadDetailsPage = () => {
             onOk={convertLeadToOpportunity}
           />
         ) : null}
+
+{openAdditionalDialog && (
+            // <Dialog
+            //   disableBackdropClick={true}
+            //   fullWidth
+            //   maxWidth="sm"
+            //   open={openAdditionalDialog}
+            //   onClose={() => setOpenAdditionalDialog(false)}
+            //   aria-labelledby="form-dialog-title"
+            //   fullScreen={isMobile || isTablet}
+            // >
+            //   <CustomDialogHeader
+            //     title="Additonal Information"
+            //     onClose={() => setOpenAdditionalDialog(false)}
+            //   ></CustomDialogHeader>
+            //   {sectionFields.map((item) => (
+            //     <CustomDialogContent>{item}</CustomDialogContent>
+            //   ))}
+
+            //   <CustomDialogFooter>
+            //     <Button
+            //       color="primary"
+            //       size="small"
+            //       onClick={() => setOpenAdditionalDialog(false)}
+            //     >
+            //       Close
+            //     </Button>
+            //     <Button color="primary" size="small" onClick={handleSave}>
+            //       Save
+            //     </Button>
+            //   </CustomDialogFooter>
+            // </Dialog>
+            <AdditionalDialogPopUp 
+                open={openAdditionalDialog}
+                close={() => setOpenAdditionalDialog(false)}
+                handleSave={handleSave}
+                title="Additional Information"
+                fieldData={sectionFields}
+            />
+          ) }
       </Layout>
     </>
   );

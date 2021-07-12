@@ -159,21 +159,21 @@ const AssignEntityDialog = ({
   };
 
   const handleSearch = (e) => {
-    let value = e.target.value.toLowerCase();
+    let value = e.target.value;
     setSearch(value);
     let resultData = [];
     let resultRole = [];
     resultData = dataConst.filter((data) => {
       if (type === "entity") {
-        return data.address?.search(value) != -1 || data.entityName?.search(value) != -1
+        return data.address?.toLowerCase().search(value.toLowerCase()) != -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) != -1
       }
       else {
-        return data.concatedName?.search(value) != -1 || data.email?.search(value) != -1;
+        return data.concatedName?.toLowerCase().search(value.toLowerCase()) != -1 || data.email?.toLowerCase().search(value.toLowerCase()) != -1;
       }
     });
     setData(resultData)
     resultRole = roleConst.filter((data) => {
-      return data.name.search(value) != -1 || data.description.search(value) != -1;
+      return data.name.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
     });
     setRole(resultRole)
   };
