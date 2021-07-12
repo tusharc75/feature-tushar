@@ -273,6 +273,7 @@ const Header = ({ toggleDrawer }) => {
       auth: {
         token,
       },
+      transports: ['websocket',"pooling"],
     });
     setSocket(s);
   }, [user]);
