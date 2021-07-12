@@ -111,7 +111,6 @@ export const UserDropdown = ({
 
   return (
     <Fragment>
-      {console.log("user",users)}
       <Autocomplete
         multiple={multiple}
         disableCloseOnSelect={multiple}
