@@ -21,7 +21,7 @@ import FormTypes from "../../components/Helpers/FormTypes";
 const ManageMarketSegmentDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { marketSegmentId, handleClose } = props;
+    const { marketSegmentId, onClose, onSuccess } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formsData, setFormsData] = useState([]);
@@ -63,7 +63,7 @@ const ManageMarketSegmentDialog = (props) => {
             values._id = marketSegmentId
             axiosInstance().put(`${marketSegment.marketSegmentApi}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                onSuccess()
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -72,7 +72,7 @@ const ManageMarketSegmentDialog = (props) => {
         else {
             axiosInstance().post(`${marketSegment.marketSegmentApi}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose(data)
+                onSuccess(data)
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -102,7 +102,7 @@ const ManageMarketSegmentDialog = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
 
                             <Form noValidate>
@@ -165,7 +165,7 @@ const ManageMarketSegmentDialog = (props) => {
 
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"

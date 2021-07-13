@@ -682,7 +682,8 @@ export default function ManageBudgetDialog({
             {
                 showAddProductCategoryDialog && <CreateProductCategory
                     productCategoryId={null}
-                    handleClose={(data) => {
+                    onClose = {() => setShowAddProductCategoryDialog(false)}
+                    onSuccess={(data) => {
                         if (data?._id) {
                             setProductCategoryDataSource((prevState) => {
                                 return [
