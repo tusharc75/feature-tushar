@@ -168,6 +168,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
+            ele.isDefaultValue = values.isDefaultValue
+
+            if (ele.isDefaultValue) {
+              ele.defaultValue = values.defaultValue
+            } else {
+              ele.defaultValue = ''
+            }
 
             // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
             //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
@@ -234,11 +241,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.formulaFields = values.formulaFields;
               ele.formulainputFields = values.formulainputFields;
               ele.formulaoption = values.formulaoption;
-            }
-            ele.isDefaultValue = values.isDefaultValue ? values.isDefaultValue : false;
-            ele.defaultValue = '';
-            if (ele.isDefaultValue) {
-              ele.defaultValue = values.defaultValue;
             }
           }
         });
