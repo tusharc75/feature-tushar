@@ -685,7 +685,8 @@ export const Properties = ({
                       isTooltip={false}
                     /> : values["isDefaultValue"] ? (
                         <Box display="block">
-                          {['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map(item => (
+                          {module === "pdf-template" &&
+                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map(item => (
                          <Chip
                             className="ml-1 cursor-pointer"
                             key={item}
@@ -720,18 +721,24 @@ export const Properties = ({
                           helperText={
                             touched["defaultValue"] && errors["defaultValue"]
                           }
-                          onChange={(e) => {
-                            if (typeof (inputRef.current) === "object" && inputRef.current !== null) {
-                              const selectionStart = inputRef.current.selectionStart;
-                              if (typeof (selectionStart) === "number") {
-                                setFieldValue("defaultValue", e.target.value.trimStart())
-                                setCursorPosition({selectionStart, selectionEnd: selectionStart})
+                            onChange={(e) => {
+                              if (module === "pdf-template") {
+                              
+                                if (typeof (inputRef.current) === "object" && inputRef.current !== null) {
+                                  const selectionStart = inputRef.current.selectionStart;
+                                  if (typeof (selectionStart) === "number") {
+                                    setFieldValue("defaultValue", e.target.value.trimStart())
+                                    setCursorPosition({selectionStart, selectionEnd: selectionStart})
+                                  }
+                                }
+                              } else {
+                                 setFieldValue("defaultValue", e.target.value.trimStart())
                               }
                             }
-                           }
                           }
                           onClick={(e) => {
-                            if (typeof(inputRef.current)==='object'&&inputRef.current!==null) {
+                            if (module === "pdf-template") {
+                              if (typeof(inputRef.current)==='object'&&inputRef.current!==null) {
                               const selectionStart = inputRef.current.selectionStart
                               const selectionEnd = inputRef.current.selectionEnd
                               setCursorPosition({
@@ -739,7 +746,8 @@ export const Properties = ({
                                 selectionEnd: selectionEnd,
                               })
                             }
-                          }}
+                            }
+                           }}
                           onKeyPress={(event) => {
                             event.stopPropagation();
                           }}
