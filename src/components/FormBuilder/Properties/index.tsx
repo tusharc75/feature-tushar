@@ -754,6 +754,7 @@ export const Properties = ({
                         />
                       </Box>
                     ) : null}
+                    {module !== "price-template" && module !== "product-template" ?
                     <FormControlLabel
                       disabled={values["required"]}
                       control={
@@ -769,7 +770,7 @@ export const Properties = ({
                         />
                       }
                       label="Hidden Field"
-                    />
+                    /> : null}
                     {fieldData.type === "process" && (
                       <FormControlLabel
                         control={
