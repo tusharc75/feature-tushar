@@ -682,7 +682,7 @@ export default function ManageBudgetDialog({
             {
                 showAddProductCategoryDialog && <CreateProductCategory
                     productCategoryId={null}
-                    onClose = {() => setShowAddProductCategoryDialog(false)}
+                    onClose={() => setShowAddProductCategoryDialog(false)}
                     onSuccess={(data) => {
                         if (data?._id) {
                             setProductCategoryDataSource((prevState) => {
@@ -705,7 +705,10 @@ export default function ManageBudgetDialog({
             {
                 showAddMarketSegmentDialog && <ManageMarketSegmentDialog
                     marketSegmentId={null}
-                    handleClose={(data) => {
+                    onClose={() => {
+                        setShowAddMarketSegmentDialog(false);
+                    }}
+                    onSuccess={(data) => {
                         if (data?._id) {
                             setMainMarketSegmentDataSource((prevState) => {
                                 return [
