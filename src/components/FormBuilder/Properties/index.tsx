@@ -685,7 +685,7 @@ export const Properties = ({
                       isTooltip={false}
                     /> : values["isDefaultValue"] ? (
                         <Box display="block">
-                          {module === "pdf-template" &&
+                          {module === "pdf-template" && fieldData.type === "multiLine" &&
                             ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map(item => (
                          <Chip
                             className="ml-1 cursor-pointer"
