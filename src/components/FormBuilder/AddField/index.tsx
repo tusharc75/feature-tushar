@@ -187,219 +187,222 @@ export const AddField = (props) => {
     maxWidth={"md"} open={true}>
     <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
-        <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
+        <Fragment>
           <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
-            {refrence === "builder" &&
-              <FormControl fullWidth margin="dense" variant="outlined" error={touched["sectionName"] && Boolean(errors["sectionName"])}>
-                <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
+            <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
+              {refrence === "builder" &&
+                <FormControl fullWidth margin="dense" variant="outlined" error={touched["sectionName"] && Boolean(errors["sectionName"])}>
+                  <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-outlined-label"
+                    id="demo-simple-select-outlined"
+                    value={values["sectionName"]}
+                    onChange={(e) => setFieldValue("sectionName", e.target.value)}
+                    label="Section Name"
+                    name="sectionName"
+                  >
+                    {section && section.map((_section) => (
+                      <MenuItem value={_section}>{_section}</MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>{errors["sectionName"]}</FormHelperText>
+                </FormControl>
+              }
+              <FormControl fullWidth margin="dense" variant="outlined">
+                <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
                   id="demo-simple-select-outlined"
-                  value={values["sectionName"]}
-                  onChange={(e) => setFieldValue("sectionName", e.target.value)}
-                  label="Section Name"
-                  name="sectionName"
+                  value={values["type"]}
+                  onChange={(e) => setFieldValue("type", e.target.value)}
+                  label="Type"
+                  name="type"
+                  error={touched["type"] && Boolean(errors["type"])}
                 >
-                  {section && section.map((_section) => (
-                    <MenuItem value={_section}>{_section}</MenuItem>
-                  ))}
+                  <MenuItem value={"singleLine"}>Single Line</MenuItem>
+                  <MenuItem value={"multiLine"}>Multi-Line</MenuItem>
+                  <MenuItem value={"decimal"}>Decimal</MenuItem>
+                  <MenuItem value={"percent"}>Percent</MenuItem>
+                  <MenuItem value={"formula"}>Formula</MenuItem>
+                  <MenuItem value={"dropDown"}>Dropdown</MenuItem>
+                  <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
+                  <MenuItem value={"converter"}>Converter</MenuItem>
+                  <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>
                 </Select>
-                <FormHelperText>{errors["sectionName"]}</FormHelperText>
               </FormControl>
-            }
-            <FormControl fullWidth margin="dense" variant="outlined">
-              <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
-              <Select
-                labelId="demo-simple-select-outlined-label"
-                id="demo-simple-select-outlined"
-                value={values["type"]}
-                onChange={(e) => setFieldValue("type", e.target.value)}
-                label="Type"
-                name="type"
-                error={touched["type"] && Boolean(errors["type"])}
-              >
-                <MenuItem value={"singleLine"}>Single Line</MenuItem>
-                <MenuItem value={"multiLine"}>Multi-Line</MenuItem>
-                <MenuItem value={"decimal"}>Decimal</MenuItem>
-                <MenuItem value={"percent"}>Percent</MenuItem>
-                <MenuItem value={"formula"}>Formula</MenuItem>
-                <MenuItem value={"dropDown"}>Dropdown</MenuItem>
-                <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
-                <MenuItem value={"converter"}>Converter</MenuItem>
-                <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              variant="outlined"
-              type="text"
-              label="Field Label"
-              required={true}
-              name="fieldLabel"
-              fullWidth
-              margin="dense"
-              value={values["fieldLabel"]}
-              error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
-              helperText={touched["fieldLabel"] && errors["fieldLabel"]}
-              onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
-            />
+              <TextField
+                variant="outlined"
+                type="text"
+                label="Field Label"
+                required={true}
+                name="fieldLabel"
+                fullWidth
+                margin="dense"
+                value={values["fieldLabel"]}
+                error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
+                helperText={touched["fieldLabel"] && errors["fieldLabel"]}
+                onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
+              />
 
-            {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
-              <Grid spacing={3} container>
-                {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
-                  <FormControl fullWidth margin="dense" variant="outlined">
-                    <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={values["returnType"]}
-                      onChange={(e) => setFieldValue("returnType", e.target.value)}
-                      label="Return Type"
-                      name="returnType"
-                    >
-                      <MenuItem value="decimal">Decimal</MenuItem>
-                      <MenuItem value="string">String</MenuItem>
-                      <MenuItem value="boolean">Boolean</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                }
-                {(values["type"] === "decimal" || values["type"] === "converter" || values["returnType"] === "decimal") &&
-                  <Grid item xs={12} sm={6} md={6}>
+              {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
+                <Grid spacing={3} container>
+                  {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
                     <FormControl fullWidth margin="dense" variant="outlined">
-                      <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
+                      <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
                       <Select
                         labelId="demo-simple-select-outlined-label"
                         id="demo-simple-select-outlined"
-                        value={values["decimalPlaces"]}
-                        onChange={(e) => setFieldValue("decimalPlaces", e.target.value)}
-                        label="Number of decimal places"
-                        name="decimalPlaces"
+                        value={values["returnType"]}
+                        onChange={(e) => setFieldValue("returnType", e.target.value)}
+                        label="Return Type"
+                        name="returnType"
                       >
-                        <MenuItem value={0}>0</MenuItem>
-                        <MenuItem value={1}>1</MenuItem>
-                        <MenuItem value={2}>2</MenuItem>
-                        <MenuItem value={3}>3</MenuItem>
-                        <MenuItem value={4}>4</MenuItem>
+                        <MenuItem value="decimal">Decimal</MenuItem>
+                        <MenuItem value="string">String</MenuItem>
+                        <MenuItem value="boolean">Boolean</MenuItem>
                       </Select>
                     </FormControl>
-                  </Grid>}
-              </Grid>}
+                  </Grid>
+                  }
+                  {(values["type"] === "decimal" || values["type"] === "converter" || values["returnType"] === "decimal") &&
+                    <Grid item xs={12} sm={6} md={6}>
+                      <FormControl fullWidth margin="dense" variant="outlined">
+                        <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-outlined-label"
+                          id="demo-simple-select-outlined"
+                          value={values["decimalPlaces"]}
+                          onChange={(e) => setFieldValue("decimalPlaces", e.target.value)}
+                          label="Number of decimal places"
+                          name="decimalPlaces"
+                        >
+                          <MenuItem value={0}>0</MenuItem>
+                          <MenuItem value={1}>1</MenuItem>
+                          <MenuItem value={2}>2</MenuItem>
+                          <MenuItem value={3}>3</MenuItem>
+                          <MenuItem value={4}>4</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>}
+                </Grid>}
 
 
-            {values["type"] === "currencyAmount" && <Currency
-              values={values}
-              setFieldValue={setFieldValue}
-              refrence={refrence}
-            />}
-
-            {(values["type"] === "currencyAmount" || values["type"] === "percent") &&
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="isFormula"
-                    checked={values["isFormula"]}
-                    onChange={(e) => {
-                      setFieldValue("isFormula", e.target.checked)
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Formula"
-              />}
-
-            {(values["type"] === "formula" || values["isFormula"]) && <Formula
-              fields={new_fields}
-              values={values}
-              setFieldValue={setFieldValue}
-              _id={fieldData && fieldData._id ? fieldData._id : ""}
-            />}
-
-            {values["type"] === "vlookupDropdown" &&
-              <Vlookup
-                fields={new_fields}
+              {values["type"] === "currencyAmount" && <Currency
                 values={values}
                 setFieldValue={setFieldValue}
-                _id={fieldData && fieldData._id ? fieldData._id : ""}
+                refrence={refrence}
               />}
 
-            {values["type"] === "currencyAmount" &&
-              <Fragment>
-                <br></br>
+              {(values["type"] === "currencyAmount" || values["type"] === "percent") &&
                 <FormControlLabel
                   control={
                     <Checkbox
-                      name="isConverter"
-                      checked={values["isConverter"]}
+                      name="isFormula"
+                      checked={values["isFormula"]}
                       onChange={(e) => {
-                        setFieldValue("isConverter", e.target.checked)
+                        setFieldValue("isFormula", e.target.checked)
                       }}
                       color="primary"
                     />
                   }
-                  label="Converter"
-                />
-              </Fragment>
-            }
-            {(values["type"] === "converter" || values["isConverter"]) && <Converter
-              fields={new_fields}
-              values={values}
-              setFieldValue={setFieldValue}
-            />}
+                  label="Formula"
+                />}
 
-            {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
-              <Option
+              {(values["type"] === "formula" || values["isFormula"]) && <Formula
+                fields={new_fields}
                 values={values}
                 setFieldValue={setFieldValue}
-                fields={new_fields}
                 _id={fieldData && fieldData._id ? fieldData._id : ""}
               />}
 
-            <Box pt={1} pb={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="required"
-                    checked={values["required"]}
-                    onChange={(e) => setFieldValue("required", e.target.checked)}
-                    color="primary"
+              {values["type"] === "vlookupDropdown" &&
+                <Vlookup
+                  fields={new_fields}
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  _id={fieldData && fieldData._id ? fieldData._id : ""}
+                />}
+
+              {values["type"] === "currencyAmount" &&
+                <Fragment>
+                  <br></br>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isConverter"
+                        checked={values["isConverter"]}
+                        onChange={(e) => {
+                          setFieldValue("isConverter", e.target.checked)
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Converter"
                   />
-                }
-                label="Required"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="isTooltip"
-                    checked={values["isTooltip"]}
-                    onChange={(e) => setFieldValue("isTooltip", e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Show Tooltip"
-              />
-              {values["isTooltip"] &&
-                <TextField
-                  variant="outlined"
-                  type="text"
-                  label="Tooltip Message"
-                  required={true}
-                  name="tooltipMessage"
-                  fullWidth
-                  margin="dense"
-                  value={values["tooltipMessage"]}
-                  error={touched["tooltipMessage"] && Boolean(errors["tooltipMessage"])}
-                  helperText={touched["tooltipMessage"] && errors["tooltipMessage"]}
-                  onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
-                />
+                </Fragment>
               }
-            </Box>
+              {(values["type"] === "converter" || values["isConverter"]) && <Converter
+                fields={new_fields}
+                values={values}
+                setFieldValue={setFieldValue}
+              />}
+
+              {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
+                <Option
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  fields={new_fields}
+                  _id={fieldData && fieldData._id ? fieldData._id : ""}
+                />}
+
+              <Box pt={1} pb={1}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="required"
+                      checked={values["required"]}
+                      onChange={(e) => setFieldValue("required", e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Required"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isTooltip"
+                      checked={values["isTooltip"]}
+                      onChange={(e) => setFieldValue("isTooltip", e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Show Tooltip"
+                />
+                {values["isTooltip"] &&
+                  <TextField
+                    variant="outlined"
+                    type="text"
+                    label="Tooltip Message"
+                    required={true}
+                    name="tooltipMessage"
+                    fullWidth
+                    margin="dense"
+                    value={values["tooltipMessage"]}
+                    error={touched["tooltipMessage"] && Boolean(errors["tooltipMessage"])}
+                    helperText={touched["tooltipMessage"] && errors["tooltipMessage"]}
+                    onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
+                  />
+                }
+              </Box>
+            </Form>
           </CustomDialogContent>
           <CustomDialogFooter>
             <Button size="small" onClick={handleClose} color="primary">Cancel</Button>
-            <Button size="small" type="submit" color="primary" variant="contained">{fieldData ? "Update" : "Add"}</Button>
+            <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">{fieldData ? "Update" : "Add"}</Button>
           </CustomDialogFooter>
-        </Form>)}
+        </Fragment>
+      )}
     </Formik>
   </Dialog>
   );

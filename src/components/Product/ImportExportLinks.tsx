@@ -101,6 +101,7 @@ export default function ImportExportLinks({ permissions, module, api, refrenceId
       formData.append("refrenceId", refrenceId);
       if (!isEmpty(data)) {
         formData.append('productCategory', data.productCategory)
+        formData.append('productTemplate', data.productTemplate)
         formData.append('priceTemplate', data.priceTemplate)
       }
       axiosInstance()
