@@ -4,15 +4,17 @@ import Product from '../ProductCard/ProductCard';
 // import { mockData } from '../../assets/mockData';
 import styles from './product-list.module.scss'
 import { Grid, Box } from "@material-ui/core";
+import CategorySidebar from "../CategorySidebar/CategorySidebar"
 import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import Layout from '../../Layout';
 
 const ProductList = ({ products }) => {
     return (
         <>
-            <Grid container className="headerbox">
-
-            </Grid>
+        <div className={styles.wrapper}>
+          
+            <CategorySidebar />
+            
             <Box className="detail-container">
                 <div className={`${styles.product_list_container}`}>
                     {
@@ -22,6 +24,7 @@ const ProductList = ({ products }) => {
                     }
                 </div>
             </Box>
+            </div>
         </>
     );
 }
