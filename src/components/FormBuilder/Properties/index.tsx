@@ -178,7 +178,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 ele.isDependentDropdown = values.isDependentDropdown;
                 ele.dropdowDependentOn = values.dropdowDependentOn;
               }
-              values.option.forEach((ele, index) => {
+              values.option && values.option.forEach((ele, index) => {
                 ele.order = index + 1;
                 ele.default = false;
                 if (fieldData.type === 'dropDown' && !values['lookup']) {
@@ -189,10 +189,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   }
                 }
               });
-              ele.option = values.option.map((item, idx) => ({
-                ...item,
-                order: idx + 1
-              }));
+              // ele.option = values.option.map((item, idx) => ({
+              //   ...item,
+              //   order: idx + 1
+              // }));
             }
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
