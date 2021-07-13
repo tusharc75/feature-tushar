@@ -704,6 +704,9 @@ export const Properties = ({
                         onChange={(e) =>
                           setFieldValue("defaultValue", e.target.value.trimStart())
                         }
+                        onKeyPress={(event) => {
+                          event.stopPropagation();
+                        }}
                       />
                     ) : null}
                     <FormControlLabel

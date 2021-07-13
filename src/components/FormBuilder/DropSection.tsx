@@ -255,6 +255,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                                 id="standard-basic"
                                 variant="outlined"
                                 margin="dense"
+                                disabled={module==="pdf-template"}
                                 value={data.sectionName}
                                 onChange={(event) => onChangeSectionName(data.sectionId, event.target.value)}
                             />
