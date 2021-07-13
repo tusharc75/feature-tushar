@@ -679,7 +679,7 @@ const ProductBuilder = (props) => {
         <CreateProduct
           isClone={false}
           productId={null}
-          handleClose={() => setIsAddNewProduct(false)}
+          onClose={() => setIsAddNewProduct(false)}
           isAddInBuilder={true}
           addProductInBuilder={addProductInBuilder}
           openFrom="builder"

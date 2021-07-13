@@ -424,7 +424,19 @@ const Product = () => {
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} openFrom="productMaster" />}
+        {open && 
+            <CreateProduct 
+                isClone={isClone} 
+                productId={productId} 
+                onClose={() => setOpen(false)} 
+                onSuccess={() => {
+                    setProductId(null)
+                    setOpen(false)
+                    fetchProduct()
+                }} 
+                openFrom="productMaster" 
+            />
+        }
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}

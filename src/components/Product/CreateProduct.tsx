@@ -24,6 +24,7 @@ import CreateProductCategory from "../../pages/ProductCategory/CreateProductCate
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { AiOutlineCloseSquare } from "react-icons/ai";
 
 const ignoreField = ["priceTemplate"]
 
@@ -31,7 +32,7 @@ const CreateProduct = (props) => {
 
     const { state: { permissions } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
+    const { productId, onSuccess, onClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -137,7 +138,7 @@ const CreateProduct = (props) => {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                onSuccess()
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -148,7 +149,7 @@ const CreateProduct = (props) => {
             delete values.brand
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                onSuccess()
                 if (isAddInBuilder) {
                     delete data.brand
                     delete data.createdBy
@@ -317,7 +318,7 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
@@ -592,7 +593,7 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"
@@ -615,7 +616,8 @@ const CreateProduct = (props) => {
         {
             showAddProductCategoryDialog && <CreateProductCategory
                 productCategoryId={null}
-                handleClose={(data) => {
+                onClose = {() => setShowAddProductCategoryDialog(false)}
+                onSuccess={(data) => {
 
                     if (data?._id) {
                         setProductCategoryDataSource((prevState) => {
