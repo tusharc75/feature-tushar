@@ -10,7 +10,7 @@ import TreeView from '@material-ui/lab/TreeView';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeItem from '@material-ui/lab/TreeItem';
-import ReactStars from 'react-rating-stars-component';
+import Rating from '@material-ui/lab/Rating';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -32,45 +32,15 @@ const useStyles = makeStyles((theme) => ({
 function CategorySidebar() {
   const classes = useStyles();
   const [productCategories, setProductCategories] = useState([]);
-
+  const [valueSafety, setValueSafety] = useState(2);
+  const [valueRes, setValueRes] = useState(2);
+  const [valueQuality, setValueQuality] = useState(2);
+  const [valueTech, setValueTech] = useState(2);
   useEffect(() => {
     let queryString = `?limit=0`;
     axiosInstance()
       .get(`/product-category${queryString}`)
       .then(({ data: { data } }) => {
-        // const tempArray = data.map((item) => item.parentCategory);
-
-        // const uniqueParent = [...new Set(tempArray)]
-        // function getUniqueListBy(arr, key) {
-        //   return [...new Map(arr.map(item => [item[key], item])).values()]
-        //  }
-        // console.log("unique", uniqueParent)
-        // const uniqueArr = getUniqueListBy(uniqueParent,"optionValue")
-        // let categories = data.map((u,index)=>{
-        //   if(u.parentCategory == null){
-        //     return {
-        //       id: u.id,
-        //       name: u.name,
-        //       children : null
-        //     }
-        //   }
-        //   else {
-
-        //     return {
-        //       id: u.parentCategory.optionValue,
-        //       name: u.parentCategory.optionLabel,
-        //       children: [
-        //         {
-        //           id: u.id,
-        //           name: u.name,
-        //         }
-        //       ]
-        //     }
-        //   }
-
-        // })
-
-        // setProductCategories(categories)
         let newData = [];
 
         data
@@ -126,19 +96,43 @@ function CategorySidebar() {
       <h3 className={styles.single_category_name}>Ratings</h3>
       <div className={styles.rating}>
         <p className={styles.single_category_name}>Safety</p>
-        <ReactStars count={5} size={24} activeColor="#ffd700" edit={false} value={3.5} isHalf={true} />
+        <Rating
+          name="simple-controlled"
+          value={valueSafety}
+          onChange={(event, newValueSafety) => {
+            setValueSafety(newValueSafety);
+          }}
+        />
       </div>
       <div className={styles.rating}>
         <p className={styles.single_category_name}>Responsiveness</p>
-        <ReactStars count={5} size={24} activeColor="#ffd700" edit={false} value={3.5} isHalf={true} />
+        <Rating
+          name="simple-controlled"
+          value={valueRes}
+          onChange={(event, newValueRes) => {
+            setValueRes(newValueRes);
+          }}
+        />
       </div>
       <div className={styles.rating}>
         <p className={styles.single_category_name}>Equipment Quality</p>
-        <ReactStars count={5} size={24} activeColor="#ffd700" edit={false} value={3} isHalf={true} />
+        <Rating
+          name="simple-controlled"
+          value={valueQuality}
+          onChange={(event, newValueQuality) => {
+            setValueQuality(newValueQuality);
+          }}
+        />
       </div>
       <div className={styles.rating}>
         <p className={styles.single_category_name}>Technical Support</p>
-        <ReactStars count={5} size={24} activeColor="#ffd700" edit={false} value={3} isHalf={true} />
+        <Rating
+          name="simple-controlled"
+          value={valueTech}
+          onChange={(event, newValueTech) => {
+            setValueTech(newValueTech);
+          }}
+        />
       </div>
     </div>
   );
