@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Button, Dialog, Grid } from '@material-ui/core'
 import { isMobile, isTablet } from 'react-device-detect'
-import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from '../constants/helpers'
+import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, simplifyValues, yupSchema } from '../constants/helpers'
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader'
 import CustomDialogContent from './CustomDialog/CustomDialogContent'
 import CommonSkeleton from './Helpers/CommonSkeleton'
@@ -12,10 +12,13 @@ import CustomButton from './Helpers/CustomButton'
 const arr = [...Array(9).keys()];
 const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) => {
     const [entityData, setEntityData] = useState({
-        fields: fieldData.map((fields) => fields.fieldData),
+        fields: fieldData.map((fields) => fields.fieldData),    
         initialValues: getObjKeys("", fieldData.map((fields) => fields.fieldData)),
     });
 
+    entityData.fields.map((obj) => {
+        return obj.required = true
+    })    
     const formsData = setFieldsInAscendingOrder(entityData.fields);
 
     const onSubmit = (values) => {
@@ -24,6 +27,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
 
     return (
         <>
+        {console.log("entityData",entityData.fields)}
             <Dialog
                 maxWidth="md"
                 fullWidth
@@ -63,7 +67,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                         }) => (
                             <>
                                 <CustomDialogContent>
-                                    <Form>
+                                    <Form noValidate>
                                         {
                                             formsData &&
                                             formsData.map((form, index1) => {
@@ -84,7 +88,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                                                                             type={field.type}
                                                                             options={field.option}
                                                                             setFieldValue={setFieldValue}
-                                                                            required={true}
+                                                                            required={field.required}
                                                                             fullWidth
                                                                             isTooltip={field?.isTooltip || false}
                                                                             tooltipMessage={field?.tooltipMessage}
@@ -118,7 +122,9 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                                         // loading={loading}
                                         variant="contained"
                                         color="primary"
-
+                                        disabled={ 
+                                            Object.keys(errors).length > 0 ? true : false
+                                        }
                                         onClick={(e) => {
                                             e.preventDefault();
                                             submitForm();
