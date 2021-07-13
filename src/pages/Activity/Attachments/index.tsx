@@ -216,7 +216,7 @@ export default function Attachment(props) {
     const ActionsRenderer = params => (
         (
             <>
-                <Tooltip title="Download">
+                {/* <Tooltip title="Download">
                     <IconButton
                         size="small"
                         aria-label="Download"
@@ -226,7 +226,7 @@ export default function Attachment(props) {
                     >
                         <GoArrowDown size={26} />
                     </IconButton>
-                </Tooltip>
+                </Tooltip> */}
                 {params.data.canEdit ?
                     <Tooltip title="Delete">
                         <IconButton
