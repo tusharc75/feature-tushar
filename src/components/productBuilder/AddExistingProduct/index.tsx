@@ -207,7 +207,14 @@ const AddExistingProduct = (props) => {
         let rows = selectedRecords
         rows.forEach((_d) => {
             _d.productId = _d._id
-            _d.qty = 0
+            if (_d.fields) {
+                const qtyField = _d.fields.filter((_f) => _f.fieldName === "qty")
+                if (qtyField.length) {
+                    if (!qtyField[0].isFormula) {
+                        _d.qty = 0
+                    }
+                }
+            }
             delete _d.id
             delete _d.brand
             delete _d.createdBy
