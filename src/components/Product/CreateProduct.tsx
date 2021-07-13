@@ -339,21 +339,15 @@ const CreateProduct = (props) => {
                                                                         item
                                                                         xs={
                                                                             //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                                                            // permissions.productCategory
-                                                                            //     .isCreate
-                                                                            true ? 10
+                                                                            permissions.productCategory.isCreate ? 10
                                                                                 : 11
                                                                         }
                                                                         sm={
-                                                                            // permissions.productCategory
-                                                                            //     .isCreate
-                                                                            true ? 10
+                                                                            permissions.productCategory.isCreate ? 10
                                                                                 : 11
                                                                         }
                                                                         md={
-                                                                            // permissions.productCategory
-                                                                            //     .isCreate
-                                                                            true ? 10
+                                                                            permissions.productCategory.isCreate ? 10
                                                                                 : 11
                                                                         }
                                                                     >
@@ -391,9 +385,7 @@ const CreateProduct = (props) => {
                                                                         />
                                                                     </Grid>
                                                                     {
-                                                                        // permissions.productCategory
-                                                                        //     .isCreate
-                                                                        true && (
+                                                                        permissions.productCategory.isCreate && (
                                                                             <Grid item xs={1} sm={1} md={1}>
                                                                                 <Tooltip
                                                                                     title="Add Product Category"
@@ -610,7 +602,8 @@ const CreateProduct = (props) => {
             </Formik> :
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>}
+            </Box>
+        }
         {isAddField && <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
 
         {
@@ -640,7 +633,7 @@ const CreateProduct = (props) => {
                 }}
             />
         }
-    </Dialog>
+    </Dialog >
     );
 }
 

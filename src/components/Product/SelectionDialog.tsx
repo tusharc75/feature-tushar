@@ -167,21 +167,15 @@ const SelectionDialog = (props) => {
                                         item
                                         xs={
                                             //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                            // permissions.productCategory
-                                            //     .isCreate
-                                            true ? 11
+                                            permissions.productCategory.isCreate ? 11
                                                 : 12
                                         }
                                         sm={
-                                            // permissions.productCategory
-                                            //     .isCreate
-                                            true ? 11
+                                            permissions.productCategory.isCreate ? 11
                                                 : 12
                                         }
                                         md={
-                                            // permissions.productCategory
-                                            //     .isCreate
-                                            true ? 11
+                                            permissions.productCategory.isCreate ? 11
                                                 : 12
                                         }
                                     >
@@ -214,9 +208,7 @@ const SelectionDialog = (props) => {
                                         />
                                     </Grid>
                                     {
-                                        // permissions.productCategory
-                                        //     .isCreate
-                                        true && (
+                                        permissions.productCategory.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
                                                     title="Add Product Category"
