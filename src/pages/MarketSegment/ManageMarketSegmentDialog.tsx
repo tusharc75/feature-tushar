@@ -59,6 +59,7 @@ const ManageMarketSegmentDialog = (props) => {
 
 
     const handleSubmit = (values) => {
+        setLoading(true);
         if (marketSegmentId) {
             values._id = marketSegmentId
             axiosInstance().put(`${marketSegment.marketSegmentApi}`, values).then(({ data: { data } }) => {
@@ -167,6 +168,7 @@ const ManageMarketSegmentDialog = (props) => {
                         <CustomDialogFooter>
                             <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
                             <CustomButton
+                                disabled={loading}
                                 loading={loading}
                                 variant="contained"
                                 color="primary"

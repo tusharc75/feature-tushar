@@ -939,7 +939,10 @@ export default function ManageOpportunityDialog({
       {
         showAddMarketSegmentDialog && <ManageMarketSegmentDialog
           marketSegmentId={null}
-          handleClose={(data) => {
+          onClose={() => {
+            setShowAddMarketSegmentDialog(false);
+          }}
+          onSuccess={(data) => {
             if (data?._id) {
               setMainMarketSegmentDataSource((prevState) => {
                 return [
