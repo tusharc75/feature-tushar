@@ -62,12 +62,24 @@ const useStyles = makeStyles((theme) => ({
     // background: "#f5f5f5 !important",
     // margin: "5px 8px",
     borderRadius: "4px",
+    [theme.breakpoints.down("xs")]: {
+      padding: "4px",
+    },
+  },
+  pbStepper: {
+    overflow: "none",
+    [theme.breakpoints.down("xs")]: {
+      overflow: "auto"
+    },
   },
   step: {
     paddingLeft: "8px",
     paddingRight: "8px",
     padding: "5px 8px",
     width: "20%",
+    [theme.breakpoints.down("xs")]: {
+      width: "50%",
+    },
     textAlign: "center",
     display: "flex",
     alignItems: "center",
@@ -133,6 +145,7 @@ const Steps = (props) => {
     loading,
     approvedQuote,
     handleVersionUpdate,
+    allowedToEdit,
     DOAlimit,
     totalCost,
     handleSendReminder = null,
@@ -305,7 +318,7 @@ const Steps = (props) => {
     <div className={classes.root}>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-        approvedQuote.approved ? (
+          approvedQuote.approved ? (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
@@ -453,7 +466,7 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center mt-2"
           >
             {activeStep !== steps.length - 1 && (
               <>
@@ -464,6 +477,7 @@ const Steps = (props) => {
                         variant="contained"
                         color="primary"
                         disabled={
+                          !allowedToEdit ||
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
                           versionStatus.includes("Sent for DOA") ||
@@ -485,7 +499,7 @@ const Steps = (props) => {
           </Grid>
           <Grid item xs={12} sm={8} md={10}>
             <div className={classes.pStepper}>
-              <Stepper className="pbStepper" activeStep={activeStep}>
+              <Stepper className={classes.pbStepper} activeStep={activeStep}>
                 {steps.map((label, i) => (
                   <Step
                     key={label}
@@ -542,6 +556,7 @@ const Steps = (props) => {
                           }}
                           size="small"
                           disabled={
+                            !allowedToEdit ||
                             loading ||
                             !nextStep ||
                             versionStatus.includes("Accepted  by DOA")

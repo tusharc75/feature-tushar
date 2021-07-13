@@ -71,7 +71,7 @@ function ReviewsComponent(props: { rating: number, review: string }) {
 const RatingAndReviewChart = () => {
     return (
         <>
-            <h1 className="text-align-center" >Feedback</h1>
+            <h2 className="text-align-center" >Feedback</h2>
             <div className={styles.rating_and_review_chart_outer}>
                 <div className={styles.rating_chart}>
                     <div className={styles.total_rating}>

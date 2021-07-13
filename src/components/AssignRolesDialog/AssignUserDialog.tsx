@@ -82,11 +82,11 @@ const AssignUserDialog = ({
   };
 
   const handleSearch = (e) => {
-    let value = e.target.value.toLowerCase();
+    let value = e.target.value;
     setSearch(value);
     let result = [];
     result = usersConst.filter((data) => {
-      return data.concatedName.search(value) != -1 || data.email.search(value) != -1;
+      return data.concatedName.toLowerCase().search(value.toLowerCase()) != -1 || data.email.toLowerCase().search(value.toLowerCase()) != -1;
     });
     setUsers(result)
   };
@@ -105,39 +105,42 @@ const AssignUserDialog = ({
           <Loader text="Loading Users" />
         ) : usersConst.length ? (
           <>
-            <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    value="top"
-                    control={
-                      <Checkbox
-                        edge="start"
-                        onChange={(e) => {
-                          users.forEach((user) => user.isChecked = e.target.checked)
-                          setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
-                        }
-                        }
-                        checked={users.every(x => x.isChecked)}
-                        inputProps={{
-                          "aria-labelledby": `checkbox-list-label-select-all`,
-                        }}
-                      />}
-                    label="Select all users"
-                  />
-                </FormControl>
-
-              </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox="terms_header_search_bar"
-                  width="300px"
-                  value={search}
-                />
-              </Grid>
-            </Grid>
             <List style={{ padding: 0 }}>
+              <ListItem divider>
+                <Grid container>
+                  <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                    <FormControl component="fieldset">
+                      <FormControlLabel
+                        value="top"
+                        className="m-0"
+                        control={
+                          <Checkbox
+                            edge="start"
+                            onChange={(e) => {
+                              users.forEach((user) => user.isChecked = e.target.checked)
+                              setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
+                            }
+                            }
+                            checked={users.every(x => x.isChecked)}
+                            inputProps={{
+                              "aria-labelledby": `checkbox-list-label-select-all`,
+                            }}
+                          />}
+                        label="Select all users"
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                    <SearchBox
+                      onSearch={handleSearch}
+                      searchbox="terms_header_search_bar"
+                      width="300px"
+                      value={search}
+                    />
+                  </Grid>
+                </Grid>
+              </ListItem>
+
               {users.map((user) => (
                 <ListItem divider key={user._id}>
                   <ListItemIcon>

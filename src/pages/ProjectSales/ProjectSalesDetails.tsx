@@ -318,6 +318,8 @@ const ProjectSalesDetails = () => {
   const isTeamMember = Boolean(teamUsers.find((u) => u._id === user.user._id));
   const isManager =
     user.user._id === projectSalesData?.projectManager?.optionValue;
+  const fiteredFieldForUpdate = projectSalesFields.filter((obj) => obj.isUpdate);
+  const fiteredFieldToShow = projectSalesFields.filter((obj) => obj.isRead);
 
   return (
     <>
@@ -327,7 +329,7 @@ const ProjectSalesDetails = () => {
           openDialog={openUpdateDialog}
           onClose={closeUpdateDIalog}
           data={projectSalesData}
-          fields={projectSalesFields}
+          fields={fiteredFieldForUpdate}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateProject}
           isProjectSales={true}
@@ -434,7 +436,7 @@ const ProjectSalesDetails = () => {
                         <Box>
                           <DetailsPage
                             data={copyOfProjectSalesData}
-                            fields={projectSalesFields}
+                            fields={fiteredFieldToShow}
                           />
                         </Box>
                       )}

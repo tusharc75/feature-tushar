@@ -55,19 +55,13 @@ const CreateProduct = (props) => {
   const [sectionName, setSectionName] = useState("");
   const ref = useRef(null);
 
-  const [isShowTemplate, setIsShowTemplate] = useState(false);
   const [fieldChanges, setFieldChanges] = useState([]);
 
   useEffect(() => {
     let _fields = [];
     productData.fields.forEach((_f) => {
       if (stage === "product") {
-        if (
-          _f.leval === "product" ||
-          _f.leval === "product-custom" ||
-          _f.leval === "product-template" ||
-          _f.leval === "product-builder-custom"
-        ) {
+        if (_f.leval === "product" || _f.leval === "product-custom" || _f.leval === "product-template" || _f.leval === "product-builder-custom") {
           _fields.push(_f);
         }
       } else {
@@ -83,20 +77,12 @@ const CreateProduct = (props) => {
     });
 
     setMasterFields(_fields.filter((_f) => _f.leval !== "cost"));
-    setFields(
-      _fields.filter(
-        (_f) =>
-          _f.leval === "product-builder-custom" ||
-          _f.leval === "price-builder-custom"
-      )
-    );
+    setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"));
 
     let values = { ...productData };
     values.productCategory = values.productCategory.optionValue;
-    values.priceTemplate =
-      values.priceTemplate &&
-      values.priceTemplate.optionValue &&
-      values.priceTemplate.optionValue;
+    values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue;
+    values.priceTemplate = values.priceTemplate && values.priceTemplate.optionValue && values.priceTemplate.optionValue;
     delete values.fields;
 
     setInitialData({
@@ -168,13 +154,8 @@ const CreateProduct = (props) => {
   const handleAddField = (field) => {
     field.sectionName = sectionName;
     field.leval = "price-builder-custom";
-    if (
-      productData.fields.filter((_f) => _f.sectionName === sectionName).length
-    ) {
-      if (
-        productData.fields.filter((_f) => _f.sectionName === sectionName)[0]
-          .leval !== "price-template"
-      ) {
+    if (productData.fields.filter((_f) => _f.sectionName === sectionName).length) {
+      if (productData.fields.filter((_f) => _f.sectionName === sectionName)[0].leval !== "price-template") {
         field.leval = "product-builder-custom";
       }
     }
@@ -203,10 +184,7 @@ const CreateProduct = (props) => {
 
   const addDisplayType = (displayType, field, displayValue) => {
     let _fieldChanges = fieldChanges;
-    if (
-      _fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length ===
-      0
-    ) {
+    if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
       if (displayType === "currency") {
         _fieldChanges.push({
           fieldName: field.fieldName,
@@ -286,7 +264,6 @@ const CreateProduct = (props) => {
     if (label.includes("Unit") && unit) {
       label = `${label.split(" Unit")[0]} ${unit}`;
     }
-
     return label;
   };
 
@@ -345,31 +322,7 @@ const CreateProduct = (props) => {
                             <Grid spacing={3} container>
                               {section.sectionFields &&
                                 section.sectionFields.map((field) =>
-                                  field.fieldName === "priceTemplate" &&
-                                  !isShowTemplate ? (
-                                    <Grid
-                                      key={field.fieldName}
-                                      item
-                                      xs={12}
-                                      sm={6}
-                                      md={6}
-                                    >
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={isShowTemplate}
-                                            onChange={() =>
-                                              setIsShowTemplate(true)
-                                            }
-                                            name="isShowTemplate"
-                                            color="primary"
-                                          />
-                                        }
-                                        label="Show Template"
-                                      />
-                                    </Grid>
-                                  ) : field.type === "converter" ||
-                                    field.type === "currencyAmount" ? (
+                                  field.type === "converter" || field.type === "currencyAmount" ? (
                                     <FormTypes
                                       fields={initialData.fields}
                                       fieldData={field}
@@ -379,13 +332,13 @@ const CreateProduct = (props) => {
                                       label={
                                         field.isFormula
                                           ? `${replaceUnit(
-                                              field.fieldLabel,
-                                              values?.unit
-                                            )} (Auto Calculated Field)`
+                                            field.fieldLabel,
+                                            values?.unit
+                                          )} (Auto Calculated Field)`
                                           : replaceUnit(
-                                              field.fieldLabel,
-                                              values?.unit
-                                            )
+                                            field.fieldLabel,
+                                            values?.unit
+                                          )
                                       }
                                       name={field.fieldName}
                                       type={field.type}
@@ -403,13 +356,7 @@ const CreateProduct = (props) => {
                                       handleRemoveField={handleRemoveField}
                                     />
                                   ) : (
-                                    <Grid
-                                      key={field.fieldName}
-                                      item
-                                      xs={12}
-                                      sm={6}
-                                      md={6}
-                                    >
+                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -421,13 +368,13 @@ const CreateProduct = (props) => {
                                             label={
                                               field.isFormula
                                                 ? `${replaceUnit(
-                                                    field.fieldLabel,
-                                                    values?.unit
-                                                  )} (Auto Calculated Field)`
+                                                  field.fieldLabel,
+                                                  values?.unit
+                                                )} (Auto Calculated Field)`
                                                 : replaceUnit(
-                                                    field.fieldLabel,
-                                                    values?.unit
-                                                  )
+                                                  field.fieldLabel,
+                                                  values?.unit
+                                                )
                                             }
                                             name={field.fieldName}
                                             type={field.type}
@@ -444,42 +391,29 @@ const CreateProduct = (props) => {
                                               field.isvlookupReverse
                                             }
                                             size="small"
-                                            disabled={
-                                              [
-                                                "productCategory",
-                                                "priceTemplate",
-                                              ].includes(field.fieldName)
-                                                ? true
-                                                : false
-                                            }
+                                            disabled={stage === "product" ?
+                                              ["productCategory", "productTemplate"].includes(field.fieldName) ? true : false
+                                              : ["productCategory", "productTemplate", "priceTemplate"].includes(field.fieldName) ? true : false}
                                             imageOrFileUploadCompletePercentage={
-                                              [
-                                                "imageUpload",
-                                                "fileUpload",
-                                              ].some((s) => s === field.type)
+                                              ["imageUpload", "fileUpload"].some((s) => s === field.type)
                                                 ? (completePercentage) => {
-                                                    setUploadingImageOrFileProgress(
-                                                      completePercentage
-                                                    );
-                                                  }
+                                                  setUploadingImageOrFileProgress(
+                                                    completePercentage
+                                                  );
+                                                }
                                                 : null
                                             }
                                             setValues={setValues}
                                           />
                                         </Box>
-                                        {(field.leval ===
-                                          "product-builder-custom" ||
-                                          field.leval ===
-                                            "price-builder-custom") && (
+                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") && (
                                           <Box>
                                             <Tooltip
                                               title="Remove"
                                               className="mt-1"
                                             >
                                               <IconButton
-                                                onClick={() =>
-                                                  handleRemoveField(field)
-                                                }
+                                                onClick={() => handleRemoveField(field)}
                                                 color="primary"
                                                 size="small"
                                               >

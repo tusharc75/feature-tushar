@@ -51,11 +51,28 @@ export default function ManageAccount(props) {
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
   const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
+  const [additionalFieldName, setAdditionalFieldName] = useState("")
 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
+    
   useEffect(() => {
+   
+    if(isNew){
+      const processSteps = accountData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
+      );
+    
+      accountData.fields.map((d) => {
+        if (
+          d.sectionName ==processSteps?.additionalInfoSection ) {
+         
+          setAdditionalFieldName(d.sectionName)
+        }
+      });
+    }
+   
     let ownerCollaboratorDropdownData = accountData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
@@ -153,10 +170,11 @@ export default function ManageAccount(props) {
                 setFieldValue,
               }) => (
                 <>
+               
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
                       {formsData &&
-                        formsData.map((form, i) => (
+                        formsData.filter((item)=>item.name!==additionalFieldName).map((form, i) => (
                           <div key={i}>
                             <h2 className="form-label-style">{form.name}</h2>
                             <Box marginY={2}>

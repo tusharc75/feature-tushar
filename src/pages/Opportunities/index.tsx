@@ -440,7 +440,7 @@ const Opportunities = () => {
         <CustomContainer>
           <div className="header-panel">
             <OpportunitiesHeader
-              selectedType={selectedType}
+              selectedRecords={selectedRecords}
               onTypeChange={handleOpportunityTypeChange}
               options={OpportunityTypes}
               onSearch={handleSearch}

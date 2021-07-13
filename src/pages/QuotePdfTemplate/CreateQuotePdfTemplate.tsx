@@ -1,102 +1,90 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  TextField,
-  Grid,
-  Box,
-  Button,
-  CircularProgress,
-  FormControlLabel,
-  Checkbox,
-} from "@material-ui/core";
+import React, { useContext, useEffect, useState } from 'react';
+import { TextField, Grid, Box, Button, CircularProgress, FormControlLabel, Checkbox } from '@material-ui/core';
 
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory } from 'react-router-dom';
 
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
 
-import { FormBuilder } from "../../components/FormBuilder";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import Layout from "../../components/Layout";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { camelCase, map, uniq } from "lodash";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import routes from "../../components/Helpers/Routes";
+import { FormBuilder } from '../../components/FormBuilder';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import Layout from '../../components/Layout';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import { camelCase, map, uniq } from 'lodash';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import routes from '../../components/Helpers/Routes';
 
 const PdfTemplateSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(3, "Too Short!")
-    .max(50, "Too Long")
-    .required("name is required"),
-  showPageNumberInFooter: Yup.boolean(),
+  name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+  showPageNumberInFooter: Yup.boolean()
 });
 
 const seedData = [
   {
-    _id: "60e57ae7801802b66486e326",
-    fieldLabel: "Header Column 1",
-    type: "singleLine",
+    _id: '60e57ae7801802b66486e326',
+    fieldLabel: 'Header Column 1',
+    type: 'singleLine',
     option: [],
     required: false,
     isTooltip: false,
-    tooltipMessage: "",
+    tooltipMessage: '',
     editAble: true,
     order: 4,
     hiddenField: false,
     isDefaultValue: true,
-    defaultValue: "Project Europe",
-    fieldName: "headerColumn1",
-    sectionName: "Header",
+    defaultValue: '',
+    fieldName: 'headerColumn1',
+    sectionName: 'Header'
   },
   {
-    _id: "60e57ae7801802b66486e327",
-    fieldLabel: "Header Column 2",
-    type: "imageUpload",
+    _id: '60e57ae7801802b66486e327',
+    fieldLabel: 'Header Column 2',
+    type: 'imageUpload',
     option: [],
     required: false,
     isTooltip: false,
-    tooltipMessage: "",
+    tooltipMessage: '',
     editAble: true,
     order: 5,
     hiddenField: false,
     isDefaultValue: true,
-    defaultValue:
-      " https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/ArcelorMittal.svg/1200px-ArcelorMittal.svg.png",
-    fieldName: "headerColumn2",
-    sectionName: "Header",
+    defaultValue: '',
+    fieldName: 'headerColumn2',
+    sectionName: 'Header'
   },
   {
-    _id: "60e57ae7801802b66486e328",
-    fieldLabel: "Footer Column 1",
-    type: "multiLine",
+    _id: '60e57ae7801802b66486e328',
+    fieldLabel: 'Footer Column 1',
+    type: 'multiLine',
     option: [],
     required: false,
     isTooltip: false,
-    tooltipMessage: "",
+    tooltipMessage: '',
     editAble: true,
     order: 6,
     hiddenField: false,
     isDefaultValue: true,
-    defaultValue: "VAT/GST will be applicable extra",
-    fieldName: "footerColumn1",
-    sectionName: "Footer",
+    defaultValue: '',
+    fieldName: 'footerColumn1',
+    sectionName: 'Footer'
   },
   {
-    _id: "60e57ae7801802b66486e329",
-    fieldLabel: "Footer Column 2",
-    type: "singleLine",
+    _id: '60e57ae7801802b66486e329',
+    fieldLabel: 'Footer Column 2',
+    type: 'singleLine',
     option: [],
     required: false,
     isTooltip: false,
-    tooltipMessage: "",
+    tooltipMessage: '',
     editAble: true,
     order: 7,
     hiddenField: false,
     isDefaultValue: true,
-    defaultValue: "Arcelor Mittal USA",
-    fieldName: "footerColumn2",
-    sectionName: "Footer",
-  },
+    defaultValue: '',
+    fieldName: 'footerColumn2',
+    sectionName: 'Footer'
+  }
 ];
 
 const CreateQuotePdfTemplate = () => {
@@ -107,38 +95,49 @@ const CreateQuotePdfTemplate = () => {
   const [initialValues, setInitialValues] = useState(null);
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
+  const [isClone] = useState(history.location.state?.isClone ? true : false);
 
   useEffect(() => {
     const _data = [];
-    const _section = uniq(map(seedData, "sectionName"));
+    const _section = uniq(map(seedData, 'sectionName'));
     _section.forEach((element: any, index: number) => {
       _data.push({
         sectionId: index,
         sectionName: element,
-        field: seedData.filter((el: any) => el.sectionName === element),
+        field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
     setSection(_data);
   }, []);
-  useEffect(()=>{
-    if(id && id != 0){
-     (async ()=>{
-       try{
-         const res = await axiosInstance().get(`/quote-pdf-template/${id}`)
-         const {data:{data}} = res;
-         setInitialValues(data);
-         setSection(data.section);
-       }catch(e){
-        toastConfig.setToastConfig(e);
-       }
-      })()
-    }else{
+  useEffect(() => {
+    if (id && id != 0) {
+      (async () => {
+        try {
+          const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
+          const {
+            data: { data }
+          } = res;
+
+          if (isClone) {
+            const { _id, name, createdBy, updatedBy, ...rest } = data;
+            setInitialValues(rest);
+            setSection(data.section);
+          }
+          else {
+            setInitialValues(data);
+            setSection(data.section);
+          }
+        } catch (e) {
+          toastConfig.setToastConfig(e);
+        }
+      })();
+    } else {
       setInitialValues({
-        name: "",
-        showPageNumberInFooter: false,
-      })
+        name: '',
+        showPageNumberInFooter: false
+      });
     }
-  },[id])
+  }, [id]);
 
   const handleSave = (values) => {
     const data: any = {};
@@ -153,9 +152,7 @@ const CreateQuotePdfTemplate = () => {
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(
-            _field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")
-          );
+          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
         }
         _field_data.order = ++order;
         fields.push(_field_data);
@@ -165,9 +162,9 @@ const CreateQuotePdfTemplate = () => {
 
     setIsUpdating(true);
 
-    if (id === "0") {
+    if (id === '0' || isClone === true) {
       axiosInstance()
-        .post("/quote-pdf-template", data)
+        .post('/quote-pdf-template', data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
           history.push({ pathname: routes.quotePdfTemplate.path });
@@ -180,7 +177,7 @@ const CreateQuotePdfTemplate = () => {
       data.templateId = id;
       data.deleteField = deleteField;
       axiosInstance()
-        .put("/quote-pdf-template", data)
+        .put('/quote-pdf-template', data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
           history.push({ pathname: routes.quotePdfTemplate.path });
@@ -200,11 +197,11 @@ const CreateQuotePdfTemplate = () => {
             routes={[
               {
                 title: routes.quotePdfTemplate.title,
-                path: routes.quotePdfTemplate.path,
+                path: routes.quotePdfTemplate.path
               },
               {
-                title: id === "0" ? "New" : initialValues && initialValues.name,
-              },
+                title: (id === '0' || isClone === true) ? 'New' : initialValues && initialValues.name
+              }
             ]}
           />
         </Grid>
@@ -212,11 +209,7 @@ const CreateQuotePdfTemplate = () => {
       </Grid>
       <div className="main-container">
         {initialValues ? (
-          <Formik
-            initialValues={initialValues}
-            validationSchema={PdfTemplateSchema}
-            onSubmit={handleSave}
-          >
+          <Formik initialValues={initialValues} validationSchema={PdfTemplateSchema} onSubmit={handleSave}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form>
                 <Box p={1} ml={1} bgcolor="white">
@@ -225,32 +218,25 @@ const CreateQuotePdfTemplate = () => {
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Price Template Name"
+                        label="Quote PDF Template Name"
                         required={true}
                         name="name"
                         fullWidth
                         margin="dense"
-                        value={values["name"]}
-                        error={touched["name"] && Boolean(errors["name"])}
-                        helperText={touched["name"] && errors["name"]}
-                        onChange={(e) =>
-                          setFieldValue("name", e.target.value.trimStart())
-                        }
+                        value={values['name']}
+                        error={touched['name'] && Boolean(errors['name'])}
+                        helperText={touched['name'] && errors['name']}
+                        onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
                       />
                     </Grid>
                     <Grid item xs={12} sm={3}>
                       <FormControlLabel
-                        value={values["showPageNumberInFooter"]}
+                        value={values['showPageNumberInFooter']}
                         control={
                           <Checkbox
                             name="showPageNumberInFooter"
-                            checked={values["showPageNumberInFooter"]}
-                            onChange={(e) =>
-                              setFieldValue(
-                                "showPageNumberInFooter",
-                                e.target.checked
-                              )
-                            }
+                            checked={values['showPageNumberInFooter']}
+                            onChange={(e) => setFieldValue('showPageNumberInFooter', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -259,13 +245,7 @@ const CreateQuotePdfTemplate = () => {
                     </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
                       <Box>
-                        <Button
-                          disabled={isUpdating}
-                          size="small"
-                          color="primary"
-                          onClick={submitForm}
-                          variant="contained"
-                        >
+                        <Button disabled={isUpdating} size="small" color="primary" onClick={submitForm} variant="contained">
                           Save{isUpdating && <CircularProgress size={24} />}
                         </Button>
                       </Box>
@@ -276,8 +256,8 @@ const CreateQuotePdfTemplate = () => {
                           variant="contained"
                           onClick={() => {
                             history.push({
-                              pathname: routes.quotePdfTemplate.path,
-                            })
+                              pathname: routes.quotePdfTemplate.path
+                            });
                           }}
                         >
                           Close

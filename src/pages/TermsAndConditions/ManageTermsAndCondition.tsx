@@ -72,7 +72,7 @@ const TermsAndCondition = ({
     TACName: Yup.string().required(`please add ${displayTitle.toLowerCase()} name`),
   });
 
-  const [additionalDataPosition, setAdditionalDataPosition] = useState(editRecord ? editRecord.topPosition ? editRecord.topPosition.toString() : "true" : "true");
+  const [additionalDataPosition, setAdditionalDataPosition] = useState(editRecord ? editRecord.topPosition?.toString() : "true");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdditionalDataPosition((event.target as HTMLInputElement).value);
   };

@@ -159,23 +159,23 @@ const AssignDataDialog = (props) => {
 
 
   const handleSearch = (e) => {
-    let value = e.target.value.toLowerCase();
+    let value = e.target.value;
     setSearch(value);
     let result = [];
     result = dataConst.filter((data) => {
       switch (type) {
         case "user":
-          return data.firstName.search(value) != -1 || data.lastName.search(value) != -1 || data.email.search(value) != -1;
+          return data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1 || data.email.toLowerCase().search(value.toLowerCase()) != -1;
         case "lead":
-          return data.salutation.search(value) != -1 || data.firstName.search(value) != -1 || data.middleName.search(value) != -1 || data.lastName.search(value) != -1;
+          return data.salutation.toLowerCase().search(value.toLowerCase()) != -1 || data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.middleName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1;
         case "opportunity":
-          return data.opportunityName.search(value) != -1;
+          return data.opportunityName.toLowerCase().search(value.toLowerCase()) != -1;
         case "quote-builder":
-          return data.quoteName.search(value) != -1;
+          return data.quoteName.toLowerCase().search(value.toLowerCase()) != -1;
         case "customer-account":
-          return data.accountName.search(value) != -1;
+          return data.accountName.toLowerCase().search(value.toLowerCase()) != -1;
         case "customer-contact":
-          return data.salutation.search(value) != -1 || data.firstName.search(value) != -1 || data.middleName.search(value) != -1 || data.lastName.search(value) != -1;
+          return data.salutation.toLowerCase().search(value.toLowerCase()) != -1 || data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.middleName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1;
         default:
           break;
       }

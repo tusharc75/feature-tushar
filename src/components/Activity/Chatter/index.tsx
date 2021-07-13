@@ -86,8 +86,10 @@ const Chatter = (props) => {
     const token = localStorage.getItem("token");
     const s = io(`${backendApi}/chatter`, {
       auth: {
-        token,
+        token
       },
+      transports: ['websocket',"pooling"],
+
     });
     setSocket(s);
   }, [chatterId]);

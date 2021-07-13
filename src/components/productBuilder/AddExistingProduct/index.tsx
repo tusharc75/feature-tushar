@@ -29,7 +29,7 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const ignoreField = ["qty"]
+const ignoreField = ["qty","priceTemplate"]
 
 const AddExistingProduct = (props) => {
 
@@ -54,10 +54,10 @@ const AddExistingProduct = (props) => {
                 : <NoDataCell />
         }
     </>
-    const PriceTemplateRenderer = params => <>
+    const ProductTemplateRenderer = params => <>
         {
-            params.data.priceTemplate || params.data.priceTemplate === 0 ?
-                typeof params.data.priceTemplate === 'object' ? params.data.priceTemplate["optionLabel"] : params.data.priceTemplate
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
                 : <NoDataCell />
         }
     </>
@@ -65,7 +65,7 @@ const AddExistingProduct = (props) => {
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
-        productTemplateRenderer: PriceTemplateRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const getQueryString = () => {
@@ -178,7 +178,7 @@ const AddExistingProduct = (props) => {
                             if (ele.fieldName === "productCategory") {
                                 col.cellRenderer = "productCategoryRenderer"
                             }
-                            if (ele.fieldName === "priceTemplate") {
+                            if (ele.fieldName === "productTemplate") {
                                 col.cellRenderer = "productTemplateRenderer"
                             }
                             col.order = ele.order;
@@ -196,7 +196,7 @@ const AddExistingProduct = (props) => {
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-            
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -234,7 +234,8 @@ const AddExistingProduct = (props) => {
         <div className="listing-grid p-3">
             <Box mb={2}>
                 <Grid container >
-                    <Grid item xs={12} sm={6}  >
+                    <Grid item xs={12} sm={6}>
+
                     </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
                         <SearchBox
@@ -243,7 +244,7 @@ const AddExistingProduct = (props) => {
                             width="300px"
                             value={search}
                         />
-                        <Box ml={1} >
+                        <Box ml={1} mt={1} >
                             <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
                                 {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                 Add</Button>

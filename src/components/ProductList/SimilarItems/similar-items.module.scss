@@ -12,14 +12,12 @@
 
 .item_details {
     display: grid;
-    grid-template-rows: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 30px 30px 30px;
 }
 
 .similar_items_child {
     display: grid;
     grid-template-rows: 1fr 1fr;
-    box-shadow: 2px 3px 3px #eceaea;
-    background: white;
 }
 
 .similar_item {
@@ -52,6 +50,9 @@
     color: #d3d6d3;
 }
 
+.item_alt{
+    background:#f2f4f6;
+}
 
 @media (max-width: 1024px) {
     .similar_items_outer {
