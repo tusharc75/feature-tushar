@@ -32,7 +32,7 @@ const CreateProduct = (props) => {
 
     const { state: { permissions } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { productId, onSuccess, onClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -138,7 +138,7 @@ const CreateProduct = (props) => {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                onSuccess()
+                handleClose();
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -149,7 +149,7 @@ const CreateProduct = (props) => {
             delete values.brand
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                onSuccess()
+                handleClose();
                 if (isAddInBuilder) {
                     delete data.brand
                     delete data.createdBy
@@ -198,7 +198,7 @@ const CreateProduct = (props) => {
                             data.fields.forEach(_f => {
                                 newField.push(_f)
                             })
-                            axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+                            axiosInstance().get(`/price-template/product-template/` + defaultproductTemplate).then(({ data: { data } }) => {
                                 setPriceTemplate(data.data)
                                 let defaultpriceTemplate = ""
                                 if (data.data.length) {
@@ -318,7 +318,7 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={onClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={handleClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
@@ -585,7 +585,7 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"
@@ -609,7 +609,7 @@ const CreateProduct = (props) => {
         {
             showAddProductCategoryDialog && <CreateProductCategory
                 productCategoryId={null}
-                onClose = {() => setShowAddProductCategoryDialog(false)}
+                onClose={() => setShowAddProductCategoryDialog(false)}
                 onSuccess={(data) => {
 
                     if (data?._id) {
