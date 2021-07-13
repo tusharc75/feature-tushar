@@ -191,22 +191,27 @@ const CreateProduct = (props) => {
                             }
                         })
                     }
-                    setInitialData({
-                        fields: initialData.fields,
-                        values: { ...ref.current.values, productTemplate: defaultproductTemplate },
-                    });
                     if (defaultproductTemplate !== "") {
                         axiosInstance().get(`/product-template/fields/` + defaultproductTemplate).then(({ data: { data } }) => {
                             let newField = [...masterFields];
                             data.fields.forEach(_f => {
                                 newField.push(_f)
                             })
-                            setInitialData({
-                                fields: newField,
-                                values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: defaultproductTemplate },
+                            axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+                                setPriceTemplate(data.data)
+                                let defaultpriceTemplate = ""
+                                if (data.data.length) {
+                                    defaultpriceTemplate = data.data[0].optionValue;
+                                }
+                                setInitialData({
+                                    fields: newField,
+                                    values: {
+                                        ...getObjKeys('', newField), ...ref.current.values,
+                                        productTemplate: defaultproductTemplate, priceTemplate: defaultpriceTemplate
+                                    },
+                                });
+                                EvaluteproductFields(newField)
                             });
-                            EvaluteproductFields(newField)
-                            handelPriceTemplate(defaultproductTemplate)
                         });
                     }
                 }
@@ -223,27 +228,21 @@ const CreateProduct = (props) => {
                     data.fields.forEach(_f => {
                         newField.push(_f)
                     })
-                    setInitialData({
-                        fields: newField,
-                        values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].optionValue },
+                    axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+                        setPriceTemplate(data.data)
+                        let defaultpriceTemplate = ""
+                        if (data.data.length) {
+                            defaultpriceTemplate = data.data[0].optionValue;
+                        }
+                        setInitialData({
+                            fields: newField,
+                            values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].optionValue, priceTemplate: defaultpriceTemplate },
+                        });
+                        EvaluteproductFields(newField)
                     });
-                    EvaluteproductFields(newField)
-                    handelPriceTemplate(result[0].optionValue)
                 });
             }
         }
-    }
-
-    const handelPriceTemplate = (value) => {
-        axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
-            setPriceTemplate(data.data)
-            if (data.data.length) {
-                setInitialData({
-                    fields: initialData.fields,
-                    values: { ...ref.current.values, priceTemplate: data.data[0].optionValue },
-                });
-            }
-        });
     }
 
     const handleOpenAddField = (name) => {

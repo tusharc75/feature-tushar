@@ -3,7 +3,6 @@ import React, {
   Fragment,
   useRef,
   useEffect,
-  useContext,
 } from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -16,6 +15,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
+import Chip from "@material-ui/core/Chip";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import FieldList from "../FieldList";
@@ -23,7 +23,7 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { camelCase } from "./../../../constants/helpers";
 import { Vlookup } from "../AddField/vlookup";
 import { Formula } from "../AddField/formula";
@@ -35,8 +35,8 @@ import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { Autocomplete } from "@material-ui/lab";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import FormTypes from "../../Helpers/FormTypes";
+import { startCase } from "lodash";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required("please enter field label"),
@@ -73,10 +73,8 @@ export const Properties = ({
   extraFields,
 }) => {
   const [initialValues, setInitialValues] = useState(fieldData);
-  const [isImgUploading, setImgUploading] = useState(false);
-  const [imageUploadProgress, setImageUploadProgress] = useState(0);
-  const { setToastConfig } = useContext(CustomToastContext);
-
+  const inputRef = useRef(null);
+  const [cursorPosition, setCursorPosition] = useState<any>({})
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -312,6 +310,8 @@ export const Properties = ({
       event.preventDefault();
     }
   };
+
+
 
   return (
     <Dialog
@@ -684,30 +684,75 @@ export const Properties = ({
                       setFieldValue={setFieldValue}
                       isTooltip={false}
                     /> : values["isDefaultValue"] ? (
-                      <TextField
-                        variant="outlined"
-                        type="text"
-                        label="Default Value"
-                        required={true}
-                        multiline={fieldData.type === "multiLine"}
-                        name="defaultValue"
-                        rows={4}
-                        fullWidth
-                        margin="dense"
-                        value={values["defaultValue"]}
-                        error={
-                          touched["defaultValue"] && Boolean(errors["defaultValue"])
-                        }
-                        helperText={
-                          touched["defaultValue"] && errors["defaultValue"]
-                        }
-                        onChange={(e) =>
-                          setFieldValue("defaultValue", e.target.value.trimStart())
-                        }
-                        onKeyPress={(event) => {
-                          event.stopPropagation();
-                        }}
-                      />
+                        <Box display="block">
+                          {module === "pdf-template" &&
+                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map(item => (
+                         <Chip
+                            className="ml-1 cursor-pointer"
+                            key={item}
+                            label={startCase(item)}
+                            onClick={() => {
+                              const value = values?.defaultValue
+                                if (typeof(value) === "string") {   
+                                    const defVal =
+                                    [values?.defaultValue.slice(0, cursorPosition.selectionStart), `{{${item}}}`, values?.defaultValue.slice(cursorPosition.selectionStart)].join("")
+                                  
+                                  setFieldValue("defaultValue", defVal)
+                                }
+                            }}
+                          />
+                      
+                      ))}
+                        <TextField
+                          inputRef={inputRef}
+                          variant="outlined"
+                          type="text"
+                          label="Default Value"
+                          required={true}
+                          multiline={fieldData.type === "multiLine"}
+                          name="defaultValue"
+                          rows={4}
+                          fullWidth
+                          margin="dense"
+                          value={values["defaultValue"]}
+                          error={
+                            touched["defaultValue"] && Boolean(errors["defaultValue"])
+                          }
+                          helperText={
+                            touched["defaultValue"] && errors["defaultValue"]
+                          }
+                            onChange={(e) => {
+                              if (module === "pdf-template") {
+                              
+                                if (typeof (inputRef.current) === "object" && inputRef.current !== null) {
+                                  const selectionStart = inputRef.current.selectionStart;
+                                  if (typeof (selectionStart) === "number") {
+                                    setFieldValue("defaultValue", e.target.value.trimStart())
+                                    setCursorPosition({selectionStart, selectionEnd: selectionStart})
+                                  }
+                                }
+                              } else {
+                                 setFieldValue("defaultValue", e.target.value.trimStart())
+                              }
+                            }
+                          }
+                          onClick={(e) => {
+                            if (module === "pdf-template") {
+                              if (typeof(inputRef.current)==='object'&&inputRef.current!==null) {
+                              const selectionStart = inputRef.current.selectionStart
+                              const selectionEnd = inputRef.current.selectionEnd
+                              setCursorPosition({
+                                selectionStart,
+                                selectionEnd: selectionEnd,
+                              })
+                            }
+                            }
+                           }}
+                          onKeyPress={(event) => {
+                            event.stopPropagation();
+                          }}
+                        />
+                      </Box>
                     ) : null}
                     <FormControlLabel
                       disabled={values["required"]}

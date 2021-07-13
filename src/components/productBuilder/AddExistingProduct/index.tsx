@@ -29,7 +29,7 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const ignoreField = ["qty","priceTemplate"]
+const ignoreField = ["qty", "priceTemplate"]
 
 const AddExistingProduct = (props) => {
 
@@ -214,7 +214,7 @@ const AddExistingProduct = (props) => {
             delete _d.updatedBy
             delete _d.fields
             for (const [key, value] of Object.entries(_d)) {
-                if (typeof value === 'object') {
+                if (typeof value === 'object' && value && value["optionValue"]) {
                     _d[key] = value["optionValue"]
                 }
             }
