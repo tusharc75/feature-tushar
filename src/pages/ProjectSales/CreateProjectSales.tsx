@@ -83,7 +83,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
 
         const filterData = projectSalesId
           ? data.filter((d) => d.isUpdate)
-          : data.filter((d) => d.isCreate).map(m => m.fieldData);
+          : data.filter((d) => d.isCreate);
 
 
         // const fieldsData = projectSalesId ?
@@ -135,9 +135,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
           });
         }
         else {
+          const createFields = filterData.map(m => m.fieldData)
           setInitialData({
-            fields: filterData,
-            values: getObjKeys("", filterData),
+            fields: createFields,
+            values: getObjKeys("", createFields),
           });
         }
 
