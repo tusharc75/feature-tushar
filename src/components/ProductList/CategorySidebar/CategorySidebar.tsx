@@ -37,13 +37,15 @@ function CategorySidebar() {
         let queryString = `?limit=0`
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data} })=>{
            
-          // const tempArray = data.map((item) => item.parentCategory);
+          const tempArray = data.map((item) => item.parentCategory);
                 
-          // const uniqueParent = [...new Set(tempArray)]
-          // console.log("temp Array", tempArray)
+          const uniqueParent = [...new Set(tempArray)]
+          // function getUniqueListBy(arr, key) {
+          //   return [...new Map(arr.map(item => [item[key], item])).values()]
+          //  }
           // console.log("unique", uniqueParent)
-        
-            let categories = data.map(u=>{
+          // const uniqueArr = getUniqueListBy(uniqueParent,"optionValue")
+            let categories = data.map((u,index)=>{
               if(u.parentCategory == null){
                 return {
                   id: u.id,
@@ -52,7 +54,6 @@ function CategorySidebar() {
               }
               else {
                
-                
                 return {
                   id: u.parentCategory.optionValue,
                   name: u.parentCategory.optionLabel,
@@ -84,7 +85,6 @@ function CategorySidebar() {
     return (
         
      <div className={styles.sidebar_nav}>
-       {console.log(productCategories)}
            <Paper component="form" className={classes.root}>
                     <IconButton type="submit" className={classes.iconButton} aria-label="search">
                       <SearchIcon />
