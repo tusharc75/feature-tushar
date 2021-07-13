@@ -97,7 +97,7 @@ export const Properties = ({
     if (initialValues) {
       const values = initialValues;
 
-      if (!values.hiddenField) {
+      if (!values.hiddenField && module !== "price-template" && module !== "product-template") {
         values.hiddenField = false;
       }
 
