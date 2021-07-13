@@ -27,7 +27,6 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
 
     return (
         <>
-        {console.log("entityData",entityData.fields)}
             <Dialog
                 maxWidth="md"
                 fullWidth
