@@ -10,11 +10,12 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, marketSegment } from "../../constants/helpers";
+import { CustomDialogTransition, marketSegment, setFieldsInAscendingOrder } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import { Box } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
+import FormTypes from "../../components/Helpers/FormTypes";
 
 
 const ManageMarketSegmentDialog = (props) => {
@@ -23,10 +24,17 @@ const ManageMarketSegmentDialog = (props) => {
     const { marketSegmentId, handleClose } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [formsData, setFormsData] = useState([]);
+
+    useEffect(() => {
+        if (initialData.fields.length > 0) {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        }
+    }, [initialData.fields]);
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Market Segment`).then(({ data: { data } }) => {
-            const fieldsData = marketSegmentId ?  data.filter(d => d.isUpdate).map((d: any) => d.fieldData) : data.filter(d => d.isCreate).map((d: any) => d.fieldData);
+            const fieldsData = marketSegmentId ? data.filter(d => d.isUpdate).map((d: any) => d.fieldData) : data.filter(d => d.isCreate).map((d: any) => d.fieldData);
             if (marketSegmentId) {
                 axiosInstance().get(`${marketSegment.marketSegmentApi}/` + marketSegmentId).then(({ data: { data } }) => {
                     setInitialData({
@@ -96,17 +104,65 @@ const ManageMarketSegmentDialog = (props) => {
                     <Fragment>
                         <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title} onClose={handleClose}></CustomDialogHeader>
                         <CustomDialogContent>
-                            <Form autoComplete="off" autoCorrect="off" noValidate >
-                                <InputField
-                                    errors={errors}
-                                    values={values}
-                                    setFieldValue={setFieldValue}
-                                    touched={touched}
-                                    fieldsData={initialData.fields}
-                                    size="small"
-                                    fullWidth
-                                />
+
+                            <Form noValidate>
+                                {formsData &&
+                                    formsData.map((form, index1) => {
+                                        return form.name ? (
+                                            <div key={index1}>
+                                                <h2 className="form-label-style">{form.name}</h2>
+                                                <Box marginY={2}>
+                                                    <Grid spacing={3} container>
+                                                        {form.sectionFields.map((field, index2) => (
+                                                            <Grid key={index2} item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    <FormTypes
+                                                                        // {...rest}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        imageOrFileUploadCompletePercentage={null}
+                                                                    />
+                                                                }
+                                                            </Grid>
+                                                        ))}
+                                                    </Grid>
+                                                </Box>
+                                            </div>
+                                        ) : (
+                                            form.sectionFields.map((field) => (
+                                                <FormTypes
+                                                    // {...rest}
+                                                    values={values}
+                                                    errors={errors}
+                                                    touched={touched}
+                                                    label={field.fieldLabel}
+                                                    name={field.fieldName}
+                                                    type={field.type}
+                                                    options={field.option}
+                                                    setFieldValue={setFieldValue}
+                                                    required={field.required}
+                                                    fullWidth
+                                                    isTooltip={field?.isTooltip || false}
+                                                    tooltipMessage={field?.tooltipMessage}
+                                                    size="small"
+                                                    style={{ visibility: "hidden" }}
+                                                />
+                                            ))
+                                        );
+                                    })}
                             </Form>
+
                         </CustomDialogContent>
                         <CustomDialogFooter>
                             <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
