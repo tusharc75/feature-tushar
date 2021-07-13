@@ -25,7 +25,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
-const ignoreField = ["qty"]
+const ignoreField = ["priceTemplate"]
 
 const CreateProduct = (props) => {
 
@@ -42,12 +42,12 @@ const CreateProduct = (props) => {
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
     const [productTemplate, setProductTemplate] = useState([]);
+    const [priceTemplate, setPriceTemplate] = useState([]);
 
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-    const [isShowTemplate, setIsShowTemplate] = useState(false);
 
     const [currencySymbol, setCurrencySymbol] = useState(null);
 
@@ -88,7 +88,6 @@ const CreateProduct = (props) => {
                             );
                         }
                     });
-
 
                     setInitialData({
                         fields: newField,
@@ -178,38 +177,41 @@ const CreateProduct = (props) => {
 
     const handleChangeCategory = (value, label, isChange) => {
         if (value && value !== "") {
-            axiosInstance().get(`/price-template/template/` + value).then(({ data: { data } }) => {
+            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
                 setProductTemplate(data.data)
                 if (isChange) {
                     let defaultproductTemplate = ""
-                    let defaultpriceTemplate = ""
                     if (data.data.length) {
-                        defaultproductTemplate = data.data[0].productTemplate
-                        defaultpriceTemplate = data.data[0].optionValue
+                        defaultproductTemplate = data.data[0].optionValue
                         data.data.forEach((_f) => {
                             let re = new RegExp(_f.optionLabel);
                             if (label.match(re)) {
-                                defaultpriceTemplate = _f.optionValue
-                                defaultproductTemplate = _f.productTemplate
+                                defaultproductTemplate = _f.optionValue
                                 return
                             }
                         })
                     }
-                    setInitialData({
-                        fields: initialData.fields,
-                        values: { ...ref.current.values, priceTemplate: defaultpriceTemplate, productTemplate: defaultproductTemplate },
-                    });
                     if (defaultproductTemplate !== "") {
                         axiosInstance().get(`/product-template/fields/` + defaultproductTemplate).then(({ data: { data } }) => {
                             let newField = [...masterFields];
                             data.fields.forEach(_f => {
                                 newField.push(_f)
                             })
-                            setInitialData({
-                                fields: newField,
-                                values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: defaultproductTemplate },
+                            axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+                                setPriceTemplate(data.data)
+                                let defaultpriceTemplate = ""
+                                if (data.data.length) {
+                                    defaultpriceTemplate = data.data[0].optionValue;
+                                }
+                                setInitialData({
+                                    fields: newField,
+                                    values: {
+                                        ...getObjKeys('', newField), ...ref.current.values,
+                                        productTemplate: defaultproductTemplate, priceTemplate: defaultpriceTemplate
+                                    },
+                                });
+                                EvaluteproductFields(newField)
                             });
-                            EvaluteproductFields(newField)
                         });
                     }
                 }
@@ -217,20 +219,27 @@ const CreateProduct = (props) => {
         }
     }
 
-    const handleChangeTemplate = (value) => {
+    const handleChangeProductTemplate = (value) => {
         if (value && value !== "") {
             const result = productTemplate.filter((_f) => _f.optionValue === value)
             if (result.length) {
-                axiosInstance().get(`/product-template/fields/` + result[0].productTemplate).then(({ data: { data } }) => {
+                axiosInstance().get(`/product-template/fields/` + result[0].optionValue).then(({ data: { data } }) => {
                     let newField = [...masterFields];
                     data.fields.forEach(_f => {
                         newField.push(_f)
                     })
-                    setInitialData({
-                        fields: newField,
-                        values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].productTemplate },
+                    axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+                        setPriceTemplate(data.data)
+                        let defaultpriceTemplate = ""
+                        if (data.data.length) {
+                            defaultpriceTemplate = data.data[0].optionValue;
+                        }
+                        setInitialData({
+                            fields: newField,
+                            values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].optionValue, priceTemplate: defaultpriceTemplate },
+                        });
+                        EvaluteproductFields(newField)
                     });
-                    EvaluteproductFields(newField)
                 });
             }
         }
@@ -471,44 +480,8 @@ const CreateProduct = (props) => {
                                                                         size="small"
                                                                     />
                                                                 </Grid>
-                                                            ) : field.fieldName === "priceTemplate" ?
+                                                            ) : field.fieldName === "productTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    {!isShowTemplate ?
-                                                                        <FormControlLabel
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={isShowTemplate}
-                                                                                    onChange={() => setIsShowTemplate(true)}
-                                                                                    name="isShowTemplate"
-                                                                                    color="primary"
-                                                                                />
-                                                                            }
-                                                                            label="Show Template"
-                                                                        /> :
-                                                                        <FormTypes
-                                                                            fields={initialData.fields}
-                                                                            fieldData={field}
-                                                                            values={values}
-                                                                            errors={errors}
-                                                                            touched={touched}
-                                                                            label={field.fieldLabel}
-                                                                            name={field.fieldName}
-                                                                            type={field.type}
-                                                                            options={productTemplate}
-                                                                            setFieldValue={setFieldValue}
-                                                                            required={field.required}
-                                                                            fullWidth
-                                                                            isTooltip={field.isTooltip}
-                                                                            tooltipMessage={field.tooltipMessage}
-                                                                            disableClearable
-                                                                            onChange={(e, val) => {
-                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                handleChangeTemplate(val && val.optionValue ? val.optionValue : "")
-                                                                            }}
-                                                                            size="small"
-                                                                        />}
-                                                                </Grid> :
-                                                                field.type === "converter" || field.type === "currencyAmount" ?
                                                                     <FormTypes
                                                                         fields={initialData.fields}
                                                                         fieldData={field}
@@ -518,49 +491,97 @@ const CreateProduct = (props) => {
                                                                         label={field.fieldLabel}
                                                                         name={field.fieldName}
                                                                         type={field.type}
-                                                                        options={field.option}
+                                                                        options={productTemplate}
                                                                         setFieldValue={setFieldValue}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field.isTooltip}
                                                                         tooltipMessage={field.tooltipMessage}
+                                                                        disableClearable
+                                                                        onChange={(e, val) => {
+                                                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                            handleChangeProductTemplate(val && val.optionValue ? val.optionValue : "")
+                                                                        }}
                                                                         size="small"
-                                                                        handleRemoveField={handleRemoveField}
-                                                                    /> :
+                                                                    />
+                                                                </Grid>
+                                                                : field.fieldName === "priceTemplate" ?
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                        <Box display="flex" >
-                                                                            <Box flexGrow={1}  >
-                                                                                <FormTypes
-                                                                                    fields={initialData.fields}
-                                                                                    fieldData={field}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={setFieldValue}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field.isTooltip}
-                                                                                    tooltipMessage={field.tooltipMessage}
-                                                                                    size="small"
-                                                                                    imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                                                                        setUploadingImageOrFileProgress(completePercentage);
-                                                                                    } : null}
-                                                                                />
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            fieldData={field}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={priceTemplate}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            disableClearable
+                                                                            onChange={(e, val) => {
+                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                            }}
+                                                                            size="small"
+                                                                        />
+                                                                    </Grid> :
+                                                                    field.type === "converter" || field.type === "currencyAmount" ?
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            fieldData={field}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={field.option}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            size="small"
+                                                                            handleRemoveField={handleRemoveField}
+                                                                        /> :
+                                                                        <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                            <Box display="flex" >
+                                                                                <Box flexGrow={1}  >
+                                                                                    <FormTypes
+                                                                                        fields={initialData.fields}
+                                                                                        fieldData={field}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={field.option}
+                                                                                        setFieldValue={setFieldValue}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field.isTooltip}
+                                                                                        tooltipMessage={field.tooltipMessage}
+                                                                                        size="small"
+                                                                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                                                        } : null}
+                                                                                    />
+                                                                                </Box>
+                                                                                {field.leval === "product-custom" &&
+                                                                                    <Box>
+                                                                                        <Tooltip title="Remove" className="mt-1">
+                                                                                            <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
+                                                                                                <HighlightOffIcon color="error" />
+                                                                                            </IconButton>
+                                                                                        </Tooltip>
+                                                                                    </Box>}
                                                                             </Box>
-                                                                            {field.leval === "product-custom" &&
-                                                                                <Box>
-                                                                                    <Tooltip title="Remove" className="mt-1">
-                                                                                        <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
-                                                                                            <HighlightOffIcon color="error" />
-                                                                                        </IconButton>
-                                                                                    </Tooltip>
-                                                                                </Box>}
-                                                                        </Box>
-                                                                    </Grid>
+                                                                        </Grid>
 
                                                     ))}
                                                 </Grid>

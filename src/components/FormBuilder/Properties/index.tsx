@@ -3,7 +3,6 @@ import React, {
   Fragment,
   useRef,
   useEffect,
-  useContext,
 } from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -16,6 +15,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
+import Chip from "@material-ui/core/Chip";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import FieldList from "../FieldList";
@@ -23,7 +23,7 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { camelCase } from "./../../../constants/helpers";
 import { Vlookup } from "../AddField/vlookup";
 import { Formula } from "../AddField/formula";
@@ -35,8 +35,8 @@ import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { Autocomplete } from "@material-ui/lab";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import FormTypes from "../../Helpers/FormTypes";
+import { startCase } from "lodash";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required("please enter field label"),
@@ -73,10 +73,8 @@ export const Properties = ({
   extraFields,
 }) => {
   const [initialValues, setInitialValues] = useState(fieldData);
-  const [isImgUploading, setImgUploading] = useState(false);
-  const [imageUploadProgress, setImageUploadProgress] = useState(0);
-  const { setToastConfig } = useContext(CustomToastContext);
-
+  const inputRef = useRef(null);
+  const [cursorPosition, setCursorPosition] = useState<any>({})
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -313,14 +311,16 @@ export const Properties = ({
     }
   };
 
+
+
   return (
     <Dialog
+      maxWidth="md"
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      fullWidth
-      maxWidth={"md"}
       open={true}
+      fullWidth
     >
       <Formik
         initialValues={initialValues}
@@ -328,36 +328,31 @@ export const Properties = ({
         onSubmit={handleSave}
       >
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <Form
-            autoComplete="off"
-            autoCorrect="off"
-            noValidate
-            onKeyPress={onKeyPress}
-          >
+          <Fragment>
             <CustomDialogHeader
-              title={`${
-                FieldList[fieldData.type.toUpperCase()].label
-              } Properties`}
+              title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
               onClose={handleClose}
             ></CustomDialogHeader>
             <CustomDialogContent>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Field Label"
-                required={true}
-                name="fieldLabel"
-                fullWidth
-                margin="dense"
-                //disabled={!values["editAble"]}
-                value={values["fieldLabel"]}
-                error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
-                helperText={touched["fieldLabel"] && errors["fieldLabel"]}
-                onChange={(e) =>
-                  setFieldValue("fieldLabel", e.target.value.trimStart())
-                }
-              />
-              {/* {((module === "product-template" || module === "price-template") && values["editAble"]) &&
+              <Box>
+                <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}   >
+                  <TextField
+                    variant="outlined"
+                    type="text"
+                    label="Field Label"
+                    required={true}
+                    name="fieldLabel"
+                    fullWidth
+                    margin="dense"
+                    //disabled={!values["editAble"]}
+                    value={values["fieldLabel"]}
+                    error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
+                    helperText={touched["fieldLabel"] && errors["fieldLabel"]}
+                    onChange={(e) =>
+                      setFieldValue("fieldLabel", e.target.value.trimStart())
+                    }
+                  />
+                  {/* {((module === "product-template" || module === "price-template") && values["editAble"]) &&
               <Box display="flex" >
                 <Box mb={1}>
                   <FormControlLabel
@@ -375,395 +370,445 @@ export const Properties = ({
               </Box>
             } */}
 
-              {(values["type"] === "decimal" ||
-                values["type"] === "formula" ||
-                values["type"] === "converter") && (
-                <Grid spacing={3} container>
-                  {values["type"] === "formula" && (
-                    <Grid item xs={12} sm={6} md={6}>
-                      <FormControl fullWidth margin="dense" variant="outlined">
-                        <InputLabel id="demo-simple-select-outlined-label">
-                          Return Type
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-outlined-label"
-                          id="demo-simple-select-outlined"
-                          value={values["returnType"]}
-                          onChange={(e) =>
-                            setFieldValue("returnType", e.target.value)
-                          }
-                          label="Return Type"
-                          name="returnType"
-                        >
-                          <MenuItem value="decimal">Decimal</MenuItem>
-                          <MenuItem value="string">String</MenuItem>
-                          <MenuItem value="boolean">Boolean</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  )}
                   {(values["type"] === "decimal" ||
-                    values["returnType"] === "decimal") && (
-                    <Grid item xs={12} sm={6} md={6}>
-                      <DecimalPlaces
-                        values={values}
-                        setFieldValue={setFieldValue}
-                      />
-                    </Grid>
-                  )}
-                </Grid>
-              )}
-              {(values["type"] === "dropDown" ||
-                values["type"] === "multiSelect") && (
-                <Fragment>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="lookup"
-                        checked={values["lookup"]}
-                        onChange={(e) =>
-                          setFieldValue("lookup", e.target.checked)
-                        }
-                        color="primary"
-                      />
-                    }
-                    label="Lookup"
-                  />
-                  {values["lookup"] && (
-                    <Box pt={1} pb={1}>
-                      <FormControl fullWidth margin="dense" variant="outlined">
-                        <InputLabel id="demo-simple-select-outlined-label">
-                          Lookup Resource
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-outlined-label"
-                          id="demo-simple-select-outlined"
-                          value={values["lookupResource"]}
-                          onChange={(e) =>
-                            setFieldValue("lookupResource", e.target.value)
+                    values["type"] === "formula" ||
+                    values["type"] === "converter") && (
+                      <Grid spacing={3} container>
+                        {values["type"] === "formula" && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">
+                                Return Type
+                              </InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values["returnType"]}
+                                onChange={(e) =>
+                                  setFieldValue("returnType", e.target.value)
+                                }
+                                label="Return Type"
+                                name="returnType"
+                              >
+                                <MenuItem value="decimal">Decimal</MenuItem>
+                                <MenuItem value="string">String</MenuItem>
+                                <MenuItem value="boolean">Boolean</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                        {(values["type"] === "decimal" ||
+                          values["returnType"] === "decimal") && (
+                            <Grid item xs={12} sm={6} md={6}>
+                              <DecimalPlaces
+                                values={values}
+                                setFieldValue={setFieldValue}
+                              />
+                            </Grid>
+                          )}
+                      </Grid>
+                    )}
+                  {(values["type"] === "dropDown" ||
+                    values["type"] === "multiSelect") && (
+                      <Fragment>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="lookup"
+                              checked={values["lookup"]}
+                              onChange={(e) =>
+                                setFieldValue("lookup", e.target.checked)
+                              }
+                              color="primary"
+                            />
                           }
-                          label="Lookup Resource"
-                          name="lookupResource"
-                        >
-                          {LookupResource.map((_data) => (
-                            <MenuItem value={_data.value}>
-                              {_data.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Box>
-                  )}
-                </Fragment>
-              )}
+                          label="Lookup"
+                        />
+                        {values["lookup"] && (
+                          <Box pt={1} pb={1}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">
+                                Lookup Resource
+                              </InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values["lookupResource"]}
+                                onChange={(e) =>
+                                  setFieldValue("lookupResource", e.target.value)
+                                }
+                                label="Lookup Resource"
+                                name="lookupResource"
+                              >
+                                {LookupResource.map((_data) => (
+                                  <MenuItem value={_data.value}>
+                                    {_data.name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        )}
+                      </Fragment>
+                    )}
 
-              {values["type"] === "currencyAmount" && (
-                <Currency
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  refrence="form-builder"
-                />
-              )}
-              <DndProvider backend={HTML5Backend}>
-                {(values["type"] === "dropDown" ||
-                  values["type"] === "multiSelect" ||
-                  values["type"] === "radio" ||
-                  values["type"] === "process") &&
-                  !values["lookup"] && (
-                    <Option
+                  {values["type"] === "currencyAmount" && (
+                    <Currency
                       values={values}
                       setFieldValue={setFieldValue}
+                      refrence="form-builder"
+                    />
+                  )}
+                  <DndProvider backend={HTML5Backend}>
+                    {(values["type"] === "dropDown" ||
+                      values["type"] === "multiSelect" ||
+                      values["type"] === "radio" ||
+                      values["type"] === "process") &&
+                      !values["lookup"] && (
+                        <Option
+                          values={values}
+                          setFieldValue={setFieldValue}
+                          fields={fields}
+                          _id={fieldData._id}
+                        />
+                      )}
+                  </DndProvider>
+                  {(values["type"] === "currencyAmount" ||
+                    values["type"] === "decimal" ||
+                    values["type"] === "percent" ||
+                    values["type"] === "converter") &&
+                    module !== "form-builder" && (
+                      <>
+                        <br></br>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="isFormula"
+                              checked={values["isFormula"]}
+                              onChange={(e) => {
+                                setFieldValue("isFormula", e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Formula"
+                        />
+                      </>
+                    )}
+                  {(values["type"] === "formula" || values["isFormula"]) && (
+                    <Formula
                       fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
                       _id={fieldData._id}
                     />
                   )}
-              </DndProvider>
-              {(values["type"] === "currencyAmount" ||
-                values["type"] === "decimal" ||
-                values["type"] === "percent" ||
-                values["type"] === "converter") &&
-                module !== "form-builder" && (
-                  <>
-                    <br></br>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="isFormula"
-                          checked={values["isFormula"]}
-                          onChange={(e) => {
-                            setFieldValue("isFormula", e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Formula"
-                    />
-                  </>
-                )}
-              {(values["type"] === "formula" || values["isFormula"]) && (
-                <Formula
-                  fields={fields}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  _id={fieldData._id}
-                />
-              )}
-              {values["type"] === "currencyAmount" && (
-                <Fragment>
-                  <br></br>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isConverter"
-                        checked={values["isConverter"]}
-                        onChange={(e) => {
-                          setFieldValue("isConverter", e.target.checked);
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Converter"
-                  />
-                </Fragment>
-              )}
-              {(values["type"] === "converter" || values["isConverter"]) && (
-                <Converter
-                  fields={fields}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                />
-              )}
-              {(values["type"] === "currencyAmount" ||
-                values["type"] === "decimal" ||
-                values["type"] === "percent" ||
-                values["type"] === "converter") &&
-                module !== "form-builder" && (
-                  <>
-                    <br></br>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="isMulitFormula"
-                          checked={values["isMulitFormula"]}
-                          onChange={(e) => {
-                            setFieldValue("isMulitFormula", e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Multiple Formula"
-                    />
-                  </>
-                )}
-              {values["isMulitFormula"] && (
-                <MultipleFormula
-                  fields={fields}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  _id={fieldData._id}
-                />
-              )}
-
-              {(values["type"] === "currencyAmount" ||
-                values["type"] === "decimal" ||
-                values["type"] === "percent" ||
-                values["type"] === "converter") &&
-                module !== "form-builder" && (
-                  <>
-                    <br></br>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="isVlookup"
-                          checked={values["isVlookup"]}
-                          onChange={(e) => {
-                            setFieldValue("isVlookup", e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Vlookup"
-                    />
-                  </>
-                )}
-              {(values["isVlookup"] ||
-                values["type"] === "vlookupDropdown") && (
-                <Vlookup
-                  fields={fields}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  _id={fieldData._id}
-                />
-              )}
-
-              <Box pt={1} pb={1}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="required"
-                      disabled={
-                        !values["editAble"] && values["required"] ? true : false
-                      }
-                      checked={values["required"]}
-                      onChange={(e) =>
-                        setFieldValue("required", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Required"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="isTooltip"
-                      checked={values["isTooltip"]}
-                      onChange={(e) =>
-                        setFieldValue("isTooltip", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Show Tooltip"
-                />
-                {values["isTooltip"] && (
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Tooltip Message"
-                    required={true}
-                    name="tooltipMessage"
-                    fullWidth
-                    margin="dense"
-                    value={values["tooltipMessage"]}
-                    error={
-                      touched["tooltipMessage"] &&
-                      Boolean(errors["tooltipMessage"])
-                    }
-                    helperText={
-                      touched["tooltipMessage"] && errors["tooltipMessage"]
-                    }
-                    onChange={(e) =>
-                      setFieldValue(
-                        "tooltipMessage",
-                        e.target.value.trimStart()
-                      )
-                    }
-                  />
-                )}
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="isDefaultValue"
-                      checked={values["isDefaultValue"]}
-                      onChange={(e) =>
-                        setFieldValue("isDefaultValue", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Default Value"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="Uneditable"
-                      checked={values["isUneditable"]}
-                      onChange={(e) =>
-                        setFieldValue("isUneditable", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Uneditable"
-                />
-
-                {fieldData.type === "imageUpload" &&
-                values["isDefaultValue"] ? <FormTypes
-                    values={{ defaultValue: values["defaultValue"] }}
-                    errors={errors}
-                    touched={touched}
-                    label={""}
-                    name={"defaultValue"}
-                    type={fieldData.type}
-                    setFieldValue={setFieldValue}
-                    isTooltip={false}
-                /> : values["isDefaultValue"] ? (
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Default Value"
-                    required={true}
-                    multiline={fieldData.type === "multiLine"}
-                    name="defaultValue"
-                    rows={4}
-                    fullWidth
-                    margin="dense"
-                    value={values["defaultValue"]}
-                    error={
-                      touched["defaultValue"] && Boolean(errors["defaultValue"])
-                    }
-                    helperText={
-                      touched["defaultValue"] && errors["defaultValue"]
-                    }
-                    onChange={(e) =>
-                      setFieldValue("defaultValue", e.target.value.trimStart())
-                    }
-                  />
-                ) : null}
-                <FormControlLabel
-                  disabled={values["required"]}
-                  control={
-                    <Checkbox
-                      name="ishiddenField"
-                      checked={
-                        values["required"] ? false : values["hiddenField"]
-                      }
-                      onChange={(e) =>
-                        setFieldValue("hiddenField", e.target.checked)
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Hidden Field"
-                />
-                {fieldData.type === "process" && (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="showAdditionalInfoPopup"
-                        checked={values["showAdditionalInfoPopup"]}
-                        onChange={(e) =>
-                          setFieldValue(
-                            "showAdditionalInfoPopup",
-                            e.target.checked
-                          )
+                  {values["type"] === "currencyAmount" && (
+                    <Fragment>
+                      <br></br>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isConverter"
+                            checked={values["isConverter"]}
+                            onChange={(e) => {
+                              setFieldValue("isConverter", e.target.checked);
+                            }}
+                            color="primary"
+                          />
                         }
-                        color="primary"
+                        label="Converter"
                       />
-                    }
-                    label="Show Additional Information Popup On Close"
-                  />
-                )}
-                {values["showAdditionalInfoPopup"] && (
-                  <Autocomplete
-                    value={values["additionalInfoSection"]}
-                    size="small"
-                    options={section.map((s) => s.sectionName)}
-                    getOptionLabel={(option) => option}
-                    onChange={(event: any, newValue: string | null) => {
-                      setFieldValue("additionalInfoSection", newValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Additional Info Section"
-                        variant="outlined"
-                        name="additionalInfoSection"
+                    </Fragment>
+                  )}
+                  {(values["type"] === "converter" || values["isConverter"]) && (
+                    <Converter
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                    />
+                  )}
+                  {(values["type"] === "currencyAmount" ||
+                    values["type"] === "decimal" ||
+                    values["type"] === "percent" ||
+                    values["type"] === "converter") &&
+                    module !== "form-builder" && (
+                      <>
+                        <br></br>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="isMulitFormula"
+                              checked={values["isMulitFormula"]}
+                              onChange={(e) => {
+                                setFieldValue("isMulitFormula", e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Multiple Formula"
+                        />
+                      </>
+                    )}
+                  {values["isMulitFormula"] && (
+                    <MultipleFormula
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      _id={fieldData._id}
+                    />
+                  )}
+
+                  {(values["type"] === "currencyAmount" ||
+                    values["type"] === "decimal" ||
+                    values["type"] === "percent" ||
+                    values["type"] === "converter") &&
+                    module !== "form-builder" && (
+                      <>
+                        <br></br>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="isVlookup"
+                              checked={values["isVlookup"]}
+                              onChange={(e) => {
+                                setFieldValue("isVlookup", e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Vlookup"
+                        />
+                      </>
+                    )}
+                  {(values["isVlookup"] ||
+                    values["type"] === "vlookupDropdown") && (
+                      <Vlookup
+                        fields={fields}
+                        values={values}
+                        setFieldValue={setFieldValue}
+                        _id={fieldData._id}
                       />
                     )}
-                  />
-                )}
+
+                  <Box pt={1} pb={1}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="required"
+                          disabled={
+                            !values["editAble"] && values["required"] ? true : false
+                          }
+                          checked={values["required"]}
+                          onChange={(e) =>
+                            setFieldValue("required", e.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Required"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isTooltip"
+                          checked={values["isTooltip"]}
+                          onChange={(e) =>
+                            setFieldValue("isTooltip", e.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Show Tooltip"
+                    />
+                    {values["isTooltip"] && (
+                      <TextField
+                        variant="outlined"
+                        type="text"
+                        label="Tooltip Message"
+                        required={true}
+                        name="tooltipMessage"
+                        fullWidth
+                        margin="dense"
+                        value={values["tooltipMessage"]}
+                        error={
+                          touched["tooltipMessage"] &&
+                          Boolean(errors["tooltipMessage"])
+                        }
+                        helperText={
+                          touched["tooltipMessage"] && errors["tooltipMessage"]
+                        }
+                        onChange={(e) =>
+                          setFieldValue(
+                            "tooltipMessage",
+                            e.target.value.trimStart()
+                          )
+                        }
+                      />
+                    )}
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isDefaultValue"
+                          checked={values["isDefaultValue"]}
+                          onChange={(e) =>
+                            setFieldValue("isDefaultValue", e.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Default Value"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="Uneditable"
+                          checked={values["isUneditable"]}
+                          onChange={(e) =>
+                            setFieldValue("isUneditable", e.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Uneditable"
+                    />
+
+                    {fieldData.type === "imageUpload" &&
+                      values["isDefaultValue"] ? <FormTypes
+                      values={{ defaultValue: values["defaultValue"] }}
+                      errors={errors}
+                      touched={touched}
+                      label={""}
+                      name={"defaultValue"}
+                      type={fieldData.type}
+                      setFieldValue={setFieldValue}
+                      isTooltip={false}
+                    /> : values["isDefaultValue"] ? (
+                        <Box display="block">
+                          {module === "pdf-template" && fieldData.type === "multiLine" &&
+                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map(item => (
+                         <Chip
+                            className="ml-1 cursor-pointer"
+                            key={item}
+                            label={startCase(item)}
+                            onClick={() => {
+                              const value = values?.defaultValue
+                                if (typeof(value) === "string") {   
+                                    const defVal =
+                                    [values?.defaultValue.slice(0, cursorPosition.selectionStart), `{{${item}}}`, values?.defaultValue.slice(cursorPosition.selectionStart)].join("")
+                                  
+                                  setFieldValue("defaultValue", defVal)
+                                }
+                            }}
+                          />
+                      
+                      ))}
+                        <TextField
+                          inputRef={inputRef}
+                          variant="outlined"
+                          type="text"
+                          label="Default Value"
+                          required={true}
+                          multiline={fieldData.type === "multiLine"}
+                          name="defaultValue"
+                          rows={4}
+                          fullWidth
+                          margin="dense"
+                          value={values["defaultValue"]}
+                          error={
+                            touched["defaultValue"] && Boolean(errors["defaultValue"])
+                          }
+                          helperText={
+                            touched["defaultValue"] && errors["defaultValue"]
+                          }
+                            onChange={(e) => {
+                              if (module === "pdf-template") {
+                              
+                                if (typeof (inputRef.current) === "object" && inputRef.current !== null) {
+                                  const selectionStart = inputRef.current.selectionStart;
+                                  if (typeof (selectionStart) === "number") {
+                                    setFieldValue("defaultValue", e.target.value.trimStart())
+                                    setCursorPosition({selectionStart, selectionEnd: selectionStart})
+                                  }
+                                }
+                              } else {
+                                 setFieldValue("defaultValue", e.target.value.trimStart())
+                              }
+                            }
+                          }
+                          onClick={(e) => {
+                            if (module === "pdf-template") {
+                              if (typeof(inputRef.current)==='object'&&inputRef.current!==null) {
+                              const selectionStart = inputRef.current.selectionStart
+                              const selectionEnd = inputRef.current.selectionEnd
+                              setCursorPosition({
+                                selectionStart,
+                                selectionEnd: selectionEnd,
+                              })
+                            }
+                            }
+                           }}
+                          onKeyPress={(event) => {
+                            event.stopPropagation();
+                          }}
+                        />
+                      </Box>
+                    ) : null}
+                    <FormControlLabel
+                      disabled={values["required"]}
+                      control={
+                        <Checkbox
+                          name="ishiddenField"
+                          checked={
+                            values["required"] ? false : values["hiddenField"]
+                          }
+                          onChange={(e) =>
+                            setFieldValue("hiddenField", e.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Hidden Field"
+                    />
+                    {fieldData.type === "process" && (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="showAdditionalInfoPopup"
+                            checked={values["showAdditionalInfoPopup"]}
+                            onChange={(e) =>
+                              setFieldValue(
+                                "showAdditionalInfoPopup",
+                                e.target.checked
+                              )
+                            }
+                            color="primary"
+                          />
+                        }
+                        label="Show Additional Information Popup On Close"
+                      />
+                    )}
+                    {values["showAdditionalInfoPopup"] && (
+                      <Autocomplete
+                        value={values["additionalInfoSection"]}
+                        size="small"
+                        options={section.map((s) => s.sectionName)}
+                        getOptionLabel={(option) => option}
+                        onChange={(event: any, newValue: string | null) => {
+                          setFieldValue("additionalInfoSection", newValue);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Additional Info Section"
+                            variant="outlined"
+                            name="additionalInfoSection"
+                          />
+                        )}
+                      />
+                    )}
+                  </Box>
+                </Form>
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -775,11 +820,12 @@ export const Properties = ({
                 type="submit"
                 color="primary"
                 variant="contained"
+                onClick={submitForm}
               >
                 Save
               </Button>
             </CustomDialogFooter>
-          </Form>
+          </Fragment>
         )}
       </Formik>
     </Dialog>
