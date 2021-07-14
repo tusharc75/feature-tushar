@@ -193,21 +193,22 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 ele.isDependentDropdown = values.isDependentDropdown;
                 ele.dropdowDependentOn = values.dropdowDependentOn;
               }
-              values.option.forEach((ele, index) => {
-                ele.order = index + 1;
-                ele.default = false;
+              values.option && values.option.forEach((_option, index) => {
+                _option.order = index + 1;
+                _option.default = false;
                 if (fieldData.type === 'dropDown' && !values['lookup']) {
                   if (values['defaultDropdownOption'] && values['defaultDropdownOption'] !== '') {
-                    if (values['defaultDropdownOption'] === ele.optionLabel) {
-                      ele.default = true;
+                    if (values['defaultDropdownOption'] === _option.optionLabel) {
+                      _option.default = true;
                     }
                   }
                 }
               });
-              ele.option = values.option.map((item, idx) => ({
-                ...item,
-                order: idx + 1
-              }));
+              ele.option = values.option;
+              // ele.option = values.option.map((item, idx) => ({
+              //   ...item,
+              //   order: idx + 1
+              // }));
             }
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
