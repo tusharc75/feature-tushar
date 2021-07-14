@@ -55,7 +55,6 @@ const BulkEditDialog = (props) => {
     useEffect(() => {
 
         const productData = productDataList[0]
-        const fieldAllowed = ["commissionPerUnit", "commissionPercentPerUnit", "profitPerUnit", "profitPercentPerUnit"]
 
         let _fields = [];
         productData.fields.forEach((_f) => {
@@ -106,6 +105,7 @@ const BulkEditDialog = (props) => {
         });
         products.forEach(element => {
             element.productCategory = element.productCategory.optionValue
+            element.productTemplate = element.productTemplate && element.productTemplate.optionValue && element.productTemplate.optionValue
             element.priceTemplate = element.priceTemplate && element.priceTemplate.optionValue && element.priceTemplate.optionValue
             element.fields = fields;
             element.fieldChanges = fieldChanges;

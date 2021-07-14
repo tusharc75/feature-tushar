@@ -1518,24 +1518,26 @@ function QuoteDetail() {
     if (Customerreq) {
       exportToCSV(true);
       setSendEmail(true);
-      if (!pdfFileBase64) {
-        setGeneratingFile(true);
-        axiosInstance()
-          .get(
-            `user/download?fileName=${pdfFileName}`,
-            {
-              responseType: "blob",
-            }
-          )
-          .then(({ data }) => {
-            setGeneratingFile(false);
-            const file = new Blob([data], { type: "application/pdf" });
-            generateBase64forFile(file, "pdf");
-          })
-          .catch((err) => {
-            setGeneratingFile(false);
-          });
-      }
+      setGeneratingFile(true);
+
+      const currentVersionFileName = pdfFileName ? pdfFileName : versionStatusData.data.find(d => d.versionNumber === currentVersion)?.PDF;
+
+      axiosInstance()
+        .get(
+          `user/download?fileName=${currentVersionFileName}`,
+          {
+            responseType: "blob",
+          }
+        )
+        .then(({ data }) => {
+          setGeneratingFile(false);
+          const file = new Blob([data], { type: "application/pdf" });
+          generateBase64forFile(file, "pdf");
+        })
+        .catch((err) => {
+          setGeneratingFile(false);
+        });
+
     }
   };
 
@@ -1643,14 +1645,14 @@ function QuoteDetail() {
   const handleViewPdf = (view = false, download = false) => {
 
     // if (!pdfFileName) {
-      handleVersionUpdate(
-        "",
-        visibleColumns,
-        versionStatus,
-        selectedRecords,
-        view,
-        download
-      );
+    handleVersionUpdate(
+      "",
+      visibleColumns,
+      versionStatus,
+      selectedRecords,
+      view,
+      download
+    );
     // }
     // else {
     //   if (view) {
@@ -1840,7 +1842,8 @@ function QuoteDetail() {
 
     if (quoteData) {
       versions.forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status === "Booked by Customer")
+        {
           approved = true;
           versionApproved = v;
           manualApproval = quoteData.versions[v]?.customerResponse?.manual;

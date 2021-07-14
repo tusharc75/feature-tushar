@@ -420,7 +420,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
                 calValues = handleAutoCalculation(ele, fieldList, returnvalues, ele.fieldName, "", "", values[ele.fieldName] || values[ele.fieldName] === 0 ? values[ele.fieldName] : "")
             }
             for (const x in calValues) {
-                if (calValues[x] === 0 || calValues[x] === "") {
+                if (isNaN(calValues[x]) || calValues[x] === 0 || calValues[x] === "") {
                     delete calValues[x]
                 }
             }
