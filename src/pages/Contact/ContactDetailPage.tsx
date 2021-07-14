@@ -1,76 +1,57 @@
-import React, { useState, useEffect, useContext } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Paper,
-  Tab,
-  Tabs,
-  Typography,
-  List,
-} from "@material-ui/core";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import { isMobile, isTablet } from "react-device-detect";
-import { Dialog } from "@material-ui/core";
-import { useHistory, useParams } from "react-router-dom";
-import Layout from "../../components/Layout";
-import { Skeleton } from "@material-ui/lab";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
-import { Link } from "react-router-dom";
-import contactClass from "./contact.module.scss";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { useData } from "../../StateProvider/Provider";
-import { contactPage } from "../../routes/Contacts";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import axiosInstance from "./../../axios/axiosInstance";
-import Activity from "../../components/Activity";
-import {
-  getObjKeysWithValues,
-  isObjectEmpty,
-  sidebarResource,
-  customerAccount,
-  processFieldName,
-} from "./../../constants/helpers";
-import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageContact from "./ManageContact/index";
-import DetailsPage from "../../components/Shared/DetailsPage";
-import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
-import QuickLinks, {
-  IQuickLinks,
-} from "../../components/QuickLinks/QuickLinks";
-import { FcFlowChart } from "react-icons/fc";
-import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
-import BoxWithBorder from "../../components/BoxWithBorder";
-import ListItem from "@material-ui/core/ListItem/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import { ListItemText } from "@material-ui/core";
-import { AiOutlineMail } from "react-icons/ai";
-import { BiPhone } from "react-icons/bi";
-import { FiStar } from "react-icons/fi";
-import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
-import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
-import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import ProcessFlow from "../../components/ProcessFlow";
-import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
-import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
+import React, { useState, useEffect, useContext } from 'react';
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from '@material-ui/core';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import { isMobile, isTablet } from 'react-device-detect';
+import { Dialog } from '@material-ui/core';
+import { useHistory, useParams } from 'react-router-dom';
+import Layout from '../../components/Layout';
+import { Skeleton } from '@material-ui/lab';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import { Link } from 'react-router-dom';
+import contactClass from './contact.module.scss';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { useData } from '../../StateProvider/Provider';
+import { contactPage } from '../../routes/Contacts';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import axiosInstance from './../../axios/axiosInstance';
+import Activity from '../../components/Activity';
+import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName } from './../../constants/helpers';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ManageContact from './ManageContact/index';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
+import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
+import { FcFlowChart } from 'react-icons/fc';
+import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import ListItem from '@material-ui/core/ListItem/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { ListItemText } from '@material-ui/core';
+import { AiOutlineMail } from 'react-icons/ai';
+import { BiPhone } from 'react-icons/bi';
+import { FiStar } from 'react-icons/fi';
+import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
+import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
+import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
+import ProcessFlow from '../../components/ProcessFlow';
+import LeadInAccordion from '../../components/LeadsInAccordion/LeadsInAccordion';
+import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     contact: { contactApi, contactResource },
     account: { accountResource },
-    contactBreadcrumb,
+    contactBreadcrumb
   } = props;
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { user, permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState("");
+  const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -83,29 +64,27 @@ const ContactDetailsPage = (props) => {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
-  const [showAtLast, setShowAtLast] = useState(false)
-  const [additionalFieldName, setAdditionalFieldName] = useState("")
+  const [showAtLast, setShowAtLast] = useState(false);
+  const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [contactPermissions, setContactPermissions] = useState({
     isCreate: false,
     isUpdate: false,
     isRead: false,
-    isDelete: false,
+    isDelete: false
   });
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([]);
-  const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] =
-    useState(false);
+  const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [quotes, setQuotes] = useState([]);
 
   let { id } = useParams();
 
-  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] =
-    useState([]);
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
 
   // useEffect(() => {
   //     if (id) {
@@ -120,7 +99,7 @@ const ContactDetailsPage = (props) => {
         isCreate: hasContactPermission.isCreate,
         isUpdate: hasContactPermission.isUpdate,
         isRead: hasContactPermission.isRead,
-        isDelete: hasContactPermission.isDelete,
+        isDelete: hasContactPermission.isDelete
       });
     }
 
@@ -132,21 +111,14 @@ const ContactDetailsPage = (props) => {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = contactFields.find(
-        (d) =>
-          d.isRead &&
-          d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase()
-      );
+      const processSteps = contactFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && contactData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(
-          (d) => d.optionLabel === contactData[processFieldName]
-        );
+        const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === contactData[processFieldName]);
         if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
-        if(currentStepToShow == steps.length -1){
-          setShowAtLast(true)
-        }
-        else{
-          setShowAtLast(false)
+        if (currentStepToShow == steps.length - 1) {
+          setShowAtLast(true);
+        } else {
+          setShowAtLast(false);
         }
       }
     }
@@ -158,9 +130,7 @@ const ContactDetailsPage = (props) => {
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
         handleMainPoints(data);
-        let name = [data.firstName, data.middleName, data.lastName]
-          .filter((d) => d)
-          .join(" ");
+        let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
         if (data?.salutation?.optionLabel) {
           name = data.salutation.optionLabel + name;
@@ -171,18 +141,11 @@ const ContactDetailsPage = (props) => {
         getContactFields();
         setTypeCreateProjectSalesDialog([
           { id: id, type: contactResource },
-          { id: data?.accountName?.optionValue, type: accountResource },
+          { id: data?.accountName?.optionValue, type: accountResource }
         ]);
-        setCanEdit(
-          [...(data?.collaborator ?? []), data?.owner].some(
-            (obj) => obj.optionValue === user.user._id
-          )
-        );
+        setCanEdit([...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id));
 
-        setCustomizedRoutes([
-          contactBreadcrumb,
-          { title: [data.firstName, data.lastName].filter((d) => d).join(" ") },
-        ]);
+        setCustomizedRoutes([contactBreadcrumb, { title: [data.firstName, data.lastName].filter((d) => d).join(' ') }]);
 
         let orgChartData = [];
 
@@ -190,28 +153,24 @@ const ContactDetailsPage = (props) => {
           data.parentHierarchy.map((d) => {
             orgChartData.push({
               id: d._id,
-              name: [d.firstName, d.middleName, d.lastName]
-                .filter((d) => d)
-                .join(" "),
+              name: [d.firstName, d.middleName, d.lastName].filter((d) => d).join(' '),
               parentId: d.reportsTo ? d.reportsTo : 0,
               logo: d.contactLogo,
               email: d.email,
               phone: d.phone,
-              current: false,
+              current: false
             });
           });
         }
 
         orgChartData.push({
           id: data._id,
-          name: [data.firstName, data.middleName, data.lastName]
-            .filter((d) => d)
-            .join(" "),
+          name: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' '),
           parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
           logo: data.contactLogo,
           email: data.email,
           phone: data.phone,
-          current: true,
+          current: true
         });
 
         setOrgChartData(orgChartData);
@@ -226,35 +185,20 @@ const ContactDetailsPage = (props) => {
       .get(`/${contactApi}/related/${id}`)
       .then(({ data: { data } }) => {
         setOpportunities(
-          data.Opportunity &&
-            data.Opportunity[
-              sidebarResource[contactResource].replaceAll(" ", "_")
-            ]
-            ? data.Opportunity[
-                sidebarResource[contactResource].replaceAll(" ", "_")
-              ]
+          data.Opportunity && data.Opportunity[sidebarResource[contactResource].replaceAll(' ', '_')]
+            ? data.Opportunity[sidebarResource[contactResource].replaceAll(' ', '_')]
             : []
         );
 
         setProjectSales(
-          data[sidebarResource.projectSales] &&
-            data[sidebarResource.projectSales][
-              sidebarResource[contactResource].replaceAll(" ", "_")
-            ]
-            ? data[sidebarResource.projectSales][
-                sidebarResource[contactResource].replaceAll(" ", "_")
-              ]
+          data[sidebarResource.projectSales] && data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
             : []
         );
 
         setQuotes(
-          data[sidebarResource.quoteBuilder] &&
-            data[sidebarResource.quoteBuilder][
-              sidebarResource[contactResource].replaceAll(" ", "_")
-            ]
-            ? data[sidebarResource.quoteBuilder][
-                sidebarResource[contactResource].replaceAll(" ", "_")
-              ]
+          data[sidebarResource.quoteBuilder] && data[sidebarResource.quoteBuilder][sidebarResource[contactResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.quoteBuilder][sidebarResource[contactResource].replaceAll(' ', '_')]
             : []
         );
       });
@@ -262,15 +206,15 @@ const ContactDetailsPage = (props) => {
 
   const quickLinks: IQuickLinks[] = [
     {
-      label: "Org Chart",
+      label: 'Org Chart',
       onClick: () => {
         setOrgChartInFullScreenDialog(true);
       },
       icon: <FcFlowChart />,
       // icon: <TiFlowChildren />,
       show: true,
-      class: "account",
-    },
+      class: 'account'
+    }
     // {
     //   label: "Projects",
     //   count: 0,
@@ -331,12 +275,12 @@ const ContactDetailsPage = (props) => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      phone: data.phone || "",
-      email: data.email || "",
-      title: data.title || "",
+      phone: data.phone || '',
+      email: data.email || '',
+      title: data.title || ''
     };
     if (data?.accountName?.optionLabel) {
-      tempMp["Account Name"] = data.accountName.optionLabel;
+      tempMp['Account Name'] = data.accountName.optionLabel;
     }
 
     setMainPoints(tempMp);
@@ -348,32 +292,24 @@ const ContactDetailsPage = (props) => {
       .then(({ data: { data } }) => {
         setContactFields(data.filter((d) => d.isUpdate || d.isRead));
         setLoading(false);
-        const processSteps = data.find(
-          (d) => d.isRead && d.fieldData.type.toLowerCase() === "process"
-        );
+        const processSteps = data.find((d) => d.isRead && d.fieldData.type.toLowerCase() === 'process');
         if (processSteps && processSteps.isRead) {
           setSteps(
             processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually: true,
+                canCompleteManually: true
               };
             })
           );
-          setShowAdditionalField(
-            processSteps.fieldData.showAdditionalInfoPopup
-          );
+          setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
         }
         data.map((d) => {
-          if (
-            d.fieldData.sectionName ==
-              processSteps?.fieldData.additionalInfoSection &&
-            sectionFields.length == 0
-          ) {
+          if (d.fieldData.sectionName == processSteps?.fieldData.additionalInfoSection && sectionFields.length == 0) {
             setSectionFields((prevItems) => {
               return [...prevItems, d];
             });
-            setAdditionalFieldName(d.fieldData.sectionName)
+            setAdditionalFieldName(d.fieldData.sectionName);
           }
         });
       });
@@ -386,8 +322,8 @@ const ContactDetailsPage = (props) => {
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           goBackToListing();
           setShowConfirmBox(false);
@@ -402,7 +338,7 @@ const ContactDetailsPage = (props) => {
   };
   const goBackToListing = () => {
     history.push({
-      pathname: contactPage.path,
+      pathname: contactPage.path
     });
   };
 
@@ -411,19 +347,10 @@ const ContactDetailsPage = (props) => {
     let allowToEdit = false;
 
     if (userId) {
-      allowToEdit =
-        contactDetails.owner?.optionValue &&
-        contactDetails.owner.optionValue == userId;
+      allowToEdit = contactDetails.owner?.optionValue && contactDetails.owner.optionValue == userId;
 
-      if (
-        !allowToEdit &&
-        contactDetails.collaborator &&
-        contactDetails.collaborator.length > 0
-      ) {
-        allowToEdit =
-          contactDetails.collaborator.findIndex(
-            (d) => d.optionValue == userId
-          ) > -1;
+      if (!allowToEdit && contactDetails.collaborator && contactDetails.collaborator.length > 0) {
+        allowToEdit = contactDetails.collaborator.findIndex((d) => d.optionValue == userId) > -1;
       }
 
       if (allowToEdit) setAllowedToEdit(allowToEdit);
@@ -431,8 +358,8 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleOpneUpdateDialog = () => {
-    if(activeStep === steps.length - 1 ){
-      setShowAtLast(true)
+    if (activeStep === steps.length - 1) {
+      setShowAtLast(true);
     }
     setOpenUpdateDialog(true);
   };
@@ -443,17 +370,12 @@ const ContactDetailsPage = (props) => {
 
   const handleSave = (data) => {
     setIsProcessing(true);
-    setShowAtLast(true)
+    setShowAtLast(true);
     setOpenAdditionalDialog(false);
-    let tempActiveStep =
-      data && data?.isSetBackStep
-        ? activeStep - 1
-        : activeStep < steps.length - 1
-        ? activeStep + 1
-        : activeStep;
-    let processFieldName = "";
+    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
+    let processFieldName = '';
     const contactFieldData = contactFields.map((f) => {
-      if (f.fieldData.type == "process") {
+      if (f.fieldData.type == 'process') {
         processFieldName = f.fieldData.fieldName;
       }
       return f.fieldData;
@@ -462,12 +384,12 @@ const ContactDetailsPage = (props) => {
     const updatedContactData = {
       ...contactData,
       ...data
-    }
+    };
 
     const updatedData = {
       ...getObjKeysWithValues(updatedContactData, contactFieldData),
       [processFieldName]: steps[tempActiveStep].text,
-      _id: contactData._id,
+      _id: contactData._id
     };
 
     axiosInstance()
@@ -484,20 +406,15 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleMarkAsCompleted = (data) => {
-    setShowAtLast(false)
+    setShowAtLast(false);
     setIsProcessing(true);
-    let tempActiveStep =
-      data && data?.isSetBackStep
-        ? activeStep - 1
-        : activeStep < steps.length - 1
-        ? activeStep + 1
-        : activeStep;
+    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
-      let processFieldName = "";
+      let processFieldName = '';
       const contactFieldData = contactFields.map((f) => {
-        if (f.fieldData.type == "process") {
+        if (f.fieldData.type == 'process') {
           processFieldName = f.fieldData.fieldName;
         }
         return f.fieldData;
@@ -506,7 +423,7 @@ const ContactDetailsPage = (props) => {
       const updatedData = {
         ...getObjKeysWithValues(contactData, contactFieldData),
         [processFieldName]: steps[tempActiveStep].text,
-        _id: contactData._id,
+        _id: contactData._id
       };
 
       axiosInstance()
@@ -529,7 +446,7 @@ const ContactDetailsPage = (props) => {
     }
     const updatedData = {
       ...values,
-      _id: contactData._id,
+      _id: contactData._id
     };
 
     axiosInstance()
@@ -538,8 +455,8 @@ const ContactDetailsPage = (props) => {
         fetchContactData();
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
         setOpenUpdateDialog(false);
       })
@@ -548,7 +465,7 @@ const ContactDetailsPage = (props) => {
       });
   };
 
-  let filteredContactFields = contactFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
+  let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   return (
     <>
       <Layout>
@@ -575,7 +492,7 @@ const ContactDetailsPage = (props) => {
                 contactFields.map((f) => {
                   return f.fieldData;
                 })
-              ),
+              )
             }}
             loading={loading}
             handleSubmit={handleUpdateContact}
@@ -586,30 +503,32 @@ const ContactDetailsPage = (props) => {
             contactResource={contactResource}
             // contactApi={contactApi}
           />
-        ): openUpdateDialog ? ( <ManageContact
-          isNew={false}
-          open={openUpdateDialog}
-          onClose={closeUpdateDialog}
-          contactData={{
-            fields: filteredContactFields.map((f) => {
-              return f.fieldData;
-            }),
-            initialValues: getObjKeysWithValues(
-              contactData,
-              filteredContactFields.map((f) => {
+        ) : openUpdateDialog ? (
+          <ManageContact
+            isNew={false}
+            open={openUpdateDialog}
+            onClose={closeUpdateDialog}
+            contactData={{
+              fields: filteredContactFields.map((f) => {
                 return f.fieldData;
-              })
-            ),
-          }}
-          loading={loading}
-          handleSubmit={handleUpdateContact}
-          contactId={contactData._id}
-          account={props?.account}
-          // contactResource={contactResource}
-          accountResource={accountResource}
-          contactResource={contactResource}
-          // contactApi={contactApi}
-        />): null}
+              }),
+              initialValues: getObjKeysWithValues(
+                contactData,
+                filteredContactFields.map((f) => {
+                  return f.fieldData;
+                })
+              )
+            }}
+            loading={loading}
+            handleSubmit={handleUpdateContact}
+            contactId={contactData._id}
+            account={props?.account}
+            // contactResource={contactResource}
+            accountResource={accountResource}
+            contactResource={contactResource}
+            // contactApi={contactApi}
+          />
+        ) : null}
 
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -619,20 +538,13 @@ const ContactDetailsPage = (props) => {
             <Paper>
               <DetailsPageHeader
                 heading={headingLbl}
-                logo={
-                  contactData?.contactLogo ? contactData.contactLogo : undefined
-                }
+                logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
                 mainPoints={mainPoints}
                 // style={{ marginTop: "150px", minHeight: "200px" }}
                 showHeading={true}
               >
                 {contactPermissions.isUpdate && canEdit ? (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={handleOpneUpdateDialog}
-                  >
+                  <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
                     Edit
                   </Button>
                 ) : null}
@@ -641,17 +553,11 @@ const ContactDetailsPage = (props) => {
                 contactData?.owner?.optionValue &&
                 user?.user?._id &&
                 contactData.owner.optionValue === user.user._id ? (
-                  <DeleteButton
-                    text="Delete"
-                    size="small"
-                    onClick={() => setShowConfirmBox(true)}
-                  />
+                  <DeleteButton text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
                 ) : null}
               </DetailsPageHeader>
               <ProcessFlow
-                disableBackNext={
-                  contactPermissions.isUpdate && canEdit ? false : true
-                }
+                disableBackNext={contactPermissions.isUpdate && canEdit ? false : true}
                 steps={steps}
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
@@ -679,22 +585,15 @@ const ContactDetailsPage = (props) => {
                       textColor="primary"
                       aria-label="icon tabs example"
                     >
-                      <Tab
-                        label="Details"
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      <Tab
-                        label="Org Chart"
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
+                      <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+                      <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                     </Tabs>
                     <Box hidden={currentTabIndex !== 0}>
-                      
-                      {showAtLast? (<DetailsPage data={contactData} fields={contactFields} />): 
+                      {showAtLast ? (
+                        <DetailsPage data={contactData} fields={contactFields} />
+                      ) : (
                         <DetailsPage data={contactData} fields={filteredContactFields} />
-                      }
+                      )}
                       {/* <DetailsPage data={contactData} fields={contactFields} /> */}
                     </Box>
                     <Box hidden={currentTabIndex !== 1}>
@@ -726,33 +625,31 @@ const ContactDetailsPage = (props) => {
                     isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
                   />
                 )}
-                {permissions?.projectSales?.isRead &&
-                  accountResource == customerAccount.accountResource && (
-                    <ProjectInAccordion
-                      recordsPerLine={3}
-                      projectSales={projectSales}
-                      type={typeCreateProjectSalesDialog}
-                      fetchData={fetchRelatedData}
-                      permissions={permissions}
-                      isAddProjectSale={true}
-                      isAllowedToEdit={contactPermissions.isUpdate && canEdit}
-                    />
-                  )}
-                {accountResource === customerAccount.accountResource &&
-                  permissions?.quoteBuilder?.isRead && (
-                    <QuotesInAccordion
-                      recordsPerLine={3}
-                      quotes={quotes}
-                      fetchData={fetchRelatedData}
-                      quoteBuilderPermission={permissions.quoteBuilder}
-                      accountId={contactData?.accountName?.optionValue}
-                      contactId={id}
-                      accountResource={accountResource}
-                      isRenderedInCustomerContact={true}
-                      isRenderedFromCustomerAccount={true}
-                      isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
-                    />
-                  )}
+                {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                    isAddProjectSale={true}
+                    isAllowedToEdit={contactPermissions.isUpdate && canEdit}
+                  />
+                )}
+                {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+                    accountId={contactData?.accountName?.optionValue}
+                    contactId={id}
+                    accountResource={accountResource}
+                    isRenderedInCustomerContact={true}
+                    isRenderedFromCustomerAccount={true}
+                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                  />
+                )}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion
@@ -767,123 +664,86 @@ const ContactDetailsPage = (props) => {
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
-                    restrictedAddActivities={
-                      contactPermissions.isUpdate && canEdit
-                        ? []
-                        : ["Attachment", "Case"]
-                    }
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
                     relatedTo={[
                       {
                         type: accountResource,
                         referenceId: contactData?.accountName?.optionValue,
-                        access: false,
+                        access: false
                       },
                       {
                         type: contactResource,
                         referenceId: contactData._id,
-                        access: true,
-                      },
+                        access: true
+                      }
                     ]}
                     handleActivityRefresh={() => {}}
-                    emails={[contactData?.email ?? ""]}
+                    emails={[contactData?.email ?? '']}
                   />
                 </div>
               )}
               <QuickLinks quickLinks={quickLinks} />
-              {contactData?.staticData?.lead &&
-                permissions &&
-                permissions.lead &&
-                permissions.lead.isRead && (
-                  <Grid item xs={12}>
-                    <BoxWithBorder style={{ marginTop: "3%", padding: "0px" }}>
-                      <div className={`${contactClass.detail_page_div3}`}>
-                        <div className={`${contactClass.leads_data}`}>
-                          <Typography
-                            color="primary"
-                            variant="h6"
-                            style={{ margin: "0 10px" }}
-                          >
-                            Related Lead
-                          </Typography>
-                        </div>
-                        <Box className={`${contactClass.custom_box1}`}>
-                          <Card className="contactCard">
-                            <CardContent className="detailListing">
-                              <List>
-                                <ListItem>
-                                  <ListItemAvatar>
-                                    <div
-                                      data-initials={[
-                                        contactData?.staticData?.lead?.firstName
-                                          ?.charAt(0)
-                                          .toUpperCase(),
-                                        contactData?.staticData?.lead?.lastName
-                                          ?.charAt(0)
-                                          .toUpperCase(),
-                                      ]
-                                        .filter((f) => f)
-                                        .join("")}
-                                    ></div>
-                                  </ListItemAvatar>
-                                  <ListItemText
-                                    className="ml-2"
-                                    primary={
-                                      <Link
-                                        className="link f_size p-l2"
-                                        to={`/lead/detail/${contactData?.staticData?.lead?._id}`}
-                                      >
-                                        {contactData?.staticData?.lead
-                                          ?.firstName || ""}{" "}
-                                        {contactData?.staticData?.lead
-                                          ?.lastName || ""}
-                                      </Link>
-                                    }
-                                    secondary={
-                                      <React.Fragment>
-                                        <Typography
-                                          component="p"
-                                          variant="body2"
-                                          className="cardDetail"
-                                        >
-                                          {contactData?.staticData?.lead
-                                            ?.title && (
-                                            <span className="d-flex gap-2 align-items-center">
-                                              <FiStar size="15" />
-                                              {
-                                                contactData?.staticData?.lead
-                                                  ?.title
-                                              }
-                                            </span>
-                                          )}
-                                          {contactData?.staticData?.lead
-                                            ?.email && (
-                                            <span className="d-flex gap-2 align-items-center">
-                                              <AiOutlineMail size="15" />
-                                              {
-                                                contactData?.staticData?.lead
-                                                  ?.email
-                                              }
-                                            </span>
-                                          )}
-                                          {contactData?.staticData?.lead
-                                            ?.phone && (
-                                            <span className="d-flex gap-2 align-items-center">
-                                              <BiPhone size="15" />
-                                              {
-                                                contactData?.staticData?.lead
-                                                  ?.phone
-                                              }
-                                            </span>
-                                          )}
-                                        </Typography>
-                                      </React.Fragment>
-                                    }
-                                  />
-                                </ListItem>
-                              </List>
-                            </CardContent>
-                          </Card>
-                          {/* <Card>
+              {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+                <Grid item xs={12}>
+                  <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
+                    <div className={`${contactClass.detail_page_div3}`}>
+                      <div className={`${contactClass.leads_data}`}>
+                        <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
+                          Related Lead
+                        </Typography>
+                      </div>
+                      <Box className={`${contactClass.custom_box1}`}>
+                        <Card className="contactCard">
+                          <CardContent className="detailListing">
+                            <List>
+                              <ListItem>
+                                <ListItemAvatar>
+                                  <div
+                                    data-initials={[
+                                      contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                      contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
+                                    ]
+                                      .filter((f) => f)
+                                      .join('')}
+                                  ></div>
+                                </ListItemAvatar>
+                                <ListItemText
+                                  className="ml-2"
+                                  primary={
+                                    <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                      {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
+                                    </Link>
+                                  }
+                                  secondary={
+                                    <React.Fragment>
+                                      <Typography component="p" variant="body2" className="cardDetail">
+                                        {contactData?.staticData?.lead?.title && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <FiStar size="15" />
+                                            {contactData?.staticData?.lead?.title}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.email && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <AiOutlineMail size="15" />
+                                            {contactData?.staticData?.lead?.email}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.phone && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <BiPhone size="15" />
+                                            {contactData?.staticData?.lead?.phone}
+                                          </span>
+                                        )}
+                                      </Typography>
+                                    </React.Fragment>
+                                  }
+                                />
+                              </ListItem>
+                            </List>
+                          </CardContent>
+                        </Card>
+                        {/* <Card>
                             <CardContent className="detailListing">
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={12} sm={12}>
@@ -900,11 +760,11 @@ const ContactDetailsPage = (props) => {
                               </Grid>
                             </CardContent>
                           </Card> */}
-                        </Box>
-                      </div>
-                    </BoxWithBorder>
-                  </Grid>
-                )}
+                      </Box>
+                    </div>
+                  </BoxWithBorder>
+                </Grid>
+              )}
             </Paper>
           </Grid>
         </Grid>
@@ -965,14 +825,13 @@ const ContactDetailsPage = (props) => {
           //     </Button>
           //   </CustomDialogFooter>
           // </Dialog>
-          <AdditionalDialogPopUp 
+          <AdditionalDialogPopUp
             open={openAdditionalDialog}
             close={() => setOpenAdditionalDialog(false)}
             handleSave={handleSave}
             title="Additional Information"
             fieldData={sectionFields}
           />
-
         )}
       </Layout>
     </>
