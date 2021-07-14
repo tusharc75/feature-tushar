@@ -1842,7 +1842,8 @@ function QuoteDetail() {
 
     if (quoteData) {
       versions.forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status === "Booked by Customer")
+        {
           approved = true;
           versionApproved = v;
           manualApproval = quoteData.versions[v]?.customerResponse?.manual;
