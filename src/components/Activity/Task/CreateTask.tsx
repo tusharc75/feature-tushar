@@ -321,12 +321,13 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                           relatedTo={initialValues.relatedTo}
                         />
                       </Box>
+                      {id &&
                       <Box mt={2}>
                         <Divider />
                         <Box mt={1}>
-                          <Comment referenceId={id} />
+                          <Comment referenceId={id} /> 
                         </Box>
-                      </Box>
+                      </Box>}
                     </MuiPickersUtilsProvider>
                   </Box>
                 </Form>
