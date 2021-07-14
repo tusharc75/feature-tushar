@@ -21,6 +21,8 @@ import { MoreVert } from "@material-ui/icons";
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
 import routes from '../Helpers/Routes';
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+
 
 const Accordion = withStyles({
     root: {
@@ -82,7 +84,7 @@ function DisplayData({ key, label, value, icon }) {
 export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate }) {
     const history = useHistory();
     const {
-        state: { selectedEntity },
+        state: { selectedEntity, user }, dispatch
     }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -128,6 +130,15 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
     const handleCloseMenu = () => {
         setAnchorEl(null);
     };
+
+    const handleEntityChange = (id) => {
+        dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    }
+
+    const hasAccessToEntity = (id) => {
+        const entityList = user.entity?.map((entity) => entity._id);
+        return entityList.includes(id);
+    }
     return <>
         <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
             <AccordionSummary
@@ -223,10 +234,18 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                                         <Grid container className="detailCardHeader">
                                                             <Grid item xs={7} sm={8}>
 
-                                                                {obj.entity === selectedEntity ? (
-                                                                    < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
-                                                                        <Typography className="detailName">{obj.quoteName}</Typography>
-                                                                    </Link>) : (<span className="d-flex gap-2 align-items-center">
+                                                                {hasAccessToEntity(obj.entity) ?
+                                                                    obj.entity === selectedEntity ? (
+                                                                        < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
+                                                                            <Typography className="detailName">{obj.quoteName}</Typography>
+                                                                        </Link>) : (
+                                                                        < Link className="link" onClick={() => {
+                                                                            handleEntityChange(obj.entity)
+                                                                            history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`)
+                                                                        }}>
+                                                                            <Typography className="detailName">{obj.quoteName}</Typography>
+                                                                        </Link>) :
+                                                                    (<span className="d-flex gap-2 align-items-center">
                                                                         <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
                                                                             <InfoOutlinedIcon fontSize="small" />
                                                                         </Tooltip>

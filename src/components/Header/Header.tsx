@@ -120,7 +120,8 @@ const useStyles = makeStyles((theme) => ({
   brandLogo: {
     maxWidth: "10%",
     height: "45px",
-    borderRadius: "3px",
+    borderRadius: "4px",
+    border: "4px solid rgb(255 255 255 / 72%)"
   },
   entitySelect: {
     fontSize: "16px",
@@ -272,6 +273,7 @@ const Header = ({ toggleDrawer }) => {
       auth: {
         token,
       },
+      transports: ['websocket',"pooling"],
     });
     setSocket(s);
   }, [user]);

@@ -1,5 +1,19 @@
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
+    .stepper-responsive {
+        .MuiStepLabel-iconContainer {
+            display: none;
+        }
+        .MuiStepLabel-label{
+            font-size: 11px;
+        }
+    }
+    .tab-font {
+        font-size: 12px;
+    }
+    .detailHeader {
+        padding: 0;
+    }
     .MuiMenuItem-root {
         font-size: 0.8rem;
         min-height: 34px;
@@ -71,10 +85,13 @@
         right: 10px;
         bottom: 14px;
     }
-    .bgbox, .profileBox{
+    .bgbox,
+    .profileBox {
         background: transparent;
     }
-
+    .product-builder-edit-grid {
+        height: 400px !important;
+    }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */

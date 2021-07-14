@@ -22,7 +22,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import {
     CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+    UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -98,14 +99,14 @@ const ProductTemplate: FC = () => {
     </Link>;
 
     const ActionsRenderer = params => <>
-        {
+        {productTemplatePermissions.isCreate &&
             <Tooltip title="Clone">
                 <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
                     <FileCopyIcon color="primary" />
                 </IconButton>
             </Tooltip>
         }
-        {productTemplatePermissions.isUpdate ?
+        {productTemplatePermissions.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -254,9 +255,6 @@ const ProductTemplate: FC = () => {
         dispatch({ type: "search", search: e.target.value });
     };
 
-
-
-
     return (
         <Layout>
             <Grid container className="headerbox">
@@ -272,24 +270,27 @@ const ProductTemplate: FC = () => {
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >
-
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
                                     width="242px"
                                     value={search}
                                 />
-                                <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                                <Button
-                                    className={styles.action_submit_btn}
-                                    variant="outlined"
-                                    color="default"
-                                    size="small"
-                                    onClick={openActions}
-                                    disabled={selectedRecords.length ? false : true}
-                                    aria-controls="action-menu"
-                                >Actions <ExpandMore />
-                                </Button>
+                                {productTemplatePermissions.isCreate &&
+                                    <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                }
+                                {productTemplatePermissions.isDelete &&
+                                    <Button
+                                        className={styles.action_submit_btn}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        disabled={selectedRecords.length ? false : true}
+                                        aria-controls="action-menu"
+                                    >Actions <ExpandMore />
+                                    </Button>
+                                }
                                 <Menu
                                     anchorEl={anchorEl}
                                     keepMounted
@@ -310,7 +311,7 @@ const ProductTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
                     loading={loading} />
 
                 {showDeleteConfirmBox &&

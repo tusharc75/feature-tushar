@@ -50,6 +50,9 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "brand-configuration",
         "project-sales",
         "doa-request",
+        "product-list",
+        "product/details",
+        "quote-pdf-template"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -83,7 +86,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
               pathname: "/login",
               search: `${
                 location && location.pathname
-                  ? `?redirect=${location.pathname}`
+                  ? `?redirect=${location.pathname}${location.search}`
                   : null
               }`,
               state: { from: location },

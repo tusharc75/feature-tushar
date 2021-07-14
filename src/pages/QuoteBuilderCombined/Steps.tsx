@@ -9,6 +9,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
+import IconButton from '@material-ui/core/IconButton';
+
 import {
   StepIconProps,
   Grid,
@@ -35,33 +37,27 @@ import NewStepper from "../../components/Helpers/NewStepper";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import { isMobile } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    // width: "100%",
-    // padding: "26px 10px !important",
-    // background: "#fefefe",
-    // boxShadow: "3px 4px 8px #cfcdcd",
-  },
   backButton: {
     marginRight: theme.spacing(1),
   },
   instructions: {
     fontWeight: "bold",
   },
-  stepperNext: {
-    // marginTop: "8px",
-    // position: "absolute",
-    // right: "12px",
-    // bottom: "0",
-    // color: theme.palette.primary.main,
-  },
   pStepper: {
     padding: "10px 4px",
-    // border: "1px solid #ece4e4",
-    // background: "#f5f5f5 !important",
-    // margin: "5px 8px",
     borderRadius: "4px",
+    [theme.breakpoints.down("xs")]: {
+      padding: "4px",
+    },
+  },
+  pbStepper: {
+    overflow: "none",
+    [theme.breakpoints.down("xs")]: {
+      overflow: "auto"
+    },
   },
   step: {
     paddingLeft: "8px",
@@ -75,15 +71,17 @@ const useStyles = makeStyles((theme) => ({
     margin: "1px",
     borderRadius: "4px",
     border: "1px solid #d6d5d5",
+    [theme.breakpoints.down("xs")]: {
+      width: "50%",
+      padding: "2px"
+    },
   },
   inActive: {
     background: "#ebebeb",
   },
   currentStep: {
     background: "#ffffff",
-    // boxShadow: "2px 2px 6px #a7a3a3",
   },
-
   active: {
     background: "#53ac65",
   },
@@ -101,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const useColorlibStepIconStyles = makeStyles({
+const useColorlibStepIconStyles = makeStyles((theme) =>({
   root: {
     color: "#d1c4c4",
     width: 30,
@@ -119,7 +117,7 @@ const useColorlibStepIconStyles = makeStyles({
   rejected: {
     color: "#b3a6a6 !important",
   },
-});
+}));
 
 const Steps = (props) => {
   const {
@@ -132,14 +130,14 @@ const Steps = (props) => {
     versionStatus,
     loading,
     approvedQuote,
-    generatePDF,
+    handleVersionUpdate,
+    allowedToEdit,
     DOAlimit,
     totalCost,
     handleSendReminder = null,
     reminderLoading = false,
     hideReminderButton = false,
     DOAData = null,
-    selectedTNC,
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -148,7 +146,7 @@ const Steps = (props) => {
   const options = ["Booked", "Not Booked", "Invalid"];
   const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] =
     useState(false);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setComment(event.target.value);
   };
@@ -183,7 +181,11 @@ const Steps = (props) => {
           rejected = true;
           completed = false;
         }
-      } else if (versionStatus.includes("Rejected by Customer") || versionStatus.includes("Not Booked by Customer") || versionStatus.includes("Invalid by Customer")) {
+      } else if (
+        versionStatus.includes("Rejected by Customer") ||
+        versionStatus.includes("Not Booked by Customer") ||
+        versionStatus.includes("Invalid by Customer")
+      ) {
         if (steps.length === 6) {
           if (props.icon > 4) {
             status = 4;
@@ -200,7 +202,11 @@ const Steps = (props) => {
       }
     }
     if (props.icon === steps.length && props.active) {
-      if (versionStatus.includes("Rejected") || versionStatus.includes("Not Booked") || versionStatus.includes("Invalid")) {
+      if (
+        versionStatus.includes("Rejected") ||
+        versionStatus.includes("Not Booked") ||
+        versionStatus.includes("Invalid")
+      ) {
         status = 4;
         active = false;
         completed = false;
@@ -213,9 +219,9 @@ const Steps = (props) => {
     }
 
     const icons: { [index: string]: React.ReactElement } = {
-      1: <GiBackwardTime size={20} />,
-      2: <GoPencil size={20} />,
-      3: <BsCheckCircle size={20} />,
+      1: <GiBackwardTime size={20}/>,
+      2: <GoPencil size={20}/>,
+      3: <BsCheckCircle size={20}/>,
       4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
       5: <FaHourglassHalf size={20} />,
     };
@@ -235,7 +241,7 @@ const Steps = (props) => {
 
   const handleNext = () => {
     if (currentStep === 2) {
-      generatePDF(false, true);
+      handleVersionUpdate();
     }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
@@ -295,7 +301,7 @@ const Steps = (props) => {
   };
 
   return (
-    <div className={classes.root}>
+    <div>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
           approvedQuote.approved ? (
@@ -446,17 +452,18 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center mt-2"
           >
-            {activeStep !== steps.length - 1 && (
+            {!isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
                   {!approvedQuote.approved && (
-                    <div className={classes.stepperNext}>
+                    <div>
                       <Button
                         variant="contained"
                         color="primary"
                         disabled={
+                          !allowedToEdit ||
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
                           versionStatus.includes("Sent for DOA") ||
@@ -478,7 +485,89 @@ const Steps = (props) => {
           </Grid>
           <Grid item xs={12} sm={8} md={10}>
             <div className={classes.pStepper}>
-              <Stepper className="pbStepper" activeStep={activeStep}>
+            <Grid container>
+          <Grid
+            item
+            xs={6}
+            className="d-flex align-items-center justify-content-start mt-1 mb-1"
+          >
+            {isMobile && activeStep !== steps.length - 1 && (
+              <>
+                <div>
+                  {!approvedQuote.approved && (
+                    <div>
+                      <IconButton
+                        color="primary"
+                        disabled={
+                          !allowedToEdit ||
+                          versionStatus.includes("Rejected by Customer") ||
+                          (steps.length === 5 && currentStep > 3) ||
+                          versionStatus.includes("Sent for DOA") ||
+                          (steps.length === 6 && currentStep >= 4) ||
+                          versionStatus.includes("Sent to Customer") ||
+                          loading
+                        }
+                        onClick={handleBack}
+                        size="small"
+                      >
+                       <IoIosArrowDropleftCircle />
+                      </IconButton>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </Grid>
+          <Grid
+            item
+            xs={6}
+            className="d-flex align-items-center justify-content-end mt-1 mb-1"
+          >
+            {isMobile && activeStep !== steps.length - 1 && (
+              <>
+                <div>
+                  {!approvedQuote.approved && (
+                    <div>
+                      {versionStatus.split(" ")[0] !== "Rejected" ? (
+                        <IconButton
+                          color="primary"
+                          onClick={() => {
+                            if (
+                              versionStatus.includes("Sent to Customer") ||
+                              steps[currentStep] === "Send To Customer" ||
+                              versionStatus === "Sent to Customer"
+                            ) {
+                              setShowManualCustomerActionDialog(true);
+                            } else {
+                              handleNext();
+                            }
+                          }}
+                          size="small"
+                          disabled={
+                            !allowedToEdit ||
+                            loading ||
+                            !nextStep ||
+                            versionStatus.includes("Accepted  by DOA")
+                            // || versionStatus.includes("Sent to Customer") ||
+                            // steps[currentStep] === "Send To Customer" ||
+                            // versionStatus === "Sent to Customer"
+                          }   
+                        >
+                          {versionStatus.includes("Accepted  by DOA")
+                            ? "End"
+                            :<IoIosArrowDroprightCircle />}
+                        </IconButton>
+                      ) : (
+                        <p>{versionStatus}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </Grid>
+          </Grid>
+              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
                 {steps.map((label, i) => (
                   <Step
                     key={label}
@@ -513,11 +602,11 @@ const Steps = (props) => {
             md={1}
             className="d-flex align-items-center justify-content-center"
           >
-            {activeStep !== steps.length - 1 && (
+            {!isMobile &&  activeStep !== steps.length - 1 && (
               <>
                 <div>
                   {!approvedQuote.approved && (
-                    <div className={classes.stepperNext}>
+                    <div>
                       {versionStatus.split(" ")[0] !== "Rejected" ? (
                         <Button
                           variant="contained"
@@ -535,6 +624,7 @@ const Steps = (props) => {
                           }}
                           size="small"
                           disabled={
+                            !allowedToEdit ||
                             loading ||
                             !nextStep ||
                             versionStatus.includes("Accepted  by DOA")
@@ -592,16 +682,17 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
-              {(selectedOption === "Invalid") && <TextField
-                id="outlined-multiline-static"
-                label="Comment"
-                multiline
-                value={comment}
-                onChange={handleChange}
-                rows={4}
-                variant="outlined"
-              />}
-
+              {selectedOption === "Invalid" && (
+                <TextField
+                  id="outlined-multiline-static"
+                  label="Comment"
+                  multiline
+                  value={comment}
+                  onChange={handleChange}
+                  rows={4}
+                  variant="outlined"
+                />
+              )}
             </>
           </CustomDialogContent>
           <CustomDialogFooter>

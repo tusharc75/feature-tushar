@@ -128,13 +128,21 @@ const ProductCategory = () => {
     const toastConfig = useContext(CustomToastContext)
     const {
         state: { permissions },
-      }: any = useData();
+    }: any = useData();
+    const [productCategoryPermissions, setProductCategoryPermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
+
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
+    
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -151,6 +159,12 @@ const ProductCategory = () => {
     //  Grid Variables - End
 
     useEffect(() => {
+        if (permissions && permissions.productCategory) {
+            setProductCategoryPermissions(permissions.productCategory);
+        }
+    }, [permissions]);
+
+    useEffect(() => {
         fetchProductCategory()
     }, [page, limit, filters, sorting, search])
 
@@ -161,14 +175,26 @@ const ProductCategory = () => {
         }}>
             <CustomRenderCell value={params.value} />
         </span>
+       
     </span>
 
     const ActionsRenderer = params => <Fragment>
-        <Tooltip title="Delete">
-            <IconButton size="small" aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
-                <DeleteIcon color="error" />
-            </IconButton>
-        </Tooltip >
+        {productCategoryPermissions.isDelete ?
+            <Tooltip title="Delete" >
+                <IconButton aria-label="Delete" onClick={() => {
+                    setDeleteRecord(params.data);
+                    setShowDeleteConfirmBox(true)
+                }}>
+                    <DeleteIcon
+                        fontSize="small" color="error" />
+                </IconButton>
+            </Tooltip> :
+            <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
+                <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                </IconButton>
+            </Tooltip>
+        }
     </Fragment>
 
     const frameworkComponents = {
@@ -248,13 +274,14 @@ const ProductCategory = () => {
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-            
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
         });
     };
 
+   
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -309,46 +336,50 @@ const ProductCategory = () => {
                         <GiAbstract055 /> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-                    <Box className={styles.filter_side_header} component="div" >
-                        <SearchBox
-                            onSearch={handleSearch}
-                            searchbox={styles.search_box_input}
-                            width="242px"
-                            size="small"
-                            value={search}
-                        />
-                        <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                        <Button
-                            className={styles.action_submit_btn}
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={openActions}
-                            disabled={selectedRecords.length ? false : true}
-                            aria-controls="action-menu"
-                        >Actions <ExpandMore />
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                        </Menu>
+                        <Box className={styles.filter_side_header} component="div" >
+                            <SearchBox
+                                onSearch={handleSearch}
+                                searchbox={styles.search_box_input}
+                                width="242px"
+                                size="small"
+                                value={search}
+                            />
+                            {productCategoryPermissions.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            }
+                            {productCategoryPermissions.isDelete &&
+                                <Button
+                                    className={styles.action_submit_btn}
+                                    variant="outlined"
+                                    color="default"
+                                    size="small"
+                                    onClick={openActions}
+                                    disabled={selectedRecords.length ? false : true}
+                                    aria-controls="action-menu"
+                                >Actions <ExpandMore />
+                                </Button>
+                            }
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                            </Menu>
                         </Box>
                     </Grid>
                 </Grid>
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
                 loading={loading} />
 
             {showDeleteConfirmBox &&
@@ -359,7 +390,17 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
-            {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
+        
+            {open && 
+                <CreateProductCategory 
+                    productCategoryId={productCategoryId}
+                    onClose = {() => setOpen(false)} 
+                    onSuccess={() => { 
+                        setOpen(false); 
+                        fetchProductCategory() 
+                    }} 
+                />
+            }
         </CustomContainer>
     </Layout>
     );

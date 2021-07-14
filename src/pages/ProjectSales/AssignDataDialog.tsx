@@ -4,6 +4,9 @@ import {
   Checkbox,
   CircularProgress,
   Dialog,
+  FormControl,
+  FormControlLabel,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -18,6 +21,7 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import SearchBox from "../../components/Helpers/SearchBox";
 
 const AssignDataDialog = (props) => {
   const {
@@ -31,19 +35,21 @@ const AssignDataDialog = (props) => {
   } = props;
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
+  const [dataConst, setDataConst] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedData, setSelectedData] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const url =
       type === "customer-contact"
         ? `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
         : type === "opportunity"
-        ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
-        : type === "quote-builder"
-        ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
-        : `/${type}?limit=100`;
+          ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+          : type === "quote-builder"
+            ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+            : `/${type}?limit=100`;
     setLoading(true);
     axiosInstance()
       .get(url)
@@ -53,6 +59,7 @@ const AssignDataDialog = (props) => {
         );
 
         setData(filteredData);
+        setDataConst(filteredData);
         setLoading(false);
       })
       .catch((error) => {
@@ -75,10 +82,10 @@ const AssignDataDialog = (props) => {
 
   const changeType = (type) => {
     let newType;
-    if(type !== "quote-builder" ){
-      newType=type;
-    }else{
-      newType="quote"
+    if (type !== "quote-builder") {
+      newType = type;
+    } else {
+      newType = "quote"
     }
     return newType;
   }
@@ -149,6 +156,33 @@ const AssignDataDialog = (props) => {
     }
   };
 
+
+
+  const handleSearch = (e) => {
+    let value = e.target.value;
+    setSearch(value);
+    let result = [];
+    result = dataConst.filter((data) => {
+      switch (type) {
+        case "user":
+          return data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1 || data.email.toLowerCase().search(value.toLowerCase()) != -1;
+        case "lead":
+          return data.salutation.toLowerCase().search(value.toLowerCase()) != -1 || data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.middleName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1;
+        case "opportunity":
+          return data.opportunityName.toLowerCase().search(value.toLowerCase()) != -1;
+        case "quote-builder":
+          return data.quoteName.toLowerCase().search(value.toLowerCase()) != -1;
+        case "customer-account":
+          return data.accountName.toLowerCase().search(value.toLowerCase()) != -1;
+        case "customer-contact":
+          return data.salutation.toLowerCase().search(value.toLowerCase()) != -1 || data.firstName.toLowerCase().search(value.toLowerCase()) != -1 || data.middleName.toLowerCase().search(value.toLowerCase()) != -1 || data.lastName.toLowerCase().search(value.toLowerCase()) != -1;
+        default:
+          break;
+      }
+    });
+    setData(result);
+  };
+
   return (
     <Dialog
       fullWidth
@@ -161,27 +195,62 @@ const AssignDataDialog = (props) => {
       <CustomDialogContent>
         {loading ? (
           <Loader text={`Loading ${startCase(type)}`} />
-        ) : data.length ? (
-          <List style={{ padding: 0 }}>
-            {data.map((_d) => (
-              <ListItem divider key={_d._id}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    onChange={(e) => handleUserSelection(e, _d._id)}
-                    checked={selectedData.indexOf(_d._id) >= 0}
-                    inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${_d._id}`,
-                    }}
+        ) : dataConst.length ? (
+          <>
+            <Grid container>
+              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    value="top"
+                    control={
+                      <Checkbox
+                        // edge="start"
+                        onChange={(e) => {
+                          data.forEach((data) => data.isChecked = e.target.checked)
+                          setSelectedData(data.filter(r => r.isChecked).map(obj => obj._id))
+                        }
+                        }
+                        checked={data.every(x => x.isChecked)}
+                        inputProps={{
+                          "aria-labelledby": `checkbox-list-label-select-all`,
+                        }}
+                      />}
+                    label="Select All"
                   />
-                </ListItemIcon>
-                <ListItemText
-                  primary={getHeading(type, _d)}
-                  secondary={getSubHeading(type, _d)}
+                </FormControl>
+
+              </Grid>
+              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="terms_header_search_bar"
+                  width="300px"
+                  value={search}
                 />
-              </ListItem>
-            ))}
-          </List>
+              </Grid>
+            </Grid>
+
+            <List style={{ padding: 0 }}>
+              {data.map((_d) => (
+                <ListItem divider key={_d._id}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => handleUserSelection(e, _d._id)}
+                      checked={selectedData.indexOf(_d._id) >= 0}
+                      inputProps={{
+                        "aria-labelledby": `checkbox-list-label-${_d._id}`,
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={getHeading(type, _d)}
+                    secondary={getSubHeading(type, _d)}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </>
         ) : (
           <Typography>
             There are no {lowerCase(type)} or you have already added all{" "}
@@ -194,7 +263,7 @@ const AssignDataDialog = (props) => {
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
-          size="small" 
+          size="small"
         >
           Cancel
         </Button>

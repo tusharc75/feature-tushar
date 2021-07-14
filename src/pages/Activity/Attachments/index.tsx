@@ -216,7 +216,7 @@ export default function Attachment(props) {
     const ActionsRenderer = params => (
         (
             <>
-                <Tooltip title="Download">
+                {/* <Tooltip title="Download">
                     <IconButton
                         size="small"
                         aria-label="Download"
@@ -226,15 +226,28 @@ export default function Attachment(props) {
                     >
                         <GoArrowDown size={26} />
                     </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                    <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        onClick={() => showConfirmBox(params.data)}>
-                        <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                </Tooltip>
+                </Tooltip> */}
+                {params.data.canEdit ?
+                    <Tooltip title="Delete">
+                        <IconButton
+                            size="small"
+                            aria-label="Delete"
+                            onClick={() => showConfirmBox(params.data)}>
+                            <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                    </Tooltip> :
+                    <Tooltip
+                        className="cursor-stop"
+                        title="Signed Quote Attachment can not be deleted"
+                    >
+
+                        <IconButton
+                            size="small"
+                            aria-label="Delete"
+                        >
+                            <DeleteIcon fontSize="small" color="disabled" />
+                        </IconButton>
+                    </Tooltip>}
             </>
         )
     )
@@ -295,6 +308,7 @@ export default function Attachment(props) {
                     const { createdBy, updatedBy, ...rest } = u
                     return {
                         ...rest,
+                        canEdit: u.canEdit,
                         createdByDate: u.createdBy.date ?? "",
                         updatedByDate: u?.updatedBy?.date ?? ""
                     }
@@ -366,7 +380,9 @@ export default function Attachment(props) {
         setAnchorEl(null);
     };
 
+
     return <Layout>
+        
         <Grid container className="headerbox">
             <CustomBreadCrumbs routes={[{ title: "Attachment" }]} />
         </Grid>
@@ -391,7 +407,7 @@ export default function Attachment(props) {
                                 onClick={() => setOpen(true)}
                                 startIcon={<AddOutlined />}>
                                 Add
-                                </Button>
+                            </Button>
                             <Button
                                 className={styles.action_submit_btn}
                                 variant="outlined"
@@ -415,13 +431,14 @@ export default function Attachment(props) {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}>
                                 <MenuItem
+                                    disabled={!selectedRecords.some((records)=>records.canEdit)}
                                     onClick={() => {
                                         showConfirmBox(null);
                                         closeActions();
                                     }}
                                 >
                                     Delete
-                                    </MenuItem>
+                                </MenuItem>
                             </Menu>
                         </Box>
                     </Grid>

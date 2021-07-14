@@ -19,6 +19,11 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import htmlToDraft from "html-to-draftjs";
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 
 import {
   EditorState,
@@ -29,9 +34,7 @@ import {
 import { RichTextEditor } from "../../components/RichEditor/RichEditor";
 import { termsAndConditionDocumentUploadMaxSize } from "../../constants/helpers";
 
-const termsAndConditionSchema = Yup.object().shape({
-  TACName: Yup.string().required("please enter terms and condition title"),
-});
+
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {
@@ -52,6 +55,7 @@ const TermsAndCondition = ({
   termsAndCondition,
   fetchData,
   editRecord,
+  displayTitle
 }) => {
   const [initialValues, setInitialValues] = useState({
     TACName: "",
@@ -63,6 +67,15 @@ const TermsAndCondition = ({
   const toastConfig = useContext(CustomToastContext);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
+
+  const termsAndConditionSchema = Yup.object().shape({
+    TACName: Yup.string().required(`please add ${displayTitle.toLowerCase()} name`),
+  });
+
+  const [additionalDataPosition, setAdditionalDataPosition] = useState(editRecord ? editRecord.topPosition?.toString() : "true");
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAdditionalDataPosition((event.target as HTMLInputElement).value);
+  };
 
   useEffect(() => {
     if (editRecord && editRecord?._id) {
@@ -82,6 +95,11 @@ const TermsAndCondition = ({
       TACName: values.TACName,
       file: values?.file ?? "",
     };
+
+    if (displayTitle === "Additional Data") {
+      request["topPosition"] = additionalDataPosition === "true" ? true : false
+    }
+
     setLoading(true);
     if (editRecord?._id) {
       axiosInstance()
@@ -146,11 +164,10 @@ const TermsAndCondition = ({
       className={classes.termAndConditionDialog}
     >
       <CustomDialogHeader
-        title={`${
-          editRecord?._id
-            ? `Edit ${editRecord?.TACName ?? ""}`
-            : "Create Terms and Condition"
-        }`}
+        title={`${editRecord?._id
+          ? `Edit ${editRecord?.TACName ?? ""}`
+          : `Create ${displayTitle}`
+          }`}
       ></CustomDialogHeader>
       {initialValues && (
         <Formik
@@ -179,7 +196,7 @@ const TermsAndCondition = ({
                             fullWidth
                             margin="dense"
                             type="text"
-                            label="Terms and Condition Name"
+                            label={`${displayTitle} Name`}
                             name="TACName"
                             variant="outlined"
                             required={true}
@@ -191,6 +208,17 @@ const TermsAndCondition = ({
                               )
                             }
                           />
+                          {(displayTitle === "Additional Data") &&
+                            <Box mt={2} >
+                              <FormControl component="fieldset">
+                                <FormLabel component="legend">{`Position of ${displayTitle.toLowerCase()} with respect to product data`}</FormLabel>
+                                <RadioGroup aria-label="postion" name="postion" value={additionalDataPosition} onChange={handleChange}>
+                                  <FormControlLabel value="true" control={<Radio />} label="Above of product data" />
+                                  <FormControlLabel value="false" control={<Radio />} label="Below of product data" />
+                                </RadioGroup>
+                              </FormControl>
+                            </Box>
+                          }
                           <Box mt={2} className={classes.fileUpload}>
                             <FormTypes
                               label="File"
@@ -228,7 +256,7 @@ const TermsAndCondition = ({
                               editorState={values.editorState}
                               onChange={setFieldValue}
                               onBlur={handleBlur}
-                              placeholder="Terms and Conditions"
+                              placeholder={displayTitle}
                             />
                           </Box>
                         </Grid>

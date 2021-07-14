@@ -25,7 +25,18 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     boxShadow: "2px 2px 4px #747474",
     background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
-    border: "#03232e"
+    border: "#03232e",
+    [theme.breakpoints.down("xs")]: {
+      borderRadius: "4px",
+      boxShadow: "2px 2px 4px #747474",
+      background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
+      border: "#03232e",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "4px 6px"
+    },
+
   },
   labelColor: {
     color: "#fff",
@@ -49,7 +60,7 @@ const DetailsPageHeader = (props) => {
     <>
       <Paper elevation={0}>
         <Grid container justify="space-between" className="detailHeader">
-          <Grid item className="d-flex align-items-center gap-1">
+          <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (

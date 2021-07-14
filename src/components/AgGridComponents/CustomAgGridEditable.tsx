@@ -122,6 +122,7 @@ export default function CustomAgGridEditable({
   page,
   loading,
   setGridApi,
+  onRowDragEnd = null,
   refreshGrid = null,
   allowSelection = true,
   allowAction = true,
@@ -314,15 +315,13 @@ export default function CustomAgGridEditable({
                 });
               }}
               onRowDragEnd={(event: any) => {
-                //  Did this for quote screen, as we need updated sequence and selected records
-                dispatch({
-                  type: "selection",
-                  selectedRecords: orderBy(
+                if (onRowDragEnd) {
+                  onRowDragEnd(orderBy(
                     event.api.getSelectedNodes(),
                     "rowIndex",
                     ["asc"]
-                  ).map((d) => d.data),
-                });
+                  ).map((d) => d.data));
+                }
               }}
               immutableData={true}
               getRowNodeId={(data) => {

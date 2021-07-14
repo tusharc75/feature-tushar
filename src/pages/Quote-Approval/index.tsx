@@ -90,6 +90,7 @@ const QuoteApproval = () => {
         show: false,
         text: null,
     });
+    const [pdf, setPdf] = useState("");
 
     useEffect(() => {
         // getCompanyDetails();
@@ -100,8 +101,11 @@ const QuoteApproval = () => {
     const fetchQuote = () => {
 
         axios.get(backendApi + "/quote-builder/getQuotefromId/" + id + location)
-            .then(({ data }) => {
+            .then(async ({ data }) => {
                 const newColumn = data.Columns.map((obj) => ({ ...obj, width: 200 }))
+
+                setPdf(data.brand.pdf);
+
                 if (data.Quote_Status === "Sent to Customer") {
                     setLogo(data.logo);
                     setColumns(newColumn);
@@ -127,16 +131,16 @@ const QuoteApproval = () => {
             });
     }
 
-    const QuoteStatusChange = (accepted, signedDocumentUrl, comment) => {
+    const QuoteStatusChange = (accepted, signedDocumentBase64, comment) => {
         let body;
         if (accepted !== "Rejected") {
-            body = { status: "Accepted by Customer", signedDocument: signedDocumentUrl }
+            body = { status: "Accepted by Customer", signature: signedDocumentBase64 }
         }
         else {
             body = { status: "Rejected by Customer", comment: comment }
         }
         axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
-            .then(({ data }) => {
+            .then(() => {
                 setReplied(true);
                 setShowQuoteStatusChangeDialog(false)
                 setShowSignatureDialog(false);
@@ -177,7 +181,7 @@ const QuoteApproval = () => {
         PdfDoc.setFontSize(14);
         PdfDoc.text("Quotation", 265, 75);
         var PDFData = [];
-        var PdfCol = ["#"];
+        var PdfCol = ["Item #"];
         var serialNumber = 1;
 
         rows.forEach((dataEntry) => {
@@ -465,6 +469,35 @@ const QuoteApproval = () => {
                             </Grid>
 
                             {
+                                pdf ? <object style={{ height: "calc(100vh - 200px)", width: "100vw" }} data={`data:application/pdf;base64,${pdf}`} type="application/pdf">
+                                    <span className="d-flex align-items-center">This browser does not support PDF preview. Try with another browser.</span>
+                                </object>
+                                    : ""
+                            }
+
+                            <div className={styles.main}>
+                                <div className="mt-1">
+                                    <Grid container alignItems="center">
+                                        <Grid item xs={12} md={4} sm={4}>
+                                            <h2>Total : {sellingPrice} {currency}</h2>
+                                        </Grid>
+                                        <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                                            <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
+                                                Accept
+                                            </Button>
+                                            <Button variant="outlined" startIcon={<GoThumbsdown />} color="default" onClick={() => {
+                                                setQuoteStatusChangeData("Rejected")
+                                                setShowQuoteStatusChangeDialog(true)
+                                            }} >
+                                                Reject
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                </div>
+                            </div>
+
+
+                            {/* {
                                 quoteData && <div className={styles.main}>
 
                                     <div className="d-flex justify-content-space-between align-items-center">
@@ -546,17 +579,6 @@ const QuoteApproval = () => {
                                         renderTermsAndConditions()
                                     }
 
-                                    {/* <div className="mt-2">
-                                        <div className={classes.gridContent}>
-                                            <DataGrid
-                                                columns={columns}
-                                                rows={rows}
-                                                density="compact"
-                                                pagination={undefined}
-                                                getRowId={(row) => row.id} />
-                                        </div>
-                                    </div> */}
-
                                     <div className="my-3">
                                         <hr />
                                     </div>
@@ -567,13 +589,6 @@ const QuoteApproval = () => {
                                                 <h2>Total : {sellingPrice} {currency}</h2>
                                             </Grid>
                                             <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
-                                                <Button variant="contained" disabled={generatingPdf.show === true} className="mr-1" startIcon={<AiOutlineEye />} color="primary" onClick={() => {
-                                                    setGeneratingPdf({ show: true, text: "Generating..." })
-                                                    generatePdf(true, false)
-                                                }
-                                                }>
-                                                    {generatingPdf.show === true ? "Generating..." : "View"}
-                                                </Button>
                                                 <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
                                                     Accept
                                                 </Button>
@@ -588,7 +603,7 @@ const QuoteApproval = () => {
                                     </div>
 
                                 </div>
-                            }
+                            } */}
                         </div>)}
                 </div>
                 ) : (
@@ -610,7 +625,8 @@ const QuoteApproval = () => {
 
             {
                 showSignatureDialog && <SignatureDialog open={showSignatureDialog} onSigned={(imageData) => {
-                    generatePdf(false, true, imageData);
+                    // generatePdf(false, true, imageData);
+                    QuoteStatusChange(true, imageData, null)
                 }} onClose={() => { setShowSignatureDialog(false) }} />
             }
         </div >

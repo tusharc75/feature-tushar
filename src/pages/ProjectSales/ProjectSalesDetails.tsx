@@ -40,6 +40,7 @@ import {
   quote,
 } from "../../constants/helpers";
 import Activity from "../../components/Activity";
+import CreateProjectSales from "./CreateProjectSales";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -111,7 +112,7 @@ const ProjectSalesDetails = () => {
   /**
    * Get sales strategy data for paticular ID
    */
-  const getSalesData = useCallback(async () => {
+  const getSalesData = async () => {
     setLoading(true);
     try {
       const {
@@ -120,6 +121,15 @@ const ProjectSalesDetails = () => {
 
       // data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
       // data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
+      let modifiedData: any = {};
+      Object.assign(modifiedData, data);
+
+      modifiedData["amount"] = formatAmountWithCurrency(
+        modifiedData.currency,
+        modifiedData.amount
+      ).shortFormatAmount;
+
+      setCopyOfProjectSalesData(modifiedData);
 
       setProjectSalesData(data);
       setCurrentTabIndex(0);
@@ -135,21 +145,11 @@ const ProjectSalesDetails = () => {
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
 
-      let modifiedData: any = {};
-      Object.assign(modifiedData, data);
-
-      modifiedData["amount"] = formatAmountWithCurrency(
-        modifiedData.currency,
-        modifiedData.amount
-      ).shortFormatAmount;
-
-      setCopyOfProjectSalesData(modifiedData);
-
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }, [id]);
+  };
 
   useEffect(() => {
     getSalesData();
@@ -318,20 +318,31 @@ const ProjectSalesDetails = () => {
   const isTeamMember = Boolean(teamUsers.find((u) => u._id === user.user._id));
   const isManager =
     user.user._id === projectSalesData?.projectManager?.optionValue;
+  const fiteredFieldForUpdate = projectSalesFields.filter((obj) => obj.isUpdate);
+  const fiteredFieldToShow = projectSalesFields.filter((obj) => obj.isRead);
 
   return (
     <>
       {openUpdateDialog && (
-        <UpdateDetailsDialog
-          title={`Update ${projectSalesData?.projectName}`}
-          openDialog={openUpdateDialog}
-          onClose={closeUpdateDIalog}
-          data={projectSalesData}
-          fields={projectSalesFields}
-          isUpdating={isUpdating}
-          handleUpdate={handleUpdateProject}
-          isProjectSales={true}
+        <CreateProjectSales
+          open={openUpdateDialog}
+          close={closeUpdateDIalog}
+          fetchData={() => {
+            getSalesData();
+          }}
+          projectSalesId={projectSalesData._id}
         />
+
+        // <UpdateDetailsDialog
+        //   title={`Update ${projectSalesData?.projectName}`}
+        //   openDialog={openUpdateDialog}
+        //   onClose={closeUpdateDIalog}
+        //   data={projectSalesData}
+        //   fields={fiteredFieldForUpdate}
+        //   isUpdating={isUpdating}
+        //   handleUpdate={handleUpdateProject}
+        //   isProjectSales={true}
+        // />
       )}
       {openDialog && (
         <AssignDataDialog
@@ -380,7 +391,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -402,8 +413,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                  !projectSalesFields.length ||
-                  !projectSalesData ? (
+                    !projectSalesFields.length ||
+                    !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -426,7 +437,7 @@ const ProjectSalesDetails = () => {
                         />
                         <Tab
                           label="OM-Neurons"
-                        aria-controls="a11y-tabpanel-1"
+                          aria-controls="a11y-tabpanel-1"
                           id="a11y-tab-1"
                         />
                       </Tabs>
@@ -434,7 +445,7 @@ const ProjectSalesDetails = () => {
                         <Box>
                           <DetailsPage
                             data={copyOfProjectSalesData}
-                            fields={projectSalesFields}
+                            fields={fiteredFieldToShow}
                           />
                         </Box>
                       )}
@@ -448,9 +459,8 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${
-                                    node.id
-                                  }`,
+                                  pathname: `${routes[node.route].path}/${node.id
+                                    }`,
                                 });
                               }
                             }}
@@ -474,7 +484,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -554,7 +564,7 @@ const ProjectSalesDetails = () => {
                       access: false,
                     })),
                   ]}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               </div>
@@ -586,8 +596,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-              : ""
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

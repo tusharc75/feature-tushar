@@ -6,6 +6,7 @@ import {
   List,
   ListItemIcon,
   ListItemText,
+  CircularProgress,
 } from "@material-ui/core";
 import { DragIndicator } from "@material-ui/icons";
 import { isMobile, isTablet } from "react-device-detect";
@@ -27,6 +28,7 @@ const ItemTypes = {
 const ColumnsDialog = (props) => {
   const { columns, setOpenDialog, id, version, refresh } = props;
   const toastConfig = useContext(CustomToastContext);
+  const [isSubmitting, setSubmitting] = useState(false);
   const [cards, setCards] = useState(
     columns.map((col, idx) => ({ id: idx + 1, text: col })) || []
   );
@@ -57,15 +59,18 @@ const ColumnsDialog = (props) => {
   };
 
   const onSave = () => {
+    setSubmitting(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${version}`, {
         acceptedColumns: cards.map((card) => card.text),
       })
       .then(({ data }) => {
+        setSubmitting(false);
         closeDialog();
         refresh(version);
       })
       .catch((error) => {
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -99,6 +104,7 @@ const ColumnsDialog = (props) => {
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button
+          disabled={isSubmitting}
           color="primary"
           variant="outlined"
           size="small"
@@ -107,12 +113,13 @@ const ColumnsDialog = (props) => {
           Cancel
         </Button>
         <Button
+          disabled={isSubmitting}
           color="primary"
           variant="contained"
           size="small"
           onClick={onSave}
         >
-          Save
+          {isSubmitting ? <CircularProgress size={18} /> : "Save"}
         </Button>
       </CustomDialogFooter>
     </Dialog>

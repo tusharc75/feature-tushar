@@ -35,6 +35,7 @@ import {
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
+import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -83,7 +84,7 @@ const Opportunities = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   })
-
+  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
   const { opportunityResource, opportunityApi } = opportunity;
 
   //  Grid Variables - Start
@@ -346,6 +347,10 @@ const Opportunities = () => {
     setSelectedType(filterValues);
   };
 
+  const handleTransferEntityDialog = () => {
+    setShowTransferEntityDialog(true)
+  }
+
   const onSuccess = () => {
     setShowCreateOpportunityDialog(false);
     fetchOpportunities();
@@ -435,7 +440,7 @@ const Opportunities = () => {
         <CustomContainer>
           <div className="header-panel">
             <OpportunitiesHeader
-              selectedType={selectedType}
+              selectedRecords={selectedRecords}
               onTypeChange={handleOpportunityTypeChange}
               options={OpportunityTypes}
               onSearch={handleSearch}
@@ -446,6 +451,7 @@ const Opportunities = () => {
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading="Opportunities"
+              showTransferEntityDialog={handleTransferEntityDialog}
             >
               {
                 accountDetails.accountId && <Chip
@@ -461,7 +467,7 @@ const Opportunities = () => {
           </div>
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
             loading={loading} />
 
           {showDeleteWarningConfirmBox ? (
@@ -522,6 +528,22 @@ const Opportunities = () => {
           dataToUpdate={null}
           resource={null}
           isRedirectTodetailPage={true}
+        />
+      )}
+      {showTransferEntityDialog && (
+        <TransferEntityDialog
+          TransferEntityDialogOpen={showTransferEntityDialog}
+          onSuccess={() => {
+            onSuccess()
+            setShowTransferEntityDialog(false);
+          }}
+          handleCloseDialog={() => {
+            setShowTransferEntityDialog(false);
+          }}
+          selectedRecs={selectedRecords.map(r => r._id)}
+          entities={user.entity.filter(e => e._id !== selectedEntity)}
+          type="opportunities"
+          api="opportunity"
         />
       )}
     </>

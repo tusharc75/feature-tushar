@@ -36,7 +36,7 @@ function QuoteHeader(props) {
   };
 
   const {
-    selectedType,
+    selectedRecords,
     onTypeChange,
     options,
     onSearch,
@@ -48,6 +48,8 @@ function QuoteHeader(props) {
     icon,
     heading,
     children,
+    showTransferEntityDialog
+
   } = props;
   return (
     <Grid className={styles.filter_side_container} container>
@@ -128,6 +130,15 @@ function QuoteHeader(props) {
                 >
                   Delete
                 </MenuItem>
+                {
+                  QuotePermissions.isUpdate && <MenuItem
+                  disabled={selectedRecords.find((d) => d.canDelete === false)}
+                    onClick={() => {
+                      closeActions();
+                      showTransferEntityDialog();
+                    }}
+                  >Transfer Entity</MenuItem>
+                }
               </Menu>
             </>
           )}

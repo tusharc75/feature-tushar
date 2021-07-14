@@ -33,6 +33,7 @@ import { HiExternalLink } from 'react-icons/hi';
 import { customerAccount, customerContact, formatAmountWithCurrency } from "../../constants/helpers";
 import { MoreVert } from "@material-ui/icons";
 import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const Accordion = withStyles({
   root: {
@@ -111,7 +112,7 @@ export default function OpportunityInAccordian({
 }) {
   const history = useHistory();
   const {
-    state: { selectedEntity },
+    state: { selectedEntity, user }, dispatch
   }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -159,6 +160,15 @@ export default function OpportunityInAccordian({
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
+
+  const handleEntityChange = (id) => {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+  }
+
+  const hasAccessToEntity = (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  }
   return (
     <>
       <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
@@ -280,10 +290,16 @@ export default function OpportunityInAccordian({
                           <CardContent className="detailListing">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={7} sm={8}>
-                                {
+                                {hasAccessToEntity(obj.entity) ?
                                   obj.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
                                     <Typography className="detailName">{obj?.opportunityName}</Typography>
-                                  </Link> : <span className="d-flex gap-2 align-items-center">
+                                  </Link> : <Link className="link" onClick={() => {
+                                    handleEntityChange(obj.entity)
+                                    history.push(`${routes.opportunityDetail.path}/${obj._id}`)
+                                  }}>
+                                    <Typography className="detailName">{obj?.opportunityName}</Typography>
+                                  </Link>
+                                  : <span className="d-flex gap-2 align-items-center">
                                     <Typography className="detailName">{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
                                       <InfoOutlinedIcon fontSize="small" />
                                     </Tooltip>

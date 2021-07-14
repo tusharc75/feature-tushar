@@ -24,6 +24,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Tooltip from '@material-ui/core/Tooltip';
+import { autoCalculate } from "../../constants/formulaUtility";
 
 var levalOrderBy = [
     "product",
@@ -54,10 +55,10 @@ const BulkEditDialog = (props) => {
     useEffect(() => {
 
         const productData = productDataList[0]
-        const fieldAllowed = ["commissionPerUnit", "commissionPercentPerUnit", "profitPerUnit", "profitPercentPerUnit"]
 
         let _fields = [];
         productData.fields.forEach((_f) => {
+            _f.required = false
             if (stage === "product") {
                 if (_f.fieldName === "qty" || (_f.leval === "product-template" || _f.leval === "product-builder-custom")) {
                     _fields.push(_f)
@@ -67,9 +68,6 @@ const BulkEditDialog = (props) => {
                 if (_f.fieldName === "qty" || _f.leval === "product-template" || _f.leval === "price-template" || _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom") {
                     _fields.push(_f)
                 }
-                // if (fieldAllowed.includes(_f.fieldName)) {
-                //     _fields.push(_f)
-                // }
             }
         })
 
@@ -84,27 +82,35 @@ const BulkEditDialog = (props) => {
         setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
         let values = { ...productData }
         delete values.fields
-        setInitialData({
-            fields: _fields,
-            values: { ...getObjKeysWithValues(values, _fields) },
-        });
         // setInitialData({
         //     fields: _fields,
-        //     values: { ...getObjKeys(values, _fields) },
+        //     values: { ...getObjKeysWithValues(values, _fields) },
         // });
+        setInitialData({
+            fields: _fields,
+            values: { ...getObjKeys("", _fields) },
+        });
         EvaluteproductFields(_fields)
     }, []);
 
     const handleSubmit = (values) => {
-        let products = [...productDataList];
-        products.forEach((_product: any) => {
-            _product = Object.assign(_product, values);
-            _product.productCategory = _product.productCategory.optionValue
-            _product.priceTemplate = _product.priceTemplate && _product.priceTemplate.optionValue && _product.priceTemplate.optionValue
-            _product.fields = fields;
-            _product.fieldChanges = fieldChanges;
-            delete _product.srno
-        })
+        for (const x in values) {
+            if (values[x] === 0 || values[x] === "0" || values[x] === "") {
+                delete values[x]
+            }
+        }
+        const products = []
+        productDataList.forEach(element => {
+            products.push(autoCalculate({ ...element, ...values }, element.fields))
+        });
+        products.forEach(element => {
+            element.productCategory = element.productCategory.optionValue
+            element.productTemplate = element.productTemplate && element.productTemplate.optionValue && element.productTemplate.optionValue
+            element.priceTemplate = element.priceTemplate && element.priceTemplate.optionValue && element.priceTemplate.optionValue
+            element.fields = fields;
+            element.fieldChanges = fieldChanges;
+            delete element.srno
+        });
         handleSaveProduct(products)
     };
 
@@ -116,7 +122,6 @@ const BulkEditDialog = (props) => {
         });
         setProductFields(customData)
     }
-
 
     const handleOpenAddField = (name) => {
         setSectionName(name)
@@ -328,7 +333,7 @@ const BulkEditDialog = (props) => {
                                                                                 decimalPlaces={field.decimalPlaces}
                                                                                 isvlookupReverse={field.isvlookupReverse}
                                                                                 size="small"
-                                                                                disabled={['unit', 'productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
+                                                                                disabled={['productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
                                                                                 imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
                                                                                     setUploadingImageOrFileProgress(completePercentage);
                                                                                 } : null}

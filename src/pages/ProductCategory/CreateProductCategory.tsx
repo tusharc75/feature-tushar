@@ -20,18 +20,20 @@ import { Box } from '@material-ui/core';
 const CreateProductCategory = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productCategoryId, handleClose } = props;
+    const { productCategoryId, onClose, onSuccess } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
-            const fieldsData = data.map((d: any) => d.fieldData);
+            const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+            const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
             if (productCategoryId) {
                 axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
                     setInitialData({
-                        fields: fieldsData,
-                        values: getObjKeysWithValues(data, fieldsData),
+                        fields: fieldsDataForUpdate,
+                        values: getObjKeysWithValues(data, fieldsDataForUpdate),
                     });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -39,8 +41,8 @@ const CreateProductCategory = (props) => {
             }
             else {
                 setInitialData({
-                    fields: fieldsData,
-                    values: getObjKeys("", fieldsData),
+                    fields: fieldsDataForCreate,
+                    values: getObjKeys("", fieldsDataForCreate),
                 });
             }
         })
@@ -55,7 +57,7 @@ const CreateProductCategory = (props) => {
             values._id = productCategoryId
             axiosInstance().put(`/product-category`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                onSuccess()
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -64,7 +66,7 @@ const CreateProductCategory = (props) => {
         else {
             axiosInstance().post(`/product-category`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose(data)
+                onSuccess(data)
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -94,7 +96,7 @@ const CreateProductCategory = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <InputField
@@ -109,7 +111,7 @@ const CreateProductCategory = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"

@@ -33,7 +33,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
 
-const ignoreField = ["qty"]
+const ignoreField = ["qty", "priceTemplate"]
 
 var levalOrderBy = [
     "product",
@@ -60,13 +60,24 @@ const Product = () => {
 
     const {
         state: { permissions },
-      }: any = useData();
-      
+    }: any = useData();
+
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
 
+    const [productPermissions, setProductPermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
 
+    useEffect(() => {
+        if (permissions && permissions.product) {
+            setProductPermissions(permissions.product);
+        }
+    }, [permissions]);
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -149,14 +160,14 @@ const Product = () => {
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
-                            if (ele.fieldName === "description") {
+                            if (ele.fieldName === "productName") {
                                 col.cellRenderer = "productNameRenderer"
                             }
                             if (ele.fieldName === "productCategory") {
                                 col.cellRenderer = "productCategoryRenderer"
                             }
-                            if (ele.fieldName === "priceTemplate") {
-                                col.cellRenderer = "priceTemplateRenderer"
+                            if (ele.fieldName === "productTemplate") {
+                                col.cellRenderer = "productTemplateRenderer"
                             }
                             col.order = ele.order;
                             col.leval = ele.leval;
@@ -230,36 +241,41 @@ const Product = () => {
         });
     }
 
-
     const ProductNameRenderer = params => (
-        <Link className="link"
-            onClick={() => {
-                OpenProduct(params.data._id);
-                setIsClone(false)
-            }}>
-            <CustomRenderCell value={params?.value} />
-        </Link>
+        productPermissions.isUpdate ?
+            <Link className="link"
+                onClick={() => {
+                    OpenProduct(params.data._id);
+                    setIsClone(false)
+                }}>
+                <CustomRenderCell value={params?.value} />
+            </Link>
+            : params?.value
     )
 
     const ActionsRenderer = params => (
         <>
-            <Tooltip title="Clone">
-                <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
-                >
-                    <FileCopyIcon color="primary" />
-                </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete">
-                <IconButton size="small" aria-label="Delete" onClick={() => {
-                    setDeleteRecord(params.data);
-                    setShowDeleteConfirmBox(true)
-                }} >
-                    <DeleteIcon color="error" />
-                </IconButton>
-            </Tooltip >
+            {productPermissions.isCreate &&
+                <Tooltip title="Clone">
+                    <IconButton
+                        size="small"
+                        aria-label="Clone"
+                        onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
+                    >
+                        <FileCopyIcon color="primary" />
+                    </IconButton>
+                </Tooltip>
+            }
+            {productPermissions.isDelete &&
+                <Tooltip title="Delete">
+                    <IconButton size="small" aria-label="Delete" onClick={() => {
+                        setDeleteRecord(params.data);
+                        setShowDeleteConfirmBox(true)
+                    }} >
+                        <DeleteIcon color="error" />
+                    </IconButton>
+                </Tooltip >
+            }
         </>
     )
 
@@ -270,10 +286,10 @@ const Product = () => {
                 : <NoDataCell />
         }
     </>
-    const PriceTemplateRenderer = params => <>
+    const ProductTemplateRenderer = params => <>
         {
-            params.data.priceTemplate || params.data.priceTemplate === 0 ?
-                typeof params.data.priceTemplate === 'object' ? params.data.priceTemplate["optionLabel"] : params.data.priceTemplate
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
                 : <NoDataCell />
         }
     </>
@@ -308,7 +324,7 @@ const Product = () => {
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
-        priceTemplateRenderer: PriceTemplateRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const replaceFieldName = (field) => {
@@ -359,17 +375,21 @@ const Product = () => {
                                 size="small"
                                 value={search}
                             />
-                            <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                            <Button
-                                className={styles.action_submit_btn}
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >Actions <ExpandMore />
-                            </Button>
+                            {productPermissions.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            }
+                            {productPermissions.isDelete &&
+                                <Button
+                                    className={styles.action_submit_btn}
+                                    variant="outlined"
+                                    color="default"
+                                    size="small"
+                                    onClick={openActions}
+                                    disabled={selectedRecords.length ? false : true}
+                                    aria-controls="action-menu"
+                                >Actions <ExpandMore />
+                                </Button>
+                            }
                             <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
@@ -404,7 +424,14 @@ const Product = () => {
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} openFrom="productMaster" />}
+        {open &&
+            <CreateProduct
+                isClone={isClone}
+                productId={productId}
+                handleClose={handleClose}
+                openFrom="productMaster"
+            />
+        }
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}

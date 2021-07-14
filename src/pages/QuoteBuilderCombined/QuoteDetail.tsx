@@ -47,17 +47,12 @@ import { BiLayerPlus } from "react-icons/bi";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { termsAndCondition } from "../../constants/helpers";
 import ManageTermsAndCondition from "../TermsAndConditions/ManageTermsAndCondition";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
-import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
 import FormControl from "@material-ui/core/FormControl";
-import draftToHtml from "draftjs-to-html";
 import Steps from "./Steps";
-import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import {
@@ -96,6 +91,7 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import VersionStatus from "./VersionStatus";
 import ColumnsDialog from "./ColumnsDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -237,6 +233,16 @@ const useStyles = makeStyles((theme) => ({
     top: "4px",
     right: "20px",
   },
+  productPos: {
+    position: "absolute",
+    top: "1px",
+    left: "6px",
+    [theme.breakpoints.down("xs")]: {
+      position: "static",
+      display: "flex",
+      alignItems: "center"
+    },
+  }
 }));
 
 function QuoteDetail() {
@@ -286,24 +292,25 @@ function QuoteDetail() {
     page,
     limit,
     pageSizes,
-    search,
-    filters,
-    sorting,
     selectedRecords,
   } = state;
 
   const [gridApi, setTNCGridApi] = useState(null);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [columnsTNC, setColumnsTNC] = useState([]);
 
-  const [columnsTNC, setColumnsTNC] = useState([
-    {
-      field: "name",
-      rowDrag: true,
-      headerName: "Name",
-      cellRenderer: "nameRenderer",
-    },
-  ]);
+  useEffect(() => {
+    setColumnsTNC([
+      {
+        field: "name",
+        rowDrag: allowedToEdit,
+        headerName: "Name",
+        cellRenderer: "nameRenderer",
+        show: true,
+      },
+    ])
+  }, [allowedToEdit]);
 
-  const [selectedTnC, setSelectedTnC] = useState([]);
   const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -319,7 +326,6 @@ function QuoteDetail() {
   const [quoteFields, setQuoteFields] = useState([]);
 
   const [mainPoints, setMainPoints] = useState(null);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
@@ -328,7 +334,6 @@ function QuoteDetail() {
   const [activeStep, setActiveStep] = useState(0);
   const [versions, setVersions] = useState([]);
   const [productBuilderID, setProductBuilderID] = useState("");
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] =
@@ -354,7 +359,7 @@ function QuoteDetail() {
 
   const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [TandC, setTNC] = useState([]);
+
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: "",
     fullFormatAmount: "",
@@ -383,7 +388,6 @@ function QuoteDetail() {
   const [DOAneeded, setDOAneeded] = useState(false);
   const [isRearrangeColumns, setRearrangeColumns] = useState(false);
 
-  const [dataTNC, setDataTNC] = useState([]);
 
   const [editRecordTNC, setEditRecordTNC] = useState(null);
   const [DOAreq, setDOAreq] = useState(false);
@@ -393,7 +397,6 @@ function QuoteDetail() {
   const [columnView, setColumnView] = useState([]);
   const [PDF, setPdf] = useState("");
   const [PDFAttachment, setPdfAttachment] = useState("");
-  const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
 
@@ -401,14 +404,11 @@ function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
 
-  let logo = null;
-  let companyName = "";
-  let companyAddress = "";
   const [DOAData, setDOAData] = useState(null);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
-  const [lastUser, setLastUser] = useState(true);
+  // const [lastUser, setLastUser] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(true);
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
@@ -473,14 +473,16 @@ function QuoteDetail() {
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showAiDialog, setShowAiDialog] = useState(false);
-  const [generatingPdf, setGeneratingPdf] = useState({
-    show: false,
-    text: null,
-  });
-  const [prevVersionTNC, setPrevVersionTNC] = useState([]);
-  const [brandQuoteDigitalSignature, setBrandQuoteDigitalSignature] = useState(
-    user?.user?.brandQuoteDigitalSignature
-  );
+  const [updatingVersion, setUpdatingVersion] = useState(false);
+  const [generatingPdfFile, setGeneratingFile] = useState(false);
+  // const [prevVersionTNC, setPrevVersionTNC] = useState([]);
+
+  const [pdfFileName, setPdfFileName] = useState("");
+  // const [TandC, setTNC] = useState([]);
+  // const [selectedTnC, setSelectedTnC] = useState([]);
+  // const [dataTNC, setDataTNC] = useState([]);
+
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -539,8 +541,6 @@ function QuoteDetail() {
   }
 
   useEffect(() => {
-    fetchDoaLimit();
-
     axiosInstance()
       .get("/user/brandInfo")
       .then(({ data }) => {
@@ -553,7 +553,6 @@ function QuoteDetail() {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setGeneratingPdf({ show: false, text: null });
       });
   }, []);
 
@@ -583,19 +582,8 @@ function QuoteDetail() {
 
   useEffect(() => {
     getVersionStatus();
+    fetchDoaLimit();
   }, [quoteData]);
-
-  useEffect(() => {
-    fetchTermsAndConditions();
-  }, []);
-
-  // useEffect(() => {
-  //   if (DOAneeded && DOASteps.indexOf(ProcessStatus) > 1) {
-  //     createImagePDF(false, true);
-  //   } else if (OtherSteps.indexOf(ProcessStatus) > 1) {
-  //     createImagePDF(false, true);
-  //   }
-  // }, [ProcessStatus]);
 
   /**
    *
@@ -605,10 +593,11 @@ function QuoteDetail() {
    */
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
-      if (selectedRecords.length > 0) {
-        setTNC(selectedRecords);
-      }
+      // if (selectedRecords.length > 0) {
+      //   setTNC(selectedRecords);
+      // }
       setLoading(true);
+      setNextStep(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
@@ -619,12 +608,12 @@ function QuoteDetail() {
 
           // handleAllowToEditList(data);
           setQuoteData(data);
-          if (data?.versions) {
-            let lastVersionData = data?.versions[currentVersion - 1];
-            if (lastVersionData && lastVersionData.TNC) {
-              setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
-            }
-          }
+          // if (data?.versions) {
+          //   let lastVersionData = data?.versions[currentVersion - 1];
+          //   if (lastVersionData && lastVersionData.TNC) {
+          //     setPrevVersionTNC(lastVersionData.TNC.map((o) => o._id));
+          //   }
+          // }
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -665,12 +654,17 @@ function QuoteDetail() {
             );
             setversionStatus(data.versions[keys[keys.length - 1]].status);
             if (data.versions[keys[keys.length - 1]].TNC) {
-              setTNC(data.versions[keys[keys.length - 1]].TNC);
+              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
+              fetchTermsAndConditions(data.versions[keys[keys.length - 1]].TNC);
+              // setTNC(data.versions[keys[keys.length - 1]].TNC);
             }
             if (data.versions[keys[keys.length - 1]].acceptedColumns) {
               setColumnView(
                 data.versions[keys[keys.length - 1]].acceptedColumns
               );
+            }
+            if (data.versions[keys[keys.length - 1]].PDF) {
+              setPdf(data.versions[keys[keys.length - 1]].PDF);
             }
 
             if (
@@ -686,7 +680,9 @@ function QuoteDetail() {
             setProductBuilderID(data.versions[version].productBuilderId);
             setversionStatus(data.versions[version].status);
             if (data.versions[version].TNC) {
-              setTNC(data.versions[version].TNC);
+              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
+              fetchTermsAndConditions(data.versions[version].TNC);
+              // setTNC(data.versions[version].TNC);
             }
             if (data.versions[version].acceptedColumns) {
               setColumnView(data.versions[version].acceptedColumns);
@@ -818,16 +814,21 @@ function QuoteDetail() {
   };
 
   const NameRenderer = (params) => (
-    <p
-      className="cursor-pointer"
+    allowedToEdit ? <p
+      className="cursor-pointer link"
       title={params.value}
       onClick={() => {
-        setEditRecordTNC(params.data);
-        setShowCreateDialog(true);
+        axiosInstance().get(`${termsAndCondition.api}/${params.data._id}`)
+          .then(({ data: { data } }) => {
+            setEditRecordTNC(data);
+            setShowCreateDialog(true);
+          }).catch(error => {
+            toastConfig.setToastConfig(error);
+          });
       }}
     >
       {params.value}
-    </p>
+    </p> : params.value
   );
 
   const frameworkComponents = {
@@ -838,7 +839,7 @@ function QuoteDetail() {
    * @TNC HANDLER
    */
 
-  const fetchTermsAndConditions = () => {
+  const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loadingTNC: true });
 
     if (gridApi) {
@@ -849,8 +850,10 @@ function QuoteDetail() {
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
         let selectedRows = [];
-        let rows = data.map((tnc, i) => {
-          if (selectedTnC.indexOf(tnc._id) >= 0) {
+        const onlyTermsAndConditionsIds = selectedTermsAndConditions ? selectedTermsAndConditions.map(d => d._id) : selectedRecords.map(d => d._id);
+
+        let rows = data.map((tnc) => {
+          if (onlyTermsAndConditionsIds.indexOf(tnc._id) >= 0) {
             selectedRows.push(tnc);
           }
           return {
@@ -865,7 +868,16 @@ function QuoteDetail() {
           count: count,
         });
         dispatch({ type: "selection", selectedRecords: selectedRows });
-        setDataTNC(data);
+
+        if (updateVersionStatus) {
+          handleVersionUpdate(
+            "",
+            visibleColumns,
+            versionStatus,
+            selectedRows
+          );
+        }
+
         setTimeout(() => {
           dispatch({ type: "loading", loadingTNC: false });
         }, gridLoadingTimeout);
@@ -948,30 +960,6 @@ function QuoteDetail() {
     productBuilderdatatoQuoteBuilderdata(data);
   };
 
-  const createImagePDF = (view, send, base64 = false) => {
-    setGeneratingPdf({ show: true, text: "Generating..." });
-    GeneratePdf(view, send, base64);
-
-    // axiosInstance()
-    //   .get("/user/brandInfo")
-    //   .then(({ data }) => {
-    //     companyName = data.data.name;
-    //     companyAddress = data.data.address;
-    //     if (data.data.logo) {
-    //       fetchImage(data.data.logo, function (dataUri) {
-    //         logo = dataUri;
-    //         GeneratePdf(view, send, base64);
-    //       });
-    //     } else {
-    //       GeneratePdf(view, send, base64);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     toastConfig.setToastConfig(err);
-    //     setGeneratingPdf({ show: false, text: null });
-    //   });
-  };
-
   const fetchImage = (Url, cb) => {
     var image = new Image();
     image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
@@ -992,228 +980,6 @@ function QuoteDetail() {
     };
 
     image.src = Url;
-  };
-
-  const GeneratePdf = (view, send, base64 = false) => {
-    const PdfDoc = new jsPDF("p", "pt", "a4");
-    let date = new Date();
-
-    const pagewidth = PdfDoc.internal.pageSize.width;
-
-    if (base64Logo !== null) {
-      PdfDoc.addImage(base64Logo, "JPEG", pagewidth - 65, 10, 40, 40);
-    }
-    PdfDoc.setFontSize(26);
-    PdfDoc.text(companyDetails.name, 20, 30);
-    PdfDoc.setFontSize(12);
-    PdfDoc.text(companyDetails.address, 20, 50);
-    PdfDoc.setLineWidth(3);
-    PdfDoc.line(15, 70, 260, 70);
-    PdfDoc.line(330, 70, 580, 70);
-    PdfDoc.setFontSize(14);
-    PdfDoc.text("Quotation", 265, 75);
-    let PDFData = [];
-    let PdfCol = ["#"];
-    let serialNumber = 1;
-    dynamicTableData.forEach((dataEntry) => {
-      let PdfRow = [serialNumber];
-      visibleColumns.forEach((ColName, idx) => {
-        if (idx < 6) {
-          if (ColumnName.indexOf(ColName) !== -1) {
-            if (PdfCol.indexOf(ColName) === -1) {
-              PdfCol.push(ColName);
-            }
-            PdfRow.push(dataEntry[ColName]);
-          }
-        }
-      });
-      PDFData.push(PdfRow);
-      serialNumber = serialNumber + 1;
-    });
-
-    PdfDoc.setFontSize(10);
-    PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
-    PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
-    PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
-    PdfDoc.text(
-      `Quote Expiry Date: ${displayDate(quoteData.expiryDate)}`,
-      285,
-      145
-    );
-    PdfDoc.text(`Inco Terms: ${quoteData.incoTerms}`, 285, 160);
-    PdfDoc.setFontSize(8);
-    PdfDoc.text("Bill To:", 20, 100);
-    PdfDoc.setFontSize(12);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel, 20, 115);
-
-    var text = "Please find the quotation below:";
-    var lineHeight = PdfDoc.getLineHeight();
-    var splittedText = PdfDoc.splitTextToSize(text, 50);
-    PdfDoc.text(text, 20, 200);
-    var lines = splittedText.length;
-    var blockHeight = lines * lineHeight;
-    PDFData = [
-      ...PDFData,
-      [
-        {
-          content: `Quote Total: ${totalsale.fullFormatAmountWithCurrencyName}`,
-          colSpan: PDFData && PDFData.length > 0 ? PDFData[0].length : 1,
-          styles: { halign: "right", valign: "middle" },
-        },
-      ],
-    ];
-    autoTable(PdfDoc, {
-      margin: { top: 150 + blockHeight, left: 20, right: 20 },
-      head: [PdfCol],
-      body: PDFData,
-      styles: { halign: "center", cellWidth: "auto", overflow: "linebreak" },
-      theme: "grid",
-    });
-    let finalY = (PdfDoc as any).lastAutoTable.finalY;
-
-    if (selectedRecords.length || TandC.length) {
-      let selecteTNCData = selectedRecords.length > 0 ? selectedRecords : TandC;
-      PdfDoc.setDrawColor(0, 0, 0);
-      PdfDoc.setFontSize(14);
-      PdfDoc.setLineWidth(3);
-      PdfDoc.line(15, finalY + 20, 580, finalY + 20);
-
-      let finalmarkup = "";
-
-      selecteTNCData.forEach((selectTNC) => {
-        finalmarkup =
-          finalmarkup + `<h3><strong>${selectTNC.TACName}:</strong></h3>`;
-        let state = convertFromRaw(JSON.parse(selectTNC.description));
-        let TNC = EditorState.createWithContent(state);
-        let markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
-
-        finalmarkup = finalmarkup + markup + "<br>";
-      });
-
-      // finalmarkup = finalmarkup.replaceAll(" ", "&nbsp;");
-      finalmarkup = finalmarkup.replaceAll(
-        "<p>",
-        "<p style='overflow-wrap:break-word;word-wrap:break-word;'>"
-      );
-      // finalmarkup = finalmarkup.replaceAll("</p>", "</p>");
-
-      let signatureContent =
-        "<br><br><span--style='font-size:10px;'>Note:</span><br>";
-      signatureContent =
-        signatureContent +
-        `<span--style='font-size:10px;'>Thanks for your business</span><br><br>`;
-
-      signatureContent =
-        signatureContent +
-        `<span--style='font-size:10px'>Customer Signature</span><br><br><br><br>`;
-      signatureContent =
-        signatureContent +
-        `<span--style='color:lightgrey'>__________________________</span>`;
-
-      signatureContent = signatureContent.replaceAll(" ", "&nbsp;");
-      signatureContent = signatureContent.replaceAll("--", " ");
-
-      finalmarkup = finalmarkup + signatureContent;
-
-      PdfDoc.html(`<div style='width:520px;'>${finalmarkup}</div>`, {
-        callback: function (doc) {
-          if (view && !send) {
-            doc.setProperties({
-              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-            });
-            const pdfBlobFile = doc.output("blob");
-            generateBase64forFile(pdfBlobFile, "pdf");
-
-            window.open(URL.createObjectURL(pdfBlobFile));
-          } else if (!view && !send && !base64) {
-            doc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}`);
-          } else if (base64) {
-            doc.setProperties({
-              title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-            });
-            const pdfBlobFile = doc.output("blob");
-            generateBase64forFile(pdfBlobFile, "pdf");
-          }
-          if (send) {
-            let PDFtoAPIData = doc.output("blob");
-
-            const formdata = new FormData();
-            formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-            axiosInstance()
-              .post("/user/upload/", formdata, {
-                headers: {
-                  "content-type": "multipart/form-data",
-                },
-              })
-              .then(({ data }) => {
-                setPdf(data.fieldName);
-                handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-                setPdfAttachment(data.fileName);
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-              });
-          }
-        },
-        x: 20,
-        y: finalY + 50,
-        margin: [20, 10, 20, 10],
-      });
-    } else {
-      finalY = finalY + 40;
-      PdfDoc.setFontSize(10);
-      PdfDoc.text("Note:", 20, finalY);
-
-      finalY = finalY + 15;
-      PdfDoc.text("Thanks for your business", 20, finalY);
-
-      finalY = finalY + 50;
-      PdfDoc.text("Customer Signature", 20, finalY);
-
-      finalY = finalY + 75;
-      PdfDoc.line(15, finalY, 260, finalY);
-
-      if (view && !send) {
-        PdfDoc.setProperties({
-          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-        });
-        const pdfBlobFile = PdfDoc.output("blob");
-        generateBase64forFile(pdfBlobFile, "pdf");
-
-        window.open(URL.createObjectURL(pdfBlobFile));
-      } else if (!view && !send && !base64) {
-        PdfDoc.save(`Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
-      } else if (base64) {
-        PdfDoc.setProperties({
-          title: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
-        });
-        const pdfBlobFile = PdfDoc.output("blob");
-        generateBase64forFile(pdfBlobFile, "pdf");
-      }
-      if (send) {
-        let PDFtoAPIData = PdfDoc.output("blob");
-        generateBase64forFile(PDFtoAPIData, "pdf");
-        const formdata = new FormData();
-        formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-        axiosInstance()
-          .post("/user/upload/", formdata, {
-            headers: {
-              "content-type": "multipart/form-data",
-            },
-          })
-          .then(({ data }) => {
-            handleVersionUpdate(data.fileName, visibleColumns, "", TandC);
-            setPdfAttachment(data.fileName);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      }
-    }
-
-    setTimeout(() => {
-      setGeneratingPdf({ show: false, text: null });
-    }, 1500);
   };
 
   const generateBase64forFile = (blobData, type) => {
@@ -1239,29 +1005,33 @@ function QuoteDetail() {
   };
 
   const fetchDoaLimit = () => {
-    axiosInstance()
-      .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
-      .then(({ data: { data } }) => {
-        setDOAsetup(data.doasetup);
-        setDOALimit(data.limit ? data.limit : 0);
-        setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
-        setLastUser(data.lastUser);
-      })
-      .catch((err) => {
-        // toastConfig.setToastConfig(err);
-      });
+    if (quoteData) {
+      axiosInstance()
+        .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
+        .then(({ data: { data } }) => {
+          setDOAsetup(data.doasetup);
+          setDOALimit(data.limit ? data.limit : 0);
+          setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
+          // setLastUser(data.lastUser);
+        })
+        .catch((err) => {
+          // toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   const fetchDOAData = () => {
-    axiosInstance()
-      .get(`doa-request/doaFlow/${id}/${currentVersion}`)
-      .then(({ data: { data } }) => {
-        setDOAData(data.reverse());
-      })
-      .catch((err) => {
-        setDOAData(null);
-        // toastConfig.setToastConfig(err);
-      });
+    if (ProcessStatus === "DOA Process") {
+      axiosInstance()
+        .get(`doa-request/doaFlow/${id}/${currentVersion}`)
+        .then(({ data: { data } }) => {
+          setDOAData(data.reverse());
+        })
+        .catch((err) => {
+          setDOAData(null);
+          // toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   useEffect(() => {
@@ -1281,6 +1051,35 @@ function QuoteDetail() {
     )
       fetchSupplierContactData(false);
   }, [quoteData]);
+
+
+  //  Reason of this useEffect:
+  //  When we have doa setup already defined and refresh the screen, DOA Process is not visible in steps
+  //  When we click on next, then that step is getting visible
+  //  The variable which is being used to hide/show that step is written in refreshProduct function
+  useEffect(() => {
+    if (DOAsetup) {
+      axiosInstance()
+        .get(`/productbuilder/getproduct/` + productBuilderID)
+        .then(({ data: { data } }) => {
+          data = data.data?.map((u, index) => ({
+            ...u,
+            id: u._id,
+            srno: index + 1,
+            // productTemplateDisplayValue: u.productTemplate?.optionLabel,
+            productCategoryDisplayValue: u.productCategory?.optionLabel,
+            priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
+          }));
+          const { totalSellingPrice } = productCalculationForDoa(data);
+
+          if (DOAsetup && totalSellingPrice > DOAlimit) {
+            setDOAneeded(true);
+          } else {
+            setDOAneeded(false);
+          }
+        })
+    }
+  }, [DOAsetup])
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -1318,7 +1117,6 @@ function QuoteDetail() {
       newTable.push({
         "Product Name": "Total:",
         "Total Sales Price": totalsale.fullFormatAmount,
-        "Total Cost": totalcost.fullFormatAmount,
       });
 
       const ws = XLSX.utils.json_to_sheet(newTable);
@@ -1482,144 +1280,155 @@ function QuoteDetail() {
       });
   };
 
+  const productCalculationForDoa = (BuilderData) => {
+
+    const inventory: { fieldName: string; fieldValue: any }[][] = [];
+    const ignoredKeys = [
+      "fields",
+      "_id",
+      "productId",
+      "templateFields",
+      "id",
+      "string",
+      "srno",
+    ];
+
+    let totalCost = 0;
+    let totalSellingPrice = 0;
+    let totalMargin = 0;
+    let totalProfit = 0;
+    let CostCurrency = "";
+    let SPCurrency = "";
+    let MarginCurrency = "";
+    let ProfitCurrency = "";
+
+    BuilderData = BuilderData.map((data) => ({
+      ...data,
+      [`profitPercentPerUnit`]:
+        data["profitPercentPerUnit"] === null ||
+          data["profitPercentPerUnit"] === undefined
+          ? 0
+          : data["profitPercentPerUnit"],
+      [`commissionPercentPerUnit`]:
+        data["commissionPercentPerUnit"] === null ||
+          data["commissionPercentPerUnit"] === undefined
+          ? 0
+          : data["commissionPercentPerUnit"],
+      [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          null ||
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
+          undefined
+          ? 0
+          : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
+    }));
+
+    if (ProcessStatus === "Price Builder") {
+      let hasPrice = false;
+      BuilderData.forEach((data) => {
+        if (
+          data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+          data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+          "undefined"
+        ) {
+          hasPrice = true;
+        } else {
+          hasPrice = false;
+        }
+      });
+      const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+      let withZeroAmt = [];
+      if (hasPrice) {
+        withZeroAmt = BuilderData.filter(
+          (d) =>
+            d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+        );
+      }
+
+      if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+    BuilderData.forEach((quoteRows: { [x: string]: any }) => {
+      const quoteRowKeys = Object.keys(quoteRows);
+
+      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+
+      quoteRowKeys.forEach((key) => {
+        if (ignoredKeys.indexOf(key) === -1) {
+          let indexkey = key;
+          let currency = "";
+          if (key.includes("_")) {
+            let splitKey = key.split("_");
+            key = splitKey[0];
+            currency = splitKey[1].toUpperCase();
+          }
+          let fields = quoteRows["fields"];
+          let field = fields.filter(
+            (d: { fieldName: string }) => d.fieldName === key
+          );
+
+          if (typeof field[0] !== "undefined") {
+            if (typeof quoteRows[key] === "object") {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
+              });
+            } else {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue:
+                  quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+              });
+            }
+
+            if (currency === quoteData?.currency && key === "totalCost") {
+              totalCost = totalCost + quoteRows[indexkey];
+              CostCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalSalesPrice"
+            ) {
+              totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+              SPCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalProfit"
+            ) {
+              totalProfit = totalProfit + quoteRows[indexkey];
+              ProfitCurrency = currency;
+            } else if (
+              currency === quoteData?.currency &&
+              key === "totalMargin"
+            ) {
+              totalMargin = totalMargin + quoteRows[indexkey];
+              MarginCurrency = currency;
+            }
+          }
+        }
+      });
+
+      inventory.push(inventorydata);
+    });
+
+    return {
+      inventory: inventory,
+      totalMargin: totalMargin,
+      totalSellingPrice: totalSellingPrice,
+      totalCost: totalCost,
+      totalProfit: totalProfit
+    };
+  }
+
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     if (BuilderData.length) {
       setOptions([]);
       setRedCard(false);
       let optionstoSet = [];
 
-      const inventory: { fieldName: string; fieldValue: any }[][] = [];
-      const ignoredKeys = [
-        "fields",
-        "_id",
-        "productId",
-        "templateFields",
-        "id",
-        "string",
-        "srno",
-      ];
-      let totalCost = 0;
-      let totalSellingPrice = 0;
-      let totalMargin = 0;
-      let totalProfit = 0;
-      let CostCurrency = "";
-      let SPCurrency = "";
-      let MarginCurrency = "";
-      let ProfitCurrency = "";
-
-      BuilderData = BuilderData.map((data) => ({
-        ...data,
-        [`profitPercentPerUnit`]:
-          data["profitPercentPerUnit"] === null ||
-            data["profitPercentPerUnit"] === undefined
-            ? 0
-            : data["profitPercentPerUnit"],
-        [`commissionPercentPerUnit`]:
-          data["commissionPercentPerUnit"] === null ||
-            data["commissionPercentPerUnit"] === undefined
-            ? 0
-            : data["commissionPercentPerUnit"],
-        [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
-            null ||
-            data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] ===
-            undefined
-            ? 0
-            : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
-      }));
-
-      if (ProcessStatus === "Price Builder") {
-        let hasPrice = false;
-        BuilderData.forEach((data) => {
-          if (
-            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            "undefined"
-          ) {
-            hasPrice = true;
-          } else {
-            hasPrice = false;
-          }
-        });
-        const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-        let withZeroAmt = [];
-        if (hasPrice) {
-          withZeroAmt = BuilderData.filter(
-            (d) =>
-              d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-          );
-        }
-
-        if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-          setNextStep(true);
-        } else {
-          setNextStep(false);
-        }
-      }
-      BuilderData.forEach((quoteRows: { [x: string]: any }) => {
-        const quoteRowKeys = Object.keys(quoteRows);
-
-        let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-
-        quoteRowKeys.forEach((key) => {
-          if (ignoredKeys.indexOf(key) === -1) {
-            let indexkey = key;
-            let currency = "";
-            if (key.includes("_")) {
-              let splitKey = key.split("_");
-              key = splitKey[0];
-              currency = splitKey[1];
-            }
-            let fields = quoteRows["fields"];
-            let field = fields.filter(
-              (d: { fieldName: string }) => d.fieldName === key
-            );
-
-            if (typeof field[0] !== "undefined") {
-              if (typeof quoteRows[key] === "object") {
-                inventorydata.push({
-                  fieldName: field[0].fieldLabel,
-                  fieldValue: quoteRows[key][key],
-                });
-              } else {
-                inventorydata.push({
-                  fieldName: field[0].fieldLabel,
-                  fieldValue:
-                    quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-                });
-              }
-
-              if (
-                currency.toUpperCase() === quoteData?.currency &&
-                key === "totalCost"
-              ) {
-                totalCost = totalCost + quoteRows[indexkey];
-                CostCurrency = currency.toUpperCase();
-              } else if (
-                currency.toUpperCase() === quoteData?.currency &&
-                key === "totalSalesPrice"
-              ) {
-                totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                SPCurrency = currency.toUpperCase();
-              } else if (
-                currency.toUpperCase() === quoteData?.currency &&
-                key === "totalProfit"
-              ) {
-                totalProfit = totalProfit + quoteRows[indexkey];
-                ProfitCurrency = currency.toUpperCase();
-              } else if (
-                currency.toUpperCase() === quoteData?.currency &&
-                key === "totalMargin"
-              ) {
-                totalMargin = totalMargin + quoteRows[indexkey];
-                MarginCurrency = currency.toUpperCase();
-              }
-            }
-          }
-        });
-
-        inventory.push(inventorydata);
-      });
+      const { inventory, totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
 
       setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
       setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
@@ -1635,7 +1444,7 @@ function QuoteDetail() {
       setButtonMessage("Send to Customer");
       setDOAreq(false);
       setCustomerreq(true);
-      if (DOAsetup && totalSellingPrice > DOAlimit && !lastUser) {
+      if (DOAsetup && totalSellingPrice > DOAlimit) {
         setDOAneeded(true);
       } else {
         setDOAneeded(false);
@@ -1643,8 +1452,7 @@ function QuoteDetail() {
       if (
         DOAsetup &&
         totalSellingPrice > DOAlimit &&
-        versionStatus === "Building Quote" &&
-        !lastUser
+        versionStatus === "Building Quote"
       ) {
         setDOAreq(true);
         setCustomerreq(false);
@@ -1659,7 +1467,10 @@ function QuoteDetail() {
       } else if (
         versionStatus === "Sent to Customer" ||
         versionStatus === "Accepted by Customer" ||
-        versionStatus === "Rejected by Customer"
+        versionStatus === "Rejected by Customer" ||
+        versionStatus === "Not Booked by Customer" ||
+        versionStatus === "Invalid by Customer" ||
+        versionStatus === "Booked by Customer"
       ) {
         setDOAreq(false);
         setCustomerreq(false);
@@ -1697,7 +1508,7 @@ function QuoteDetail() {
       axiosInstance()
         .post(`/doa-request/create/${id}?version=${currentVersion}`)
         .then(({ data }) => {
-          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", TandC);
+          handleVersionUpdate(PDF, visibleColumns, "Sent for DOA", selectedRecords);
           fetchQuoteData(currentVersion);
         })
         .catch((err) => {
@@ -1706,17 +1517,33 @@ function QuoteDetail() {
     }
     if (Customerreq) {
       exportToCSV(true);
-      if (!pdfFileBase64) {
-        GeneratePdf(false, false, true);
-      }
-
       setSendEmail(true);
+      setGeneratingFile(true);
+
+      const currentVersionFileName = pdfFileName ? pdfFileName : versionStatusData.data.find(d => d.versionNumber === currentVersion)?.PDF;
+
+      axiosInstance()
+        .get(
+          `user/download?fileName=${currentVersionFileName}`,
+          {
+            responseType: "blob",
+          }
+        )
+        .then(({ data }) => {
+          setGeneratingFile(false);
+          const file = new Blob([data], { type: "application/pdf" });
+          generateBase64forFile(file, "pdf");
+        })
+        .catch((err) => {
+          setGeneratingFile(false);
+        });
+
     }
   };
 
   const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
-    handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
+    handleVersionUpdate(PDF, event.target.value, versionStatus, selectedRecords);
   };
 
   function getStyles(name, personName, theme) {
@@ -1733,7 +1560,7 @@ function QuoteDetail() {
     axiosInstance()
       .post(
         `/quote-builder/createVersion/${id}?version=${currentVersion}`,
-        dataTNC
+        selectedRecords
       )
       .then(({ data: { data } }) => {
         fetchQuoteData(0);
@@ -1745,24 +1572,142 @@ function QuoteDetail() {
       });
   };
 
-  const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
+  const handleVersionUpdate = (
+    PDFfile,
+    Columns,
+    versionStatus,
+    selectedTermsAndConditions,
+    view = false,
+    download = false
+  ) => {
     let body = {
-      PDF: PDFfile,
       acceptedColumns: Columns,
       status: versionStatus,
-      TNC: TC,
+      //  Old
+      //  TNC: selectedRecords.length > 0 ? selectedRecords : TandC,
+      TNC: selectedTermsAndConditions,
     };
+
+    setUpdatingVersion(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => { })
+      .then(({ data: { data } }) => {
+        setUpdatingVersion(false);
+
+        setPdfFileName(data.fileName)
+        if (view && data.fileName) {
+          setUpdatingVersion(true);
+          axiosInstance()
+            .get(`user/download?fileName=${data.fileName}`, {
+              responseType: "blob",
+            })
+            .then(({ data }) => {
+              setUpdatingVersion(false);
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+            })
+            .catch((err) => {
+              setUpdatingVersion(true);
+            });
+        } else if (download && data.fileName) {
+          setUpdatingVersion(true);
+          axiosInstance()
+            .get(`user/download?fileName=${data.fileName}`, {
+              responseType: "blob",
+            })
+            .then(({ data }) => {
+              setUpdatingVersion(false);
+              const url = window.URL.createObjectURL(
+                new Blob([data], { type: "application/pdf" })
+              );
+              const link = document.createElement("a");
+              link.href = url;
+              link.setAttribute(
+                "download",
+                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+              );
+              document.body.appendChild(link);
+              link.click();
+            })
+            .catch((err) => {
+              setUpdatingVersion(true);
+            });
+        }
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setUpdatingVersion(false);
       });
+  };
+
+  const handleViewPdf = (view = false, download = false) => {
+
+    // if (!pdfFileName) {
+    handleVersionUpdate(
+      "",
+      visibleColumns,
+      versionStatus,
+      selectedRecords,
+      view,
+      download
+    );
+    // }
+    // else {
+    //   if (view) {
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //       .get(
+    //         `user/download?fileName=${pdfFileName}`,
+    //         {
+    //           responseType: "blob",
+    //         }
+    //       )
+    //       .then(({ data }) => {
+    //         setUpdatingVersion(false);
+    //         const file = new Blob([data], { type: "application/pdf" });
+    //         const fileURL = URL.createObjectURL(file);
+    //         const pdfWindow = window.open();
+    //         pdfWindow.location.href = fileURL;
+    //       })
+    //       .catch((err) => {
+    //         setUpdatingVersion(true);
+    //       });
+    //   } else if (download) {
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //       .get(
+    //         `user/download?fileName=${pdfFileName}`,
+    //         {
+    //           responseType: "blob",
+    //         }
+    //       )
+    //       .then(({ data }) => {
+    //         setUpdatingVersion(false);
+    //         const url = window.URL.createObjectURL(
+    //           new Blob([data], { type: "application/pdf" })
+    //         );
+    //         const link = document.createElement("a");
+    //         link.href = url;
+    //         link.setAttribute(
+    //           "download",
+    //           `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+    //         );
+    //         document.body.appendChild(link);
+    //         link.click();
+    //       })
+    //       .catch((err) => {
+    //         setUpdatingVersion(true);
+    //       });
+    //   }
+    // }
+
   };
 
   const onSuccess = () => {
     setSendEmail(false);
-    handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
+    handleVersionUpdate("", visibleColumns, "Sent to Customer", selectedRecords);
     handleAttachments();
     fetchQuoteData(currentVersion);
   };
@@ -1853,7 +1798,7 @@ function QuoteDetail() {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
       contentType: pdfFileBase64.split(";")[0].split(":")[1],
-      name: `Quotation v${currentVersion}`,
+      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
     });
   }
   if (excelFileBase64) {
@@ -1862,7 +1807,7 @@ function QuoteDetail() {
         parseInt(excelFileBase64.indexOf(",") + 1)
       ),
       contentType: excelFileBase64.split(";")[0].split(":")[1],
-      name: `Quotation v${currentVersion}`,
+      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
     });
   }
 
@@ -1897,12 +1842,12 @@ function QuoteDetail() {
 
     if (quoteData) {
       versions.forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
           approved = true;
           versionApproved = v;
-          manualApproval = quoteData.versions[v]?.customerResponse;
+          manualApproval = quoteData.versions[v]?.customerResponse?.manual;
         }
-        if (quoteData.versions[v]?.status.includes("Rejected by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Rejected by Customer") || quoteData.versions[v]?.status.includes("Not Booked by Customer") || quoteData.versions[v]?.status.includes("Invalid by Customer")) {
           disapproved = true;
           versionDisapproved = v;
         }
@@ -2001,9 +1946,9 @@ function QuoteDetail() {
                     {allVersionStatusButtonText}{" "}
                   </Button> */}
                   {quotePermissions.isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -2043,7 +1988,7 @@ function QuoteDetail() {
                         color: tabValue === 0 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <InfoIcon className="mr-1" fontSize="inherit" /> All
                           Version Status
                         </div>
@@ -2056,7 +2001,7 @@ function QuoteDetail() {
                         color: tabValue === 1 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <FaWpforms className="mr-1" fontSize="inherit" />{" "}
                           Details
                         </div>
@@ -2069,7 +2014,7 @@ function QuoteDetail() {
                         color: tabValue === 2 ? "white" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center font-size-3">
+                        <div className="d-flex align-items-center tab-font">
                           <BiFoodMenu className="mr-1" fontSize="inherit" />{" "}
                           Quote Versions
                         </div>
@@ -2120,10 +2065,10 @@ function QuoteDetail() {
                               fields={
                                 !ifQuoteApproved().approved
                                   ? quoteFields.filter(
-                                      (_f) =>
-                                        _f.fieldData.sectionName !==
-                                        "Post-Quote Information"
-                                    )
+                                    (_f) =>
+                                      _f.fieldData.sectionName !==
+                                      "Post-Quote Information"
+                                  )
                                   : quoteFields
                               }
                             />
@@ -2213,7 +2158,7 @@ function QuoteDetail() {
                           xs={ProcessStatus === "New" ? 12 : 12}
                           sm={ProcessStatus === "New" ? 12 : 5}
                           md={ProcessStatus === "New" ? 12 : 5}
-                          className="d-flex justify-content-end"
+                          className="d-flex align-items-center justify-content-end"
                         >
                           {allowedToEdit && ifQuoteApproved().approved ? (
                             <Button
@@ -2244,17 +2189,18 @@ function QuoteDetail() {
                                   variant="outlined"
                                   size="small"
                                   disabled={
-                                    deletingDOA || loading || DOAneeded
+                                    !allowedToEdit ||
+                                    deletingDOA || loading || (DOAneeded
                                       ? DOASteps.indexOf(ProcessStatus) > 1
-                                      : OtherSteps.indexOf(ProcessStatus) > 1
+                                      : OtherSteps.indexOf(ProcessStatus) > 1)
                                   }
                                   onClick={deleteVersion}
                                 >
-                                  Delete Version
+                                  Delete
                                 </Button>
                               )}
                               <Button
-                                disabled={isCloning || loading}
+                                disabled={!allowedToEdit || isCloning || loading}
                                 variant="contained"
                                 type="button"
                                 size="small"
@@ -2277,7 +2223,7 @@ function QuoteDetail() {
                                 {isCloning ? (
                                   <>Cloning v{currentVersion}</>
                                 ) : (
-                                  `Clone Version ${currentVersion}`
+                                  `Clone ${currentVersion}`
                                 )}
                               </Button>{" "}
                             </>
@@ -2285,49 +2231,33 @@ function QuoteDetail() {
                         </Grid>
                       </Grid>
                       <div>
-                        {DOAneeded ? (
-                          <Steps
-                            steps={DOASteps}
-                            currentStep={DOASteps.indexOf(ProcessStatus)}
-                            id={id}
-                            version={currentVersion}
-                            Refresh={fetchQuoteData}
-                            nextStep={nextStep}
-                            versionStatus={versionStatus}
-                            loading={loading}
-                            approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAmaxLimit}
-                            totalCost={totalPrice}
-                            handleSendReminder={handleSendReminder}
-                            reminderLoading={reminderLoading}
-                            hideReminderButton={isHideReminder}
-                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            allowedToEdit={allowedToEdit}
-                            DOAData={DOAData}
-                            generatePDF={GeneratePdf}
-                            selectedTNC={selectedRecords}
-                          />
-                        ) : (
-                          <Steps
-                            steps={OtherSteps}
-                            currentStep={OtherSteps.indexOf(ProcessStatus)}
-                            id={id}
-                            version={currentVersion}
-                            Refresh={fetchQuoteData}
-                            nextStep={nextStep}
-                            versionStatus={versionStatus}
-                            loading={loading}
-                            approvedQuote={ifQuoteApproved()}
-                            DOAlimit={DOAmaxLimit}
-                            totalCost={totalPrice}
-                            handleSendReminder={handleSendReminder}
-                            reminderLoading={reminderLoading}
-                            hideReminderButton={isHideReminder}
-                            openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                            generatePDF={GeneratePdf}
-                            selectedTNC={selectedRecords}
-                          />
-                        )}
+                        <Steps
+                          steps={DOAneeded ? DOASteps : OtherSteps}
+                          currentStep={DOAneeded ? DOASteps.indexOf(ProcessStatus) : OtherSteps.indexOf(ProcessStatus)}
+                          id={id}
+                          version={currentVersion}
+                          Refresh={fetchQuoteData}
+                          nextStep={nextStep}
+                          versionStatus={versionStatus}
+                          loading={loading}
+                          approvedQuote={ifQuoteApproved()}
+                          DOAlimit={DOAmaxLimit}
+                          totalCost={totalPrice}
+                          handleSendReminder={handleSendReminder}
+                          reminderLoading={reminderLoading}
+                          hideReminderButton={isHideReminder}
+                          openInvoiceDialog={() => setOpenInvoiceDialog(true)}
+                          allowedToEdit={allowedToEdit}
+                          DOAData={DOAData}
+                          handleVersionUpdate={() => {
+                            handleVersionUpdate(
+                              "",
+                              visibleColumns,
+                              versionStatus,
+                              selectedRecords
+                            );
+                          }}
+                        />
                       </div>
                     </Paper>
                   </TabPanel>
@@ -2369,8 +2299,8 @@ function QuoteDetail() {
                             className="d-flex align-items-center gap-1"
                           >
                             {!ifQuoteApproved().approved &&
-                            ProcessStatus === "New" ? (
-                              <span className="productPos m-2">
+                              ProcessStatus === "New" && allowedToEdit ? (
+                              <span className={`${classes.productPos} m-2`}>
                                 <Button
                                   variant="outlined"
                                   size="small"
@@ -2410,6 +2340,7 @@ function QuoteDetail() {
                                   >
                                     <Autocomplete
                                       id="demo-mutiple-chip"
+                                      disabled={!allowedToEdit}
                                       fullWidth
                                       size="small"
                                       multiple
@@ -2420,7 +2351,7 @@ function QuoteDetail() {
                                           PDF,
                                           val,
                                           versionStatus,
-                                          TandC
+                                          selectedRecords
                                         );
                                       }}
                                       options={ColumnName}
@@ -2450,6 +2381,7 @@ function QuoteDetail() {
                                 </Grid>
                                 <Grid item xs={1} md={1} sm={1}>
                                   <IconButton
+                                    disabled={!allowedToEdit}
                                     title="Re-arrange columns"
                                     color="inherit"
                                     onClick={() => setRearrangeColumns(true)}
@@ -2461,14 +2393,14 @@ function QuoteDetail() {
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                               versionStatus === "Building Quote") ||
-                            (ProcessStatus === "Send To Customer" &&
-                              versionStatus !== "Sent to Customer") ? (
+                              (ProcessStatus === "Send To Customer" &&
+                                versionStatus !== "Sent to Customer") ? (
                               <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                 {!ifQuoteApproved().approved && (
                                   <Button
                                     onClick={() => handleCases()}
                                     disabled={
-                                      (!DOAreq && !Customerreq) || loading
+                                      !allowedToEdit || (!DOAreq && !Customerreq) || loading
                                     }
                                     startIcon={<BiMailSend />}
                                     variant="contained"
@@ -2482,24 +2414,25 @@ function QuoteDetail() {
                             ) : null}
                           </Grid>
                           {ProcessStatus !== "New" &&
-                          ProcessStatus !== "Price Builder" ? (
+                            ProcessStatus !== "Price Builder" ? (
                             <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
                               <Button
-                                onClick={() => createImagePDF(true, false)}
+                                onClick={() => {
+                                  handleViewPdf(true, false);
+                                }}
                                 variant="outlined"
-                                disabled={generatingPdf.text}
+                                disabled={updatingVersion}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<AiOutlineEye />}
                                 color="primary"
                               >
-                                {generatingPdf.text === null
-                                  ? "View"
-                                  : "Generating..."}
+                                View
                               </Button>
                               <Button
+                                disabled={updatingVersion}
                                 onClick={() => {
-                                  createImagePDF(false, false);
+                                  handleViewPdf(false, true);
                                   exportToCSV();
                                 }}
                                 variant="outlined"
@@ -2524,7 +2457,7 @@ function QuoteDetail() {
                           <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderID ? (
                               ProcessStatus === "Quote Builder" &&
-                              visibleColumns.length > 0 ? (
+                                visibleColumns.length > 0 ? (
                                 <ProductGrid
                                   productBuilderId={productBuilderID}
                                   refreshProducts={refreshProducts}
@@ -2535,6 +2468,9 @@ function QuoteDetail() {
                                 />
                               ) : (
                                 <ProductBuilder
+                                  fromQuote={true}
+                                  permissions={permissions?.quoteBuilder}
+                                  hasPermission={allowedToEdit}
                                   currency={quoteData?.currency.toLowerCase()}
                                   productBuilderId={productBuilderID}
                                   isAddNewProduct={isAddNewProduct}
@@ -2551,8 +2487,8 @@ function QuoteDetail() {
                                     ProcessStatus === "Price Builder"
                                   }
                                   Editable={
-                                    ProcessStatus === "Price Builder" ||
-                                    ProcessStatus === "New"
+                                    allowedToEdit && (ProcessStatus === "Price Builder" ||
+                                      ProcessStatus === "New")
                                       ? true
                                       : false
                                   }
@@ -2574,6 +2510,7 @@ function QuoteDetail() {
                                     Additional Data
                                   </h4>
                                   <Button
+                                    disabled={!allowedToEdit}
                                     onClick={() => setShowCreateDialog(true)}
                                     variant="contained"
                                     size="small"
@@ -2595,19 +2532,33 @@ function QuoteDetail() {
                                   pageSizes={pageSizes}
                                   page={page}
                                   actionWidth={150}
-                                  allowSelection={true}
+                                  allowSelection={allowedToEdit}
                                   allowAction={false}
                                   isClientSideGrid={true}
                                   allowPagination={false}
-                                  selectedRecords={[
-                                    ...selectedTnC,
-                                    ...prevVersionTNC,
-                                  ]}
+                                  selectedRecords={selectedRecords}
                                   loading={loadingTNC}
-                                  onSelection={(selectedRecords) => {
-                                    setSelectedTnC([
-                                      ...selectedRecords.map((o) => o._id),
-                                    ]);
+                                  onSelection={(newSelectedRecords) => {
+                                    dispatch({ type: "selection", selectedRecords: newSelectedRecords });
+                                    handleVersionUpdate(
+                                      "",
+                                      visibleColumns,
+                                      versionStatus,
+                                      newSelectedRecords
+                                    );
+                                  }}
+                                  onRowDragEnd={(newSequence) => {
+                                    dispatch({
+                                      type: "selection",
+                                      newSequence: newSequence,
+                                    });
+
+                                    handleVersionUpdate(
+                                      "",
+                                      visibleColumns,
+                                      versionStatus,
+                                      newSequence
+                                    );
                                   }}
                                 />
                               </Box>
@@ -2658,7 +2609,7 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -2703,8 +2654,12 @@ function QuoteDetail() {
             termsAndCondition={termsAndCondition}
             open={showCreateDialog}
             handleClose={handleCloseCreateDialog}
-            fetchData={fetchTermsAndConditions}
+            fetchData={() => {
+              fetchTermsAndConditions(null, true);
+            }}
             editRecord={editRecordTNC}
+            displayTitle={"Additional Data"}
+
           />
         )}
 
@@ -2732,6 +2687,7 @@ function QuoteDetail() {
             fullWidth
           >
             <CreateEmail
+              generatingFile={generatingPdfFile}
               handleClose={() => setSendEmail(false)}
               fetchData={onSuccess}
               id={id}
@@ -2744,9 +2700,8 @@ function QuoteDetail() {
               cc={userEmails?.cc ?? []}
               emailId={null}
               qouteBuilderAttachments={attachments}
-              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${
-                quoteData?.quoteName ?? ""
-              }`}
+              subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                }`}
             />
           </Dialog>
         )}
