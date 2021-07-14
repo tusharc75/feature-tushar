@@ -1,5 +1,13 @@
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
+    .stepper-responsive {
+        .MuiStepLabel-iconContainer {
+            display: none;
+        }
+        .MuiStepLabel-label{
+            font-size: 11px;
+        }
+    }
     .tab-font {
         font-size: 12px;
     }
@@ -80,6 +88,9 @@
     .bgbox,
     .profileBox {
         background: transparent;
+    }
+    .product-builder-edit-grid {
+        height: 400px !important;
     }
 }
 

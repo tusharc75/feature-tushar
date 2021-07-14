@@ -406,12 +406,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
                                 setFieldValue("startTime", date);
-                                setFieldValue(
-                                  "endTime",
-                                  new Date(
-                                    new Date(date._d).getTime() + 30 * 60000
-                                  )
-                                );
+                                if (new Date(date._d).getHours() < 23) {
+                                  setFieldValue("endTime", new Date(
+                                      new Date(date._d).getTime() + 30 * 60000
+                                      )
+                                  );                                  
+                                }
                               }}
                               error={
                                 Boolean(touched["startTime"]) &&
@@ -482,9 +482,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               placeholder="08:00 AM"
                               mask="__:__ _M"
                               value={values.endTime}
-                              onChange={(date) =>
-                                setFieldValue("endTime", date)
-                              }
+                              onChange={(date:any) => {
+                                const nDate = new Date(values.startTime).toISOString().split("T")[0];
+                                const nTime = new Date(date._d).toISOString().split("T")[1];
+
+                                setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                              }}
                               error={
                                 Boolean(touched["endTime"]) &&
                                 Boolean(errors["endTime"])
