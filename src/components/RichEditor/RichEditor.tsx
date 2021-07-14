@@ -146,7 +146,7 @@ const BLOCK_TYPES = [
   { label: 'Small', style: 'header-four', message: "Heading Small" },
   // { label: 'H5', style: 'header-five' },
   // { label: 'H6', style: 'header-six' },
-  { label: 'Code Block', style: 'code-block', message: "Code-block" },
+  // { label: 'Code Block', style: 'code-block', message: "Code-block" },
   { label: 'Blockquote', icon: <MdFormatQuote className="richTextEditorIcons" />, style: 'blockquote' },
   { label: 'UL', icon: <BsListUl className="richTextEditorIcons" />, style: 'unordered-list-item' },
   { label: 'OL', icon: <BsListOl className="richTextEditorIcons" />, style: 'ordered-list-item' },
