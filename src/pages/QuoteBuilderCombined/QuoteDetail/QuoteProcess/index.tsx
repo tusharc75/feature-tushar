@@ -1,6 +1,6 @@
 import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbox, TextField, IconButton, Tooltip } from "@material-ui/core";
 import { Autocomplete } from "formik-material-ui-lab";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
 import { AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
 import { BiLayerPlus, BiMailSend } from "react-icons/bi";
@@ -102,7 +102,7 @@ const OtherSteps = [
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, ifQuoteApproved, currentVersion, handleChangeVersion, productBuilderId, versionStatus, fetchQuoteData, permissions, handleOpenUpdateDialog }) {
+export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, ifQuoteApproved, currentVersion, handleChangeVersion, productBuilderId, versionStatus, fetchQuoteData, quotePermissions, handleOpenUpdateDialog }) {
 
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
@@ -161,6 +161,30 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
     const [sendEmail, setSendEmail] = useState(false);
     const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
+    const [loadingVersions, setLoadingVersions] = useState(true);
+
+    useEffect(() => {
+        if (currentVersion !== 0) fetchDOAData();
+      }, [currentVersion, DOAreq]);
+
+      useEffect(() => {
+        fetchDoaLimit();
+      }, [quoteData]);  
+
+      const fetchDOAData = () => {
+        if (ProcessStatus === "DOA Process") {
+          axiosInstance()
+            .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
+            .then(({ data: { data } }) => {
+              setDOAData(data.reverse());
+            })
+            .catch((err) => {
+              setDOAData(null);
+              // toastConfig.setToastConfig(err);
+            });
+        }
+      };
+    
 
     const defaultTotalValue = useMemo(() => {
         let result = "0";
@@ -169,6 +193,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
         }
         return result;
     }, [quoteData]);
+
 
     const productCalculationForDoa = (BuilderData) => {
 
@@ -889,7 +914,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                             md={12}
                             className="d-flex align-items-center gap-1"
                         >
-                            {!ifQuoteApproved().approved &&
+                            {!ifQuoteApproved.approved &&
                                 ProcessStatus === "New" && allowedToEdit ? (
                                 <span className={`${classes.productPos} m-2`}>
                                     <Button
@@ -986,7 +1011,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                 (ProcessStatus === "Send To Customer" &&
                                     versionStatus !== "Sent to Customer") ? (
                                 <div className="w-100 d-flex align-items-center justify-content-end doaAction">
-                                    {!ifQuoteApproved().approved && (
+                                    {!ifQuoteApproved.approved && (
                                         <Button
                                             onClick={() => handleCases()}
                                             disabled={
@@ -1059,7 +1084,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                 ) : (
                                     <ProductBuilder
                                         fromQuote={true}
-                                        permissions={permissions}
+                                        permissions={quotePermissions}
                                         hasPermission={allowedToEdit}
                                         currency={quoteData?.currency.toLowerCase()}
                                         productBuilderId={productBuilderId}

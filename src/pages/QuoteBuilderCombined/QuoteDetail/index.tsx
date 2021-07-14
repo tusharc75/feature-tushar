@@ -20,7 +20,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
-
+const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -338,7 +338,23 @@ export default function QuoteDetail() {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={2}>
-
+                  <Suspense fallback={
+                      <Loader minHeight="500px" text="Loading..." />
+                    }>
+                      {(quoteData && <QuoteProcess
+                        quoteData={quoteData}
+                        quotePermissions={permissions[qbResource]}
+                        ProcessStatus={selectedEntity}
+                        ifQuoteApproved={ifQuoteApproved}
+                        allowedToEdit={allowedToEdit}
+                        handleOpenUpdateDialog={handleOpenUpdateDialog}
+                        handleChangeVersion={handleChangeVersion}
+                        currentVersion={currentVersion}
+                        productBuilderId={productBuilderId}
+                        versionStatus={versionStatus}
+                        fetchQuoteData={fetchQuoteData}
+                      />)}
+                    </Suspense>
                   </TabPanel>
                 </>
               )}
