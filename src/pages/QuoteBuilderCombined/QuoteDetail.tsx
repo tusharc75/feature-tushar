@@ -657,6 +657,8 @@ function QuoteDetail() {
               dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
               fetchTermsAndConditions(data.versions[keys[keys.length - 1]].TNC);
               // setTNC(data.versions[keys[keys.length - 1]].TNC);
+            } else {
+              fetchTermsAndConditions();
             }
             if (data.versions[keys[keys.length - 1]].acceptedColumns) {
               setColumnView(
@@ -683,6 +685,8 @@ function QuoteDetail() {
               dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
               fetchTermsAndConditions(data.versions[version].TNC);
               // setTNC(data.versions[version].TNC);
+            } else {
+              fetchTermsAndConditions();
             }
             if (data.versions[version].acceptedColumns) {
               setColumnView(data.versions[version].acceptedColumns);
@@ -1842,7 +1846,7 @@ function QuoteDetail() {
 
     if (quoteData) {
       versions.forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status === "Booked by Customer") {
           approved = true;
           versionApproved = v;
           manualApproval = quoteData.versions[v]?.customerResponse?.manual;
