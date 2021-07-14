@@ -61,7 +61,10 @@ const LookupResource = [
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
   const [initialValues, setInitialValues] = useState(fieldData);
   const inputRef = useRef(null);
-  const [cursorPosition, setCursorPosition] = useState<any>({});
+  const [cursorPosition, setCursorPosition] = useState<any>({
+    selectionStart: 0,
+    selectionEnd: 0,
+  });
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -78,6 +81,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   useEffect(() => {
     if (initialValues) {
       const values = initialValues;
+
+      if (!values.isDefaultValue) {
+        values.isDefaultValue = false;
+        values.defaultValue = '';
+      }
 
       if (!values.hiddenField && module !== 'price-template' && module !== 'product-template') {
         values.hiddenField = false;
@@ -557,9 +565,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 const value = values?.defaultValue;
                                 if (typeof value === 'string') {
                                   const defVal = [
-                                    values?.defaultValue.slice(0, cursorPosition.selectionStart),
+                                    value.slice(0, cursorPosition.selectionStart),
                                     `{{${item}}}`,
-                                    values?.defaultValue.slice(cursorPosition.selectionStart)
+                                    value.slice(cursorPosition.selectionStart)
                                   ].join('');
 
                                   setFieldValue('defaultValue', defVal);
