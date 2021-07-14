@@ -334,7 +334,7 @@ const CreateProduct = (props) => {
                                           ? `${replaceUnit(
                                             field.fieldLabel,
                                             values?.unit
-                                          )} (Auto Calculated Field)`
+                                          )} ${field.isUneditable && "(Auto Calculated Field)"}`
                                           : replaceUnit(
                                             field.fieldLabel,
                                             values?.unit
