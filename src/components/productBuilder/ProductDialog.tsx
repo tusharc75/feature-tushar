@@ -330,11 +330,11 @@ const CreateProduct = (props) => {
                                       errors={errors}
                                       touched={touched}
                                       label={
-                                        field.isFormula
+                                        field.isUneditable
                                           ? `${replaceUnit(
                                             field.fieldLabel,
                                             values?.unit
-                                          )} ${field.isUneditable && "(Auto Calculated Field)"}`
+                                          )} (Auto Calculated Field)`
                                           : replaceUnit(
                                             field.fieldLabel,
                                             values?.unit
@@ -366,11 +366,11 @@ const CreateProduct = (props) => {
                                             errors={errors}
                                             touched={touched}
                                             label={
-                                              field.isFormula
+                                              field.isUneditable
                                                 ? `${replaceUnit(
                                                   field.fieldLabel,
                                                   values?.unit
-                                                )} ${field.isUneditable && "(Auto Calculated Field)"}`
+                                                )} (Auto Calculated Field)`
                                                 : replaceUnit(
                                                   field.fieldLabel,
                                                   values?.unit
