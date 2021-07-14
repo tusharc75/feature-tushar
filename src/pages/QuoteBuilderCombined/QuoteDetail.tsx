@@ -2022,10 +2022,10 @@ function QuoteDetail() {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-                    <VersionStatus
+                    {/* <VersionStatus
                       loadingVersions={loadingVersions}
                       versionStatusData={versionStatusData}
-                    />
+                    /> */}
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
