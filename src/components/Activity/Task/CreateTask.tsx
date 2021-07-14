@@ -304,6 +304,18 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                         </Grid>
                         <Grid item xs={12} md={5} sm={6}>
                           {id && (
+                             <Fragment>
+                                <Box mt={1}>
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  disableElevation
+                                  onClick={() => setOpenAddSub(true)}
+                                  startIcon={<TableChartIcon />}
+                                >
+                                  Add a child Task
+                                </Button>
+                              </Box>
                               <Box mt={2}>
                                 <SubTask
                                   openAddSub={openAddSub}
@@ -313,6 +325,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                   setId={setId}
                                 />
                               </Box>
+                              </Fragment>
                           )}
                         </Grid>
                       </Grid>
