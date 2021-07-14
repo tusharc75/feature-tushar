@@ -44,6 +44,7 @@ import ProcessFlow from '../../components/ProcessFlow';
 import FormTypes from '../../components/Helpers/FormTypes';
 
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import { SVG } from '../../assets';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -61,7 +62,6 @@ function OpportunityDetailsPage() {
   const [mainPoints, setMainPoints] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [currentTabIndex] = useState(0);
 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
@@ -72,7 +72,7 @@ function OpportunityDetailsPage() {
   const [quotes, setQuotes] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
-  const [filteredArr, setFilteredArr] = useState(opportunityFields);
+  const [filteredArr, setFilteredArr] = useState([]);
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -150,21 +150,21 @@ function OpportunityDetailsPage() {
       fetchSupplierContactData(false);
   }, [opportunityData]);
 
-  useEffect(() => {
-    if (steps.length > 0) {
-      const processSteps = opportunityFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
-      if (processSteps && processSteps.isRead && opportunityData) {
-        setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
-        const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === opportunityData[processFieldName]);
-        setActiveStep(currentStepToShow);
-        if (currentStepToShow === steps.length - 1) {
-          setShowAtLast(true);
-        } else {
-          setShowAtLast(false);
-        }
-      }
-    }
-  }, [steps]);
+  // useEffect(() => {
+  //   if (steps.length > 0) {
+  //     const processSteps = opportunityFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+  //     if (processSteps && processSteps.isRead && opportunityData) {
+  //       setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
+  //       const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === opportunityData[processFieldName]);
+  //       setActiveStep(currentStepToShow);
+  //       if (currentStepToShow === steps.length - 1) {
+  //         setShowAtLast(true);
+  //       } else {
+  //         setShowAtLast(false);
+  //       }
+  //     }
+  //   }
+  // }, [steps]);
 
   const fetchOpportunityData = () => {
     if (selectedEntity) {
@@ -172,6 +172,12 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+
+          let modifiedData = {};
+          Object.assign(modifiedData, data);
+          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).shortFormatAmount;
+          setCopyOfOpportunityData(modifiedData);
+
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
@@ -204,11 +210,6 @@ function OpportunityDetailsPage() {
             setNotToBeRemovedContacts(ids);
           }
 
-          let modifiedData = {};
-          Object.assign(modifiedData, data);
-          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).shortFormatAmount;
-          setCopyOfOpportunityData(modifiedData);
-
           let tempExpanded = {
             supplierContacts: true,
             customerContacts: true
@@ -221,7 +222,7 @@ function OpportunityDetailsPage() {
           }
           setExpanded(tempExpanded);
 
-          getOpportunityFields();
+          getOpportunityFields(data);
           setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
         })
         .catch((error) => {
@@ -353,22 +354,14 @@ function OpportunityDetailsPage() {
     setMainPoints(mainPoint);
   };
 
-  const getOpportunityFields = () => {
+  const getOpportunityFields = (passedOpportunityData) => {
     if (selectedEntity) {
       axiosInstance()
         .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          setOpportunityFields(data);
+          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName')
+
           const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
-          data.map((d) => {
-            if (d.fieldData.sectionName == processSteps.fieldData.additionalInfoSection && sectionFields.length == 0) {
-              setSectionFields((prevItems) => {
-                return [...prevItems, d];
-              });
-            }
-          });
-          setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
-          setFilteredArr(data.filter((item) => item.fieldData.sectionName != processSteps.fieldData.additionalInfoSection));
 
           if (data && data.length) {
             let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccountName')?.fieldData;
@@ -381,18 +374,51 @@ function OpportunityDetailsPage() {
               );
             }
           }
-          setLoading(false);
 
           if (processSteps && processSteps.isRead) {
-            setSteps(
-              processSteps.fieldData.option.map((m) => {
-                return {
-                  text: m.optionLabel,
-                  canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase())
-                };
-              })
-            );
+            data.map((d) => {
+              if (d.fieldData.sectionName == processSteps.fieldData.additionalInfoSection && sectionFields.length == 0) {
+                setSectionFields((prevItems) => {
+                  return [...prevItems, d];
+                });
+              }
+            });
+
+            setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
+
+            const allProcessSteps = processSteps.fieldData.option.map((m) => {
+              return {
+                text: m.optionLabel,
+                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase())
+              };
+            })
+
+            setSteps(allProcessSteps);
+
+            if (allProcessSteps.length > 0) {
+              const currentProcessSteps = filteredFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+              if (currentProcessSteps && currentProcessSteps.isRead && passedOpportunityData) {
+                setAdditionalFieldName(currentProcessSteps.fieldData.additionalInfoSection);
+                const currentStepToShow = currentProcessSteps.fieldData.option.findIndex((d) => d.optionLabel === passedOpportunityData[processFieldName]);
+                setActiveStep(currentStepToShow);
+                if (currentStepToShow === allProcessSteps.length - 1) {
+                  setShowAtLast(true);
+                } else {
+                  setShowAtLast(false);
+                }
+
+                if (currentStepToShow === allProcessSteps.length - 1) {
+                  setOpportunityFields(filteredFields);
+                } else {
+                  setOpportunityFields(filteredFields.filter((item) => item.fieldData.sectionName !== processSteps.fieldData.additionalInfoSection));
+                }
+              }
+            }
+            setLoading(false);
             setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
+          } else {
+            setOpportunityFields(filteredFields);
+            setLoading(false);
           }
         })
 
@@ -431,25 +457,6 @@ function OpportunityDetailsPage() {
       pathname: routes.opportunity.path
     });
   };
-
-  // const quickLinks = [
-  //   {
-  //     label: "Call a log",
-  //     count: 0,
-  //   },
-  //   {
-  //     label: "New Task",
-  //     count: 0,
-  //   },
-  //   {
-  //     label: "Email",
-  //     count: 0,
-  //   },
-  //   {
-  //     label: "New Event",
-  //     count: 0,
-  //   },
-  // ];
 
   const handleUpdateOpportunity = (supplierAccounts) => {
     let newFields = [];
@@ -610,9 +617,9 @@ function OpportunityDetailsPage() {
                     </Button>
                   ) : null}
                   {opportunityPermissions.isDelete &&
-                  opportunityData?.owner.optionValue &&
-                  user?.user?._id &&
-                  opportunityData.owner.optionValue === user.user._id ? (
+                    opportunityData?.owner.optionValue &&
+                    user?.user?._id &&
+                    opportunityData.owner.optionValue === user.user._id ? (
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   ) : null}
                 </DetailsPageHeader>
@@ -624,7 +631,7 @@ function OpportunityDetailsPage() {
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
               />
-              {loading ? (
+              {/* {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
@@ -636,105 +643,107 @@ function OpportunityDetailsPage() {
                     ))}
                   </Grid>
                 </Box>
-              ) : (
-                <>
-                  <TabPanel value={currentTabIndex} index={0}>
-                    <Box padding="16px">
-                      {showAtLast ? (
-                        <DetailsPage
-                          data={copyOfOpportunityData}
-                          fields={opportunityFields.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName')}
-                        />
-                      ) : (
-                        <DetailsPage
-                          data={copyOfOpportunityData}
-                          fields={filteredArr.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName')}
-                        />
-                      )}
-                    </Box>
-                    <div className="p-3">
-                      {opportunityData && (
-                        <OpportunityContacts
-                          contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
-                          title="Supplier Contacts"
-                          contactApi={supplierContact.contactApi}
-                          isExpanded={expanded.supplierContacts}
-                          onAddContact={() => {
-                            fetchSupplierContactData(true);
-                          }}
-                          onSetExpanded={() => {
-                            setExpanded({
-                              ...expanded,
-                              supplierContacts: !expanded.supplierContacts
-                            });
-                          }}
-                          recordsPerLine={recordsPerLine}
-                          accounts={cloneDeep(opportunityData?.supplierAccountName)}
-                          isAllowedToUpdate={allowedToEdit}
-                        />
-                      )}
-                      {opportunityData && (
-                        <OpportunityContacts
-                          contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
-                          title="Customer Contacts"
-                          isExpanded={expanded['customerContacts']}
-                          contactApi={customerContact.contactApi}
-                          onAddContact={() => {
-                            fetchCustomerContactData(true);
-                          }}
-                          onSetExpanded={() => {
-                            setExpanded({
-                              ...expanded,
-                              customerContacts: !expanded.customerContacts
-                            });
-                          }}
-                          recordsPerLine={recordsPerLine}
-                          saveContactToOpportunity={handleAssignContacts}
-                          accountId={opportunityData?.customerAccountName?.optionValue}
-                          isAllowedToUpdate={allowedToEdit}
-                        />
-                      )}
-                      {permissions?.projectSales?.isRead && (
-                        <ProjectInAccordion
-                          recordsPerLine={3}
-                          projectSales={projectSales}
-                          type={typeCreateProjectSalesDialog}
-                          fetchData={fetchRelatedData}
-                          permissions={permissions}
-                          isAddProjectSale={true}
-                          isAllowedToEdit={allowedToEdit}
-                        />
-                      )}
-                      {permissions?.quoteBuilder?.isRead && (
-                        <QuotesInAccordion
-                          recordsPerLine={3}
-                          quotes={quotes}
-                          fetchData={fetchRelatedData}
-                          quoteBuilderPermission={permissions.quoteBuilder}
-                          opportunityId={id}
-                          accountId={opportunityData?.customerAccountName?.optionValue}
-                          opportunityName={opportunityData?.opportunityName}
-                          isRenderedFromOpportunity={true}
-                          isAllowedToUpdate={allowedToEdit}
-                        />
-                      )}
-                    </div>
-                  </TabPanel>
-                  <TabPanel value={currentTabIndex} index={1}>
-                    <Activity />
-                  </TabPanel>
-                </>
-              )}
+              ) : ( */}
+
+              {loading ? (
+                <Grid container spacing={2}>
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                    <Grid key={index} item sm={6} md={6}>
+                      <Skeleton variant="text" width="100px" height="16px" />
+                      <Box marginY={1} />
+                      <Skeleton width="100%" height="50px" />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : !opportunityFields.length ? (
+                <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+                  <img src={SVG('Opportunity Placeholder')} alt="No Data" />
+                </Box>
+              ) :
+                <DetailsPage
+                  data={copyOfOpportunityData}
+                  fields={opportunityFields}
+                />
+              }
+
+              <div className="p-3">
+                {opportunityData && (
+                  <OpportunityContacts
+                    contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
+                    title="Supplier Contacts"
+                    contactApi={supplierContact.contactApi}
+                    isExpanded={expanded.supplierContacts}
+                    onAddContact={() => {
+                      fetchSupplierContactData(true);
+                    }}
+                    onSetExpanded={() => {
+                      setExpanded({
+                        ...expanded,
+                        supplierContacts: !expanded.supplierContacts
+                      });
+                    }}
+                    recordsPerLine={recordsPerLine}
+                    accounts={cloneDeep(opportunityData?.supplierAccountName)}
+                    isAllowedToUpdate={allowedToEdit}
+                  />
+                )}
+                {opportunityData && (
+                  <OpportunityContacts
+                    contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
+                    title="Customer Contacts"
+                    isExpanded={expanded['customerContacts']}
+                    contactApi={customerContact.contactApi}
+                    onAddContact={() => {
+                      fetchCustomerContactData(true);
+                    }}
+                    onSetExpanded={() => {
+                      setExpanded({
+                        ...expanded,
+                        customerContacts: !expanded.customerContacts
+                      });
+                    }}
+                    recordsPerLine={recordsPerLine}
+                    saveContactToOpportunity={handleAssignContacts}
+                    accountId={opportunityData?.customerAccountName?.optionValue}
+                    isAllowedToUpdate={allowedToEdit}
+                  />
+                )}
+                {permissions?.projectSales?.isRead && (
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                    isAddProjectSale={true}
+                    isAllowedToEdit={allowedToEdit}
+                  />
+                )}
+                {permissions?.quoteBuilder?.isRead && (
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+                    opportunityId={id}
+                    accountId={opportunityData?.customerAccountName?.optionValue}
+                    opportunityName={opportunityData?.opportunityName}
+                    isRenderedFromOpportunity={true}
+                    isAllowedToUpdate={allowedToEdit}
+                  />
+                )}
+              </div>
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
+
+          <Grid item xs={12} sm={12} md={4} lg={4} className="gap-2">
             <Paper>
               {!opportunityData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
                   <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Skeleton width="100%" height="50px" />
+                  {[0, 1, 2, 3, 4].map((i, index) => (
+                    <Skeleton key={index} width="100%" height="50px" />
                   ))}
                 </Box>
               ) : (
@@ -764,14 +773,16 @@ function OpportunityDetailsPage() {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />
                 </div>
               )}
             </Paper>
           </Grid>
+
         </Grid>
+
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
@@ -804,7 +815,7 @@ function OpportunityDetailsPage() {
             dataToUpdate={opportunityData}
             resource={null}
             isRedirectTodetailPage={false}
-            // opportunityApi={opportunityApi}
+          // opportunityApi={opportunityApi}
           />
         )}
 
