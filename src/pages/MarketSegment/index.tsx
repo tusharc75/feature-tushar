@@ -293,7 +293,15 @@ const MarketSegment = () => {
                     onOk={handleDelete}
                 />
             }
-            {open && <CreateMarketSegment marketSegmentId={marketSegmentId} handleClose={() => { setOpen(false); fetchMarketSegment() }} />}
+            {open && 
+            <CreateMarketSegment 
+                marketSegmentId={marketSegmentId} 
+                onClose = {() => setOpen(false)}
+                onSuccess={() => { 
+                    setOpen(false); 
+                    fetchMarketSegment() 
+                }} 
+            />}
         </CustomContainer>
     </Layout>
     );

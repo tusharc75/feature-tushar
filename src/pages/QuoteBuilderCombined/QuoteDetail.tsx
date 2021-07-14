@@ -1642,7 +1642,7 @@ function QuoteDetail() {
 
   const handleViewPdf = (view = false, download = false) => {
 
-    if (!pdfFileName) {
+    // if (!pdfFileName) {
       handleVersionUpdate(
         "",
         visibleColumns,
@@ -1651,55 +1651,55 @@ function QuoteDetail() {
         view,
         download
       );
-    }
-    else {
-      if (view) {
-        setUpdatingVersion(true);
-        axiosInstance()
-          .get(
-            `user/download?fileName=${pdfFileName}`,
-            {
-              responseType: "blob",
-            }
-          )
-          .then(({ data }) => {
-            setUpdatingVersion(false);
-            const file = new Blob([data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-          })
-          .catch((err) => {
-            setUpdatingVersion(true);
-          });
-      } else if (download) {
-        setUpdatingVersion(true);
-        axiosInstance()
-          .get(
-            `user/download?fileName=${pdfFileName}`,
-            {
-              responseType: "blob",
-            }
-          )
-          .then(({ data }) => {
-            setUpdatingVersion(false);
-            const url = window.URL.createObjectURL(
-              new Blob([data], { type: "application/pdf" })
-            );
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute(
-              "download",
-              `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-            );
-            document.body.appendChild(link);
-            link.click();
-          })
-          .catch((err) => {
-            setUpdatingVersion(true);
-          });
-      }
-    }
+    // }
+    // else {
+    //   if (view) {
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //       .get(
+    //         `user/download?fileName=${pdfFileName}`,
+    //         {
+    //           responseType: "blob",
+    //         }
+    //       )
+    //       .then(({ data }) => {
+    //         setUpdatingVersion(false);
+    //         const file = new Blob([data], { type: "application/pdf" });
+    //         const fileURL = URL.createObjectURL(file);
+    //         const pdfWindow = window.open();
+    //         pdfWindow.location.href = fileURL;
+    //       })
+    //       .catch((err) => {
+    //         setUpdatingVersion(true);
+    //       });
+    //   } else if (download) {
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //       .get(
+    //         `user/download?fileName=${pdfFileName}`,
+    //         {
+    //           responseType: "blob",
+    //         }
+    //       )
+    //       .then(({ data }) => {
+    //         setUpdatingVersion(false);
+    //         const url = window.URL.createObjectURL(
+    //           new Blob([data], { type: "application/pdf" })
+    //         );
+    //         const link = document.createElement("a");
+    //         link.href = url;
+    //         link.setAttribute(
+    //           "download",
+    //           `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+    //         );
+    //         document.body.appendChild(link);
+    //         link.click();
+    //       })
+    //       .catch((err) => {
+    //         setUpdatingVersion(true);
+    //       });
+    //   }
+    // }
 
   };
 

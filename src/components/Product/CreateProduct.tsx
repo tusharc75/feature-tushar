@@ -24,6 +24,7 @@ import CreateProductCategory from "../../pages/ProductCategory/CreateProductCate
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { AiOutlineCloseSquare } from "react-icons/ai";
 
 const ignoreField = ["priceTemplate"]
 
@@ -137,7 +138,7 @@ const CreateProduct = (props) => {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                handleClose();
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -148,7 +149,7 @@ const CreateProduct = (props) => {
             delete values.brand
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                handleClose();
                 if (isAddInBuilder) {
                     delete data.brand
                     delete data.createdBy
@@ -197,7 +198,7 @@ const CreateProduct = (props) => {
                             data.fields.forEach(_f => {
                                 newField.push(_f)
                             })
-                            axiosInstance().get(`/price-template/product-template/` + value).then(({ data: { data } }) => {
+                            axiosInstance().get(`/price-template/product-template/` + defaultproductTemplate).then(({ data: { data } }) => {
                                 setPriceTemplate(data.data)
                                 let defaultpriceTemplate = ""
                                 if (data.data.length) {
@@ -338,21 +339,15 @@ const CreateProduct = (props) => {
                                                                         item
                                                                         xs={
                                                                             //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                                                            // permissions.productCategory
-                                                                            //     .isCreate
-                                                                            true ? 10
+                                                                            permissions.productCategory.isCreate ? 10
                                                                                 : 11
                                                                         }
                                                                         sm={
-                                                                            // permissions.productCategory
-                                                                            //     .isCreate
-                                                                            true ? 10
+                                                                            permissions.productCategory.isCreate ? 10
                                                                                 : 11
                                                                         }
                                                                         md={
-                                                                            // permissions.productCategory
-                                                                            //     .isCreate
-                                                                            true ? 10
+                                                                            permissions.productCategory.isCreate ? 10
                                                                                 : 11
                                                                         }
                                                                     >
@@ -390,9 +385,7 @@ const CreateProduct = (props) => {
                                                                         />
                                                                     </Grid>
                                                                     {
-                                                                        // permissions.productCategory
-                                                                        //     .isCreate
-                                                                        true && (
+                                                                        permissions.productCategory.isCreate && (
                                                                             <Grid item xs={1} sm={1} md={1}>
                                                                                 <Tooltip
                                                                                     title="Add Product Category"
@@ -609,13 +602,15 @@ const CreateProduct = (props) => {
             </Formik> :
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>}
+            </Box>
+        }
         {isAddField && <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
 
         {
             showAddProductCategoryDialog && <CreateProductCategory
                 productCategoryId={null}
-                handleClose={(data) => {
+                onClose={() => setShowAddProductCategoryDialog(false)}
+                onSuccess={(data) => {
 
                     if (data?._id) {
                         setProductCategoryDataSource((prevState) => {
@@ -638,7 +633,7 @@ const CreateProduct = (props) => {
                 }}
             />
         }
-    </Dialog>
+    </Dialog >
     );
 }
 

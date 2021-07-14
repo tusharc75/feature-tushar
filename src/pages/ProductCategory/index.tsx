@@ -391,7 +391,16 @@ const ProductCategory = () => {
                 />
             }
         
-            {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
+            {open && 
+                <CreateProductCategory 
+                    productCategoryId={productCategoryId}
+                    onClose = {() => setOpen(false)} 
+                    onSuccess={() => { 
+                        setOpen(false); 
+                        fetchProductCategory() 
+                    }} 
+                />
+            }
         </CustomContainer>
     </Layout>
     );
