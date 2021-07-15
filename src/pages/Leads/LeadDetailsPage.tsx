@@ -1,43 +1,39 @@
-import { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper } from "@material-ui/core";
-import { useHistory, useParams } from "react-router-dom";
-import { Skeleton } from "@material-ui/lab";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import Layout from "../../components/Layout";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
-import DetailsPage from "../../components/Shared/DetailsPage";
-import axiosInstance from "./../../axios/axiosInstance";
-import { leadPage } from "../../routes/Lead";
-import routes from "../../components/Helpers/Routes";
-import { useData } from "../../StateProvider/Provider";
-import { SVG } from "../../assets";
-import Activity from "../../components/Activity";
-import {
-  getObjKeysWithValues,
-  lead,
-  processFieldName,
-} from "../../constants/helpers";
-import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
-import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import AccordionOfOpportunity from "./AccordionOfOpportunity";
-import ProcessFlow from "../../components/ProcessFlow";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import { isMobile, isTablet } from "react-device-detect";
-import { Dialog } from "@material-ui/core";
-import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
+import { useState, useEffect, useContext } from 'react';
+import { Box, Button, Grid, Paper } from '@material-ui/core';
+import { useHistory, useParams } from 'react-router-dom';
+import { Skeleton } from '@material-ui/lab';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import Layout from '../../components/Layout';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import axiosInstance from './../../axios/axiosInstance';
+import { leadPage } from '../../routes/Lead';
+import routes from '../../components/Helpers/Routes';
+import { useData } from '../../StateProvider/Provider';
+import { SVG } from '../../assets';
+import Activity from '../../components/Activity';
+import { getObjKeysWithValues, lead, processFieldName } from '../../constants/helpers';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
+import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
+import AccordionOfOpportunity from './AccordionOfOpportunity';
+import ProcessFlow from '../../components/ProcessFlow';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import { isMobile, isTablet } from 'react-device-detect';
+import { Dialog } from '@material-ui/core';
+import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState("");
+  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -50,28 +46,24 @@ const LeadDetailsPage = () => {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
-  const [showAtLast, setShowAtLast] = useState(false)
-  const [additionalFieldName, setAdditionalFieldName] = useState("")
+  const [showAtLast, setShowAtLast] = useState(false);
+  const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
     isRead: false,
-    isDelete: false,
+    isDelete: false
   });
 
-  const [
-    hasPermissionToConvertToOpportunity,
-    setHasPermissionToConvertToOpportunity,
-  ] = useState(false);
-  const [
-    isLeadAlreadyConvertedToOpportunity,
-    setIsLeadAlreadyConvertedToOpportunity,
-  ] = useState(false);
+  const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
+  const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
 
-  const [
-    convertLeadToOpportunityConfirmationDialog,
-    setConvertLeadToOpportunityConfirmationDialog,
-  ] = useState({ open: false, id: null, leadName: null, message: null });
+  const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
+    open: false,
+    id: null,
+    leadName: null,
+    message: null
+  });
 
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -94,22 +86,14 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = leadFields.find(
-        (d) =>
-          d.isRead &&
-          d.fieldData.fieldName.toLowerCase() ===
-            processFieldName.toLocaleLowerCase()
-      );
+      const processSteps = leadFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
       if (processSteps && processSteps.isRead && leadData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(
-          (d) => d.optionLabel === leadData[processFieldName]
-        );
+        const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === leadData[processFieldName]);
         setActiveStep(currentStepToShow);
-        if(currentStepToShow == steps.length -1){
-          setShowAtLast(true)
-        }
-        else{
-          setShowAtLast(false)
+        if (currentStepToShow == steps.length - 1) {
+          setShowAtLast(true);
+        } else {
+          setShowAtLast(false);
         }
       }
     }
@@ -127,38 +111,31 @@ const LeadDetailsPage = () => {
         .then(({ data: { data } }) => {
           const userId = user?.user?._id;
           handleMainPoints(data);
-          let name = [data.firstName, data.middleName, data.lastName]
-            .filter((d) => d)
-            .join(" ");
+          let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
           let dontHavePermissions = [];
 
-          if (!permissions["customerAccount"].isCreate) {
-            dontHavePermissions.push("Customer Account");
+          if (!permissions['customerAccount'].isCreate) {
+            dontHavePermissions.push('Customer Account');
           }
-          if (!permissions["customerContact"].isCreate) {
-            dontHavePermissions.push("Customer Contact");
+          if (!permissions['customerContact'].isCreate) {
+            dontHavePermissions.push('Customer Contact');
           }
-          if (!permissions["opportunity"].isCreate) {
-            dontHavePermissions.push("Opportunity");
+          if (!permissions['opportunity'].isCreate) {
+            dontHavePermissions.push('Opportunity');
           }
 
-          const isAllowedToUpdate = [
-            ...(data.collaborator ?? []),
-            data.owner,
-          ].some((d) => d?.optionValue === userId);
+          const isAllowedToUpdate = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === userId);
 
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
               user?.user?.permissions?.convertLeadToOpportunity &&
               isAllowedToUpdate &&
               data[processFieldName] &&
-              data[processFieldName].toLowerCase() === "qualified"
+              data[processFieldName].toLowerCase() === 'qualified'
           );
           setIsLeadAlreadyConvertedToOpportunity(
-            data.staticData && data.staticData["convertedToOpportunity"]
-              ? data.staticData["convertedToOpportunity"]
-              : false
+            data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
           );
 
           if (data?.salutation?.optionLabel) {
@@ -166,14 +143,8 @@ const LeadDetailsPage = () => {
           }
           setHeadingLbl(name);
 
-          setAllowedToEdit(
-            [...(data.collaborator ?? []), data.owner].some(
-              (d) => d?.optionValue === userId
-            )
-          );
-          setAllowedToDelete(
-            [data.owner].some((d) => d?.optionValue === userId)
-          );
+          setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === userId));
+          setAllowedToDelete([data.owner].some((d) => d?.optionValue === userId));
           setLeadData(data);
           getLeadFields();
           setCustomizedRoutes([routes.lead, { title: name }]);
@@ -183,10 +154,10 @@ const LeadDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      company: data.company || "",
-      title: data.title || "",
-      phone: data.phone || "",
-      email: data.email || "",
+      company: data.company || '',
+      title: data.title || '',
+      phone: data.phone || '',
+      email: data.email || ''
     };
     setMainPoints(tempMp);
   };
@@ -197,35 +168,24 @@ const LeadDetailsPage = () => {
       .then(({ data: { data } }) => {
         setLeadFields(data);
 
-        const processSteps = data.find(
-          (d) =>
-            d.isRead &&
-            d.fieldData.fieldName.toLowerCase() ===
-              processFieldName.toLowerCase()
-        );
+        const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
         if (processSteps && processSteps.isRead) {
           setSteps(
             processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually: true, //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+                canCompleteManually: true //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
               };
             })
           );
-          setShowAdditionalField(
-            processSteps.fieldData.showAdditionalInfoPopup
-          );
+          setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
         }
         data.map((d) => {
-          if (
-            d.fieldData.sectionName ==
-              processSteps.fieldData.additionalInfoSection &&
-            sectionFields.length == 0
-          ) {
+          if (d.fieldData.sectionName == processSteps?.fieldData.additionalInfoSection && sectionFields.length == 0) {
             setSectionFields((prevItems) => {
               return [...prevItems, d];
             });
-            setAdditionalFieldName(d.fieldData.sectionName)
+            setAdditionalFieldName(d.fieldData.sectionName);
           }
         });
 
@@ -237,13 +197,13 @@ const LeadDetailsPage = () => {
     if (leadData?._id) {
       axiosInstance()
         .put(`${leadApi}/remove?entity=${selectedEntity}`, {
-          ids: [leadData._id],
+          ids: [leadData._id]
         })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           goBackToListing();
           setShowConfirmBox(false);
@@ -258,7 +218,7 @@ const LeadDetailsPage = () => {
   };
   const goBackToListing = () => {
     history.push({
-      pathname: leadPage.path,
+      pathname: leadPage.path
     });
   };
 
@@ -268,8 +228,8 @@ const LeadDetailsPage = () => {
   };
 
   const handleOpneUpdateDialog = () => {
-    if(activeStep === steps.length - 1 ){
-      setShowAtLast(true)
+    if (activeStep === steps.length - 1) {
+      setShowAtLast(true);
     }
     setOpenUpdateDialog(true);
   };
@@ -280,14 +240,14 @@ const LeadDetailsPage = () => {
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
         setConvertLeadToOpportunityConfirmationDialog({
           open: false,
           id: null,
           leadName: null,
-          message: null,
+          message: null
         });
         history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
       })
@@ -298,18 +258,13 @@ const LeadDetailsPage = () => {
 
   const handleSave = (data) => {
     setIsProcessing(true);
-    setShowAtLast(true)
+    setShowAtLast(true);
     setOpenAdditionalDialog(false);
-    let tempActiveStep =
-      data && data?.isSetBackStep
-        ? activeStep - 1
-        : activeStep < steps.length - 1
-        ? activeStep + 1
-        : activeStep;
+    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
 
-    let processFieldName = "";
+    let processFieldName = '';
     const leadFieldData = leadFields.map((f) => {
-      if (f.fieldData.type == "process") {
+      if (f.fieldData.type == 'process') {
         processFieldName = f.fieldData.fieldName;
       }
       return f.fieldData;
@@ -318,12 +273,12 @@ const LeadDetailsPage = () => {
     const updatedLeadData = {
       ...leadData,
       ...data
-    }
+    };
 
     const updatedData = {
       ...getObjKeysWithValues(updatedLeadData, leadFieldData),
       [processFieldName]: steps[tempActiveStep].text,
-      _id: leadData._id,
+      _id: leadData._id
     };
 
     axiosInstance()
@@ -340,50 +295,43 @@ const LeadDetailsPage = () => {
   };
 
   const handleMarkAsCompleted = (data) => {
-    setShowAtLast(false)
+    setShowAtLast(false);
     setIsProcessing(true);
-    let tempActiveStep =
-      data && data?.isSetBackStep
-        ? activeStep - 1
-        : activeStep < steps.length - 1
-        ? activeStep + 1
-        : activeStep;
-        if (tempActiveStep == steps.length - 1 && showAdditionalField) {
-          setOpenAdditionalDialog(true);
-        } 
-        else {
-          let processFieldName = "";
-          const leadFieldData = leadFields.map((f) => {
-            if (f.fieldData.type == "process") {
-              processFieldName = f.fieldData.fieldName;
-            }
-            return f.fieldData;
-          });
-
-          const updatedData = {
-            ...getObjKeysWithValues(leadData, leadFieldData),
-            [processFieldName]: steps[tempActiveStep].text,
-            _id: leadData._id,
-          };
-      
-          axiosInstance()
-            .put(`/lead?entity=${selectedEntity}`, updatedData)
-            .then(() => {
-              // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
-              setIsProcessing(false);
-              // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
-              // }
-              fetchLeadData();
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-              setIsProcessing(false);
-            });
+    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
+    if (tempActiveStep == steps.length - 1 && showAdditionalField) {
+      setOpenAdditionalDialog(true);
+    } else {
+      let processFieldName = '';
+      const leadFieldData = leadFields.map((f) => {
+        if (f.fieldData.type == 'process') {
+          processFieldName = f.fieldData.fieldName;
         }
-   
+        return f.fieldData;
+      });
+
+      const updatedData = {
+        ...getObjKeysWithValues(leadData, leadFieldData),
+        [processFieldName]: steps[tempActiveStep].text,
+        _id: leadData._id
+      };
+
+      axiosInstance()
+        .put(`/lead?entity=${selectedEntity}`, updatedData)
+        .then(() => {
+          // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
+          setIsProcessing(false);
+          // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
+          // }
+          fetchLeadData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsProcessing(false);
+        });
+    }
   };
 
-  let filteredLeadFields = leadFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
+  let filteredLeadFields = leadFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   return (
     <>
       {openUpdateDialog && (
@@ -417,77 +365,50 @@ const LeadDetailsPage = () => {
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
                   <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
+                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
                     <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
+                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
                   </Box>
                 </div>
               ) : (
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
-                  leadStatus={leadData?.process ?? ""}
+                  leadStatus={leadData?.process ?? ''}
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
                   {leadsPermissions.isUpdate && allowedToEdit && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpneUpdateDialog}
-                    >
+                    <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {!isLeadAlreadyConvertedToOpportunity &&
-                    hasPermissionToConvertToOpportunity && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => {
-                            const leadName = [
-                              leadData.firstName,
-                              leadData.middleName,
-                              leadData.lastName,
-                            ]
-                              .filter((d) => d)
-                              .join(" ");
-                            setConvertLeadToOpportunityConfirmationDialog({
-                              open: true,
-                              id: leadData._id,
-                              leadName: leadName,
-                              message: `Are you sure you want to convert ${leadName} to opportunity?`,
-                            });
-                          }}
-                        >
-                          Convert Lead To Opportunity
-                        </Button>
-                      </>
-                    )}
-                  {leadsPermissions.isDelete && allowedToDelete && (
-                    <DeleteButton
-                      text="Delete"
-                      onClick={() => setShowConfirmBox(true)}
-                    />
+                  {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
+                    <>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
+                          setConvertLeadToOpportunityConfirmationDialog({
+                            open: true,
+                            id: leadData._id,
+                            leadName: leadName,
+                            message: `Are you sure you want to convert ${leadName} to opportunity?`
+                          });
+                        }}
+                      >
+                        Convert Lead To Opportunity
+                      </Button>
+                    </>
                   )}
+                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               )}
 
               <ProcessFlow
-                disableBackNext={
-                  leadsPermissions.isUpdate && allowedToEdit ? false : true
-                }
+                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
                 steps={steps}
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
@@ -496,35 +417,24 @@ const LeadDetailsPage = () => {
 
               {loading ? (
                 <Grid container spacing={2}>
-                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
-                    (i, index) => (
-                      <Grid key={index} item sm={6} md={6}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    )
-                  )}
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                    <Grid key={index} item sm={6} md={6}>
+                      <Skeleton variant="text" width="100px" height="16px" />
+                      <Box marginY={1} />
+                      <Skeleton width="100%" height="50px" />
+                    </Grid>
+                  ))}
                 </Grid>
               ) : !leadFields.length ? (
-                <Box
-                  height="100%"
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <img src={SVG("Contacts Placeholder")} alt="No Data" />
+                <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+                  <img src={SVG('Contacts Placeholder')} alt="No Data" />
                 </Box>
+              ) : showAtLast ? (
+                <DetailsPage data={leadData} fields={leadFields} />
               ) : (
-                showAtLast ? ( <DetailsPage data={leadData} fields={leadFields} />) :  
                 <DetailsPage data={leadData} fields={filteredLeadFields} />
-               
               )}
-              <AccordionOfOpportunity
-                recordsPerLine={3}
-                opportunity={leadData?.staticData?.opportunity}
-              />
+              <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
               {/* <ProjectInAccordion recordsPerLine={3} projectSales={null}/> */}
               {/* <QuotesInAccordion recordsPerLine={3} /> */}
               {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
@@ -545,20 +455,16 @@ const LeadDetailsPage = () => {
               ) : (
                 <div>
                   <Activity
-                    restrictedAddActivities={
-                      leadsPermissions.isUpdate && allowedToEdit
-                        ? []
-                        : ["Attachment", "Case"]
-                    }
+                    restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ['Attachment', 'Case']}
                     relatedTo={[
                       {
                         type: leadResource,
                         referenceId: leadData._id,
-                        access: true,
-                      },
+                        access: true
+                      }
                     ]}
                     handleActivityRefresh={() => {}}
-                    emails={[leadData?.email ?? ""]}
+                    emails={[leadData?.email ?? '']}
                   />
                 </div>
               )}
@@ -575,52 +481,52 @@ const LeadDetailsPage = () => {
                 open: false,
                 id: null,
                 leadName: null,
-                message: null,
+                message: null
               })
             }
             onOk={convertLeadToOpportunity}
           />
         ) : null}
 
-{openAdditionalDialog && (
-            // <Dialog
-            //   disableBackdropClick={true}
-            //   fullWidth
-            //   maxWidth="sm"
-            //   open={openAdditionalDialog}
-            //   onClose={() => setOpenAdditionalDialog(false)}
-            //   aria-labelledby="form-dialog-title"
-            //   fullScreen={isMobile || isTablet}
-            // >
-            //   <CustomDialogHeader
-            //     title="Additonal Information"
-            //     onClose={() => setOpenAdditionalDialog(false)}
-            //   ></CustomDialogHeader>
-            //   {sectionFields.map((item) => (
-            //     <CustomDialogContent>{item}</CustomDialogContent>
-            //   ))}
+        {openAdditionalDialog && (
+          // <Dialog
+          //   disableBackdropClick={true}
+          //   fullWidth
+          //   maxWidth="sm"
+          //   open={openAdditionalDialog}
+          //   onClose={() => setOpenAdditionalDialog(false)}
+          //   aria-labelledby="form-dialog-title"
+          //   fullScreen={isMobile || isTablet}
+          // >
+          //   <CustomDialogHeader
+          //     title="Additonal Information"
+          //     onClose={() => setOpenAdditionalDialog(false)}
+          //   ></CustomDialogHeader>
+          //   {sectionFields.map((item) => (
+          //     <CustomDialogContent>{item}</CustomDialogContent>
+          //   ))}
 
-            //   <CustomDialogFooter>
-            //     <Button
-            //       color="primary"
-            //       size="small"
-            //       onClick={() => setOpenAdditionalDialog(false)}
-            //     >
-            //       Close
-            //     </Button>
-            //     <Button color="primary" size="small" onClick={handleSave}>
-            //       Save
-            //     </Button>
-            //   </CustomDialogFooter>
-            // </Dialog>
-            <AdditionalDialogPopUp 
-                open={openAdditionalDialog}
-                close={() => setOpenAdditionalDialog(false)}
-                handleSave={handleSave}
-                title="Additional Information"
-                fieldData={sectionFields}
-            />
-          ) }
+          //   <CustomDialogFooter>
+          //     <Button
+          //       color="primary"
+          //       size="small"
+          //       onClick={() => setOpenAdditionalDialog(false)}
+          //     >
+          //       Close
+          //     </Button>
+          //     <Button color="primary" size="small" onClick={handleSave}>
+          //       Save
+          //     </Button>
+          //   </CustomDialogFooter>
+          // </Dialog>
+          <AdditionalDialogPopUp
+            open={openAdditionalDialog}
+            close={() => setOpenAdditionalDialog(false)}
+            handleSave={handleSave}
+            title="Additional Information"
+            fieldData={sectionFields}
+          />
+        )}
       </Layout>
     </>
   );

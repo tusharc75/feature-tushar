@@ -33,7 +33,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
 
-const ignoreField = ["qty"]
+const ignoreField = ["qty", "priceTemplate"]
 
 var levalOrderBy = [
     "product",
@@ -160,14 +160,14 @@ const Product = () => {
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
-                            if (ele.fieldName === "description") {
+                            if (ele.fieldName === "productName") {
                                 col.cellRenderer = "productNameRenderer"
                             }
                             if (ele.fieldName === "productCategory") {
                                 col.cellRenderer = "productCategoryRenderer"
                             }
-                            if (ele.fieldName === "priceTemplate") {
-                                col.cellRenderer = "priceTemplateRenderer"
+                            if (ele.fieldName === "productTemplate") {
+                                col.cellRenderer = "productTemplateRenderer"
                             }
                             col.order = ele.order;
                             col.leval = ele.leval;
@@ -241,7 +241,6 @@ const Product = () => {
         });
     }
 
-
     const ProductNameRenderer = params => (
         productPermissions.isUpdate ?
             <Link className="link"
@@ -287,10 +286,10 @@ const Product = () => {
                 : <NoDataCell />
         }
     </>
-    const PriceTemplateRenderer = params => <>
+    const ProductTemplateRenderer = params => <>
         {
-            params.data.priceTemplate || params.data.priceTemplate === 0 ?
-                typeof params.data.priceTemplate === 'object' ? params.data.priceTemplate["optionLabel"] : params.data.priceTemplate
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
                 : <NoDataCell />
         }
     </>
@@ -325,7 +324,7 @@ const Product = () => {
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
-        priceTemplateRenderer: PriceTemplateRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const replaceFieldName = (field) => {
@@ -425,7 +424,14 @@ const Product = () => {
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} openFrom="productMaster" />}
+        {open &&
+            <CreateProduct
+                isClone={isClone}
+                productId={productId}
+                handleClose={handleClose}
+                openFrom="productMaster"
+            />
+        }
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}

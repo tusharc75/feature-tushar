@@ -657,6 +657,8 @@ function QuoteDetail() {
               dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
               fetchTermsAndConditions(data.versions[keys[keys.length - 1]].TNC);
               // setTNC(data.versions[keys[keys.length - 1]].TNC);
+            } else {
+              fetchTermsAndConditions();
             }
             if (data.versions[keys[keys.length - 1]].acceptedColumns) {
               setColumnView(
@@ -683,6 +685,8 @@ function QuoteDetail() {
               dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
               fetchTermsAndConditions(data.versions[version].TNC);
               // setTNC(data.versions[version].TNC);
+            } else {
+              fetchTermsAndConditions();
             }
             if (data.versions[version].acceptedColumns) {
               setColumnView(data.versions[version].acceptedColumns);
@@ -1518,24 +1522,26 @@ function QuoteDetail() {
     if (Customerreq) {
       exportToCSV(true);
       setSendEmail(true);
-      if (!pdfFileBase64) {
-        setGeneratingFile(true);
-        axiosInstance()
-          .get(
-            `user/download?fileName=${pdfFileName}`,
-            {
-              responseType: "blob",
-            }
-          )
-          .then(({ data }) => {
-            setGeneratingFile(false);
-            const file = new Blob([data], { type: "application/pdf" });
-            generateBase64forFile(file, "pdf");
-          })
-          .catch((err) => {
-            setGeneratingFile(false);
-          });
-      }
+      setGeneratingFile(true);
+
+      const currentVersionFileName = pdfFileName ? pdfFileName : versionStatusData.data.find(d => d.versionNumber === currentVersion)?.PDF;
+
+      axiosInstance()
+        .get(
+          `user/download?fileName=${currentVersionFileName}`,
+          {
+            responseType: "blob",
+          }
+        )
+        .then(({ data }) => {
+          setGeneratingFile(false);
+          const file = new Blob([data], { type: "application/pdf" });
+          generateBase64forFile(file, "pdf");
+        })
+        .catch((err) => {
+          setGeneratingFile(false);
+        });
+
     }
   };
 
@@ -1642,64 +1648,64 @@ function QuoteDetail() {
 
   const handleViewPdf = (view = false, download = false) => {
 
-    if (!pdfFileName) {
-      handleVersionUpdate(
-        "",
-        visibleColumns,
-        versionStatus,
-        selectedRecords,
-        view,
-        download
-      );
-    }
-    else {
-      if (view) {
-        setUpdatingVersion(true);
-        axiosInstance()
-          .get(
-            `user/download?fileName=${pdfFileName}`,
-            {
-              responseType: "blob",
-            }
-          )
-          .then(({ data }) => {
-            setUpdatingVersion(false);
-            const file = new Blob([data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-          })
-          .catch((err) => {
-            setUpdatingVersion(true);
-          });
-      } else if (download) {
-        setUpdatingVersion(true);
-        axiosInstance()
-          .get(
-            `user/download?fileName=${pdfFileName}`,
-            {
-              responseType: "blob",
-            }
-          )
-          .then(({ data }) => {
-            setUpdatingVersion(false);
-            const url = window.URL.createObjectURL(
-              new Blob([data], { type: "application/pdf" })
-            );
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute(
-              "download",
-              `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-            );
-            document.body.appendChild(link);
-            link.click();
-          })
-          .catch((err) => {
-            setUpdatingVersion(true);
-          });
-      }
-    }
+    // if (!pdfFileName) {
+    handleVersionUpdate(
+      "",
+      visibleColumns,
+      versionStatus,
+      selectedRecords,
+      view,
+      download
+    );
+    // }
+    // else {
+    //   if (view) {
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //       .get(
+    //         `user/download?fileName=${pdfFileName}`,
+    //         {
+    //           responseType: "blob",
+    //         }
+    //       )
+    //       .then(({ data }) => {
+    //         setUpdatingVersion(false);
+    //         const file = new Blob([data], { type: "application/pdf" });
+    //         const fileURL = URL.createObjectURL(file);
+    //         const pdfWindow = window.open();
+    //         pdfWindow.location.href = fileURL;
+    //       })
+    //       .catch((err) => {
+    //         setUpdatingVersion(true);
+    //       });
+    //   } else if (download) {
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //       .get(
+    //         `user/download?fileName=${pdfFileName}`,
+    //         {
+    //           responseType: "blob",
+    //         }
+    //       )
+    //       .then(({ data }) => {
+    //         setUpdatingVersion(false);
+    //         const url = window.URL.createObjectURL(
+    //           new Blob([data], { type: "application/pdf" })
+    //         );
+    //         const link = document.createElement("a");
+    //         link.href = url;
+    //         link.setAttribute(
+    //           "download",
+    //           `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+    //         );
+    //         document.body.appendChild(link);
+    //         link.click();
+    //       })
+    //       .catch((err) => {
+    //         setUpdatingVersion(true);
+    //       });
+    //   }
+    // }
 
   };
 
@@ -1840,7 +1846,7 @@ function QuoteDetail() {
 
     if (quoteData) {
       versions.forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status === "Booked by Customer") {
           approved = true;
           versionApproved = v;
           manualApproval = quoteData.versions[v]?.customerResponse?.manual;

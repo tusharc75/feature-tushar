@@ -29,7 +29,7 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const ignoreField = ["qty"]
+const ignoreField = ["qty", "priceTemplate"]
 
 const AddExistingProduct = (props) => {
 
@@ -54,10 +54,10 @@ const AddExistingProduct = (props) => {
                 : <NoDataCell />
         }
     </>
-    const PriceTemplateRenderer = params => <>
+    const ProductTemplateRenderer = params => <>
         {
-            params.data.priceTemplate || params.data.priceTemplate === 0 ?
-                typeof params.data.priceTemplate === 'object' ? params.data.priceTemplate["optionLabel"] : params.data.priceTemplate
+            params.data.productTemplate || params.data.productTemplate === 0 ?
+                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
                 : <NoDataCell />
         }
     </>
@@ -65,7 +65,7 @@ const AddExistingProduct = (props) => {
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
-        productTemplateRenderer: PriceTemplateRenderer,
+        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const getQueryString = () => {
@@ -178,7 +178,7 @@ const AddExistingProduct = (props) => {
                             if (ele.fieldName === "productCategory") {
                                 col.cellRenderer = "productCategoryRenderer"
                             }
-                            if (ele.fieldName === "priceTemplate") {
+                            if (ele.fieldName === "productTemplate") {
                                 col.cellRenderer = "productTemplateRenderer"
                             }
                             col.order = ele.order;
@@ -207,14 +207,21 @@ const AddExistingProduct = (props) => {
         let rows = selectedRecords
         rows.forEach((_d) => {
             _d.productId = _d._id
-            _d.qty = 0
+            if (_d.fields) {
+                const qtyField = _d.fields.filter((_f) => _f.fieldName === "qty")
+                if (qtyField.length) {
+                    if (!qtyField[0].isFormula) {
+                        _d.qty = 0
+                    }
+                }
+            }
             delete _d.id
             delete _d.brand
             delete _d.createdBy
             delete _d.updatedBy
             delete _d.fields
             for (const [key, value] of Object.entries(_d)) {
-                if (typeof value === 'object') {
+                if (typeof value === 'object' && value && value["optionValue"]) {
                     _d[key] = value["optionValue"]
                 }
             }

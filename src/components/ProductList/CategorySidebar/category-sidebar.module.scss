@@ -1,0 +1,26 @@
+.sidebar_nav {
+  width: 25rem;
+  margin-top: 1rem;
+  max-height: 45rem;
+
+  overflow-y: scroll;
+}
+
+.single_category {
+  margin: 0.8rem;
+
+  &_name {
+    color: var(--colorContact);
+    margin: 0.2rem;
+    font-weight: 600;
+  }
+
+  &_icon {
+    color: var(--colorContact);
+  }
+}
+
+.rating {
+  display: flex;
+  justify-content: space-between;
+}

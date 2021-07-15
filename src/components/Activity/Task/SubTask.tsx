@@ -105,17 +105,6 @@ export const SubTask = ({
             >
               Child Task
             </h4>
-            <Button
-              variant="outlined"  
-              size="small"
-              color="primary"
-              disableElevation
-              className={classes.childBtn}
-              onClick={() => setOpenAddSub(true)}
-              startIcon={<TableChartIcon />}
-            >
-              Add
-            </Button>
           </div>
         </Box>
       )}

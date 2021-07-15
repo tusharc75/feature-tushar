@@ -68,7 +68,7 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
         fs['f1'] = new Function(...argument, formula);
         value = fs['f1'].apply(null, values);
         if (returnType === "decimal") {
-            value = parseFloat(value.toFixed(decimalPlaces))
+            //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
     catch (e) {
@@ -85,7 +85,8 @@ const formatDecimal = (value, decimalPlaces) => {
     //     return 0;
     // }
     else {
-        return parseFloat(value.toFixed(decimalPlaces));
+        return value
+        //return parseFloat(value.toFixed(decimalPlaces));
     }
 };
 
@@ -118,6 +119,11 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         }
     }
     catch (e) {
+    }
+    for (var x in resultValues) {
+        if (typeof resultValues[x] === "number") {
+            resultValues[x] = parseFloat(resultValues[x].toFixed(2))
+        }
     }
     return resultValues
 }
@@ -420,7 +426,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
                 calValues = handleAutoCalculation(ele, fieldList, returnvalues, ele.fieldName, "", "", values[ele.fieldName] || values[ele.fieldName] === 0 ? values[ele.fieldName] : "")
             }
             for (const x in calValues) {
-                if (calValues[x] === 0 || calValues[x] === "") {
+                if (isNaN(calValues[x]) || calValues[x] === 0 || calValues[x] === "") {
                     delete calValues[x]
                 }
             }

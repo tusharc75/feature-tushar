@@ -47,7 +47,7 @@ const MarketSegment = () => {
     const [open, setOpen] = useState(false);
     const [marketSegmentId, setMarketSegmentId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    
+
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -58,6 +58,7 @@ const MarketSegment = () => {
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columns = [
         { field: "name", headerName: "Market Segment", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "parentMarketSegmentName", headerName: "Parent MarketSegment", show: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -74,7 +75,7 @@ const MarketSegment = () => {
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-        
+
     </span>
 
     const ActionsRenderer = params => <Fragment>
@@ -103,7 +104,7 @@ const MarketSegment = () => {
         actionsRenderer: ActionsRenderer
     };
 
-    
+
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -112,6 +113,9 @@ const MarketSegment = () => {
 
             case "updatedBy":
                 return "updatedBy.user.concatedName";
+
+            case "parentMarketSegmentName":
+                return "parentMarketSegment.optionLabel";
 
             default:
                 return field;
@@ -161,7 +165,7 @@ const MarketSegment = () => {
                 let res = {
                     ...restProperties,
                     id: u._id,
-
+                    parentMarketSegmentName: u.parentMarketSegment?.optionLabel,
                     createdBy: u.createdBy?.user?.concatedName,
                     createdByDate: u.createdBy?.date,
                     updatedBy: u.updatedBy?.user?.concatedName,
@@ -293,7 +297,15 @@ const MarketSegment = () => {
                     onOk={handleDelete}
                 />
             }
-            {open && <CreateMarketSegment marketSegmentId={marketSegmentId} handleClose={() => { setOpen(false); fetchMarketSegment() }} />}
+            {open &&
+                <CreateMarketSegment
+                    marketSegmentId={marketSegmentId}
+                    onClose={() => setOpen(false)}
+                    onSuccess={() => {
+                        setOpen(false);
+                        fetchMarketSegment()
+                    }}
+                />}
         </CustomContainer>
     </Layout>
     );

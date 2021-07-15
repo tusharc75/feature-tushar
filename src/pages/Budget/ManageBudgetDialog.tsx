@@ -17,7 +17,8 @@ import {
     simplifyValues,
     budget,
     setFieldsInAscendingOrder,
-    getUniqueCurrencies
+    getUniqueCurrencies,
+    formFieldNames
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -33,6 +34,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
 import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
+import { useData } from "../../StateProvider/Provider";
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -51,6 +53,9 @@ export default function ManageBudgetDialog({
         fields: [],
         initialValues: {},
     });
+    const {
+        state: { permissions },
+    }: any = useData();
 
     const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -61,8 +66,8 @@ export default function ManageBudgetDialog({
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
 
     const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
-    const [isSubMarketSegmentDialog, setIsSubMarketSegmentDialog] = useState(false);
 
+    const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
     const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
     const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
     const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
@@ -85,12 +90,20 @@ export default function ManageBudgetDialog({
                     ? data.filter((d) => d.isUpdate)
                     : data.filter((d) => d.isCreate);
 
-                //  Initialize market segment dropdown which have parentMarketSegment === ""
+                //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
                 const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
-                    (d) => d.fieldName === "marketSegment"
+                    (d) => d.fieldName === formFieldNames.marketSegment
                 );
                 if (marketSegmentDropdownData) {
-                    setMarketSegmentDataSource(marketSegmentDropdownData.option)
+                    setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
+
+                    let initializeMarketSegmentDataSource = [];
+                    marketSegmentDropdownData.option.forEach(option => {
+                        if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
+                            initializeMarketSegmentDataSource.push(option);
+                        }
+                    })
+                    setMarketSegmentDataSource(initializeMarketSegmentDataSource);
                 }
 
                 if (budgetId) {
@@ -144,7 +157,7 @@ export default function ManageBudgetDialog({
     };
 
     const marketSegmentChange = (marketSegmentId: string) => {
-        setSubMarketSegmentDataSource(marketSegmentId ? marketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
+        setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
     }
 
     const onSubmit = (values) => {
@@ -198,12 +211,12 @@ export default function ManageBudgetDialog({
     };
 
     const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
-        if (values && values.hasOwnProperty("marketSegment")) {
+        if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
             const getNewAddedMarketSegment = marketSegmentSource.find(
                 (d) => d.optionValue === newMarketSegmentId
             );
             if (getNewAddedMarketSegment) {
-                values["marketSegment"] = getNewAddedMarketSegment.optionValue;
+                values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
             }
             return values;
         }
@@ -211,12 +224,12 @@ export default function ManageBudgetDialog({
     };
 
     const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
-        if (values && values.hasOwnProperty("subMarketSegment")) {
+        if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
             const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
                 (d) => d.optionValue === newSubMarketSegmentId
             );
             if (getNewAddedSubMarketSegment) {
-                values["subMarketSegment"] = getNewAddedSubMarketSegment.optionValue;
+                values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
             }
             return values;
         }
@@ -340,21 +353,15 @@ export default function ManageBudgetDialog({
                                                                                         item
                                                                                         xs={
                                                                                             //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                                                                            // permissions.productCategory
-                                                                                            //     .isCreate
-                                                                                            true ? 10
+                                                                                            permissions.productCategory.isCreate ? 10
                                                                                                 : 11
                                                                                         }
                                                                                         sm={
-                                                                                            // permissions.productCategory
-                                                                                            //     .isCreate
-                                                                                            true ? 10
+                                                                                            permissions.productCategory.isCreate ? 10
                                                                                                 : 11
                                                                                         }
                                                                                         md={
-                                                                                            // permissions.productCategory
-                                                                                            //     .isCreate
-                                                                                            true ? 10
+                                                                                            permissions.productCategory.isCreate ? 10
                                                                                                 : 11
                                                                                         }
                                                                                     >
@@ -391,9 +398,7 @@ export default function ManageBudgetDialog({
                                                                                         />
                                                                                     </Grid>
                                                                                     {
-                                                                                        // permissions.productCategory
-                                                                                        //     .isCreate
-                                                                                        true && (
+                                                                                        permissions.productCategory.isCreate && (
                                                                                             <Grid item xs={1} sm={1} md={1}>
                                                                                                 <Tooltip
                                                                                                     title="Add Product Category"
@@ -422,20 +427,20 @@ export default function ManageBudgetDialog({
                                                                                     ) : null}
                                                                                 </Grid>
                                                                             </Grid>
-                                                                                : field.fieldName === "marketSegment" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                                : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                                                                     <Grid container spacing={1}>
                                                                                         <Grid
                                                                                             item
                                                                                             xs={
-                                                                                                true ? 10
+                                                                                                permissions.marketSegment.isCreate ? 10
                                                                                                     : 11
                                                                                             }
                                                                                             sm={
-                                                                                                true ? 10
+                                                                                                permissions.marketSegment.isCreate ? 10
                                                                                                     : 11
                                                                                             }
                                                                                             md={
-                                                                                                true ? 10
+                                                                                                permissions.marketSegment.isCreate ? 10
                                                                                                     : 11
                                                                                             }
                                                                                         >
@@ -455,7 +460,8 @@ export default function ManageBudgetDialog({
                                                                                                 onChange={(e, val) => {
                                                                                                     setNewMarketSegmentId(null);
                                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                                    setFieldValue("subMarketSegment", "")
+                                                                                                    setNewSubMarketSegmentId(null);
+                                                                                                    setFieldValue(formFieldNames.subMarketSegment, "")
                                                                                                     marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                                                                                 }}
                                                                                                 size="small"
@@ -474,7 +480,7 @@ export default function ManageBudgetDialog({
                                                                                         {
                                                                                             // permissions.productCategory
                                                                                             //     .isCreate
-                                                                                            true && (
+                                                                                            permissions.marketSegment.isCreate && (
                                                                                                 <Grid item xs={1} sm={1} md={1}>
                                                                                                     <Tooltip
                                                                                                         title="Add Market Segment"
@@ -503,20 +509,20 @@ export default function ManageBudgetDialog({
                                                                                         ) : null}
                                                                                     </Grid>
                                                                                 </Grid>
-                                                                                    : field.fieldName === "subMarketSegment" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                                    : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                                                                         <Grid container spacing={1}>
                                                                                             <Grid
                                                                                                 item
                                                                                                 xs={
-                                                                                                    true ? 10
+                                                                                                    permissions.marketSegment.isCreate ? 10
                                                                                                         : 11
                                                                                                 }
                                                                                                 sm={
-                                                                                                    true ? 10
+                                                                                                    permissions.marketSegment.isCreate ? 10
                                                                                                         : 11
                                                                                                 }
                                                                                                 md={
-                                                                                                    true ? 10
+                                                                                                    permissions.marketSegment.isCreate ? 10
                                                                                                         : 11
                                                                                                 }
                                                                                             >
@@ -551,7 +557,7 @@ export default function ManageBudgetDialog({
                                                                                                 />
                                                                                             </Grid>
                                                                                             {
-                                                                                                true && (
+                                                                                                permissions.marketSegment.isCreate && (
                                                                                                     <Grid item xs={1} sm={1} md={1}>
                                                                                                         <Tooltip
                                                                                                             title="Add Sub Market Segment"
@@ -560,7 +566,6 @@ export default function ManageBudgetDialog({
                                                                                                             <IconButton
                                                                                                                 onClick={() => {
                                                                                                                     setShowAddMarketSegmentDialog(true);
-                                                                                                                    setIsSubMarketSegmentDialog(true)
                                                                                                                 }}
                                                                                                                 size="small"
                                                                                                             >
@@ -677,7 +682,8 @@ export default function ManageBudgetDialog({
             {
                 showAddProductCategoryDialog && <CreateProductCategory
                     productCategoryId={null}
-                    handleClose={(data) => {
+                    onClose={() => setShowAddProductCategoryDialog(false)}
+                    onSuccess={(data) => {
                         if (data?._id) {
                             setProductCategoryDataSource((prevState) => {
                                 return [
@@ -686,7 +692,7 @@ export default function ManageBudgetDialog({
                                         optionValue: data._id,
                                         optionLabel: data.name,
                                         order: productCategoryDataSource.length,
-                                        default: false,
+                                        default: false
                                     },
                                 ];
                             });
@@ -699,24 +705,26 @@ export default function ManageBudgetDialog({
             {
                 showAddMarketSegmentDialog && <ManageMarketSegmentDialog
                     marketSegmentId={null}
-                    handleClose={(data) => {
+                    onClose={() => {
+                        setShowAddMarketSegmentDialog(false);
+                    }}
+                    onSuccess={(data) => {
                         if (data?._id) {
-                            if (isSubMarketSegmentDialog) {
-                                setSubMarketSegmentDataSource((prevState) => {
-                                    return [
-                                        ...prevState,
-                                        {
-                                            optionValue: data._id,
-                                            optionLabel: data.name,
-                                            order: subMarketSegmentDataSource.length,
-                                            default: false,
-                                        },
-                                    ];
-                                });
-                                setNewSubMarketSegmentId(data._id);
-                                setIsSubMarketSegmentDialog(false)
-                            }
-                            else {
+                            setMainMarketSegmentDataSource((prevState) => {
+                                return [
+                                    ...prevState,
+                                    {
+                                        optionValue: data._id,
+                                        optionLabel: data.name,
+                                        order: mainMarketSegmentDataSource.length,
+                                        default: false,
+                                        parentMarketSegment: data.parentMarketSegment
+                                    }
+                                ];
+                            });
+
+                            //  If no parent selected, consider that as parent and add it in Market Segment
+                            if (data.parentMarketSegment === "") {
                                 setMarketSegmentDataSource((prevState) => {
                                     return [
                                         ...prevState,
@@ -725,15 +733,64 @@ export default function ManageBudgetDialog({
                                             optionLabel: data.name,
                                             order: marketSegmentDataSource.length,
                                             default: false,
-                                        },
+                                            parentMarketSegment: data.parentMarketSegment
+                                        }
                                     ];
                                 });
+                                setSubMarketSegmentDataSource([]);
                                 setNewMarketSegmentId(data._id);
+                                setNewSubMarketSegmentId(null);
+                            } else {
+                                //  If parent selected, consider that as a child
+                                if (marketSegmentDataSource.some(d => d.optionValue === data.parentMarketSegment)) {
+                                    setSubMarketSegmentDataSource([
+                                        ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                                        {
+                                            optionValue: data._id,
+                                            optionLabel: data.name,
+                                            order: subMarketSegmentDataSource.length,
+                                            default: false,
+                                            parentMarketSegment: data.parentMarketSegment
+                                        }]
+                                    );
+                                } else {
+
+                                    let initializeMarketSegmentDataSource = [];
+                                    mainMarketSegmentDataSource.forEach(option => {
+                                        if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
+                                            initializeMarketSegmentDataSource.push(option);
+                                        }
+                                    })
+
+                                    if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
+                                        const getMarketSegment = mainMarketSegmentDataSource.find(d => d.optionValue === data.parentMarketSegment);
+
+                                        initializeMarketSegmentDataSource.push({
+                                            optionValue: getMarketSegment.optionValue,
+                                            optionLabel: getMarketSegment.optionLabel,
+                                            order: initializeMarketSegmentDataSource.length,
+                                            default: false,
+                                            parentMarketSegment: getMarketSegment.parentMarketSegment
+                                        })
+                                    }
+                                    setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+
+                                    setSubMarketSegmentDataSource([
+                                        ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                                        {
+                                            optionValue: data._id,
+                                            optionLabel: data.name,
+                                            order: subMarketSegmentDataSource.length,
+                                            default: false,
+                                            parentMarketSegment: data.parentMarketSegment
+                                        }]
+                                    );
+                                }
+                                setNewMarketSegmentId(data.parentMarketSegment);
+                                setNewSubMarketSegmentId(data._id);
                             }
                         }
                         setShowAddMarketSegmentDialog(false);
-                        // fetchProductCategory();
-
                     }}
                 />
             }
