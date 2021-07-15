@@ -1,5 +1,5 @@
 import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbox, TextField, IconButton, Tooltip } from "@material-ui/core";
-import { Autocomplete } from "formik-material-ui-lab";
+import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
 import { AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
@@ -955,7 +955,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                             fullWidth
                                             className={classes.formControl}
                                         >
-                                            {/* <Autocomplete
+                                            <Autocomplete
                                                 id="demo-mutiple-chip"
                                                 disabled={!allowedToEdit}
                                                 fullWidth
@@ -992,7 +992,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                                         placeholder="Select "
                                                     />
                                                 )}
-                                            /> */}
+                                            />
                                         </FormControl>
                                     </Grid>
                                     <Grid item xs={1} md={1} sm={1}>
