@@ -165,7 +165,6 @@ export default function QuoteDetail() {
 
   const handleSetSteps = (steps) => {
     setSteps(steps);
-    debugger
   };
 
   const fetchQuoteData = (version: any) => {
@@ -185,6 +184,24 @@ export default function QuoteDetail() {
                 (d) => d?.optionValue === user?.user?._id
               )
             );
+            let caccccccccc = [...(data.collaborator ?? []), data.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+            debugger
+            var keys = Object.keys(data.versions);
+
+            if (keys.length === 1) {
+              setCurrentVersion(parseInt(keys[keys.length - 1]));
+              setProcessStatus(data.versions[keys[keys.length - 1]].processStatus);
+              setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
+              setVersionStatus(data.versions[keys[keys.length - 1]].status);
+            }
+            else {
+              setCurrentVersion(version);
+              setProcessStatus(data.versions[version].processStatus);
+              setProductBuilderId(data.versions[version].productBuilderId);
+              setVersionStatus(data.versions[version].status);
+            }
             setLoading(false);
           });
         })
@@ -338,13 +355,13 @@ export default function QuoteDetail() {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={2}>
-                  <Suspense fallback={
+                    <Suspense fallback={
                       <Loader minHeight="500px" text="Loading..." />
                     }>
                       {(quoteData && <QuoteProcess
                         quoteData={quoteData}
                         quotePermissions={permissions[qbResource]}
-                        ProcessStatus={selectedEntity}
+                        ProcessStatus={processStatus}
                         ifQuoteApproved={ifQuoteApproved}
                         allowedToEdit={allowedToEdit}
                         handleOpenUpdateDialog={handleOpenUpdateDialog}

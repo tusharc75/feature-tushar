@@ -19,6 +19,7 @@ import * as XLSX from "xlsx";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
+import AdditionalData from "./AdditionalData";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -1115,6 +1116,11 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                     text="Loading..."
                                 />
                             )}
+                            {ProcessStatus === "Quote Builder" ? (
+                               <AdditionalData
+                               allowedToEdit={allowedToEdit}
+                               />
+                               ) : null}
                         </Grid>
                     </Grid>
                 ) : null}
