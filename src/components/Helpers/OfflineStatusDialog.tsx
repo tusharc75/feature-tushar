@@ -19,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function OfflineStatusDialog(props) {
     const classes = useStyles();
-    const { open } = props;
 
     return (
         <Dialog
@@ -34,7 +33,6 @@ export default function OfflineStatusDialog(props) {
             id="confirmation-dialog"
             keepMounted
         >
-            {/* <DialogTitle id="confirmation-dialog-title" className="text-white">Offline</DialogTitle> */}
             <DialogContent dividers>
                 {
                     <Typography>You are offline</Typography>
@@ -44,11 +42,4 @@ export default function OfflineStatusDialog(props) {
     );
 }
 
-OfflineStatusDialog.propTypes = {
-    onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired,
-    message: PropTypes.string.isRequired,
-    onOk: PropTypes.func,
-    okBtnLoading: PropTypes.any
-};
 
