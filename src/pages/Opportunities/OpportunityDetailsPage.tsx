@@ -353,7 +353,7 @@ function OpportunityDetailsPage() {
     mainPoint['Opportunity Owner'] = data?.owner?.optionLabel || '';
     setMainPoints(mainPoint);
   };
-
+  let customFields;
   const getOpportunityFields = (passedOpportunityData) => {
     if (selectedEntity) {
       axiosInstance()
@@ -409,6 +409,7 @@ function OpportunityDetailsPage() {
 
                 if (currentStepToShow === allProcessSteps.length - 1) {
                   setOpportunityFields(filteredFields);
+                  customFields = filteredFields;
                 } else {
                   setOpportunityFields(filteredFields.filter((item) => item.fieldData.sectionName !== processSteps.fieldData.additionalInfoSection));
                 }
@@ -527,8 +528,10 @@ function OpportunityDetailsPage() {
       ...opportunityData,
       ...data
     };
+
+    const updatedOpportunityFields = [...opportunityFieldData,...sectionFields.map((item)=>item.fieldData)]
     const updatedData = {
-      ...getObjKeysWithValues(updatedOpportunityData, opportunityFieldData),
+      ...getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields),
       [processFieldName]: steps[tempActiveStep].text,
       _id: opportunityData._id
     };
