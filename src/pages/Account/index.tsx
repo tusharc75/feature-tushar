@@ -132,6 +132,7 @@ export default function Account(props) {
     { field: "accountName", headerName: "Account Name", show: true, disabled: true, cellRenderer: "accountNameRenderer" },
     { field: "lead", headerName: "Related Lead", show: true, cellRenderer: "leadRenderer" },
     { field: "typeOfAccount", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
+    { field: "entity", headerName: "Entity Name", show: true, cellRenderer: "commonRenderer" },
     { field: "industry", headerName: "Industry", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
@@ -303,6 +304,8 @@ export default function Account(props) {
 
       case "parentAccount":
         return "parentAccount.optionLabel";
+      case "entity":
+        return "entity.optionLabel";
 
       default:
         return field;
@@ -378,7 +381,7 @@ export default function Account(props) {
       .then(({ data: { data, count } }) => {
 
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, ...restProperties } = u;
+          const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
 
           let res = {
             ...restProperties,
@@ -398,6 +401,8 @@ export default function Account(props) {
 
             parentAccount: parentAccount?.optionLabel,
             parentAccountId: parentAccount?.optionValue,
+
+            entity: entity?.optionLabel,
 
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?.accountName : "",
             masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?._id : "",
