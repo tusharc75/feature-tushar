@@ -6,6 +6,7 @@ import {
   IconButton,
   Grid,
   Box,
+  Button
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -15,7 +16,7 @@ import { BsBriefcase } from "react-icons/bs";
 import { GoNote } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { FiPlusSquare } from "react-icons/fi";
-import { AiOutlinePaperClip } from "react-icons/ai";
+import { AiOutlinePaperClip, AiOutlineHistory } from "react-icons/ai";
 import { Task } from "./Task";
 import { CreateTask } from "./Task/CreateTask";
 import { Event } from "./Event";
@@ -34,6 +35,7 @@ import ManageAttachment from "./Attachments/ManageAttachment";
 import Chatter from "./Chatter";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
+import HistoryDialog from "./History/index"
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
@@ -55,7 +57,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [] } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [],
+    resourceId = '', resource = '' } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -70,6 +73,7 @@ const Activity = (props) => {
     Email: 0,
     Attachment: 0,
   });
+  const [showHistory, setShowHistory] = useState(false)
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
@@ -177,161 +181,179 @@ const Activity = (props) => {
   };
 
   return (
-    <Box>
-      <Box className="detailHeader">
-        <h2 className="listingHeader single">Activity</h2>
-      </Box>
-      <Box className={classes.activityBox}>
-        {tabs.map((data, index) => (
-          <Fragment key={index}>
-            <Box
-              className={classes.activitySubBox}
-              onClick={(event) => handleChangeType(event, data)}
-            >
-              <Grid container>
-                <Grid item xs={8}>
-                  <Box display="flex">
-                    <Box>
-                      <IconButton size="small">
-                        {type === data ? (
-                          <ExpandLessIcon />
-                        ) : (
-                          <ExpandMoreIcon />
-                        )}
-                      </IconButton>
-                    </Box>
-                    <Box ml={1} mt={0.5}>
-                      <Typography
-                        variant="subtitle2"
-                        color="primary"
-                        className="d-flex align-items-center"
-                      >
-                        {getIcon(data)} {data} ({totalCount[data]})
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                {
-                  restrictedAddActivities.indexOf(data) >= 0 ? null :
-                    <Grid item xs={4} container justify="flex-end">
-                      <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={(event) => handleCreateActivity(event, data)}
-                      >
-                        {" "}
-                        <FiPlusSquare />
-                      </IconButton>
+    <>
+      <Box>
+        <Box className="detailHeader">
+          <h2 className="listingHeader single">Activity</h2>
+        </Box>
+        <Box className={classes.activityBox}>
+          <>
+            {tabs.map((data, index) => (
+              <Fragment key={index}>
+                <Box
+                  className={classes.activitySubBox}
+                  onClick={(event) => handleChangeType(event, data)}
+                >
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box>
+                          <IconButton size="small">
+                            {type === data ? (
+                              <ExpandLessIcon />
+                            ) : (
+                              <ExpandMoreIcon />
+                            )}
+                          </IconButton>
+                        </Box>
+                        <Box ml={1} mt={0.5}>
+                          <Typography
+                            variant="subtitle2"
+                            color="primary"
+                            className="d-flex align-items-center"
+                          >
+                            {getIcon(data)} {data} ({totalCount[data]})
+                          </Typography>
+                        </Box>
+                      </Box>
                     </Grid>
-                }
-              </Grid>
+                    {
+                      restrictedAddActivities.indexOf(data) >= 0 ? null :
+                        <Grid item xs={4} container justify="flex-end">
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={(event) => handleCreateActivity(event, data)}
+                          >
+                            {" "}
+                            <FiPlusSquare />
+                          </IconButton>
+                        </Grid>
+                    }
+                  </Grid>
+                </Box>
+                <Box>
+                  {type === "Task" && data === "Task" ? (
+                    <Task
+                      relatedTo={relatedTo}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
+                  ) : null}
+                  {type === "Event" && data === "Event" ? (
+                    <Event
+                      relatedTo={relatedTo}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
+                  ) : null}
+                  {type === "Case" && data === "Case" ? (
+                    <Case
+                      relatedTo={relatedTo}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
+                  ) : null}
+                  {type === "Note" && data === "Note" ? (
+                    <Note
+                      relatedTo={relatedTo}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
+                  ) : null}
+                  {type === "Email" && data === "Email" ? (
+                    <Email
+                      relatedTo={relatedTo}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
+                  ) : null}
+                  {type === "Attachment" && data === "Attachment" ? (
+                    <Attachments
+                      relatedTo={relatedTo}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
+                  ) : null}
+                </Box>
+              </Fragment>
+            ))}
+            <Box
+              className={classes.activitySubBox} style={{ width: '100px', padding: '4px' }}>
+              <Button onClick={() => setShowHistory(true)}  >
+                <AiOutlineHistory className="mr-1" size={20} /> History
+              </Button>
             </Box>
-            <Box>
-              {type === "Task" && data === "Task" ? (
-                <Task
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                  onSetCount={handleSetCount}
-                />
-              ) : null}
-              {type === "Event" && data === "Event" ? (
-                <Event
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                  onSetCount={handleSetCount}
-                />
-              ) : null}
-              {type === "Case" && data === "Case" ? (
-                <Case
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                  onSetCount={handleSetCount}
-                />
-              ) : null}
-              {type === "Note" && data === "Note" ? (
-                <Note
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                  onSetCount={handleSetCount}
-                />
-              ) : null}
-              {type === "Email" && data === "Email" ? (
-                <Email
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                  onSetCount={handleSetCount}
-                />
-              ) : null}
-              {type === "Attachment" && data === "Attachment" ? (
-                <Attachments
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                  onSetCount={handleSetCount}
-                />
-              ) : null}
-            </Box>
-          </Fragment>
-        ))}
-        {relatedTo && relatedTo[0].referenceId ? (
-          <Chatter relatedTo={relatedTo} />
-        ) : null}
+            {relatedTo && relatedTo[0].referenceId ? (
+              <Chatter relatedTo={relatedTo} />
+            ) : null}
+          </>
+        </Box>
+        <Dialog
+          fullScreen={isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          open={open}
+          aria-labelledby="customized-dialog-title"
+          maxWidth={"md"}
+          onClose={handleClose}
+          fullWidth
+        >
+          {type === "Task" ? (
+            <CreateTask
+              taskId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+            />
+          ) : null}
+          {type === "Event" ? (
+            <CreateEvent
+              eventId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+              email={emails}
+            />
+          ) : null}
+          {type === "Case" ? (
+            <CreateCase
+              caseId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+            />
+          ) : null}
+          {type === "Note" ? (
+            <CreateNote
+              noteId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+              handleDialogClose={handleClose}
+            />
+          ) : null}
+          {type === "Email" ? (
+            <CreateEmail
+              emailId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+              options={emailUsersOptions}
+            />
+          ) : null}
+          {type === "Attachment" ? (
+            <ManageAttachment
+              attachmentId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+            />
+          ) : null}
+        </Dialog>
       </Box>
-      <Dialog
-        fullScreen={isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        open={open}
-        aria-labelledby="customized-dialog-title"
-        maxWidth={"md"}
-        onClose={handleClose}
-        fullWidth
-      >
-        {type === "Task" ? (
-          <CreateTask
-            taskId={null}
-            handleClose={handleClose}
-            relatedTo={relatedTo}
-          />
-        ) : null}
-        {type === "Event" ? (
-          <CreateEvent
-            eventId={null}
-            handleClose={handleClose}
-            relatedTo={relatedTo}
-            email={emails}
-          />
-        ) : null}
-        {type === "Case" ? (
-          <CreateCase
-            caseId={null}
-            handleClose={handleClose}
-            relatedTo={relatedTo}
-          />
-        ) : null}
-        {type === "Note" ? (
-          <CreateNote
-            noteId={null}
-            handleClose={handleClose}
-            relatedTo={relatedTo}
-            handleDialogClose={handleClose}
-          />
-        ) : null}
-        {type === "Email" ? (
-          <CreateEmail
-            emailId={null}
-            handleClose={handleClose}
-            relatedTo={relatedTo}
-            options={emailUsersOptions}
-          />
-        ) : null}
-        {type === "Attachment" ? (
-          <ManageAttachment
-            attachmentId={null}
-            handleClose={handleClose}
-            relatedTo={relatedTo}
-          />
-        ) : null}
-      </Dialog>
-    </Box>
+      {
+        showHistory ? <HistoryDialog
+          open={showHistory}
+          resourceId={resourceId}
+          resource={resource}
+          onClose={() => setShowHistory(false)}
+        /> : null
+      }
+    </>
   );
 };
 

@@ -2613,6 +2613,8 @@ function QuoteDetail() {
                         access: false,
                       },
                     ]}
+                    resourceId={quoteData?._id}
+                    resource={quote.quoteResource}
                     handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />

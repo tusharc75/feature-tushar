@@ -1,0 +1,90 @@
+import React, { useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
+import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography'
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog';
+import axiosInstance from "../../../axios/axiosInstance"
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: '100%',
+        maxWidth: 360,
+        backgroundColor: theme.palette.background.paper,
+    },
+    paper: {
+        width: '80%',
+        maxHeight: 435,
+    },
+}));
+
+export default function HistoryDialog(props) {
+    const classes = useStyles();
+    const { onClose, open, resourceId, resource } = props;
+    const [history, setHistory] = useState([])
+    const [loading, setLoading] = useState(false)
+    const toastConfig = useContext(CustomToastContext);
+
+    useEffect(() => {
+        fetchHistory()
+    }, [])
+
+    const fetchHistory = () => {
+        if (resourceId && resource) {
+            setLoading(true)
+            axiosInstance()
+                .get(`/history/${resource}/${resourceId}`)
+                .then(({ data }) => {
+                    setLoading(false)
+                    console.log("🚀 ~ file: index.js ~ line 31 ~ .then ~ data", data)
+                })
+                .catch((err) => {
+                    setLoading(false)
+                    toastConfig.setToastConfig(err);
+                })
+        }
+    }
+
+
+    return (
+        <Dialog
+            disableBackdropClick
+            disableEscapeKeyDown
+            maxWidth="xs"
+            aria-labelledby="confirmation-dialog-title"
+            open={open}
+            classes={{
+                paper: classes.paper,
+            }}
+            id="confirmation-dialog"
+            keepMounted
+        >
+            <DialogTitle id="confirmation-dialog-title" className="text-white">
+                History</DialogTitle>
+            <DialogContent dividers>
+                {
+                    loading ? <Typography>Fetching Data</Typography> :
+                        history.length ? null : <Typography>No History Available</Typography>
+                }
+            </DialogContent>
+            <DialogActions>
+                <Button size="small" autoFocus onClick={onClose} color="primary">Cancel</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
+HistoryDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+    message: PropTypes.string.isRequired,
+    onOk: PropTypes.func,
+    okBtnLoading: PropTypes.any,
+    resourceId: PropTypes.any,
+    resource: PropTypes.any,
+};
+
