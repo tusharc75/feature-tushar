@@ -41,6 +41,7 @@ import { displayCardDate } from "../../constants/helpers";
 import ChatIcon from "@material-ui/icons/Chat";
 import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import { backendApi } from "../../config";
+import OfflineStatusDialog from "../../components/Helpers/OfflineStatusDialog";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -189,6 +190,7 @@ const Header = ({ toggleDrawer }) => {
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
+  const [isOffline, setIsOffline] = useState(false)
 
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] =
@@ -210,6 +212,34 @@ const Header = ({ toggleDrawer }) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+
+  window.addEventListener('load', function (e) {
+    if (navigator.onLine) {
+      if (isOffline) setIsOffline(false)
+    }
+    else {
+      setIsOffline(true);
+      if (socket) {
+        socket.on("disconnect", (e) => {
+          socket.disconnect()
+        })
+      }
+    }
+  }, false);
+
+  window.addEventListener('online', function (e) {
+    if (isOffline) setIsOffline(false)
+  }, false);
+
+  window.addEventListener('offline', function (e) {
+    setIsOffline(true);
+    if (socket) {
+      socket.on("disconnect", (e) => {
+        socket.disconnect()
+      })
+    }
+  }, false);
 
   const handleFullScreenNotificationClose = () => {
     setFullScreenNotificationAnchorEl(null);
@@ -272,7 +302,7 @@ const Header = ({ toggleDrawer }) => {
       auth: {
         token,
       },
-      transports: ['websocket',"pooling"],
+      transports: ['websocket', "pooling"],
     });
     setSocket(s);
   }, [user]);
@@ -1120,6 +1150,10 @@ const Header = ({ toggleDrawer }) => {
               <MoreIcon />
             </IconButton>
           )}
+          {
+            isOffline ?
+              <OfflineStatusDialog /> : null
+          }
         </Toolbar>
       </AppBar>
       {renderMobileMenu}

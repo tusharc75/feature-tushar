@@ -87,13 +87,11 @@ import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyCart from "./components/ProductList/MyCart/MyCart";
-import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog"
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
-  const [isOffline, setIsOffline] = useState(false)
 
   const {
     state: { user },
@@ -102,23 +100,6 @@ function App() {
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
 
-
-  window.addEventListener('load', function (e) {
-    if (navigator.onLine) {
-      if (isOffline) setIsOffline(false)
-    }
-    else {
-      setIsOffline(true)
-    }
-  }, false);
-
-  window.addEventListener('online', function (e) {
-    if (isOffline) setIsOffline(false)
-  }, false);
-
-  window.addEventListener('offline', function (e) {
-    setIsOffline(true)
-  }, false);
 
   const getVersion = () => {
     setTimeout(() => {
@@ -526,10 +507,6 @@ function App() {
           }}
         />
       )}
-      {
-        isOffline ?
-          <OfflineStatusDialog /> : null
-      }
     </ThemeProvider>
   );
 }
