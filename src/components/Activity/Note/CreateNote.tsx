@@ -32,6 +32,7 @@ import { displayDate } from "../../../constants/helpers"
 const NoteSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter note title"),
+    fileUrl: Yup.string().required("please upload attachment"),
 });
 
 
@@ -248,7 +249,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
 
     const classes = useStyles();
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
+        {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
             <>
                 <CustomDialogHeader onClose={handleDialogClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
@@ -271,7 +272,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                         <Box margin={0.5} />
-                                        <Grid item xs={10}>
+                                        <Grid item xs={10} >
                                             <FormTypes
                                                 label="File"
                                                 name="fileUrl"
@@ -290,6 +291,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                                 imageOrFileUploadCompletePercentage={(completePercentage) => {
                                                     setUploadingImageOrFileProgress(completePercentage);
                                                 }}
+                                                showErrorMessage={true}
                                             />
                                         </Grid>
                                         {renderFileThumbnails}
@@ -303,7 +305,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             emailId={noteId}
                                             isRenderedFrom={true}
                                         />
-                                        <Box mt={2}>
+                                        <Box >
                                             <RichTextEditor
                                                 className={classes.textEditor}
                                                 value={values["description"]}
@@ -373,8 +375,16 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                 </CustomDialogContent>
                 <CustomDialogFooter>
                     <Button size="small" type="button" color="primary" onClick={handleDialogClose}>Cancel</Button>
-                    <Button size="small" type="button" color="primary" variant="contained" onClick={submitForm}
-                        disabled={uploadingImageOrFileProgress > 0}>Save</Button>
+                    <Button size="small" type="button" color="primary" variant="contained"
+                        onClick={() => {
+                            if (Object.keys(errors).length) {
+                                Object.keys(errors).map(k => {
+                                    setFieldTouched(k, true)
+                                })
+                            }
+                            else submitForm()
+                        }}
+                        disabled={uploadingImageOrFileProgress > 0 || (fileImageAttachments.length == 0 && otherAttachments.length == 0)}>Save</Button>
                 </CustomDialogFooter>
                 {
                     open ?

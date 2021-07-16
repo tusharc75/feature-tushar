@@ -127,8 +127,9 @@ const ProductCategory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
-        state: { permissions },
+        state: { permissions, user },
     }: any = useData();
+
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
         isCreate: false,
         isUpdate: false,
@@ -136,13 +137,12 @@ const ProductCategory = () => {
         isDelete: false,
     });
 
-
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    
+
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
     //  Grid Variables - Start
@@ -175,11 +175,11 @@ const ProductCategory = () => {
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-       
+
     </span>
 
     const ActionsRenderer = params => <Fragment>
-        {productCategoryPermissions.isDelete ?
+        {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -195,7 +195,7 @@ const ProductCategory = () => {
                 </IconButton>
             </Tooltip>
         }
-    </Fragment>
+    </Fragment >
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
@@ -262,9 +262,11 @@ const ProductCategory = () => {
                     id: u._id,
 
                     createdBy: u.createdBy?.user?.concatedName,
+                    createdById: u.createdBy?.user?._id,
                     createdByDate: u.createdBy?.date,
                     updatedBy: u.updatedBy?.user?.concatedName,
                     updatedByDate: u.updatedBy?.date,
+
                 }
 
                 return res;
@@ -281,7 +283,7 @@ const ProductCategory = () => {
         });
     };
 
-   
+
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -390,15 +392,15 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
-        
-            {open && 
-                <CreateProductCategory 
+
+            {open &&
+                <CreateProductCategory
                     productCategoryId={productCategoryId}
-                    onClose = {() => setOpen(false)} 
-                    onSuccess={() => { 
-                        setOpen(false); 
-                        fetchProductCategory() 
-                    }} 
+                    onClose={() => setOpen(false)}
+                    onSuccess={() => {
+                        setOpen(false);
+                        fetchProductCategory()
+                    }}
                 />
             }
         </CustomContainer>

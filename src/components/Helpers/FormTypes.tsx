@@ -165,9 +165,9 @@ const FormTypes = (props) => {
     canEdit = true,
     customError = {},
     handleRemoveField,
+    showErrorMessage = false,
     ...rest
   } = props;
-
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
@@ -256,6 +256,10 @@ const FormTypes = (props) => {
       event.target.value = '';
     }
   };
+
+  const getLabel = label => {
+    return label ? label.length > 35 ? label.substr(0, 35) + "..." : label : ""
+  }
 
   const handleUploadFile = (ev) => {
     if (ev.target.files && ev.target.files.length) {
@@ -507,7 +511,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="text"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -522,7 +526,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="text"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -543,7 +547,7 @@ const FormTypes = (props) => {
         variant="outlined"
         type="text"
         multiline
-        label={label}
+        label={getLabel(label)}
         name={name}
         required={required}
         rows={3}
@@ -558,7 +562,7 @@ const FormTypes = (props) => {
       <TextField
         {...rest}
         variant="outlined"
-        label={label}
+        label={getLabel(label)}
         name={name}
         required={required}
         value={values[name]}
@@ -584,7 +588,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="number"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -595,8 +599,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              }
+              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            }
         }
         InputProps={{
           inputProps: { min: 0 },
@@ -610,7 +614,7 @@ const FormTypes = (props) => {
         {...rest}
         type="number"
         variant="outlined"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -626,8 +630,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              }
+              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            }
         }
       />
     </InfoLabel>
@@ -637,7 +641,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
-        label={label}
+        label={getLabel(label)}
         name={name}
         required={required}
         value={values[name]}
@@ -647,12 +651,12 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                if (fieldData.returnType === 'decimal') {
-                  handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                } else {
-                  handleChange(name, e.target.value);
-                }
+              if (fieldData.returnType === 'decimal') {
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              } else {
+                handleChange(name, e.target.value);
               }
+            }
         }
         InputProps={{
           inputProps: { min: 0 },
@@ -666,7 +670,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="email"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -681,7 +685,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="password"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -699,7 +703,7 @@ const FormTypes = (props) => {
         countryCodeEditable={false}
         variant="outlined"
         required={required}
-        label={label}
+        label={getLabel(label)}
         name={name}
         value={values[name]}
         onChange={onChange ? onChange : (val) => setFieldValue(name, val)}
@@ -725,14 +729,14 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) => {
-                handleChange(name, val && val.optionValue ? val.optionValue : '');
-              }
+              handleChange(name, val && val.optionValue ? val.optionValue : '');
+            }
         }
         renderInput={(params) => (
           <TextField
             {...params}
             name={name}
-            label={label}
+            label={getLabel(label)}
             variant="outlined"
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
@@ -756,7 +760,7 @@ const FormTypes = (props) => {
           <TextField
             {...params}
             name={name}
-            label={label}
+            label={getLabel(label)}
             variant="outlined"
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
@@ -771,7 +775,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="text"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -823,12 +827,12 @@ const FormTypes = (props) => {
               {(fieldData.leval === 'product-custom' ||
                 fieldData.leval === 'product-builder-custom' ||
                 fieldData.leval === 'price-builder-custom') && (
-                <Tooltip title="Remove">
-                  <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                    <HighlightOffIcon color="error" />
-                  </IconButton>
-                </Tooltip>
-              )}
+                  <Tooltip title="Remove">
+                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                )}
               {isExtraDispayType && (
                 <AddDisplayTypeDialog
                   handleAddDisplayType={handleAddDisplayType}
@@ -917,12 +921,12 @@ const FormTypes = (props) => {
                   {(fieldData.leval === 'product-custom' ||
                     fieldData.leval === 'product-builder-custom' ||
                     fieldData.leval === 'price-builder-custom') && (
-                    <Tooltip title="Remove">
-                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                      <Tooltip title="Remove">
+                        <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                          <HighlightOffIcon color="error" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   {fieldData.displayUnits.length !== fieldData.units.length && (
                     <Tooltip title="Add Converter" className="formActionButton">
                       <IconButton
@@ -994,12 +998,12 @@ const FormTypes = (props) => {
                     onChange
                       ? onChange
                       : (e) => {
-                          if (fieldData.displayCurrency.length > 1) {
-                            handleCurrencyChange(name, _currency, parseFloat(e.target.value));
-                          } else {
-                            handleChange(name + '_' + _currency.toLowerCase(), parseFloat(e.target.value));
-                          }
+                        if (fieldData.displayCurrency.length > 1) {
+                          handleCurrencyChange(name, _currency, parseFloat(e.target.value));
+                        } else {
+                          handleChange(name + '_' + _currency.toLowerCase(), parseFloat(e.target.value));
                         }
+                      }
                   }
                   InputProps={{
                     startAdornment: (
@@ -1034,12 +1038,12 @@ const FormTypes = (props) => {
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
-                  <Tooltip title="Remove">
-                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                      <HighlightOffIcon color="error" />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                    <Tooltip title="Remove">
+                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 {isExtraDispayType && (
                   <AddDisplayTypeDialog
                     handleAddDisplayType={handleAddDisplayType}
@@ -1082,7 +1086,7 @@ const FormTypes = (props) => {
             {...params}
             variant="outlined"
             name={name}
-            label={label}
+            label={getLabel(label)}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
             required={required}
@@ -1092,28 +1096,28 @@ const FormTypes = (props) => {
           const { currencyCode, currencyName, symbolNative } = option;
           return `${currencyCode} - ${currencyName} - (${symbolNative})`;
         }}
-        // renderOption={(option) => {
-        //   const { currencyCode, name, countryCode, symbolNative } = option;
-        //   return (
-        //     <Grid container alignItems="center">
-        //       <Grid item>
-        //         <Avatar
-        //           variant="rounded"
-        //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-        //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-        //         />
-        //       </Grid>
-        //       <Grid item xs>
-        //         <Typography>
-        //           {currencyCode} ({symbolNative})
-        //         </Typography>
-        //         <Typography variant="body2" color="textSecondary">
-        //           {name}
-        //         </Typography>
-        //       </Grid>
-        //     </Grid>
-        //   );
-        // }}
+      // renderOption={(option) => {
+      //   const { currencyCode, name, countryCode, symbolNative } = option;
+      //   return (
+      //     <Grid container alignItems="center">
+      //       <Grid item>
+      //         <Avatar
+      //           variant="rounded"
+      //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+      //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+      //         />
+      //       </Grid>
+      //       <Grid item xs>
+      //         <Typography>
+      //           {currencyCode} ({symbolNative})
+      //         </Typography>
+      //         <Typography variant="body2" color="textSecondary">
+      //           {name}
+      //         </Typography>
+      //       </Grid>
+      //     </Grid>
+      //   );
+      // }}
       />
     </InfoLabel>
   ) : type === 'multiSelect' ? (
@@ -1130,20 +1134,21 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
             {...params}
             variant="outlined"
-            label={label}
+            label={getLabel(label)}
             name={name}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
             required={required}
+            style={{ whiteSpace: 'nowrap' }}
           />
         )}
       />
@@ -1158,7 +1163,7 @@ const FormTypes = (props) => {
             <GreenSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
           )
         }
-        label={label}
+        label={getLabel(label)}
       />
     </InfoLabel>
   ) : type === 'checkBox' ? (
@@ -1202,9 +1207,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1214,7 +1219,7 @@ const FormTypes = (props) => {
             {...params}
             variant="outlined"
             name={name}
-            label={label}
+            label={getLabel(label)}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
             required={required}
@@ -1360,7 +1365,18 @@ const FormTypes = (props) => {
             {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
           </Button>
         </label>
-
+        {
+          showErrorMessage ?
+            <>
+              <Box ml={1} />
+              <Box flex="1" className="text-truncate">
+                <Typography variant="body2" className="text-truncate" color={'error'}>
+                  {touched[name] && Boolean(errors[name])
+                    ? errors[name] || 'No file choosen' : null}
+                </Typography>
+              </Box>
+            </> : null
+        }
         {doNotShowUploadedFile ? null : (
           <>
             <Box ml={1} />
@@ -1370,10 +1386,10 @@ const FormTypes = (props) => {
                 {isFileUploading
                   ? `Uploading... ${fileUploadProgress}%`
                   : values[name]
-                  ? values[name]
-                  : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : 'No file choosen'}
+                    ? values[name]
+                    : touched[name] && Boolean(errors[name])
+                      ? errors[name]
+                      : 'No file choosen'}
               </Typography>
             </Box>
             {values[name] ? (
@@ -1388,6 +1404,7 @@ const FormTypes = (props) => {
                 <DeleteIcon color="error" />
               </IconButton>
             ) : null}
+
           </>
         )}
       </Box>
@@ -1398,7 +1415,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="url"
-        label={label}
+        label={getLabel(label)}
         required={required}
         name={name}
         value={values[name]}
@@ -1418,7 +1435,7 @@ const FormTypes = (props) => {
           inputVariant="outlined"
           value={values[name]}
           name={name}
-          label={label}
+          label={getLabel(label)}
           onChange={onChange ? onChange : (date) => setFieldValue(name, date ? date : '')}
           // onChange={(date) => setFieldValue(name, date ? date : "")}
           error={customError[name] || (touched[name] && Boolean(errors[name]))}
@@ -1442,7 +1459,7 @@ const FormTypes = (props) => {
           ampm={false}
           value={values[name] || new Date('2018-01-01T00:00:00.000Z')}
           name={name}
-          label={label}
+          label={getLabel(label)}
           onChange={(date) => setFieldValue(name, date)}
           onError={console.log}
           disablePast
@@ -1467,7 +1484,7 @@ const FormTypes = (props) => {
           inputVariant="outlined"
           value={values[name] || new Date()}
           name={name}
-          label={label}
+          label={getLabel(label)}
           views={['year']}
           onChange={(date) => setFieldValue(name, date)}
           error={touched[name] && Boolean(errors[name])}
