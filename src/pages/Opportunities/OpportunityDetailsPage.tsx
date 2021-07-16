@@ -172,7 +172,6 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).shortFormatAmount;
@@ -359,7 +358,7 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName')
+          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName');
 
           const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
 
@@ -391,15 +390,19 @@ function OpportunityDetailsPage() {
                 text: m.optionLabel,
                 canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase())
               };
-            })
+            });
 
             setSteps(allProcessSteps);
 
             if (allProcessSteps.length > 0) {
-              const currentProcessSteps = filteredFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+              const currentProcessSteps = filteredFields.find(
+                (d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase()
+              );
               if (currentProcessSteps && currentProcessSteps.isRead && passedOpportunityData) {
                 setAdditionalFieldName(currentProcessSteps.fieldData.additionalInfoSection);
-                const currentStepToShow = currentProcessSteps.fieldData.option.findIndex((d) => d.optionLabel === passedOpportunityData[processFieldName]);
+                const currentStepToShow = currentProcessSteps.fieldData.option.findIndex(
+                  (d) => d.optionLabel === passedOpportunityData[processFieldName]
+                );
                 setActiveStep(currentStepToShow);
                 if (currentStepToShow === allProcessSteps.length - 1) {
                   setShowAtLast(true);
@@ -617,9 +620,9 @@ function OpportunityDetailsPage() {
                     </Button>
                   ) : null}
                   {opportunityPermissions.isDelete &&
-                    opportunityData?.owner.optionValue &&
-                    user?.user?._id &&
-                    opportunityData.owner.optionValue === user.user._id ? (
+                  opportunityData?.owner.optionValue &&
+                  user?.user?._id &&
+                  opportunityData.owner.optionValue === user.user._id ? (
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   ) : null}
                 </DetailsPageHeader>
@@ -659,12 +662,9 @@ function OpportunityDetailsPage() {
                 <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
                   <img src={SVG('Opportunity Placeholder')} alt="No Data" />
                 </Box>
-              ) :
-                <DetailsPage
-                  data={copyOfOpportunityData}
-                  fields={opportunityFields}
-                />
-              }
+              ) : (
+                <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
+              )}
 
               <div className="p-3">
                 {opportunityData && (
@@ -773,14 +773,13 @@ function OpportunityDetailsPage() {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
               )}
             </Paper>
           </Grid>
-
         </Grid>
 
         {showConfirmBox ? (
@@ -815,7 +814,7 @@ function OpportunityDetailsPage() {
             dataToUpdate={opportunityData}
             resource={null}
             isRedirectTodetailPage={false}
-          // opportunityApi={opportunityApi}
+            // opportunityApi={opportunityApi}
           />
         )}
 
