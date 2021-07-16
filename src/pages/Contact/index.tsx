@@ -288,7 +288,6 @@ export default function Contact(props) {
             accountName: u.accountName?.optionLabel,
 
             entity: entity?.optionLabel,
-
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 

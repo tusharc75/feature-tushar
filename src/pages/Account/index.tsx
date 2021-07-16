@@ -403,7 +403,6 @@ export default function Account(props) {
             parentAccountId: parentAccount?.optionValue,
 
             entity: entity?.optionLabel,
-
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?.accountName : "",
             masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?._id : "",
 
