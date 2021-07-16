@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbox, TextField, IconButton, Tooltip } from "@material-ui/core";
+import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbox, TextField, IconButton, Tooltip, Dialog, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
@@ -10,7 +10,7 @@ import { HiPencil } from "react-icons/hi";
 import axiosInstance from "../../../../axios/axiosInstance";
 import Loader from "../../../../components/Loader";
 import ProductBuilder from "../../../../components/productBuilder";
-import { currencyCodeToSymbol, formatAmountWithCurrency, quoteBuilder } from "../../../../constants/helpers";
+import { currencyCodeToSymbol, CustomDialogTransition, customerAccount, customerContact, formatAmountWithCurrency, opportunity, quote, quoteBuilder, sidebarResource, supplierAccount } from "../../../../constants/helpers";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import ProductGrid from "./ProductGrid";
 import Steps from "./Steps";
@@ -20,6 +20,16 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import AdditionalData from "./AdditionalData";
+import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
+import { isMobile, isTablet } from "react-device-detect";
+import PerformanceTuningImg from "../../../../assets/PerformanceTuning.png";
+import { CreateEmail } from "../../../../components/Activity/Email/CreateEmail";
+import MessageDialog from "../../../../components/Helpers/MessageDialog";
+import ColumnsDialog from "./ColumnsDialog";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { useData } from "../../../../StateProvider/Provider";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -103,11 +113,14 @@ const OtherSteps = [
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, ifQuoteApproved, currentVersion, handleChangeVersion, productBuilderId, versionStatus, fetchQuoteData, quotePermissions, handleOpenUpdateDialog }) {
+export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, ifQuoteApproved, currentVersion, handleChangeVersion, productBuilderId, versionStatus, fetchQuoteData, handleOpenUpdateDialog }) {
 
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const { qbResource, qbApi } = quoteBuilder;
+    const {
+        state: { user, permissions },
+      }: any = useData();
 
     const [nextStep, setNextStep] = useState(true);
     const [options, setOptions] = useState([]);
@@ -159,33 +172,38 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
     const [generatingPdfFile, setGeneratingFile] = useState(false);
+    const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
     const [sendEmail, setSendEmail] = useState(false);
     const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
     const [loadingVersions, setLoadingVersions] = useState(true);
+    const [messageDialog, setMessageDialog] = useState({
+        open: false,
+        message: null,
+    });
 
     useEffect(() => {
         if (currentVersion !== 0) fetchDOAData();
-      }, [currentVersion, DOAreq]);
+    }, [currentVersion, DOAreq]);
 
-      useEffect(() => {
+    useEffect(() => {
         fetchDoaLimit();
-      }, [quoteData]);  
+    }, [quoteData]);
 
-      const fetchDOAData = () => {
+    const fetchDOAData = () => {
         if (ProcessStatus === "DOA Process") {
-          axiosInstance()
-            .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
-            .then(({ data: { data } }) => {
-              setDOAData(data.reverse());
-            })
-            .catch((err) => {
-              setDOAData(null);
-              // toastConfig.setToastConfig(err);
-            });
+            axiosInstance()
+                .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
+                .then(({ data: { data } }) => {
+                    setDOAData(data.reverse());
+                })
+                .catch((err) => {
+                    setDOAData(null);
+                    // toastConfig.setToastConfig(err);
+                });
         }
-      };
-    
+    };
+
 
     const defaultTotalValue = useMemo(() => {
         let result = "0";
@@ -742,6 +760,128 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
         }
     };
 
+    const handleVersionUpdateFromAdditionalData = (additionalData) => {
+        handleVersionUpdate(
+            "",
+            visibleColumns,
+            versionStatus,
+            additionalData
+        );
+    }
+
+    const onSendEmailSuccess = () => {
+        setSendEmail(false);
+        // handleVersionUpdate("", visibleColumns, "Sent to Customer", selectedRecords);
+        handleAttachments();
+        fetchQuoteData(currentVersion);
+    };
+
+    let attachments = [];
+    if (pdfFileBase64) {
+        attachments.push({
+            base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(",") + 1)),
+            contentType: pdfFileBase64.split(";")[0].split(":")[1],
+            name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
+        });
+    }
+    if (excelFileBase64) {
+        attachments.push({
+            base64: excelFileBase64.substring(
+                parseInt(excelFileBase64.indexOf(",") + 1)
+            ),
+            contentType: excelFileBase64.split(";")[0].split(":")[1],
+            name: `Quotation-${quoteData.quoteName}-v${currentVersion}`,
+        });
+    }
+
+    const fetchUserEmails = () => {
+        let ownerCollaboratorEmails = [];
+        if (quoteData?.collaborator && quoteData.collaborator.length) {
+            ownerCollaboratorEmails = quoteData.collaborator
+                .filter((o) => o?.email)
+                .map((o) => o?.email);
+        }
+        if (quoteData?.owner?.email) {
+            ownerCollaboratorEmails.push(quoteData.owner.email);
+        }
+        let toEmails = [];
+        if (
+            quoteData?.customerContactName &&
+            quoteData?.customerContactName.length
+        ) {
+            toEmails = quoteData?.customerContactName
+                .filter((o) => o?.email)
+                .map((o) => o.email);
+            setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
+        } else {
+            axiosInstance()
+                .get(
+                    `/${customerAccount.accountApi}/related/${quoteData?.customerAccountName?.optionValue}`
+                )
+                .then(({ data: { data } }) => {
+                    let relatedContacts =
+                        data[sidebarResource[customerContact.contactResource]] &&
+                            data[sidebarResource[customerContact.contactResource]][
+                            "Account_Name"
+                            ]
+                            ? data[sidebarResource[customerContact.contactResource]][
+                            "Account_Name"
+                            ]
+                            : [];
+                    if (relatedContacts.length) {
+                        toEmails = relatedContacts.map((o) => o?.email);
+                    }
+                    setUserEmails({
+                        cc: [...ownerCollaboratorEmails],
+                        to: [...toEmails],
+                    });
+                })
+                .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                });
+        }
+    };
+
+    const handleAttachments = () => {
+        let request;
+    
+        request = {
+          name: "Quotation V" + currentVersion,
+          fileUrl: "",
+          relatedTo: [
+            {
+              type: quote.quoteResource,
+              referenceId: quoteData?._id,
+              access: true,
+            },
+            {
+              type: quoteData?.customerAccountName
+                ? customerAccount?.accountResource
+                : supplierAccount?.accountResource,
+              referenceId: quoteData?.customerAccountName
+                ? quoteData?.customerAccountName?.optionValue
+                : quoteData?.supplierAccountName?.optionValue,
+              access: false,
+            },
+            {
+              type: opportunity.opportunityResource,
+              referenceId: quoteData.opportunity?.optionValue,
+              access: false,
+            },
+          ],
+        };
+    
+        // if (PDFAttachment !== "") {
+        //   request.fileUrl = PDFAttachment;
+        //   axiosInstance()
+        //     .post(`/attachment`, request)
+        //     .then(({ data }) => { })
+        //     .catch((error) => {
+        //       toastConfig.setToastConfig(error);
+        //     });
+        // }
+      };
+    
 
     return (
         <>
@@ -1014,7 +1154,10 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                 <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                                     {!ifQuoteApproved.approved && (
                                         <Button
-                                            onClick={() => handleCases()}
+                                            onClick={() => {
+                                                handleCases();
+                                                fetchUserEmails()
+                                            }}
                                             disabled={
                                                 !allowedToEdit || (!DOAreq && !Customerreq) || loading
                                             }
@@ -1085,7 +1228,7 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                 ) : (
                                     <ProductBuilder
                                         fromQuote={true}
-                                        permissions={quotePermissions}
+                                        permissions={permissions[qbResource]}
                                         hasPermission={allowedToEdit}
                                         currency={quoteData?.currency.toLowerCase()}
                                         productBuilderId={productBuilderId}
@@ -1117,14 +1260,95 @@ export default function QuoteProcess({ quoteData, ProcessStatus, allowedToEdit, 
                                 />
                             )}
                             {ProcessStatus === "Quote Builder" ? (
-                               <AdditionalData
-                               allowedToEdit={allowedToEdit}
-                               />
-                               ) : null}
+                                <AdditionalData
+                                    allowedToEdit={allowedToEdit}
+                                    handleVersionUpdateFromAdditionalData={handleVersionUpdateFromAdditionalData}
+                                />
+                            ) : null}
                         </Grid>
                     </Grid>
                 ) : null}
             </div>
+            {showAiDialog && (
+                <Dialog
+                    open={showAiDialog}
+                    aria-labelledby="customized-dialog-title"
+                    maxWidth="sm"
+                    onClose={() => {
+                        setShowAiDialog(false);
+                    }}
+                    fullWidth
+                    fullScreen={isMobile || isTablet}
+                    TransitionComponent={CustomDialogTransition}
+                >
+                    <CustomDialogHeader
+                        title="AI Suggestion"
+                        onClose={() => {
+                            setShowAiDialog(false);
+                        }}
+                    />
+                    <CustomDialogContent>
+                        <div className="text-align-center">
+                            <Typography variant="h4">Under Construction </Typography>
+                            <img
+                                src={`${PerformanceTuningImg}`}
+                                style={{ height: "300px" }}
+                            />
+                        </div>
+                    </CustomDialogContent>
+                </Dialog>
+            )}
+
+            {isRearrangeColumns && (
+                <DndProvider backend={HTML5Backend}>
+                    <ColumnsDialog
+                        setColumns={setVisibleColumnName}
+                        columns={visibleColumns}
+                        setOpenDialog={setRearrangeColumns}
+                        id={quoteData._id}
+                        version={currentVersion}
+                        refresh={fetchQuoteData}
+                    />
+                </DndProvider>
+            )}
+
+            {sendEmail && (
+                <Dialog
+                    open={sendEmail}
+                    fullScreen={isMobile || isTablet}
+                    TransitionComponent={CustomDialogTransition}
+                    aria-labelledby="customized-dialog-title"
+                    maxWidth="md"
+                    onClose={() => setSendEmail(false)}
+                    fullWidth
+                >
+                    <CreateEmail
+                        generatingFile={generatingPdfFile}
+                        handleClose={() => setSendEmail(false)}
+                        fetchData={onSendEmailSuccess}
+                        id={quoteData._id}
+                        showESign={true}
+                        version={currentVersion}
+                        isQuoteBuilder={true}
+                        options={userEmails?.to}
+                        cc={userEmails?.cc ?? []}
+                        emailId={null}
+                        qouteBuilderAttachments={attachments}
+                        subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
+                            }`}
+                    />
+                </Dialog>
+            )}
+
+            {messageDialog.open && (
+                <MessageDialog
+                    open={messageDialog.open}
+                    onClose={() => {
+                        setMessageDialog({ open: false, message: null });
+                    }}
+                    message={messageDialog.message}
+                />
+            )}
         </>
     )
 }

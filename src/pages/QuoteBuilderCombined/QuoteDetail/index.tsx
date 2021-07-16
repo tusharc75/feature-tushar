@@ -18,6 +18,8 @@ import routes from "../../../components/Helpers/Routes";
 import axiosInstance from "../../../axios/axiosInstance";
 import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -184,10 +186,6 @@ export default function QuoteDetail() {
                 (d) => d?.optionValue === user?.user?._id
               )
             );
-            let caccccccccc = [...(data.collaborator ?? []), data.owner].some(
-              (d) => d?.optionValue === user?.user?._id
-            )
-            debugger
             var keys = Object.keys(data.versions);
 
             if (keys.length === 1) {
@@ -212,6 +210,31 @@ export default function QuoteDetail() {
     }
   };
 
+  const handleDeleteQuote = () => {
+    if (quoteData?._id) {
+      axiosInstance()
+        .put(`${qbApi}/remove?entity=${selectedEntity}`, {
+          ids: [quoteData._id],
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          history.push({
+            pathname: routes.quoteBuilder.path,
+          });
+          setShowConfirmBox(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setShowConfirmBox(false);
+        });
+    } else {
+      setShowConfirmBox(false);
+    }
+  };
 
   return (
     <>
@@ -360,7 +383,6 @@ export default function QuoteDetail() {
                     }>
                       {(quoteData && <QuoteProcess
                         quoteData={quoteData}
-                        quotePermissions={permissions[qbResource]}
                         ProcessStatus={processStatus}
                         ifQuoteApproved={ifQuoteApproved}
                         allowedToEdit={allowedToEdit}
@@ -423,6 +445,36 @@ export default function QuoteDetail() {
             </Paper>
           </Grid>
         </Grid>
+        {showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this Quote?`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteQuote}
+          />
+        ) : null}
+
+        {openUpdateDialog && (
+          <ManageQuoteDialog
+            open={openUpdateDialog}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchQuoteData(currentVersion);
+            }}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            isNew={false}
+            dataToUpdate={quoteData}
+            resource={null}
+            isRedirectTodetailPage={false}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            disableCurrency={true}
+            quoteApproved={ifQuoteApproved.approved}
+          />
+        )}
       </Layout>
     </>
   );
