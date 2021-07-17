@@ -412,7 +412,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {(values['type'] === 'formula' || values['isFormula']) && (
                     <Formula fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} />
                   )}
-                  {values['type'] === 'currencyAmount' && (
+                  {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
                     <Fragment>
                       <br></br>
                       <FormControlLabel
