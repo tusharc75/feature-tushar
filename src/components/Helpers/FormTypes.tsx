@@ -578,32 +578,6 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
-  ) : type === 'decimal' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="number"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        ref={inputNumberRef}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
-                handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              }
-        }
-        InputProps={{
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-      />
-    </InfoLabel>
   ) : type === 'percent' ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
@@ -626,8 +600,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              }
+              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            }
         }
       />
     </InfoLabel>
@@ -647,12 +621,12 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                if (fieldData.returnType === 'decimal') {
-                  handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                } else {
-                  handleChange(name, e.target.value);
-                }
+              if (fieldData.returnType === 'decimal') {
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              } else {
+                handleChange(name, e.target.value);
               }
+            }
         }
         InputProps={{
           inputProps: { min: 0 },
@@ -725,8 +699,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) => {
-                handleChange(name, val && val.optionValue ? val.optionValue : '');
-              }
+              handleChange(name, val && val.optionValue ? val.optionValue : '');
+            }
         }
         renderInput={(params) => (
           <TextField
@@ -780,7 +754,7 @@ const FormTypes = (props) => {
         onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
       />
     </InfoLabel>
-  ) : type === 'converter' ? (
+  ) : (type === 'converter' || (type === 'decimal' && fieldData && fieldData.isConverter)) ? (
     fieldData.displayUnits &&
     Array.isArray(fieldData.displayUnits) &&
     fieldData.displayUnits.map((_unit, i) => (
@@ -823,12 +797,12 @@ const FormTypes = (props) => {
               {(fieldData.leval === 'product-custom' ||
                 fieldData.leval === 'product-builder-custom' ||
                 fieldData.leval === 'price-builder-custom') && (
-                <Tooltip title="Remove">
-                  <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                    <HighlightOffIcon color="error" />
-                  </IconButton>
-                </Tooltip>
-              )}
+                  <Tooltip title="Remove">
+                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                )}
               {isExtraDispayType && (
                 <AddDisplayTypeDialog
                   handleAddDisplayType={handleAddDisplayType}
@@ -917,12 +891,12 @@ const FormTypes = (props) => {
                   {(fieldData.leval === 'product-custom' ||
                     fieldData.leval === 'product-builder-custom' ||
                     fieldData.leval === 'price-builder-custom') && (
-                    <Tooltip title="Remove">
-                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                      <Tooltip title="Remove">
+                        <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                          <HighlightOffIcon color="error" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   {fieldData.displayUnits.length !== fieldData.units.length && (
                     <Tooltip title="Add Converter" className="formActionButton">
                       <IconButton
@@ -994,12 +968,12 @@ const FormTypes = (props) => {
                     onChange
                       ? onChange
                       : (e) => {
-                          if (fieldData.displayCurrency.length > 1) {
-                            handleCurrencyChange(name, _currency, parseFloat(e.target.value));
-                          } else {
-                            handleChange(name + '_' + _currency.toLowerCase(), parseFloat(e.target.value));
-                          }
+                        if (fieldData.displayCurrency.length > 1) {
+                          handleCurrencyChange(name, _currency, parseFloat(e.target.value));
+                        } else {
+                          handleChange(name + '_' + _currency.toLowerCase(), parseFloat(e.target.value));
                         }
+                      }
                   }
                   InputProps={{
                     startAdornment: (
@@ -1034,12 +1008,12 @@ const FormTypes = (props) => {
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
-                  <Tooltip title="Remove">
-                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                      <HighlightOffIcon color="error" />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                    <Tooltip title="Remove">
+                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 {isExtraDispayType && (
                   <AddDisplayTypeDialog
                     handleAddDisplayType={handleAddDisplayType}
@@ -1063,6 +1037,32 @@ const FormTypes = (props) => {
         </Grid>
       )
     )
+  ) : type === 'decimal' ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        type="number"
+        label={label}
+        required={required}
+        name={name}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        ref={inputNumberRef}
+        onChange={
+          onChange
+            ? onChange
+            : (e) => {
+              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            }
+        }
+        InputProps={{
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        }}
+      />
+    </InfoLabel>
   ) : type === 'currency' ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
@@ -1092,28 +1092,28 @@ const FormTypes = (props) => {
           const { currencyCode, currencyName, symbolNative } = option;
           return `${currencyCode} - ${currencyName} - (${symbolNative})`;
         }}
-        // renderOption={(option) => {
-        //   const { currencyCode, name, countryCode, symbolNative } = option;
-        //   return (
-        //     <Grid container alignItems="center">
-        //       <Grid item>
-        //         <Avatar
-        //           variant="rounded"
-        //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-        //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-        //         />
-        //       </Grid>
-        //       <Grid item xs>
-        //         <Typography>
-        //           {currencyCode} ({symbolNative})
-        //         </Typography>
-        //         <Typography variant="body2" color="textSecondary">
-        //           {name}
-        //         </Typography>
-        //       </Grid>
-        //     </Grid>
-        //   );
-        // }}
+      // renderOption={(option) => {
+      //   const { currencyCode, name, countryCode, symbolNative } = option;
+      //   return (
+      //     <Grid container alignItems="center">
+      //       <Grid item>
+      //         <Avatar
+      //           variant="rounded"
+      //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+      //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+      //         />
+      //       </Grid>
+      //       <Grid item xs>
+      //         <Typography>
+      //           {currencyCode} ({symbolNative})
+      //         </Typography>
+      //         <Typography variant="body2" color="textSecondary">
+      //           {name}
+      //         </Typography>
+      //       </Grid>
+      //     </Grid>
+      //   );
+      // }}
       />
     </InfoLabel>
   ) : type === 'multiSelect' ? (
@@ -1130,10 +1130,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -1202,9 +1202,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1370,10 +1370,10 @@ const FormTypes = (props) => {
                 {isFileUploading
                   ? `Uploading... ${fileUploadProgress}%`
                   : values[name]
-                  ? values[name]
-                  : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : 'No file choosen'}
+                    ? values[name]
+                    : touched[name] && Boolean(errors[name])
+                      ? errors[name]
+                      : 'No file choosen'}
               </Typography>
             </Box>
             {values[name] ? (
