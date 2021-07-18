@@ -87,7 +87,7 @@ import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyCart from "./components/ProductList/MyCart/MyCart";
-import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog"
+import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -102,13 +102,12 @@ function App() {
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
 
-
   window.addEventListener('load', function (e) {
     if (navigator.onLine) {
       if (isOffline) setIsOffline(false)
     }
     else {
-      setIsOffline(true)
+      setIsOffline(true);
     }
   }, false);
 
@@ -117,8 +116,9 @@ function App() {
   }, false);
 
   window.addEventListener('offline', function (e) {
-    setIsOffline(true)
+    setIsOffline(true);
   }, false);
+
 
   const getVersion = () => {
     setTimeout(() => {
@@ -165,20 +165,22 @@ function App() {
           }
         })
         .catch((error) => {
-          toast.setToastConfig(error);
+          // toast.setToastConfig(error);
         });
     }
   };
 
   const getChatNotification = async () => {
     if (localStorage.getItem("token")) {
-      await axiosInstance()
-        .get(`/user/user-notification/unseen`)
-        .then(({ data: { count } }) => {
-          if (count > 0) {
-            chatNotification.setCount(count);
-          }
-        });
+      if (!isOffline) {
+        await axiosInstance()
+          .get(`/user/user-notification/unseen`)
+          .then(({ data: { count } }) => {
+            if (count > 0) {
+              chatNotification.setCount(count);
+            }
+          });
+      }
     }
   };
 

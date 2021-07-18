@@ -582,32 +582,6 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
-  ) : type === 'decimal' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="number"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        ref={inputNumberRef}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
-              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-            }
-        }
-        InputProps={{
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-      />
-    </InfoLabel>
   ) : type === 'percent' ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
@@ -784,7 +758,7 @@ const FormTypes = (props) => {
         onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
       />
     </InfoLabel>
-  ) : type === 'converter' ? (
+  ) : (type === 'converter' || (type === 'decimal' && fieldData && fieldData.isConverter)) ? (
     fieldData.displayUnits &&
     Array.isArray(fieldData.displayUnits) &&
     fieldData.displayUnits.map((_unit, i) => (
@@ -1067,6 +1041,32 @@ const FormTypes = (props) => {
         </Grid>
       )
     )
+  ) : type === 'decimal' ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        type="number"
+        label={label}
+        required={required}
+        name={name}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        ref={inputNumberRef}
+        onChange={
+          onChange
+            ? onChange
+            : (e) => {
+              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            }
+        }
+        InputProps={{
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        }}
+      />
+    </InfoLabel>
   ) : type === 'currency' ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete

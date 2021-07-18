@@ -322,7 +322,7 @@ const CreateProduct = (props) => {
                             <Grid spacing={3} container>
                               {section.sectionFields &&
                                 section.sectionFields.map((field) =>
-                                  field.type === "converter" || field.type === "currencyAmount" ? (
+                                  field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
                                       fields={initialData.fields}
                                       fieldData={field}
