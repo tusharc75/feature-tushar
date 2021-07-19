@@ -169,7 +169,7 @@ export default function QuoteProcess(props) {
     const [DOAlimit, setDOALimit] = useState(0);
     const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
     const [DOAsetup, setDOAsetup] = useState(false);
-    const [visibleColumns, setVisibleColumnName] = useState([]);
+    const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
     const [ColumnName, setColName] = useState([]);
     const [columnView, setColumnView] = useState(quoteData.versions[currentVersion].acceptedColumns);
     const [dynamicTableData, setDynamicTableData] = useState([]);
@@ -497,10 +497,8 @@ export default function QuoteProcess(props) {
             setColName(ColName);
             setOptions(optionstoSet);
             if (columnView.length > 0) {
-                setVisibleColumnName(columnView);
-            } else {
-                setVisibleColumnName(defaultSelectColumns);
-            }
+                setVisibleColumns(columnView);
+            } 
             setDynamicTableData(allData);
         }
     };
@@ -1125,7 +1123,7 @@ export default function QuoteProcess(props) {
                                                 multiple
                                                 value={visibleColumns}
                                                 onChange={(e, val) => {
-                                                    setVisibleColumnName(val);
+                                                    setVisibleColumns(val);
                                                     handleVersionUpdate(
                                                         val,
                                                         versionStatus,
@@ -1327,7 +1325,7 @@ export default function QuoteProcess(props) {
             {isRearrangeColumns && (
                 <DndProvider backend={HTML5Backend}>
                     <ColumnsDialog
-                        setColumns={setVisibleColumnName}
+                        setColumns={setVisibleColumns}
                         columns={visibleColumns}
                         setOpenDialog={setRearrangeColumns}
                         id={quoteData._id}
