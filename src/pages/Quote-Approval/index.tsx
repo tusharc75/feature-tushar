@@ -439,6 +439,11 @@ const QuoteApproval = () => {
             "otp":values.code,
         })
         .then(({data:{data}})=> {
+            toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: "Succesfully Validated"
+            })
             if( data.token ){ 
                 setShowValidationDialog(false)
                 setShowUnlockAction(false)
