@@ -232,7 +232,7 @@ export default function ManageOpportunityDialog({
         });
 
         if (!isNew && marketSegmentDropdownData) {
-          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
         setEntityData({
