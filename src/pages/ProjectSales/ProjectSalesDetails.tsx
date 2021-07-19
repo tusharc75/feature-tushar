@@ -538,7 +538,7 @@ const ProjectSalesDetails = () => {
               <div>
                 <Activity
                   resourceId={id}
-                  resource={projectSales.projectSalesResource}
+                  resource={projectSales.projectSalesRoute}
                   relatedTo={[
                     {
                       type: projectSales.projectSalesResource,

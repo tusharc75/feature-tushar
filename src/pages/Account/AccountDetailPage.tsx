@@ -909,7 +909,7 @@ export default function AccountDetailPage(props) {
                     <div>
                       <Activity
                         resourceId={accountData._id}
-                        resource={accountResource}
+                        resource={accountRoute}
                         restrictedAddActivities={
                           permissions &&
                             permissions[accountResource] &&

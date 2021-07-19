@@ -43,7 +43,7 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    contact: { contactApi, contactResource },
+    contact: { contactApi, contactResource, contactRoute },
     account: { accountResource },
     contactBreadcrumb
   } = props;
@@ -665,7 +665,7 @@ const ContactDetailsPage = (props) => {
                 <div>
                   <Activity
                     resourceId={contactData._id}
-                    resource={contactResource}
+                    resource={contactRoute}
                     restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
                     relatedTo={[
                       {

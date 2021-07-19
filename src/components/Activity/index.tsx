@@ -278,12 +278,16 @@ const Activity = (props) => {
                 </Box>
               </Fragment>
             ))}
-            <Box
-              className={classes.activitySubBox} style={{ width: '100px', padding: '4px' }}>
-              <Button onClick={() => setShowHistory(true)}  >
-                <AiOutlineHistory className="mr-1" size={20} /> History
-              </Button>
-            </Box>
+            {
+              resourceId && resource ?
+                <Box
+                  className={classes.activitySubBox} style={{ width: '100px', padding: '4px' }}>
+                  <Button onClick={() => setShowHistory(true)}  >
+                    <AiOutlineHistory className="mr-1" size={20} /> History
+                  </Button>
+                </Box> : null
+            }
+
             {relatedTo && relatedTo[0].referenceId ? (
               <Chatter relatedTo={relatedTo} />
             ) : null}

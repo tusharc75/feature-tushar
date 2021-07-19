@@ -9,6 +9,14 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from "../../../axios/axiosInstance"
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import Timeline from '@material-ui/lab/Timeline';
+import TimelineItem from '@material-ui/lab/TimelineItem';
+import TimelineSeparator from '@material-ui/lab/TimelineSeparator';
+import TimelineConnector from '@material-ui/lab/TimelineConnector';
+import TimelineContent from '@material-ui/lab/TimelineContent';
+import TimelineDot from '@material-ui/lab/TimelineDot';
+import TimelineOppositeContent from '@material-ui/lab/TimelineOppositeContent';
+import { displayDate } from "../../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -25,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
 export default function HistoryDialog(props) {
     const classes = useStyles();
     const { onClose, open, resourceId, resource } = props;
+
     const [history, setHistory] = useState([])
     const [loading, setLoading] = useState(false)
     const toastConfig = useContext(CustomToastContext);
@@ -38,9 +47,10 @@ export default function HistoryDialog(props) {
             setLoading(true)
             axiosInstance()
                 .get(`/history/${resource}/${resourceId}`)
-                .then(({ data }) => {
+                .then(({ data: { data } }) => {
                     setLoading(false)
-                    console.log("🚀 ~ file: index.js ~ line 31 ~ .then ~ data", data)
+                    data = data.reverse()
+                    setHistory(data)
                 })
                 .catch((err) => {
                     setLoading(false)
@@ -48,7 +58,6 @@ export default function HistoryDialog(props) {
                 })
         }
     }
-
 
     return (
         <Dialog
@@ -63,12 +72,32 @@ export default function HistoryDialog(props) {
             id="confirmation-dialog"
             keepMounted
         >
-            <DialogTitle id="confirmation-dialog-title" className="text-white">
-                History</DialogTitle>
+            <DialogTitle id="confirmation-dialog-title" className="text-white text-capitalize">
+                History
+            </DialogTitle>
             <DialogContent dividers>
                 {
                     loading ? <Typography>Fetching Data</Typography> :
-                        history.length ? null : <Typography>No History Available</Typography>
+                        history.length ? <>
+                            <Timeline align="alternate">
+                                {
+                                    history.map(o => {
+                                        return <TimelineItem>
+                                            <TimelineOppositeContent>
+                                                <Typography color="textSecondary">{o?.date ? displayDate(o.date) : null}</Typography>
+                                            </TimelineOppositeContent>
+                                            <TimelineSeparator>
+                                                <TimelineDot />
+                                                <TimelineConnector />
+                                            </TimelineSeparator>
+                                            <TimelineContent>
+                                                <Typography className="text-capitalize">{o?.user?.fullName ?? ''} ({o?.action ?? ''})</Typography>
+                                            </TimelineContent>
+                                        </TimelineItem>
+                                    })
+                                }
+                            </Timeline>
+                        </> : <Typography>No History Available</Typography>
                 }
             </DialogContent>
             <DialogActions>
