@@ -53,6 +53,10 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
   },
+  historyButton: {
+    width: "100%",
+    padding: "4px"
+  }
 }));
 
 const Activity = (props) => {
@@ -281,8 +285,8 @@ const Activity = (props) => {
             {
               resourceId && resource ?
                 <Box
-                  className={classes.activitySubBox} style={{ width: '100px', padding: '4px' }}>
-                  <Button onClick={() => setShowHistory(true)}  >
+                  className={classes.activitySubBox}>
+                  <Button className={classes.historyButton} style={{ width: '100%', padding: '2px' }} onClick={() => setShowHistory(true)}  >
                     <AiOutlineHistory className="mr-1" size={20} /> History
                   </Button>
                 </Box> : null
