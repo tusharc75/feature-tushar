@@ -63,7 +63,7 @@ export default function QuoteDetail() {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-   const [state, dispatch] = useReducer(reducer, intialState);
+  const [state, dispatch] = useReducer(reducer, intialState);
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -126,7 +126,7 @@ export default function QuoteDetail() {
 
     if (quoteData) {
       Object.keys(quoteData.versions).forEach((v) => {
-        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status.includes("Booked by Customer")) {
+        if (quoteData.versions[v]?.status.includes("Accepted by Customer") || quoteData.versions[v]?.status === "Booked by Customer") {
           approved = true;
           versionApproved = Number(v);
           manualApproval = quoteData.versions[v]?.customerResponse?.manual;
@@ -175,7 +175,7 @@ export default function QuoteDetail() {
   const handleSetSteps = (steps) => {
     setSteps(steps);
   };
-  
+
 
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
@@ -202,7 +202,7 @@ export default function QuoteDetail() {
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
               setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || [])
               dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
-              
+
             }
             else {
               setCurrentVersion(version);
@@ -248,7 +248,7 @@ export default function QuoteDetail() {
     }
   };
 
-  
+
   const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loading: true });
 
@@ -432,7 +432,7 @@ export default function QuoteDetail() {
                     <Suspense fallback={
                       <Loader minHeight="500px" text="Loading..." />
                     }>
-                        {(quoteData && <QuoteProcess
+                      {(quoteData && <QuoteProcess
                         state={state}
                         dispatch={dispatch}
                         quoteData={quoteData}
