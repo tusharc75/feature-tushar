@@ -1,14 +1,10 @@
+import { useEffect, useReducer, useState, useContext, Fragment } from "react";
 import { Box, Button, makeStyles } from "@material-ui/core";
-import CustomAgGrid, {
-  reducer,
-  intialState,
-} from "../../../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid from "../../../../components/AgGridComponents/CustomAgGrid";
 import AddIcon from "@material-ui/icons/Add";
-import { useEffect, useReducer, useState, useContext } from "react";
 import axiosInstance from "../../../../axios/axiosInstance";
 import { gridLoadingTimeout, termsAndCondition } from "../../../../constants/helpers";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
-import Layout from "../../../../components/Layout";
 import ManageTermsAndCondition from "../../../TermsAndConditions/ManageTermsAndCondition";
 
 const useStyles = makeStyles((theme) => ({
@@ -20,7 +16,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function AdditionalData({ allowedToEdit, handleVersionUpdateFromAdditionalData }) {
+export default function AdditionalData({
+  state,
+  dispatch,
+  allowedToEdit,
+  handleVersionUpdateFromAdditionalData,
+fetchTNC}) {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
 
@@ -28,7 +29,6 @@ export default function AdditionalData({ allowedToEdit, handleVersionUpdateFromA
   const [showManageAdditionalDataDialog, setShowManageAdditionalDataDialog] = useState(false);
 
   const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const {
     dataRows,
     rowCount,
@@ -41,10 +41,7 @@ export default function AdditionalData({ allowedToEdit, handleVersionUpdateFromA
     sorting,
     selectedRecords,
   } = state;
-  const [columns, setColumns] = useState([]);
-
-  useEffect(() => {
-    setColumns([
+  const [columns, setColumns] = useState([
       {
         field: "name",
         rowDrag: allowedToEdit,
@@ -52,12 +49,11 @@ export default function AdditionalData({ allowedToEdit, handleVersionUpdateFromA
         cellRenderer: "nameRenderer",
         show: true,
       },
-    ])
-  }, [allowedToEdit]);
+    ]);
 
-  useEffect(() => {
-    fetchTermsAndConditions()
-  }, []);
+  // useEffect(() => {
+  //   fetchTNC()
+  // }, []);
 
   const handleCloseCreateDialog = () => {
     setShowManageAdditionalDataDialog(false);
@@ -88,56 +84,46 @@ export default function AdditionalData({ allowedToEdit, handleVersionUpdateFromA
     nameRenderer: NameRenderer,
   };
 
-  const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
-    dispatch({ type: "loading", loading: true });
+  // const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
+  //   dispatch({ type: "loading", loading: true });
 
-    if (gridApi) {
-      // gridApi.setRowData([]);
-    }
+  //   if (gridApi) {
+  //     // gridApi.setRowData([]);
+  //   }
 
-    axiosInstance()
-      .get(`${termsAndCondition.api}?limit=0`)
-      .then(({ data: { data, count } }) => {
-        let selectedRows = [];
-        const onlyTermsAndConditionsIds = selectedTermsAndConditions ? selectedTermsAndConditions.map(d => d._id) : selectedRecords.map(d => d._id);
+  //   axiosInstance()
+  //     .get(`${termsAndCondition.api}?limit=0`)
+  //     .then(({ data: { data, count } }) => {
+  //       let rows = data.map((tnc) => {
+  //         return {
+  //           ...tnc,
+  //           id: tnc._id,
+  //           name: tnc.TACName,
+  //         };
+  //       });
+  //       dispatch({
+  //         type: "initialize",
+  //         data: rows,
+  //         count: count,
+  //       });
 
-        let rows = data.map((tnc) => {
-          if (onlyTermsAndConditionsIds.indexOf(tnc._id) >= 0) {
-            selectedRows.push(tnc);
-          }
-          return {
-            ...tnc,
-            id: tnc._id,
-            name: tnc.TACName,
-          };
-        });
-        dispatch({
-          type: "initialize",
-          data: rows,
-          count: count,
-        });
-        dispatch({ type: "selection", selectedRecords: selectedRows });
+  //       // if (updateVersionStatus) {
+  //       //   handleVersionUpdateFromAdditionalData(selectedRecords);
+  //       // }
 
-        if (updateVersionStatus) {
-            handleVersionUpdateFromAdditionalData(
-              selectedRows
-            );
-        }
-
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: "loading", loading: false });
-      });
-  };
+  //       setTimeout(() => {
+  //         dispatch({ type: "loading", loading: false });
+  //       }, gridLoadingTimeout);
+  //     })
+  //     .catch((err) => {
+  //       toastConfig.setToastConfig(err);
+  //       dispatch({ type: "loading", loading: false });
+  //     });
+  // };
 
 
   return (
-    <Layout>
-
+    <Fragment>
       <Box className="m-3">
         <div className="position-relative">
           <h4
@@ -198,14 +184,14 @@ export default function AdditionalData({ allowedToEdit, handleVersionUpdateFromA
           open={showManageAdditionalDataDialog}
           handleClose={handleCloseCreateDialog}
           fetchData={() => {
-            fetchTermsAndConditions(null, true);
+            fetchTNC(null, true);
           }}
           editRecord={editRecordTNC}
           displayTitle={"Additional Data"}
 
         />
       )}
-    </Layout>
+    </Fragment>
 
   )
 

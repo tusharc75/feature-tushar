@@ -1,16 +1,19 @@
+import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import React, { Suspense, useContext, useEffect, useMemo, useState } from 'react'
-import CustomDataGridNoDataFound from '../../../components/Helpers/CustomDataGridNoDataFound'
-import { Paper, Box, Tabs, Tab, Button, CircularProgress, FormControl, IconButton, Dialog, Typography, Grid } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import { BiFoodMenu, BiLayerPlus, BiMailSend } from "react-icons/bi";
+import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../../components/DetailsPageHeader";
 import DeleteButton from "../../../components/Helpers/DeleteButton";
 import Layout from "../../../components/Layout";
-import { quote, customerAccount, supplierAccount, opportunity, termsAndCondition, CustomDialogTransition, quoteBuilder, yyyyMMDD, formatAmountWithCurrency } from "../../../constants/helpers";
+import {
+  reducer,
+  intialState,
+} from "../../../components/AgGridComponents/CustomAgGrid";
+import { quote, customerAccount, supplierAccount, opportunity, quoteBuilder, yyyyMMDD, formatAmountWithCurrency, gridLoadingTimeout, termsAndCondition } from "../../../constants/helpers";
 import Activity from "../../../components/Activity";
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -60,6 +63,7 @@ export default function QuoteDetail() {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+   const [state, dispatch] = useReducer(reducer, intialState);
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -92,6 +96,8 @@ export default function QuoteDetail() {
       else {
         fetchQuoteData(0);
       }
+
+      fetchTermsAndConditions()
     }
   }, [id]);
 
@@ -168,6 +174,7 @@ export default function QuoteDetail() {
   const handleSetSteps = (steps) => {
     setSteps(steps);
   };
+  
 
   const fetchQuoteData = (version: any) => {
     if (selectedEntity) {
@@ -193,12 +200,15 @@ export default function QuoteDetail() {
               setProcessStatus(data.versions[keys[keys.length - 1]].processStatus);
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
+              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
+              
             }
             else {
               setCurrentVersion(version);
               setProcessStatus(data.versions[version].processStatus);
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
+              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
             }
             setLoading(false);
           });
@@ -235,6 +245,45 @@ export default function QuoteDetail() {
       setShowConfirmBox(false);
     }
   };
+
+  
+  const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
+    dispatch({ type: "loading", loading: true });
+
+    // if (gridApi) {
+    //   // gridApi.setRowData([]);
+    // }
+
+    axiosInstance()
+      .get(`${termsAndCondition.api}?limit=0`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((tnc) => {
+          return {
+            ...tnc,
+            id: tnc._id,
+            name: tnc.TACName,
+          };
+        });
+        dispatch({
+          type: "initialize",
+          data: rows,
+          count: count,
+        });
+
+        // if (updateVersionStatus) {
+        //   handleVersionUpdateFromAdditionalData(selectedRecords);
+        // }
+
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: "loading", loading: false });
+      });
+  };
+
 
   return (
     <>
@@ -381,7 +430,9 @@ export default function QuoteDetail() {
                     <Suspense fallback={
                       <Loader minHeight="500px" text="Loading..." />
                     }>
-                      {(quoteData && <QuoteProcess
+                        {(quoteData && <QuoteProcess
+                        state={state}
+                        dispatch={dispatch}
                         quoteData={quoteData}
                         ProcessStatus={processStatus}
                         ifQuoteApproved={ifQuoteApproved}
@@ -392,6 +443,7 @@ export default function QuoteDetail() {
                         productBuilderId={productBuilderId}
                         versionStatus={versionStatus}
                         fetchQuoteData={fetchQuoteData}
+                        fetchTNC={fetchTermsAndConditions}
                       />)}
                     </Suspense>
                   </TabPanel>
