@@ -72,6 +72,7 @@ export default function QuoteDetail() {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(0);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [columnView, setColumnView] = useState([]);
   const [steps, setSteps] = useState([]);
   const [productBuilderId, setProductBuilderId] = useState("");
   const [versionStatus, setVersionStatus] = useState("Building Quote");
@@ -193,13 +194,13 @@ export default function QuoteDetail() {
                 (d) => d?.optionValue === user?.user?._id
               )
             );
-            var keys = Object.keys(data.versions);
-
-            if (keys.length === 1) {
+            let keys = Object.keys(data.versions);
+            if (keys.length !== 0) {
               setCurrentVersion(parseInt(keys[keys.length - 1]));
               setProcessStatus(data.versions[keys[keys.length - 1]].processStatus);
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
+              setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || [])
               dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
               
             }
@@ -208,6 +209,7 @@ export default function QuoteDetail() {
               setProcessStatus(data.versions[version].processStatus);
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
+              setColumnView(data.versions[version].acceptedColumns || [])
               dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
             }
             setLoading(false);
@@ -443,6 +445,7 @@ export default function QuoteDetail() {
                         productBuilderId={productBuilderId}
                         versionStatus={versionStatus}
                         fetchQuoteData={fetchQuoteData}
+                        columnView={columnView}
                         fetchTNC={fetchTermsAndConditions}
                       />)}
                     </Suspense>

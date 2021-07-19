@@ -125,7 +125,8 @@ export default function QuoteProcess(props) {
          handleChangeVersion,
          productBuilderId,
          versionStatus,
-         fetchQuoteData,
+        fetchQuoteData,
+         columnView,
         handleOpenUpdateDialog,
         fetchTNC} = props
 
@@ -171,7 +172,6 @@ export default function QuoteProcess(props) {
     const [DOAsetup, setDOAsetup] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
     const [ColumnName, setColName] = useState([]);
-    const [columnView, setColumnView] = useState(quoteData?.versions[currentVersion]?.acceptedColumns || []);
     const [dynamicTableData, setDynamicTableData] = useState([]);
     const [deletingDOA, setDeletingDOA] = useState(false);
     const [reminderLoading, setReminderLoading] = useState(false);
@@ -201,6 +201,10 @@ export default function QuoteProcess(props) {
     }, [currentVersion, DOAreq]);
 
     useEffect(() => {
+        if (currentVersion === 0) {
+            const finalVersion = Object.keys(quoteData?.versions)[Object.keys(quoteData?.versions).length - 1]
+            
+        }
         fetchDoaLimit();
     }, [quoteData]);
 
@@ -505,14 +509,14 @@ export default function QuoteProcess(props) {
     };
 
     const cloneVersion = () => {
-        let selectedRecords = []
+        const previousVersionTNC = quoteData.versions[currentVersion]?.acceptedColumns
         setCloning(true);
         axiosInstance()
             .post(
                 `/quote-builder/createVersion/${quoteData._id}?version=${currentVersion}`,
-                selectedRecords
+                {TNC: previousVersionTNC}
             )
-            .then(({ data: { data } }) => {
+            .then(() => {
                 fetchQuoteData(0);
                 setCloning(false);
             })
