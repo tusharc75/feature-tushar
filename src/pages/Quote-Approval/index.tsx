@@ -1,7 +1,7 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState, useContext } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
-import { Grid, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Dialog, Grid, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from "@material-ui/core";
 import {
     Button,
     Table,
@@ -20,6 +20,11 @@ import { formatAmountWithCurrency } from "../../constants/helpers";
 import { AiOutlineEye } from 'react-icons/ai';
 import styles from './quote-approval.module.scss'
 import { withStyles, createStyles } from '@material-ui/core/styles';
+import {FcUnlock} from 'react-icons/fc';
+import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CodeValidation from "./CodeValidation";
+import axiosInstance from "../../axios/axiosInstance";
 
 const StyledTableCell = withStyles(() =>
     createStyles({
@@ -65,6 +70,7 @@ const useStyles = makeStyles(() => ({
 const QuoteApproval = () => {
     let location = useLocation().search;
 
+    const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const { id } = useParams();
     const [replied, setReplied] = useState(false);
@@ -91,7 +97,10 @@ const QuoteApproval = () => {
         text: null,
     });
     const [pdf, setPdf] = useState("");
-
+    const [showAcceptRejectButtons, setShowAcceptRejectButtons] = useState(false);
+    const [showUnlockAction, setShowUnlockAction] = useState(true);
+    const [showValidationDialog, setShowValidationDialog] = useState(false);
+    const [token, setToken] = useState("");
     useEffect(() => {
         // getCompanyDetails();
         fetchQuote();
@@ -134,7 +143,7 @@ const QuoteApproval = () => {
     const QuoteStatusChange = (accepted, signedDocumentBase64, comment) => {
         let body;
         if (accepted !== "Rejected") {
-            body = { status: "Accepted by Customer", signature: signedDocumentBase64 }
+            body = { status: "Accepted by Customer", signature: signedDocumentBase64 , token : token}
         }
         else {
             body = { status: "Rejected by Customer", comment: comment }
@@ -423,6 +432,28 @@ const QuoteApproval = () => {
         return <div dangerouslySetInnerHTML={{ __html: `${finalmarkup} ${signatureContent}` }}></div>
     }
 
+    const handleSave = (values) => {
+        console.log(values);
+        axiosInstance()
+        .post(`quote-builder/verify-otp/${id}/${versionDetails.versionNumber}`,{
+            "otp":values.code,
+        })
+        .then(({data:{data}})=> {
+            if( data.token ){ 
+                setShowValidationDialog(false)
+                setShowUnlockAction(false)
+                setShowAcceptRejectButtons(true)
+                setToken(data.token)
+            }
+            
+        }).catch((err) => {
+            toastConfig.setToastConfig({
+                open:true,
+                type: "error",
+                message: "Entered otp does not matched"
+            });
+        })
+    }
     return (
         <div>
             {validQuote ?
@@ -481,17 +512,38 @@ const QuoteApproval = () => {
                                         <Grid item xs={12} md={4} sm={4}>
                                             <h2>Total : {sellingPrice} {currency}</h2>
                                         </Grid>
-                                        <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
-                                            <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
-                                                Accept
-                                            </Button>
-                                            <Button variant="outlined" startIcon={<GoThumbsdown />} color="default" onClick={() => {
-                                                setQuoteStatusChangeData("Rejected")
-                                                setShowQuoteStatusChangeDialog(true)
-                                            }} >
-                                                Reject
-                                            </Button>
-                                        </Grid>
+                                        { showUnlockAction &&
+                                            <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                                            <Tooltip 
+                                                title="Click to unlock accept/reject options"
+                                            >
+                                                <Button 
+                                                    variant = "outlined"
+                                                    color="primary"
+                                                    size="medium"
+                                                    startIcon={<FcUnlock />}
+                                                    onClick={()=>{
+                                                    setShowValidationDialog(true);
+                                                    }}>
+                                                     Unlock
+                                                </Button>
+                                            </Tooltip>
+                                            </Grid>
+                                        }
+
+                                       { showAcceptRejectButtons &&
+                                            <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                                                <Button variant="contained" className="mr-1" startIcon={<GoThumbsup />} color="primary" onClick={() => setShowSignatureDialog(true)}>
+                                                    Accept
+                                                </Button>
+                                                <Button variant="outlined" startIcon={<GoThumbsdown />} color="default" onClick={() => {
+                                                    setQuoteStatusChangeData("Rejected")
+                                                    setShowQuoteStatusChangeDialog(true)
+                                                }} >
+                                                    Reject
+                                                </Button>
+                                            </Grid>
+                                        }
                                     </Grid>
                                 </div>
                             </div>
@@ -611,6 +663,21 @@ const QuoteApproval = () => {
                         <h1>Invalid URL, Please check the URL</h1>
                     </div>
                 )
+            }
+            {
+            showValidationDialog && 
+                <CodeValidation 
+                    open={showValidationDialog}
+                    title = "Unlock Actions"
+                    close = {() => setShowValidationDialog(false)}
+                    handleSave = {handleSave}
+                    email = {versionDetails.email.to[0]}
+                    versionNumber = {versionDetails.versionNumber}
+                    quoteId = {id}
+                />
+
+
+                
             }
             {
                 showQuoteStatusChangeDialog && (
