@@ -110,9 +110,6 @@ export default function HistoryDialog(props) {
 HistoryDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
-    message: PropTypes.string.isRequired,
-    onOk: PropTypes.func,
-    okBtnLoading: PropTypes.any,
     resourceId: PropTypes.any,
     resource: PropTypes.any,
 };
