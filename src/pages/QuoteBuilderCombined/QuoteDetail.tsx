@@ -2589,6 +2589,8 @@ function QuoteDetail() {
               ) : (
                 <div>
                   <Activity
+                    resourceId={quoteData?._id}
+                    resource={quote.quoteResource}
                     restrictedAddActivities={
                       allowedToEdit ? [] : ["Attachment", "Case"]
                     }
