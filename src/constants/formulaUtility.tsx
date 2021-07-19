@@ -117,14 +117,27 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
                 resultValues[_r.fieldName] = ""
             });
         }
+
+        for (var x in resultValues) {
+            if (typeof resultValues[x] === "number") {
+                if (isNaN(resultValues[x])) {
+                    resultValues[x] = 0
+                }
+                var decimalPlaces = 2
+                var fieldResult = fields.filter((_f) => (_f.fieldName === x || _f.fieldName === x.split("_")[0]))
+                if (fieldResult.length) {
+                    if (fieldResult[0].decimalPlaces || fieldResult[0].decimalPlaces === 0) {
+                        decimalPlaces = fieldResult[0].decimalPlaces;
+                    }
+                }
+                resultValues[x] = parseFloat(resultValues[x].toFixed(decimalPlaces))
+            }
+        }
+        resultValues[name] = value;
     }
     catch (e) {
     }
-    for (var x in resultValues) {
-        if (typeof resultValues[x] === "number") {
-            resultValues[x] = parseFloat(resultValues[x].toFixed(2))
-        }
-    }
+
     return resultValues
 }
 
@@ -435,6 +448,39 @@ export const autoCalculate = (values: any, fieldList: any) => {
     });
     return returnvalues;
 }
+
+export const autoCalculateSpecificFields = (inputValues: any, values: any, fieldList: any) => {
+    const returnvalues: any = { ...inputValues }
+    console.log(inputValues)
+    for (var _fieldName in inputValues) {
+        const field: any = fieldList.filter((_f) => _f.fieldName === _fieldName || _f.fieldName === _fieldName.split("_")[0]);
+        if (field.length) {
+            const fieldData: any = field[0];
+            let currency = "";
+            let unit = "";
+            if (_fieldName.split("_").length) {
+                if (fieldData.type !== "currencyAmount" && (fieldData.type === "converter" || fieldData.isConverter === true)) {
+                    if (_fieldName.split("_").length === 2) {
+                        unit = _fieldName.split("_")[1];
+                    }
+                } else if (fieldData.type === "currencyAmount" && (fieldData.type === "converter" || fieldData.isConverter === true)) {
+                    if (_fieldName.split("_").length === 3) {
+                        currency = _fieldName.split("_")[1];
+                        unit = _fieldName.split("_")[2];
+                    }
+                } else if (fieldData.type === "currencyAmount") {
+                    if (_fieldName.split("_").length === 2) {
+                        currency = _fieldName.split("_")[1];
+                    }
+                }
+            }
+            const calValues = handleAutoCalculation(fieldData, fieldList, values, _fieldName, currency, unit, inputValues[_fieldName]);
+            Object.assign(returnvalues, calValues);
+        }
+    }
+    return returnvalues
+}
+
 
 export const checkFormulaLoop = (fields) => {
     try {

@@ -324,7 +324,7 @@ export const AddField = (props) => {
                   _id={fieldData && fieldData._id ? fieldData._id : ""}
                 />}
 
-              {values["type"] === "currencyAmount" &&
+              {(values["type"] === "currencyAmount" || values["type"] === "decimal") &&
                 <Fragment>
                   <br></br>
                   <FormControlLabel
