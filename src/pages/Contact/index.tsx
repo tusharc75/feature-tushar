@@ -86,6 +86,7 @@ export default function Contact(props) {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const columnState = JSON.parse(localStorage.getItem(contactResource));
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
@@ -98,6 +99,15 @@ export default function Contact(props) {
     { field: 'accountName', headerName: 'Account Name', show: true, cellRenderer: 'accountNameRenderer' }
   ];
   //  Grid Variables - End
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
@@ -493,7 +503,7 @@ export default function Contact(props) {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom="contactPage"
+            renderedFrom={contactResource}
           />
 
           {showDeleteWarningConfirmBox ? (

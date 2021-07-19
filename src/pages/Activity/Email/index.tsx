@@ -63,6 +63,7 @@ const Email = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
   const [columns, setColumns] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
@@ -88,6 +89,16 @@ const Email = () => {
       cellRenderer: 'createdByDate'
     }
   ]);
+
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   useEffect(() => {
     fetchUsersEmails();

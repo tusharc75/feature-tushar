@@ -55,11 +55,22 @@ const Note = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
+  const columnState = JSON.parse(localStorage.getItem('notesPage'));
+
   const columns = [
     { field: 'name', headerName: 'Title', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   //  Grid Variables - End
 
   useEffect(() => {

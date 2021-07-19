@@ -137,6 +137,7 @@ export default function Attachment(props) {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const columnState = JSON.parse(localStorage.getItem('attachmentPage'));
 
   const [columns, setColumns] = useState([
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
@@ -157,6 +158,15 @@ export default function Attachment(props) {
       sortable: false
     }
   ]);
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   useEffect(() => {
     if (referenceType) {
       GetReferenceName(referenceType, referenceId)

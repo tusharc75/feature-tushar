@@ -63,6 +63,7 @@ export default function Account(props) {
     account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb
   } = props;
+
   const {
     state: { user, permissions }
   }: any = useData();
@@ -106,6 +107,8 @@ export default function Account(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
+  const columnState = JSON.parse(localStorage.getItem(accountResource));
+
   const columns = [
     { field: 'accountName', headerName: 'Account Name', show: true, disabled: true, cellRenderer: 'accountNameRenderer' },
     { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
@@ -117,6 +120,16 @@ export default function Account(props) {
     { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false },
     { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' }
   ];
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   //  Grid Variables - End
 
   useEffect(() => {
@@ -764,7 +777,7 @@ export default function Account(props) {
             pageSizes={pageSizes}
             page={page}
             loading={loading}
-            renderedFrom="accountPage"
+            renderedFrom={accountResource}
           />
 
           {showDeleteWarningConfirmBox ? (

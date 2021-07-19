@@ -145,14 +145,15 @@ export default function CustomAgGrid({
       });
     }
     if (handleGridReady) handleGridReady(params);
-    var columnState = JSON.parse(localStorage.getItem(renderedFrom));
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
     if (columnState) {
       params.columnApi.setColumnState(columnState);
     }
   };
 
   const onColumnMoved = (params) => {
-    var columnState = JSON.stringify(params.columnApi.getColumnState());
+    const columnState = JSON.stringify(params.columnApi.getColumnState());
     localStorage.setItem(renderedFrom, columnState);
   };
 
@@ -216,7 +217,13 @@ export default function CustomAgGrid({
         )}
 
         <div style={{ opacity: loading ? 0.5 : 1 }}>
-          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} refreshGrid={refreshGrid} />
+          <CustomGridHeaderOptions
+            columns={columns}
+            setColumns={setColumns}
+            columnApi={columnApi}
+            refreshGrid={refreshGrid}
+            renderedFrom={renderedFrom}
+          />
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact

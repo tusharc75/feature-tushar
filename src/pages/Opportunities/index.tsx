@@ -72,7 +72,7 @@ const Opportunities = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const columnState = JSON.parse(localStorage.getItem(opportunityResource));
   const columns = [
     { field: 'opportunityName', headerName: 'Opportunity Name', show: true, disabled: true, cellRenderer: 'opportunityNameRenderer' },
     { field: 'supplierAccountName', headerName: 'Supplier Account Name', show: true, cellRenderer: 'supplierAccountNameRenderer' },
@@ -83,6 +83,16 @@ const Opportunities = () => {
     { field: 'closeDate', headerName: 'Close Date', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'owner', headerName: 'Opportunity Owner', show: true, cellRenderer: 'commonRenderer' }
   ];
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   //  Grid Variables - End
 
   useEffect(() => {
@@ -460,7 +470,7 @@ const Opportunities = () => {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom="opportunityPage"
+            renderedFrom={opportunityResource}
           />
 
           {showDeleteWarningConfirmBox ? (

@@ -69,6 +69,9 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  const { leadResource, leadApi } = lead;
+  const columnState = JSON.parse(localStorage.getItem(leadResource));
+
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const [columns, setColumns] = useState([
     { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
@@ -82,6 +85,16 @@ const Leads = () => {
     { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
     { field: 'owner', headerName: 'Owner Alies', show: true, cellRenderer: 'commonRenderer' }
   ]);
+
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   //  Grid Variables - End
 
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
@@ -91,8 +104,6 @@ const Leads = () => {
     message: null
   });
   const hasPermissionToConvertInOpportunity = user?.user?.permissions?.convertLeadToOpportunity;
-
-  const { leadResource, leadApi } = lead;
 
   useEffect(() => {
     if (permissions && permissions[leadResource]) {
@@ -487,7 +498,7 @@ const Leads = () => {
           page={page}
           actionWidth={150}
           loading={loading}
-          renderedFrom="leadPage"
+          renderedFrom={leadResource}
         />
 
         {isOpen && (
