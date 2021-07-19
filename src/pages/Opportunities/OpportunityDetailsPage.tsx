@@ -352,7 +352,6 @@ function OpportunityDetailsPage() {
     mainPoint['Opportunity Owner'] = data?.owner?.optionLabel || '';
     setMainPoints(mainPoint);
   };
-
   const getOpportunityFields = (passedOpportunityData) => {
     if (selectedEntity) {
       axiosInstance()
@@ -530,8 +529,10 @@ function OpportunityDetailsPage() {
       ...opportunityData,
       ...data
     };
+
+    const updatedOpportunityFields = [...opportunityFieldData,...sectionFields.map((item)=>item.fieldData)]
     const updatedData = {
-      ...getObjKeysWithValues(updatedOpportunityData, opportunityFieldData),
+      ...getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields),
       [processFieldName]: steps[tempActiveStep].text,
       _id: opportunityData._id
     };

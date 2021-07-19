@@ -92,6 +92,7 @@ export default function Contact(props) {
   const columns = [
     { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'concatedNameRenderer' },
     { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
+    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'commonRenderer' },
     { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
     { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
@@ -227,6 +228,9 @@ export default function Contact(props) {
       case 'accountName':
         return 'accountName.optionLabel';
 
+      case 'entity':
+        return 'entity.optionLabel';
+
       default:
         return field;
     }
@@ -274,7 +278,7 @@ export default function Contact(props) {
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, ...restProperties } = u;
+          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
 
           return {
             ...restProperties,
@@ -285,6 +289,7 @@ export default function Contact(props) {
             accountId: u.accountName?.optionValue,
             accountName: u.accountName?.optionLabel,
 
+            entity: entity?.optionLabel,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
