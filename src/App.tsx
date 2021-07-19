@@ -186,16 +186,17 @@ function App() {
 
   useEffect(() => {
     try {
-      getNotification();
-      getChatNotification();
-      history.listen((location, action) => {
-        ReactGA.set({ page: location.pathname });
-        ReactGA.pageview(location.pathname);
-      });
-
-      setInterval(async () => {
-        await getNotification();
-      }, 60000);
+      if (!isOffline) {
+        getNotification();
+        getChatNotification();
+        history.listen((location, action) => {
+          ReactGA.set({ page: location.pathname });
+          ReactGA.pageview(location.pathname);
+        });
+        setInterval(async () => {
+          await getNotification();
+        }, 60000);
+      }
     } catch (e) { }
 
     // getVersion();
