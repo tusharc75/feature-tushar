@@ -750,30 +750,33 @@ function OpportunityDetailsPage() {
               ) : (
                 <div>
                   <Activity
-                    relatedTo={[
-                      {
-                        type: opportunityData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-                        referenceId: opportunityData?.customerAccountName
-                          ? opportunityData?.customerAccountName?.optionValue
-                          : opportunityData?.supplierAccountName?.optionValue,
-                        access: false
-                      },
-                      ...opportunityData?.staticData.customerContact?.map((cc) => ({
-                        type: customerContact.contactResource,
-                        referenceId: cc._id,
-                        access: false
-                      })),
-                      ...opportunityData?.staticData.supplierContact?.map((sc) => ({
-                        type: supplierContact.contactResource,
-                        referenceId: sc._id,
-                        access: false
-                      })),
-                      {
-                        type: opportunityResource,
-                        referenceId: opportunityData?._id,
-                        access: true
-                      }
-                    ]}
+                    resourceId={opportunityData?._id}
+                    resource={opportunityResource}
+                    relatedTo={
+                      [
+                        {
+                          type: opportunityData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                          referenceId: opportunityData?.customerAccountName
+                            ? opportunityData?.customerAccountName?.optionValue
+                            : opportunityData?.supplierAccountName?.optionValue,
+                          access: false
+                        },
+                        ...opportunityData?.staticData.customerContact?.map((cc) => ({
+                          type: customerContact.contactResource,
+                          referenceId: cc._id,
+                          access: false
+                        })),
+                        ...opportunityData?.staticData.supplierContact?.map((sc) => ({
+                          type: supplierContact.contactResource,
+                          referenceId: sc._id,
+                          access: false
+                        })),
+                        {
+                          type: opportunityResource,
+                          referenceId: opportunityData?._id,
+                          access: true
+                        }
+                      ]}
                     handleActivityRefresh={() => { }}
                     emails={contactsEmailsData}
                   />

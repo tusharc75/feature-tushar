@@ -210,10 +210,10 @@ export default function AccountDetailPage(props) {
           (d) => d.optionLabel === accountData[processFieldName]
         );
         if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
-        if(currentStepToShow == steps.length -1){
+        if (currentStepToShow == steps.length - 1) {
           setShowAtLast(true)
         }
-        else{
+        else {
           setShowAtLast(false)
         }
       }
@@ -575,7 +575,7 @@ export default function AccountDetailPage(props) {
   };
 
   const handleOpneUpdateDialog = () => {
-    if(activeStep === steps.length - 1 ){
+    if (activeStep === steps.length - 1) {
       setShowAtLast(true)
     }
     setOpenUpdateDialog(true);
@@ -677,7 +677,7 @@ export default function AccountDetailPage(props) {
     // }
   };
 
-  let filteredAccountFields = accountFields.filter(item=> item.fieldData.sectionName != additionalFieldName )
+  let filteredAccountFields = accountFields.filter(item => item.fieldData.sectionName != additionalFieldName)
 
   return (
     <>
@@ -801,9 +801,9 @@ export default function AccountDetailPage(props) {
                     </Tabs>
                     <TabPanel value={tabValue} index={0}>
                       <Box>
-                        {showAtLast? (<DetailsPage data={accountData} fields={accountFields} />): 
-                        <DetailsPage data={accountData} fields={filteredAccountFields} />
-                      }
+                        {showAtLast ? (<DetailsPage data={accountData} fields={accountFields} />) :
+                          <DetailsPage data={accountData} fields={filteredAccountFields} />
+                        }
                       </Box>
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
@@ -908,6 +908,8 @@ export default function AccountDetailPage(props) {
                   {accountData && (
                     <div>
                       <Activity
+                        resourceId={accountData._id}
+                        resource={accountRoute}
                         restrictedAddActivities={
                           permissions &&
                             permissions[accountResource] &&
@@ -1079,7 +1081,7 @@ export default function AccountDetailPage(props) {
               onOk={handleApproveDisapprove}
             />
           ) : null}
-          {openUpdateDialog &&  showAtLast ?(
+          {openUpdateDialog && showAtLast ? (
             <ManageAccount
               isNew={false}
               open={openUpdateDialog}
@@ -1099,27 +1101,27 @@ export default function AccountDetailPage(props) {
               handleSubmit={onUpdateAccount}
               accountId={accountData?._id}
             />
-          ): openUpdateDialog ? (
+          ) : openUpdateDialog ? (
             <ManageAccount
-            isNew={false}
-            open={openUpdateDialog}
-            onClose={closeUpdateDIalog}
-            accountData={{
-              fields: filteredAccountFields.map((f) => {
-                return f.fieldData;
-              }),
-              initialValues: getObjKeysWithValues(
-                accountData,
-                filteredAccountFields.map((f) => {
+              isNew={false}
+              open={openUpdateDialog}
+              onClose={closeUpdateDIalog}
+              accountData={{
+                fields: filteredAccountFields.map((f) => {
                   return f.fieldData;
-                })
-              ),
-            }}
-            loading={loading}
-            handleSubmit={onUpdateAccount}
-            accountId={accountData?._id}
-          />
-          ): null}
+                }),
+                initialValues: getObjKeysWithValues(
+                  accountData,
+                  filteredAccountFields.map((f) => {
+                    return f.fieldData;
+                  })
+                ),
+              }}
+              loading={loading}
+              handleSubmit={onUpdateAccount}
+              accountId={accountData?._id}
+            />
+          ) : null}
 
           {showCreateOpportunityDialog && (
             <ManageOpportunityDialog
@@ -1199,9 +1201,9 @@ export default function AccountDetailPage(props) {
               title="Additional Dialog"
               handleSave={handleSave}
               fieldData={sectionFields}
-              
+
             />
-          ) }
+          )}
         </div>
       </Layout>
     </>

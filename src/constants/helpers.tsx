@@ -158,6 +158,7 @@ export const quoteBuilder = {
 export const projectSales = {
   projectSalesResource: "projectSales",
   projectSalesApi: "/project-sales",
+  projectSalesRoute: "project-sales"
 };
 
 export const quote = {

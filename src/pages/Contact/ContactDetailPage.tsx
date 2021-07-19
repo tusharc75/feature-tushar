@@ -43,7 +43,7 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    contact: { contactApi, contactResource },
+    contact: { contactApi, contactResource, contactRoute },
     account: { accountResource },
     contactBreadcrumb
   } = props;
@@ -501,7 +501,7 @@ const ContactDetailsPage = (props) => {
             // contactResource={contactResource}
             accountResource={accountResource}
             contactResource={contactResource}
-            // contactApi={contactApi}
+          // contactApi={contactApi}
           />
         ) : openUpdateDialog ? (
           <ManageContact
@@ -526,7 +526,7 @@ const ContactDetailsPage = (props) => {
             // contactResource={contactResource}
             accountResource={accountResource}
             contactResource={contactResource}
-            // contactApi={contactApi}
+          // contactApi={contactApi}
           />
         ) : null}
 
@@ -550,9 +550,9 @@ const ContactDetailsPage = (props) => {
                 ) : null}
 
                 {contactPermissions.isDelete &&
-                contactData?.owner?.optionValue &&
-                user?.user?._id &&
-                contactData.owner.optionValue === user.user._id ? (
+                  contactData?.owner?.optionValue &&
+                  user?.user?._id &&
+                  contactData.owner.optionValue === user.user._id ? (
                   <DeleteButton text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
                 ) : null}
               </DetailsPageHeader>
@@ -664,6 +664,8 @@ const ContactDetailsPage = (props) => {
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
+                    resourceId={contactData._id}
+                    resource={contactRoute}
                     restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
                     relatedTo={[
                       {
@@ -677,7 +679,7 @@ const ContactDetailsPage = (props) => {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={[contactData?.email ?? '']}
                   />
                 </div>

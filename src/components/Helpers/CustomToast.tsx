@@ -18,13 +18,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomToast = (props) => {
-  const { open, close, message, type } = props;
+  const { open, close, message, type, hideDuration = 6000 } = props;
   const classes = useStyles();
 
   return <>
     {
       open && <div className={classes.root}>
-        <Snackbar open={open} autoHideDuration={6000} onClose={close}
+        <Snackbar open={open} autoHideDuration={hideDuration} onClose={close}
           anchorOrigin={{
             vertical: 'top',
             horizontal: 'center',
