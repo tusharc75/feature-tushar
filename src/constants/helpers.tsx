@@ -158,6 +158,7 @@ export const quoteBuilder = {
 export const projectSales = {
   projectSalesResource: "projectSales",
   projectSalesApi: "/project-sales",
+  projectSalesRoute: "project-sales"
 };
 
 export const quote = {
@@ -252,10 +253,7 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = value ? value : false;
-    } else if (
-      key.type !== "currencyAmount" &&
-      (key.type === "converter" || key.isConverter === true)
-    ) {
+    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
       key.displayUnits &&
         key.displayUnits.forEach((_unit) => {
           obj[key.fieldName + "_" + _unit.toLowerCase()] =

@@ -749,6 +749,8 @@ function OpportunityDetailsPage() {
               ) : (
                 <div>
                   <Activity
+                    resourceId={opportunityData?._id}
+                    resource={opportunityResource}
                     relatedTo={[
                       {
                         type: opportunityData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
