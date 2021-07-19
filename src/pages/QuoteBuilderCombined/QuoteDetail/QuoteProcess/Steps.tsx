@@ -19,6 +19,7 @@ import {
   ListItemIcon,
   Checkbox,
   TextField,
+  Box
 } from "@material-ui/core";
 import {
   IoIosArrowDroprightCircle,
@@ -615,8 +616,10 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
+              <Box my={1} />
               {selectedOption === "Invalid" && (
                 <TextField
+                  fullWidth
                   id="outlined-multiline-static"
                   label="Comment"
                   multiline

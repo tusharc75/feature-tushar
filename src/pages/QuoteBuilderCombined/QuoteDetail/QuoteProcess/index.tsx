@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-var defaultSelectColumns = [
+let defaultSelectColumns = [
     "Product Name",
     "Description",
     "Unit",
@@ -171,7 +171,7 @@ export default function QuoteProcess(props) {
     const [DOAsetup, setDOAsetup] = useState(false);
     const [visibleColumns, setVisibleColumnName] = useState([]);
     const [ColumnName, setColName] = useState([]);
-    const [columnView, setColumnView] = useState(quoteData.versions[currentVersion].acceptedColumns);
+    const [columnView, setColumnView] = useState(quoteData?.versions[currentVersion]?.acceptedColumns || []);
     const [dynamicTableData, setDynamicTableData] = useState([]);
     const [deletingDOA, setDeletingDOA] = useState(false);
     const [reminderLoading, setReminderLoading] = useState(false);
@@ -496,6 +496,7 @@ export default function QuoteProcess(props) {
 
             setColName(ColName);
             setOptions(optionstoSet);
+          
             if (columnView.length > 0) {
                 setVisibleColumnName(columnView);
             } else {
@@ -766,7 +767,7 @@ export default function QuoteProcess(props) {
                 setGeneratingFile(true);
                 axiosInstance()
                     .get(
-                        `user/download?fileName=${pdfFileName}`,
+                        `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
                         {
                             responseType: "blob",
                         }
