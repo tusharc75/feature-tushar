@@ -1333,7 +1333,7 @@ const FormTypes = (props) => {
   ) : type === 'fileUpload' ? (
     <Fragment>
       <Box display="flex" alignItems="center">
-        <Typography color="textSecondary">{label}</Typography>
+        {/* <Typography color="textSecondary">{label}</Typography> */}
         {isTooltip && Boolean(tooltipMessage) && (
           <IconButton size="small">
             <Tooltip title={tooltipMessage}>
