@@ -522,7 +522,7 @@ const CreateProduct = (props) => {
                                                                             size="small"
                                                                         />
                                                                     </Grid> :
-                                                                    field.type === "converter" || field.type === "currencyAmount" ?
+                                                                    (field.type === "converter" || field.type === "currencyAmount" || field.isConverter) ?
                                                                         <FormTypes
                                                                             fields={initialData.fields}
                                                                             fieldData={field}

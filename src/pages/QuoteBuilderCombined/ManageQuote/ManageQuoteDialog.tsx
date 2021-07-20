@@ -352,7 +352,7 @@ export default function ManageQuoteDialog({
         }
 
         if (!isNew && marketSegmentDropdownData) {
-          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
         filterData.map((_f) => {
