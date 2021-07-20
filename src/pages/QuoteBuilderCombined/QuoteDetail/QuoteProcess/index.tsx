@@ -638,7 +638,8 @@ export default function QuoteProcess(props) {
                             pdfWindow.location.href = fileURL;
                         })
                         .catch((err) => {
-                            setUpdatingVersion(true);
+                            setUpdatingVersion(false);
+                            toastConfig.setToastConfig(err);
                         });
                 } else if (download && data.fileName) {
                     setUpdatingVersion(true);
@@ -661,7 +662,8 @@ export default function QuoteProcess(props) {
                             link.click();
                         })
                         .catch((err) => {
-                            setUpdatingVersion(true);
+                            setUpdatingVersion(false);
+                            toastConfig.setToastConfig(err);
                         });
                 }
             })
