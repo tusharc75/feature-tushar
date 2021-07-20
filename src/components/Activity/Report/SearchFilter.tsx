@@ -44,6 +44,8 @@ export const SearchFilter = ({
     { type: "supplierContact", name: "All", isAll: true },
     { type: "lead", name: "All", isAll: true },
     { type: "opportunity", name: "All", isAll: true },
+    { type: "quotes", name: "All", isAll: true },
+    { type: "projectSales", name: "All", isAll: true },
     { type: "my", name: user?._id, isAll: true },
   ];
 
