@@ -8,7 +8,7 @@ export default function HistoryButton(props) {
     const { onClick } = props
     return <Box>
         <Tooltip title="History">
-            <IconButton style={{ padding: '6px', marginRight: '5px' }}
+            <IconButton className="mr-2" style={{ padding: '6px' }}
                 onClick={onClick}>
                 <AiOutlineHistory className="mr-1" size={20} />
             </IconButton>
