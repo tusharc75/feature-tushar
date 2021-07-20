@@ -91,7 +91,7 @@ export default function HistoryDialog(props) {
                                                 <TimelineConnector />
                                             </TimelineSeparator>
                                             <TimelineContent>
-                                                <Typography className="text-capitalize">{o?.user?.fullName ?? ''} {`${o?.action ? o?.action : ""}`}</Typography>
+                                                <Typography className="text-capitalize">{o?.user?.fullName ?? ''} {o?.action ? `(${o?.action})` : ""}</Typography>
                                             </TimelineContent>
                                         </TimelineItem>
                                     })
