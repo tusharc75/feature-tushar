@@ -204,7 +204,7 @@ export default function QuoteDetail() {
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
               setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || [])
-              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
+              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC || [] });
 
             }
             else {
@@ -213,7 +213,7 @@ export default function QuoteDetail() {
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
               setColumnView(data.versions[version].acceptedColumns || [])
-              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
+              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC || [] });
             }
             setLoading(false);
           });

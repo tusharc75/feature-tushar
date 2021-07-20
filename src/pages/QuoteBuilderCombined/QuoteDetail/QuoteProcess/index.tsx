@@ -1290,13 +1290,13 @@ export default function QuoteProcess(props) {
                                 />
                             )}
                             {ProcessStatus === "Quote Builder" && (
-                                <AdditionalData
+                                state?.dataRows.length > 0 ? <AdditionalData 
                                     fetchTNC={fetchTNC}
                                     state={state}
                                     dispatch={dispatch}
                                     allowedToEdit={allowedToEdit}
                                     handleVersionUpdateFromAdditionalData={handleVersionUpdateFromAdditionalData}
-                                />
+                                /> : null
                             )}
                         </Grid>
                     </Grid>
