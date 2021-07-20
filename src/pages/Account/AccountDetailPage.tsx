@@ -398,14 +398,14 @@ export default function AccountDetailPage(props) {
     axiosInstance()
       .get(`/field?resource=${sidebarResource[accountResource]}`)
       .then(({ data: { data } }) => {
-        // console.log(data);
+
         setAccountFields(data.filter((d) => d.isUpdate || d.isRead));
         setLoading(false);
 
         const processSteps = data.find(
           (d) => d.isRead && d.fieldData.type.toLowerCase() === "process"
         );
-        // console.log(processSteps);
+
         if (processSteps && processSteps.isRead) {
           setSteps(
             processSteps.fieldData.option.map((m) => {
