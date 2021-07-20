@@ -123,6 +123,7 @@ export default function QuoteDetail() {
     let versionApproved = currentVersion;
     let versionDisapproved = currentVersion;
     let manualApproval = false;
+    let manualDispproval = false;
 
     if (quoteData) {
       Object.keys(quoteData.versions).forEach((v) => {
@@ -134,6 +135,7 @@ export default function QuoteDetail() {
         if (quoteData.versions[v]?.status.includes("Rejected by Customer") || quoteData.versions[v]?.status.includes("Not Booked by Customer") || quoteData.versions[v]?.status.includes("Invalid by Customer")) {
           disapproved = true;
           versionDisapproved = Number(v);
+          manualDispproval = quoteData.versions[v]?.customerResponse?.manual;
         }
       });
     }
@@ -143,6 +145,7 @@ export default function QuoteDetail() {
       disapproved,
       versionDisapproved,
       manualApproval,
+      manualDispproval
     };
   }, [quoteData?.versions]);
 
@@ -272,10 +275,6 @@ export default function QuoteDetail() {
           count: count,
         });
 
-        // if (updateVersionStatus) {
-        //   handleVersionUpdateFromAdditionalData(selectedRecords);
-        // }
-
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
@@ -317,7 +316,18 @@ export default function QuoteDetail() {
                 <DetailsPageHeader
                   heading={quoteData ? quoteData.quoteName : ""}
                   logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-                  mainPoints={quoteData ? getMainPoints : ""}
+                    mainPoints={quoteData ? {
+                      ...getMainPoints,
+                      "Quote Status": ifQuoteApproved.approved
+                      ? ifQuoteApproved.manualApproval
+                        ? `End (Accepted By Customer Manually)`
+                        : `End (Accepted By Customer)`
+                        : ifQuoteApproved.disapproved && ifQuoteApproved.manualDispproval &&
+                          ifQuoteApproved.versionDisapproved ===
+                          parseInt(Object.keys(quoteData.versions)[Object.keys(quoteData.versions).length - 1])
+                            ? "Not Booked (Ended Manually)"
+                          : "In Progress",
+                    } : ""}
                   showHeading={true}
                 >
 

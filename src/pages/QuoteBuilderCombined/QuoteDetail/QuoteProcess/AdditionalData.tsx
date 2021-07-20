@@ -51,9 +51,12 @@ fetchTNC}) {
       },
     ]);
 
-  // useEffect(() => {
-  //   fetchTNC()
-  // }, []);
+  useEffect(() => {
+    if (gridApi) {
+      gridApi.refreshCells({enableCellChangeFlash: true})
+      
+    }
+  }, [selectedRecords]);
 
   const handleCloseCreateDialog = () => {
     setShowManageAdditionalDataDialog(false);

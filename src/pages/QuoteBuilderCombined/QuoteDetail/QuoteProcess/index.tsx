@@ -197,8 +197,15 @@ export default function QuoteProcess(props) {
     });
 
     useEffect(() => {
-        if (currentVersion !== 0) fetchDOAData();
+        if (currentVersion !== 0) {
+            fetchDOAData();
+        }
+
     }, [currentVersion, DOAreq]);
+
+    useEffect(() => {
+        dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion].TNC });
+    },[currentVersion])
 
     useEffect(() => {
         fetchDoaLimit();
