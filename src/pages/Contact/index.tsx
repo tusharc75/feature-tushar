@@ -1,56 +1,46 @@
-import React, { useContext, useEffect, useState, useReducer } from "react";
-import Layout from "../../components/Layout";
-import {
-  Box,
-  Button,
-  Menu,
-  MenuItem,
-  Grid
-} from "@material-ui/core";
-import { useData } from "../../StateProvider/Provider";
-import { Link } from "react-router-dom";
-import { ExpandMore } from "@material-ui/icons";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import AddIcon from "@material-ui/icons/Add";
-import ManageContactDialog from "./ManageContact/index";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import SearchBox from "../../components/Helpers/SearchBox";
-import CustomContainer from "../../components/CustomContainer";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import styles from "../Leads/Header.module.scss";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import { MdContacts } from "react-icons/md";
-import axiosInstance from "../../axios/axiosInstance";
-import {
-  sidebarResource,
-  isObjectEmpty,
-  gridLoadingTimeout
-} from "../../constants/helpers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { useHistory } from "react-router-dom";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import { Chip } from "@material-ui/core";
-import routes from "./../../components/Helpers/Routes";
+import React, { useContext, useEffect, useState, useReducer } from 'react';
+import Layout from '../../components/Layout';
+import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
+import { useData } from '../../StateProvider/Provider';
+import { Link } from 'react-router-dom';
+import { ExpandMore } from '@material-ui/icons';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import AddIcon from '@material-ui/icons/Add';
+import ManageContactDialog from './ManageContact/index';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import SearchBox from '../../components/Helpers/SearchBox';
+import CustomContainer from '../../components/CustomContainer';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import styles from '../Leads/Header.module.scss';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import { MdContacts } from 'react-icons/md';
+import axiosInstance from '../../axios/axiosInstance';
+import { sidebarResource, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import { useHistory } from 'react-router-dom';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { Chip } from '@material-ui/core';
+import routes from './../../components/Helpers/Routes';
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
   CommonRendererWithCopy
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+} from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 
 const ContactTypes = [
   {
-    key: "All Contacts",
-    value: 1,
+    key: 'All Contacts',
+    value: 1
   },
   {
-    key: "My Contacts",
-    value: 2,
-  },
+    key: 'My Contacts',
+    value: 2
+  }
 ];
 
 let contactTimeout;
@@ -59,59 +49,66 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user },
+    state: { user }
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
     contactBreadcrumb,
-    account,
+    account
   } = props;
   const [selectedType, setSelectedType] = useState(1);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
 
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
   const [singleContactDelete, setSingleContactDelete] = useState({
     id: null,
     show: false,
-    contactedName: "",
+    contactedName: ''
   });
 
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
+    accountName: history.location?.state?.accountName
   });
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
     isRead: false,
-    isDelete: false,
+    isDelete: false
   });
 
-  const [filter, setFilter] = useState("All Contacts");
+  const [filter, setFilter] = useState('All Contacts');
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const columnState = JSON.parse(localStorage.getItem(contactResource));
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
-    { field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "concatedNameRenderer" },
-    { field: "relatedLead", headerName: "Related Lead", show: true, cellRenderer: "relatedLeadRenderer" },
-    { field: "entity", headerName: "Entity Name", show: true, cellRenderer: "commonRenderer" },
-    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
-    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRendererWithCopy" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    { field: "accountName", headerName: "Account Name", show: true, cellRenderer: "accountNameRenderer" }
+    { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'concatedNameRenderer' },
+    { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
+    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
+    { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
+    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+    { field: 'accountName', headerName: 'Account Name', show: true, cellRenderer: 'accountNameRenderer' }
   ];
   //  Grid Variables - End
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
@@ -124,14 +121,12 @@ export default function Contact(props) {
     const data = user?.role?.sideBar;
 
     if (data) {
-      const hasContactPermission = data.find(
-        (d) => d.name === contactPermission
-      );
+      const hasContactPermission = data.find((d) => d.name === contactPermission);
       if (hasContactPermission) {
         setContactPermissions({
           isCreate: hasContactPermission.isCreate,
           isRead: hasContactPermission.isRead,
-          isDelete: hasContactPermission.isDelete,
+          isDelete: hasContactPermission.isDelete
         });
       }
     }
@@ -155,34 +150,44 @@ export default function Contact(props) {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails]);
 
-  const ConcatedNameRenderer = params => <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
-    {params.value}
-  </Link>
-
-  const RelatedLeadRenderer = params => params.value ?
-    <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+  const ConcatedNameRenderer = (params) => (
+    <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
       {params.value}
-    </Link> : <NoDataCell />
+    </Link>
+  );
 
-  const AccountNameRenderer = params => <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
-    {params.value}
-  </Link>
+  const RelatedLeadRenderer = (params) =>
+    params.value ? (
+      <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
 
-  const ActionsRenderer = params => <>
-    <GridDeleteIcon
-      hasDeletePermission={contactPermissions.isDelete}
-      ownerId={params.data.ownerId}
-      userId={user?.user?._id}
-      onDelete={() => {
-        setSingleContactDelete({
-          show: true,
-          id: params.data._id,
-          contactedName: params.data.concatedName,
-        })
-      }}
-      entity="contact"
-    />
-  </>
+  const AccountNameRenderer = (params) => (
+    <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const ActionsRenderer = (params) => (
+    <>
+      <GridDeleteIcon
+        hasDeletePermission={contactPermissions.isDelete}
+        ownerId={params.data.ownerId}
+        userId={user?.user?._id}
+        onDelete={() => {
+          setSingleContactDelete({
+            show: true,
+            id: params.data._id,
+            contactedName: params.data.concatedName
+          });
+        }}
+        entity="contact"
+      />
+    </>
+  );
 
   const frameworkComponents = {
     concatedNameRenderer: ConcatedNameRenderer,
@@ -197,20 +202,19 @@ export default function Contact(props) {
 
   const replaceFieldName = (field) => {
     switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
 
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
 
-      case "lead":
-        return "staticData.lead.concatedName";
-      
+      case 'lead':
+        return 'staticData.lead.concatedName';
 
       default:
         return field;
     }
-  }
+  };
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
@@ -218,41 +222,41 @@ export default function Contact(props) {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "owner":
-        return "owner.optionLabel";
+      case 'owner':
+        return 'owner.optionLabel';
 
-      case "accountName":
-        return "accountName.optionLabel";
-      
-      case "entity":
-        return "entity.optionLabel";
+      case 'accountName':
+        return 'accountName.optionLabel';
+
+      case 'entity':
+        return 'entity.optionLabel';
 
       default:
         return field;
     }
-  }
+  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${selectedType}`;
 
     if (accountDetails.accountId) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("accountName"), term: accountDetails.accountId }])}`
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName('accountName'), term: accountDetails.accountId }])}`;
     }
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).forEach(field => {
+      Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
-        })
+        });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -263,9 +267,8 @@ export default function Contact(props) {
   };
 
   const getContacts = () => {
-
     const queryString = getQueryString();
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
       gridApi.setRowData([]);
@@ -274,7 +277,6 @@ export default function Contact(props) {
     axiosInstance()
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-
         let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
 
@@ -298,38 +300,37 @@ export default function Contact(props) {
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
             updatedByDate: u.updatedBy?.date
-          }
+          };
         });
 
-        dispatch({ type: "initialize", data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
       });
   };
 
   const handleSingleDeleteContacts = async () => {
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
     axiosInstance()
       .put(`/${contactApi}/remove`, { ids: [singleContactDelete.id] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
         getContacts();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
       });
-    setSingleContactDelete({ id: null, show: false, contactedName: "" });
+    setSingleContactDelete({ id: null, show: false, contactedName: '' });
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -351,16 +352,16 @@ export default function Contact(props) {
     });
 
     if (selectedContacts.length > 0) {
-      dispatch({ type: "loading", loading: true });
+      dispatch({ type: 'loading', loading: true });
       axiosInstance()
         .put(`/${contactApi}/remove`, {
-          ids: [...selectedContacts],
+          ids: [...selectedContacts]
         })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           getContacts();
         })
@@ -368,14 +369,14 @@ export default function Contact(props) {
           toastConfig.setToastConfig(error);
         })
         .finally(() => {
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
           setShowDeleteConfirmBox(false);
         });
     }
   };
 
   const handleSearch = (e) => {
-    dispatch({ type: "search", search: e.target.value });
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const handleContactSelect = (filterValues) => {
@@ -402,24 +403,12 @@ export default function Contact(props) {
 
       <CustomContainer>
         <div className="header-panel">
-          <Grid
-            className={styles.filter_side_container}
-            container
-            justify="space-between"
-          >
+          <Grid className={styles.filter_side_container} container justify="space-between">
             <Grid item className="d-flex align-items-center gap-1">
               <MdContacts className="headerLogo" />
-              <span className="listingHeader">
-                {sidebarResource[contactResource]}
-              </span>
+              <span className="listingHeader">{sidebarResource[contactResource]}</span>
               {ContactTypes && (
-                <ToggleButtonGroup
-                  size="small"
-                  className="ml-8"
-                  value={filter}
-                  exclusive
-                  onChange={handleFilter}
-                >
+                <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                   {ContactTypes.map((k, index) => {
                     return (
                       <ToggleButton value={k.key} key={index}>
@@ -443,12 +432,7 @@ export default function Contact(props) {
             </Grid>
             <Grid className={styles.filter_side} item>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox={styles.search_box_input}
-                  value={search}
-                  size="small"
-                />
+                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
                 {contactPermissions.isCreate && (
                   <>
                     <Button
@@ -483,8 +467,8 @@ export default function Contact(props) {
                       keepMounted
                       getContentAnchorEl={null}
                       anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
+                        vertical: 'bottom',
+                        horizontal: 'left'
                       }}
                       id="action-menu"
                       open={Boolean(anchorEl)}
@@ -512,10 +496,20 @@ export default function Contact(props) {
           </Grid>
         </div>
         <Box component="div">
-
-          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} 
-            loading={loading} />
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={contactResource}
+          />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
@@ -555,7 +549,7 @@ export default function Contact(props) {
                 setSingleContactDelete({
                   id: null,
                   show: false,
-                  contactedName: "",
+                  contactedName: ''
                 })
               }
               onOk={handleSingleDeleteContacts}

@@ -1,59 +1,46 @@
-import { useState, useEffect, useContext, useReducer } from "react";
-import {
-  Grid,
-  Chip
-} from "@material-ui/core";
-import { Link } from "react-router-dom";
-import { useData } from "../../StateProvider/Provider";
-import Layout from "../../components/Layout";
-import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
-import OpportunitiesHeader from "./OpportunitiesHeader";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import routes from "./../../components/Helpers/Routes";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { GiHiveMind } from "react-icons/gi";
-import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
-import {
-  opportunity,
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout
-} from "../../constants/helpers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import CustomContainer from "../../components/CustomContainer";
-import { useHistory } from "react-router-dom";
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import "./style.scss";
-import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
+import { useState, useEffect, useContext, useReducer } from 'react';
+import { Grid, Chip } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
+import Layout from '../../components/Layout';
+import axiosInstance from '../../axios/axiosInstance';
+import { displayDate } from '../../services/util';
+import OpportunitiesHeader from './OpportunitiesHeader';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { GiHiveMind } from 'react-icons/gi';
+import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
+import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout } from '../../constants/helpers';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import CustomContainer from '../../components/CustomContainer';
+import { useHistory } from 'react-router-dom';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import './style.scss';
+import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 
 let opportunityTimeout;
 const OpportunityTypes = [
   {
-    key: "All Opportunities",
-    value: 1,
+    key: 'All Opportunities',
+    value: 1
   },
   {
-    key: "My Opportunities",
-    value: 2,
-  },
+    key: 'My Opportunities',
+    value: 2
+  }
 ];
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -64,44 +51,48 @@ const Opportunities = () => {
     isCreate: false,
     isUpdate: false,
     isRead: false,
-    isDelete: false,
+    isDelete: false
   });
-  const [
-    showCreateOpportunityDialog,
-    setShowCreateOpportunityDialog,
-  ] = useState(false);
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({
     id: null,
     show: false,
-    opportunityName: "",
+    opportunityName: ''
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource,
-  })
-  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
+    resource: history.location?.state?.resource
+  });
+  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const { opportunityResource, opportunityApi } = opportunity;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const columnState = JSON.parse(localStorage.getItem(opportunityResource));
   const columns = [
-    { field: "opportunityName", headerName: "Opportunity Name", show: true, disabled: true, cellRenderer: "opportunityNameRenderer" },
-    { field: "supplierAccountName", headerName: "Supplier Account Name", show: true, cellRenderer: "supplierAccountNameRenderer" },
-    { field: "customerAccountName", headerName: "Customer Account Name", show: true, cellRenderer: "customerAccountNameRenderer" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    { field: "stage", headerName: "Stage", show: true, cellRenderer: "commonRenderer" },
-    { field: "closeDate", headerName: "Close Date", show: true, filter: false, cellRenderer: "commonRenderer" },
-    { field: "owner", headerName: "Opportunity Owner", show: true, cellRenderer: "commonRenderer" }
+    { field: 'opportunityName', headerName: 'Opportunity Name', show: true, disabled: true, cellRenderer: 'opportunityNameRenderer' },
+    { field: 'supplierAccountName', headerName: 'Supplier Account Name', show: true, cellRenderer: 'supplierAccountNameRenderer' },
+    { field: 'customerAccountName', headerName: 'Customer Account Name', show: true, cellRenderer: 'customerAccountNameRenderer' },
+    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+    { field: 'stage', headerName: 'Stage', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'closeDate', headerName: 'Close Date', show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'owner', headerName: 'Opportunity Owner', show: true, cellRenderer: 'commonRenderer' }
   ];
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   //  Grid Variables - End
 
   useEffect(() => {
@@ -110,8 +101,8 @@ const Opportunities = () => {
     }
 
     return () => {
-      setOpportunityPermissions(null)
-    }
+      setOpportunityPermissions(null);
+    };
   }, [permissions]);
 
   useEffect(() => {
@@ -133,71 +124,73 @@ const Opportunities = () => {
   }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
 
   const handleSingleDeleteOpportunity = async () => {
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
       .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
-        ids: [singleOpportunityDelete.id],
+        ids: [singleOpportunityDelete.id]
       })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
         fetchOpportunities();
-        dispatch({ type: "loading", loading: false });
-        setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" });
-
+        dispatch({ type: 'loading', loading: false });
+        setSingleOpportunityDelete({ id: null, show: false, opportunityName: '' });
       })
       .catch((error) => {
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
       });
   };
 
-  const OpportunityNameRenderer = params => <Link className="link" title={params.value}
-    to={`${routes.opportunityDetail.path}/${params.data._id}`}>
-    {params.value}
-  </Link>
+  const OpportunityNameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.opportunityDetail.path}/${params.data._id}`}>
+      {params.value}
+    </Link>
+  );
 
-  const CustomerAccountNameRenderer = params => <Link className="link" title={params.value}
-    to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
-  >
-    {params.value}
-  </Link>
+  const CustomerAccountNameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
+      {params.value}
+    </Link>
+  );
 
-  const SupplierAccountNameRenderer = params => params.value ? (
+  const SupplierAccountNameRenderer = (params) =>
+    params.value ? (
+      <>
+        <h5 className="createBy d-flex">
+          <Link className="link" title={params.value} to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountId}`}>
+            {params.value}
+          </Link>
+          {params.data.restSupplierAccounts.length > 0 && (
+            <span className="createdAtTime badge-date">{`+${params.data.restSupplierAccounts.length} more..`}</span>
+          )}
+        </h5>
+      </>
+    ) : (
+      <NoDataCell />
+    );
+
+  const ActionsRenderer = (params) => (
     <>
-      <h5 className="createBy d-flex">
-        <Link className="link" title={params.value}
-          to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountId}`}
-        >
-          {params.value}
-        </Link>
-        {
-          params.data.restSupplierAccounts.length > 0 &&
-          <span className="createdAtTime badge-date">
-            {`+${params.data.restSupplierAccounts.length} more..`}
-          </span>
+      <GridDeleteIcon
+        hasDeletePermission={opportunityPermissions.isDelete}
+        ownerId={params.data.ownerId}
+        userId={user?.user?._id}
+        onDelete={() =>
+          setSingleOpportunityDelete({
+            show: true,
+            id: params.data._id,
+            opportunityName: `${params.data.opportunityName}`
+          })
         }
-      </h5>
+        entity="opportunity"
+      />
     </>
-  ) : <NoDataCell />
-
-  const ActionsRenderer = params => <>
-    <GridDeleteIcon
-      hasDeletePermission={opportunityPermissions.isDelete}
-      ownerId={params.data.ownerId}
-      userId={user?.user?._id}
-      onDelete={() => setSingleOpportunityDelete({
-        show: true,
-        id: params.data._id,
-        opportunityName: `${params.data.opportunityName}`,
-      })}
-      entity="opportunity"
-    />
-  </>
+  );
 
   const frameworkComponents = {
     opportunityNameRenderer: OpportunityNameRenderer,
@@ -211,16 +204,16 @@ const Opportunities = () => {
 
   const replaceFieldName = (field) => {
     switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
 
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
 
       default:
         return field;
     }
-  }
+  };
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
@@ -228,49 +221,53 @@ const Opportunities = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "owner":
-        return "owner.optionLabel";
+      case 'owner':
+        return 'owner.optionLabel';
 
-      case "customerAccountName":
-        return "customerAccountName.optionLabel";
+      case 'customerAccountName':
+        return 'customerAccountName.optionLabel';
 
-      case "supplierAccountName":
-        return "supplierAccountName.optionLabel";
+      case 'supplierAccountName':
+        return 'supplierAccountName.optionLabel';
 
       default:
         return field;
     }
-  }
+  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterOpportunities=${selectedType}`;
 
     if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("customerAccountName"), term: accountDetails.accountId }])}`
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          { field: replaceFieldName('customerAccountName'), term: accountDetails.accountId }
+        ])}`;
       } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("supplierAccountName"), term: { $in: [accountDetails.accountId] } }])}`
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          { field: replaceFieldName('supplierAccountName'), term: { $in: [accountDetails.accountId] } }
+        ])}`;
       }
     }
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).forEach(field => {
+      Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
-        })
+        });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -283,7 +280,7 @@ const Opportunities = () => {
   const fetchOpportunities = async () => {
     if (selectedEntity) {
       const queryString = getQueryString();
-      dispatch({ type: "loading", loading: true });
+      dispatch({ type: 'loading', loading: true });
 
       if (gridApi) {
         gridApi.setRowData([]);
@@ -292,10 +289,8 @@ const Opportunities = () => {
       axiosInstance()
         .get(`${opportunityApi}${queryString}`)
         .then(({ data: { data, count } }) => {
-
           let rows = data.map((u) => {
-            const { owner, collaborator, createdBy, updatedBy, customerAccountName,
-              supplierAccountName, staticData, ...restProperties } = u;
+            const { owner, collaborator, createdBy, updatedBy, customerAccountName, supplierAccountName, staticData, ...restProperties } = u;
 
             const [firstSupplierAccount, ...restSupplierAccounts] = supplierAccountName;
 
@@ -308,10 +303,10 @@ const Opportunities = () => {
 
               canDelete: u.owner?.optionValue === user?.user._id,
               stage: u.stage,
-              closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
+              closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
 
-              supplierAccountName: firstSupplierAccount?.optionLabel ?? "",
-              supplierAccountId: firstSupplierAccount?.optionValue ?? "",
+              supplierAccountName: firstSupplierAccount?.optionLabel ?? '',
+              supplierAccountId: firstSupplierAccount?.optionValue ?? '',
 
               restSupplierAccounts: restSupplierAccounts,
 
@@ -326,21 +321,20 @@ const Opportunities = () => {
             return res;
           });
 
-          dispatch({ type: "initialize", data: rows, count: count });
+          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
+            dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
-
         })
         .catch((error) => {
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   const handleSearch = (e) => {
-    dispatch({ type: "search", search: e.target.value });
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const handleOpportunityTypeChange = (filterValues) => {
@@ -348,8 +342,8 @@ const Opportunities = () => {
   };
 
   const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true)
-  }
+    setShowTransferEntityDialog(true);
+  };
 
   const onSuccess = () => {
     setShowCreateOpportunityDialog(false);
@@ -386,13 +380,13 @@ const Opportunities = () => {
     if (recordsToDelete.length > 0) {
       axiosInstance()
         .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
-          ids: recordsToDelete,
+          ids: recordsToDelete
         })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
@@ -414,11 +408,7 @@ const Opportunities = () => {
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
-          <Grid
-            item
-            md={8}
-            sm={1}
-            xs={2}>
+          <Grid item md={8} sm={1} xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
@@ -453,22 +443,35 @@ const Opportunities = () => {
               heading="Opportunities"
               showTransferEntityDialog={handleTransferEntityDialog}
             >
-              {
-                accountDetails.accountId && <Chip
+              {accountDetails.accountId && (
+                <Chip
                   className="ml-3"
                   color="primary"
-                  label={`${accountDetails.resource === customerAccount.accountResource ? "Customer" : "Supplier"} Account: ${accountDetails.accountName}`}
+                  label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${
+                    accountDetails.accountName
+                  }`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null, resource: null });
                   }}
                 />
-              }
+              )}
             </OpportunitiesHeader>
           </div>
 
-          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
-            loading={loading} />
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={opportunityResource}
+          />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
@@ -480,8 +483,9 @@ const Opportunities = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? "Opportunity" : "Opportunities"
-                }   ${deleteRecord.opportunityName || ""}?`}
+              message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${
+                deleteRecord.opportunityName || ''
+              }?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
@@ -508,7 +512,7 @@ const Opportunities = () => {
                 setSingleOpportunityDelete({
                   id: null,
                   show: false,
-                  opportunityName: "",
+                  opportunityName: ''
                 })
               }
               onOk={handleSingleDeleteOpportunity}
@@ -534,14 +538,14 @@ const Opportunities = () => {
         <TransferEntityDialog
           TransferEntityDialogOpen={showTransferEntityDialog}
           onSuccess={() => {
-            onSuccess()
+            onSuccess();
             setShowTransferEntityDialog(false);
           }}
           handleCloseDialog={() => {
             setShowTransferEntityDialog(false);
           }}
-          selectedRecs={selectedRecords.map(r => r._id)}
-          entities={user.entity.filter(e => e._id !== selectedEntity)}
+          selectedRecs={selectedRecords.map((r) => r._id)}
+          entities={user.entity.filter((e) => e._id !== selectedEntity)}
           type="opportunities"
           api="opportunity"
         />
