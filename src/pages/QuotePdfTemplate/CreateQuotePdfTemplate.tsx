@@ -20,7 +20,15 @@ const PdfTemplateSchema = Yup.object().shape({
   showPageNumberInFooter: Yup.boolean()
 });
 
-const seedData = [
+
+
+const CreateQuotePdfTemplate = () => {
+  const history = useHistory();
+  const { id } = useParams();
+  const toastConfig = useContext(CustomToastContext);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [initialValues, setInitialValues] = useState(null);
+  const [seedData] = useState([
   {
     _id: '60e57ae7801802b66486e326',
     fieldLabel: 'Header Column 1',
@@ -85,17 +93,11 @@ const seedData = [
     fieldName: 'footerColumn2',
     sectionName: 'Footer'
   }
-];
-
-const CreateQuotePdfTemplate = () => {
-  const history = useHistory();
-  const { id } = useParams();
-  const toastConfig = useContext(CustomToastContext);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [initialValues, setInitialValues] = useState(null);
+  ])
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
+
 
   useEffect(() => {
     const _data = [];
@@ -107,6 +109,7 @@ const CreateQuotePdfTemplate = () => {
         field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
+    console.log(_data)
     setSection(_data);
   }, []);
   useEffect(() => {

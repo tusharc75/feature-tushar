@@ -1,27 +1,11 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Popover,
-  FormControl,
-  FormGroup,
-  FormControlLabel,
-  Tooltip,
-  Divider,
-  Switch,
-} from "@material-ui/core";
-import ViewWeekIcon from "@material-ui/icons/ViewWeek";
-import RefreshIcon from "@material-ui/icons/Refresh";
+import React, { useState } from 'react';
+import { Box, Button, Popover, FormControl, FormGroup, FormControlLabel, Tooltip, Divider, Switch } from '@material-ui/core';
+import ViewWeekIcon from '@material-ui/icons/ViewWeek';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
-export default function CustomGridHeaderOptions({
-  columns,
-  setColumns,
-  columnApi,
-  refreshGrid = null,
-}) {
+export default function CustomGridHeaderOptions({ columns, setColumns, columnApi, refreshGrid = null, renderedFrom = null }) {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
-  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] =
-    useState<HTMLButtonElement | null>(null);
+  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   return (
     <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2">
@@ -48,24 +32,19 @@ export default function CustomGridHeaderOptions({
           setOpenColumnSelectionAnchorEl(null);
         }}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
+          vertical: 'bottom',
+          horizontal: 'left'
         }}
         transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
+          vertical: 'top',
+          horizontal: 'left'
         }}
       >
         <FormControl component="fieldset" className="px-3 py-2">
           <FormGroup>
             {columns.map((column: any, index) => {
               return (
-                <Tooltip
-                  key={index}
-                  title={
-                    column.disabled ? "Main columns are always visible" : ""
-                  }
-                >
+                <Tooltip key={index} title={column.disabled ? 'Main columns are always visible' : ''}>
                   <FormControlLabel
                     key={index}
                     className="my-1"
@@ -75,25 +54,20 @@ export default function CustomGridHeaderOptions({
                         size="small"
                         disabled={column.disabled}
                         checked={column.show}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>
-                        ) => {
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                           const newColumns = [...columns];
 
-                          const getFieldIndex = columns.findIndex(
-                            (d) => d.field === column.field
-                          );
+                          const getFieldIndex = columns.findIndex((d) => d.field === column.field);
                           newColumns[getFieldIndex].show = event.target.checked;
                           setColumns(newColumns);
 
-                          const hiddenColumns = newColumns
-                            .filter((d) => !d.show)
-                            .map((m) => m.field);
-                          const nonHiddenColumns = newColumns
-                            .filter((d) => d.show)
-                            .map((m) => m.field);
+                          const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
+                          const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
                           columnApi.setColumnsVisible(hiddenColumns, false);
                           columnApi.setColumnsVisible(nonHiddenColumns, true);
+                          const columnState = JSON.stringify(columnApi.getColumnState());
+
+                          localStorage.setItem(renderedFrom, columnState);
                         }}
                       />
                     }

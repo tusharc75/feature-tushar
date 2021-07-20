@@ -110,7 +110,7 @@ const PriceTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {priceTemplatePermissions.isDelete ?
+        {priceTemplatePermissions.isDelete && params.data?.createdById === user?.user?._id ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -237,6 +237,7 @@ const PriceTemplate: FC = () => {
                         ...restProperties,
                         id: u._id,
                         createdBy: u.createdBy?.user?.concatedName,
+                        createdById: u.createdBy?.user?._id,
                         createdByDate: u.createdBy?.date,
                         updatedBy: u.updatedBy?.user?.concatedName,
                         updatedByDate: u.updatedBy?.date,

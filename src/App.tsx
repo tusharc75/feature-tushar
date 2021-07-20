@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, lazy, Suspense } from "react";
+import React, { useContext, useEffect, lazy, Suspense, useState } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import ReactGA from "react-ga";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
@@ -87,11 +87,13 @@ import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyCart from "./components/ProductList/MyCart/MyCart";
+import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
+  const [isOffline, setIsOffline] = useState(false)
 
   const {
     state: { user },
@@ -99,6 +101,24 @@ function App() {
   }: any = useData();
   const history = useHistory();
   ReactGA.initialize(TRACKING_ID);
+
+  window.addEventListener('load', function (e) {
+    if (navigator.onLine) {
+      if (isOffline) setIsOffline(false)
+    }
+    else {
+      setIsOffline(true);
+    }
+  }, false);
+
+  window.addEventListener('online', function (e) {
+    if (isOffline) setIsOffline(false)
+  }, false);
+
+  window.addEventListener('offline', function (e) {
+    setIsOffline(true);
+  }, false);
+
 
   const getVersion = () => {
     setTimeout(() => {
@@ -145,35 +165,38 @@ function App() {
           }
         })
         .catch((error) => {
-          toast.setToastConfig(error);
+          // toast.setToastConfig(error);
         });
     }
   };
 
   const getChatNotification = async () => {
     if (localStorage.getItem("token")) {
-      await axiosInstance()
-        .get(`/user/user-notification/unseen`)
-        .then(({ data: { count } }) => {
-          if (count > 0) {
-            chatNotification.setCount(count);
-          }
-        });
+      if (!isOffline) {
+        await axiosInstance()
+          .get(`/user/user-notification/unseen`)
+          .then(({ data: { count } }) => {
+            if (count > 0) {
+              chatNotification.setCount(count);
+            }
+          });
+      }
     }
   };
 
   useEffect(() => {
     try {
-      getNotification();
-      getChatNotification();
-      history.listen((location, action) => {
-        ReactGA.set({ page: location.pathname });
-        ReactGA.pageview(location.pathname);
-      });
-
-      setInterval(async () => {
-        await getNotification();
-      }, 60000);
+      if (!isOffline) {
+        getNotification();
+        getChatNotification();
+        history.listen((location, action) => {
+          ReactGA.set({ page: location.pathname });
+          ReactGA.pageview(location.pathname);
+        });
+        setInterval(async () => {
+          await getNotification();
+        }, 60000);
+      }
     } catch (e) { }
 
     // getVersion();
@@ -205,294 +228,294 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         {/* <Switch location={location} key={location.key}> */}
         <Switch>
-            <Route
-              // exact
-              path="/login"
-              render={({ location }) => conditionalRedirect(Login, location)}
-            />
-            <Route
-              // exact
-              path="/office365/login"
-              render={({ location }) => conditionalRedirect(AzureLogin, location)}
-            />
-            <Route
-              exact
-              path="/create-password"
-              render={({ location }) =>
-                conditionalRedirect(PasswordSetup, location)
-              }
-            />
-            <Route
-              exact
-              path="/forget-password"
-              render={({ location }) =>
-                conditionalRedirect(ForgetPassword, location)
-              }
-            />
-            <Route
-              exact
-              path="/reset-password"
-              render={({ location }) =>
-                conditionalRedirect(ResetPassword, location)
-              }
-            />
-            <PrivateRoute exact path="/">
-              <Dashboard />
-            </PrivateRoute>
-            <PrivateRoute exact path="/lead">
-              <Leads />
-            </PrivateRoute>
-            <PrivateRoute exact path="/lead/detail/:id">
-              <LeadDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/new-lead">
-              <NewLead />
-            </PrivateRoute>
-            <PrivateRoute exact path="/opportunity">
-              <Opportunities />
-            </PrivateRoute>
-            <PrivateRoute exact path="/opportunity/detail/:id">
-              <OpportunityDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/new-opp">
-              <AddNewOpportunity />
-            </PrivateRoute>
-            <PrivateRoute exact path="/doa">
-              <Doa />
-            </PrivateRoute>
-            <PrivateRoute exact path="/add-doa">
-              <Doa />
-            </PrivateRoute>
-            {/* <PrivateRoute exact path="/">
+          <Route
+            // exact
+            path="/login"
+            render={({ location }) => conditionalRedirect(Login, location)}
+          />
+          <Route
+            // exact
+            path="/office365/login"
+            render={({ location }) => conditionalRedirect(AzureLogin, location)}
+          />
+          <Route
+            exact
+            path="/create-password"
+            render={({ location }) =>
+              conditionalRedirect(PasswordSetup, location)
+            }
+          />
+          <Route
+            exact
+            path="/forget-password"
+            render={({ location }) =>
+              conditionalRedirect(ForgetPassword, location)
+            }
+          />
+          <Route
+            exact
+            path="/reset-password"
+            render={({ location }) =>
+              conditionalRedirect(ResetPassword, location)
+            }
+          />
+          <PrivateRoute exact path="/">
+            <Dashboard />
+          </PrivateRoute>
+          <PrivateRoute exact path="/lead">
+            <Leads />
+          </PrivateRoute>
+          <PrivateRoute exact path="/lead/detail/:id">
+            <LeadDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/new-lead">
+            <NewLead />
+          </PrivateRoute>
+          <PrivateRoute exact path="/opportunity">
+            <Opportunities />
+          </PrivateRoute>
+          <PrivateRoute exact path="/opportunity/detail/:id">
+            <OpportunityDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/new-opp">
+            <AddNewOpportunity />
+          </PrivateRoute>
+          <PrivateRoute exact path="/doa">
+            <Doa />
+          </PrivateRoute>
+          <PrivateRoute exact path="/add-doa">
+            <Doa />
+          </PrivateRoute>
+          {/* <PrivateRoute exact path="/">
           <CreateBrand />
         </PrivateRoute> */}
-            {/* <PrivateRoute exact path="/contact/new">
+          {/* <PrivateRoute exact path="/contact/new">
                     <CreateContact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/contact/:id">
                     <CreateContact />
                 </PrivateRoute> */}
-            <PrivateRoute key="customer-account" exact path="/customer-account">
-              <Account
-                account={customerAccount}
-                accountBreadcrumb={routes.customerAccount}
-              />
-            </PrivateRoute>
-            <PrivateRoute
-              key="customer-account-edit"
-              exact
-              path="/customer-account/detail/:id"
-            >
-              <AccountDetailPage
-                account={customerAccount}
-                contact={customerContact}
-                accountBreadcrumb={routes.customerAccount}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="customer-contact" exact path="/customer-contact">
-              <Contact
-                contact={customerContact}
-                account={customerAccount}
-                contactBreadcrumb={routes.customerContact}
-              />
-            </PrivateRoute>
-            <PrivateRoute
-              key="customer-contact-edit"
-              exact
-              path="/customer-contact/detail/:id"
-            >
-              <ContactDetailPage
-                account={customerAccount}
-                contact={customerContact}
-                contactBreadcrumb={routes.customerContact}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="supplier-account" exact path="/supplier-account">
-              <Account
-                account={supplierAccount}
-                accountBreadcrumb={routes.supplierAccount}
-              />
-            </PrivateRoute>
-            <PrivateRoute
-              key="supplier-account-edit"
-              exact
-              path="/supplier-account/detail/:id"
-            >
-              <AccountDetailPage
-                account={supplierAccount}
-                contact={supplierContact}
-                accountBreadcrumb={routes.supplierAccount}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
-              <Contact
-                contact={supplierContact}
-                account={supplierAccount}
-                contactBreadcrumb={routes.supplierContact}
-              />
-            </PrivateRoute>
-            <PrivateRoute
-              key="supplier-contact-edit"
-              exact
-              path="/supplier-contact/detail/:id"
-            >
-              <ContactDetailPage
-                account={supplierAccount}
-                contact={supplierContact}
-                contactBreadcrumb={routes.supplierContact}
-              />
-            </PrivateRoute>
-            <PrivateRoute
-              key="project-sales"
-              exact
-              path={routes.projectSales.path}
-            >
-              <ProjectSales />
-            </PrivateRoute>
-            <PrivateRoute
-              key="project-sales-details"
-              exact
-              path={`${routes.projectSalesDetail.path}/:id`}
-            >
-              <ProjectSalesDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path="/user">
-              <User />
-            </PrivateRoute>
-            <PrivateRoute exact path="/profile">
-              <UserProfilePage profileBreadCrumbs={routes.profilePage} />
-            </PrivateRoute>
-            <PrivateRoute exact path="/brand-configuration">
-              <BrandConfiguration />
-            </PrivateRoute>
-            <PrivateRoute exact path="/user/detail/:id">
-              <UserDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/entity">
-              <Entity />
-            </PrivateRoute>
-            <PrivateRoute exact path="/entity/detail/:id">
-              <EntityDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/role">
-              <Roles />
-            </PrivateRoute>
-            <PrivateRoute exact path="/role/detail/:id">
-              <RoleDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/activity">
-              <Activitydemo />
-            </PrivateRoute>
-            <PrivateRoute exact path="/email">
-              <Email />
-            </PrivateRoute>
-            <PrivateRoute exact path="/note">
-              <Note />
-            </PrivateRoute>
-            <PrivateRoute exact path="/attachment">
-              <Attachments />
-            </PrivateRoute>
-            <PrivateRoute exact path="/calendar">
-              <Calender />
-            </PrivateRoute>
-            <PrivateRoute exact path="/reminder">
-              <Reminder />
-            </PrivateRoute>
-            <PrivateRoute path="/case">
-              <Activity type="case" />
-            </PrivateRoute>
-            <PrivateRoute path="/task">
-              <Activity type="task" />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.product.path}>
-              <Product />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productCategory.path}>
-              <ProductCategory />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productTemplate.path}>
-              <ProductTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
-              <CreateProductTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.quotePdfTemplate.path}>
-              <QuotePdfTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quotePdfTemplate.path}/:id`}>
-              <CreateQuotePdfTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.formBuilder.path}>
-              <FormBuilder />
-            </PrivateRoute>
-            <PrivateRoute
-              exact
-              path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}
-            >
-              <CreateFormBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={termsAndCondition.route}>
-              <TermsAndConditions
-                termsAndConditionBreadcrumb={routes.termsAndConditions}
-              />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.priceTemplate.path}>
-              <PriceTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.priceTemplate.path + "/:id"}>
-              <CreatePriceTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productBuilder.path}>
-              <ProductBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
-              <CreateProductBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.currencyConverter.path}>
-              <CurrencyConverter />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
-              <QuoteDetail />
-            </PrivateRoute>
-            <Route exact path={"/dashboards"}>
-              <KpiDashboard />
-            </Route>
-            <Route exact path={"/dashboard/detail/:id"}>
-              <EditDashboard edit={true} />
-            </Route>
-            <Route exact path={"/dashboard/:id"}>
-              <EditDashboard edit={false} />
-            </Route>
+          <PrivateRoute key="customer-account" exact path="/customer-account">
+            <Account
+              account={customerAccount}
+              accountBreadcrumb={routes.customerAccount}
+            />
+          </PrivateRoute>
+          <PrivateRoute
+            key="customer-account-edit"
+            exact
+            path="/customer-account/detail/:id"
+          >
+            <AccountDetailPage
+              account={customerAccount}
+              contact={customerContact}
+              accountBreadcrumb={routes.customerAccount}
+            />
+          </PrivateRoute>
+          <PrivateRoute key="customer-contact" exact path="/customer-contact">
+            <Contact
+              contact={customerContact}
+              account={customerAccount}
+              contactBreadcrumb={routes.customerContact}
+            />
+          </PrivateRoute>
+          <PrivateRoute
+            key="customer-contact-edit"
+            exact
+            path="/customer-contact/detail/:id"
+          >
+            <ContactDetailPage
+              account={customerAccount}
+              contact={customerContact}
+              contactBreadcrumb={routes.customerContact}
+            />
+          </PrivateRoute>
+          <PrivateRoute key="supplier-account" exact path="/supplier-account">
+            <Account
+              account={supplierAccount}
+              accountBreadcrumb={routes.supplierAccount}
+            />
+          </PrivateRoute>
+          <PrivateRoute
+            key="supplier-account-edit"
+            exact
+            path="/supplier-account/detail/:id"
+          >
+            <AccountDetailPage
+              account={supplierAccount}
+              contact={supplierContact}
+              accountBreadcrumb={routes.supplierAccount}
+            />
+          </PrivateRoute>
+          <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
+            <Contact
+              contact={supplierContact}
+              account={supplierAccount}
+              contactBreadcrumb={routes.supplierContact}
+            />
+          </PrivateRoute>
+          <PrivateRoute
+            key="supplier-contact-edit"
+            exact
+            path="/supplier-contact/detail/:id"
+          >
+            <ContactDetailPage
+              account={supplierAccount}
+              contact={supplierContact}
+              contactBreadcrumb={routes.supplierContact}
+            />
+          </PrivateRoute>
+          <PrivateRoute
+            key="project-sales"
+            exact
+            path={routes.projectSales.path}
+          >
+            <ProjectSales />
+          </PrivateRoute>
+          <PrivateRoute
+            key="project-sales-details"
+            exact
+            path={`${routes.projectSalesDetail.path}/:id`}
+          >
+            <ProjectSalesDetails />
+          </PrivateRoute>
+          <PrivateRoute exact path="/user">
+            <User />
+          </PrivateRoute>
+          <PrivateRoute exact path="/profile">
+            <UserProfilePage profileBreadCrumbs={routes.profilePage} />
+          </PrivateRoute>
+          <PrivateRoute exact path="/brand-configuration">
+            <BrandConfiguration />
+          </PrivateRoute>
+          <PrivateRoute exact path="/user/detail/:id">
+            <UserDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/entity">
+            <Entity />
+          </PrivateRoute>
+          <PrivateRoute exact path="/entity/detail/:id">
+            <EntityDetailPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/role">
+            <Roles />
+          </PrivateRoute>
+          <PrivateRoute exact path="/role/detail/:id">
+            <RoleDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity">
+            <Activitydemo />
+          </PrivateRoute>
+          <PrivateRoute exact path="/email">
+            <Email />
+          </PrivateRoute>
+          <PrivateRoute exact path="/note">
+            <Note />
+          </PrivateRoute>
+          <PrivateRoute exact path="/attachment">
+            <Attachments />
+          </PrivateRoute>
+          <PrivateRoute exact path="/calendar">
+            <Calender />
+          </PrivateRoute>
+          <PrivateRoute exact path="/reminder">
+            <Reminder />
+          </PrivateRoute>
+          <PrivateRoute path="/case">
+            <Activity type="case" />
+          </PrivateRoute>
+          <PrivateRoute path="/task">
+            <Activity type="task" />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.product.path}>
+            <Product />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productCategory.path}>
+            <ProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path}>
+            <ProductTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
+            <CreateProductTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.quotePdfTemplate.path}>
+            <QuotePdfTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={`${routes.quotePdfTemplate.path}/:id`}>
+            <CreateQuotePdfTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.formBuilder.path}>
+            <FormBuilder />
+          </PrivateRoute>
+          <PrivateRoute
+            exact
+            path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}
+          >
+            <CreateFormBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={termsAndCondition.route}>
+            <TermsAndConditions
+              termsAndConditionBreadcrumb={routes.termsAndConditions}
+            />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.priceTemplate.path}>
+            <PriceTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.priceTemplate.path + "/:id"}>
+            <CreatePriceTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productBuilder.path}>
+            <ProductBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
+            <CreateProductBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.currencyConverter.path}>
+            <CurrencyConverter />
+          </PrivateRoute>
+          <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
+            <QuoteDetail />
+          </PrivateRoute>
+          <Route exact path={"/dashboards"}>
+            <KpiDashboard />
+          </Route>
+          <Route exact path={"/dashboard/detail/:id"}>
+            <EditDashboard edit={true} />
+          </Route>
+          <Route exact path={"/dashboard/:id"}>
+            <EditDashboard edit={false} />
+          </Route>
             //Route available for customers to Accept Reject Quote
-            <Route exact path={"/quote-approval/:id"}>
-              <QuoteApproval />
-            </Route>
-            <PrivateRoute exact path={"/doa-request"}>
-              <DOARequest />
-            </PrivateRoute>
-            <PrivateRoute exact path={"/doa-request/:id"}>
-              <DOAapproval />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.quoteBuilder.path}>
-              <QuoteBuilderCombined />
-            </PrivateRoute>
-            <PrivateRoute exact path="/product-list">
-              <Products />
-            </PrivateRoute>
-            <PrivateRoute exact path="/product/details/:id">
-              <ProductDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path="/product/my-cart">
-              <MyCart />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.budget.path}>
-              <Budget />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.marketSegment.path}>
-              <MarketSegment />
-            </PrivateRoute>
-            <Route path="*" component={NotFound} />
-            {/* <Route exact path="/crm/account" component={Account} /> */}
+          <Route exact path={"/quote-approval/:id"}>
+            <QuoteApproval />
+          </Route>
+          <PrivateRoute exact path={"/doa-request"}>
+            <DOARequest />
+          </PrivateRoute>
+          <PrivateRoute exact path={"/doa-request/:id"}>
+            <DOAapproval />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.quoteBuilder.path}>
+            <QuoteBuilderCombined />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product-list">
+            <Products />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product/details/:id">
+            <ProductDetails />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product/my-cart">
+            <MyCart />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.budget.path}>
+            <Budget />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.marketSegment.path}>
+            <MarketSegment />
+          </PrivateRoute>
+          <Route path="*" component={NotFound} />
+          {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>
 
@@ -506,6 +529,10 @@ function App() {
           }}
         />
       )}
+      {
+        isOffline ?
+          <OfflineStatusDialog /> : null
+      }
     </ThemeProvider>
   );
 }
