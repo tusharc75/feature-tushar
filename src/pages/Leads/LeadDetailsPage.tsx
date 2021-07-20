@@ -129,10 +129,10 @@ const LeadDetailsPage = () => {
 
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.user?.permissions?.convertLeadToOpportunity &&
-              isAllowedToUpdate &&
-              data[processFieldName] &&
-              data[processFieldName].toLowerCase() === 'qualified'
+            user?.user?.permissions?.convertLeadToOpportunity &&
+            isAllowedToUpdate &&
+            data[processFieldName] &&
+            data[processFieldName].toLowerCase() === 'qualified'
           );
           setIsLeadAlreadyConvertedToOpportunity(
             data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
@@ -463,7 +463,9 @@ const LeadDetailsPage = () => {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => {}}
+                    resourceId={leadData._id}
+                    resource={leadResource}
+                    handleActivityRefresh={() => { }}
                     emails={[leadData?.email ?? '']}
                   />
                 </div>

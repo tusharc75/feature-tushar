@@ -87,7 +87,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.defaultValue = '';
       }
 
-      if (!values.hiddenField && module !== 'price-template' && module !== 'product-template') {
+      if (!values.hiddenField && module !== 'price-template' && module !== 'product-template'
+      && module !== "pdf-template") {
         values.hiddenField = false;
       }
 
@@ -102,6 +103,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
         setInitialValues(values);
       }
+
+      return () => setInitialValues(null)
     }
   }, [fieldData]);
 
@@ -409,7 +412,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {(values['type'] === 'formula' || values['isFormula']) && (
                     <Formula fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} />
                   )}
-                  {values['type'] === 'currencyAmount' && (
+                  {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
                     <Fragment>
                       <br></br>
                       <FormControlLabel
@@ -621,7 +624,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       </Box>
                     ) : null}
-                    {module !== 'price-template' && module !== 'product-template' ? (
+                    {module !== 'price-template' && module !== 'product-template'
+                      && module !== "pdf-template" ? (
                       <FormControlLabel
                         disabled={values['required']}
                         control={

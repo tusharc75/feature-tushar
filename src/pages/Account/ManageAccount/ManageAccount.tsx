@@ -56,23 +56,22 @@ export default function ManageAccount(props) {
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
-    
+
   useEffect(() => {
-   
-    if(isNew){
+
+    if (isNew) {
       const processSteps = accountData.fields.find(
         (d) => d.type.toLowerCase() === "process"
       );
-    
-      accountData.fields.map((d) => {
-        if (
-          d.sectionName ==processSteps?.additionalInfoSection ) {
-         
-          setAdditionalFieldName(d.sectionName)
-        }
-      });
+      if (processSteps) {
+        accountData.fields.map((d) => {
+          if (d.sectionName == processSteps?.additionalInfoSection) {
+            setAdditionalFieldName(d.sectionName)
+          }
+        });
+      }
     }
-   
+
     let ownerCollaboratorDropdownData = accountData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
@@ -92,8 +91,8 @@ export default function ManageAccount(props) {
         isNew
           ? parentAccountDropdownData.option
           : parentAccountDropdownData.option.filter(
-              (d) => d.optionValue !== accountId
-            )
+            (d) => d.optionValue !== accountId
+          )
       );
     }
 
@@ -146,11 +145,10 @@ export default function ManageAccount(props) {
           title={
             isNew
               ? "Add Account"
-              : `Editing ${
-                  accountData.initialValues.accountName
-                    ? accountData.initialValues.accountName
-                    : ""
-                }`
+              : `Editing ${accountData.initialValues.accountName
+                ? accountData.initialValues.accountName
+                : ""
+              }`
           }
         />
         {accountData.fields.length > 0 ? (
@@ -170,11 +168,11 @@ export default function ManageAccount(props) {
                 setFieldValue,
               }) => (
                 <>
-               
+
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
                       {formsData &&
-                        formsData.filter((item)=>item.name!==additionalFieldName).map((form, i) => (
+                        formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
                             <h2 className="form-label-style">{form.name}</h2>
                             <Box marginY={2}>
@@ -216,10 +214,10 @@ export default function ManageAccount(props) {
                                               const newCollaboratorDataSource =
                                                 fromProject
                                                   ? collaborators.filter(
-                                                      (c) =>
-                                                        c.optionValue !==
-                                                        values["owner"]
-                                                    )
+                                                    (c) =>
+                                                      c.optionValue !==
+                                                      values["owner"]
+                                                  )
                                                   : collaboratorDataSource;
 
                                               setFieldValue("collaborator", [
@@ -258,10 +256,10 @@ export default function ManageAccount(props) {
                                         options={
                                           fromProject
                                             ? collaborators.filter(
-                                                (c) =>
-                                                  c.optionValue !==
-                                                  values["owner"]
-                                              )
+                                              (c) =>
+                                                c.optionValue !==
+                                                values["owner"]
+                                            )
                                             : collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
@@ -403,10 +401,10 @@ export default function ManageAccount(props) {
                                             (s) => s === field.type
                                           )
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(
-                                                  completePercentage
-                                                );
-                                              }
+                                              setUploadingImageOrFileProgress(
+                                                completePercentage
+                                              );
+                                            }
                                             : null
                                         }
                                       />
@@ -441,9 +439,9 @@ export default function ManageAccount(props) {
                             accountData.fields
                           )
                         ).toString() ===
-                          Object.values(
-                            simplifyValues(values, accountData.fields)
-                          ).toString()
+                        Object.values(
+                          simplifyValues(values, accountData.fields)
+                        ).toString()
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {

@@ -22,6 +22,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { checkFormulaLoop } from "../../constants/formulaUtility";
 import { useData } from "../../StateProvider/Provider";
+import HistoryDialog from "../../components/Activity/History"
+import { productTemplate } from "../../constants/helpers"
+import HistoryButton from "../../components/Helpers/HistoryButton";
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -43,6 +46,7 @@ const ProductTemplate = () => {
     const [section, setSection] = useState([]);
     const [deleteField, setDeleteField] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
+    const [showHistory, setShowHistory] = useState(false)
     //const [productUnit, setProductUnit] = useState(null);
 
     const {
@@ -324,6 +328,7 @@ const ProductTemplate = () => {
                                         />} */}
                                     </Grid>
                                     <Grid item xs={12} sm={2} container justify="flex-end">
+                                        <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
                                                 <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
@@ -351,6 +356,14 @@ const ProductTemplate = () => {
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+            {
+                showHistory ? <HistoryDialog
+                    open={showHistory}
+                    resourceId={initialValues?._id}
+                    resource={productTemplate.productTemplateRoute}
+                    onClose={() => setShowHistory(false)}
+                /> : null
+            }
         </CustomContainer>
     </Layout>
     );
