@@ -1,55 +1,42 @@
-import { useState, useContext, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import {
-  Grid,
-  Paper,
-  Button,
-  Box,
-  TextField,
-  CircularProgress,
-  Link as MuiLink,
-} from "@material-ui/core";
-import { Formik, Form } from "formik";
-import { useData } from "../../StateProvider/Provider";
-import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-import axiosInstance from "./../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
-import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import { useState, useContext, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { Grid, Paper, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
+import { Formik, Form } from 'formik';
+import { useData } from '../../StateProvider/Provider';
+import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from './../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 
-import {
-  AuthenticatedTemplate,
-  UnauthenticatedTemplate,
-  useAccount,
-  useMsal,
-} from "@azure/msal-react";
-import { isEmpty } from "lodash";
-import getAzureAcessToken from "../../components/Azure/getAzureAccessToken";
-import { AzureLogin } from "../../components/Azure/Azure";
-import { SiMicrosoftoffice } from "react-icons/si";
-import { SVG } from "../../assets";
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
+import { isEmpty } from 'lodash';
+import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
+import { AzureLogin } from '../../components/Azure/Azure';
+import { SiMicrosoftoffice } from 'react-icons/si';
+import { SVG } from '../../assets';
 const useStyles = makeStyles((theme) => ({
   container: {
-    height: "90vh",
-    width: "90vw",
-    overflow: "hidden",
+    height: '90vh',
+    width: '90vw',
+    overflow: 'hidden'
   },
   grid: {
-    height: "100%",
+    height: '100%'
   },
   formSide: {
-    height: "100%",
-    width: "100%",
-    padding: "30px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    height: '100%',
+    width: '100%',
+    padding: '30px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   logo: {
-    width: "150px",
-    height: "100%",
-  },
+    width: '150px',
+    height: '100%'
+  }
 }));
 
 const Login = () => {
@@ -70,16 +57,16 @@ const Login = () => {
       (async () => {
         try {
           const graphToken = await getAzureAcessToken(instance);
-          const res = await axiosInstance().post("/user/login/azure", {
-            "graph-token": graphToken,
+          const res = await axiosInstance().post('/user/login/azure', {
+            'graph-token': graphToken
           });
           const { data } = res.data;
-          localStorage.setItem("token", data.token);
+          localStorage.setItem('token', data.token);
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
               type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id,
+              payload: data.role.selectedEntity._id
             });
           }
         } catch (e) {
@@ -105,20 +92,20 @@ const Login = () => {
     setSubmitting(true);
     const data = {
       email: values.email,
-      password: values.password,
+      password: values.password
     };
 
     axiosInstance()
-      .post("/user/login", data)
+      .post('/user/login', data)
       .then(({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
-        localStorage.setItem("token", data.token);
+        localStorage.setItem('token', data.token);
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({
             type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id,
+            payload: data.role.selectedEntity._id
           });
         }
 
@@ -149,15 +136,13 @@ const Login = () => {
   const validateForm = (values) => {
     const errors: any = {};
     if (!values.email) {
-      errors.email = "Email is required";
-    } else if (
-      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
-    ) {
-      errors.email = "Invalid email address";
+      errors.email = 'Email is required';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+      errors.email = 'Invalid email address';
     }
 
     if (!values.password) {
-      errors.password = "Password is required";
+      errors.password = 'Password is required';
     }
 
     return errors;
@@ -169,33 +154,24 @@ const Login = () => {
         <Grid container className={classes.grid}>
           <Grid item sm={6} md={5} className="loginSidebar">
             <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
-              <img className="imgLogin" src={SVG("imgComputer")}></img>
+              <img className="imgLogin" src={SVG('imgComputer')}></img>
             </Box>
           </Grid>
           <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
             <Box textAlign="center">
-              <img
-                className={classes.logo}
-                src={SVG("LogoPng")}
-                alt="equip logo"
-                title="eQuipt Logo"
-              />
+              <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
               <Box my={4} />
               <Formik
                 initialValues={{
-                  email: "",
-                  password: "",
+                  email: ['local', 'development'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
+                  password: ['local', 'development'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
               >
                 {({ submitForm, values, errors, touched, setFieldValue }) => (
                   <Form>
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                    >
+                    <Box display="flex" flexDirection="column" alignItems="center">
                       <Box mb={3}>
                         <TextField
                           style={{ width: 260 }}
@@ -204,12 +180,10 @@ const Login = () => {
                           size="small"
                           label="Email"
                           name="email"
-                          value={values["email"]}
-                          error={touched["email"] && Boolean(errors["email"])}
-                          helperText={touched["email"] && errors["email"]}
-                          onChange={(e) =>
-                            setFieldValue("email", e.target.value)
-                          }
+                          value={values['email']}
+                          error={touched['email'] && Boolean(errors['email'])}
+                          helperText={touched['email'] && errors['email']}
+                          onChange={(e) => setFieldValue('email', e.target.value)}
                         />
                       </Box>
                       <Box>
@@ -220,14 +194,10 @@ const Login = () => {
                           size="small"
                           label="Password"
                           name="password"
-                          value={values["password"]}
-                          error={
-                            touched["password"] && Boolean(errors["password"])
-                          }
-                          helperText={touched["password"] && errors["password"]}
-                          onChange={(e) =>
-                            setFieldValue("password", e.target.value)
-                          }
+                          value={values['password']}
+                          error={touched['password'] && Boolean(errors['password'])}
+                          helperText={touched['password'] && errors['password']}
+                          onChange={(e) => setFieldValue('password', e.target.value)}
                         />
                       </Box>
                       <Box width={260} mt={1}>
@@ -238,27 +208,14 @@ const Login = () => {
                         </Box>
                       </Box>
                       <Box width={260} className="mt-2">
-                        <Button
-                          disabled={isSubmitting}
-                          fullWidth
-                          variant="contained"
-                          color="secondary"
-                          type="submit"
-                          onClick={submitForm}
-                        >
-                          {isSubmitting ? (
-                            <CircularProgress size={22} />
-                          ) : (
-                            "Login"
-                          )}
+                        <Button disabled={isSubmitting} fullWidth variant="contained" color="secondary" type="submit" onClick={submitForm}>
+                          {isSubmitting ? <CircularProgress size={22} /> : 'Login'}
                         </Button>
 
                         <Box className="mt-2">
                           <AuthenticatedTemplate>
                             {invalidAzureLogin ? (
-                              <span>
-                                Not authorized loging out in {counter}
-                              </span>
+                              <span>Not authorized loging out in {counter}</span>
                             ) : (
                               <Button
                                 variant="contained"
