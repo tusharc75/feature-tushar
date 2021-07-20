@@ -6,5 +6,7 @@ export const resActivityColors = {
   lead: "#BF360C",
   opportunity: "#3949AB",
   user: "#990033",
+  quotes: "#CC33CC",
+  projectSales: "#003333",
   my: "#990033",
 };
