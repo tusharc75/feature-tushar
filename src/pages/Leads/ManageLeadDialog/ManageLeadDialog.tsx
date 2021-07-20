@@ -80,12 +80,14 @@ export default function ManageLeadDialog({
         (d) => d.type.toLowerCase() === "process"
       );
 
-      leadData.fields.map((d) => {
-        if (
-          d.sectionName == processSteps?.additionalInfoSection) {
-          setAdditionalFieldName(d.sectionName)
-        }
-      });
+      if (processSteps) {
+        leadData.fields.map((d) => {
+          if (
+            d.sectionName == processSteps?.additionalInfoSection) {
+            setAdditionalFieldName(d.sectionName)
+          }
+        });
+      }
     }
     if (!isNew) {
       const processSteps = leadData.fields.find(
@@ -216,7 +218,7 @@ export default function ManageLeadDialog({
             if (marketSegmentDropdownData) {
               setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
             }
-            
+
             filterData.map((_f) => newFields.push(_f.fieldData));
             setLeadData({
               fields: newFields,
