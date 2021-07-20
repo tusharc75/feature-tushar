@@ -22,6 +22,9 @@ import {
   checkFormulaLoop,
 } from "../../constants/formulaUtility";
 import { useData } from "../../StateProvider/Provider";
+import HistoryButton from "../../components/Helpers/HistoryButton";
+import HistoryDialog from "../../components/Activity/History"
+import { priceTemplate } from "../../constants/helpers"
 
 const PriceTemplateSchema = Yup.object().shape({
   name: Yup.string()
@@ -42,6 +45,7 @@ const PriceTemplate = () => {
   const [deleteField, setDeleteField] = useState([]);
   const [productTemplate, setProductTemplate] = useState([]);
   const [templateField, setTemplateField] = useState([]);
+  const [showHistory, setShowHistory] = useState(false)
 
   const {
     state: { permissions },
@@ -346,6 +350,7 @@ const PriceTemplate = () => {
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
+                      <HistoryButton onClick={() => setShowHistory(true)} />
                       <Box>
                         {(priceTemplatePermissions.isCreate ||
                           priceTemplatePermissions.isUpdate) && (
@@ -396,6 +401,14 @@ const PriceTemplate = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
+        {
+          showHistory ? <HistoryDialog
+            open={showHistory}
+            resourceId={initialValues?._id}
+            resource={priceTemplate.priceTemplateRoute}
+            onClose={() => setShowHistory(false)}
+          /> : null
+        }
       </div>
     </Layout>
   );

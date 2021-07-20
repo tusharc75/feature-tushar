@@ -143,11 +143,13 @@ export const entity = {
 export const productTemplate = {
   productTemplateResource: "productTemplate",
   productTemplateApi: "/product-template",
+  productTemplateRoute: "product-template",
 };
 
 export const priceTemplate = {
   priceTemplateResource: "priceTemplate",
   priceTemplateApi: "/price-template",
+  priceTemplateRoute: "price-template"
 };
 
 export const quoteBuilder = {
