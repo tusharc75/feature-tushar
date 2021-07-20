@@ -201,10 +201,6 @@ export default function QuoteProcess(props) {
     }, [currentVersion, DOAreq]);
 
     useEffect(() => {
-        if (currentVersion === 0) {
-            const finalVersion = Object.keys(quoteData?.versions)[Object.keys(quoteData?.versions).length - 1]
-            
-        }
         fetchDoaLimit();
     }, [quoteData]);
 
