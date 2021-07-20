@@ -101,13 +101,13 @@ export default function ManageOpportunityDialog({
         (d) => d.type.toLowerCase() === "process"
       );
 
-      entityData.fields.map((d) => {
-        if (
-          d.sectionName == processSteps.additionalInfoSection) {
-
-          setAdditionalFieldName(d.sectionName)
-        }
-      });
+      if (processSteps) {
+        entityData.fields.map((d) => {
+          if (d.sectionName == processSteps.additionalInfoSection) {
+            setAdditionalFieldName(d.sectionName)
+          }
+        });
+      }
     }
     if (!isNew) {
       const processSteps = entityData.fields.find(
