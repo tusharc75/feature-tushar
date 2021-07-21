@@ -211,6 +211,61 @@ export default function QuoteProcess(props) {
         fetchDoaLimit();
     }, [quoteData]);
 
+    useEffect(() => {
+        if (DOAsetup) {
+          axiosInstance()
+            .get(`/productbuilder/getproduct/` + productBuilderId)
+            .then(({ data: { data } }) => {
+              data = data.data?.map((u, index) => ({
+                ...u,
+                id: u._id,
+                srno: index + 1,
+                // productTemplateDisplayValue: u.productTemplate?.optionLabel,
+                productCategoryDisplayValue: u.productCategory?.optionLabel,
+                priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
+              }));
+              const { totalSellingPrice } = productCalculationForDoa(data);
+    
+              if (DOAsetup && totalSellingPrice > DOAlimit) {
+                setDOAneeded(true);
+              } else {
+                setDOAneeded(false);
+              }
+              if (DOAsetup && totalSellingPrice > DOAlimit) {
+                setDOAneeded(true);
+            } else {
+                setDOAneeded(false);
+            }
+            if (
+                DOAsetup &&
+                totalSellingPrice > DOAlimit &&
+                versionStatus === "Building Quote"
+            ) {
+                setDOAreq(true);
+                setCustomerreq(false);
+                setButtonMessage("Send for DOA");
+            } else if (versionStatus.includes("Rejected by DOA")) {
+                setDOAreq(true);
+                setCustomerreq(false);
+                setButtonMessage("Re-Send for DOA");
+            } else if (versionStatus === "Sent for DOA") {
+                setDOAreq(false);
+                setCustomerreq(false);
+            } else if (
+                versionStatus === "Sent to Customer" ||
+                versionStatus === "Accepted by Customer" ||
+                versionStatus === "Rejected by Customer" ||
+                versionStatus === "Not Booked by Customer" ||
+                versionStatus === "Invalid by Customer" ||
+                versionStatus === "Booked by Customer"
+            ) {
+                setDOAreq(false);
+                setCustomerreq(false);
+            }
+            })
+        }
+      }, [DOAsetup])
+
     const fetchDOAData = () => {
         if (ProcessStatus === "DOA Process") {
             axiosInstance()
