@@ -469,7 +469,7 @@ const Leads = () => {
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
             icon={<HiUserGroup className="headerLogo" />}
-            heading="Leads"
+            heading={routes.lead.title}
             allowToConvertLeadToOpportunity={
               permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate
             }

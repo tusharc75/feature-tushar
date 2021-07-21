@@ -440,7 +440,7 @@ const Opportunities = () => {
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
-              heading="Opportunities"
+              heading={routes.opportunity.title}
               showTransferEntityDialog={handleTransferEntityDialog}
             >
               {accountDetails.accountId && (

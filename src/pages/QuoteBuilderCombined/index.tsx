@@ -670,7 +670,7 @@ const QuoteBuilders = () => {
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
-              heading="Quotes"
+              heading={routes.quoteBuilder.title}
               showTransferEntityDialog={handleTransferEntityDialog}
 
             >

@@ -6,6 +6,7 @@ import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import routes from "../../components/Helpers/Routes";
 
 const ProjectStrategyHeader = (props) => {
   const {
@@ -38,7 +39,7 @@ const ProjectStrategyHeader = (props) => {
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
         <BiNetworkChart className="headerLogo" />
-        <span className="listingHeader">Project Sales</span>
+        <span className="listingHeader">{routes.projectSales.title}</span>
         <ToggleButtonGroup
           size="small"
           className="ml-8"
