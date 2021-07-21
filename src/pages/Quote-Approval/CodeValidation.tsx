@@ -130,7 +130,7 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
                                         label="Code"
                                         name="code"
                                         type="password"
-                                        placeholder="Please the 4 digit code received in your email"
+                                        placeholder="Please enter the 4 digit code received in your email"
                                         onChange={(e) => setFieldValue((prevState) => ({ ...prevState, code: e.target.value }))}
                                         fullWidth
                                         size="small"
