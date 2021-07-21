@@ -433,7 +433,6 @@ const QuoteApproval = () => {
     }
 
     const handleSave = (values) => {
-        console.log(values);
         axiosInstance()
         .post(`quote-builder/verify-otp/${id}/${versionDetails.versionNumber}`,{
             "otp":values.code,
