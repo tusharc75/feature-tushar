@@ -32,6 +32,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
+import routes from '../../../components/Helpers/Routes';
 
 const tabs = {
   Inbox: 1,
@@ -331,14 +332,14 @@ const Email = () => {
     <Layout>
       <Grid container className="headerbox">
         <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: 'Email' }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
         </Grid>
       </Grid>
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
-              <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{RESOURCE_LABEL.email}</span>
+              <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
               <ToggleButtonGroup size="small" className="ml-8" value={currentTab} exclusive onChange={handleTab}>
                 {Object.keys(tabs).map((k, index) => (
                   <ToggleButton value={tabs[k]} key={index} className="l-2">

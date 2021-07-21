@@ -100,6 +100,8 @@ export const sidebarResource = {
   customerAccount: "Customer Account",
   supplierContact: "Supplier Contact",
   supplierAccount: "Supplier Account",
+  account: 'Supplier Account',
+  contact: 'Supplier Contact',
   pricing: "Pricing",
   priceBuilder: "Price Builder",
   quoteBuilder: "Quotes",
@@ -122,7 +124,13 @@ export const sidebarResource = {
   formBuilder: "Form Builder",
   budget: "Budget",
   marketSegment: "Market Segment",
-  quotePdfTemplate: "Quote Pdf Template"
+  quotePdfTemplate: "Quote Pdf Template",
+  field: 'Field',
+  projectStrategy: 'Project Sales',
+  PNQBuilder: 'PNQ Builder',
+  DOARequest: 'DOA Request',
+  event: 'Event',
+  dashboard: 'Dashboard',
 };
 
 export const RESOURCE_LABEL = {
@@ -660,6 +668,8 @@ export const getPermissions = (
 ): IPermission | null => {
   if (user) {
     let permissions = {};
+    let routesAndTitle = {};
+
     let data = [...user?.role?.sideBar];
 
     if (selectedEntity) {
@@ -694,7 +704,7 @@ export const getPermissions = (
             isCreate: d.isCreate,
             isRead: d.isRead,
             isUpdate: d.isUpdate,
-            isDelete: d.isDelete,
+            isDelete: d.isDelete
           };
 
           if (accounts.some((acountType) => acountType === d.name)) {
@@ -702,10 +712,15 @@ export const getPermissions = (
           }
 
           permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+
+          routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
+            title: d.resourceLabel || d.name
+          };
         }
       });
     }
 
+    localStorage.setItem("routes", JSON.stringify(routesAndTitle));
     return permissions;
   }
 };

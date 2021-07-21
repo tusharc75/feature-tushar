@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomContainer from "../../components/CustomContainer";
 import { FaWpforms } from 'react-icons/fa';
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, RESOURCE_LABEL } from "../../constants/helpers";
+import { gridLoadingTimeout } from "../../constants/helpers";
 
 const FormBuilder = () => {
 
@@ -69,7 +69,7 @@ const FormBuilder = () => {
         <Grid container spacing={1} >
           <Grid item xs={12} className="d-flex align-items-center gap-1">
             <div className="header-panel d-flex align-items-center gap-1">
-              <FaWpforms className="headerLogo" /> <span className="listingHeader">{RESOURCE_LABEL.formBuilder}
+              <FaWpforms className="headerLogo" /> <span className="listingHeader">{routes.formBuilder.title}
             </span>
             </div>
           </Grid>

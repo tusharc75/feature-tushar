@@ -576,7 +576,7 @@ export default function Account(props) {
       <Layout>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[{ title: accountBreadcrumb.title }]} />
+            <CustomBreadCrumbs routes={[{ title: routes[accountResource].title }]} />
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
@@ -594,7 +594,7 @@ export default function Account(props) {
             <Grid container className="header-panel" justify="space-between" alignContent="center">
               <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
                 <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{RESOURCE_LABEL[accountResourceLabel]}</span>
+                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{routes[accountResource].title}</span>
                   <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                     {AccTypes && (
                       <ToggleButtonGroup
