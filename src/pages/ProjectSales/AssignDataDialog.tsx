@@ -49,7 +49,7 @@ const AssignDataDialog = (props) => {
           ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
           : type === "quote-builder"
             ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
-            : `/${type}?limit=100`;
+            : `/${type}?limit=0`;
     setLoading(true);
     axiosInstance()
       .get(url)
