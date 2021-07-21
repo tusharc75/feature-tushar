@@ -176,7 +176,7 @@ const routes = {
   },
   calendar: {
     title: RESOURCE_LABEL.calendar,
-    path: "/attachment",
+    path: "/calendar",
   },
   reminder: {
     title: RESOURCE_LABEL.reminder,
