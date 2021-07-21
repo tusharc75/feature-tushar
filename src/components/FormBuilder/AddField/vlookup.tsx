@@ -9,10 +9,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import FieldList from '../FieldList';
-import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
@@ -21,6 +18,8 @@ import { camelCase, UnCamelCase } from "../../../constants/helpers";
 import * as XLSX from 'xlsx';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 const MenuProps = {
     PaperProps: {
@@ -122,6 +121,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
         return result;
     }
 
+
     return (
         <Box marginTop={2}>
             <Autocomplete
@@ -211,15 +211,37 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                                 </Box>
                                 {values["inputFields"] && values["inputFields"].map((_row) => (
                                     <Box minWidth={200} maxWidth={200} pl={1}>
-                                        <TextField
-                                            id="standard-basic"
-                                            variant="outlined"
-                                            margin="dense"
-                                            fullWidth
-                                            style={{ margin: 0 }}
-                                            value={data[_row]}
-                                            onChange={(event) => onChangeValue(index, _row, event.target.value)}
-                                        />
+                                        {(fields.filter((_f) => _f.fieldName === _row).length) &&
+                                            fields.filter((_f) => _f.fieldName === _row)[0].type === "dropDown" ||
+                                            fields.filter((_f) => _f.fieldName === _row)[0].type === "vlookupDropdown" ?
+                                            <Select
+                                                id="demo-simple-select-outlined"
+                                                fullWidth
+                                                variant="outlined"
+                                                margin="dense"
+                                                value={data[_row]}
+                                                onChange={(event) => onChangeValue(index, _row, event.target.value)}
+                                            >
+                                                {fields.filter((_f) => _f.fieldName === _row)[0].option &&
+                                                    fields.filter((_f) => _f.fieldName === _row)[0].option.map((_option) => {
+                                                        return (<MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                                                            {_option.optionLabel}
+                                                        </MenuItem>
+                                                        );
+                                                    })
+                                                }
+                                            </Select>
+                                            :
+                                            <TextField
+                                                id="standard-basic"
+                                                variant="outlined"
+                                                margin="dense"
+                                                fullWidth
+                                                style={{ margin: 0 }}
+                                                value={data[_row]}
+                                                onChange={(event) => onChangeValue(index, _row, event.target.value)}
+                                            />
+                                        }
                                     </Box>))}
                             </Box>
                         </Box>
