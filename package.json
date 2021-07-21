@@ -1,6 +1,6 @@
 {
   "name": "oms_frontend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@azure/msal-browser": "^2.14.1",
@@ -68,8 +68,10 @@
   "scripts": {
     "start": "react-scripts start",
     "dev": "yarn install && react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts --max_old_space_size=4096 build",
+    "build": "react-scripts --max_old_space_size=4096 build",
     "winBuild": "set \"GENERATE_SOURCEMAP=false\" && react-scripts --max_old_space_size=4096 build",
+    "sourceMapBuild": "react-scripts --max_old_space_size=4096 build",
+    "postbuild": "node uploadSourcemaps.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -93,7 +95,6 @@
     ]
   },
   "devDependencies": {
-    "@sentry/webpack-plugin": "^1.15.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -103,7 +104,8 @@
     "@types/node": "^14.14.35",
     "@types/react-big-calendar": "^0.31.0",
     "node-sass": "4.14.1",
-    "prettier": "^2.3.2"
+    "prettier": "^2.3.2",
+    "sentry-files": "^1.0.1"
   },
   "prettier": {
     "arrowParens": "always",
