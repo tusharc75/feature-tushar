@@ -262,19 +262,19 @@ function App() {
           <PrivateRoute exact path="/">
             <Dashboard />
           </PrivateRoute>
-          <PrivateRoute exact path="/lead">
+          <PrivateRoute exact path={routes.lead.path}>
             <Leads />
           </PrivateRoute>
-          <PrivateRoute exact path="/lead/detail/:id">
+          <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
             <LeadDetailsPage />
           </PrivateRoute>
           <PrivateRoute exact path="/new-lead">
             <NewLead />
           </PrivateRoute>
-          <PrivateRoute exact path="/opportunity">
+          <PrivateRoute exact path={routes.opportunity.path}>
             <Opportunities />
           </PrivateRoute>
-          <PrivateRoute exact path="/opportunity/detail/:id">
+          <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
             <OpportunityDetailsPage />
           </PrivateRoute>
           <PrivateRoute exact path="/new-opp">
@@ -287,15 +287,15 @@ function App() {
             <Doa />
           </PrivateRoute>
           {/* <PrivateRoute exact path="/">
-          <CreateBrand />
-        </PrivateRoute> */}
-          {/* <PrivateRoute exact path="/contact/new">
-                    <CreateContact />
-                </PrivateRoute>
-                <PrivateRoute exact path="/contact/:id">
-                    <CreateContact />
-                </PrivateRoute> */}
-          <PrivateRoute key="customer-account" exact path="/customer-account">
+            <CreateBrand />
+          </PrivateRoute> */}
+            {/* <PrivateRoute exact path="/contact/new">
+              <CreateContact />
+          </PrivateRoute>
+          <PrivateRoute exact path="/contact/:id">
+              <CreateContact />
+          </PrivateRoute> */}
+          <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
             <Account
               account={customerAccount}
               accountBreadcrumb={routes.customerAccount}
@@ -304,7 +304,7 @@ function App() {
           <PrivateRoute
             key="customer-account-edit"
             exact
-            path="/customer-account/detail/:id"
+            path={`${routes.customerAccountDetail.path}/:id`}
           >
             <AccountDetailPage
               account={customerAccount}
@@ -312,7 +312,7 @@ function App() {
               accountBreadcrumb={routes.customerAccount}
             />
           </PrivateRoute>
-          <PrivateRoute key="customer-contact" exact path="/customer-contact">
+          <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
             <Contact
               contact={customerContact}
               account={customerAccount}
@@ -322,7 +322,7 @@ function App() {
           <PrivateRoute
             key="customer-contact-edit"
             exact
-            path="/customer-contact/detail/:id"
+            path={`${routes.customerContactDetail.path}/:id`}
           >
             <ContactDetailPage
               account={customerAccount}
@@ -330,7 +330,7 @@ function App() {
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
-          <PrivateRoute key="supplier-account" exact path="/supplier-account">
+          <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
             <Account
               account={supplierAccount}
               accountBreadcrumb={routes.supplierAccount}
@@ -339,7 +339,7 @@ function App() {
           <PrivateRoute
             key="supplier-account-edit"
             exact
-            path="/supplier-account/detail/:id"
+            path={`${routes.supplierAccountDetail.path}/:id`}
           >
             <AccountDetailPage
               account={supplierAccount}
@@ -347,7 +347,7 @@ function App() {
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
-          <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
+          <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
             <Contact
               contact={supplierContact}
               account={supplierAccount}
@@ -357,7 +357,7 @@ function App() {
           <PrivateRoute
             key="supplier-contact-edit"
             exact
-            path="/supplier-contact/detail/:id"
+            path={`${routes.supplierContactDetail.path}/:id`}
           >
             <ContactDetailPage
               account={supplierAccount}
@@ -406,10 +406,10 @@ function App() {
           <PrivateRoute exact path="/activity">
             <Activitydemo />
           </PrivateRoute>
-          <PrivateRoute exact path="/email">
+          <PrivateRoute exact path={routes.activityEmail.path}>
             <Email />
           </PrivateRoute>
-          <PrivateRoute exact path="/note">
+          <PrivateRoute exact path={routes.note.path}>
             <Note />
           </PrivateRoute>
           <PrivateRoute exact path={routes.attachment.path}>
@@ -421,10 +421,10 @@ function App() {
           <PrivateRoute exact path={routes.reminder.path}>
             <Reminder />
           </PrivateRoute>
-          <PrivateRoute path="/case">
+          <PrivateRoute path={routes.case.path}>
             <Activity type="case" />
           </PrivateRoute>
-          <PrivateRoute path="/task">
+          <PrivateRoute path={routes.task.path}>
             <Activity type="task" />
           </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
@@ -490,10 +490,10 @@ function App() {
           <Route exact path={"/quote-approval/:id"}>
             <QuoteApproval />
           </Route>
-          <PrivateRoute exact path={"/doa-request"}>
+          <PrivateRoute exact path={routes.DOARequest.path}>
             <DOARequest />
           </PrivateRoute>
-          <PrivateRoute exact path={"/doa-request/:id"}>
+          <PrivateRoute exact path={`${routes.DOARequest.path}}/:id`}>
             <DOAapproval />
           </PrivateRoute>
           <PrivateRoute exact path={routes.quoteBuilder.path}>

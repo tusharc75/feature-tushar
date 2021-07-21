@@ -387,7 +387,7 @@ export default function Contact(props) {
     <Layout>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[contactBreadcrumb]} />
+          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -406,7 +406,7 @@ export default function Contact(props) {
           <Grid className={styles.filter_side_container} container justify="space-between">
             <Grid item className="d-flex align-items-center gap-1">
               <MdContacts className="headerLogo" />
-              <span className="listingHeader">{RESOURCE_LABEL[contactResourceLabel]}</span>
+              <span className="listingHeader">{routes[contactResource].title}</span>
               {ContactTypes && (
                 <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                   {ContactTypes.map((k, index) => {
