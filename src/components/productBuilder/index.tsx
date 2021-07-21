@@ -654,6 +654,7 @@ const ProductBuilder = (props) => {
           <CustomAgGridEditable
             currency={currency}
             forProductBuilder={isPriceBuilder}
+            fromProductGrid={true}
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
