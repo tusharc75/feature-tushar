@@ -125,6 +125,45 @@ export const sidebarResource = {
   quotePdfTemplate: "Quote Pdf Template"
 };
 
+export const RESOURCE_LABEL = {
+  account: 'Supplier Accounts',
+  customerAccount: 'Customer Accounts',
+  user: 'Users',
+  contact: 'Supplier Contacts',
+  customerContact: 'Customer Contacts',
+  brand: 'Brands',
+  entity: 'Entities',
+  role: 'Roles',
+  lead: 'Leads',
+  opportunity: 'Opportunities',
+  field: 'Fields',
+  productCategory: 'Product Categories',
+  priceTemplate: 'Price Templates',
+  product: 'Products',
+  productTemplate: 'Product Templates',
+  doa: 'DOA',
+  termsAndConditions: 'T&Cs',
+  projectStrategy: 'Project Sales',
+  productBuilder: 'Price Builder',
+  formBuilder: 'Form Builder',
+  currencyConverter: 'Currency Converter',
+  quoteBuilder: 'Quotes',
+  PNQBuilder: 'PNQ Builder',
+  DOARequest: 'DOA Requests',
+  task: 'Tasks',
+  case: 'Cases',
+  note: 'Notes',
+  event: 'Events',
+  email: 'Emails',
+  attachment: 'Attachments',
+  reminder: 'Reminders',
+  calendar: 'Calendar',
+  dashboard: 'Dashboards',
+  budget: 'Budgets',
+  marketSegment: 'Market Segments',
+  quotePdfTemplate: 'Quote PDF Templates'
+};
+
 export const lead = {
   leadResource: "lead", //  Key of sidebar object
   leadApi: "/lead",
@@ -172,6 +211,7 @@ export const supplierAccount = {
   accountRoute: "supplier-account",
   accountResource: "supplierAccount", //  Key of sidebar object
   accountPermission: "Supplier Account",
+  accountResourceLabel: "account"
 };
 
 export const termsAndCondition = {
@@ -185,6 +225,7 @@ export const customerAccount = {
   accountRoute: "customer-account",
   accountResource: "customerAccount", //  Key of sidebar object
   accountPermission: "Customer Account",
+  accountResourceLabel: "customerAccount"
 };
 
 export const supplierContact = {
@@ -192,6 +233,7 @@ export const supplierContact = {
   contactRoute: "supplier-contact",
   contactResource: "supplierContact", //  Key of sidebar object
   contactPermission: "Supplier Contact",
+  contactResourceLabel: "contact"
 };
 
 export const customerContact = {
@@ -199,6 +241,7 @@ export const customerContact = {
   contactRoute: "customer-contact",
   contactResource: "customerContact", //  Key of sidebar object
   contactPermission: "Customer Contact",
+  contactResourceLabel: "customerContact"
 };
 
 export const profilePage = {

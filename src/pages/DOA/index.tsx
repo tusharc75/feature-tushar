@@ -9,7 +9,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import moment from "moment";
 import { GiAbstract055 } from "react-icons/gi";
 import CustomContainer from "../../components/CustomContainer";
-import { dateFormat, gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
+import { dateFormat, gridLoadingTimeout, gridPageSizes, RESOURCE_LABEL } from "../../constants/helpers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 function reducer(state, action) {
@@ -244,7 +244,7 @@ const DOARequest = () => {
           <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
               <GiAbstract055 />{" "}
-              <span className="listingHeader">{"DOA Requests"}</span>
+              <span className="listingHeader">{RESOURCE_LABEL.DOARequest}</span>
             </Grid>
           </Grid>
         </div>

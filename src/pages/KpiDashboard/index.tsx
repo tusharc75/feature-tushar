@@ -24,7 +24,7 @@ import {
     UpdatedByRenderer,
     CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from "../../constants/helpers";
 import styles from "../../pages/Leads/Header.module.scss"
 
 const KpiDashboard = () => {
@@ -196,7 +196,7 @@ const KpiDashboard = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">{'Dashboards'}</span>
+                        <GiAbstract055 /> <span className="listingHeader">{RESOURCE_LABEL.dashboard}</span>
                     </Grid>
                     <Grid item xs={6} container justify="flex-end">
                         <Box component="div" className={styles.filter_side_header} >

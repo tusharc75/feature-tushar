@@ -1,23 +1,48 @@
 import React, { useState, useContext } from 'react'
-import { Box, Button, Dialog, Grid } from '@material-ui/core'
+import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core'
 import { isMobile, isTablet } from 'react-device-detect'
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, simplifyValues, yupSchema } from '../../constants/helpers'
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader'
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Form, Formik } from 'formik'
 import FormTypes from '../../components/Helpers/FormTypes'
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter'
 import CustomButton from '../../components/Helpers/CustomButton'
 import axiosInstance from '../../axios/axiosInstance'
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: 'flex',
+      flexWrap: 'wrap',
+    },
+    textField: {
+      marginLeft: theme.spacing(1),
+      marginRight: theme.spacing(1),
+      width: '25ch',
+    },
+  }),
+);
+
 const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, handleSave }) => {
+    const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [showPasswordField, setShowPasswordField] = useState(false);
-    const [disableResendCode , setDisableResendCode] = useState(false);
+    const [disableResendCode, setDisableResendCode] = useState(false);
     const [buttonLabel, setButtonLabel] = useState("Get Code");
-    
+    const [fieldValue, setFieldValue] = useState({
+        email: email,
+        code: ""
+    })
+
+    const copyOfEmail =
+        email.substring(0, email.indexOf("@"))
+            .split("").map((char) => char = "x")
+            .join("")
+        + email.substring(email.indexOf("@"), email.length);
+
 
     const handleSendCodeToEmail = () => {
         axiosInstance()
@@ -43,10 +68,6 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
 
     }
 
-    const onSubmit = ((values) => {
-        handleSave(values)
-    })
-
     return (
         <>
             <Dialog
@@ -63,115 +84,86 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
                     title={title}
                     onClose={close}
                 />
-                <Formik
-                    initialValues={{
-                        email,
-                        code: "",
-                    }}
-                    // validationSchema={yupSchema(entityData.fields)}
-                    validateOnMount
-                    onSubmit={onSubmit}
-                >
-                    {({
-                        submitForm,
-                        values,
-                        errors,
-                        touched,
-                        setFieldValue,
-                        setFieldTouched,
-                        setErrors,
-                        setValues,
-                    }) => (
-                        <>
-                            <CustomDialogContent>
-                                <Form noValidate>
-                                    <Box marginY={2}>
-                                        <Grid spacing={3} container>
-                                            <Grid key={1} item xs={12} sm={8} md={10}>
-                                                <FormTypes
-                                                    values={values}
-                                                    errors={errors}
-                                                    touched={touched}
-                                                    label="Email"
-                                                    name="email"
-                                                    type="email"
-                                                    disabled={true}
-                                                    setFieldValue={setFieldValue}
-                                                    fullWidth
-                                                    size="small"
-                                                />
-                                            </Grid>
-                                            <Grid key={1} item xs={12} sm={4} md={2} >
-                                                <Button
-                                                    className="ml-1"
-                                                    color="primary"
-                                                    variant="outlined"
-                                                    disabled={disableResendCode}
-                                                    onClick={
-                                                        handleSendCodeToEmail
-                                                    }
-                                                    fullWidth
-                                                >
-                                                    {buttonLabel}
-                                                </Button>
 
-                                            </Grid>
-
-                                        </Grid>
-                                        {showPasswordField &&
-                                            <Grid spacing={3} container>
-                                                <Grid key={1} item xs={12} sm={12} md={12}>
-                                                    <FormTypes
-                                                        values={values}
-                                                        errors={errors}
-                                                        touched={touched}
-                                                        label="Enter the Received Code"
-                                                        name="code"
-                                                        type="password"
-                                                        setFieldValue={setFieldValue}
-                                                        fullWidth
-                                                        size="small"
-                                                    />
-
-                                                </Grid>
-
-                                            </Grid>}
-                                    </Box>
-
-
-
-
-                                </Form>
-                            </CustomDialogContent>
-                            <CustomDialogFooter>
-                                <Button
-                                    type="button"
+                <CustomDialogContent>
+                    <Box marginY={2}>
+                        <Grid spacing={3} container>
+                            <Grid key={1} item xs={12} sm={8} md={10}>
+                                <TextField
                                     variant="outlined"
-                                    color="primary"
+                                    label="Email"
+                                    name="email"
+                                    type="email"
+                                    value={copyOfEmail}
+                                    disabled={true}
+                                    fullWidth
                                     size="small"
-                                    onClick={close}
+                                />
+                            </Grid>
+                            <Grid key={1} item xs={12} sm={4} md={2} >
+                                <Button
+                                    className="ml-1"
+                                    color="primary"
+                                    variant="outlined"
+                                    disabled={disableResendCode}
+                                    onClick={
+                                        handleSendCodeToEmail
+                                    }
+                                    fullWidth
                                 >
-                                    Cancel
+                                    {buttonLabel}
                                 </Button>
 
-                                <CustomButton
-                                    // loading={loading}
-                                    variant="contained"
-                                    color="primary"
-                                    disabled={
-                                        Object.keys(errors).length > 0 ? true : false
-                                    }
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        submitForm();
-                                    }}
-                                >
-                                    Save
-                                </CustomButton>
-                            </CustomDialogFooter>
-                        </>
-                    )}
-                </Formik>
+                            </Grid>
+
+                        </Grid>
+                        {showPasswordField &&
+                            <Grid spacing={3} container>
+                                <Grid key={1} item xs={12} sm={12} md={12}>
+                                    <TextField
+                                        id="outlined-full-width"
+                                        margin="normal"
+                                        variant="outlined"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                          }}                                
+                                        label="Code"
+                                        name="code"
+                                        type="password"
+                                        placeholder="Please enter the 4 digit code received in your email"
+                                        onChange={(e) => setFieldValue((prevState) => ({ ...prevState, code: e.target.value }))}
+                                        fullWidth
+                                        size="small"
+                                    />
+                                </Grid>
+                            </Grid>
+                        }
+                    </Box>
+
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                    <Button
+                        type="button"
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={close}
+                    >
+                        Cancel
+                    </Button>
+
+                    <CustomButton
+                        // loading={loading}
+                        variant="contained"
+                        color="primary"
+                        disabled={fieldValue.code.length !== 4}
+                        onClick={(e) => {
+                            handleSave(fieldValue);
+                        }}
+                    >
+                        Save
+                    </CustomButton>
+                </CustomDialogFooter>
             </Dialog>
         </>
 

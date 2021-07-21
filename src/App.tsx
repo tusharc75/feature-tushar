@@ -412,13 +412,13 @@ function App() {
           <PrivateRoute exact path="/note">
             <Note />
           </PrivateRoute>
-          <PrivateRoute exact path="/attachment">
+          <PrivateRoute exact path={routes.attachment.path}>
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute exact path="/calendar">
+          <PrivateRoute exact path={routes.calendar.path}>
             <Calender />
           </PrivateRoute>
-          <PrivateRoute exact path="/reminder">
+          <PrivateRoute exact path={routes.reminder.path}>
             <Reminder />
           </PrivateRoute>
           <PrivateRoute path="/case">
