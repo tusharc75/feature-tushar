@@ -128,7 +128,12 @@ export default function QuoteProcess(props) {
         fetchQuoteData,
          columnView,
         handleOpenUpdateDialog,
-        fetchTNC} = props
+        fetchTNC,
+        handleVersionUpdate,
+        updatingVersion,
+        setUpdatingVersion,
+        pdfFileName
+    } = props
 
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
@@ -179,9 +184,8 @@ export default function QuoteProcess(props) {
     const [isRearrangeColumns, setRearrangeColumns] = useState(false);
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);
     const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
-    const [updatingVersion, setUpdatingVersion] = useState(false);
-    const [pdfFileName, setPdfFileName] = useState("");
-    const [PDF, setPdf] = useState("");
+    // const [updatingVersion, setUpdatingVersion] = useState(false);
+    // const [pdfFileName, setPdfFileName] = useState("");
     const [loading, setLoading] = useState(false);
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
@@ -190,7 +194,6 @@ export default function QuoteProcess(props) {
     const [sendEmail, setSendEmail] = useState(false);
     const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
-    const [loadingVersions, setLoadingVersions] = useState(true);
     const [messageDialog, setMessageDialog] = useState({
         open: false,
         message: null,
@@ -666,74 +669,74 @@ export default function QuoteProcess(props) {
 
 
 
-    const handleVersionUpdate = (
-        Columns,
-        versionStatus,
-        selectedTermsAndConditions,
-        view = false,
-        download = false
-    ) => {
-        let body = {
-            acceptedColumns: Columns,
-            status: versionStatus,
-            TNC: selectedTermsAndConditions
-        };
+    // const handleVersionUpdate = (
+    //     Columns,
+    //     versionStatus,
+    //     selectedTermsAndConditions,
+    //     view = false,
+    //     download = false
+    // ) => {
+    //     let body = {
+    //         acceptedColumns: Columns,
+    //         status: versionStatus,
+    //         TNC: selectedTermsAndConditions
+    //     };
 
-        setUpdatingVersion(true);
-        axiosInstance()
-            .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-            .then(({ data: { data } }) => {
-                setUpdatingVersion(false);
+    //     setUpdatingVersion(true);
+    //     axiosInstance()
+    //         .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+    //         .then(({ data: { data } }) => {
+    //             setUpdatingVersion(false);
 
-                setPdfFileName(data.fileName)
-                if (view && data.fileName) {
-                    setUpdatingVersion(true);
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            setUpdatingVersion(false);
-                            const file = new Blob([data], { type: "application/pdf" });
-                            const fileURL = URL.createObjectURL(file);
-                            const pdfWindow = window.open();
-                            pdfWindow.location.href = fileURL;
-                        })
-                        .catch((err) => {
-                            setUpdatingVersion(false);
-                            toastConfig.setToastConfig(err);
-                        });
-                } else if (download && data.fileName) {
-                    setUpdatingVersion(true);
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            setUpdatingVersion(false);
-                            const url = window.URL.createObjectURL(
-                                new Blob([data], { type: "application/pdf" })
-                            );
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.setAttribute(
-                                "download",
-                                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-                            );
-                            document.body.appendChild(link);
-                            link.click();
-                        })
-                        .catch((err) => {
-                            setUpdatingVersion(false);
-                            toastConfig.setToastConfig(err);
-                        });
-                }
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setUpdatingVersion(false);
-            });
-    };
+    //             setPdfFileName(data.fileName)
+    //             if (view && data.fileName) {
+    //                 setUpdatingVersion(true);
+    //                 axiosInstance()
+    //                     .get(`user/download?fileName=${data.fileName}`, {
+    //                         responseType: "blob",
+    //                     })
+    //                     .then(({ data }) => {
+    //                         setUpdatingVersion(false);
+    //                         const file = new Blob([data], { type: "application/pdf" });
+    //                         const fileURL = URL.createObjectURL(file);
+    //                         const pdfWindow = window.open();
+    //                         pdfWindow.location.href = fileURL;
+    //                     })
+    //                     .catch((err) => {
+    //                         setUpdatingVersion(false);
+    //                         toastConfig.setToastConfig(err);
+    //                     });
+    //             } else if (download && data.fileName) {
+    //                 setUpdatingVersion(true);
+    //                 axiosInstance()
+    //                     .get(`user/download?fileName=${data.fileName}`, {
+    //                         responseType: "blob",
+    //                     })
+    //                     .then(({ data }) => {
+    //                         setUpdatingVersion(false);
+    //                         const url = window.URL.createObjectURL(
+    //                             new Blob([data], { type: "application/pdf" })
+    //                         );
+    //                         const link = document.createElement("a");
+    //                         link.href = url;
+    //                         link.setAttribute(
+    //                             "download",
+    //                             `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+    //                         );
+    //                         document.body.appendChild(link);
+    //                         link.click();
+    //                     })
+    //                     .catch((err) => {
+    //                         setUpdatingVersion(false);
+    //                         toastConfig.setToastConfig(err);
+    //                     });
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             toastConfig.setToastConfig(err);
+    //             setUpdatingVersion(false);
+    //         });
+    // };
 
 
 
@@ -1345,13 +1348,13 @@ export default function QuoteProcess(props) {
                                 />
                             )}
                             {ProcessStatus === "Quote Builder" && (
-                                state?.dataRows.length > 0 ? <AdditionalData 
+                                <AdditionalData 
                                     fetchTNC={fetchTNC}
                                     state={state}
                                     dispatch={dispatch}
                                     allowedToEdit={allowedToEdit}
                                     handleVersionUpdateFromAdditionalData={handleVersionUpdateFromAdditionalData}
-                                /> : null
+                                />
                             )}
                         </Grid>
                     </Grid>

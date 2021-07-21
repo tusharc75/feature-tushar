@@ -77,6 +77,8 @@ export default function QuoteDetail() {
   const [productBuilderId, setProductBuilderId] = useState("");
   const [versionStatus, setVersionStatus] = useState("Building Quote");
   const [processStatus, setProcessStatus] = useState("New");
+  const [updatingVersion, setUpdatingVersion] = useState(false);
+   const [pdfFileName, setPdfFileName] = useState("");
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
@@ -204,7 +206,7 @@ export default function QuoteDetail() {
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
               setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || [])
-              // dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
+              dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
 
             }
             else {
@@ -213,7 +215,7 @@ export default function QuoteDetail() {
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
               setColumnView(data.versions[version].acceptedColumns || [])
-              // dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
+              dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
             }
             setLoading(false);
           });
@@ -262,6 +264,7 @@ export default function QuoteDetail() {
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
+        const selectedRows = data.filter(d => state.selectedRecords.filter(_d => _d._id === d._id).length > 0)
         let rows = data.map((tnc) => {
           return {
             ...tnc,
@@ -275,6 +278,16 @@ export default function QuoteDetail() {
           count: count,
         });
 
+
+        if (updateVersionStatus) {
+            handleVersionUpdate(
+              columnView,
+              versionStatus,
+              selectedRows
+            )
+          }
+
+
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
@@ -284,6 +297,77 @@ export default function QuoteDetail() {
         dispatch({ type: "loading", loading: false });
       });
   };
+
+
+  const handleVersionUpdate = (
+        Columns,
+        versionStatus,
+        selectedTermsAndConditions,
+        view = false,
+        download = false
+    ) => {
+        let body = {
+            acceptedColumns: Columns,
+            status: versionStatus,
+            TNC: selectedTermsAndConditions
+        };
+
+        setUpdatingVersion(true);
+        axiosInstance()
+            .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+            .then(({ data: { data } }) => {
+                setUpdatingVersion(false);
+
+                setPdfFileName(data.fileName)
+                if (view && data.fileName) {
+                    setUpdatingVersion(true);
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            setUpdatingVersion(false);
+                            const file = new Blob([data], { type: "application/pdf" });
+                            const fileURL = URL.createObjectURL(file);
+                            const pdfWindow = window.open();
+                            pdfWindow.location.href = fileURL;
+                        })
+                        .catch((err) => {
+                            setUpdatingVersion(false);
+                            toastConfig.setToastConfig(err);
+                        });
+                } else if (download && data.fileName) {
+                    setUpdatingVersion(true);
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            setUpdatingVersion(false);
+                            const url = window.URL.createObjectURL(
+                                new Blob([data], { type: "application/pdf" })
+                            );
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute(
+                                "download",
+                                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+                            );
+                            document.body.appendChild(link);
+                            link.click();
+                        })
+                        .catch((err) => {
+                            setUpdatingVersion(false);
+                            toastConfig.setToastConfig(err);
+                        });
+                }
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setUpdatingVersion(false);
+            });
+    };
+
 
 
   return (
@@ -442,22 +526,26 @@ export default function QuoteDetail() {
                     <Suspense fallback={
                       <Loader minHeight="500px" text="Loading..." />
                     }>
-                      {(quoteData && <QuoteProcess
-                        state={state}
-                        dispatch={dispatch}
-                        quoteData={quoteData}
-                        ProcessStatus={processStatus}
-                        ifQuoteApproved={ifQuoteApproved}
-                        allowedToEdit={allowedToEdit}
-                        handleOpenUpdateDialog={handleOpenUpdateDialog}
-                        handleChangeVersion={handleChangeVersion}
-                        currentVersion={currentVersion}
-                        productBuilderId={productBuilderId}
-                        versionStatus={versionStatus}
-                        fetchQuoteData={fetchQuoteData}
-                        columnView={columnView}
-                        fetchTNC={fetchTermsAndConditions}
-                      />)}
+                        {(quoteData && <QuoteProcess
+                          pdfFileName={pdfFileName}
+                          updatingVersion={updatingVersion}
+                          setUpdatingVersion={setUpdatingVersion}
+                          handleVersionUpdate={handleVersionUpdate}
+                          state={state}
+                          dispatch={dispatch}
+                          quoteData={quoteData}
+                          ProcessStatus={processStatus}
+                          ifQuoteApproved={ifQuoteApproved}
+                          allowedToEdit={allowedToEdit}
+                          handleOpenUpdateDialog={handleOpenUpdateDialog}
+                          handleChangeVersion={handleChangeVersion}
+                          currentVersion={currentVersion}
+                          productBuilderId={productBuilderId}
+                          versionStatus={versionStatus}
+                          fetchQuoteData={fetchQuoteData}
+                          columnView={columnView}
+                          fetchTNC={fetchTermsAndConditions}
+                        />)}
                     </Suspense>
                   </TabPanel>
                 </>

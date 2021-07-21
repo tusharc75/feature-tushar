@@ -143,15 +143,26 @@ export default function CustomAgGrid({
     setGridApi(params.api);
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
-    if (selectedRecords.length) {
-      params.api.forEachNode(function (node) {
-        node.setSelected(
-          selectedRecords.some((o) => o._id === node.data._id)
-        );
-      });
-    }
+    // if (selectedRecords.length) {
+    //   params.api.forEachNode(function (node) {
+    //     node.setSelected(
+    //       selectedRecords.some((o) => o._id === node.data._id)
+    //     );
+    //   });
+    // }
     if (handleGridReady) handleGridReady(params);
   };
+
+  useEffect(() => {
+    if (clientSideGridApi && selectedRecords.length) {
+          clientSideGridApi.forEachNode(function (node) {
+            node.setSelected(
+              selectedRecords.some((o) => o._id === node.data._id)
+            );
+        });
+    }
+    
+  },[clientSideGridApi, selectedRecords])
 
   var customFilterParams = {
     filterOptions: ["contains"],
