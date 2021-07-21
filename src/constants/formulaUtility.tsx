@@ -439,7 +439,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
                 calValues = handleAutoCalculation(ele, fieldList, returnvalues, ele.fieldName, "", "", values[ele.fieldName] || values[ele.fieldName] === 0 ? values[ele.fieldName] : "")
             }
             for (const x in calValues) {
-                if (isNaN(calValues[x]) || calValues[x] === 0 || calValues[x] === "") {
+                if (calValues[x] === 0 || calValues[x] === "") {
                     delete calValues[x]
                 }
             }
@@ -451,7 +451,6 @@ export const autoCalculate = (values: any, fieldList: any) => {
 
 export const autoCalculateSpecificFields = (inputValues: any, values: any, fieldList: any) => {
     const returnvalues: any = { ...inputValues }
-    console.log(inputValues)
     for (var _fieldName in inputValues) {
         const field: any = fieldList.filter((_f) => _f.fieldName === _fieldName || _f.fieldName === _fieldName.split("_")[0]);
         if (field.length) {
