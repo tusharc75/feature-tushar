@@ -1,71 +1,53 @@
+import { RESOURCE_LABEL } from "../../constants/helpers";
+
 const routes = {
-  // account: {
-  //   title: "Account",
-  //   path: "/account",
-  //   data: {},
-  // },
-  // accountDetails: {
-  //   title: "Account",
-  //   path: "/account/detail",
-  //   data: {},
-  // },
-  // contact: {
-  //   title: "Contact",
-  //   path: "/contact",
-  //   data: {},
-  // },
-  // contactDetail: {
-  //   title: "Contact",
-  //   path: "/contact/detail",
-  //   data: {},
-  // },
   lead: {
-    title: "Lead",
+    title: RESOURCE_LABEL.lead,
     path: "/lead",
     data: {},
   },
   leadDetail: {
-    title: "Lead Detail",
+    title: RESOURCE_LABEL.lead,
     path: "/lead/detail",
     data: {},
   },
   opportunity: {
-    title: "Opportunity",
+    title: RESOURCE_LABEL.opportunity,
     path: "/opportunity",
     data: {},
   },
   user: {
-    title: "User",
+    title: RESOURCE_LABEL.user,
     path: "/user",
     data: {},
   },
   userDetail: {
-    title: "User",
+    title: RESOURCE_LABEL.user,
     path: "/user/detail",
     data: {},
   },
   entity: {
-    title: "Entity",
+    title: RESOURCE_LABEL.entity,
     path: "/entity",
     data: {},
   },
   entityDetails: {
-    title: "Entity",
+    title: RESOURCE_LABEL.entity,
     path: "/entity/detail",
     data: {},
   },
   role: {
-    title: "Role",
+    title: RESOURCE_LABEL.role,
     path: "/role",
     data: {},
   },
   roleDetail: {
-    title: "Role",
+    title: RESOURCE_LABEL.role,
     path: "/role/detail",
     data: {},
   },
   opportunityDetail: {
-    title: "Opportunity Detail",
+    title: RESOURCE_LABEL.opportunity,
     path: "/opportunity/detail",
     data: {},
   },
@@ -75,57 +57,57 @@ const routes = {
     data: {},
   },
   activityEmail: {
-    title: "Activity Email",
+    title: RESOURCE_LABEL.email,
     path: "/email",
     data: {},
   },
   activityNote: {
-    title: "Activity Note",
+    title: RESOURCE_LABEL.note,
     path: "/note",
     data: {},
   },
   customerAccount: {
-    title: "Customer Account",
+    title: RESOURCE_LABEL.customerAccount,
     path: "/customer-account",
   },
   customerAccountDetail: {
-    title: "Customer Account",
+    title: RESOURCE_LABEL.customerAccount,
     path: "/customer-account/detail",
   },
   supplierAccount: {
-    title: "Supplier Account",
+    title: RESOURCE_LABEL.account,
     path: "/supplier-account",
   },
   supplierAccountDetail: {
-    title: "Supplier Account",
+    title: RESOURCE_LABEL.account,
     path: "/supplier-account/detail",
   },
   customerContact: {
-    title: "Customer Contact",
+    title: RESOURCE_LABEL.customerContact,
     path: "/customer-contact",
   },
   customerContactDetail: {
-    title: "Customer Contact",
+    title: RESOURCE_LABEL.customerContact,
     path: "/customer-contact/detail",
   },
   supplierContact: {
-    title: "Supplier Contact",
+    title: RESOURCE_LABEL.contact,
     path: "/supplier-contact",
   },
   supplierContactDetail: {
-    title: "Supplier Contact",
+    title: RESOURCE_LABEL.contact,
     path: "/supplier-contact/detail",
   },
   doa: {
-    title: "Doa",
+    title: RESOURCE_LABEL.doa,
     path: "/doa",
   },
   product: {
-    title: "Product",
+    title: RESOURCE_LABEL.product,
     path: "/product",
   },
   formBuilder: {
-    title: "Form Builder",
+    title: RESOURCE_LABEL.formBuilder,
     path: "/form-builder",
   },
   formBuilderResource: {
@@ -133,7 +115,7 @@ const routes = {
     path: "/resource",
   },
   termsAndConditions: {
-    title: "Terms and Conditions",
+    title: RESOURCE_LABEL.termsAndConditions,
     path: "/terms-conditions",
   },
   profilePage: {
@@ -141,19 +123,19 @@ const routes = {
     path: "/profile",
   },
   projectSales: {
-    title: "Project Sales",
+    title: RESOURCE_LABEL.projectStrategy,
     path: "/project-sales",
   },
   projectSalesDetail: {
-    title: "Project Sales",
+    title: RESOURCE_LABEL.projectStrategy,
     path: "/project-sales/detail",
   },
   priceTemplate: {
-    title: "Price Template",
+    title: RESOURCE_LABEL.priceTemplate,
     path: "/price-template",
   },
   productBuilder: {
-    title: "Product Builder",
+    title: RESOURCE_LABEL.productBuilder,
     path: "/product-builder",
   },
   brandConfiguration: {
@@ -161,33 +143,45 @@ const routes = {
     path: "/brand-configuration",
   },
   currencyConverter: {
-    title: "Currency Converter",
+    title: RESOURCE_LABEL.currencyConverter,
     path: "/currency-converter",
   },
   productCategory: {
-    title: "Product Category",
+    title: RESOURCE_LABEL.productCategory,
     path: "/product-category",
   },
   productTemplate: {
-    title: "Product Template",
+    title: RESOURCE_LABEL.productTemplate,
     path: "/product-template",
   },
   quoteBuilder: {
-    title: "Quotes",
+    title: RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",
   },
   budget: {
-    title: "Budget",
+    title: RESOURCE_LABEL.budget,
     path: "/budget",
   },
   marketSegment: {
-    title: "Market Segment",
+    title: RESOURCE_LABEL.marketSegment,
     path: "/market-segment",
   },
   quotePdfTemplate: {
-    title: "Quote PDF Template",
+    title: RESOURCE_LABEL.quotePdfTemplate,
     path: "/quote-pdf-template",
-  }
+  },
+  attachment: {
+    title: RESOURCE_LABEL.attachment,
+    path: "/attachment",
+  },
+  calendar: {
+    title: RESOURCE_LABEL.calendar,
+    path: "/attachment",
+  },
+  reminder: {
+    title: RESOURCE_LABEL.reminder,
+    path: "/reminder",
+  },
 };
 
 export default routes;

@@ -8,6 +8,7 @@ import Layout from "../../components/Layout";
 import { ListRelatedTo } from "../../components/Activity/Helpers/ListRelatedTo";
 import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 import { MdDateRange } from 'react-icons/md';
+import routes from "../../components/Helpers/Routes";
 
 const Reminder = () => {
   const [events, setEvents] = useState([]);
@@ -116,7 +117,7 @@ const Reminder = () => {
       )}
       <Layout>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[{ title: "Reminder" }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.reminder.title }]} />
         </Grid>
         <div className="detail-container">
           <Paper>

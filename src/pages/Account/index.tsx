@@ -26,7 +26,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -60,7 +60,7 @@ export default function Account(props) {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    account: { accountApi, accountResource, accountRoute },
+    account: { accountApi, accountResource, accountRoute, accountResourceLabel },
     accountBreadcrumb
   } = props;
 
@@ -594,7 +594,7 @@ export default function Account(props) {
             <Grid container className="header-panel" justify="space-between" alignContent="center">
               <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
                 <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
+                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{RESOURCE_LABEL[accountResourceLabel]}</span>
                   <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                     {AccTypes && (
                       <ToggleButtonGroup

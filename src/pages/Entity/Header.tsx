@@ -3,8 +3,9 @@ import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
-import { BiNetworkChart } from "react-icons/bi"
-  ;
+import { BiNetworkChart } from "react-icons/bi";
+import { RESOURCE_LABEL } from "../../constants/helpers";
+
 const EntityHeader = (props) => {
   const {
     onSearch,
@@ -28,7 +29,7 @@ const EntityHeader = (props) => {
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <BiNetworkChart className="headerLogo" />
-        <span className="listingHeader">Entities</span>
+        <span className="listingHeader">{RESOURCE_LABEL.entity}</span>
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box component="div" className={styles.filter_side_header}>

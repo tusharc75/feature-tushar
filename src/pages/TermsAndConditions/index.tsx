@@ -20,7 +20,7 @@ import CustomContainer from "../../components/CustomContainer";
 import styles from "../Leads/Header.module.scss";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { termsAndCondition, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
@@ -194,7 +194,7 @@ export default function TermsAndCondition(props) {
                     <Grid container className={styles.filter_side_container}>
                         <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
                             <IoDocumentTextOutline className="headerLogo" />{" "}
-                            <span className="listingHeader">Terms and Conditions</span>
+                            <span className="listingHeader">{RESOURCE_LABEL.termsAndConditions}</span>
                         </Grid>
 
                         <Grid item xs={6} className={styles.filter_side}>
