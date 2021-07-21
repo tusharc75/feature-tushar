@@ -218,6 +218,19 @@ export default function QuoteProcess(props) {
 
     useEffect(() => {
         fetchDoaLimit();
+        fetchUserEmails();
+        const tempProcessStatus= quoteData?.versions[currentVersion]?.processStatus;
+        const  tempOverallStatus = quoteData?.versions[currentVersion]?.status;
+
+      if ( tempProcessStatus=== "DOA Process" && ! tempOverallStatus.includes("Accepted")) {
+        setNextStep(false);
+      }
+      if ( tempProcessStatus=== "DOA Process" &&  tempOverallStatus.includes("Accepted")) {
+        setNextStep(true);
+      }
+      if ( tempProcessStatus=== "Customer Process") {
+        setNextStep(false);
+      }
     }, [quoteData]);
 
     useEffect(() => {

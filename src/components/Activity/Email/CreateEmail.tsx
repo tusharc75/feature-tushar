@@ -225,18 +225,17 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSendQuoteEmail = (values) => {
     setSending(true);
     const body = {
-      email: [user?.user?.email],
+      email: [values.to.slice(-1)[0]],
       version: version,
       emailBody: values.content.toString("html"),
       emailSubject: values.name,
       cc: values.cc,
-      bcc: [values.to.slice(-1)[0]],
       id: id,
       attachments: [...qouteBuilderAttachments],
       eSign: toogle["E-Sign"],
@@ -382,8 +381,8 @@ export const CreateEmail = ({
                       <Typography variant="subtitle2">
                         {attachment
                           ? attachment.substring(
-                              attachment.lastIndexOf("/") + 1
-                            )
+                            attachment.lastIndexOf("/") + 1
+                          )
                           : "attachment"}
                       </Typography>
                       <IconButton className={emailStyles.text}>
@@ -496,7 +495,7 @@ export const CreateEmail = ({
                             />
 
                             {initialValues?.relatedTo &&
-                            initialValues.relatedTo.length ? (
+                              initialValues.relatedTo.length ? (
                               <Box mt={2}>
                                 <RelatedToDispay
                                   relatedTo={initialValues.relatedTo}
@@ -619,9 +618,9 @@ export const CreateEmail = ({
                                   isQuoteBuilder
                                     ? cc
                                     : options.filter(
-                                        (option) =>
-                                          values.to.indexOf(option) < 0
-                                      )
+                                      (option) =>
+                                        values.to.indexOf(option) < 0
+                                    )
                                 }
                                 freeSolo
                                 renderTags={(value, getTagProps) =>
@@ -730,43 +729,43 @@ export const CreateEmail = ({
                                     isQuoteBuilder
                                       ? null
                                       : [
-                                          <button
-                                            type="button"
-                                            className={
-                                              emailStyles.emailRichTextEditorCustomControls
-                                            }
-                                          >
-                                            <label htmlFor="avatar">
-                                              <IconButton
-                                                title="Add picture"
-                                                size="small"
-                                                aria-label="upload picture"
-                                                component="span"
-                                              >
-                                                <BsFillImageFill
-                                                  size={18}
-                                                  color="black"
-                                                />
-                                                <input
-                                                  disabled={isUploading}
-                                                  id="avatar"
-                                                  name="avatar"
-                                                  onChange={handleUploadImage}
-                                                  accept="image/x-png,image/gif,image/jpeg"
-                                                  style={{
-                                                    opacity: "0",
-                                                    position: "absolute",
-                                                    zIndex: -1,
-                                                  }}
-                                                  onClick={(e: any) =>
-                                                    (e.target.value = null)
-                                                  }
-                                                  type="file"
-                                                />
-                                              </IconButton>
-                                            </label>
-                                          </button>,
-                                        ]
+                                        <button
+                                          type="button"
+                                          className={
+                                            emailStyles.emailRichTextEditorCustomControls
+                                          }
+                                        >
+                                          <label htmlFor="avatar">
+                                            <IconButton
+                                              title="Add picture"
+                                              size="small"
+                                              aria-label="upload picture"
+                                              component="span"
+                                            >
+                                              <BsFillImageFill
+                                                size={18}
+                                                color="black"
+                                              />
+                                              <input
+                                                disabled={isUploading}
+                                                id="avatar"
+                                                name="avatar"
+                                                onChange={handleUploadImage}
+                                                accept="image/x-png,image/gif,image/jpeg"
+                                                style={{
+                                                  opacity: "0",
+                                                  position: "absolute",
+                                                  zIndex: -1,
+                                                }}
+                                                onClick={(e: any) =>
+                                                  (e.target.value = null)
+                                                }
+                                                type="file"
+                                              />
+                                            </IconButton>
+                                          </label>
+                                        </button>,
+                                      ]
                                   }
                                   toolbarConfig={toolbarConfig}
                                 />
