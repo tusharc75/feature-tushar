@@ -12,6 +12,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
 
 import "./style.scss";
+import { RESOURCE_LABEL } from "../../constants/helpers";
 
 const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -61,7 +62,7 @@ const Activity = ({ type }) => {
     <Layout>
       <Grid container className="headerbox">
         <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
+          <CustomBreadCrumbs routes={[{ title: capitalize(RESOURCE_LABEL[type]) }]} />
         </Grid>
       </Grid>
       <CustomContainer styles={{ width: "100%" }}>

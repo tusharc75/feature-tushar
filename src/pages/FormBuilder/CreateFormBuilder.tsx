@@ -107,7 +107,7 @@ const CreateFormBuilder = (props) => {
     const classes = useStyles();
     return (<Layout>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[routes.formBuilder, { title: "Resource" }]} />
+            <CustomBreadCrumbs routes={[routes.formBuilder, { title: routes.quoteBuilder.title }]} />
         </Grid>
         <CustomContainer>
             {section ?

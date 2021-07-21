@@ -33,6 +33,7 @@ import { CustomDialogTransition } from "../../../constants/helpers";
 import { BiTask } from "react-icons/bi";
 import { BsBriefcase } from "react-icons/bs";
 import { VscCalendar } from "react-icons/vsc";
+import routes from "../../../components/Helpers/Routes";
 
 const BigCalendar = () => {
   const {
@@ -139,7 +140,7 @@ const BigCalendar = () => {
     <Layout>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[{ title: "Calendar" }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
         </Grid>
       </Grid>
       <CustomContainer>
