@@ -30,6 +30,7 @@ import ColumnsDialog from "./ColumnsDialog";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useData } from "../../../../StateProvider/Provider";
+import { isEqual } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -132,7 +133,8 @@ export default function QuoteProcess(props) {
         handleVersionUpdate,
         updatingVersion,
         setUpdatingVersion,
-        pdfFileName
+        pdfFileName,
+        setColumnView
     } = props
 
     const classes = useStyles();
@@ -208,7 +210,11 @@ export default function QuoteProcess(props) {
 
     useEffect(() => {
         dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion].TNC });
-    },[currentVersion])
+    }, [currentVersion])
+    
+    useEffect(() => {
+        setVisibleColumns(columnView && columnView.length ? columnView : defaultSelectColumns)
+    }, [columnView])
 
     useEffect(() => {
         fetchDoaLimit();
@@ -561,10 +567,6 @@ export default function QuoteProcess(props) {
 
             setColName(ColName);
             setOptions(optionstoSet);
-          
-            if (columnView.length > 0) {
-                setVisibleColumns(columnView);
-            } 
             setDynamicTableData(allData);
         }
     };
@@ -741,7 +743,7 @@ export default function QuoteProcess(props) {
 
 
     const handleViewPdf = (view = false, download = false) => {
-        if (!pdfFileName) {
+        
             handleVersionUpdate(
                 visibleColumns,
                 versionStatus,
@@ -749,55 +751,6 @@ export default function QuoteProcess(props) {
                 view,
                 download
             );
-        }
-        else {
-            if (view) {
-                setUpdatingVersion(true);
-                axiosInstance()
-                    .get(
-                        `user/download?fileName=${pdfFileName}`,
-                        {
-                            responseType: "blob",
-                        }
-                    )
-                    .then(({ data }) => {
-                        setUpdatingVersion(false);
-                        const file = new Blob([data], { type: "application/pdf" });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                    })
-                    .catch((err) => {
-                        setUpdatingVersion(true);
-                    });
-            } else if (download) {
-                setUpdatingVersion(true);
-                axiosInstance()
-                    .get(
-                        `user/download?fileName=${pdfFileName}`,
-                        {
-                            responseType: "blob",
-                        }
-                    )
-                    .then(({ data }) => {
-                        setUpdatingVersion(false);
-                        const url = window.URL.createObjectURL(
-                            new Blob([data], { type: "application/pdf" })
-                        );
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.setAttribute(
-                            "download",
-                            `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-                        );
-                        document.body.appendChild(link);
-                        link.click();
-                    })
-                    .catch((err) => {
-                        setUpdatingVersion(true);
-                    });
-            }
-        }
 
     };
 
@@ -850,11 +803,14 @@ export default function QuoteProcess(props) {
     };
 
     const handleVersionUpdateFromAdditionalData = (additionalData) => {
-        handleVersionUpdate(
+        if (!isEqual(state.selectedRecords, additionalData)) {
+            handleVersionUpdate(
             visibleColumns,
             versionStatus,
             additionalData
         );
+        }
+        
     }
 
     const onSendEmailSuccess = () => {

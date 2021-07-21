@@ -104,6 +104,12 @@ export default function QuoteDetail() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if(quoteData && quoteData.versions[currentVersion].acceptedColumns){
+      setColumnView(quoteData.versions[currentVersion].acceptedColumns)
+    }
+  },[currentVersion])
+
 
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
@@ -544,6 +550,7 @@ export default function QuoteDetail() {
                           versionStatus={versionStatus}
                           fetchQuoteData={fetchQuoteData}
                           columnView={columnView}
+                          setColumnView={setColumnView}
                           fetchTNC={fetchTermsAndConditions}
                         />)}
                     </Suspense>
