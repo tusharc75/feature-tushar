@@ -15,6 +15,8 @@ import {
   ButtonBase,
   Popover,
 } from "@material-ui/core";
+import Grid from '@material-ui/core/Grid';
+import Avatar from "@material-ui/core/Avatar";
 import {
   Menu as MenuIcon,
   MoreVert as MoreIcon,
@@ -539,9 +541,19 @@ const Header = ({ toggleDrawer }) => {
             >
               {
                 <>
-                  <h4>{d.title}</h4>
-                  <h5>{d.description}</h5>
-                  <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
+                  <Grid container>
+                    <Grid item xs={2} md={2}>
+                      <Avatar
+                        style={{ height: 30, width: 30 }}
+                        src={d?.avatar}
+                      ></Avatar>
+                    </Grid>
+                    <Grid item xs={10} md={10}>
+                      <h6>{displayCardDate(d?.date)}</h6>
+                      <h4>{d.title}</h4>
+                      <h5>{d.description}</h5>
+                    </Grid>
+                  </Grid>
                 </>
               }
             </div>
@@ -638,9 +650,19 @@ const Header = ({ toggleDrawer }) => {
             >
               {
                 <>
-                  <h4>{d.title}</h4>
-                  <h5>{d.description}</h5>
-                  <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
+                  <Grid container>
+                    <Grid item xs={2} md={2}>
+                      <Avatar
+                        style={{ height: 30, width: 30 }}
+                        src={d?.avatar}
+                      ></Avatar>
+                    </Grid>
+                    <Grid item xs={10} md={10}>
+                      <h6>{displayCardDate(d?.date)}</h6>
+                      <h4>{d.title}</h4>
+                      <h5>{d.description}</h5>
+                    </Grid>
+                  </Grid>
                 </>
               }
             </div>

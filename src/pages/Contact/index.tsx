@@ -17,7 +17,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { sidebarResource, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { sidebarResource, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -52,7 +52,7 @@ export default function Contact(props) {
     state: { user }
   }: any = useData();
   const {
-    contact: { contactApi, contactResource, contactPermission, contactRoute },
+    contact: { contactApi, contactResource, contactPermission, contactRoute, contactResourceLabel },
     contactBreadcrumb,
     account
   } = props;
@@ -387,7 +387,7 @@ export default function Contact(props) {
     <Layout>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[contactBreadcrumb]} />
+          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -406,7 +406,7 @@ export default function Contact(props) {
           <Grid className={styles.filter_side_container} container justify="space-between">
             <Grid item className="d-flex align-items-center gap-1">
               <MdContacts className="headerLogo" />
-              <span className="listingHeader">{sidebarResource[contactResource]}</span>
+              <span className="listingHeader">{routes[contactResource].title}</span>
               {ContactTypes && (
                 <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                   {ContactTypes.map((k, index) => {

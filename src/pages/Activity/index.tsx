@@ -11,6 +11,7 @@ import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
 
+import routes from "../../components/Helpers/Routes";
 import "./style.scss";
 
 const capitalize = (string) => {
@@ -61,7 +62,7 @@ const Activity = ({ type }) => {
     <Layout>
       <Grid container className="headerbox">
         <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
+          <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
         </Grid>
       </Grid>
       <CustomContainer styles={{ width: "100%" }}>

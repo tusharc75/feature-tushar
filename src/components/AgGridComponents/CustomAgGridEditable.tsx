@@ -178,7 +178,7 @@ export default function CustomAgGridEditable({
         result[key] = result[key] ? result[key] + item[key] : item[key];
       });
       return result;
-    }, { srno: "Total" });
+    }, {[fromProductGrid && !allowSelection && "productName"]: "Total" });
     
     // console.log(res)
     // rowKeys.push(res)
@@ -281,7 +281,7 @@ export default function CustomAgGridEditable({
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
-              pinnedBottomRowData={fromProductGrid ? createdPinnedData() : []}
+              pinnedBottomRowData={fromProductGrid || forProductBuilder ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{
                 resizable: true,
@@ -372,6 +372,9 @@ export default function CustomAgGridEditable({
                   checkboxSelection={true}
                   resizable={false}
                   sortable={false}
+                  pinnedRowCellRendererFramework={() => (
+                    <p>Total</p>
+                  )}
                 ></AgGridColumn>
               )}
 
@@ -388,6 +391,9 @@ export default function CustomAgGridEditable({
                   sortable={false}
                   filter={false}
                   cellRenderer="actionsRenderer"
+                  pinnedRowCellRendererFramework={() => (
+                    <></>
+                  )}
                 ></AgGridColumn>
               )}
             </AgGridReact>

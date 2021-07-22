@@ -150,7 +150,7 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
         <Box pt={0.5} pb={0.5}>
           {values["inputFields"].map((_field) => (
             <Chip
-              className="ml-1 cursor-pointer"
+              className="ml-1 cursor-pointer mb-1"
               key={_field}
               label={generateLabel(_field)}
               onClick={() => handleAddInputField(_field)}

@@ -27,6 +27,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import { truncate } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
 
 const Note = () => {
   const {
@@ -233,7 +234,7 @@ const Note = () => {
     <Layout>
       <Grid container className="headerbox">
         <Grid item xs={6}>
-          <CustomBreadCrumbs routes={[{ title: 'Note' }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
         </Grid>
       </Grid>
 
@@ -241,7 +242,7 @@ const Note = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
-              <GoNote className="headerLogo" /> <span className="listingHeader">Note ({dataRows.length})</span>
+              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
             </Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
@@ -345,7 +346,7 @@ const Note = () => {
             handleClose={handleClose}
             handleDialogClose={handleDialogClose}
 
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}
