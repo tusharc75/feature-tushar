@@ -178,7 +178,7 @@ export default function CustomAgGridEditable({
         result[key] = result[key] ? result[key] + item[key] : item[key];
       });
       return result;
-    }, {});
+    }, {[fromProductGrid && !allowSelection && "productName"]: "Total" });
     
     // console.log(res)
     // rowKeys.push(res)
