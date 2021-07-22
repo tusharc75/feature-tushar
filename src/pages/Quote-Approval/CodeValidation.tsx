@@ -161,7 +161,7 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
                             handleSave(fieldValue);
                         }}
                     >
-                        Save
+                        Submit
                     </CustomButton>
                 </CustomDialogFooter>
             </Dialog>
