@@ -1272,17 +1272,17 @@ export default function QuoteProcess(props) {
                         ) : null}
                         <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderId ? (
-                                ProcessStatus === "Quote Builder" &&
-                                    visibleColumns.length > 0 ? (
-                                    <ProductGrid
-                                        productBuilderId={productBuilderId}
-                                        refreshProducts={refreshProducts}
-                                        stage={"cost"}
-                                        isAll={true}
-                                        columnsData={visibleColumns}
-                                        currency={quoteData?.currency}
-                                    />
-                                ) : (
+                                // ProcessStatus === "Quote Builder" &&
+                                //     visibleColumns.length > 0 ? (
+                                //     <ProductGrid
+                                //         productBuilderId={productBuilderId}
+                                //         refreshProducts={refreshProducts}
+                                //         stage={"cost"}
+                                //         isAll={true}
+                                //         columnsData={visibleColumns}
+                                //         currency={quoteData?.currency}
+                                //     />
+                                 
                                     <ProductBuilder
                                         fromQuote={true}
                                         permissions={permissions[qbResource]}
@@ -1309,7 +1309,7 @@ export default function QuoteProcess(props) {
                                                 : false
                                         }
                                     />
-                                )
+                                
                             ) : (
                                 <Loader
                                     style={{ minHeight: 300 }}
