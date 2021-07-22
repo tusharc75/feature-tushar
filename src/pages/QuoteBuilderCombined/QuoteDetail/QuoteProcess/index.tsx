@@ -1278,7 +1278,7 @@ export default function QuoteProcess(props) {
                                         productBuilderId={productBuilderId}
                                         refreshProducts={refreshProducts}
                                         stage={"cost"}
-                                        isAll={false}
+                                        isAll={true}
                                         columnsData={visibleColumns}
                                         currency={quoteData?.currency}
                                     />
