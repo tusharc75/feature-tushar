@@ -294,7 +294,20 @@ export default function ManageUserDialog({
                   variant="contained"
                   color="primary"
                   size="small"
-                  onClick={submitForm}
+                  onClick={() => {
+                    const err = Object.keys(errors);
+                    if (err.length) {
+                      const input = document.querySelector(
+                        `input[name=${err[0]}]`,
+                      );
+
+                      input.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'start',
+                      });
+                    }
+                    submitForm()}}
                   disabled={
                     isSubmitting || loading || uploadingImageOrFileProgress > 0
                   }
