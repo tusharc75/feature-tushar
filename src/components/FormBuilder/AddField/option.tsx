@@ -15,6 +15,13 @@ import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { XYCoord } from "dnd-core";
 import update from "immutability-helper";
 import { DragIndicator } from "@material-ui/icons";
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
   const [options, setOptions] = useState(values.option || []);
@@ -105,7 +112,6 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   const moveCard = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragCard = options[dragIndex];
-
       setOptions(
         update(options, {
           $splice: [
@@ -123,7 +129,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     setFieldValue("option", options);
   }, [options]);
 
-  return (
+  return (<DndProvider backend={HTML5Backend}>
     <Box pt={2} pb={2}>
       {values["type"] === "dropDown" && (
         <Grid spacing={3} container>
@@ -149,7 +155,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                 options={
                   fields &&
                   fields.filter(
-                    (_f) => _f._id !== _id && _f.type === "dropDown"
+                    (_f) => _f._id !== _id && _f.type === "dropDown" && !_f.lookup
                   )
                 }
                 getOptionLabel={(option: any) =>
@@ -160,14 +166,14 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                 }
                 value={
                   fields &&
-                  fields.filter(
-                    (data) => data.fieldName === values["dropdowDependentOn"]
-                  ).length
+                    fields.filter(
+                      (data) => data.fieldName === values["dropdowDependentOn"]
+                    ).length
                     ? fields &&
-                      fields.filter(
-                        (data) =>
-                          data.fieldName === values["dropdowDependentOn"]
-                      )[0]
+                    fields.filter(
+                      (data) =>
+                        data.fieldName === values["dropdowDependentOn"]
+                    )[0]
                     : ""
                 }
                 onChange={(e, val) => {
@@ -233,12 +239,13 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             <Card
               key={index}
               index={index}
-              id={data.order}
+              id={index}
               data={data}
               moveCard={moveCard}
               onChangeValue={onChangeValue}
               values={values}
               AddRemoveValue={AddRemoveValue}
+              fields={fields}
             />
           ))}
       </Box>
@@ -251,14 +258,14 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             getOptionSelected={(option: any, val) => option.optionValue === val}
             value={
               values["option"] &&
-              values["option"].filter(
-                (data) => data.optionValue === values["defaultDropdownOption"]
-              ).length
+                values["option"].filter(
+                  (data) => data.optionValue === values["defaultDropdownOption"]
+                ).length
                 ? values["option"] &&
-                  values["option"].filter(
-                    (data) =>
-                      data.optionValue === values["defaultDropdownOption"]
-                  )[0]
+                values["option"].filter(
+                  (data) =>
+                    data.optionValue === values["defaultDropdownOption"]
+                )[0]
                 : ""
             }
             onChange={(e, val) => {
@@ -280,6 +287,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
         </Box>
       )}
     </Box>
+  </DndProvider>
   );
 };
 
@@ -290,8 +298,8 @@ interface DragItem {
 }
 
 const Card = (props) => {
-  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue } =
-    props;
+  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue, fields } = props;
+
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
     accept: "card",
@@ -363,8 +371,32 @@ const Card = (props) => {
           </Grid>
           {values["isDependentDropdown"] &&
             values["dropdowDependentOn"] !== "" && (
-              <Grid item xs={5}>
-                <TextField
+              <Grid item xs={4}>
+                <Select
+                  id="demo-simple-select-outlined"
+                  fullWidth
+                  variant="outlined"
+                  margin="dense"
+                  value={data[values["dropdowDependentOn"]]}
+                  onChange={(e) =>
+                    onChangeValue(
+                      index,
+                      values["dropdowDependentOn"],
+                      e.target.value
+                    )
+                  }
+                >
+                  {(values["dropdowDependentOn"] && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"]).length) &&
+                    fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option &&
+                    fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option.map((_option) => {
+                      return (<MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                        {_option.optionLabel}
+                      </MenuItem>
+                      );
+                    })
+                  }
+                </Select>
+                {/* <TextField
                   id="standard-basic"
                   variant="outlined"
                   margin="dense"
@@ -378,7 +410,7 @@ const Card = (props) => {
                       e.target.value
                     )
                   }
-                />
+                /> */}
               </Grid>
             )}
           <Grid item xs={2}>

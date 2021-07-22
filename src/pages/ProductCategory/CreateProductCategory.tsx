@@ -16,7 +16,6 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/hel
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box } from '@material-ui/core';
 
-
 const CreateProductCategory = (props) => {
 
     const toastConfig = useContext(CustomToastContext)

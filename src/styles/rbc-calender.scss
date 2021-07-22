@@ -19,8 +19,13 @@
     color: #797979;
   }
   
+  .rbc-month-view{
+    height: auto;
+  }
   .rbc-month-row {
     border-top: 1px solid #f0ecec !important;
+    min-height: 80px;
+    flex-basis: inherit;
   }
   
   .rbc-day-bg + .rbc-day-bg{
@@ -80,6 +85,5 @@
 
   .rbc-show-more{
     background-color: #b8d3be;
-    padding: 5px 2px 2px;
   }
   

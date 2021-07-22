@@ -24,7 +24,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Tooltip from '@material-ui/core/Tooltip';
-import { autoCalculate } from "../../constants/formulaUtility";
+import { autoCalculate, autoCalculateSpecificFields } from "../../constants/formulaUtility";
 
 var levalOrderBy = [
     "product",
@@ -56,17 +56,17 @@ const BulkEditDialog = (props) => {
 
         const productData = productDataList[0]
 
-        let _fields = [];
+        var _fields = [];
         productData.fields.forEach((_f) => {
             _f.required = false
             if (stage === "product") {
                 if (_f.fieldName === "qty" || (_f.leval === "product-template" || _f.leval === "product-builder-custom")) {
-                    _fields.push(_f)
+                    _fields.push({ ..._f })
                 }
             }
             else {
                 if (_f.fieldName === "qty" || _f.leval === "product-template" || _f.leval === "price-template" || _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom") {
-                    _fields.push(_f)
+                    _fields.push({ ..._f })
                 }
             }
         })
@@ -86,6 +86,10 @@ const BulkEditDialog = (props) => {
         //     fields: _fields,
         //     values: { ...getObjKeysWithValues(values, _fields) },
         // });
+        _fields.forEach((_f) => {
+            _f.isFormula = false
+            _f.isMulitFormula = false
+        })
         setInitialData({
             fields: _fields,
             values: { ...getObjKeys("", _fields) },
@@ -95,13 +99,14 @@ const BulkEditDialog = (props) => {
 
     const handleSubmit = (values) => {
         for (const x in values) {
-            if (values[x] === 0 || values[x] === "0" || values[x] === "") {
+            if (isNaN(values[x]) || values[x] === 0 || values[x] === "0" || values[x] === "") {
                 delete values[x]
             }
         }
         const products = []
         productDataList.forEach(element => {
-            products.push(autoCalculate({ ...element, ...values }, element.fields))
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, element.fields)
+            products.push({ ...element, ...calValues })
         });
         products.forEach(element => {
             element.productCategory = element.productCategory.optionValue
@@ -153,7 +158,6 @@ const BulkEditDialog = (props) => {
         setSectionName("")
         setIsAddField(false)
     }
-
 
     const handleRemoveField = (field) => {
         let newField = initialData.fields.filter((_f) => _f._id !== field._id);

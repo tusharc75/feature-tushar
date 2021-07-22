@@ -10,6 +10,7 @@ import { BsPersonBoundingBox } from 'react-icons/bs';
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
 import { localStorageKeys } from "../../constants/helpers";
+import routes from "../../components/Helpers/Routes";
 
 const RoleHeader = (props) => {
   const {
@@ -50,7 +51,7 @@ const RoleHeader = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-        <BsPersonBoundingBox /> <span className="listingHeader">Roles</span>
+        <BsPersonBoundingBox /> <span className="listingHeader">{routes.role.title}</span>
         {options && (
           <ToggleButtonGroup
             size="small"

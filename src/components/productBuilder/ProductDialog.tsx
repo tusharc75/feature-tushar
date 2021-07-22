@@ -30,6 +30,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Tooltip from "@material-ui/core/Tooltip";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
+import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
 
 var levalOrderBy = [
   "product",
@@ -163,9 +164,17 @@ const CreateProduct = (props) => {
     setFields(fields);
     let newField = initialData.fields;
     newField.push(field);
+    var extraCalculatedValue: any = {}
+    if (field.type === "formula" || field.isFormula) {
+      var inputValues = {};
+      field.inputFields && field.inputFields.forEach((_f) => {
+        inputValues[_f] = ref.current.values[_f] ? ref.current.values[_f] : 0
+      })
+      extraCalculatedValue = autoCalculateSpecificFields(inputValues, ref.current.values, newField)
+    }
     setInitialData({
       fields: newField,
-      values: { ...getObjKeys("", newField), ...ref.current.values },
+      values: { ...getObjKeys("", newField), ...ref.current.values, ...extraCalculatedValue },
     });
     EvaluteproductFields(newField);
     setSectionName("");
@@ -322,7 +331,7 @@ const CreateProduct = (props) => {
                             <Grid spacing={3} container>
                               {section.sectionFields &&
                                 section.sectionFields.map((field) =>
-                                  field.type === "converter" || field.type === "currencyAmount" ? (
+                                  field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
                                       fields={initialData.fields}
                                       fieldData={field}

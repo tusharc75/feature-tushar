@@ -20,7 +20,15 @@ const PdfTemplateSchema = Yup.object().shape({
   showPageNumberInFooter: Yup.boolean()
 });
 
-const seedData = [
+
+
+const CreateQuotePdfTemplate = () => {
+  const history = useHistory();
+  const { id } = useParams();
+  const toastConfig = useContext(CustomToastContext);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [initialValues, setInitialValues] = useState(null);
+  const [seedData] = useState([
   {
     _id: '60e57ae7801802b66486e326',
     fieldLabel: 'Header Column 1',
@@ -85,17 +93,11 @@ const seedData = [
     fieldName: 'footerColumn2',
     sectionName: 'Footer'
   }
-];
-
-const CreateQuotePdfTemplate = () => {
-  const history = useHistory();
-  const { id } = useParams();
-  const toastConfig = useContext(CustomToastContext);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [initialValues, setInitialValues] = useState(null);
+  ])
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
+
 
   useEffect(() => {
     const _data = [];
@@ -107,6 +109,7 @@ const CreateQuotePdfTemplate = () => {
         field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
+    console.log(_data)
     setSection(_data);
   }, []);
   useEffect(() => {
@@ -189,6 +192,30 @@ const CreateQuotePdfTemplate = () => {
     }
   };
 
+  const handleExportFields = () => {
+    var dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(section));
+    var dlAnchorElem = document.getElementById("downloadAnchorElem");
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "template_field.json");
+    dlAnchorElem.click();
+  };
+
+  const handleImportFields = (e) => {
+    e.preventDefault();
+    var files = e.target.files,
+      f = files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data: any = e.target.result;
+      setSection(JSON.parse(data));
+    };
+    reader.readAsBinaryString(f);
+  };
+
+
+
   return (
     <Layout>
       <Grid container className="headerbox">
@@ -205,7 +232,35 @@ const CreateQuotePdfTemplate = () => {
             ]}
           />
         </Grid>
-        <Grid container justify="flex-end" item md={8} sm={1} xs={2}></Grid>
+        <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
+          <label
+            htmlFor="importField"
+            style={{ color: "white" }}
+            className="cursor-pointer mr-3"
+          >
+            Import Fields
+            <input
+              onClick={(e: any) => (e.target.value = null)}
+              id="importField"
+              name="importField"
+              onChange={handleImportFields}
+              style={{
+                opacity: "0",
+                position: "absolute",
+                zIndex: -1,
+              }}
+              type="file"
+            />
+          </label>
+          <label
+            style={{ color: "white" }}
+            className="cursor-pointer"
+            onClick={handleExportFields}
+          >
+            Export Fields
+          </label>
+          <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+        </Grid>
       </Grid>
       <div className="main-container">
         {initialValues ? (
