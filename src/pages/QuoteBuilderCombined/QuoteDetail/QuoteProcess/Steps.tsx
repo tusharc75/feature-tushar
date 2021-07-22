@@ -581,6 +581,7 @@ const Steps = (props) => {
                     })}
                   >
                     <StepLabel
+                      style={{color: "#555"}}
                       StepIconComponent={ColorlibStepIcon}
                       className={
                         currentStep === i || approvedQuote.approved
