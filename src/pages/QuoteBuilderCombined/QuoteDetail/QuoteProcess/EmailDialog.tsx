@@ -8,29 +8,29 @@ import React, {
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import { Formik, Form, Field } from "formik";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../../../components/CustomDialog/CustomDialogFooter";
 import Dialog from "@material-ui/core/Dialog";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomButton from "../../components/Helpers/CustomButton";
+import axiosInstance from "../../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
+import CustomButton from "../../../../components/Helpers/CustomButton";
 import TextField from "@material-ui/core/TextField";
 import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
-import AxiosInstance from "../../axios/axiosInstance";
+import AxiosInstance from "../../../../axios/axiosInstance";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import routes from "../../components/Helpers/Routes";
+import routes from "../../../../components/Helpers/Routes";
 import { stubTrue } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
 import {
   CustomDialogTransition,
   imageUploadMaxSize,
-} from "./../../constants/helpers";
+} from "../../../../constants/helpers";
 import RichTextEditor from "react-rte";
-import FormTypes from "../../components/Helpers/FormTypes";
-import emailStyles from "../../pages/Activity/Email/email.module.scss";
-import ImageAttachments from "../../components/Activity/Email/ImageAttachments";
+import FormTypes from "../../../../components/Helpers/FormTypes";
+import emailStyles from "../../../../pages/Activity/Email/email.module.scss";
+import ImageAttachments from "../../../../components/Activity/Email/ImageAttachments";
 import { BsFillImageFill } from "react-icons/bs";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
@@ -39,9 +39,9 @@ import { GoArrowDown } from "react-icons/go";
 import { Paper } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
-import { fileIcons } from "../../components/Activity/Email/FileIcons";
-import { toolbarConfig } from "../../components/Activity/Email/TextEditorToolbar";
-import ImagePreview from "../../components/Activity/Email/ImagePreview";
+import { fileIcons } from "../../../../components/Activity/Email/FileIcons";
+import { toolbarConfig } from "../../../../components/Activity/Email/TextEditorToolbar";
+import ImagePreview from "../../../../components/Activity/Email/ImagePreview";
 
 const ProductBuilderSchema = Yup.object().shape({
   subject: Yup.string().required("please enter email subject"),
