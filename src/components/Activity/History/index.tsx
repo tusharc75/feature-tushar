@@ -79,11 +79,11 @@ export default function HistoryDialog(props) {
                 {
                     loading ? <Typography>Fetching Data</Typography> :
                         history.length ? <>
-                            <Timeline align="alternate">
+                            <Timeline>
                                 {
                                     history.map(o => {
                                         return <TimelineItem>
-                                            <TimelineOppositeContent>
+                                            <TimelineOppositeContent style={{ flex: 0.1 }}>
                                                 <Typography color="textSecondary">{o?.date ? displayDate(o.date) : null}</Typography>
                                             </TimelineOppositeContent>
                                             <TimelineSeparator>
@@ -91,7 +91,7 @@ export default function HistoryDialog(props) {
                                                 <TimelineConnector />
                                             </TimelineSeparator>
                                             <TimelineContent>
-                                                <Typography className="text-capitalize">{o?.user?.fullName ?? ''} {o?.action ? `(${o?.action})` : ""}</Typography>
+                                                <Typography className="text-capitalize"><span>{o?.user?.fullName ?? ''} </span><h3 className="font-size-2">{o?.action ? `(${o?.action})` : ""}</h3></Typography>
                                             </TimelineContent>
                                         </TimelineItem>
                                     })

@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
 import { Typography } from '@material-ui/core';
+import { IoCloudOfflineOutline } from 'react-icons/io5'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,8 +35,10 @@ export default function OfflineStatusDialog(props) {
             keepMounted
         >
             <DialogContent dividers>
-                {
-                    <Typography>You are offline</Typography>
+                {<div className="d-flex align-items-center flex-column" color="text.grey">
+                    <IoCloudOfflineOutline size="40" />
+                    <h2 className="mt-2">You're offline</h2>
+                </div>
                 }
             </DialogContent>
         </Dialog>

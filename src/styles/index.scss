@@ -29,7 +29,7 @@
   --teal: #1e7682;
   --theme-text: #fff;
   --grey: #838485;
-  --lightgrey: lightgrey;
+  --lightgrey: #ededed;
 
   --common-border-color: #dee2e6;
 
@@ -67,7 +67,9 @@
     )
   );
 }
-
+.ag-theme-material .ag-cell, .ag-theme-material .ag-full-width-row .ag-cell-wrapper.ag-row-group{
+  line-height: 26px;
+}
 .ag-theme-material .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
   border: 1px solid lightgray !important;
 }
