@@ -338,7 +338,7 @@ const AssignEntityDialog = ({
                             color="primary"
                             size="small"
                             onClick={handleNext}
-                            disabled={selectedData.some(item => item?.isChecked)}
+                            disabled={selectedData.length === 0}
                             className={classes.button}
                           >
                             Next
