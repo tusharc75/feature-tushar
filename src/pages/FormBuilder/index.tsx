@@ -69,7 +69,7 @@ const FormBuilder = () => {
         <Grid container spacing={1} >
           <Grid item xs={12} className="d-flex align-items-center gap-1">
             <div className="header-panel d-flex align-items-center gap-1">
-              <FaWpforms className="headerLogo" /> <span className="listingHeader">Form Builder
+              <FaWpforms className="headerLogo" /> <span className="listingHeader">{routes.formBuilder.title}
             </span>
             </div>
           </Grid>

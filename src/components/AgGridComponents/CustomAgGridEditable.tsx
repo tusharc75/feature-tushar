@@ -133,6 +133,7 @@ export default function CustomAgGridEditable({
   onCellValueChanged,
   className = "ag-grid-listing-grid",
   forProductBuilder = false,
+  fromProductGrid = false,
   currency = null,
 }) {
   const [, setColumns] = useState(columns);
@@ -149,14 +150,41 @@ export default function CustomAgGridEditable({
     if (handleGridReady) handleGridReady(params);
   };
 
-  var customFilterParams = {
+  let customFilterParams = {
     filterOptions: ["contains"],
     textCustomComparator: () => {
       return true;
     },
     // trimInput: true,
     // debounceMs: 1000,
-  };
+  }
+
+  const createdPinnedData = () => {
+    const rowKeys = []
+    dataRows.forEach((data) => {
+        let obj = {}
+        Object.entries(data).forEach(([k, v]) => {
+          if (typeof v === "number") {
+              obj[k] = v
+          }
+        })
+       rowKeys.push(obj)
+    })
+     
+    const res = rowKeys.reduce((result, item) => {
+    const keys = Object.keys(item);
+      keys.forEach(key => {
+        if (key === 'srno') { return; }
+        result[key] = result[key] ? result[key] + item[key] : item[key];
+      });
+      return result;
+    }, {});
+    
+    // console.log(res)
+    // rowKeys.push(res)
+    // console.log(rowKeys)
+    return [res]
+  }
 
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
@@ -253,6 +281,7 @@ export default function CustomAgGridEditable({
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
+              pinnedBottomRowData={fromProductGrid || forProductBuilder ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{
                 resizable: true,
@@ -343,6 +372,9 @@ export default function CustomAgGridEditable({
                   checkboxSelection={true}
                   resizable={false}
                   sortable={false}
+                  pinnedRowCellRendererFramework={() => (
+                    <p>Total</p>
+                  )}
                 ></AgGridColumn>
               )}
 
@@ -359,6 +391,9 @@ export default function CustomAgGridEditable({
                   sortable={false}
                   filter={false}
                   cellRenderer="actionsRenderer"
+                  pinnedRowCellRendererFramework={() => (
+                    <></>
+                  )}
                 ></AgGridColumn>
               )}
             </AgGridReact>
