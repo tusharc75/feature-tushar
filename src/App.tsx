@@ -493,7 +493,7 @@ function App() {
           <PrivateRoute exact path={routes.DOARequest.path}>
             <DOARequest />
           </PrivateRoute>
-          <PrivateRoute exact path={`${routes.DOARequest.path}}/:id`}>
+          <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
             <DOAapproval />
           </PrivateRoute>
           <PrivateRoute exact path={routes.quoteBuilder.path}>
