@@ -30,10 +30,11 @@ import ColumnsDialog from "./ColumnsDialog";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useData } from "../../../../StateProvider/Provider";
-import { isEqual } from "lodash";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
+import { camelCase, capitalize, isEqual, lowerCase, startCase } from "lodash";
+
 const useStyles = makeStyles((theme) => ({
     formControl: {
         margin: theme.spacing(1),
@@ -146,6 +147,7 @@ export default function QuoteProcess(props) {
         state: { user, permissions },
     }: any = useData();
 
+    const[quoteCurrency] = useState(quoteData?.currency)
     const [nextStep, setNextStep] = useState(true);
     const [options, setOptions] = useState([]);
     const [redCard, setRedCard] = useState(false);
@@ -193,6 +195,7 @@ export default function QuoteProcess(props) {
     const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
     const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
     const [approvedButtonText, setApprovedButtonText] = useState("Accept");
+    const [productsData, setProductsData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
@@ -401,7 +404,6 @@ export default function QuoteProcess(props) {
 
 
     const productCalculationForDoa = (BuilderData) => {
-
         const inventory: { fieldName: string; fieldValue: any }[][] = [];
         const ignoredKeys = [
             "fields",
@@ -412,6 +414,8 @@ export default function QuoteProcess(props) {
             "string",
             "srno",
         ];
+    
+        setProductsData(BuilderData)
 
         let totalCost = 0;
         let totalSellingPrice = 0;
@@ -745,12 +749,38 @@ export default function QuoteProcess(props) {
                 newTable.push(obj);
             });
 
-            newTable.push({
-                "Product Name": "Total:",
-                "Total Sales Price": totalsale.fullFormatAmount,
-            });
+            
+            const newData = []
+            for (let data of productsData) {
+                let obj = {}
+                const keys = Object.keys(data);
+                const rows = Object.keys(newTable[0]);
+                keys.forEach((k) => {
+                    rows.forEach(_k => {
+                        if (k.includes(camelCase(_k))) {
+                            obj[startCase(k)] = data[k] || '';
+                        }
+                    })
+                })
 
-            const ws = XLSX.utils.json_to_sheet(newTable);
+                newData.push(obj)
+
+            }
+
+            const res = newData.reduce((result, item) => {
+               const keys = Object.keys(item);
+                keys.forEach(key => {
+                    if (!key.includes(capitalize(quoteCurrency))) { return; }
+                    result[key] = result[key] ?
+                        formatAmountWithCurrency(quoteCurrency, result[key] + item[key]).fullFormatAmount
+                        : item[key];
+                });
+                return result;
+            }, {["Product Name"]: "Total" });
+
+            newData.push(res);
+            
+            const ws = XLSX.utils.json_to_sheet(newData);
             const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
             const excelBuffer = XLSX.write(wb, {
                 bookType: "xlsx",
@@ -1424,17 +1454,17 @@ export default function QuoteProcess(props) {
                         ) : null}
                         <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderId ? (
-                                ProcessStatus === "Quote Builder" &&
-                                    visibleColumns.length > 0 ? (
-                                    <ProductGrid
-                                        productBuilderId={productBuilderId}
-                                        refreshProducts={refreshProducts}
-                                        stage={"cost"}
-                                        isAll={true}
-                                        columnsData={visibleColumns}
-                                        currency={quoteData?.currency}
-                                    />
-                                ) : (
+                                // ProcessStatus === "Quote Builder" &&
+                                //     visibleColumns.length > 0 ? (
+                                //     <ProductGrid
+                                //         productBuilderId={productBuilderId}
+                                //         refreshProducts={refreshProducts}
+                                //         stage={"cost"}
+                                //         isAll={true}
+                                //         columnsData={visibleColumns}
+                                //         currency={quoteData?.currency}
+                                //     />
+                                 
                                     <ProductBuilder
                                         fromQuote={true}
                                         permissions={permissions[qbResource]}
@@ -1461,7 +1491,7 @@ export default function QuoteProcess(props) {
                                                 : false
                                         }
                                     />
-                                )
+                                
                             ) : (
                                 <Loader
                                     style={{ minHeight: 300 }}
