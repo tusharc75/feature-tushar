@@ -1492,7 +1492,7 @@ export default function QuoteProcess(props) {
                                         handleViewPdf(true, false);
                                     }}
                                     variant="outlined"
-                                    disabled={viewDownloadLoading}
+                                    disabled={viewDownloadLoading || updatingVersion}
                                     size="small"
                                     className="mr-1"
                                     startIcon={<AiOutlineEye />}
@@ -1501,7 +1501,7 @@ export default function QuoteProcess(props) {
                                     View
                                 </Button>
                                 <Button
-                                    disabled={viewDownloadLoading}
+                                    disabled={viewDownloadLoading || updatingVersion}
                                     onClick={() => {
                                         handleViewPdf(false, true);
                                         exportToCSV();
