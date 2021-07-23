@@ -885,6 +885,9 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.lead.path)) {
       history.push({ pathname: routes.lead.path });
     }
+    if (history.location.pathname.includes(routes.quoteBuilder.path)) {
+      history.push({ pathname: routes.quoteBuilder.path });
+    }
   }
 
   return (

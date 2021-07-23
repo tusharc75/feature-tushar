@@ -526,6 +526,7 @@ const QuoteApproval = () => {
                                                     color="primary"
                                                     size="medium"
                                                     startIcon={<FcUnlock />}
+                                                    disabled={!Boolean(versionDetails)}
                                                     onClick={()=>{
                                                     setShowValidationDialog(true);
                                                     }}>

@@ -30,7 +30,10 @@ import ColumnsDialog from "./ColumnsDialog";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useData } from "../../../../StateProvider/Provider";
-import { isEqual } from "lodash";
+import ThumbUpIcon from "@material-ui/icons/ThumbUp";
+import ThumbDownIcon from "@material-ui/icons/ThumbDown";
+import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
+import { camelCase, capitalize, isEqual, lowerCase, startCase } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -122,19 +125,16 @@ export default function QuoteProcess(props) {
         ProcessStatus,
         allowedToEdit,
         ifQuoteApproved,
-         currentVersion,
-         handleChangeVersion,
-         productBuilderId,
-         versionStatus,
+        currentVersion,
+        handleChangeVersion,
+        productBuilderId,
+        versionStatus,
         fetchQuoteData,
-         columnView,
+        columnView,
         handleOpenUpdateDialog,
         fetchTNC,
         handleVersionUpdate,
-        updatingVersion,
-        setUpdatingVersion,
-        pdfFileName,
-        setColumnView
+        updatingVersion
     } = props
 
     const classes = useStyles();
@@ -142,8 +142,9 @@ export default function QuoteProcess(props) {
     const { qbResource, qbApi } = quoteBuilder;
     const {
         state: { user, permissions },
-      }: any = useData();
+    }: any = useData();
 
+    const [quoteCurrency] = useState(quoteData?.currency)
     const [nextStep, setNextStep] = useState(true);
     const [options, setOptions] = useState([]);
     const [redCard, setRedCard] = useState(false);
@@ -177,6 +178,8 @@ export default function QuoteProcess(props) {
     const [DOAlimit, setDOALimit] = useState(0);
     const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
     const [DOAsetup, setDOAsetup] = useState(false);
+    const [DOAApproved, setDOAApproved] = useState(false);
+    const [DOARequestId, setDOARequestId] = useState(null);
     const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
     const [ColumnName, setColName] = useState([]);
     const [dynamicTableData, setDynamicTableData] = useState([]);
@@ -186,8 +189,10 @@ export default function QuoteProcess(props) {
     const [isRearrangeColumns, setRearrangeColumns] = useState(false);
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);
     const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
-    // const [updatingVersion, setUpdatingVersion] = useState(false);
-    // const [pdfFileName, setPdfFileName] = useState("");
+    const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
+    const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
+    const [approvedButtonText, setApprovedButtonText] = useState("Accept");
+    const [productsData, setProductsData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
@@ -196,6 +201,7 @@ export default function QuoteProcess(props) {
     const [sendEmail, setSendEmail] = useState(false);
     const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
+    const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
     const [messageDialog, setMessageDialog] = useState({
         open: false,
         message: null,
@@ -210,8 +216,34 @@ export default function QuoteProcess(props) {
 
     useEffect(() => {
         dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion].TNC });
+
+        axiosInstance()
+            .get(`/doa-request`)
+            .then(({ data: { data } }) => {
+                let rows = data.map((doa) => ({
+                    ...doa,
+                    name: doa.DOAName,
+                    quotedBy: doa.QuotedBy.firstName,
+                    quoteById: doa.QuotedBy.id,
+                    requestedBy: doa.RequestedBy.firstName,
+                    requestedById: doa.RequestedBy.id,
+                }));
+                axiosInstance()
+                    .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
+                    .then(({ data: { data } }) => {
+                        setDOAApproved(data.canApprove)
+                        setDOARequestId(data.requestId)
+                    })
+                    .catch((err) => {
+                        // toastConfig.setToastConfig(err);
+                    });
+            })
+            .catch((error) => {
+                //   toastConfig.setToastConfig(error);
+            });
+
     }, [currentVersion])
-    
+
     useEffect(() => {
         setVisibleColumns(columnView && columnView.length ? columnView : defaultSelectColumns)
     }, [columnView])
@@ -219,74 +251,131 @@ export default function QuoteProcess(props) {
     useEffect(() => {
         fetchDoaLimit();
         fetchUserEmails();
-        const tempProcessStatus= quoteData?.versions[currentVersion]?.processStatus;
-        const  tempOverallStatus = quoteData?.versions[currentVersion]?.status;
+        const tempProcessStatus = quoteData?.versions[currentVersion]?.processStatus;
+        const tempOverallStatus = quoteData?.versions[currentVersion]?.status;
 
-      if ( tempProcessStatus=== "DOA Process" && ! tempOverallStatus.includes("Accepted")) {
-        setNextStep(false);
-      }
-      if ( tempProcessStatus=== "DOA Process" &&  tempOverallStatus.includes("Accepted")) {
-        setNextStep(true);
-      }
-      if ( tempProcessStatus=== "Customer Process") {
-        setNextStep(false);
-      }
+        if (tempProcessStatus === "DOA Process" && !tempOverallStatus.includes("Accepted")) {
+            setNextStep(false);
+        }
+        if (tempProcessStatus === "DOA Process" && tempOverallStatus.includes("Accepted")) {
+            setNextStep(true);
+        }
+        if (tempProcessStatus === "Customer Process") {
+            setNextStep(false);
+        }
     }, [quoteData]);
 
     useEffect(() => {
         if (DOAsetup) {
-          axiosInstance()
-            .get(`/productbuilder/getproduct/` + productBuilderId)
-            .then(({ data: { data } }) => {
-              data = data.data?.map((u, index) => ({
-                ...u,
-                id: u._id,
-                srno: index + 1,
-                // productTemplateDisplayValue: u.productTemplate?.optionLabel,
-                productCategoryDisplayValue: u.productCategory?.optionLabel,
-                priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
-              }));
-              const { totalSellingPrice } = productCalculationForDoa(data);
-    
-              if (DOAsetup && totalSellingPrice > DOAlimit) {
-                setDOAneeded(true);
-              } else {
-                setDOAneeded(false);
-              }
-              if (DOAsetup && totalSellingPrice > DOAlimit) {
-                setDOAneeded(true);
-            } else {
-                setDOAneeded(false);
-            }
-            if (
-                DOAsetup &&
-                totalSellingPrice > DOAlimit &&
-                versionStatus === "Building Quote"
-            ) {
-                setDOAreq(true);
-                setCustomerreq(false);
-                setButtonMessage("Send for DOA");
-            } else if (versionStatus.includes("Rejected by DOA")) {
-                setDOAreq(true);
-                setCustomerreq(false);
-                setButtonMessage("Re-Send for DOA");
-            } else if (versionStatus === "Sent for DOA") {
-                setDOAreq(false);
-                setCustomerreq(false);
-            } else if (
-                versionStatus === "Sent to Customer" ||
-                versionStatus === "Accepted by Customer" ||
-                versionStatus === "Rejected by Customer" ||
-                versionStatus === "Not Booked by Customer" ||
-                versionStatus === "Invalid by Customer" ||
-                versionStatus === "Booked by Customer"
-            ) {
-                setDOAreq(false);
-                setCustomerreq(false);
-            }
-            })
+            axiosInstance()
+                .get(`/productbuilder/getproduct/` + productBuilderId)
+                .then(({ data: { data } }) => {
+                    data = data.data?.map((u, index) => ({
+                        ...u,
+                        id: u._id,
+                        srno: index + 1,
+                        // productTemplateDisplayValue: u.productTemplate?.optionLabel,
+                        productCategoryDisplayValue: u.productCategory?.optionLabel,
+                        priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
+                    }));
+                    const { totalSellingPrice } = productCalculationForDoa(data);
+
+                    if (DOAsetup && totalSellingPrice > DOAlimit) {
+                        setDOAneeded(true);
+                    } else {
+                        setDOAneeded(false);
+                    }
+                    if (DOAsetup && totalSellingPrice > DOAlimit) {
+                        setDOAneeded(true);
+                    } else {
+                        setDOAneeded(false);
+                    }
+                    if (
+                        DOAsetup &&
+                        totalSellingPrice > DOAlimit &&
+                        versionStatus === "Building Quote"
+                    ) {
+                        setDOAreq(true);
+                        setCustomerreq(false);
+                        setButtonMessage("Send for DOA");
+                    } else if (versionStatus.includes("Rejected by DOA")) {
+                        setDOAreq(true);
+                        setCustomerreq(false);
+                        setButtonMessage("Re-Send for DOA");
+                    } else if (versionStatus === "Sent for DOA") {
+                        setDOAreq(false);
+                        setCustomerreq(false);
+                    } else if (
+                        versionStatus === "Sent to Customer" ||
+                        versionStatus === "Accepted by Customer" ||
+                        versionStatus === "Rejected by Customer" ||
+                        versionStatus === "Not Booked by Customer" ||
+                        versionStatus === "Invalid by Customer" ||
+                        versionStatus === "Booked by Customer"
+                    ) {
+                        setDOAreq(false);
+                        setCustomerreq(false);
+                    }
+                })
         }
-      }, [DOAsetup])
+    }, [DOAsetup])
+
+
+
+    useEffect(() => {
+        if (DOAsetup) {
+            axiosInstance()
+                .get(`/productbuilder/getproduct/` + productBuilderId)
+                .then(({ data: { data } }) => {
+                    data = data.data?.map((u, index) => ({
+                        ...u,
+                        id: u._id,
+                        srno: index + 1,
+                        // productTemplateDisplayValue: u.productTemplate?.optionLabel,
+                        productCategoryDisplayValue: u.productCategory?.optionLabel,
+                        priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
+                    }));
+                    const { totalSellingPrice } = productCalculationForDoa(data);
+
+                    if (DOAsetup && totalSellingPrice > DOAlimit) {
+                        setDOAneeded(true);
+                    } else {
+                        setDOAneeded(false);
+                    }
+                    if (DOAsetup && totalSellingPrice > DOAlimit) {
+                        setDOAneeded(true);
+                    } else {
+                        setDOAneeded(false);
+                    }
+                    if (
+                        DOAsetup &&
+                        totalSellingPrice > DOAlimit &&
+                        versionStatus === "Building Quote"
+                    ) {
+                        setDOAreq(true);
+                        setCustomerreq(false);
+                        setButtonMessage("Send for DOA");
+                    } else if (versionStatus.includes("Rejected by DOA")) {
+                        setDOAreq(true);
+                        setCustomerreq(false);
+                        setButtonMessage("Re-Send for DOA");
+                    } else if (versionStatus === "Sent for DOA") {
+                        setDOAreq(false);
+                        setCustomerreq(false);
+                    } else if (
+                        versionStatus === "Sent to Customer" ||
+                        versionStatus === "Accepted by Customer" ||
+                        versionStatus === "Rejected by Customer" ||
+                        versionStatus === "Not Booked by Customer" ||
+                        versionStatus === "Invalid by Customer" ||
+                        versionStatus === "Booked by Customer"
+                    ) {
+                        setDOAreq(false);
+                        setCustomerreq(false);
+                    }
+                })
+        }
+    }, [DOAsetup])
 
     const fetchDOAData = () => {
         if (ProcessStatus === "DOA Process") {
@@ -313,7 +402,6 @@ export default function QuoteProcess(props) {
 
 
     const productCalculationForDoa = (BuilderData) => {
-
         const inventory: { fieldName: string; fieldValue: any }[][] = [];
         const ignoredKeys = [
             "fields",
@@ -324,6 +412,8 @@ export default function QuoteProcess(props) {
             "string",
             "srno",
         ];
+
+        setProductsData(BuilderData)
 
         let totalCost = 0;
         let totalSellingPrice = 0;
@@ -590,7 +680,7 @@ export default function QuoteProcess(props) {
         axiosInstance()
             .post(
                 `/quote-builder/createVersion/${quoteData._id}?version=${currentVersion}`,
-                {TNC: previousVersionTNC}
+                { TNC: previousVersionTNC }
             )
             .then(() => {
                 fetchQuoteData(0);
@@ -641,7 +731,7 @@ export default function QuoteProcess(props) {
         }
     };
 
-        const exportToCSV = (send = false) => {
+    const exportToCSV = (send = false) => {
         const fileType =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
         const fileExtension = ".xlsx";
@@ -657,12 +747,38 @@ export default function QuoteProcess(props) {
                 newTable.push(obj);
             });
 
-            newTable.push({
-                "Product Name": "Total:",
-                "Total Sales Price": totalsale.fullFormatAmount,
-            });
 
-            const ws = XLSX.utils.json_to_sheet(newTable);
+            const newData = []
+            for (let data of productsData) {
+                let obj = {}
+                const keys = Object.keys(data);
+                const rows = Object.keys(newTable[0]);
+                keys.forEach((k) => {
+                    rows.forEach(_k => {
+                        if (k.includes(camelCase(_k))) {
+                            obj[startCase(k)] = data[k] || '';
+                        }
+                    })
+                })
+
+                newData.push(obj)
+
+            }
+
+            const res = newData.reduce((result, item) => {
+                const keys = Object.keys(item);
+                keys.forEach(key => {
+                    if (!key.includes(capitalize(quoteCurrency))) { return; }
+                    result[key] = result[key] ?
+                        formatAmountWithCurrency(quoteCurrency, result[key] + item[key]).fullFormatAmount
+                        : item[key];
+                });
+                return result;
+            }, { ["Product Name"]: "Total" });
+
+            newData.push(res);
+
+            const ws = XLSX.utils.json_to_sheet(newData);
             const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
             const excelBuffer = XLSX.write(wb, {
                 bookType: "xlsx",
@@ -753,18 +869,98 @@ export default function QuoteProcess(props) {
     //         });
     // };
 
+    const QuoteStatusChange = (accepted, signature, comment) => {
+        if (DOARequestId) {
+            if (accepted !== "Rejected") {
 
+                axiosInstance()
+                    .post("/doa-request/DOAResponse/" + DOARequestId, { response: "Accepted" })
+                    .then(({ data }) => {
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: "success",
+                            message: data.message,
+                        });
+                        fetchQuoteData(currentVersion);
+                    })
+                    .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                        setShowQuoteStatusChangeDialog(false)
+                    });
+
+            } else {
+                axiosInstance()
+                    .post("/doa-request/DOAResponse/" + DOARequestId, { response: "Rejected", comment: comment })
+                    .then(({ data }) => {
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: "success",
+                            message: data.message,
+                        });
+                        fetchQuoteData(currentVersion);
+                    })
+                    .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                        setShowQuoteStatusChangeDialog(false)
+                    });
+            }
+        }
+
+    };
 
     const handleViewPdf = (view = false, download = false) => {
-        
-            handleVersionUpdate(
-                visibleColumns,
-                versionStatus,
-                state?.selectedRecords,
-                view,
-                download
-            );
-
+        setViewDownloadLoading(true)
+        axiosInstance()
+            .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+            .then(({ data }) => {
+                if (view && data.data.fileName) {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const file = new Blob([data], { type: "application/pdf" });
+                            const fileURL = URL.createObjectURL(file);
+                            const pdfWindow = window.open();
+                            pdfWindow.location.href = fileURL;
+                            setViewDownloadLoading(false)
+                        })
+                        .catch((err) => {
+                            setViewDownloadLoading(false)
+                            toastConfig.setToastConfig(err);
+                        });
+                } else if (download && data.data.fileName) {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const url = window.URL.createObjectURL(
+                                new Blob([data], { type: "application/pdf" })
+                            );
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute(
+                                "download",
+                                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+                            );
+                            document.body.appendChild(link);
+                            link.click();
+                            setViewDownloadLoading(false)
+                        })
+                        .catch((err) => {
+                            toastConfig.setToastConfig(err);
+                            setViewDownloadLoading(false)
+                        });
+                }
+                else{
+                setViewDownloadLoading(false)
+                }
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setViewDownloadLoading(false)
+            });
     };
 
 
@@ -818,12 +1014,12 @@ export default function QuoteProcess(props) {
     const handleVersionUpdateFromAdditionalData = (additionalData) => {
         if (!isEqual(state.selectedRecords, additionalData)) {
             handleVersionUpdate(
-            visibleColumns,
-            versionStatus,
-            additionalData
-        );
+                visibleColumns,
+                versionStatus,
+                additionalData
+            );
         }
-        
+
     }
 
     const onSendEmailSuccess = () => {
@@ -901,33 +1097,33 @@ export default function QuoteProcess(props) {
 
     const handleAttachments = () => {
         let request;
-    
+
         request = {
-          name: "Quotation V" + currentVersion,
-          fileUrl: "",
-          relatedTo: [
-            {
-              type: quote.quoteResource,
-              referenceId: quoteData?._id,
-              access: true,
-            },
-            {
-              type: quoteData?.customerAccountName
-                ? customerAccount?.accountResource
-                : supplierAccount?.accountResource,
-              referenceId: quoteData?.customerAccountName
-                ? quoteData?.customerAccountName?.optionValue
-                : quoteData?.supplierAccountName?.optionValue,
-              access: false,
-            },
-            {
-              type: opportunity.opportunityResource,
-              referenceId: quoteData.opportunity?.optionValue,
-              access: false,
-            },
-          ],
+            name: "Quotation V" + currentVersion,
+            fileUrl: "",
+            relatedTo: [
+                {
+                    type: quote.quoteResource,
+                    referenceId: quoteData?._id,
+                    access: true,
+                },
+                {
+                    type: quoteData?.customerAccountName
+                        ? customerAccount?.accountResource
+                        : supplierAccount?.accountResource,
+                    referenceId: quoteData?.customerAccountName
+                        ? quoteData?.customerAccountName?.optionValue
+                        : quoteData?.supplierAccountName?.optionValue,
+                    access: false,
+                },
+                {
+                    type: opportunity.opportunityResource,
+                    referenceId: quoteData.opportunity?.optionValue,
+                    access: false,
+                },
+            ],
         };
-    
+
         // if (PDFAttachment !== "") {
         //   request.fileUrl = PDFAttachment;
         //   axiosInstance()
@@ -937,8 +1133,8 @@ export default function QuoteProcess(props) {
         //       toastConfig.setToastConfig(error);
         //     });
         // }
-      };
-    
+    };
+
 
     return (
         <>
@@ -1002,6 +1198,33 @@ export default function QuoteProcess(props) {
                         md={ProcessStatus === "New" ? 12 : 5}
                         className="d-flex align-items-center justify-content-end"
                     >
+                        {DOAApproved && versionStatus === "Sent for DOA" && (
+                            <>
+                                <Button
+                                    onClick={() => {
+                                        QuoteStatusChange("Accepted", "", "")
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<ThumbUpIcon />}
+                                    color="primary"
+                                >
+                                    {approvedButtonText}
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setQuoteStatusChangeData("Rejected")
+                                        setShowQuoteStatusChangeDialog(true)
+                                    }}
+                                    startIcon={<ThumbDownIcon />}
+                                    variant="contained"
+                                    size="small"
+                                    color="primary"
+                                >
+                                    Reject
+                                </Button>
+                            </>
+                        )}
                         {allowedToEdit && ifQuoteApproved.approved ? (
                             <Button
                                 variant="outlined"
@@ -1237,7 +1460,7 @@ export default function QuoteProcess(props) {
                                         handleViewPdf(true, false);
                                     }}
                                     variant="outlined"
-                                    disabled={updatingVersion}
+                                    disabled={viewDownloadLoading}
                                     size="small"
                                     className="mr-1"
                                     startIcon={<AiOutlineEye />}
@@ -1246,7 +1469,7 @@ export default function QuoteProcess(props) {
                                     View
                                 </Button>
                                 <Button
-                                    disabled={updatingVersion}
+                                    disabled={viewDownloadLoading}
                                     onClick={() => {
                                         handleViewPdf(false, true);
                                         exportToCSV();
@@ -1272,44 +1495,44 @@ export default function QuoteProcess(props) {
                         ) : null}
                         <Grid item xs={12} sm={12} md={12} className="mt-2">
                             {quoteData && !loading && productBuilderId ? (
-                                ProcessStatus === "Quote Builder" &&
-                                    visibleColumns.length > 0 ? (
-                                    <ProductGrid
-                                        productBuilderId={productBuilderId}
-                                        refreshProducts={refreshProducts}
-                                        stage={"cost"}
-                                        isAll={true}
-                                        columnsData={visibleColumns}
-                                        currency={quoteData?.currency}
-                                    />
-                                ) : (
-                                    <ProductBuilder
-                                        fromQuote={true}
-                                        permissions={permissions[qbResource]}
-                                        hasPermission={allowedToEdit}
-                                        currency={quoteData?.currency.toLowerCase()}
-                                        productBuilderId={productBuilderId}
-                                        isAddNewProduct={isAddNewProduct}
-                                        setIsAddNewProduct={setIsAddNewProduct}
-                                        isAddExistingProduct={isAddExistingProduct}
-                                        setIsAddExistingProduct={
-                                            setIsAddExistingProduct
-                                        }
-                                        refreshProducts={refreshProducts}
-                                        stage={
-                                            ProcessStatus === "New" ? "product" : "cost"
-                                        }
-                                        isPriceBuilder={
-                                            ProcessStatus === "Price Builder"
-                                        }
-                                        Editable={
-                                            allowedToEdit && (ProcessStatus === "Price Builder" ||
-                                                ProcessStatus === "New")
-                                                ? true
-                                                : false
-                                        }
-                                    />
-                                )
+                                // ProcessStatus === "Quote Builder" &&
+                                //     visibleColumns.length > 0 ? (
+                                //     <ProductGrid
+                                //         productBuilderId={productBuilderId}
+                                //         refreshProducts={refreshProducts}
+                                //         stage={"cost"}
+                                //         isAll={true}
+                                //         columnsData={visibleColumns}
+                                //         currency={quoteData?.currency}
+                                //     />
+
+                                <ProductBuilder
+                                    fromQuote={true}
+                                    permissions={permissions[qbResource]}
+                                    hasPermission={allowedToEdit}
+                                    currency={quoteData?.currency.toLowerCase()}
+                                    productBuilderId={productBuilderId}
+                                    isAddNewProduct={isAddNewProduct}
+                                    setIsAddNewProduct={setIsAddNewProduct}
+                                    isAddExistingProduct={isAddExistingProduct}
+                                    setIsAddExistingProduct={
+                                        setIsAddExistingProduct
+                                    }
+                                    refreshProducts={refreshProducts}
+                                    stage={
+                                        ProcessStatus === "New" ? "product" : "cost"
+                                    }
+                                    isPriceBuilder={
+                                        ProcessStatus === "Price Builder"
+                                    }
+                                    Editable={
+                                        allowedToEdit && (ProcessStatus === "Price Builder" ||
+                                            ProcessStatus === "New")
+                                            ? true
+                                            : false
+                                    }
+                                />
+
                             ) : (
                                 <Loader
                                     style={{ minHeight: 300 }}
@@ -1317,7 +1540,7 @@ export default function QuoteProcess(props) {
                                 />
                             )}
                             {ProcessStatus === "Quote Builder" && (
-                                <AdditionalData 
+                                <AdditionalData
                                     fetchTNC={fetchTNC}
                                     state={state}
                                     dispatch={dispatch}
@@ -1409,6 +1632,14 @@ export default function QuoteProcess(props) {
                         setMessageDialog({ open: false, message: null });
                     }}
                     message={messageDialog.message}
+                />
+            )}
+            {showQuoteStatusChangeDialog && (
+                <DOAReasonDialog
+                    reasonDialogOpen={showQuoteStatusChangeDialog}
+                    handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+                    QuoteStatusChange={QuoteStatusChange}
+                    accepted={quoteStatusChangeData}
                 />
             )}
         </>

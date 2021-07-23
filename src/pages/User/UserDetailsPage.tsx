@@ -427,6 +427,23 @@ const UserDetailsPage = () => {
     setRolesDialogOpen(false);
   };
 
+  const handleResetPassword = async () => {
+    axiosInstance()
+        .post(`/user/forget-password`, {
+            email: userData.email,
+        })
+        .then(({ data }) => {
+            toastConfig.setToastConfig({
+                message: data.message,
+                type: 'success',
+                open: true,
+            });
+        })
+        .catch((err) => {
+            toastConfig.setToastConfig(err);
+        });
+};
+
   const isLoggedInUserBrandAdmin = 'userType' in user?.user;
   return (
     <>
@@ -495,6 +512,18 @@ const UserDetailsPage = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
+                  {
+                    isLoggedInUserBrandAdmin && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleResetPassword}
+                      >
+                        Reset Password
+                      </Button>
+                    )
+                  }
                   {permissions.user.isUpdate ? (
                     <Button
                       variant="contained"
