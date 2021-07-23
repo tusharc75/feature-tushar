@@ -33,8 +33,9 @@ export default (history = null, passedHeaders = null) => {
 
     axiosInstance.interceptors.request.use((request) => {
         if (navigator) {
-            let bandwidth = navigator["connection"].downlink
-            if (bandwidth * 1000 <= 400) {
+            let bandwidth = navigator["connection"].downlink //in mb/s
+            let maxSlowSpeed = 400 // in kb/s
+            if (bandwidth * 1000 <= maxSlowSpeed) {
                 if (localStorage.getItem("slowInternetConnection") !== "true") {
                     localStorage.setItem("slowInternetConnection", "true")
                 }
