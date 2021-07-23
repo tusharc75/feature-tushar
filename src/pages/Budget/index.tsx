@@ -83,6 +83,8 @@ function Budget() {
     fetchBudgetList();
   }, [page, limit, filters, sorting]);
 
+  const columnState = JSON.parse(localStorage.getItem("budgetPage"));
+
   const columns = [
     {
       field: "name",
@@ -128,7 +130,15 @@ function Budget() {
       cellRenderer: "commonRenderer"
     },
   ];
-
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   const NameRenderer = params => (
     <>
       {
@@ -405,6 +415,7 @@ function Budget() {
               page={page}
               actionWidth={100}
               loading={loading}
+              renderedFrom="budgetPage"
             />
           </Box>
         </CustomContainer>
