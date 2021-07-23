@@ -536,6 +536,7 @@ function App() {
         <CustomToaster
           type={toast.toastConfig.type}
           message={toast.toastConfig.message}
+          anchorOrigin={toast.toastConfig?.anchorOrigin || null}
           open={toast.toastConfig.open}
           close={() => {
             toast.setToastConfig({ open: false });
