@@ -188,7 +188,7 @@ const Activity = (props) => {
     <>
       <Box>
         <Box className="detailHeader">
-          <h2 className="listingHeader single">Activity</h2>
+          <h2 className="listingHeader single">Activities</h2>
         </Box>
         <Box className={classes.activityBox}>
           <>

@@ -14,6 +14,8 @@ import { Check } from "@material-ui/icons";
 import { getUniqueCurrencies } from "../../constants/helpers";
 import { FcCancel } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import routes from "./Routes";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -208,14 +210,30 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                         QontoStepIconForPending :
                         QontoStepIconForReject
                     }>
-                      <div style={{ color: "#09445A" }}>{`${label.firstName} ${label.lastName}`}</div>
+                      <div style={{ color: "#09445A" }}>
+                        <Link
+                          title={label.name}
+                          className="link"
+                          to={`${routes.userDetail.path}/${label.id}`}
+                        >
+                          {`${label.firstName} ${label.lastName}`}
+                        </Link>
+                      </div>
                     </StepLabel>
                   </Step>
                 )))
                 : (steps.map((label) => (
                   <Step key={label.id}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
-                      <div style={{ color: "#09445A" }}>{label.name}</div>
+                      <div style={{ color: "#09445A" }}>
+                      <Link
+                          title={label.name}
+                          className="link"
+                          to={`${routes.userDetail.path}/${label.id}`}
+                        >
+                          {`${label.firstName} ${label.lastName}`}
+                        </Link>
+                      </div>
                       {doaCurrency && <div style={{ color: "#09445A" }}>{
                         getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
                           ? getUniqueCurrencies().filter(
