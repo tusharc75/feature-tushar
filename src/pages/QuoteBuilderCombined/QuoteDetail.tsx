@@ -410,6 +410,7 @@ function QuoteDetail() {
   const [DOAsetup, setDOAsetup] = useState(false);
   // const [lastUser, setLastUser] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(true);
+  const [showActivity, setActivityShow] = useState(true);
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
       {
@@ -482,7 +483,10 @@ function QuoteDetail() {
   // const [selectedTnC, setSelectedTnC] = useState([]);
   // const [dataTNC, setDataTNC] = useState([]);
 
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
+  
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -1900,8 +1904,8 @@ function QuoteDetail() {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={8}>
+        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+          <div>
             <Paper>
               {!quoteData ? (
                 <div>
@@ -2575,55 +2579,61 @@ function QuoteDetail() {
                 </>
               )}
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={12} lg={4}>
-            <Paper>
-              {!quoteData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Skeleton key={i} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    // resourceId={quoteData?._id}
-                    // resource={quote.quoteResource}
-                    restrictedAddActivities={
-                      allowedToEdit ? [] : ["Attachment", "Case"]
-                    }
-                    relatedTo={[
-                      {
-                        type: quote.quoteResource,
-                        referenceId: quoteData?._id,
-                        access: true,
-                      },
-                      {
-                        type: quoteData?.customerAccountName
-                          ? customerAccount?.accountResource
-                          : supplierAccount?.accountResource,
-                        referenceId: quoteData?.customerAccountName
-                          ? quoteData?.customerAccountName?.optionValue
-                          : quoteData?.supplierAccountName?.optionValue,
-                        access: false,
-                      },
-                      {
-                        type: opportunity.opportunityResource,
-                        referenceId: quoteData.opportunity?.optionValue,
-                        access: false,
-                      },
-                    ]}
-                    handleActivityRefresh={() => { }}
-                    emails={contactsEmailsData}
-                  />
-                </div>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-
+          </div>
+          <div>
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  Hide Activities
+                </a>}
+                {!quoteData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Skeleton key={i} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      // resourceId={quoteData?._id}
+                      // resource={quote.quoteResource}
+                      restrictedAddActivities={
+                        allowedToEdit ? [] : ["Attachment", "Case"]
+                      }
+                      relatedTo={[
+                        {
+                          type: quote.quoteResource,
+                          referenceId: quoteData?._id,
+                          access: true,
+                        },
+                        {
+                          type: quoteData?.customerAccountName
+                            ? customerAccount?.accountResource
+                            : supplierAccount?.accountResource,
+                          referenceId: quoteData?.customerAccountName
+                            ? quoteData?.customerAccountName?.optionValue
+                            : quoteData?.supplierAccountName?.optionValue,
+                          access: false,
+                        },
+                        {
+                          type: opportunity.opportunityResource,
+                          referenceId: quoteData.opportunity?.optionValue,
+                          access: false,
+                        },
+                      ]}
+                      handleActivityRefresh={() => { }}
+                      emails={contactsEmailsData}
+                    />
+                  </div>
+                )}
+              </Paper> :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                Show Activities
+              </a>}
+          </div>
+        </div>
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
