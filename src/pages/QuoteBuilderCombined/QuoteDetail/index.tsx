@@ -81,7 +81,6 @@ export default function QuoteDetail() {
   const [versionStatus, setVersionStatus] = useState("Building Quote");
   const [processStatus, setProcessStatus] = useState("New");
   const [updatingVersion, setUpdatingVersion] = useState(false);
-  const [pdfFileName, setPdfFileName] = useState("");
   const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
@@ -320,8 +319,6 @@ export default function QuoteDetail() {
     Columns,
     versionStatus,
     selectedTermsAndConditions,
-    view = false,
-    download = false
   ) => {
     let body = {
       acceptedColumns: Columns,
@@ -332,9 +329,8 @@ export default function QuoteDetail() {
     setUpdatingVersion(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(({ data: { data } }) => {
+      .then(() => {
         setUpdatingVersion(false);
-        setPdfFileName(data.fileName)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

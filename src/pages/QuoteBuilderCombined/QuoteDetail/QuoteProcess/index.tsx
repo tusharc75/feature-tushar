@@ -927,7 +927,15 @@ export default function QuoteProcess(props) {
     };
 
     const handleViewPdf = (view = false, download = false) => {
-        setViewDownloadLoading(true)
+      setViewDownloadLoading(true)
+      let body = {
+        acceptedColumns: visibleColumns,
+        status: versionStatus,
+        TNC: state.selectedRecords
+      };
+    axiosInstance()
+      .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+      .then(() => {
         axiosInstance()
             .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
             .then(({ data }) => {
@@ -979,6 +987,12 @@ export default function QuoteProcess(props) {
                 toastConfig.setToastConfig(err);
                 setViewDownloadLoading(false)
             });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setViewDownloadLoading(false)
+      });
+        
     };
 
 
