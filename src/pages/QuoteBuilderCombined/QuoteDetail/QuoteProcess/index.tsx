@@ -144,7 +144,7 @@ export default function QuoteProcess(props) {
         state: { user, permissions },
     }: any = useData();
 
-    const[quoteCurrency] = useState(quoteData?.currency)
+    const [quoteCurrency] = useState(quoteData?.currency)
     const [nextStep, setNextStep] = useState(true);
     const [options, setOptions] = useState([]);
     const [redCard, setRedCard] = useState(false);
@@ -201,6 +201,7 @@ export default function QuoteProcess(props) {
     const [sendEmail, setSendEmail] = useState(false);
     const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
+    const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
     const [messageDialog, setMessageDialog] = useState({
         open: false,
         message: null,
@@ -411,7 +412,7 @@ export default function QuoteProcess(props) {
             "string",
             "srno",
         ];
-    
+
         setProductsData(BuilderData)
 
         let totalCost = 0;
@@ -746,7 +747,7 @@ export default function QuoteProcess(props) {
                 newTable.push(obj);
             });
 
-            
+
             const newData = []
             for (let data of productsData) {
                 let obj = {}
@@ -765,7 +766,7 @@ export default function QuoteProcess(props) {
             }
 
             const res = newData.reduce((result, item) => {
-               const keys = Object.keys(item);
+                const keys = Object.keys(item);
                 keys.forEach(key => {
                     if (!key.includes(capitalize(quoteCurrency))) { return; }
                     result[key] = result[key] ?
@@ -773,10 +774,10 @@ export default function QuoteProcess(props) {
                         : item[key];
                 });
                 return result;
-            }, {["Product Name"]: "Total" });
+            }, { ["Product Name"]: "Total" });
 
             newData.push(res);
-            
+
             const ws = XLSX.utils.json_to_sheet(newData);
             const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
             const excelBuffer = XLSX.write(wb, {
@@ -908,15 +909,58 @@ export default function QuoteProcess(props) {
     };
 
     const handleViewPdf = (view = false, download = false) => {
-
-        handleVersionUpdate(
-            visibleColumns,
-            versionStatus,
-            state?.selectedRecords,
-            view,
-            download
-        );
-
+        setViewDownloadLoading(true)
+        axiosInstance()
+            .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+            .then(({ data }) => {
+                if (view && data.data.fileName) {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const file = new Blob([data], { type: "application/pdf" });
+                            const fileURL = URL.createObjectURL(file);
+                            const pdfWindow = window.open();
+                            pdfWindow.location.href = fileURL;
+                            setViewDownloadLoading(false)
+                        })
+                        .catch((err) => {
+                            setViewDownloadLoading(false)
+                            toastConfig.setToastConfig(err);
+                        });
+                } else if (download && data.data.fileName) {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const url = window.URL.createObjectURL(
+                                new Blob([data], { type: "application/pdf" })
+                            );
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute(
+                                "download",
+                                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+                            );
+                            document.body.appendChild(link);
+                            link.click();
+                            setViewDownloadLoading(false)
+                        })
+                        .catch((err) => {
+                            toastConfig.setToastConfig(err);
+                            setViewDownloadLoading(false)
+                        });
+                }
+                else{
+                setViewDownloadLoading(false)
+                }
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setViewDownloadLoading(false)
+            });
     };
 
 
@@ -1340,11 +1384,11 @@ export default function QuoteProcess(props) {
                                                 value={visibleColumns}
                                                 onChange={(e, val) => {
                                                     setVisibleColumns(val);
-                                                    // handleVersionUpdate(
-                                                    //     val,
-                                                    //     versionStatus,
-                                                    //     state?.selectedRecords
-                                                    // );
+                                                    handleVersionUpdate(
+                                                        val,
+                                                        versionStatus,
+                                                        state?.selectedRecords
+                                                    );
                                                 }}
                                                 options={ColumnName}
                                                 disableCloseOnSelect
@@ -1416,7 +1460,7 @@ export default function QuoteProcess(props) {
                                         handleViewPdf(true, false);
                                     }}
                                     variant="outlined"
-                                    disabled={updatingVersion}
+                                    disabled={viewDownloadLoading}
                                     size="small"
                                     className="mr-1"
                                     startIcon={<AiOutlineEye />}
@@ -1425,7 +1469,7 @@ export default function QuoteProcess(props) {
                                     View
                                 </Button>
                                 <Button
-                                    disabled={updatingVersion}
+                                    disabled={viewDownloadLoading}
                                     onClick={() => {
                                         handleViewPdf(false, true);
                                         exportToCSV();
@@ -1461,34 +1505,34 @@ export default function QuoteProcess(props) {
                                 //         columnsData={visibleColumns}
                                 //         currency={quoteData?.currency}
                                 //     />
-                                 
-                                    <ProductBuilder
-                                        fromQuote={true}
-                                        permissions={permissions[qbResource]}
-                                        hasPermission={allowedToEdit}
-                                        currency={quoteData?.currency.toLowerCase()}
-                                        productBuilderId={productBuilderId}
-                                        isAddNewProduct={isAddNewProduct}
-                                        setIsAddNewProduct={setIsAddNewProduct}
-                                        isAddExistingProduct={isAddExistingProduct}
-                                        setIsAddExistingProduct={
-                                            setIsAddExistingProduct
-                                        }
-                                        refreshProducts={refreshProducts}
-                                        stage={
-                                            ProcessStatus === "New" ? "product" : "cost"
-                                        }
-                                        isPriceBuilder={
-                                            ProcessStatus === "Price Builder"
-                                        }
-                                        Editable={
-                                            allowedToEdit && (ProcessStatus === "Price Builder" ||
-                                                ProcessStatus === "New")
-                                                ? true
-                                                : false
-                                        }
-                                    />
-                                
+
+                                <ProductBuilder
+                                    fromQuote={true}
+                                    permissions={permissions[qbResource]}
+                                    hasPermission={allowedToEdit}
+                                    currency={quoteData?.currency.toLowerCase()}
+                                    productBuilderId={productBuilderId}
+                                    isAddNewProduct={isAddNewProduct}
+                                    setIsAddNewProduct={setIsAddNewProduct}
+                                    isAddExistingProduct={isAddExistingProduct}
+                                    setIsAddExistingProduct={
+                                        setIsAddExistingProduct
+                                    }
+                                    refreshProducts={refreshProducts}
+                                    stage={
+                                        ProcessStatus === "New" ? "product" : "cost"
+                                    }
+                                    isPriceBuilder={
+                                        ProcessStatus === "Price Builder"
+                                    }
+                                    Editable={
+                                        allowedToEdit && (ProcessStatus === "Price Builder" ||
+                                            ProcessStatus === "New")
+                                            ? true
+                                            : false
+                                    }
+                                />
+
                             ) : (
                                 <Loader
                                     style={{ minHeight: 300 }}
