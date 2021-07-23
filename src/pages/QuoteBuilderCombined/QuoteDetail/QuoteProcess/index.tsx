@@ -134,10 +134,7 @@ export default function QuoteProcess(props) {
         handleOpenUpdateDialog,
         fetchTNC,
         handleVersionUpdate,
-        updatingVersion,
-        setUpdatingVersion,
-        pdfFileName,
-        setColumnView
+        updatingVersion
     } = props
 
     const classes = useStyles();
@@ -1343,11 +1340,11 @@ export default function QuoteProcess(props) {
                                                 value={visibleColumns}
                                                 onChange={(e, val) => {
                                                     setVisibleColumns(val);
-                                                    handleVersionUpdate(
-                                                        val,
-                                                        versionStatus,
-                                                        state?.selectedRecords
-                                                    );
+                                                    // handleVersionUpdate(
+                                                    //     val,
+                                                    //     versionStatus,
+                                                    //     state?.selectedRecords
+                                                    // );
                                                 }}
                                                 options={ColumnName}
                                                 disableCloseOnSelect
