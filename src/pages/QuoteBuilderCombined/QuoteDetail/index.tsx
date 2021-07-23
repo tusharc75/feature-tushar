@@ -1,7 +1,7 @@
 import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -23,6 +23,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
+import { HiPencil } from 'react-icons/hi';
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -78,7 +79,8 @@ export default function QuoteDetail() {
   const [versionStatus, setVersionStatus] = useState("Building Quote");
   const [processStatus, setProcessStatus] = useState("New");
   const [updatingVersion, setUpdatingVersion] = useState(false);
-   const [pdfFileName, setPdfFileName] = useState("");
+  const [pdfFileName, setPdfFileName] = useState("");
+  const [quoteReOpening, setQuoteReOpening] = useState(false);
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
@@ -105,7 +107,7 @@ export default function QuoteDetail() {
   }, [id]);
 
   useEffect(() => {
-    if(quoteData && quoteData.versions[currentVersion].acceptedColumns){
+    if (quoteData && quoteData.versions[currentVersion].acceptedColumns) {
       setColumnView(quoteData.versions[currentVersion].acceptedColumns)
     }
   }, [currentVersion])
@@ -262,7 +264,7 @@ export default function QuoteDetail() {
 
   const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loading: true });
-    const {selectedRecords} = state
+    const { selectedRecords } = state
 
     // if (gridApi) {
     //   // gridApi.setRowData([]);
@@ -282,7 +284,7 @@ export default function QuoteDetail() {
             name: tnc.TACName,
           };
         });
-        
+
         dispatch({ type: "selection", selectedRecords: selectedRows });
         dispatch({
           type: "initialize",
@@ -292,12 +294,12 @@ export default function QuoteDetail() {
 
 
         if (updateVersionStatus) {
-            handleVersionUpdate(
-              columnView,
-              versionStatus,
-              selectedRows
-            )
-          }
+          handleVersionUpdate(
+            columnView,
+            versionStatus,
+            selectedRows
+          )
+        }
 
 
         setTimeout(() => {
@@ -310,32 +312,49 @@ export default function QuoteDetail() {
       });
   };
 
+  const handleReOpenQuote = () => {
+    const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
+    setQuoteReOpening(true);
+    axiosInstance()
+        .post(
+            `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+            { TNC: previousVersionTNC }
+        )
+        .then(() => {
+            fetchQuoteData(0);
+            setQuoteReOpening(false);
+        })
+        .catch((error) => {
+            toastConfig.setToastConfig(error);
+            setQuoteReOpening(false);
+        });
+};
 
   const handleVersionUpdate = (
-        Columns,
-        versionStatus,
-        selectedTermsAndConditions,
-        view = false,
-        download = false
-    ) => {
-        let body = {
-            acceptedColumns: Columns,
-            status: versionStatus,
-            TNC: selectedTermsAndConditions
-        };
-
-        setUpdatingVersion(true);
-        axiosInstance()
-            .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-            .then(({ data: { data } }) => {
-                setUpdatingVersion(false);
-                setPdfFileName(data.fileName)
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setUpdatingVersion(false);
-            });
+    Columns,
+    versionStatus,
+    selectedTermsAndConditions,
+    view = false,
+    download = false
+  ) => {
+    let body = {
+      acceptedColumns: Columns,
+      status: versionStatus,
+      TNC: selectedTermsAndConditions
     };
+
+    setUpdatingVersion(true);
+    axiosInstance()
+      .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+      .then(({ data: { data } }) => {
+        setUpdatingVersion(false);
+        setPdfFileName(data.fileName)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setUpdatingVersion(false);
+      });
+  };
 
 
 
@@ -372,6 +391,18 @@ export default function QuoteDetail() {
                   mainPoints={quoteData ? getMainPoints : ""}
                   showHeading={true}
                 >
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      startIcon={<HiPencil />}
+                      disabled={quoteReOpening}
+                      onClick={handleReOpenQuote}
+                    >
+                      Re-Open
+                    </Button>
+                  )}
 
                   {permissions[qbResource].isDelete &&
                     quoteData?.owner.optionValue &&
@@ -382,6 +413,7 @@ export default function QuoteDetail() {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
+
                 </DetailsPageHeader>
               )}
 
@@ -484,24 +516,24 @@ export default function QuoteDetail() {
                     <Suspense fallback={
                       <Loader minHeight="500px" text="Loading..." />
                     }>
-                        {(quoteData && <QuoteProcess
-                          updatingVersion={updatingVersion}
-                          handleVersionUpdate={handleVersionUpdate}
-                          state={state}
-                          dispatch={dispatch}
-                          quoteData={quoteData}
-                          ProcessStatus={processStatus}
-                          ifQuoteApproved={ifQuoteApproved}
-                          allowedToEdit={allowedToEdit}
-                          handleOpenUpdateDialog={handleOpenUpdateDialog}
-                          handleChangeVersion={handleChangeVersion}
-                          currentVersion={currentVersion}
-                          productBuilderId={productBuilderId}
-                          versionStatus={versionStatus}
-                          fetchQuoteData={fetchQuoteData}
-                          columnView={columnView}
-                          fetchTNC={fetchTermsAndConditions}
-                        />)}
+                      {(quoteData && <QuoteProcess
+                        updatingVersion={updatingVersion}
+                        handleVersionUpdate={handleVersionUpdate}
+                        state={state}
+                        dispatch={dispatch}
+                        quoteData={quoteData}
+                        ProcessStatus={processStatus}
+                        ifQuoteApproved={ifQuoteApproved}
+                        allowedToEdit={allowedToEdit}
+                        handleOpenUpdateDialog={handleOpenUpdateDialog}
+                        handleChangeVersion={handleChangeVersion}
+                        currentVersion={currentVersion}
+                        productBuilderId={productBuilderId}
+                        versionStatus={versionStatus}
+                        fetchQuoteData={fetchQuoteData}
+                        columnView={columnView}
+                        fetchTNC={fetchTermsAndConditions}
+                      />)}
                     </Suspense>
                   </TabPanel>
                 </>

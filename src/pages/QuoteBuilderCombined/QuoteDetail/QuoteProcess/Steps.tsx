@@ -463,6 +463,7 @@ const Steps = (props) => {
                         variant="contained"
                         color="primary"
                         disabled={
+                          currentStep === 0 ||
                           !allowedToEdit ||
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
