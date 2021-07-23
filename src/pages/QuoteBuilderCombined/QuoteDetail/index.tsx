@@ -23,7 +23,6 @@ import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
-import { isEqual } from 'lodash';
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
