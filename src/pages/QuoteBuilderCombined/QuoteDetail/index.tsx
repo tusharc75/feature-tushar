@@ -23,6 +23,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
+import { isEqual } from 'lodash';
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -270,9 +271,10 @@ export default function QuoteDetail() {
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
-        const selectedRows = selectedRecords && selectedRecords.length ? data.filter(d => state.selectedRecords.filter(_d => _d._id === d._id).length > 0) : []
-        
-        console.log(data)
+        const selectedRows = selectedRecords && selectedRecords.length
+          ? data.filter(d => state.selectedRecords.filter(_d => _d._id === d._id).length > 0)
+          : []
+
 
         let rows = data.map((tnc) => {
           return {
@@ -282,8 +284,7 @@ export default function QuoteDetail() {
           };
         });
         
-        console.log(rows)
-
+        dispatch({ type: "selection", selectedRecords: selectedRows });
         dispatch({
           type: "initialize",
           data: rows,
@@ -528,9 +529,7 @@ export default function QuoteDetail() {
                       <Loader minHeight="500px" text="Loading..." />
                     }>
                         {(quoteData && <QuoteProcess
-                          pdfFileName={pdfFileName}
                           updatingVersion={updatingVersion}
-                          setUpdatingVersion={setUpdatingVersion}
                           handleVersionUpdate={handleVersionUpdate}
                           state={state}
                           dispatch={dispatch}
@@ -545,7 +544,6 @@ export default function QuoteDetail() {
                           versionStatus={versionStatus}
                           fetchQuoteData={fetchQuoteData}
                           columnView={columnView}
-                          setColumnView={setColumnView}
                           fetchTNC={fetchTermsAndConditions}
                         />)}
                     </Suspense>

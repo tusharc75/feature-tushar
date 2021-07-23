@@ -131,10 +131,7 @@ export default function QuoteProcess(props) {
         handleOpenUpdateDialog,
         fetchTNC,
         handleVersionUpdate,
-        updatingVersion,
-        setUpdatingVersion,
-        pdfFileName,
-        setColumnView
+        updatingVersion
     } = props
 
     const classes = useStyles();
@@ -708,82 +705,7 @@ export default function QuoteProcess(props) {
         }
     };
 
-
-
-
-    // const handleVersionUpdate = (
-    //     Columns,
-    //     versionStatus,
-    //     selectedTermsAndConditions,
-    //     view = false,
-    //     download = false
-    // ) => {
-    //     let body = {
-    //         acceptedColumns: Columns,
-    //         status: versionStatus,
-    //         TNC: selectedTermsAndConditions
-    //     };
-
-    //     setUpdatingVersion(true);
-    //     axiosInstance()
-    //         .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-    //         .then(({ data: { data } }) => {
-    //             setUpdatingVersion(false);
-
-    //             setPdfFileName(data.fileName)
-    //             if (view && data.fileName) {
-    //                 setUpdatingVersion(true);
-    //                 axiosInstance()
-    //                     .get(`user/download?fileName=${data.fileName}`, {
-    //                         responseType: "blob",
-    //                     })
-    //                     .then(({ data }) => {
-    //                         setUpdatingVersion(false);
-    //                         const file = new Blob([data], { type: "application/pdf" });
-    //                         const fileURL = URL.createObjectURL(file);
-    //                         const pdfWindow = window.open();
-    //                         pdfWindow.location.href = fileURL;
-    //                     })
-    //                     .catch((err) => {
-    //                         setUpdatingVersion(false);
-    //                         toastConfig.setToastConfig(err);
-    //                     });
-    //             } else if (download && data.fileName) {
-    //                 setUpdatingVersion(true);
-    //                 axiosInstance()
-    //                     .get(`user/download?fileName=${data.fileName}`, {
-    //                         responseType: "blob",
-    //                     })
-    //                     .then(({ data }) => {
-    //                         setUpdatingVersion(false);
-    //                         const url = window.URL.createObjectURL(
-    //                             new Blob([data], { type: "application/pdf" })
-    //                         );
-    //                         const link = document.createElement("a");
-    //                         link.href = url;
-    //                         link.setAttribute(
-    //                             "download",
-    //                             `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-    //                         );
-    //                         document.body.appendChild(link);
-    //                         link.click();
-    //                     })
-    //                     .catch((err) => {
-    //                         setUpdatingVersion(false);
-    //                         toastConfig.setToastConfig(err);
-    //                     });
-    //             }
-    //         })
-    //         .catch((err) => {
-    //             toastConfig.setToastConfig(err);
-    //             setUpdatingVersion(false);
-    //         });
-    // };
-
-
-
     const handleViewPdf = (view = false, download = false) => {
-        
             handleVersionUpdate(
                 visibleColumns,
                 versionStatus,
@@ -791,7 +713,6 @@ export default function QuoteProcess(props) {
                 view,
                 download
             );
-
     };
 
 
@@ -1188,11 +1109,11 @@ export default function QuoteProcess(props) {
                                                 value={visibleColumns}
                                                 onChange={(e, val) => {
                                                     setVisibleColumns(val);
-                                                    handleVersionUpdate(
-                                                        val,
-                                                        versionStatus,
-                                                        state?.selectedRecords
-                                                    );
+                                                    // handleVersionUpdate(
+                                                    //     val,
+                                                    //     versionStatus,
+                                                    //     state?.selectedRecords
+                                                    // );
                                                 }}
                                                 options={ColumnName}
                                                 disableCloseOnSelect
