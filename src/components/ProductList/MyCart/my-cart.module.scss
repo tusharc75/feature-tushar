@@ -135,7 +135,7 @@
     grid-template-columns: 2fr 1fr;
     margin: 0px 10rem;
   }
-  @supports not (-webkit-gap: 0.25rem) {
+  @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
     .wrapper > *:not(:nth-child(1)) {
         margin-left: 0.25rem !important;
     }

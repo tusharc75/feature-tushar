@@ -143,6 +143,7 @@ const ProjectSales: FC = () => {
     sorting,
     selectedRecords,
   } = state;
+  const columnState = JSON.parse(localStorage.getItem("projectSalesPage"));
 
   const [columns] = useState([
     {
@@ -172,6 +173,15 @@ const ProjectSales: FC = () => {
       cellRenderer: "updatedByRenderer",
     },
   ]);
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   //  Grid Variables - End
 
   useEffect(() => {
@@ -450,6 +460,7 @@ const ProjectSales: FC = () => {
             page={page}
             actionWidth={150}
             loading={loading}
+            renderedFrom="projectSalesPage"
           />
         </div>
 

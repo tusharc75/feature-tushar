@@ -28,7 +28,7 @@
     -webkit-gap: 0.5rem;
     flex-direction: column;
   }
-  @supports not (-webkit-gap: 0.5rem) {
+  @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
     .customHeader > *:not(:nth-child(1)) {
       margin-left: 0.5rem !important;
     }

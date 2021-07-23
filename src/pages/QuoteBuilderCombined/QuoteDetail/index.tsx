@@ -24,6 +24,7 @@ import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 import { HiPencil } from 'react-icons/hi';
+import { isMobile, isTablet } from "react-device-detect";
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -56,6 +57,8 @@ function a11yProps(index: any) {
   };
 }
 
+
+
 export default function QuoteDetail() {
 
   const history = useHistory();
@@ -82,6 +85,7 @@ export default function QuoteDetail() {
   const [pdfFileName, setPdfFileName] = useState("");
   const [quoteReOpening, setQuoteReOpening] = useState(false);
 
+  const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
@@ -91,7 +95,9 @@ export default function QuoteDetail() {
   };
 
   const { id } = useParams();
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   useEffect(() => {
     if (id) {
       if (location.state !== undefined) {
@@ -364,8 +370,8 @@ export default function QuoteDetail() {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={8}>
+        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+          <div>
             <Paper>
               {!quoteData ? (
                 <div>
@@ -539,9 +545,12 @@ export default function QuoteDetail() {
                 </>
               )}
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={12} lg={4}>
+          </div>
+          <div>   {showActivity ?
             <Paper>
+              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                Hide Activities
+              </a>}
               {!quoteData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -583,9 +592,12 @@ export default function QuoteDetail() {
                   />
                 </div>
               )}
-            </Paper>
-          </Grid>
-        </Grid>
+            </Paper> :
+            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              Show Activities
+            </a>}
+          </div>
+        </div>
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}

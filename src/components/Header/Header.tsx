@@ -148,15 +148,17 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: `calc(100vh - 200px)`,
   },
   markAll: {
-    borderTop: "1px solid lightgrey",
-    background: "#047d1c",
     textAlign: "center",
-    color: "white",
+    color: "#a59e9e",
     padding: "5px",
     display: "flex !important",
     alignItems: "center !important",
-    justifyContent: "center",
-  },
+    justifyContent: "flex-end",
+    paddingRight: "10px",
+    "&:hover": {
+     textDecoration: "underline"
+    }
+  }
 }));
 
 const Header = ({ toggleDrawer }) => {
@@ -501,6 +503,40 @@ const Header = ({ toggleDrawer }) => {
           }`}
         style={{ position: "relative" }}
       >
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`}
+          style={{ position: "sticky", top: 0 }}>
+          <Typography
+            onClick={() => {
+              axiosInstance()
+                .put("/user/notification/all-read", { toggle: true })
+                .then(({ data }) => {
+                  let updatedNotificationList = [];
+                  notificationList.map((notification) => {
+                    notification.read = true;
+                    updatedNotificationList.push(notification);
+                  });
+
+                  setNotificationList(updatedNotificationList);
+                  toastConfig.setToastConfig({
+                    open: true,
+                    message: data.message,
+                    type: "success",
+                  });
+
+                  setFullScreenNotificationAnchorEl(null);
+                  setMobileScreenNotificationAnchorEl(null);
+                })
+                .catch((error) => {
+                  toastConfig.setToastConfig(error);
+                });
+            }}
+            className="cursor-pointer"
+          >
+            <FiCheckCircle className="mr-2 pt-1" size={16} />
+            <span>Mark all as read</span>
+          </Typography>
+        </div>
+
         {data.map((d, index) => {
           return (
             <div
@@ -560,39 +596,7 @@ const Header = ({ toggleDrawer }) => {
           );
         })}
 
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`}
-          style={{ position: "sticky", bottom: 0 }}>
-          <Typography
-            onClick={() => {
-              axiosInstance()
-                .put("/user/notification/all-read", { toggle: true })
-                .then(({ data }) => {
-                  let updatedNotificationList = [];
-                  notificationList.map((notification) => {
-                    notification.read = true;
-                    updatedNotificationList.push(notification);
-                  });
 
-                  setNotificationList(updatedNotificationList);
-                  toastConfig.setToastConfig({
-                    open: true,
-                    message: data.message,
-                    type: "success",
-                  });
-
-                  setFullScreenNotificationAnchorEl(null);
-                  setMobileScreenNotificationAnchorEl(null);
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-            }}
-            className="cursor-pointer"
-          >
-            <FiCheckCircle className="mr-2 pt-1" size={16} />
-            <span>Mark all as read</span>
-          </Typography>
-        </div>
 
         {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
@@ -670,7 +674,7 @@ const Header = ({ toggleDrawer }) => {
         })}
 
         <div className={`${classes.markAll} d-flex align-items-center gap-1`}
-          style={{ position: "sticky", bottom: 0 }}>
+          style={{ position: "sticky", top: 0 }}>
           <Typography
             onClick={() => {
               axiosInstance()
