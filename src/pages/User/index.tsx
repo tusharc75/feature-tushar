@@ -64,7 +64,7 @@ const User: FC = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const columnState = JSON.parse(localStorage.getItem("userPage"));
   const columns = [
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
@@ -82,6 +82,15 @@ const User: FC = () => {
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   const NameRenderer = params => (<div className="d-flex align-items-center">
     <Link
@@ -581,6 +590,7 @@ const User: FC = () => {
             page={page}
             actionWidth={110}
             loading={loading}
+            renderedFrom="userPage"
           />
 
         </CustomContainer>

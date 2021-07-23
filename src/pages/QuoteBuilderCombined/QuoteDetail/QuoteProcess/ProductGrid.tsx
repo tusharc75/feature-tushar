@@ -2,15 +2,15 @@ import { useState, useEffect, useContext, useReducer } from "react";
 import Box from "@material-ui/core/Box";
 import { orderBy, sortBy } from "lodash";
 
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomAgGrid, {
   reducer,
   intialState,
-} from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import Loader from "../../components/Loader";
-import { gridLoadingTimeout } from "../../constants/helpers";
+} from "../../../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer } from "../../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import Loader from "../../../../components/Loader";
+import { gridLoadingTimeout } from "../../../../constants/helpers";
 
 var levalOrderBy = [
   "product",

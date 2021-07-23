@@ -50,12 +50,12 @@ export default function ManageAccount(props) {
   ] = useState([]);
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+  const [tempcollaboratorDataSource, setTempCollaboratorDataSource] = useState([]);
   const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState("")
 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
-
 
   useEffect(() => {
 
@@ -114,13 +114,38 @@ export default function ManageAccount(props) {
     );
   };
 
-  const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
+  const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId, selectedEntity) => {
     setCollaboratorDataSource(
       getCollaboratorDropdownDataSource(
         selectedOwnerId,
         ownerCollaboratorCommonDataSource
       )
     );
+  
+
+    if(selectedEntity && collaboratorDataSource){
+     
+      let newTempArray = []
+     
+      selectedEntity.map(d=>{
+        getCollaboratorDropdownDataSource(
+          selectedOwnerId,
+          ownerCollaboratorCommonDataSource
+        ).map(item=>{
+          if(item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId){
+            newTempArray.push(item)
+          }
+        })
+        setCollaboratorDataSource(newTempArray)
+        // setCollaboratorDataSource(
+        //   getCollaboratorDropdownDataSource(
+        //   selectedOwnerId,
+        //   ownerCollaboratorCommonDataSource
+        // ).filter(item => item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId)) 
+        
+        
+      })
+    }
   };
   //  Owner, Collaborator Code - End
 
@@ -171,6 +196,7 @@ export default function ManageAccount(props) {
 
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
+                     
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
@@ -271,11 +297,43 @@ export default function ManageAccount(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
-                                            values.owner
+                                            values.owner, values.entity ? values.entity : "" 
                                           )
                                         }
                                       />
-                                    ) : field.fieldName ===
+                                    ) 
+                                    // : field.fieldName === "entity" ? (
+                                    //   <FormTypes
+                                    //     multiple
+                                    //     values={values}
+                                    //     errors={errors}
+                                    //     touched={touched}
+                                    //     label={field.fieldLabel}
+                                    //     name={field.fieldName}
+                                    //     type={field.type}
+                                        
+                                    //     setFieldValue={setFieldValue}
+                                    //     options={field.option}
+                                    //     fullWidth
+                                    //     isTooltip={field?.isTooltip || false}
+                                    //     tooltipMessage={field?.tooltipMessage}
+                                    //     size="small"
+                                    //     // onChange={(e, value) => {
+                                    //     //   setFieldValue(
+                                    //     //     field.fieldName,
+                                    //     //     value && value.optionValue
+                                    //     //       ? value.optionValue
+                                    //     //       : ""
+                                    //     //   );
+                                    //     //   setFieldValue(
+                                    //     //     "collaborator",
+                                    //     //     []
+                                    //     //   );
+                                          
+                                    //     // }}
+                                    //   />
+                                    // )
+                                    : field.fieldName ===
                                       "isShippingAddressSameAsBillingAddress" ? (
                                       <FormTypes
                                         values={values}
@@ -446,6 +504,18 @@ export default function ManageAccount(props) {
                       }
                       onClick={(e) => {
                         e.preventDefault();
+                        const err = Object.keys(errors);
+                        if (err.length) {
+                          const input = document.querySelector(
+                            `input[name=${err[0]}]`,
+                          );
+
+                          input.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'start',
+                          });
+                        }
                         submitForm();
                       }}
                     >

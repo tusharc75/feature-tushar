@@ -66,7 +66,7 @@ import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from "./pages/Quote-Approval";
-import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail";
+import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail/index";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 import Dashboard from "./pages/Dashboard";
@@ -100,6 +100,19 @@ function App() {
     dispatch,
   }: any = useData();
   const history = useHistory();
+  history.listen((location, action) => {
+    let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
+    if (isSlowInternetConnection == "true") {
+      toast.setToastConfig({
+        open: true, type: "warning", message: "Slow or no internet connection.",
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'right',
+        }
+      });
+      localStorage.setItem("slowInternetConnection", "false")
+    }
+  });
   ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
@@ -289,7 +302,7 @@ function App() {
           {/* <PrivateRoute exact path="/">
             <CreateBrand />
           </PrivateRoute> */}
-            {/* <PrivateRoute exact path="/contact/new">
+          {/* <PrivateRoute exact path="/contact/new">
               <CreateContact />
           </PrivateRoute>
           <PrivateRoute exact path="/contact/:id">
@@ -493,7 +506,7 @@ function App() {
           <PrivateRoute exact path={routes.DOARequest.path}>
             <DOARequest />
           </PrivateRoute>
-          <PrivateRoute exact path={`${routes.DOARequest.path}}/:id`}>
+          <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
             <DOAapproval />
           </PrivateRoute>
           <PrivateRoute exact path={routes.quoteBuilder.path}>
@@ -523,6 +536,7 @@ function App() {
         <CustomToaster
           type={toast.toastConfig.type}
           message={toast.toastConfig.message}
+          anchorOrigin={toast.toastConfig?.anchorOrigin || null}
           open={toast.toastConfig.open}
           close={() => {
             toast.setToastConfig({ open: false });
