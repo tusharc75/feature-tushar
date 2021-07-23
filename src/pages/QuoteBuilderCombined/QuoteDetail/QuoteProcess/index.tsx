@@ -768,12 +768,22 @@ export default function QuoteProcess(props) {
                const keys = Object.keys(item);
                 keys.forEach(key => {
                     if (!key.includes(capitalize(quoteCurrency))) { return; }
-                    result[key] = result[key] ?
-                        formatAmountWithCurrency(quoteCurrency, result[key] + item[key]).fullFormatAmount
+                    result[key] = result[key]
+                        ? result[key] + item[key]
                         : item[key];
                 });
                 return result;
-            }, {["Product Name"]: "Total" });
+            }, { ["Product Name"]: "Total" });
+
+            Object.keys(res).forEach(k => {
+                if (k.includes(capitalize(quoteCurrency))) {
+                    res[k] = res[k] && res[k].toString().split(".")[1] !== undefined
+                        && res[k].toString().split(".")[1].length > 4
+                        ? parseFloat(res[k]).toFixed(4)
+                        : res[k]
+                    }
+            })
+
 
             newData.push(res);
             
