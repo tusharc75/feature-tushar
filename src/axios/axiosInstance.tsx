@@ -32,6 +32,17 @@ export default (history = null, passedHeaders = null) => {
     }
 
     axiosInstance.interceptors.request.use((request) => {
+        if (navigator) {
+            let bandwidth = navigator["connection"].downlink
+            if (bandwidth * 1000 <= 400) {
+                if (localStorage.getItem("slowInternetConnection") !== "true") {
+                    localStorage.setItem("slowInternetConnection", "true")
+                }
+            }
+            else if (localStorage.getItem("slowInternetConnection") === "true") {
+                localStorage.setItem("slowInternetConnection", "false")
+            }
+        }
         return request;
     }, error => {
         return Promise.reject(error);
@@ -41,7 +52,7 @@ export default (history = null, passedHeaders = null) => {
         new Promise((resolve, reject) => {
             resolve(response);
         }), (error) => {
-            if(error.request.responseType === 'blob' &&  error.response.data.type.toLowerCase().indexOf('json') != -1){
+            if (error.request.responseType === 'blob' && error.response.data.type.toLowerCase().indexOf('json') != -1) {
                 return new Promise(async (resolve, reject) => {
                     const bufferArray = await error.response.data.text()
                     const err = JSON.parse(bufferArray);

@@ -100,6 +100,19 @@ function App() {
     dispatch,
   }: any = useData();
   const history = useHistory();
+  history.listen((location, action) => {
+    let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
+    if (isSlowInternetConnection == "true") {
+      toast.setToastConfig({
+        open: true, type: "warning", message: "Slow or no internet connection.",
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'right',
+        }
+      });
+      localStorage.setItem("slowInternetConnection", "false")
+    }
+  });
   ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
@@ -289,7 +302,7 @@ function App() {
           {/* <PrivateRoute exact path="/">
             <CreateBrand />
           </PrivateRoute> */}
-            {/* <PrivateRoute exact path="/contact/new">
+          {/* <PrivateRoute exact path="/contact/new">
               <CreateContact />
           </PrivateRoute>
           <PrivateRoute exact path="/contact/:id">
