@@ -1,7 +1,7 @@
 import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -23,6 +23,8 @@ import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
+import { HiPencil } from 'react-icons/hi';
+import { isMobile, isTablet } from "react-device-detect";
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -55,6 +57,8 @@ function a11yProps(index: any) {
   };
 }
 
+
+
 export default function QuoteDetail() {
 
   const history = useHistory();
@@ -78,8 +82,10 @@ export default function QuoteDetail() {
   const [versionStatus, setVersionStatus] = useState("Building Quote");
   const [processStatus, setProcessStatus] = useState("New");
   const [updatingVersion, setUpdatingVersion] = useState(false);
-   const [pdfFileName, setPdfFileName] = useState("");
+  const [pdfFileName, setPdfFileName] = useState("");
+  const [quoteReOpening, setQuoteReOpening] = useState(false);
 
+  const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
@@ -89,7 +95,9 @@ export default function QuoteDetail() {
   };
 
   const { id } = useParams();
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   useEffect(() => {
     if (id) {
       if (location.state !== undefined) {
@@ -105,7 +113,7 @@ export default function QuoteDetail() {
   }, [id]);
 
   useEffect(() => {
-    if(quoteData && quoteData.versions[currentVersion].acceptedColumns){
+    if (quoteData && quoteData.versions[currentVersion].acceptedColumns) {
       setColumnView(quoteData.versions[currentVersion].acceptedColumns)
     }
   }, [currentVersion])
@@ -262,7 +270,7 @@ export default function QuoteDetail() {
 
   const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
     dispatch({ type: "loading", loading: true });
-    const {selectedRecords} = state
+    const { selectedRecords } = state
 
     // if (gridApi) {
     //   // gridApi.setRowData([]);
@@ -270,9 +278,10 @@ export default function QuoteDetail() {
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
-        const selectedRows = selectedRecords && selectedRecords.length ? data.filter(d => state.selectedRecords.filter(_d => _d._id === d._id).length > 0) : []
-        
-        console.log(data)
+        const selectedRows = selectedRecords && selectedRecords.length
+          ? data.filter(d => state.selectedRecords.filter(_d => _d._id === d._id).length > 0)
+          : []
+
 
         let rows = data.map((tnc) => {
           return {
@@ -281,9 +290,8 @@ export default function QuoteDetail() {
             name: tnc.TACName,
           };
         });
-        
-        console.log(rows)
 
+        dispatch({ type: "selection", selectedRecords: selectedRows });
         dispatch({
           type: "initialize",
           data: rows,
@@ -292,12 +300,12 @@ export default function QuoteDetail() {
 
 
         if (updateVersionStatus) {
-            handleVersionUpdate(
-              columnView,
-              versionStatus,
-              selectedRows
-            )
-          }
+          handleVersionUpdate(
+            columnView,
+            versionStatus,
+            selectedRows
+          )
+        }
 
 
         setTimeout(() => {
@@ -310,75 +318,46 @@ export default function QuoteDetail() {
       });
   };
 
+  const handleReOpenQuote = () => {
+    const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
+    setQuoteReOpening(true);
+    axiosInstance()
+        .post(
+            `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+            { TNC: previousVersionTNC }
+        )
+        .then(() => {
+            fetchQuoteData(0);
+            setQuoteReOpening(false);
+        })
+        .catch((error) => {
+            toastConfig.setToastConfig(error);
+            setQuoteReOpening(false);
+        });
+};
 
   const handleVersionUpdate = (
-        Columns,
-        versionStatus,
-        selectedTermsAndConditions,
-        view = false,
-        download = false
-    ) => {
-        let body = {
-            acceptedColumns: Columns,
-            status: versionStatus,
-            TNC: selectedTermsAndConditions
-        };
-
-        setUpdatingVersion(true);
-        axiosInstance()
-            .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-            .then(({ data: { data } }) => {
-                setUpdatingVersion(false);
-
-                setPdfFileName(data.fileName)
-                if (view && data.fileName) {
-                    setUpdatingVersion(true);
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            setUpdatingVersion(false);
-                            const file = new Blob([data], { type: "application/pdf" });
-                            const fileURL = URL.createObjectURL(file);
-                            const pdfWindow = window.open();
-                            pdfWindow.location.href = fileURL;
-                        })
-                        .catch((err) => {
-                            setUpdatingVersion(false);
-                            toastConfig.setToastConfig(err);
-                        });
-                } else if (download && data.fileName) {
-                    setUpdatingVersion(true);
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            setUpdatingVersion(false);
-                            const url = window.URL.createObjectURL(
-                                new Blob([data], { type: "application/pdf" })
-                            );
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.setAttribute(
-                                "download",
-                                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-                            );
-                            document.body.appendChild(link);
-                            link.click();
-                        })
-                        .catch((err) => {
-                            setUpdatingVersion(false);
-                            toastConfig.setToastConfig(err);
-                        });
-                }
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setUpdatingVersion(false);
-            });
+    Columns,
+    versionStatus,
+    selectedTermsAndConditions,
+  ) => {
+    let body = {
+      acceptedColumns: Columns,
+      status: versionStatus,
+      TNC: selectedTermsAndConditions
     };
+
+    setUpdatingVersion(true);
+    axiosInstance()
+      .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+      .then(() => {
+        setUpdatingVersion(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setUpdatingVersion(false);
+      });
+  };
 
 
 
@@ -388,8 +367,8 @@ export default function QuoteDetail() {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={8}>
+        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+          <div>
             <Paper>
               {!quoteData ? (
                 <div>
@@ -415,6 +394,18 @@ export default function QuoteDetail() {
                   mainPoints={quoteData ? getMainPoints : ""}
                   showHeading={true}
                 >
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      startIcon={<HiPencil />}
+                      disabled={quoteReOpening}
+                      onClick={handleReOpenQuote}
+                    >
+                      Re-Open
+                    </Button>
+                  )}
 
                   {permissions[qbResource].isDelete &&
                     quoteData?.owner.optionValue &&
@@ -425,6 +416,7 @@ export default function QuoteDetail() {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
+
                 </DetailsPageHeader>
               )}
 
@@ -527,35 +519,35 @@ export default function QuoteDetail() {
                     <Suspense fallback={
                       <Loader minHeight="500px" text="Loading..." />
                     }>
-                        {(quoteData && <QuoteProcess
-                          pdfFileName={pdfFileName}
-                          updatingVersion={updatingVersion}
-                          setUpdatingVersion={setUpdatingVersion}
-                          handleVersionUpdate={handleVersionUpdate}
-                          state={state}
-                          dispatch={dispatch}
-                          quoteData={quoteData}
-                          ProcessStatus={processStatus}
-                          ifQuoteApproved={ifQuoteApproved}
-                          allowedToEdit={allowedToEdit}
-                          handleOpenUpdateDialog={handleOpenUpdateDialog}
-                          handleChangeVersion={handleChangeVersion}
-                          currentVersion={currentVersion}
-                          productBuilderId={productBuilderId}
-                          versionStatus={versionStatus}
-                          fetchQuoteData={fetchQuoteData}
-                          columnView={columnView}
-                          setColumnView={setColumnView}
-                          fetchTNC={fetchTermsAndConditions}
-                        />)}
+                      {(quoteData && <QuoteProcess
+                        updatingVersion={updatingVersion}
+                        handleVersionUpdate={handleVersionUpdate}
+                        state={state}
+                        dispatch={dispatch}
+                        quoteData={quoteData}
+                        ProcessStatus={processStatus}
+                        ifQuoteApproved={ifQuoteApproved}
+                        allowedToEdit={allowedToEdit}
+                        handleOpenUpdateDialog={handleOpenUpdateDialog}
+                        handleChangeVersion={handleChangeVersion}
+                        currentVersion={currentVersion}
+                        productBuilderId={productBuilderId}
+                        versionStatus={versionStatus}
+                        fetchQuoteData={fetchQuoteData}
+                        columnView={columnView}
+                        fetchTNC={fetchTermsAndConditions}
+                      />)}
                     </Suspense>
                   </TabPanel>
                 </>
               )}
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={12} lg={4}>
+          </div>
+          <div>   {showActivity ?
             <Paper>
+              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                Hide Activities
+              </a>}
               {!quoteData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -597,9 +589,12 @@ export default function QuoteDetail() {
                   />
                 </div>
               )}
-            </Paper>
-          </Grid>
-        </Grid>
+            </Paper> :
+            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              Show Activities
+            </a>}
+          </div>
+        </div>
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}

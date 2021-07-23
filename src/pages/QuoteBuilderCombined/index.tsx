@@ -127,7 +127,16 @@ const QuoteBuilders = () => {
           </Typography>
         ),
       },
-
+      {
+        field: "processStatus", headerName: "Conclusion", flex: 1,
+        renderCell: (params: any) => (
+          <Typography
+            title={params.value}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
 
       {
         field: "totalCost", headerName: "Total Cost", flex: 1,
