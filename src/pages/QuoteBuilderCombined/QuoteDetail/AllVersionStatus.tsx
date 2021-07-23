@@ -56,6 +56,16 @@ export default function AllVersionStatus({ quoteId, quoteData, fetchQuoteData, h
                     <Typography title={params.value}>{params.value}</Typography>
                 ),
             },
+            {
+                field: "processStatus", headerName: "Conclusion", flex: 1,
+                renderCell: (params: any) => (
+                  <Typography
+                    title={params.value}
+                  >
+                    {params.value}
+                  </Typography>
+                ),
+              },
             { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
             {
                 field: "totalSalesPrice",

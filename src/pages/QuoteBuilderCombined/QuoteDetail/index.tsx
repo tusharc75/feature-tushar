@@ -1,7 +1,7 @@
 import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -23,6 +23,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
+import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from "react-device-detect";
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
@@ -81,6 +82,9 @@ export default function QuoteDetail() {
   const [versionStatus, setVersionStatus] = useState("Building Quote");
   const [processStatus, setProcessStatus] = useState("New");
   const [updatingVersion, setUpdatingVersion] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState("");
+  const [quoteReOpening, setQuoteReOpening] = useState(false);
+
   const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
@@ -314,6 +318,23 @@ export default function QuoteDetail() {
       });
   };
 
+  const handleReOpenQuote = () => {
+    const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
+    setQuoteReOpening(true);
+    axiosInstance()
+        .post(
+            `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+            { TNC: previousVersionTNC }
+        )
+        .then(() => {
+            fetchQuoteData(0);
+            setQuoteReOpening(false);
+        })
+        .catch((error) => {
+            toastConfig.setToastConfig(error);
+            setQuoteReOpening(false);
+        });
+};
 
   const handleVersionUpdate = (
     Columns,
@@ -373,6 +394,18 @@ export default function QuoteDetail() {
                   mainPoints={quoteData ? getMainPoints : ""}
                   showHeading={true}
                 >
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      startIcon={<HiPencil />}
+                      disabled={quoteReOpening}
+                      onClick={handleReOpenQuote}
+                    >
+                      Re-Open
+                    </Button>
+                  )}
 
                   {permissions[qbResource].isDelete &&
                     quoteData?.owner.optionValue &&
@@ -383,6 +416,7 @@ export default function QuoteDetail() {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
+
                 </DetailsPageHeader>
               )}
 
