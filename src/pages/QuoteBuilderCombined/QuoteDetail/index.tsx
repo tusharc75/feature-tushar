@@ -340,8 +340,6 @@ export default function QuoteDetail() {
     Columns,
     versionStatus,
     selectedTermsAndConditions,
-    view = false,
-    download = false
   ) => {
     let body = {
       acceptedColumns: Columns,
@@ -352,9 +350,8 @@ export default function QuoteDetail() {
     setUpdatingVersion(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(({ data: { data } }) => {
+      .then(() => {
         setUpdatingVersion(false);
-        setPdfFileName(data.fileName)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
