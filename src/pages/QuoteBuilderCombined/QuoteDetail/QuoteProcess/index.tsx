@@ -90,14 +90,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-let defaultSelectColumns = [
-    "Product Name",
-    "Description",
-    "Unit",
-    "Qty",
-    "Sales Price Per Unit",
-    "Total Sales Price",
-];
 
 const DOASteps = [
     "New",
@@ -136,7 +128,14 @@ export default function QuoteProcess(props) {
         handleVersionUpdate,
         updatingVersion
     } = props
-
+    const defaultSelectColumns = [
+        "Product Name",
+        "Description",
+        "Unit",
+        "Qty",
+        `Sales Price Per Unit`,
+        `Total Sales Price`,
+      ]
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const { qbResource, qbApi } = quoteBuilder;
@@ -445,45 +444,51 @@ export default function QuoteProcess(props) {
                     : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
         }));
 
-        if (ProcessStatus === "Price Builder") {
-            let hasPrice = false;
-            BuilderData.forEach((data) => {
-                if (
-                    data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-                    data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-                    "undefined"
-                ) {
-                    hasPrice = true;
-                } else {
-                    hasPrice = false;
-                }
-            });
-            const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-            let withZeroAmt = [];
-            if (hasPrice) {
-                withZeroAmt = BuilderData.filter(
-                    (d) =>
-                        d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-                );
-            }
+        // if (ProcessStatus === "Price Builder") {
+            // let hasPrice = false;
+            // BuilderData.forEach((data) => {
+            //     if (
+            //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+            //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+            //         "undefined"
+            //     ) {
+            //         hasPrice = true;
+            //     } else {
+            //         hasPrice = false;
+            //     }
+            // });
+            // const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+            // let withZeroAmt = [];
+            // if (hasPrice) {
+            //     withZeroAmt = BuilderData.filter(
+            //         (d) =>
+            //             d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+            //     );
+            // }
 
-            if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-                setNextStep(true);
-            } else {
-                setNextStep(false);
-            }
-        }
+            // if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
+            //     setNextStep(true);
+            // } else {
+            //     setNextStep(false);
+            // }
+        // }
         BuilderData.forEach((quoteRows: { [x: string]: any }) => {
             const quoteRowKeys = Object.keys(quoteRows);
 
             let inventorydata: { fieldName: string; fieldValue: any }[] = [];
 
+            // const colName = [];
+
             quoteRowKeys.forEach((key) => {
                 if (ignoredKeys.indexOf(key) === -1) {
+                    // const fullKey = key.includes("_") ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()}` : startCase(key)
+                    // if (!colName.includes(fullKey)) {
+                    //     colName.push(fullKey)
+                    // }
                     let indexkey = key;
                     let currency = "";
                     if (key.includes("_")) {
-                        let splitKey = key.split("_");
+                        let splitKey = key.split("_") 
                         key = splitKey[0];
                         currency = splitKey[1].toUpperCase();
                     }
@@ -531,6 +536,8 @@ export default function QuoteProcess(props) {
                     }
                 }
             });
+
+            // setColName(colName)
 
             inventory.push(inventorydata);
         });
@@ -655,6 +662,7 @@ export default function QuoteProcess(props) {
             const ColName = inventory[0].map((col) =>
                 col.fieldName === "Productname" ? "Product Name" : col.fieldName
             );
+
             const allData: any = [];
             inventory.forEach((col) => {
                 let obj: { [key: string]: string | number } = {};
@@ -919,7 +927,15 @@ export default function QuoteProcess(props) {
     };
 
     const handleViewPdf = (view = false, download = false) => {
-        setViewDownloadLoading(true)
+      setViewDownloadLoading(true)
+      let body = {
+        acceptedColumns: visibleColumns,
+        status: versionStatus,
+        TNC: state.selectedRecords
+      };
+    axiosInstance()
+      .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+      .then(() => {
         axiosInstance()
             .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
             .then(({ data }) => {
@@ -971,6 +987,12 @@ export default function QuoteProcess(props) {
                 toastConfig.setToastConfig(err);
                 setViewDownloadLoading(false)
             });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setViewDownloadLoading(false)
+      });
+        
     };
 
 
