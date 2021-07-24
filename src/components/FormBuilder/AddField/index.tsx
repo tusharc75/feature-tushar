@@ -95,7 +95,7 @@ export const AddField = (props) => {
     }
     data.type = values.type
     data.fieldLabel = values.fieldLabel
-    data.fieldName = camelCase(values.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+    data.fieldName = camelCase(values.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
 
     if (refrence !== "custom") {
       if (fields.filter((t) => t.fieldName === data.fieldName).length) {
@@ -145,6 +145,7 @@ export const AddField = (props) => {
     if (values.type === "converter" || values.isConverter) {
       data.units = values.units
       data.displayUnits = values.displayUnits
+      data.formulaUnits = values.formulaUnits
       data.option = values.option
     }
     if (values.type === "currencyAmount") {
