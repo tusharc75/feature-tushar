@@ -80,13 +80,11 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             ).symbolNative
             : null);
 
+    const tempUserList = from === "UserDetailPage" ? userList.filter(v => v.id !== userSelected[0]) : userList.filter(v => v.id !== "self")
     const fetchDoa = useCallback(() => {
-
         doa.length > 0 ?
             setUsers(doa) :
-            from === "UserDetailPage" ?
-                setUsers(([{ id: userList.find(v => v.id == userSelected[0]).id, name: userList.find(v => v.id == userSelected[0]).name, amount: 0 }]))
-                : setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
+            setUsers(([{ id: tempUserList[0].id, name: tempUserList[0].name, amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -268,7 +266,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                             size="small"
                                                                                             style={{ minWidth: 200 }}
                                                                                             value={userList.find(v => v.name == userVal.name) ? userList.find(v => v.name == userVal.name) : ""}
-                                                                                            options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
+                                                                                            options={(selectedType === 2) ? userList.filter(element => !values.users.map(e => e.name).includes(element.name)) : tempUserList.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                             getOptionLabel={(option: any) => option?.name ? option?.name : ""}
                                                                                             onChange={(event, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
@@ -308,11 +306,12 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                 name="amount"
                                                                                                 placeholder="Enter Amount"
                                                                                                 value={userVal.amount}
-                                                                                                onChange={(e) => arrayHelpers.replace(index, {
-                                                                                                    ...values.users[index],
-                                                                                                    ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                                                                })}
-
+                                                                                                onChange={(e) => {
+                                                                                                    arrayHelpers.replace(index, {
+                                                                                                        ...values.users[index],
+                                                                                                        ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                                    })
+                                                                                            }}
                                                                                             />
                                                                                         </Grid>
                                                                                     }

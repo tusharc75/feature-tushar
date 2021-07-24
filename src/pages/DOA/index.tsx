@@ -122,6 +122,7 @@ const DOARequest = () => {
     sorting,
     selectedRecords,
   } = state;
+  const columnState = JSON.parse(localStorage.getItem("doaRequestPage"));
 
   const [columns, setColumns] = useState([
     {
@@ -150,6 +151,16 @@ const DOARequest = () => {
       show: true,
     },
   ]);
+
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   useEffect(() => {
     fetchProductBuilder();
@@ -263,6 +274,7 @@ const DOARequest = () => {
             allowSelection={false}
             allowAction={false}
             loading={loading}
+            renderedFrom="doaRequestPage"
           />
       </CustomContainer>
     </Layout>

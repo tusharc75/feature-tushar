@@ -562,7 +562,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       <Box display="block">
                         {module === 'pdf-template' &&
                           ['multiLine', 'singleLine'].includes(fieldData.type) &&
-                          ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map((item) => (
+                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                              'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map((item) => (
                             <Chip
                               className="ml-1 cursor-pointer"
                               key={item}

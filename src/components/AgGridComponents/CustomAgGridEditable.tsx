@@ -164,26 +164,34 @@ export default function CustomAgGridEditable({
     dataRows.forEach((data) => {
         let obj = {}
         Object.entries(data).forEach(([k, v]) => {
-          if (typeof v === "number") {
+          if (typeof v === "number" && k.includes(currency.toLowerCase())) {
               obj[k] = v
           }
         })
        rowKeys.push(obj)
     })
      
-    const res = rowKeys.reduce((result, item) => {
+    let res = rowKeys.reduce((result, item) => {
     const keys = Object.keys(item);
       keys.forEach(key => {
         if (key === 'srno') { return; }
-        result[key] = result[key] ? result[key] + item[key] : item[key];
+        result[key] = result[key]
+          ? result[key] + item[key]
+          : item[key];
       });
       return result;
     }, {[fromProductGrid && !allowSelection && "productName"]: "Total" });
     
-    // console.log(res)
-    // rowKeys.push(res)
-    // console.log(rowKeys)
-    return [res]
+    let dataObj = {}
+    Object.keys(res).forEach(k => {
+      if (k !== "productName") {
+        dataObj[k] = res[k] && res[k].toString().split(".")[1] !== undefined && res[k].toString().split(".")[1].length > 4
+        ? parseFloat(res[k]).toFixed(4)
+        : res[k]
+      }
+    })
+
+    return [dataObj]
   }
 
   const generateColumns = columns.map((column: any, index) => {
