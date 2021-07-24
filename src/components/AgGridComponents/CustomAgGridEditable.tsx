@@ -162,17 +162,17 @@ export default function CustomAgGridEditable({
   const createdPinnedData = () => {
     const rowKeys = []
     dataRows.forEach((data) => {
-        let obj = {}
-        Object.entries(data).forEach(([k, v]) => {
-          if (typeof v === "number" && k.includes(currency.toLowerCase())) {
-              obj[k] = v
-          }
-        })
-       rowKeys.push(obj)
+      let obj = {}
+      Object.entries(data).forEach(([k, v]) => {
+        if (typeof v === "number" && k.includes(currency && currency.toLowerCase())) {
+          obj[k] = v
+        }
+      })
+      rowKeys.push(obj)
     })
-     
+
     let res = rowKeys.reduce((result, item) => {
-    const keys = Object.keys(item);
+      const keys = Object.keys(item);
       keys.forEach(key => {
         if (key === 'srno') { return; }
         result[key] = result[key]
@@ -180,14 +180,14 @@ export default function CustomAgGridEditable({
           : item[key];
       });
       return result;
-    }, {[fromProductGrid && !allowSelection && "productName"]: "Total" });
-    
+    }, { [fromProductGrid && !allowSelection && "productName"]: "Total" });
+
     let dataObj = {}
     Object.keys(res).forEach(k => {
       if (k !== "productName") {
         dataObj[k] = res[k] && res[k].toString().split(".")[1] !== undefined && res[k].toString().split(".")[1].length > 4
-        ? parseFloat(res[k]).toFixed(4)
-        : res[k]
+          ? parseFloat(res[k]).toFixed(4)
+          : res[k]
       }
     })
 
@@ -209,10 +209,10 @@ export default function CustomAgGridEditable({
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
         singleClickEdit={true}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -231,10 +231,10 @@ export default function CustomAgGridEditable({
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
         singleClickEdit={true}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });
