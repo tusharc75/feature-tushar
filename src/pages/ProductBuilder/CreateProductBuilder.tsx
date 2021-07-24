@@ -176,7 +176,7 @@ const CreateProductBuilder = () => {
                     <Box p={1}>
                       <Grid
                         item
-                        xs={6}
+                        xs={12} md={6} sm={6}
                         className="d-flex align-items-center gap-1"
                       >
                         {permissions.isUpdate && (

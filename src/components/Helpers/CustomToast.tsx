@@ -18,17 +18,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomToast = (props) => {
-  const { open, close, message, type } = props;
+  const { open, close, message, type, hideDuration = 6000, anchorOrigin = null } = props;
   const classes = useStyles();
 
   return <>
     {
       open && <div className={classes.root}>
-        <Snackbar open={open} autoHideDuration={6000} onClose={close}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
+        <Snackbar open={open} autoHideDuration={hideDuration} onClose={close}
+          anchorOrigin={anchorOrigin ? anchorOrigin :
+            {
+              vertical: 'top',
+              horizontal: 'center',
+            }}
         >
           <Alert onClose={close} severity={type}>
             {message}
@@ -44,6 +45,7 @@ CustomToast.propTypes = {
   close: PropTypes.func.isRequired,
   message: PropTypes.any.isRequired,
   type: PropTypes.string.isRequired,
+  anchorOrigin: PropTypes.object
 };
 
 export default CustomToast;

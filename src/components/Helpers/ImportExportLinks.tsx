@@ -63,6 +63,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
   const uploadData = (event) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
+        hideDuration: null,
         open: true,
         type: "info",
         message: `Uploading ${module}, Please wait...`,

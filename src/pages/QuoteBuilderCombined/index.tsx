@@ -39,6 +39,8 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 
 let quoteTimeout;
 const QuoteType = [
@@ -51,6 +53,7 @@ const QuoteType = [
     value: 2,
   },
 ];
+const arr = [...Array(9).keys()];
 
 const QuoteBuilders = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -124,7 +127,16 @@ const QuoteBuilders = () => {
           </Typography>
         ),
       },
-
+      {
+        field: "processStatus", headerName: "Conclusion", flex: 1,
+        renderCell: (params: any) => (
+          <Typography
+            title={params.value}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
 
       {
         field: "totalCost", headerName: "Total Cost", flex: 1,
@@ -253,25 +265,25 @@ const QuoteBuilders = () => {
     accountDetails,
   ]);
 
-  const getVersionStatus =  (event,id, currency) => {
+  const getVersionStatus =  (id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
-    if(event){
-      toastConfig.setToastConfig({
-        open: true,
-        type: "info",
-        message: `Please wait...`,
-    });
-    }
+    // if(event){
+    //   toastConfig.setToastConfig({
+    //     open: true,
+    //     type: "info",
+    //     message: `Please wait...`,
+    // });
+    // }
     setLoadingVersions(true)
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: "Data Retreived successfully",
-      });
-        setShowVersionsDialog(true);
+      //   toastConfig.setToastConfig({
+      //     open: true,
+      //     type: "success",
+      //     message: "Data Retreived successfully",
+      // });
+        // setShowVersionsDialog(true);
         let quoteId = id;
         const newData = data.versions.map((d, index) => {
           return {
@@ -346,8 +358,9 @@ const QuoteBuilders = () => {
         title="Versions">
         <span
           className="cursor-pointer link ml-1"
-          onClick={(event) => {
-            getVersionStatus(event,params.data._id, params.data.currency)
+          onClick={() => {
+            setShowVersionsDialog(true)
+            getVersionStatus(params.data._id, params.data.currency)
           }}>({params.data.versionCount})</span>
       </Tooltip>
     </span>
@@ -666,7 +679,7 @@ const QuoteBuilders = () => {
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
-              heading="Quotes"
+              heading={routes.quoteBuilder.title}
               showTransferEntityDialog={handleTransferEntityDialog}
 
             >
@@ -764,10 +777,17 @@ const QuoteBuilders = () => {
           open={showVersionsDialog}
           onClose={() => {
             setShowVersionsDialog(false);
+            setVersionStatusData((prevState) => ({ ...prevState, data: [] }))
           }}
         >
-          <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
-          />
+        <CustomDialogContent>
+          {versionStatusData.data.length === 0 && (
+              <CommonSkeleton lenArray={arr} />
+          )}
+         { versionStatusData.data.length > 0 && 
+            <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
+          />}
+            </CustomDialogContent>
         </CustomDialogComponent>
       )}
       {showTransferEntityDialog && (

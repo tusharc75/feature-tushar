@@ -133,6 +133,7 @@ export default function CustomAgGridEditable({
   onCellValueChanged,
   className = "ag-grid-listing-grid",
   forProductBuilder = false,
+  fromProductGrid = false,
   currency = null,
 }) {
   const [, setColumns] = useState(columns);
@@ -149,14 +150,49 @@ export default function CustomAgGridEditable({
     if (handleGridReady) handleGridReady(params);
   };
 
-  var customFilterParams = {
+  let customFilterParams = {
     filterOptions: ["contains"],
     textCustomComparator: () => {
       return true;
     },
     // trimInput: true,
     // debounceMs: 1000,
-  };
+  }
+
+  const createdPinnedData = () => {
+    const rowKeys = []
+    dataRows.forEach((data) => {
+        let obj = {}
+        Object.entries(data).forEach(([k, v]) => {
+          if (typeof v === "number" && k.includes(currency.toLowerCase())) {
+              obj[k] = v
+          }
+        })
+       rowKeys.push(obj)
+    })
+     
+    let res = rowKeys.reduce((result, item) => {
+    const keys = Object.keys(item);
+      keys.forEach(key => {
+        if (key === 'srno') { return; }
+        result[key] = result[key]
+          ? result[key] + item[key]
+          : item[key];
+      });
+      return result;
+    }, {[fromProductGrid && !allowSelection && "productName"]: "Total" });
+    
+    let dataObj = {}
+    Object.keys(res).forEach(k => {
+      if (k !== "productName") {
+        dataObj[k] = res[k] && res[k].toString().split(".")[1] !== undefined && res[k].toString().split(".")[1].length > 4
+        ? parseFloat(res[k]).toFixed(4)
+        : res[k]
+      }
+    })
+
+    return [dataObj]
+  }
 
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
@@ -253,6 +289,7 @@ export default function CustomAgGridEditable({
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
+              pinnedBottomRowData={fromProductGrid || forProductBuilder ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{
                 resizable: true,
@@ -343,6 +380,9 @@ export default function CustomAgGridEditable({
                   checkboxSelection={true}
                   resizable={false}
                   sortable={false}
+                  pinnedRowCellRendererFramework={() => (
+                    <p>Total</p>
+                  )}
                 ></AgGridColumn>
               )}
 
@@ -359,6 +399,9 @@ export default function CustomAgGridEditable({
                   sortable={false}
                   filter={false}
                   cellRenderer="actionsRenderer"
+                  pinnedRowCellRendererFramework={() => (
+                    <></>
+                  )}
                 ></AgGridColumn>
               )}
             </AgGridReact>

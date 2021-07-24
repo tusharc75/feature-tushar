@@ -88,7 +88,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
 
       if (!values.hiddenField && module !== 'price-template' && module !== 'product-template'
-      && module !== "pdf-template") {
+        && module !== "pdf-template") {
         values.hiddenField = false;
       }
 
@@ -208,10 +208,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }
               });
               ele.option = values.option;
-              // ele.option = values.option.map((item, idx) => ({
-              //   ...item,
-              //   order: idx + 1
-              // }));
             }
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
@@ -292,29 +288,27 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     name="fieldLabel"
                     fullWidth
                     margin="dense"
-                    //disabled={!values["editAble"]}
+                    disabled={!values["editAble"]}
                     value={values['fieldLabel']}
                     error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
                     helperText={touched['fieldLabel'] && errors['fieldLabel']}
                     onChange={(e) => setFieldValue('fieldLabel', e.target.value.trimStart())}
                   />
-                  {/* {((module === "product-template" || module === "price-template") && values["editAble"]) &&
-              <Box display="flex" >
-                <Box mb={1}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isChangeFieldName"
-                        checked={isChangeFieldName}
-                        onChange={(e) => setIsChangeFieldName(e.target.checked)}
-                        color="primary"
-                      />
-                    }
-                    label="Change Field Name"
-                  />
-                </Box>
-              </Box>
-            } */}
+                  {/* {((module === "product-template" || module === "price-template")) &&
+                    <Box mb={1}>
+                      <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="isChangeFieldName"
+                              checked={isChangeFieldName}
+                              onChange={(e) => setIsChangeFieldName(e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Change Field Name"
+                        />
+                    </Box>
+                  } */}
 
                   {(values['type'] === 'decimal' || values['type'] === 'formula' || values['type'] === 'converter') && (
                     <Grid spacing={3} container>
@@ -380,13 +374,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   )}
 
                   {values['type'] === 'currencyAmount' && <Currency values={values} setFieldValue={setFieldValue} refrence="form-builder" />}
-                  <DndProvider backend={HTML5Backend}>
-                    {(values['type'] === 'dropDown' ||
-                      values['type'] === 'multiSelect' ||
-                      values['type'] === 'radio' ||
-                      values['type'] === 'process') &&
-                      !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
-                  </DndProvider>
+
+                  {(values['type'] === 'dropDown' ||
+                    values['type'] === 'multiSelect' ||
+                    values['type'] === 'radio' ||
+                    values['type'] === 'process') &&
+                    !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
+
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
@@ -560,7 +554,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       <Box display="block">
                         {module === 'pdf-template' &&
                           ['multiLine', 'singleLine'].includes(fieldData.type) &&
-                          ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map((item) => (
+                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                              'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map((item) => (
                             <Chip
                               className="ml-1 cursor-pointer"
                               key={item}

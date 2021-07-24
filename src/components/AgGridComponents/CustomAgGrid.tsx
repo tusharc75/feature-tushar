@@ -1,93 +1,88 @@
-import React, { useState, useEffect } from "react";
-import { TablePagination } from "@material-ui/core";
-import { AgGridReact, AgGridColumn } from "ag-grid-react";
-import { isMobile, isTablet } from "react-device-detect";
-import {
-  AgGridHeaderHeight,
-  AgGridFloatingFiltersHeight,
-  AgGridRowHeight,
-  gridPageSizes,
-} from "../../constants/helpers";
-import CustomGridHeaderOptions from "./CustomGridHeaderOptions";
-import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
-import { orderBy } from "lodash";
+import React, { useState, useEffect } from 'react';
+import { TablePagination } from '@material-ui/core';
+import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
+import CustomGridHeaderOptions from './CustomGridHeaderOptions';
+import { CustomLoadingOverlay } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
+import { orderBy } from 'lodash';
 
 export function reducer(state, action) {
   switch (action.type) {
-    case "loading":
+    case 'loading':
       return {
         ...state,
-        loading: action.loading,
+        loading: action.loading
       };
 
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count,
-      };
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      };
-
-    case "update":
+    case 'initialize':
       return {
         ...state,
         dataRows: action.data,
-        loading: false,
+        rowCount: action.count
       };
 
-    case "filter":
+    case 'selection':
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords
+      };
+
+    case 'update':
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      };
+
+    case 'filter':
       return {
         ...state,
         loading: true,
         filters: action.filters,
-        page: 0,
+        page: 0
       };
 
-    case "sort":
+    case 'sort':
       return {
         ...state,
         sorting: action.sorting,
-        loading: true,
+        loading: true
       };
 
-    case "search":
+    case 'search':
       return {
         ...state,
         search: action.search,
-        loading: true,
+        loading: true
       };
 
-    case "pageChange":
+    case 'pageChange':
       return {
         ...state,
-        page: action.page,
+        page: action.page
       };
 
-    case "pageSizeChange":
+    case 'pageSizeChange':
       return {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true,
+        loading: true
       };
 
-    case "count":
+    case 'count':
       return {
         ...state,
         rowCount: action.count,
-        loading: false,
+        loading: false
       };
 
-    case "complete":
+    case 'complete':
       return {
         ...state,
-        loading: false,
+        loading: false
       };
 
     default:
@@ -104,10 +99,10 @@ export const intialState = {
   page: 0,
   limit: gridPageSizes[0],
   pageSizes: gridPageSizes,
-  search: "",
+  search: '',
   filters: {},
   sorting: [],
-  selectedRecords: [],
+  selectedRecords: []
 };
 
 export default function CustomAgGrid({
@@ -131,6 +126,7 @@ export default function CustomAgGrid({
   allowPagination = true,
   selectedRecords = [],
   onSelection = null,
+  renderedFrom = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -143,21 +139,35 @@ export default function CustomAgGrid({
     setGridApi(params.api);
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
-    if (selectedRecords.length) {
-      params.api.forEachNode(function (node) {
-        node.setSelected(
-          selectedRecords.some((o) => o._id === node.data._id)
-        );
-      });
-    }
     if (handleGridReady) handleGridReady(params);
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+    if (columnState) {
+      params.columnApi.setColumnState(columnState);
+    }
   };
 
+  const onColumnMoved = (params) => {
+    const columnState = JSON.stringify(params.columnApi.getColumnState());
+    localStorage.setItem(renderedFrom, columnState);
+  };
+
+  useEffect(() => {
+    if (clientSideGridApi && selectedRecords.length) {
+          clientSideGridApi.forEachNode(function (node) {
+            node.setSelected(
+              selectedRecords.some((o) => o._id === node.data._id)
+            );
+        });
+    }
+    
+  },[clientSideGridApi, selectedRecords])
+
   var customFilterParams = {
-    filterOptions: ["contains"],
+    filterOptions: ['contains'],
     textCustomComparator: () => {
       return true;
-    },
+    }
     // trimInput: true,
     // debounceMs: 1000,
   };
@@ -168,23 +178,23 @@ export default function CustomAgGrid({
         key={index}
         field={column.field}
         headerName={column.headerName}
-        filter={column.filter ?? "agTextColumnFilter"}
+        filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
         key={index}
         field={column.field}
         headerName={column.headerName}
-        filter={column.filter ?? "agTextColumnFilter"}
+        filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         minWidth={column.width ?? 250}
@@ -193,10 +203,10 @@ export default function CustomAgGrid({
         comparator={() => {
           return 0;
         }}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
       ></AgGridColumn>
     );
   });
@@ -209,7 +219,7 @@ export default function CustomAgGrid({
             <span>Loading</span>
           </div>
         ) : (
-          ""
+          ''
         )}
 
         <div style={{ opacity: loading ? 0.5 : 1 }}>
@@ -218,14 +228,13 @@ export default function CustomAgGrid({
             setColumns={setColumns}
             columnApi={columnApi}
             refreshGrid={refreshGrid}
+            renderedFrom={renderedFrom}
           />
 
-          <div
-            className="ag-theme-material ag-grid-listing-grid"
-            style={{ zIndex: -500, position: "inherit" }}
-          >
+          <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
               rowData={dataRows}
+              onColumnMoved={onColumnMoved}
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
               accentedSort={true}
@@ -236,7 +245,7 @@ export default function CustomAgGrid({
               frameworkComponents={{
                 ...frameworkComponents,
                 customLoadingOverlay: CustomLoadingOverlay,
-                customFloatingFilter: CustomFloatingFilter,
+                customFloatingFilter: CustomFloatingFilter
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
@@ -248,15 +257,13 @@ export default function CustomAgGrid({
                 suppressMenu: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true },
+                floatingFilterComponentParams: { suppressFilterButton: true }
               }}
               onSortChanged={() => {
                 if (!isClientSideGrid) {
                   dispatch({
-                    type: "sort",
-                    sorting: columnApi
-                      .getColumnState()
-                      .filter((d) => ["asc", "desc"].some((s) => s === d.sort)),
+                    type: 'sort',
+                    sorting: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
                   });
                 }
               }}
@@ -264,13 +271,12 @@ export default function CustomAgGrid({
                 if (isClientSideGrid) {
                   clientSideGridApi.paginationGoToPage(0);
                   dispatch({
-                    type: "count",
-                    count:
-                      clientSideGridApi.getModel().rootNode.allChildrenCount,
+                    type: 'count',
+                    count: clientSideGridApi.getModel().rootNode.allChildrenCount
                   });
-                  dispatch({ type: "pageChange", page: 0 });
+                  dispatch({ type: 'pageChange', page: 0 });
                 } else {
-                  dispatch({ type: "filter", filters: e.api.getFilterModel() });
+                  dispatch({ type: 'filter', filters: e.api.getFilterModel() });
                 }
               }}
               enableCellTextSelection={true}
@@ -292,21 +298,17 @@ export default function CustomAgGrid({
               // }}
 
               suppressRowClickSelection={true}
-              rowSelection={"multiple"}
+              rowSelection={'multiple'}
               onSelectionChanged={(event: any) => {
                 if (onSelection) onSelection(event.api.getSelectedRows());
                 dispatch({
-                  type: "selection",
-                  selectedRecords: event.api.getSelectedRows(),
+                  type: 'selection',
+                  selectedRecords: event.api.getSelectedRows()
                 });
               }}
               onRowDragEnd={(event: any) => {
                 if (onRowDragEnd) {
-                  onRowDragEnd(orderBy(
-                    event.api.getSelectedNodes(),
-                    "rowIndex",
-                    ["asc"]
-                  ).map((d) => d.data));
+                  onRowDragEnd(orderBy(event.api.getSelectedNodes(), 'rowIndex', ['asc']).map((d) => d.data));
                 }
               }}
               immutableData={true}
@@ -339,7 +341,7 @@ export default function CustomAgGrid({
                   width={actionWidth}
                   field="actions"
                   headerName="Actions"
-                  pinned={isMobile || isTablet ? false : "right"}
+                  pinned={isMobile || isTablet ? false : 'right'}
                   lockPinned={isMobile || isTablet ? false : true}
                   resizable={false}
                   sortable={false}
@@ -357,7 +359,7 @@ export default function CustomAgGrid({
               page={page}
               className="agPagination"
               onChangePage={(event, newPage) => {
-                dispatch({ type: "pageChange", page: newPage });
+                dispatch({ type: 'pageChange', page: newPage });
 
                 if (clientSideGridApi) {
                   clientSideGridApi.paginationGoToPage(newPage);
@@ -365,7 +367,7 @@ export default function CustomAgGrid({
               }}
               rowsPerPage={limit}
               onChangeRowsPerPage={(event) => {
-                dispatch({ type: "pageSizeChange", limit: event.target.value });
+                dispatch({ type: 'pageSizeChange', limit: event.target.value });
 
                 if (clientSideGridApi) {
                   clientSideGridApi.paginationGoToPage(0);

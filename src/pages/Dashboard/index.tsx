@@ -33,6 +33,21 @@ function Dashboard() {
     setSections(data);
   }, [user]);
 
+  const handleRoutes = (item) => {
+    return `/${kebabCase(item.name)}`;
+    
+    //  Use below code to handle special route cases
+    // switch (item.name) {
+
+    //   case "T&Cs":
+    //     return "/terms-conditions";
+
+    //   default:
+    //     return `/${kebabCase(item.name)}`;
+    // }
+
+  }
+
   return (
     <Layout>
       <Container>
@@ -51,8 +66,8 @@ function Dashboard() {
                           <>
                             <Box marginY={1} key={item.name} component="div">
                               <Typography paragraph>
-                                <Link to={`/${kebabCase(item.name)}`}>
-                                  {item.name}
+                                <Link to={handleRoutes(item)}>
+                                  {item.resourceLabel || item.name}
                                 </Link>
                               </Typography>
                             </Box>

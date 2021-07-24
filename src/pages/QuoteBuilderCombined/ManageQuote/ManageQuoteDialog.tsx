@@ -352,7 +352,7 @@ export default function ManageQuoteDialog({
         }
 
         if (!isNew && marketSegmentDropdownData) {
-          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
         filterData.map((_f) => {
@@ -1443,9 +1443,22 @@ export default function ManageQuoteDialog({
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      if (Object.keys(customError).length > 0) {
-                        return;
-                      } else submitForm();
+                      const err = Object.keys({...errors,...customError});
+                      if (err.length) {
+                        const input = document.querySelector(
+                          `input[name=${err[0]}]`,
+                        );
+
+                        input.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                          inline: 'start',
+                        });
+                      }
+                      // if (Object.keys(customError).length > 0) {
+                      //   return;
+                      // } else 
+                      submitForm();
                     }}
                   >
                     Save

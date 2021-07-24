@@ -54,11 +54,22 @@ const QuotePdfTemplate: FC = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
+    const columnState = JSON.parse(localStorage.getItem("quotePdfPage"));
+
     const columns = [
         { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
+    if (columnState) {
+        columns.map((item) => {
+          columnState.map((d) => {
+            if (d.colId == item.field) {
+              item.show = !d.hide;
+            }
+          });
+        });
+      }
     //  Grid Variables - End
 
 
@@ -304,7 +315,7 @@ const QuotePdfTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} />
+                    loading={loading} renderedFrom="quotePdfPage"/>
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

@@ -1,71 +1,55 @@
+import { RESOURCE_LABEL } from "../../constants/helpers";
+
+const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
+
 const routes = {
-  // account: {
-  //   title: "Account",
-  //   path: "/account",
-  //   data: {},
-  // },
-  // accountDetails: {
-  //   title: "Account",
-  //   path: "/account/detail",
-  //   data: {},
-  // },
-  // contact: {
-  //   title: "Contact",
-  //   path: "/contact",
-  //   data: {},
-  // },
-  // contactDetail: {
-  //   title: "Contact",
-  //   path: "/contact/detail",
-  //   data: {},
-  // },
   lead: {
-    title: "Lead",
+    title: storedRoutes ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: "/lead",
     data: {},
   },
   leadDetail: {
-    title: "Lead Detail",
+    title: storedRoutes ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: "/lead/detail",
     data: {},
   },
   opportunity: {
-    title: "Opportunity",
+    title: storedRoutes ? storedRoutes.opportunity?.title : RESOURCE_LABEL.opportunity,
     path: "/opportunity",
     data: {},
   },
   user: {
-    title: "User",
+    title: storedRoutes ? storedRoutes.user?.title : RESOURCE_LABEL.user,
     path: "/user",
     data: {},
   },
   userDetail: {
-    title: "User",
+    title: storedRoutes ? storedRoutes.user?.title : RESOURCE_LABEL.user,
     path: "/user/detail",
     data: {},
   },
   entity: {
-    title: "Entity",
+    title: storedRoutes ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: "/entity",
     data: {},
   },
   entityDetails: {
-    title: "Entity",
+    title: storedRoutes ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: "/entity/detail",
     data: {},
   },
   role: {
-    title: "Role",
+    title: storedRoutes ? storedRoutes.role?.title : RESOURCE_LABEL.role,
     path: "/role",
     data: {},
   },
   roleDetail: {
-    title: "Role",
+    title: storedRoutes ? storedRoutes.role?.title : RESOURCE_LABEL.role,
     path: "/role/detail",
     data: {},
   },
   opportunityDetail: {
-    title: "Opportunity Detail",
+    title: storedRoutes ? storedRoutes.opportunity?.title : RESOURCE_LABEL.opportunity,
     path: "/opportunity/detail",
     data: {},
   },
@@ -75,57 +59,58 @@ const routes = {
     data: {},
   },
   activityEmail: {
-    title: "Activity Email",
+    title: storedRoutes ? storedRoutes.email?.title : RESOURCE_LABEL.email,
     path: "/email",
     data: {},
   },
   activityNote: {
-    title: "Activity Note",
+    title: storedRoutes ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: "/note",
     data: {},
   },
   customerAccount: {
-    title: "Customer Account",
+    title: storedRoutes ? storedRoutes.customerAccount?.title : RESOURCE_LABEL.customerAccount,
     path: "/customer-account",
   },
   customerAccountDetail: {
-    title: "Customer Account",
+    title: storedRoutes ? storedRoutes.customerAccount?.title : RESOURCE_LABEL.customerAccount,
     path: "/customer-account/detail",
   },
   supplierAccount: {
-    title: "Supplier Account",
+    title: storedRoutes ? storedRoutes.supplierAccount?.title : RESOURCE_LABEL.account,
     path: "/supplier-account",
   },
   supplierAccountDetail: {
-    title: "Supplier Account",
+    title: storedRoutes ? storedRoutes.supplierAccount?.title : RESOURCE_LABEL.account,
     path: "/supplier-account/detail",
   },
   customerContact: {
-    title: "Customer Contact",
+    title: storedRoutes ? storedRoutes.customerContact?.title : RESOURCE_LABEL.customerContact,
     path: "/customer-contact",
   },
   customerContactDetail: {
-    title: "Customer Contact",
+    title: storedRoutes ? storedRoutes.customerContact?.title : RESOURCE_LABEL.customerContact,
     path: "/customer-contact/detail",
   },
   supplierContact: {
-    title: "Supplier Contact",
+    title: storedRoutes ? storedRoutes.supplierContact?.title : RESOURCE_LABEL.contact,
     path: "/supplier-contact",
   },
   supplierContactDetail: {
-    title: "Supplier Contact",
+    title: storedRoutes ? storedRoutes.supplierContact?.title : RESOURCE_LABEL.contact,
     path: "/supplier-contact/detail",
   },
+  //  need to see either we are using this doa or not
   doa: {
-    title: "Doa",
+    title: RESOURCE_LABEL.doa,
     path: "/doa",
   },
   product: {
-    title: "Product",
+    title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
     path: "/product",
   },
   formBuilder: {
-    title: "Form Builder",
+    title: storedRoutes ? storedRoutes.formBuilder?.title : RESOURCE_LABEL.formBuilder,
     path: "/form-builder",
   },
   formBuilderResource: {
@@ -133,7 +118,7 @@ const routes = {
     path: "/resource",
   },
   termsAndConditions: {
-    title: "Terms and Conditions",
+    title: storedRoutes ? storedRoutes.termsAndConditions?.title : RESOURCE_LABEL.termsAndConditions,
     path: "/terms-conditions",
   },
   profilePage: {
@@ -141,19 +126,19 @@ const routes = {
     path: "/profile",
   },
   projectSales: {
-    title: "Project Sales",
+    title: storedRoutes ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectStrategy,
     path: "/project-sales",
   },
   projectSalesDetail: {
-    title: "Project Sales",
+    title: storedRoutes ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectStrategy,
     path: "/project-sales/detail",
   },
   priceTemplate: {
-    title: "Price Template",
+    title: storedRoutes ? storedRoutes.priceTemplate?.title : RESOURCE_LABEL.priceTemplate,
     path: "/price-template",
   },
   productBuilder: {
-    title: "Product Builder",
+    title: storedRoutes ? storedRoutes.productBuilder?.title : RESOURCE_LABEL.productBuilder,
     path: "/product-builder",
   },
   brandConfiguration: {
@@ -161,33 +146,61 @@ const routes = {
     path: "/brand-configuration",
   },
   currencyConverter: {
-    title: "Currency Converter",
+    title: storedRoutes ? storedRoutes.currencyConverter?.title : RESOURCE_LABEL.currencyConverter,
     path: "/currency-converter",
   },
   productCategory: {
-    title: "Product Category",
+    title: storedRoutes ? storedRoutes.productCategory?.title : RESOURCE_LABEL.productCategory,
     path: "/product-category",
   },
   productTemplate: {
-    title: "Product Template",
+    title: storedRoutes ? storedRoutes.productTemplate?.title : RESOURCE_LABEL.productTemplate,
     path: "/product-template",
   },
   quoteBuilder: {
-    title: "Quotes",
+    title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",
   },
   budget: {
-    title: "Budget",
+    title: storedRoutes ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
   },
   marketSegment: {
-    title: "Market Segment",
+    title: storedRoutes ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: "/market-segment",
   },
   quotePdfTemplate: {
-    title: "Quote PDF Template",
+    title: storedRoutes ? storedRoutes.quotePdfTemplate?.title : RESOURCE_LABEL.quotePdfTemplate,
     path: "/quote-pdf-template",
-  }
+  },
+  attachment: {
+    title: storedRoutes ? storedRoutes.attachment?.title : RESOURCE_LABEL.attachment,
+    path: "/attachment",
+  },
+  calendar: {
+    title: storedRoutes ? storedRoutes.calendar?.title : RESOURCE_LABEL.calendar,
+    path: "/calendar",
+  },
+  reminder: {
+    title: storedRoutes ? storedRoutes.reminder?.title : RESOURCE_LABEL.reminder,
+    path: "/reminder",
+  },
+  DOARequest: {
+    title: storedRoutes ? storedRoutes.DOARequest?.title : RESOURCE_LABEL.DOARequest,
+    path: "/doa-request",
+  },
+  task: {
+    title: storedRoutes ? storedRoutes.task?.title : RESOURCE_LABEL.task,
+    path: "/task",
+  },
+  case: {
+    title: storedRoutes ? storedRoutes.case?.title : RESOURCE_LABEL.case,
+    path: "/case",
+  },
+  note: {
+    title: storedRoutes ? storedRoutes.note?.title : RESOURCE_LABEL.note,
+    path: "/note",
+  },
 };
 
 export default routes;

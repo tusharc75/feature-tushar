@@ -100,6 +100,8 @@ export const sidebarResource = {
   customerAccount: "Customer Account",
   supplierContact: "Supplier Contact",
   supplierAccount: "Supplier Account",
+  account: 'Supplier Account',
+  contact: 'Supplier Contact',
   pricing: "Pricing",
   priceBuilder: "Price Builder",
   quoteBuilder: "Quotes",
@@ -122,7 +124,52 @@ export const sidebarResource = {
   formBuilder: "Form Builder",
   budget: "Budget",
   marketSegment: "Market Segment",
-  quotePdfTemplate: "Quote Pdf Template"
+  quotePdfTemplate: "Quote Pdf Template",
+  field: 'Field',
+  projectStrategy: 'Project Sales',
+  PNQBuilder: 'PNQ Builder',
+  DOARequest: 'DOA Request',
+  event: 'Event',
+  dashboard: 'Dashboard',
+};
+
+export const RESOURCE_LABEL = {
+  account: 'Supplier Accounts',
+  customerAccount: 'Customer Accounts',
+  user: 'Users',
+  contact: 'Supplier Contacts',
+  customerContact: 'Customer Contacts',
+  brand: 'Brands',
+  entity: 'Entities',
+  role: 'Roles',
+  lead: 'Leads',
+  opportunity: 'Opportunities',
+  field: 'Fields',
+  productCategory: 'Product Categories',
+  priceTemplate: 'Price Templates',
+  product: 'Products',
+  productTemplate: 'Product Templates',
+  doa: 'DOA',
+  termsAndConditions: 'T&Cs',
+  projectStrategy: 'Project Sales',
+  productBuilder: 'Price Builder',
+  formBuilder: 'Form Builder',
+  currencyConverter: 'Currency Converter',
+  quoteBuilder: 'Quotes',
+  PNQBuilder: 'PNQ Builder',
+  DOARequest: 'DOA Requests',
+  task: 'Tasks',
+  case: 'Cases',
+  note: 'Notes',
+  event: 'Events',
+  email: 'Emails',
+  attachment: 'Attachments',
+  reminder: 'Reminders',
+  calendar: 'Calendar',
+  dashboard: 'Dashboards',
+  budget: 'Budgets',
+  marketSegment: 'Market Segments',
+  quotePdfTemplate: 'Quote PDF Templates'
 };
 
 export const lead = {
@@ -143,11 +190,13 @@ export const entity = {
 export const productTemplate = {
   productTemplateResource: "productTemplate",
   productTemplateApi: "/product-template",
+  productTemplateRoute: "product-template",
 };
 
 export const priceTemplate = {
   priceTemplateResource: "priceTemplate",
   priceTemplateApi: "/price-template",
+  priceTemplateRoute: "price-template"
 };
 
 export const quoteBuilder = {
@@ -158,6 +207,7 @@ export const quoteBuilder = {
 export const projectSales = {
   projectSalesResource: "projectSales",
   projectSalesApi: "/project-sales",
+  projectSalesRoute: "project-sales"
 };
 
 export const quote = {
@@ -169,6 +219,7 @@ export const supplierAccount = {
   accountRoute: "supplier-account",
   accountResource: "supplierAccount", //  Key of sidebar object
   accountPermission: "Supplier Account",
+  accountResourceLabel: "account"
 };
 
 export const termsAndCondition = {
@@ -182,6 +233,7 @@ export const customerAccount = {
   accountRoute: "customer-account",
   accountResource: "customerAccount", //  Key of sidebar object
   accountPermission: "Customer Account",
+  accountResourceLabel: "customerAccount"
 };
 
 export const supplierContact = {
@@ -189,6 +241,7 @@ export const supplierContact = {
   contactRoute: "supplier-contact",
   contactResource: "supplierContact", //  Key of sidebar object
   contactPermission: "Supplier Contact",
+  contactResourceLabel: "contact"
 };
 
 export const customerContact = {
@@ -196,6 +249,7 @@ export const customerContact = {
   contactRoute: "customer-contact",
   contactResource: "customerContact", //  Key of sidebar object
   contactPermission: "Customer Contact",
+  contactResourceLabel: "customerContact"
 };
 
 export const profilePage = {
@@ -614,6 +668,8 @@ export const getPermissions = (
 ): IPermission | null => {
   if (user) {
     let permissions = {};
+    let routesAndTitle = {};
+
     let data = [...user?.role?.sideBar];
 
     if (selectedEntity) {
@@ -648,7 +704,7 @@ export const getPermissions = (
             isCreate: d.isCreate,
             isRead: d.isRead,
             isUpdate: d.isUpdate,
-            isDelete: d.isDelete,
+            isDelete: d.isDelete
           };
 
           if (accounts.some((acountType) => acountType === d.name)) {
@@ -656,10 +712,15 @@ export const getPermissions = (
           }
 
           permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+
+          routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
+            title: d.resourceLabel || d.name
+          };
         }
       });
     }
 
+    localStorage.setItem("routes", JSON.stringify(routesAndTitle));
     return permissions;
   }
 };

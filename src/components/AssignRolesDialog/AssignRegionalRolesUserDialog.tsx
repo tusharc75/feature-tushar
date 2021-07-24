@@ -275,7 +275,7 @@ const AssignRegionalRolesUserDialog = ({
                                                         color="primary"
                                                         size="small"
                                                         onClick={handleNext}
-                                                        disabled={selectedEntity.some(item => item?.isChecked)}
+                                                        disabled={selectedUser.length === 0}
                                                         className={classes.button}
                                                     >
                                                         Next

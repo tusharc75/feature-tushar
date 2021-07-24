@@ -70,6 +70,7 @@ function OpportunityDetailsPage() {
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [showActivity, setActivityShow] = useState(true);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [filteredArr, setFilteredArr] = useState([]);
@@ -94,6 +95,10 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
+
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
 
   const handleOpenUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
@@ -172,7 +177,6 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).shortFormatAmount;
@@ -353,13 +357,12 @@ function OpportunityDetailsPage() {
     mainPoint['Opportunity Owner'] = data?.owner?.optionLabel || '';
     setMainPoints(mainPoint);
   };
-
   const getOpportunityFields = (passedOpportunityData) => {
     if (selectedEntity) {
       axiosInstance()
         .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName')
+          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName');
 
           const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
 
@@ -391,15 +394,19 @@ function OpportunityDetailsPage() {
                 text: m.optionLabel,
                 canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase())
               };
-            })
+            });
 
             setSteps(allProcessSteps);
 
             if (allProcessSteps.length > 0) {
-              const currentProcessSteps = filteredFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+              const currentProcessSteps = filteredFields.find(
+                (d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase()
+              );
               if (currentProcessSteps && currentProcessSteps.isRead && passedOpportunityData) {
                 setAdditionalFieldName(currentProcessSteps.fieldData.additionalInfoSection);
-                const currentStepToShow = currentProcessSteps.fieldData.option.findIndex((d) => d.optionLabel === passedOpportunityData[processFieldName]);
+                const currentStepToShow = currentProcessSteps.fieldData.option.findIndex(
+                  (d) => d.optionLabel === passedOpportunityData[processFieldName]
+                );
                 setActiveStep(currentStepToShow);
                 if (currentStepToShow === allProcessSteps.length - 1) {
                   setShowAtLast(true);
@@ -527,8 +534,10 @@ function OpportunityDetailsPage() {
       ...opportunityData,
       ...data
     };
+
+    const updatedOpportunityFields = [...opportunityFieldData, ...sectionFields.map((item) => item.fieldData)]
     const updatedData = {
-      ...getObjKeysWithValues(updatedOpportunityData, opportunityFieldData),
+      ...getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields),
       [processFieldName]: steps[tempActiveStep].text,
       _id: opportunityData._id
     };
@@ -592,8 +601,8 @@ function OpportunityDetailsPage() {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+          <div>
             <Paper>
               {!opportunityData ? (
                 <div>
@@ -659,12 +668,9 @@ function OpportunityDetailsPage() {
                 <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
                   <img src={SVG('Opportunity Placeholder')} alt="No Data" />
                 </Box>
-              ) :
-                <DetailsPage
-                  data={copyOfOpportunityData}
-                  fields={opportunityFields}
-                />
-              }
+              ) : (
+                <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
+              )}
 
               <div className="p-3">
                 {opportunityData && (
@@ -734,54 +740,62 @@ function OpportunityDetailsPage() {
                 )}
               </div>
             </Paper>
-          </Grid>
-
-          <Grid item xs={12} sm={12} md={4} lg={4} className="gap-2">
-            <Paper>
-              {!opportunityData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i, index) => (
-                    <Skeleton key={index} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    relatedTo={[
-                      {
-                        type: opportunityData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-                        referenceId: opportunityData?.customerAccountName
-                          ? opportunityData?.customerAccountName?.optionValue
-                          : opportunityData?.supplierAccountName?.optionValue,
-                        access: false
-                      },
-                      ...opportunityData?.staticData.customerContact?.map((cc) => ({
-                        type: customerContact.contactResource,
-                        referenceId: cc._id,
-                        access: false
-                      })),
-                      ...opportunityData?.staticData.supplierContact?.map((sc) => ({
-                        type: supplierContact.contactResource,
-                        referenceId: sc._id,
-                        access: false
-                      })),
-                      {
-                        type: opportunityResource,
-                        referenceId: opportunityData?._id,
-                        access: true
-                      }
-                    ]}
-                    handleActivityRefresh={() => { }}
-                    emails={contactsEmailsData}
-                  />
-                </div>
-              )}
-            </Paper>
-          </Grid>
-
-        </Grid>
+          </div>
+          <div>
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  Hide Activities
+                </a>}
+                {!opportunityData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i, index) => (
+                      <Skeleton key={index} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      resourceId={opportunityData?._id}
+                      resource={opportunityResource}
+                      relatedTo={[
+                        {
+                          type: opportunityData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                          referenceId: opportunityData?.customerAccountName
+                            ? opportunityData?.customerAccountName?.optionValue
+                            : opportunityData?.supplierAccountName?.optionValue,
+                          access: false
+                        },
+                        ...opportunityData?.staticData.customerContact?.map((cc) => ({
+                          type: customerContact.contactResource,
+                          referenceId: cc._id,
+                          access: false
+                        })),
+                        ...opportunityData?.staticData.supplierContact?.map((sc) => ({
+                          type: supplierContact.contactResource,
+                          referenceId: sc._id,
+                          access: false
+                        })),
+                        {
+                          type: opportunityResource,
+                          referenceId: opportunityData?._id,
+                          access: true
+                        }
+                      ]}
+                      handleActivityRefresh={() => { }}
+                      emails={contactsEmailsData}
+                    />
+                  </div>
+                )}
+              </Paper>
+              :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                Show Activities
+              </a>}
+          </div>
+        </div>
 
         {showConfirmBox ? (
           <ConfirmationDialog

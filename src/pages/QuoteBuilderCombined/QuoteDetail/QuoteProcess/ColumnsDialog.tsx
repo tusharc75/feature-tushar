@@ -14,19 +14,19 @@ import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { XYCoord } from "dnd-core";
 import update from "immutability-helper";
 
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import { CustomDialogTransition } from "../../constants/helpers";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../../../components/CustomDialog/CustomDialogFooter";
+import { CustomDialogTransition } from "../../../../constants/helpers";
+import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../../axios/axiosInstance";
 
 const ItemTypes = {
   CARD: "card",
 };
 
 const ColumnsDialog = (props) => {
-  const { columns, setOpenDialog, id, version, refresh } = props;
+  const { columns, setOpenDialog,versionStatus,selectedTNC, id, version, refresh } = props;
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
   const [cards, setCards] = useState(
@@ -63,6 +63,8 @@ const ColumnsDialog = (props) => {
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${version}`, {
         acceptedColumns: cards.map((card) => card.text),
+        status: versionStatus,
+        TNC: selectedTNC
       })
       .then(({ data }) => {
         setSubmitting(false);

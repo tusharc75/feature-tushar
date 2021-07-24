@@ -12,7 +12,7 @@
         font-size: 12px;
     }
     .detailHeader {
-        padding: 0;
+        padding: 8px;
     }
     .MuiMenuItem-root {
         font-size: 0.8rem;
@@ -92,6 +92,12 @@
     .product-builder-edit-grid {
         height: 400px !important;
     }
+    .MuiTab-textColorPrimary.Mui-selected {
+        border-radius: 0;
+        background: white !important;
+        color: #163340 !important;
+        border-radius: 0;
+  }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
