@@ -25,6 +25,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from "react-device-detect";
+import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectInAccordion"
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -64,6 +65,7 @@ export default function QuoteDetail() {
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
+  const { id } = useParams();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -87,6 +89,9 @@ export default function QuoteDetail() {
 
   const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
+  const [relatedTo, setRelatedTo] = useState({});
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: qbResource }]);
+
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
     newValue: number
@@ -94,7 +99,6 @@ export default function QuoteDetail() {
     setTabValue(newValue);
   };
 
-  const { id } = useParams();
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -109,6 +113,7 @@ export default function QuoteDetail() {
       }
 
       fetchTermsAndConditions()
+      fetchRelatedTo()
     }
   }, [id]);
 
@@ -118,6 +123,16 @@ export default function QuoteDetail() {
     }
   }, [currentVersion])
 
+  const fetchRelatedTo = () => {
+    axiosInstance()
+      .get(`/quote-builder/related/${id}`)
+      .then(({ data: { data } }) => {
+        setRelatedTo(data)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
@@ -322,19 +337,19 @@ export default function QuoteDetail() {
     const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
     setQuoteReOpening(true);
     axiosInstance()
-        .post(
-            `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
-            { TNC: previousVersionTNC }
-        )
-        .then(() => {
-            fetchQuoteData(0);
-            setQuoteReOpening(false);
-        })
-        .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setQuoteReOpening(false);
-        });
-};
+      .post(
+        `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+        { TNC: previousVersionTNC }
+      )
+      .then(() => {
+        fetchQuoteData(0);
+        setQuoteReOpening(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setQuoteReOpening(false);
+      });
+  };
 
   const handleVersionUpdate = (
     Columns,
@@ -496,6 +511,17 @@ export default function QuoteDetail() {
                         fetchQuoteData={fetchQuoteData}
                         handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
                       />)}
+                      {relatedTo && relatedTo["Project Sales"]?.Quotes && permissions?.projectSales?.isRead && (
+                        <ProjectInAccordion
+                          recordsPerLine={3}
+                          projectSales={relatedTo["Project Sales"]["Quotes"]}
+                          type={typeCreateProjectSalesDialog}
+                          fetchData={() => fetchRelatedTo()}
+                          permissions={permissions}
+                          isAddProjectSale={true}
+                          isAllowedToEdit={allowedToEdit}
+                        />
+                      )}
                     </Suspense>
                   </TabPanel>
 
