@@ -65,7 +65,7 @@ export default function Account(props) {
   } = props;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -155,7 +155,7 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, filters, sorting]);
+  }, [page, limit, selectedType, type, filters, sorting, selectedEntity]);
 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -315,6 +315,10 @@ export default function Account(props) {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
 
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
     const updatedFilters = [];
     if (type !== options[0]) {
       updatedFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
@@ -363,9 +367,11 @@ export default function Account(props) {
   };
 
   const fetchAccounts = async () => {
+    if(selectedEntity){
+    dispatch({ type: 'loading', loading: true });
+
     const queryString = getQueryString();
 
-    dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
       gridApi.setRowData([]);
@@ -416,6 +422,7 @@ export default function Account(props) {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
       });
+    }
   };
 
   const cloneAccount = async (accountId) => {

@@ -904,6 +904,18 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.quoteBuilder.path)) {
       history.push({ pathname: routes.quoteBuilder.path });
     }
+    if (history.location.pathname.includes(routes.customerAccountDetail.path)) {
+      history.push({ pathname: routes.customerAccount.path });
+    }
+    if (history.location.pathname.includes(routes.supplierAccountDetail.path)) {
+      history.push({ pathname: routes.supplierAccount.path });
+    }
+    if (history.location.pathname.includes(routes.customerContactDetail.path)) {
+      history.push({ pathname: routes.customerContact.path });
+    }
+    if (history.location.pathname.includes(routes.supplierContactDetail.path)) {
+      history.push({ pathname: routes.supplierContact.path });
+    }
   }
 
   return (
