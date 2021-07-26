@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Editor, RichUtils } from 'draft-js';
+import React, { useEffect, useRef, useState, useContext } from 'react';
+import { RichUtils, EditorState, AtomicBlockUtils } from 'draft-js';
 import "./RichEditorStyle.scss";
 import {
   BsTypeBold,
@@ -11,6 +11,15 @@ import {
 import { MdFormatQuote } from "react-icons/md"
 import { VscSymbolNamespace } from "react-icons/vsc"
 import { IconButton, Tooltip } from "@material-ui/core"
+import createImagePlugin from '@draft-js-plugins/image';
+import Editor from '@draft-js-plugins/editor';
+import { BsFillImageFill } from "react-icons/bs";
+import Typography from "@material-ui/core/Typography";
+import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { imageUploadMaxSize } from "../../constants/helpers"
+const imagePlugin = createImagePlugin();
+const plugins = [imagePlugin];
 
 export function RichTextEditor(props) {
   const { editorState, style, placeholder } = props;
@@ -72,6 +81,7 @@ export function RichTextEditor(props) {
         <BlockStyleControls
           editorState={editorState}
           onToggle={toggleBlockType}
+          onChange={onChange}
         />
         <InlineStyleControls
           editorState={editorState}
@@ -79,7 +89,7 @@ export function RichTextEditor(props) {
         />
       </div>
       <div className={className} onClick={focus}>
-        <Editor
+        {/* <Editor
           blockStyleFn={getBlockStyle}
           customStyleMap={styleMap}
           editorState={editorState}
@@ -91,6 +101,18 @@ export function RichTextEditor(props) {
           ref={editorRef}
           spellCheck={true}
           handleReturn={handleReturn}
+        /> */}
+        <Editor
+          editorState={editorState}
+          onChange={onChange}
+          plugins={plugins}
+          ref={editorRef}
+          handleKeyCommand={handleKeyCommand}
+          spellCheck={true}
+          placeholder={placeholder || ''}
+          onTab={onTab}
+          customStyleMap={styleMap}
+          blockStyleFn={getBlockStyle}
         />
       </div>
     </div>
@@ -139,26 +161,119 @@ function StyleButton(props) {
   );
 }
 
-const BLOCK_TYPES = [
-  { label: 'Huge', style: 'header-one', message: "Heading Huge" },
-  { label: 'Large', style: 'header-two', message: "Heading Large" },
-  { label: 'Medium', style: 'header-three', message: "Heading Medium" },
-  { label: 'Small', style: 'header-four', message: "Heading Small" },
-  // { label: 'H5', style: 'header-five' },
-  // { label: 'H6', style: 'header-six' },
-  // { label: 'Code Block', style: 'code-block', message: "Code-block" },
-  { label: 'Blockquote', icon: <MdFormatQuote className="richTextEditorIcons" />, style: 'blockquote' },
-  { label: 'UL', icon: <BsListUl className="richTextEditorIcons" />, style: 'unordered-list-item' },
-  { label: 'OL', icon: <BsListOl className="richTextEditorIcons" />, style: 'ordered-list-item' },
-];
-
 const BlockStyleControls = props => {
-  const { editorState } = props;
+  const { editorState, onChange } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
     .getCurrentContent()
     .getBlockForKey(selection.getStartKey())
     .getType();
+  const toastConfig = useContext(CustomToastContext);
+  const [isUploading, setUploading] = useState(false);
+
+  const insertImage = (editorState, source) => {
+    console.log("🚀 ~ file: RichEditor.tsx ~ line 174 ~ insertImage ~ src", source)
+
+    const contentState = editorState.getCurrentContent();
+    const contentStateWithEntity = contentState.createEntity(
+      "image",
+      "IMMUTABLE",
+      { src: source }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    const newEditorState = EditorState.set(editorState, {
+      currentContent: contentStateWithEntity
+    });
+    return AtomicBlockUtils.insertAtomicBlock(newEditorState, entityKey, " ");
+  };
+
+  const handleUploadImage = (event) => {
+    if (event.target.files && event.target.files.length) {
+      const file = event.target.files[0];
+      if (file.size > imageUploadMaxSize.size) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "error",
+          message: `Image must be less than ${imageUploadMaxSize.text} size`,
+        });
+      } else {
+        getImageUrl(file);
+      }
+    }
+  };
+
+  const getImageUrl = (file) => {
+    let formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    axiosInstance()
+      .post("/user/upload-public", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(({ data }) => {
+        const newEditorState = insertImage(editorState, data.fileUrl)
+        onChange(newEditorState);
+        setUploading(false);
+      })
+      .catch((err) => {
+        setUploading(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const BLOCK_TYPES = [
+    { label: 'Huge', style: 'header-one', message: "Heading Huge" },
+    { label: 'Large', style: 'header-two', message: "Heading Large" },
+    { label: 'Medium', style: 'header-three', message: "Heading Medium" },
+    { label: 'Small', style: 'header-four', message: "Heading Small" },
+    // { label: 'H5', style: 'header-five' },
+    // { label: 'H6', style: 'header-six' },
+    // { label: 'Code Block', style: 'code-block', message: "Code-block" },
+    {
+      label: 'Image', icon:
+        <>
+          {
+            isUploading ? <Typography variant="subtitle2">Uploading</Typography> :
+              (<>
+
+                < label htmlFor="avatar">
+                  <IconButton
+                    style={{ marginBottom: '2px' }}
+                    title="Add picture"
+                    size="small"
+                    aria-label="upload picture"
+                    component="span"
+                  >
+                    <BsFillImageFill
+                      size={18}
+                      color="black"
+                    />
+                    <input
+                      disabled={isUploading}
+                      id="avatar"
+                      name="avatar"
+                      onChange={handleUploadImage}
+                      accept="image/x-png,image/gif,image/jpeg"
+                      style={{
+                        opacity: "0",
+                        position: "absolute",
+                        zIndex: -1,
+                      }}
+                      onClick={(e: any) =>
+                        (e.target.value = null)
+                      }
+                      type="file"
+                    />
+                  </IconButton>
+                </label>
+              </>)
+          }</>, style: ''
+
+    },
+    { label: 'Blockquote', icon: <MdFormatQuote className="richTextEditorIcons" />, style: 'blockquote' },
+    { label: 'UL', icon: <BsListUl className="richTextEditorIcons" />, style: 'unordered-list-item' },
+    { label: 'OL', icon: <BsListOl className="richTextEditorIcons" />, style: 'ordered-list-item' },
+  ];
   return (
     <div className="RichEditor-controls">
       {BLOCK_TYPES.map(type =>
@@ -184,7 +299,7 @@ const INLINE_STYLES = [
 const InlineStyleControls = props => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
-    <div className="RichEditor-controls">
+    <div className="RichEditor-controls custom-controls">
       {INLINE_STYLES.map(type =>
         <StyleButton
           key={type.label}

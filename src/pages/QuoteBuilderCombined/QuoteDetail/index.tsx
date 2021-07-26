@@ -1,7 +1,7 @@
 import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid, Button } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -511,10 +511,28 @@ export default function QuoteDetail() {
                         fetchQuoteData={fetchQuoteData}
                         handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
                       />)}
-                      {relatedTo && relatedTo["Project Sales"]?.Quotes && permissions?.projectSales?.isRead && (
+                    </Suspense>
+                  </TabPanel>
+
+                  <TabPanel value={tabValue} index={1}>
+                    <>
+                      <Suspense fallback={
+                        <Loader minHeight="500px" text="Loading..." />
+                      }>
+                        {(quoteData && <QuoteDetailPage
+                          quoteData={quoteData}
+                          quotePermissions={permissions[qbResource]}
+                          selectedEntity={selectedEntity}
+                          ifQuoteApprovedAapproved={ifQuoteApproved.approved}
+                          allowedToEdit={allowedToEdit}
+                          handleOpenUpdateDialog={handleOpenUpdateDialog}
+                          handleSetSteps={handleSetSteps}
+                        />)}
+                      </Suspense>
+                      {permissions?.projectSales?.isRead && (
                         <ProjectInAccordion
                           recordsPerLine={3}
-                          projectSales={relatedTo["Project Sales"]["Quotes"]}
+                          projectSales={relatedTo && relatedTo["Project Sales"]?.Quotes || []}
                           type={typeCreateProjectSalesDialog}
                           fetchData={() => fetchRelatedTo()}
                           permissions={permissions}
@@ -522,23 +540,7 @@ export default function QuoteDetail() {
                           isAllowedToEdit={allowedToEdit}
                         />
                       )}
-                    </Suspense>
-                  </TabPanel>
-
-                  <TabPanel value={tabValue} index={1}>
-                    <Suspense fallback={
-                      <Loader minHeight="500px" text="Loading..." />
-                    }>
-                      {(quoteData && <QuoteDetailPage
-                        quoteData={quoteData}
-                        quotePermissions={permissions[qbResource]}
-                        selectedEntity={selectedEntity}
-                        ifQuoteApprovedAapproved={ifQuoteApproved.approved}
-                        allowedToEdit={allowedToEdit}
-                        handleOpenUpdateDialog={handleOpenUpdateDialog}
-                        handleSetSteps={handleSetSteps}
-                      />)}
-                    </Suspense>
+                    </>
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={2}>
