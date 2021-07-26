@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
 import Sidebar from "./Sidebar/Sidebar";
+import GlobalUserChat from "./GlobalUserChat";
 
 const useStyles = makeStyles(() => ({
   content: {
@@ -16,7 +17,7 @@ const useStyles = makeStyles(() => ({
 
 const Layout = ({ children, width }) => {
   const contentRef = useRef(null);
-  const { key } = useLocation();
+  const { key, pathname } = useLocation();
   const classes = useStyles();
   const [toggleDrawer, setToggleDrawer] = useState<Boolean>(false);
 
@@ -48,6 +49,7 @@ const Layout = ({ children, width }) => {
           {children}
         </motion.div>
       </Box>
+      {pathname==="/"  && <GlobalUserChat/>}
     </div>
   );
 };

@@ -1208,9 +1208,9 @@ export default function QuoteProcess(props) {
                                 </option>
                             ))}
                         </select>
-                        {ifQuoteApproved.approved === false && (
+                        { (
                             <>
-                                {currentVersion !== 1 && (
+                                {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                                     <Button
                                         variant="outlined"
                                         size="small"
@@ -1226,7 +1226,7 @@ export default function QuoteProcess(props) {
                                     </Button>
                                 )}
                                 <Button
-                                    disabled={!allowedToEdit || isCloning || loading}
+                                    disabled={quoteData.versions[currentVersion]?.processStatus === "End" || !allowedToEdit || isCloning || loading}
                                     variant="contained"
                                     type="button"
                                     size="small"
@@ -1265,6 +1265,7 @@ export default function QuoteProcess(props) {
                         Refresh={fetchQuoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
+                        versionProcessStatus={quoteData.versions[currentVersion]?.processStatus}
                         loading={loading}
                         approvedQuote={ifQuoteApproved}
                         DOAlimit={DOAmaxLimit}
