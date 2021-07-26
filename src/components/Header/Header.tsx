@@ -423,6 +423,15 @@ const Header = ({ toggleDrawer }) => {
     setOpen(false);
   };
 
+  window.addEventListener('storage', (event) => {
+    if (event.storageArea == localStorage) {
+         let token = localStorage.getItem('token');
+         if(token == undefined) { 
+            window.location.reload();
+          }
+    }
+});
+
   const logoutUser = async () => {
     try {
       if (!isEmpty(account)) {
