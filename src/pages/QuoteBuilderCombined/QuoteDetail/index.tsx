@@ -321,20 +321,42 @@ export default function QuoteDetail() {
   const handleReOpenQuote = () => {
     const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
     setQuoteReOpening(true);
+
+    let notEndVersions = []
+    Object.keys(quoteData.versions).forEach((v) => {
+      if (quoteData.versions[v]?.processStatus !== "End"){
+        notEndVersions.push(v)
+      }
+    });
+
     axiosInstance()
-        .post(
-            `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
-            { TNC: previousVersionTNC }
-        )
-        .then(() => {
-            fetchQuoteData(0);
-            setQuoteReOpening(false);
-        })
-        .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setQuoteReOpening(false);
-        });
-};
+    .put(
+      `/quote-builder/updateVersions/${quoteData._id}`,
+      { versions: notEndVersions, status:"Not Booked", processStatus:"End" }
+    )
+    .then(() => {
+
+      axiosInstance()
+      .post(
+        `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+        { TNC: previousVersionTNC }
+      )
+      .then(() => {
+        fetchQuoteData(0);
+        setQuoteReOpening(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setQuoteReOpening(false);
+      });
+
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+      setQuoteReOpening(false);
+    });
+
+  };
 
   const handleVersionUpdate = (
     Columns,
