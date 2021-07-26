@@ -295,6 +295,7 @@ export default function NewOpportunityProjectSales({
                                   ) : field.fieldName === "amount" ? (
                                     <FormTypes
                                       // {...rest}
+                                      selectedCurrencyCode={values["currency"]}
                                       startAdornment={
                                         currencySymbol ? (
                                           <InputAdornment position="start">

@@ -324,6 +324,7 @@ export default function ManageBudgetDialog({
                                                                             ) : budgetMonths.some(d => d === field.fieldName.trim()) ? (
                                                                                 <FormTypes
                                                                                     // {...rest}
+                                                                                    selectedCurrencyCode={values["currency"]}
                                                                                     startAdornment={
                                                                                         currencySymbol ? (
                                                                                             <InputAdornment position="start">
