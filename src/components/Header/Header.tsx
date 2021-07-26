@@ -25,7 +25,7 @@ import {
   HelpOutline,
   ExpandMore,
 } from "@material-ui/icons";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 import { useHistory, Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
@@ -173,7 +173,7 @@ const Header = ({ toggleDrawer }) => {
   const history = useHistory();
   const isMobile = useMediaQuery("(max-width:599px)");
   const [isSearch, setSearch] = useState(false);
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
   const [entitiesEl, setEntitiesEl] = useState(null);
@@ -277,6 +277,8 @@ const Header = ({ toggleDrawer }) => {
         token,
       },
       transports: ['websocket', "pooling"],
+      reconnectionAttempts:5,
+      reconnectionDelay:5000
     });
     setSocket(s);
   }, [user]);
@@ -295,6 +297,7 @@ const Header = ({ toggleDrawer }) => {
     }
     return () => {
       if (socket) {
+        socket.disconnect();
         socket.off("connect");
         socket.off("data");
       }
@@ -422,6 +425,15 @@ const Header = ({ toggleDrawer }) => {
     }
     setOpen(false);
   };
+
+  window.addEventListener('storage', (event) => {
+    if (event.storageArea == localStorage) {
+         let token = localStorage.getItem('token');
+         if(token == undefined) { 
+            window.location.reload();
+          }
+    }
+});
 
   const logoutUser = async () => {
     try {

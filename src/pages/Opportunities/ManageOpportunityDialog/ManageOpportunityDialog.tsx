@@ -633,6 +633,7 @@ export default function ManageOpportunityDialog({
                                       "estimatedAmount" ? (
                                       <FormTypes
                                         // {...rest}
+                                        selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
                                             <InputAdornment position="start">
