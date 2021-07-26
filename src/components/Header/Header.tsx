@@ -916,6 +916,9 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.supplierContactDetail.path)) {
       history.push({ pathname: routes.supplierContact.path });
     }
+    if (history.location.pathname.includes(routes.projectSalesDetail.path)) {
+      history.push({ pathname: routes.projectSales.path });
+    }
   }
 
   return (
