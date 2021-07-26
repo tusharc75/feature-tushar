@@ -133,8 +133,8 @@ export default function QuoteProcess(props) {
         "Description",
         "Unit",
         "Qty",
-        `Sales Price Per Unit`,
-        `Total Sales Price`,
+        `Sales Price Per Unit ${quoteData?.currency}`,
+        `Total Sales Price ${quoteData?.currency}`,
       ]
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
@@ -399,6 +399,15 @@ export default function QuoteProcess(props) {
         return result;
     }, [quoteData]);
 
+    const getNormalizeKey = (key) => {
+         return key.includes("_")
+                    ? key.split("_").length === 2
+                        ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()}`
+                        : key.split("_").length === 3
+                        ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()}`
+                        : `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()} ${key.split("_")[3].toUpperCase()}`
+                    : startCase(key);
+    } 
 
     const productCalculationForDoa = (BuilderData) => {
         const inventory: { fieldName: string; fieldValue: any }[][] = [];
@@ -411,8 +420,6 @@ export default function QuoteProcess(props) {
             "string",
             "srno",
         ];
-
-        setProductsData(BuilderData)
 
         let totalCost = 0;
         let totalSellingPrice = 0;
@@ -472,19 +479,25 @@ export default function QuoteProcess(props) {
             //     setNextStep(false);
             // }
         // }
+        let colName = [];
+        let dynamicTable = [];
+        let allData = [];
+
         BuilderData.forEach((quoteRows: { [x: string]: any }) => {
             const quoteRowKeys = Object.keys(quoteRows);
-
             let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-
-            // const colName = [];
-
+            let tableObj = {}
+            let dataObj = {}
             quoteRowKeys.forEach((key) => {
                 if (ignoredKeys.indexOf(key) === -1) {
-                    // const fullKey = key.includes("_") ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()}` : startCase(key)
-                    // if (!colName.includes(fullKey)) {
-                    //     colName.push(fullKey)
-                    // }
+                    if (typeof quoteRows[key] !== "object") {
+                        tableObj[getNormalizeKey(key)] = quoteRows[key];
+                        dataObj[key] = quoteRows[key];
+                    }
+                    const fullKey = getNormalizeKey(key);
+                    if (!colName.includes(fullKey) && fullKey !== "Product Image") {
+                        colName.push(fullKey)
+                    }
                     let indexkey = key;
                     let currency = "";
                     if (key.includes("_")) {
@@ -537,11 +550,15 @@ export default function QuoteProcess(props) {
                 }
             });
 
-            // setColName(colName)
-
+            
             inventory.push(inventorydata);
+            dynamicTable.push(tableObj)
+            allData.push(dataObj)
         });
 
+        setColName(colName)
+        setProductsData(allData);
+        setDynamicTableData(dynamicTable);
         return {
             inventory: inventory,
             totalMargin: totalMargin,
@@ -659,26 +676,26 @@ export default function QuoteProcess(props) {
                 setCustomerreq(false);
             }
 
-            const ColName = inventory[0].map((col) =>
-                col.fieldName === "Productname" ? "Product Name" : col.fieldName
-            );
+            // const ColName = inventory[0].map((col) =>
+            //     col.fieldName === "Productname" ? "Product Name" : col.fieldName
+            // );
 
-            const allData: any = [];
-            inventory.forEach((col) => {
-                let obj: { [key: string]: string | number } = {};
+            
+            // setColName(ColName);
+            // const allData: any = [];
+            // inventory.forEach((col) => {
+            //     let obj: { [key: string]: string | number } = {};
 
-                col.forEach((_col) => {
-                    obj[
-                        _col.fieldName === "Productname" ? "Product Name" : _col.fieldName
-                    ] = _col.fieldValue || "";
-                });
+            //     col.forEach((_col) => {
+            //         obj[
+            //             _col.fieldName === "Productname" ? "Product Name" : _col.fieldName
+            //         ] = _col.fieldValue || "";
+            //     });
 
-                allData.push(obj);
-            });
-
-            setColName(ColName);
+            //     allData.push(obj);
+            // });
             setOptions(optionstoSet);
-            setDynamicTableData(allData);
+
         }
     };
 
@@ -755,28 +772,10 @@ export default function QuoteProcess(props) {
                 newTable.push(obj);
             });
 
-
-            const newData = []
-            for (let data of productsData) {
-                let obj = {}
-                const keys = Object.keys(data);
-                const rows = Object.keys(newTable[0]);
-                keys.forEach((k) => {
-                    rows.forEach(_k => {
-                        if (k.includes(camelCase(_k))) {
-                            obj[startCase(k)] = data[k] || '';
-                        }
-                    })
-                })
-
-                newData.push(obj)
-
-            }
-
-            const res = newData.reduce((result, item) => {
+            const res = newTable.reduce((result, item) => {
                 const keys = Object.keys(item);
                 keys.forEach(key => {
-                    if (!key.includes(capitalize(quoteCurrency))) { return; }
+                    if (!key.includes(quoteCurrency)) { return; }
                     result[key] = result[key]
                         ? result[key] + item[key]
                         : item[key];
@@ -784,8 +783,10 @@ export default function QuoteProcess(props) {
                 return result;
             }, { ["Product Name"]: "Total" });
 
+            console.log(res)
+
             Object.keys(res).forEach(k => {
-                if (k.includes(capitalize(quoteCurrency))) {
+                if (k.includes(quoteCurrency)) {
                     res[k] = res[k] && res[k].toString().split(".")[1] !== undefined
                         && res[k].toString().split(".")[1].length > 4
                         ? parseFloat(res[k]).toFixed(4)
@@ -794,9 +795,9 @@ export default function QuoteProcess(props) {
             })
 
 
-            newData.push(res);
+            newTable.push(res);
 
-            const ws = XLSX.utils.json_to_sheet(newData);
+            const ws = XLSX.utils.json_to_sheet(newTable);
             const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
             const excelBuffer = XLSX.write(wb, {
                 bookType: "xlsx",
@@ -814,78 +815,6 @@ export default function QuoteProcess(props) {
             }
         }
     };
-
-
-
-
-    // const handleVersionUpdate = (
-    //     Columns,
-    //     versionStatus,
-    //     selectedTermsAndConditions,
-    //     view = false,
-    //     download = false
-    // ) => {
-    //     let body = {
-    //         acceptedColumns: Columns,
-    //         status: versionStatus,
-    //         TNC: selectedTermsAndConditions
-    //     };
-
-    //     setUpdatingVersion(true);
-    //     axiosInstance()
-    //         .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-    //         .then(({ data: { data } }) => {
-    //             setUpdatingVersion(false);
-
-    //             setPdfFileName(data.fileName)
-    //             if (view && data.fileName) {
-    //                 setUpdatingVersion(true);
-    //                 axiosInstance()
-    //                     .get(`user/download?fileName=${data.fileName}`, {
-    //                         responseType: "blob",
-    //                     })
-    //                     .then(({ data }) => {
-    //                         setUpdatingVersion(false);
-    //                         const file = new Blob([data], { type: "application/pdf" });
-    //                         const fileURL = URL.createObjectURL(file);
-    //                         const pdfWindow = window.open();
-    //                         pdfWindow.location.href = fileURL;
-    //                     })
-    //                     .catch((err) => {
-    //                         setUpdatingVersion(false);
-    //                         toastConfig.setToastConfig(err);
-    //                     });
-    //             } else if (download && data.fileName) {
-    //                 setUpdatingVersion(true);
-    //                 axiosInstance()
-    //                     .get(`user/download?fileName=${data.fileName}`, {
-    //                         responseType: "blob",
-    //                     })
-    //                     .then(({ data }) => {
-    //                         setUpdatingVersion(false);
-    //                         const url = window.URL.createObjectURL(
-    //                             new Blob([data], { type: "application/pdf" })
-    //                         );
-    //                         const link = document.createElement("a");
-    //                         link.href = url;
-    //                         link.setAttribute(
-    //                             "download",
-    //                             `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-    //                         );
-    //                         document.body.appendChild(link);
-    //                         link.click();
-    //                     })
-    //                     .catch((err) => {
-    //                         setUpdatingVersion(false);
-    //                         toastConfig.setToastConfig(err);
-    //                     });
-    //             }
-    //         })
-    //         .catch((err) => {
-    //             toastConfig.setToastConfig(err);
-    //             setUpdatingVersion(false);
-    //         });
-    // };
 
     const QuoteStatusChange = (accepted, signature, comment) => {
         if (DOARequestId) {
