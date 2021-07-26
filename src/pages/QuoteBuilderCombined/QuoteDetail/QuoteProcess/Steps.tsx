@@ -230,11 +230,11 @@ const Steps = (props) => {
       <div
         className={clsx(classes.root, {
           [classes.active]: active,
-          [classes.completed]: completed || approvedQuote.approved,
+          [classes.completed]: completed ,
           [classes.rejected]: rejected,
         })}
       >
-        {icons[approvedQuote.approved ? "3" : String(status)]}
+        {icons[String(status)]}
       </div>
     );
   };
@@ -304,14 +304,14 @@ const Steps = (props) => {
     <div>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+          approvedQuote.approved  && approvedQuote.versionApproved === version && (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
               been Approved
             </Typography>
           </div>
-        ) : (
+        )}
           <>
             {/* {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
@@ -399,7 +399,6 @@ const Steps = (props) => {
               </div>
             )}
           </>
-        )}
         {/* 
         {activeStep !== steps.length - 1 && (
           <>
@@ -457,7 +456,7 @@ const Steps = (props) => {
             {!isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       <Button
                         variant="contained"
@@ -494,7 +493,7 @@ const Steps = (props) => {
             {isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       <IconButton
                         color="primary"
@@ -526,7 +525,7 @@ const Steps = (props) => {
             {isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       {versionStatus.split(" ")[0] !== "Rejected" ? (
                         <IconButton
@@ -574,8 +573,7 @@ const Steps = (props) => {
                     className={clsx(classes.step, {
                       [classes.active]:
                         currentStep > i ||
-                        steps[currentStep] === "End" ||
-                        approvedQuote.approved,
+                        steps[currentStep] === "End" ,
                       [classes.currentStep]: currentStep === i,
                       [classes.inActive]: currentStep !== i,
                     })}
@@ -584,7 +582,7 @@ const Steps = (props) => {
                       style={{color: "#555"}}
                       StepIconComponent={ColorlibStepIcon}
                       className={
-                        currentStep === i || approvedQuote.approved
+                        currentStep === i 
                           ? "currentStepColor"
                           : null
                       }
@@ -606,7 +604,7 @@ const Steps = (props) => {
             {!isMobile &&  activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       {versionStatus.split(" ")[0] !== "Rejected" ? (
                         <Button
