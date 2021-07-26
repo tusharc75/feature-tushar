@@ -137,7 +137,7 @@ const ProductTemplate = () => {
                 let _field_data = _field
                 _field_data._id = _field_data._id.toString();
                 if (!isNaN(_field._id)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
                 }
                 _field_data.sectionName = _section.sectionName
                 _field_data.order = ++order
