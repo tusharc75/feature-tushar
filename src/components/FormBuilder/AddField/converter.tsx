@@ -37,9 +37,8 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
 
 
     const handleChangeUnit = (value) => {
-        setFieldValue("units", value)
+        setFieldValue("units", value.map((_f) => _f.trim()))
         let data = values["option"] ? [...values["option"]] : []
-
         if (data.length > value.length) {
             let index = 0;
             let deleteindex = 0;
@@ -61,7 +60,6 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
             newOptions.push(row)
         });
         setFieldValue("option", newOptions)
-
         if (values["displayUnits"]) {
             const result = []
             values["displayUnits"].forEach((_unit) => {
@@ -70,6 +68,15 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                 }
             })
             setFieldValue("displayUnits", result)
+        }
+        if (values["formulaUnits"]) {
+            const result = []
+            values["formulaUnits"].forEach((_unit) => {
+                if (value.includes(_unit)) {
+                    result.push(_unit)
+                }
+            })
+            setFieldValue("formulaUnits", result)
         }
     }
 
@@ -80,7 +87,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
             <Autocomplete
                 multiple
                 disableCloseOnSelect={true}
-                id="tags-filled"
+                id="units"
                 options={[]}
                 value={values["units"] ? values["units"] : []}
                 freeSolo
@@ -120,7 +127,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                                     {values["units"] && values["units"].map((_unit, index) => (
                                         <td className={classes.tdWidth} key={index}>
                                             <TextField
-                                                id="standard-basic"
+                                                name={_unit + "_" + index}
                                                 variant="outlined"
                                                 margin="dense"
                                                 fullWidth
@@ -137,13 +144,13 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                 </Box>}
             {(values["units"] && values["units"].length > 0) && <Box mt={1}>
                 <Grid spacing={3} container>
-                    <Grid item xs={12} sm={6} md={6}>
+                    <Grid item xs={12} sm={4} md={4}>
                         <FormControl variant="outlined" fullWidth margin="dense">
-                            <InputLabel htmlFor="filled-age-native-simple">Display Units</InputLabel>
+                            <InputLabel htmlFor="displayUnits">Display Units</InputLabel>
                             <Select
                                 inputProps={{
-                                    name: 'inputFields',
-                                    id: "demo-simple-select-outlined"
+                                    name: 'displayUnits',
+                                    id: "displayUnits"
                                 }}
                                 margin="dense"
                                 label="Display Units"
@@ -163,20 +170,46 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                             </Select>
                         </FormControl>
                     </Grid>
+                    <Grid item xs={12} sm={4} md={4}>
+                        <FormControl variant="outlined" fullWidth margin="dense">
+                            <InputLabel htmlFor="formulaUnits">Formula Units</InputLabel>
+                            <Select
+                                inputProps={{
+                                    name: 'formulaUnits',
+                                    id: "formulaUnits"
+                                }}
+                                margin="dense"
+                                label="Formula Units"
+                                multiple
+                                name="formulaUnits"
+                                value={values["formulaUnits"] ? values["formulaUnits"] : []}
+                                onChange={(e) => setFieldValue("formulaUnits", e.target.value)}
+                                renderValue={(selected: any) => selected.join(', ')}
+                                MenuProps={MenuProps}
+                            >
+                                {values["units"] && values["units"].map((_unit) => (
+                                    <MenuItem key={_unit} value={_unit}>
+                                        <Checkbox color="primary" checked={values["formulaUnits"] && values["formulaUnits"].indexOf(_unit) > -1} />
+                                        <ListItemText primary={_unit} />
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
 
                     {values["isFormula"] &&
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid item xs={12} sm={4} md={4}>
                             <FormControl fullWidth margin="dense" variant="outlined">
-                                <InputLabel id="demo-simple-select-outlined-label">Formula applied on converter</InputLabel>
+                                <InputLabel id="formulaOnConverter">Formula applied on converter</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-outlined-label"
-                                    id="demo-simple-select-outlined"
+                                    labelId="formulaOnConverter"
+                                    id="formulaOnConverter"
                                     value={values["formulaOnConverter"]}
                                     onChange={(e) => setFieldValue("formulaOnConverter", e.target.value)}
                                     label="Formula applied on converter"
                                     name="formulaOnConverter"
                                 >
-                                    {values["displayUnits"] && values["displayUnits"].map((_unit) => (
+                                    {values["formulaUnits"] && values["formulaUnits"].map((_unit) => (
                                         <MenuItem value={_unit}>{_unit}</MenuItem>
                                     ))}
                                 </Select>

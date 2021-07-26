@@ -777,7 +777,7 @@ const FormTypes = (props) => {
                 error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
                 helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
                 ref={inputNumberRef}
-                onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))}
+                onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
                 InputProps={{
                   inputProps: { min: 0 },
                   readOnly: fieldData && fieldData.isUneditable ? true : false

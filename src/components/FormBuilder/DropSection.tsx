@@ -80,6 +80,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                 delete fieldData.createdBy
                 delete fieldData.updatedBy
                 delete fieldData._id
+                delete fieldData.fieldName
                 if (index !== null) {
                     row.field.splice(index, 0, { _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 });
                 }

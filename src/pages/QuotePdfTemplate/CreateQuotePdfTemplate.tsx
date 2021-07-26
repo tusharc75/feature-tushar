@@ -155,7 +155,7 @@ const CreateQuotePdfTemplate = () => {
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
+          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
         }
         _field_data.order = ++order;
         fields.push(_field_data);

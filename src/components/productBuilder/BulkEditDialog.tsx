@@ -24,7 +24,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Tooltip from '@material-ui/core/Tooltip';
-import { autoCalculate, autoCalculateSpecificFields } from "../../constants/formulaUtility";
+import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
 
 var levalOrderBy = [
     "product",
