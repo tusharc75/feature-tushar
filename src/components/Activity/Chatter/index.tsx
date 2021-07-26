@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { Send } from "@material-ui/icons";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -41,7 +41,7 @@ const Chatter = (props) => {
   const [message, setMessage] = useState("");
   const [chatterId, setChatterId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState<Socket>(null);
   const [isFocused, setFocused] = useState(false);
 
   const msgBoxRef = useCallback(
@@ -88,7 +88,9 @@ const Chatter = (props) => {
       auth: {
         token
       },
-      transports: ['websocket',"pooling"],
+      reconnectionAttempts:5,
+      reconnectionDelay:5000,
+      transports: ['websocket',"pooling"]
 
     });
     setSocket(s);
@@ -108,6 +110,7 @@ const Chatter = (props) => {
 
     return () => {
       if (socket) {
+        socket.disconnect()
         socket.off("connect");
       }
     };

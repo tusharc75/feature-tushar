@@ -1058,6 +1058,7 @@ export default function ManageQuoteDialog({
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
                                         // {...rest}
+                                        selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
                                             <InputAdornment position="start">
@@ -1443,7 +1444,7 @@ export default function ManageQuoteDialog({
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      const err = Object.keys({...errors,...customError});
+                      const err = Object.keys({ ...errors, ...customError });
                       if (err.length) {
                         const input = document.querySelector(
                           `input[name=${err[0]}]`,
