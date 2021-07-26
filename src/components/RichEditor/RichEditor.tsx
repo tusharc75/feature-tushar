@@ -172,7 +172,6 @@ const BlockStyleControls = props => {
   const [isUploading, setUploading] = useState(false);
 
   const insertImage = (editorState, source) => {
-    console.log("🚀 ~ file: RichEditor.tsx ~ line 174 ~ insertImage ~ src", source)
 
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
