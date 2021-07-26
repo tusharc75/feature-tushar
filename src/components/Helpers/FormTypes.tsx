@@ -40,7 +40,8 @@ import {
   documentUploadMaxSize,
   dateFormatForInputControl,
   getUniqueCurrencies,
-  documentUploadSupportExtensions
+  documentUploadSupportExtensions,
+  formatAmountWithCurrency
 } from '../../constants/helpers';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
@@ -72,9 +73,25 @@ const formatDecimal = (value, decimalPlaces) => {
   }
 };
 
-const CustomFormat = (props: NumberFormatCustomProps) => {
-  const { inputRef, onChange, ...other } = props;
-  return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
+const CustomFormat = (props: NumberFormatCustomProps | any) => {
+  const { inputRef, onChange, selectedCurrencyCode, ...other } = props;
+
+  if (selectedCurrencyCode) {
+    const { amountWithouCurrencyCode } = formatAmountWithCurrency(selectedCurrencyCode, 123456789);
+
+    if (amountWithouCurrencyCode === "12,34,56,789") {
+      return <NumberFormat {...other} getInputRef={inputRef} isNumericString thousandSeparator
+        thousandsGroupStyle="lakh" />;
+    } else if (amountWithouCurrencyCode === "1,2345,6789") {
+      return <NumberFormat {...other} getInputRef={inputRef} isNumericString thousandSeparator
+        thousandsGroupStyle="wan" />;
+    } else {
+      return <NumberFormat {...other} getInputRef={inputRef} isNumericString thousandSeparator
+        thousandsGroupStyle="thousand" />;
+    }
+  } else {
+    return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
+  }
 };
 
 const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) =>
@@ -166,6 +183,7 @@ const FormTypes = (props) => {
     customError = {},
     handleRemoveField,
     showErrorMessage = false,
+    selectedCurrencyCode = null,
     ...rest
   } = props;
   const [optionsList, setOptions] = React.useState([]);
@@ -576,7 +594,8 @@ const FormTypes = (props) => {
             allowNegative: false,
             onValueChange: (values) => {
               handleChange(name, values.value);
-            }
+            },
+            selectedCurrencyCode: selectedCurrencyCode
           },
           startAdornment: startAdornment
         }}
