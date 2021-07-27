@@ -117,7 +117,7 @@ let projectSalesTimeout;
 const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -200,7 +200,7 @@ const ProjectSales: FC = () => {
     if (renderCount > 0) {
       fetchProjects();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
   const NameRenderer = (params) => (
     <Link
@@ -279,6 +279,10 @@ const ProjectSales: FC = () => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterProjects=${selectedType}`;
 
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -307,35 +311,37 @@ const ProjectSales: FC = () => {
   };
 
   const fetchProjects = async () => {
-    dispatch({ type: "loading", loading: true });
-    const queryString = getQueryString();
+    if (selectedEntity) {
+      dispatch({ type: "loading", loading: true });
+      const queryString = getQueryString();
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+      if (gridApi) {
+        gridApi.setRowData([]);
+      }
 
-    axiosInstance()
-      .get(`/project-sales${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((project) => ({
-          ...project,
-          projectManager: project.projectManager?.optionLabel,
-          projectManagerId: project.projectManager?.optionValue,
-          createdBy: project.createdBy?.user?.concatedName,
-          createdByDate: project.createdBy?.date,
-          updatedBy: project.updatedBy?.user?.concatedName,
-          updatedByDate: project.updatedBy?.date,
-        }));
+      axiosInstance()
+        .get(`/project-sales${queryString}`)
+        .then(({ data: { data, count } }) => {
+          let rows = data.map((project) => ({
+            ...project,
+            projectManager: project.projectManager?.optionLabel,
+            projectManagerId: project.projectManager?.optionValue,
+            createdBy: project.createdBy?.user?.concatedName,
+            createdByDate: project.createdBy?.date,
+            updatedBy: project.updatedBy?.user?.concatedName,
+            updatedByDate: project.updatedBy?.date,
+          }));
 
-        dispatch({ type: "initialize", data: rows, count: count });
-        setTimeout(() => {
+          dispatch({ type: "initialize", data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: "loading", loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
           dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: "loading", loading: false });
-      });
+        });
+    }
     // eslint-disable-next-line
   };
 
