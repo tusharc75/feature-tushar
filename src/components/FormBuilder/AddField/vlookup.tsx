@@ -68,6 +68,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
             const ws = readedData.Sheets[wsname];
             const dataParse = XLSX.utils.sheet_to_json(ws, { header: 1 });
             if (dataParse.length) {
+                dataParse.splice(0, 1);
                 let option = []
                 dataParse.forEach((row) => {
                     let rowInsert = {}
