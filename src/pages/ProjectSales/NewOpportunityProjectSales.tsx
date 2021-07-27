@@ -644,6 +644,18 @@ export default function NewOpportunityProjectSales({
                   }
                   onClick={(e) => {
                     e.preventDefault();
+                    const err = Object.keys(errors);
+                    if (err.length) {
+                      const input = document.querySelector(
+                        `input[name=${err[0]}]`,
+                      );
+
+                      input.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'start',
+                      });
+                    }
                     handleSubmit(
                       errors,
                       setFieldTouched,

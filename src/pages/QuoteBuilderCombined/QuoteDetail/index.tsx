@@ -1,7 +1,7 @@
 import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid, Button } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -25,6 +25,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from "react-device-detect";
+import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectInAccordion"
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
 const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
@@ -64,6 +65,7 @@ export default function QuoteDetail() {
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
+  const { id } = useParams();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -87,6 +89,9 @@ export default function QuoteDetail() {
 
   const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
+  const [relatedTo, setRelatedTo] = useState({});
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: qbResource }]);
+
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
     newValue: number
@@ -94,7 +99,6 @@ export default function QuoteDetail() {
     setTabValue(newValue);
   };
 
-  const { id } = useParams();
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -109,6 +113,7 @@ export default function QuoteDetail() {
       }
 
       fetchTermsAndConditions()
+      fetchRelatedTo()
     }
   }, [id]);
 
@@ -118,6 +123,16 @@ export default function QuoteDetail() {
     }
   }, [currentVersion])
 
+  const fetchRelatedTo = () => {
+    axiosInstance()
+      .get(`/quote-builder/related/${id}`)
+      .then(({ data: { data } }) => {
+        setRelatedTo(data)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
@@ -321,20 +336,42 @@ export default function QuoteDetail() {
   const handleReOpenQuote = () => {
     const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
     setQuoteReOpening(true);
+
+    let notEndVersions = []
+    Object.keys(quoteData.versions).forEach((v) => {
+      if (quoteData.versions[v]?.processStatus !== "End") {
+        notEndVersions.push(v)
+      }
+    });
+
     axiosInstance()
-        .post(
+      .put(
+        `/quote-builder/updateVersions/${quoteData._id}`,
+        { versions: notEndVersions, status: "Not Booked", processStatus: "End" }
+      )
+      .then(() => {
+
+        axiosInstance()
+          .post(
             `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
             { TNC: previousVersionTNC }
-        )
-        .then(() => {
+          )
+          .then(() => {
             fetchQuoteData(0);
             setQuoteReOpening(false);
-        })
-        .catch((error) => {
+          })
+          .catch((error) => {
             toastConfig.setToastConfig(error);
             setQuoteReOpening(false);
-        });
-};
+          });
+
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setQuoteReOpening(false);
+      });
+
+  };
 
   const handleVersionUpdate = (
     Columns,
@@ -500,19 +537,32 @@ export default function QuoteDetail() {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
-                    <Suspense fallback={
-                      <Loader minHeight="500px" text="Loading..." />
-                    }>
-                      {(quoteData && <QuoteDetailPage
-                        quoteData={quoteData}
-                        quotePermissions={permissions[qbResource]}
-                        selectedEntity={selectedEntity}
-                        ifQuoteApprovedAapproved={ifQuoteApproved.approved}
-                        allowedToEdit={allowedToEdit}
-                        handleOpenUpdateDialog={handleOpenUpdateDialog}
-                        handleSetSteps={handleSetSteps}
-                      />)}
-                    </Suspense>
+                    <>
+                      <Suspense fallback={
+                        <Loader minHeight="500px" text="Loading..." />
+                      }>
+                        {(quoteData && <QuoteDetailPage
+                          quoteData={quoteData}
+                          quotePermissions={permissions[qbResource]}
+                          selectedEntity={selectedEntity}
+                          ifQuoteApprovedAapproved={ifQuoteApproved.approved}
+                          allowedToEdit={allowedToEdit}
+                          handleOpenUpdateDialog={handleOpenUpdateDialog}
+                          handleSetSteps={handleSetSteps}
+                        />)}
+                      </Suspense>
+                      {permissions?.projectSales?.isRead && (
+                        <ProjectInAccordion
+                          recordsPerLine={3}
+                          projectSales={relatedTo && relatedTo["Project Sales"]?.Quotes || []}
+                          type={typeCreateProjectSalesDialog}
+                          fetchData={() => fetchRelatedTo()}
+                          permissions={permissions}
+                          isAddProjectSale={true}
+                          isAllowedToEdit={allowedToEdit}
+                        />
+                      )}
+                    </>
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={2}>
