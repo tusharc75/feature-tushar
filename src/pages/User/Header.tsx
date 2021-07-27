@@ -24,7 +24,8 @@ const Header = (props) => {
     openDOADialog,
     entityRoleRedirectDetails,
     onEntityRoleRedirectDetailRemove,
-    unAssignUsersFromEntity
+    unAssignUsersFromEntity,
+    openUserSetupDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -162,6 +163,15 @@ const Header = (props) => {
                         Un-assign Entity
                       </MenuItem>
                     )}
+                    <MenuItem
+                        disabled={rolesActionDisabled}
+                        onClick={() => {
+                          openUserSetupDialog();
+                          closeActions();
+                        }}
+                      >
+                        User Setup
+                      </MenuItem>
                   </>
                 )}
               </Menu>

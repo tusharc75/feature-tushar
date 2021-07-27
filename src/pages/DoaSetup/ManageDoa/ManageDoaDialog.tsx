@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage" }) => {
+const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage", isRenderedFromUserSetUp = false }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
@@ -144,16 +144,17 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
     }, []);
 
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            scroll="body"
-            maxWidth="md"
-            fullWidth
-        >
+        // <Dialog
+        //     open={open}
+        //     onClose={onClose}
+        //     scroll="body"
+        //     maxWidth="md"
+        //     fullWidth
+        // >
+        <>
             {!loading &&
                 <>
-                    <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />
+                    {!isRenderedFromUserSetUp && <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />}
                     <Grid container className={classes.doaBox}>
                         <Grid item xs={6} md={6} sm={6}>
                             <ToggleButtonGroup size="small"
@@ -361,13 +362,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
 
                                     <CustomDialogFooter>
 
-                                        <Button
-                                            size="small"
-                                            onClick={onClose}
-                                            variant="contained"
-                                        >
-                                            Cancel
-                                        </Button>
+                                        {!isRenderedFromUserSetUp &&
+                                            <Button
+                                                size="small"
+                                                onClick={onClose}
+                                                variant="contained"
+                                            >
+                                                Cancel
+                                            </Button>}
                                         <Button
                                             variant="contained"
                                             color="primary"
@@ -381,7 +383,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                 handleSubmit(values.users)
                                             }}
                                         >
-                                            Save
+                                            {isRenderedFromUserSetUp ? "Save & Finish" : "Save"}
                                         </Button>
                                     </CustomDialogFooter>
                                 </>
@@ -390,7 +392,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                     </div>
                 </>
             }
-        </Dialog>
+            {/* </Dialog> */}
+        </>
     )
 }
 

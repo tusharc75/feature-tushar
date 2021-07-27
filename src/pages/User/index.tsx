@@ -1,5 +1,5 @@
 import { useState, FC, useEffect, useContext, useReducer } from "react";
-import { Tooltip, IconButton, Grid } from "@material-ui/core";
+import { Tooltip, IconButton, Grid, Dialog } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import {
@@ -31,6 +31,7 @@ import ApprovalProcessDialog from "./ApprovalProcessDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import UserSetupDialog from "./UserSetupDialog";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -40,6 +41,7 @@ const User: FC = () => {
     state: { user, permissions },
   }: any = useData();
   const history = useHistory();
+  const [openUserSetupDialog, setOpenUserSetupDialog] = useState(false)
   const [showApprovalProcessDialog, setShowApprovalProcessDialog] = useState(false);
   const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
   const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
@@ -481,55 +483,103 @@ const User: FC = () => {
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
       }
+      {
+        openUserSetupDialog && (
+          <UserSetupDialog
+            open={openUserSetupDialog}
+            close={() => setOpenUserSetupDialog(false)}
+            userIds={selectedRecords.map((d) => d._id)}
+            onSuccess={() => {
+              setOpenUserSetupDialog(false)
+              fetchUsers()
+            }}
+            fetchUsers={() => fetchUsers()}
+            userList={userList}
+            selectedRecords={selectedRecords}
+          />
+        )
+      }
       {globalRolesDialogOpen && (
-        <AssignRolesDialog
-          rolesDialogOpen={globalRolesDialogOpen}
-          handleCloseDialog={handleGlobalRolesCloseDialog}
-          userIds={selectedRecords.map((d) => d._id)}
-          assignedRoles={null}
-          onSuccess={() => {
-            handleGlobalRolesCloseDialog();
-            fetchUsers();
-          }}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={globalRolesDialogOpen}
+          onClose={handleGlobalRolesCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignRolesDialog
+            rolesDialogOpen={globalRolesDialogOpen}
+            handleCloseDialog={handleGlobalRolesCloseDialog}
+            userIds={selectedRecords.map((d) => d._id)}
+            assignedRoles={null}
+            onSuccess={() => {
+              handleGlobalRolesCloseDialog();
+              fetchUsers();
+            }}
+          />
+        </Dialog>
       )}
       {
         showApprovalProcessDialog &&
-        <ApprovalProcessDialog
-          openApprovalProcessDialog={showApprovalProcessDialog}
-          hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
-          onSuccess={() =>
-            setShowApprovalProcessDialog(false)
-          }
-          handleCloseDialog={() => setShowApprovalProcessDialog(false)}
-          userIds={selectedRecords.map((user) => user._id)}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="sm"
+          open={showApprovalProcessDialog}
+          onClose={() => setShowApprovalProcessDialog(false)}
+          aria-labelledby="set-approval-dialog"
+        >
+          <ApprovalProcessDialog
+            openApprovalProcessDialog={showApprovalProcessDialog}
+            hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
+            onSuccess={() =>
+              setShowApprovalProcessDialog(false)
+            }
+            handleCloseDialog={() => setShowApprovalProcessDialog(false)}
+            userIds={selectedRecords.map((user) => user._id)}
+          />
+        </Dialog>
       }
       {regionalRolesDialogOpen && (
-        <AssignEntityDialog
-          entitiesDialogOpen={regionalRolesDialogOpen}
-          handleCloseDialog={handleRegionalRolesCloseDialog}
-          type="entity"
-          ids={selectedRecords.map((d) => d._id)}
-          assignedEntity={[]}
-          regionalRole={false}
-          onSuccess={() => {
-            handleRegionalRolesCloseDialog();
-            fetchUsers();
-          }}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={regionalRolesDialogOpen}
+          onClose={handleRegionalRolesCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignEntityDialog
+            entitiesDialogOpen={regionalRolesDialogOpen}
+            handleCloseDialog={handleRegionalRolesCloseDialog}
+            type="entity"
+            ids={selectedRecords.map((d) => d._id)}
+            assignedEntity={[]}
+            regionalRole={false}
+            onSuccess={() => {
+              handleRegionalRolesCloseDialog();
+              fetchUsers();
+            }}
+          />
+        </Dialog>
       )}
       {doaDialogOpen && (
-        <DoaDialog
-          userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
-          doa={[]}
-          doaCurrency={null}
-          userSelected={selectedRecords.map((d) => d._id)}
+        <Dialog
           open={doaDialogOpen}
-          from={"UserListPage"}
-          onSuccess={handleDOACloseDialog}
           onClose={handleDOACloseDialog}
-        />
+          scroll="body"
+          maxWidth="md"
+          fullWidth
+        >
+          <DoaDialog
+            userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
+            doa={[]}
+            doaCurrency={null}
+            userSelected={selectedRecords.map((d) => d._id)}
+            open={doaDialogOpen}
+            from={"UserListPage"}
+            onSuccess={handleDOACloseDialog}
+            onClose={handleDOACloseDialog}
+          />
+        </Dialog>
       )}
       <Layout>
         <Grid container className="headerbox">
@@ -574,6 +624,9 @@ const User: FC = () => {
               unAssignUsersFromEntity={() => {
                 setIsConformDialogVisible(true);
                 setUnAssignLoading(true)
+              }}
+              openUserSetupDialog={() => {
+                setOpenUserSetupDialog(true);
               }}
             />
           </div>
