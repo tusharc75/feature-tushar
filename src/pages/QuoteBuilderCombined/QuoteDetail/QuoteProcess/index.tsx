@@ -505,8 +505,8 @@ export default function QuoteProcess(props) {
                             } else if (data.displayUnits) {
                                 data.displayUnits.forEach((unit) => {
                                     const casedLabel = `${camelCase(fieldLabel)}_${unit.toLowerCase()}`
-                                    labels.push(`${fieldLabel} ${unit}`)
-                                    labelsWithVal[`${fieldLabel} ${unit}`] = quoteRows[casedLabel]
+                                    labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
+                                    labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
                                 })
                                 
                             } else {
@@ -514,10 +514,13 @@ export default function QuoteProcess(props) {
                                 labelsWithVal[fieldLabel] = quoteRows[data.fieldName]
                             }
 
-                            labels.forEach(d => colName.push(d))
+                            labels.forEach(d => {
+                                if (!colName.includes(d)) {
+                                    colName.push(d)
+                                }
+                            })
                         }
                     })
-                    console.log(labelsWithVal)
                     dynamicTable.push(labelsWithVal)
                 }
                 
