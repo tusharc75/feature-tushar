@@ -143,6 +143,23 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
         setCurrencyData(sortedArr);
     }, []);
 
+    const validate = (values) => {
+        let errors = null;
+        let minTemp = values.users.reduce(function(prev, curr) {
+            return prev.amount < curr.amount ? prev : curr;
+        });
+
+        if (values.users.length > 0) {
+            let tempUser = values.users.find(item => item.id ===  userSelected[0] || item.id ===  "self")
+                if (tempUser && tempUser.amount !== minTemp.amount) {
+                    errors = "Too many characters!";
+                }
+           
+        }
+
+        return errors;
+    };
+
     return (
         <Dialog
             open={open}
@@ -210,7 +227,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                     </Grid>
                     <div className={classes.doaUsersStyle}>
                         <Formik
-                            initialValues={{ users: users }}
+                            initialValues={{ users: users }} 
                             onSubmit={() => { }}
                             render={({ values,
                                 errors }) => (
@@ -311,8 +328,11 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                         ...values.users[index],
                                                                                                         ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                                     })
-                                                                                            }}
+                                                                                                }}
                                                                                             />
+                                                                                            {validate(values) &&  (userVal.id ===  userSelected[0] || userVal.id ===  "self") && (
+                                                                                                    <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
+                                                                                                )}
                                                                                         </Grid>
                                                                                     }
                                                                                     <Grid item md={2}>

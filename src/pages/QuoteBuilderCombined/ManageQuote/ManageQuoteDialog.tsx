@@ -49,6 +49,7 @@ export default function ManageQuoteDialog({
   onSuccess,
   onClose,
   isNew,
+  isClone = false,
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
@@ -393,17 +394,64 @@ export default function ManageQuoteDialog({
         if (isRenderedFromOpportunity) {
           initialData["quoteName"] = opportunityName;
         }
-        setEntityData({
-          fields: newFields,
-          initialValues: isNew
-            ? initialData
-            : getObjKeysWithValues(dataToUpdate, newFields),
-        });
+
+        if (isClone) {
+          let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate))
+          delete tempQuoteData._id;
+          delete tempQuoteData.createdBy;
+          delete tempQuoteData.quoteName;
+          delete tempQuoteData.updatedBy;
+          delete tempQuoteData.versions;
+          setEntityData({
+            fields: newFields,
+            initialValues: getObjKeysWithValues(tempQuoteData, newFields),
+          })
+        }
+        else {
+          setEntityData({
+            fields: newFields,
+            initialValues: isNew
+              ? initialData
+              : getObjKeysWithValues(dataToUpdate, newFields),
+          })
+        }
       });
   };
 
   const onSubmit = (values) => {
-    isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+    isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+  };
+
+  const handleCloneQuote = (values) => {
+    // values.closeDate = "03/03/2021"
+    if (
+      accountId &&
+      accountResource !== customerAccount.accountResource &&
+      !isRenderedFromOpportunity
+    )
+      values["supplierAccountName"] = [accountId];
+    setLoading(true);
+    if (values.customerContactName === "") {
+      values.customerContactName = [];
+    }
+    axiosInstance()
+      .post(`${qbApi}?entity=${selectedEntity}`, values)
+      .then(({ data }) => {
+        const newId = data.data._id;
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+        history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+        setLoading(false);
+        // onSuccess(newId);
+        onClose()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
+      });
   };
 
   const handleCreateQuote = (values) => {
@@ -1443,7 +1491,7 @@ export default function ManageQuoteDialog({
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      const err = Object.keys({...errors,...customError});
+                      const err = Object.keys({ ...errors, ...customError });
                       if (err.length) {
                         const input = document.querySelector(
                           `input[name=${err[0]}]`,
