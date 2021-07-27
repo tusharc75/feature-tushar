@@ -1106,6 +1106,7 @@ export default function ManageQuoteDialog({
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
                                         // {...rest}
+                                        selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
                                             <InputAdornment position="start">

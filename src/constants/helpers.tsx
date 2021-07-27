@@ -933,6 +933,9 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         ...options,
       }
     ).format(amount),
+    amountWithouCurrencyCode: new Intl.NumberFormat(
+      `${language}-${currencyData.countryCode}`
+    ).format(amount)
   };
 };
 

@@ -84,7 +84,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: tempUserList[0].id, name: tempUserList[0].name, amount: 0 }]))
+            setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
     }, [open]);
 
     useEffect(() => {

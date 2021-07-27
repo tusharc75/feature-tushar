@@ -459,6 +459,7 @@ const CreateProduct = (props) => {
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
                                                                         // {...rest}
+                                                                        selectedCurrencyCode={values["currency"]}
                                                                         startAdornment={
                                                                             currencySymbol ? (
                                                                                 <InputAdornment position="start">
