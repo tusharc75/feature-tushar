@@ -397,14 +397,10 @@ export default function ManageQuoteDialog({
 
         if (isClone) {
           let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate))
-          delete tempQuoteData._id;
-          delete tempQuoteData.createdBy;
-          delete tempQuoteData.quoteName;
-          delete tempQuoteData.updatedBy;
-          delete tempQuoteData.versions;
+          const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
           setEntityData({
             fields: newFields,
-            initialValues: getObjKeysWithValues(tempQuoteData, newFields),
+            initialValues: getObjKeysWithValues(rest, newFields),
           })
         }
         else {
@@ -423,7 +419,6 @@ export default function ManageQuoteDialog({
   };
 
   const handleCloneQuote = (values) => {
-    // values.closeDate = "03/03/2021"
     if (
       accountId &&
       accountResource !== customerAccount.accountResource &&
@@ -630,7 +625,7 @@ export default function ManageQuoteDialog({
         fullScreen={isMobile || isTablet}
       >
         <CustomDialogHeader
-          title={isNew ? "Create Quote" : `Editing ${dataToUpdate.quoteName}`}
+          title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
           onClose={onClose}
         />
 

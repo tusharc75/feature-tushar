@@ -145,8 +145,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
 
     const validate = (values) => {
         let errors = null;
-        let minTemp = values.users.reduce(function(prev, curr) {
-            return prev.amount < curr.amount ? prev : curr;
+        let minTemp = values.users.reduce(function(previous, current) {
+            return previous.amount < current.amount ? previous : current;
         });
 
         if (values.users.length > 0) {
