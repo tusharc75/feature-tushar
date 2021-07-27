@@ -49,6 +49,7 @@ export default function ManageQuoteDialog({
   onSuccess,
   onClose,
   isNew,
+  isClone = false,
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
@@ -393,17 +394,59 @@ export default function ManageQuoteDialog({
         if (isRenderedFromOpportunity) {
           initialData["quoteName"] = opportunityName;
         }
-        setEntityData({
-          fields: newFields,
-          initialValues: isNew
-            ? initialData
-            : getObjKeysWithValues(dataToUpdate, newFields),
-        });
+
+        if (isClone) {
+          let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate))
+          const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
+          setEntityData({
+            fields: newFields,
+            initialValues: getObjKeysWithValues(rest, newFields),
+          })
+        }
+        else {
+          setEntityData({
+            fields: newFields,
+            initialValues: isNew
+              ? initialData
+              : getObjKeysWithValues(dataToUpdate, newFields),
+          })
+        }
       });
   };
 
   const onSubmit = (values) => {
-    isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+    isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+  };
+
+  const handleCloneQuote = (values) => {
+    if (
+      accountId &&
+      accountResource !== customerAccount.accountResource &&
+      !isRenderedFromOpportunity
+    )
+      values["supplierAccountName"] = [accountId];
+    setLoading(true);
+    if (values.customerContactName === "") {
+      values.customerContactName = [];
+    }
+    axiosInstance()
+      .post(`${qbApi}?entity=${selectedEntity}`, values)
+      .then(({ data }) => {
+        const newId = data.data._id;
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+        history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+        setLoading(false);
+        // onSuccess(newId);
+        onClose()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
+      });
   };
 
   const handleCreateQuote = (values) => {
@@ -582,7 +625,7 @@ export default function ManageQuoteDialog({
         fullScreen={isMobile || isTablet}
       >
         <CustomDialogHeader
-          title={isNew ? "Create Quote" : `Editing ${dataToUpdate.quoteName}`}
+          title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
           onClose={onClose}
         />
 
