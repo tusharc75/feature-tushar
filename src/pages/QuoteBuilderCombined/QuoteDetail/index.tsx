@@ -78,6 +78,7 @@ export default function QuoteDetail() {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(0);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [isQuoteClone, setIsQuoteClone] = useState(false);
   const [columnView, setColumnView] = useState([]);
   const [steps, setSteps] = useState([]);
   const [productBuilderId, setProductBuilderId] = useState("");
@@ -191,21 +192,15 @@ export default function QuoteDetail() {
     setVersionStatus(quoteData["versions"][event.target.value]["status"]);
     setProcessStatus(quoteData["versions"][event.target.value]["processStatus"]);
   };
-  const handleClone = () => {
-    axiosInstance()
-      .post(`${qbApi}/clone/${quoteData._id}`)
-      .then(({ data }) => {
-        history.push(`${routes.quoteBuilder.path}/detail/${data.data._id}`);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
-
+  
+  const handleOpenCloneDialog = () => {
+    setOpenUpdateDialog(true);
+    setIsQuoteClone(true);
+  };
   const handleSetSteps = (steps) => {
     setSteps(steps);
   };
@@ -548,6 +543,7 @@ export default function QuoteDetail() {
                           ifQuoteApprovedAapproved={ifQuoteApproved.approved}
                           allowedToEdit={allowedToEdit}
                           handleOpenUpdateDialog={handleOpenUpdateDialog}
+                          handleOpenCloneDialog={handleOpenCloneDialog}
                           handleSetSteps={handleSetSteps}
                         />)}
                       </Suspense>
@@ -658,13 +654,16 @@ export default function QuoteDetail() {
           <ManageQuoteDialog
             open={openUpdateDialog}
             onSuccess={() => {
+              setIsQuoteClone(false)
               setOpenUpdateDialog(false);
               fetchQuoteData(currentVersion);
             }}
             onClose={() => {
               setOpenUpdateDialog(false);
+              setIsQuoteClone(false)
             }}
             isNew={false}
+            isClone={isQuoteClone}
             dataToUpdate={quoteData}
             resource={null}
             isRedirectTodetailPage={false}

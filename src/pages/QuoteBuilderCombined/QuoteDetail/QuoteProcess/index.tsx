@@ -227,7 +227,8 @@ export default function QuoteProcess(props) {
                     requestedBy: doa.RequestedBy.firstName,
                     requestedById: doa.RequestedBy.id,
                 }));
-                axiosInstance()
+                if(data.length !== 0){
+                    axiosInstance()
                     .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
                     .then(({ data: { data } }) => {
                         setDOAApproved(data.canApprove)
@@ -236,6 +237,8 @@ export default function QuoteProcess(props) {
                     .catch((err) => {
                         // toastConfig.setToastConfig(err);
                     });
+                }
+
             })
             .catch((error) => {
                 //   toastConfig.setToastConfig(error);
@@ -481,23 +484,52 @@ export default function QuoteProcess(props) {
         // }
         let colName = [];
         let dynamicTable = [];
-        let allData = [];
+        setProductsData(BuilderData);
 
+        const filterKeys = ["priceTemplate", "productTemplate", "productCategory", "productImage"]
         BuilderData.forEach((quoteRows: { [x: string]: any }) => {
             const quoteRowKeys = Object.keys(quoteRows);
             let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-            let tableObj = {}
-            let dataObj = {}
+
+            // Making table columns and data for table
             quoteRowKeys.forEach((key) => {
+                if (key === "fields") {
+                    const labelsWithVal = {}
+                    quoteRows[key].forEach((data) => {
+                        if (!filterKeys.includes(data.fieldName)) {
+                            const fieldLabel = data.fieldLabel;
+                            const labels = []
+                            if (data.displayCurrency) {
+                                data.displayCurrency.forEach((cur) => {
+                                    const casedLabel = `${camelCase(fieldLabel)}_${cur.toLowerCase()}`
+                                    labels.push(`${fieldLabel} ${cur}`)
+                                    labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
+                                })
+                            } else if (data.displayUnits) {
+                                data.displayUnits.forEach((unit) => {
+                                    const casedLabel = `${camelCase(fieldLabel)}_${unit.toLowerCase()}`
+                                    labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
+                                    labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
+                                })
+                                
+                            } else {
+                                labels.push(fieldLabel)
+                                labelsWithVal[fieldLabel] = quoteRows[data.fieldName]
+                            }
+
+                            labels.forEach(d => {
+                                if (!colName.includes(d)) {
+                                    colName.push(d)
+                                }
+                            })
+                        }
+                    })
+                    dynamicTable.push(labelsWithVal)
+                }
+                
+
+
                 if (ignoredKeys.indexOf(key) === -1) {
-                    if (typeof quoteRows[key] !== "object") {
-                        tableObj[getNormalizeKey(key)] = quoteRows[key];
-                        dataObj[key] = quoteRows[key];
-                    }
-                    const fullKey = getNormalizeKey(key);
-                    if (!colName.includes(fullKey) && fullKey !== "Product Image") {
-                        colName.push(fullKey)
-                    }
                     let indexkey = key;
                     let currency = "";
                     if (key.includes("_")) {
@@ -505,24 +537,24 @@ export default function QuoteProcess(props) {
                         key = splitKey[0];
                         currency = splitKey[1].toUpperCase();
                     }
-                    let fields = quoteRows["fields"];
-                    let field = fields.filter(
-                        (d: { fieldName: string }) => d.fieldName === key
-                    );
+                    // let fields = quoteRows["fields"];
+                    // let field = fields.filter(
+                    //     (d: { fieldName: string }) => d.fieldName === key
+                    // );
 
-                    if (typeof field[0] !== "undefined") {
-                        if (typeof quoteRows[key] === "object") {
-                            inventorydata.push({
-                                fieldName: field[0].fieldLabel,
-                                fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-                            });
-                        } else {
-                            inventorydata.push({
-                                fieldName: field[0].fieldLabel,
-                                fieldValue:
-                                    quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-                            });
-                        }
+                    // if (typeof field[0] !== "undefined") {
+                    //     // if (typeof quoteRows[key] === "object") {
+                    //     //     inventorydata.push({
+                    //     //         fieldName: field[0].fieldLabel,
+                    //     //         fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
+                    //     //     });
+                    //     // } else {
+                    //     //     inventorydata.push({
+                    //     //         fieldName: field[0].fieldLabel,
+                    //     //         fieldValue:
+                    //     //             quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+                    //     //     });
+                    //     // }
 
                         if (currency === quoteData?.currency && key === "totalCost") {
                             totalCost = totalCost + quoteRows[indexkey];
@@ -546,18 +578,16 @@ export default function QuoteProcess(props) {
                             totalMargin = totalMargin + quoteRows[indexkey];
                             MarginCurrency = currency;
                         }
-                    }
+                    // }
                 }
             });
 
             
             inventory.push(inventorydata);
-            dynamicTable.push(tableObj)
-            allData.push(dataObj)
         });
+        
 
         setColName(colName)
-        setProductsData(allData);
         setDynamicTableData(dynamicTable);
         return {
             inventory: inventory,
@@ -782,8 +812,6 @@ export default function QuoteProcess(props) {
                 });
                 return result;
             }, { ["Product Name"]: "Total" });
-
-            console.log(res)
 
             Object.keys(res).forEach(k => {
                 if (k.includes(quoteCurrency)) {
