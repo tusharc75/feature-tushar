@@ -227,7 +227,8 @@ export default function QuoteProcess(props) {
                     requestedBy: doa.RequestedBy.firstName,
                     requestedById: doa.RequestedBy.id,
                 }));
-                axiosInstance()
+                if(data.length !== 0){
+                    axiosInstance()
                     .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
                     .then(({ data: { data } }) => {
                         setDOAApproved(data.canApprove)
@@ -236,6 +237,8 @@ export default function QuoteProcess(props) {
                     .catch((err) => {
                         // toastConfig.setToastConfig(err);
                     });
+                }
+
             })
             .catch((error) => {
                 //   toastConfig.setToastConfig(error);
