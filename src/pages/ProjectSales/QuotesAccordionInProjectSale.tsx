@@ -302,13 +302,17 @@ export default function QuotesAccordionInProjectSale({
                                   !isQuotePrivate(obj) ?
                                     quoteNameWithRedirect(obj)
                                     :
-                                    [...obj.collaborator, obj.owner].includes(user.user?._id) ?
+                                    obj?.privateAccess === true ?
+                                      [...obj.collaborator, obj.owner].includes(user.user?._id) ?
+                                        quoteNameWithRedirect(obj)
+                                        :
+                                        (<span className="d-flex gap-2 align-items-center">
+                                          <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                            <InfoOutlinedIcon fontSize="small" />
+                                          </Tooltip>
+                                        </span>)
+                                      :
                                       quoteNameWithRedirect(obj)
-                                      : (<span className="d-flex gap-2 align-items-center">
-                                        <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
-                                          <InfoOutlinedIcon fontSize="small" />
-                                        </Tooltip>
-                                      </span>)
                                 }
                               </Grid>
                               <Grid item xs={6}>
