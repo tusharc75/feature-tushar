@@ -17,7 +17,7 @@ const useStyles = makeStyles(() => ({
 
 const Layout = ({ children, width }) => {
   const contentRef = useRef(null);
-  const { key, pathname } = useLocation();
+  const { key } = useLocation();
   const classes = useStyles();
   const [toggleDrawer, setToggleDrawer] = useState<Boolean>(false);
 
@@ -49,7 +49,7 @@ const Layout = ({ children, width }) => {
           {children}
         </motion.div>
       </Box>
-      {pathname==="/"  && <GlobalUserChat/>}
+      {/* <GlobalUserChat/> */}
     </div>
   );
 };
