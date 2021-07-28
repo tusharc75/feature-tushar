@@ -63,6 +63,10 @@ export default function ManageQuoteDialog({
   opportunityName = null,
   isRenderedFromCustomerAccount = false,
   contacts = null,
+  marketSegmentId = null,
+  subMarketSegmentId = null,
+  currency = null,
+  estimatedAmount = null,
   disableCurrency = false,
   quoteApproved = false,
 }) {
@@ -356,6 +360,10 @@ export default function ManageQuoteDialog({
           setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
+        if (marketSegmentId && marketSegmentDropdownData) {
+          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
+        }
+
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
@@ -373,6 +381,13 @@ export default function ManageQuoteDialog({
               _f.fieldData.fieldName,
               opportunityId
             );
+          }
+
+          if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName,marketSegmentId)
+          }
+          if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName,subMarketSegmentId)
           }
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
@@ -393,6 +408,8 @@ export default function ManageQuoteDialog({
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity) {
           initialData["quoteName"] = opportunityName;
+          initialData["currency"] = currency;
+          initialData["estimatedAmount"] = estimatedAmount;
         }
 
         if (isClone) {
