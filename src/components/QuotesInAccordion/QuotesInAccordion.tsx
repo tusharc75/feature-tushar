@@ -81,8 +81,8 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ 
-    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null,subMarketSegmentId = null,currency = null,estimatedAmount = null,}) {
+export default function QuotesInAccordion({
+    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null, }) {
     const history = useHistory();
     const {
         state: { selectedEntity, user }, dispatch
@@ -260,16 +260,20 @@ export default function QuotesInAccordion({
 
                                                                 {
                                                                     !isQuotePrivate(obj) ?
-                                                                        quoteNameWithRedirect(obj)
+                                                                        quoteNameWithRedirect(obj)                                                                      
                                                                         :
-                                                                        [...obj.collaborator, obj.owner].includes(user.user?._id) ?
-                                                                            quoteNameWithRedirect(obj)
+                                                                        obj?.privateAccess === true ?
+                                                                            [...obj.collaborator, obj.owner].includes(user.user?._id) ?
+                                                                                quoteNameWithRedirect(obj)
+                                                                                :
+                                                                                (<span className="d-flex gap-2 align-items-center">
+                                                                                    <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                                                                        <InfoOutlinedIcon fontSize="small" />
+                                                                                    </Tooltip>
+                                                                                </span>)
                                                                             :
-                                                                            (<span className="d-flex gap-2 align-items-center">
-                                                                                <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
-                                                                                    <InfoOutlinedIcon fontSize="small" />
-                                                                                </Tooltip>
-                                                                            </span>)
+                                                                            quoteNameWithRedirect(obj)
+
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={5} sm={4}>
