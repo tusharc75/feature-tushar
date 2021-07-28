@@ -29,8 +29,13 @@ const useStyles = makeStyles((theme) => ({
     cursor: "normal",
     textOverflow: "ellipsis",
     overflow: "hidden",
-    [theme.breakpoints.up("md")]: {
+    [theme.breakpoints.down("md")]: {
       whiteSpace: "nowrap",
+      width: "250px"
+    },
+    [theme.breakpoints.down("xs")]: {
+      whiteSpace: "nowrap",
+      width: "250px"
     },
   },
   popoverText: {
@@ -257,7 +262,7 @@ const Details = (props: DetailProps) => {
                       //   )
                       // }
                     >
-                      <span className={classes.dataValue}>
+                      <span className={`text-truncate ${classes.dataValue}`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? "," : ""}
                       </span>
@@ -280,7 +285,7 @@ const Details = (props: DetailProps) => {
                 //   )
                 // }
               >
-                <span className={classes.dataValue}>
+                <span className={`text-truncate ${classes.dataValue}`}>
                   {data[fieldData.fieldName].optionLabel}
                   {data[fieldData.fieldName]?.staticData?.approved &&
                   data[fieldData.fieldName]?.staticData?.approved === true ? (
@@ -315,14 +320,14 @@ const Details = (props: DetailProps) => {
                 }
                 target="_blank"
               >
-                <span className={classes.dataValue}> {value} </span>
+                <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
               </MuiLink>
               {fieldData.type === "email" && value !== "-" ? (
                 <CopyToClipboard textToCopy={value} />
               ) : null}
             </>
           ) : (
-            <span className={classes.dataValue}> {value} </span>
+            <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
           )}
           {fieldData.type === "mobileNumber" && value !== "-" ? (
             <CopyToClipboard textToCopy={value} />
@@ -417,7 +422,7 @@ const Details = (props: DetailProps) => {
                   component={Link}
                   to={`/${lookupResource}/detail/${popoverData?._id}`}
                 >
-                  <span className={classes.dataValue}>{name}</span>
+                  <span className={`text-truncate ${classes.dataValue}`}>{name}</span>
                 </MuiLink>
               </Typography>
               <Typography

@@ -294,7 +294,7 @@ const DOAApproval = () => {
           ]}
         />
       </div>
-      <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
         <div>
           <Paper className="subContainer">
             <Grid container className="detailHeader">
