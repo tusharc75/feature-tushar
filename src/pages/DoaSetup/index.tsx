@@ -10,6 +10,7 @@ import {
   Button,
   TextField,
   InputAdornment,
+  Dialog,
 } from "@material-ui/core";
 import { Link } from 'react-router-dom'
 import { DataGrid } from "@material-ui/data-grid";
@@ -466,18 +467,26 @@ export default function Doa() {
       </Container>
       <Box component="div">
         {(userSingleSelect) && (
-          <DoaDialog
-            userList={dataRows}
-            doa={doa}
-            doaCurrency={"USD"}
-            userSelected={userSingleSelect.id}
+          <Dialog
             open={open}
             onClose={() => setOpen(false)}
-            onSuccess={() => {
-              setOpen(false)
-              fetchDoa(userSingleSelect.id)
-            }}
-          />
+            scroll="body"
+            maxWidth="md"
+            fullWidth
+          >
+            <DoaDialog
+              userList={dataRows}
+              doa={doa}
+              doaCurrency={"USD"}
+              userSelected={userSingleSelect.id}
+              open={open}
+              onClose={() => setOpen(false)}
+              onSuccess={() => {
+                setOpen(false)
+                fetchDoa(userSingleSelect.id)
+              }}
+            />
+          </Dialog>
         )}
         {/* <BrandHeader
           total={dataRows.length}
@@ -527,7 +536,7 @@ export default function Doa() {
                       onClick={() => setOpen(true)}
                     >
                       Edit Doa
-                </Button>
+                    </Button>
                     <NewStepper
                       heading={"DOA Details of " + userSingleSelect?.name}
                       doaCurrency={"USD"}

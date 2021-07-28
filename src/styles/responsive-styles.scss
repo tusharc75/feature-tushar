@@ -130,3 +130,19 @@
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
 }
+
+/* Extra small devices -Activity And detail changes(phones, 1300px and down) */
+@media only screen and (max-width: 1300px) {
+   .grid-with-activity{
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        gap: 10px;
+        grid-template-columns: none;
+   }
+   .activityHide{
+       display: none;
+   }
+   .detail-container{
+       height: auto;
+   }
+}

@@ -50,7 +50,8 @@ const AssignEntityDialog = ({
   ids,
   type,
   assignedEntity,
-  regionalRole
+  regionalRole,
+  isRenderedFromUserSetUp = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
@@ -176,6 +177,7 @@ const AssignEntityDialog = ({
       return data.name.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
     });
     setRole(resultRole)
+  
   };
 
 
@@ -265,14 +267,15 @@ const AssignEntityDialog = ({
   }
 
   return (
-    <Dialog
-      fullWidth
-      maxWidth="sm"
-      open={entitiesDialogOpen}
-      onClose={handleCloseDialog}
-      aria-labelledby="assign-roles-dialog"
-    >
-      <CustomDialogHeader title={regionalRole ? `Assign  Region wide functional role` : `Assign  ${startCase(type)}`} />
+    // <Dialog
+    //   fullWidth
+    //   maxWidth="sm"
+    //   open={entitiesDialogOpen}
+    //   onClose={handleCloseDialog}
+    //   aria-labelledby="assign-roles-dialog"
+    // >
+    <>
+      {!isRenderedFromUserSetUp && <CustomDialogHeader title={regionalRole ? `Assign  Region wide functional role` : `Assign  ${startCase(type)}`} />}
       <CustomDialogContent>
         {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
@@ -381,14 +384,16 @@ const AssignEntityDialog = ({
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          disabled={isAssigning}
-          onClick={handleCloseDialog}
-          color="primary"
-          size="small"
-        >
-          Cancel
-        </Button>
+        {!isRenderedFromUserSetUp &&
+          <Button
+            disabled={isAssigning}
+            onClick={handleCloseDialog}
+            color="primary"
+            size="small"
+          >
+            Cancel
+          </Button>
+        }
         <Button
           disabled={!selectedData?.length || !selectedRole?.length}
           onClick={handleAssignEntity}
@@ -396,10 +401,10 @@ const AssignEntityDialog = ({
           size="small"
           variant="contained"
         >
-          {isAssigning ? <CircularProgress size={22} /> : "Save"}
-        </Button>
+          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? "Save & Continue" : "Save"}          </Button>
       </CustomDialogFooter>
-    </Dialog>
+      {/* </Dialog> */}
+    </>
   );
 };
 

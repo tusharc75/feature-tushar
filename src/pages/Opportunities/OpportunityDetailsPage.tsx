@@ -601,7 +601,7 @@ function OpportunityDetailsPage() {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               {!opportunityData ? (
@@ -734,6 +734,10 @@ function OpportunityDetailsPage() {
                     opportunityId={id}
                     accountId={opportunityData?.customerAccountName?.optionValue}
                     opportunityName={opportunityData?.opportunityName}
+                    marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                    subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                    currency={opportunityData?.currency}
+                    estimatedAmount={opportunityData?.estimatedAmount}
                     isRenderedFromOpportunity={true}
                     isAllowedToUpdate={allowedToEdit}
                   />

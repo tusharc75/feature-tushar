@@ -1,5 +1,6 @@
 import React, { useState, FC, useEffect, useContext, useReducer } from "react";
 import {
+  Dialog,
   Grid,
   IconButton,
   Link as MuiLink,
@@ -105,7 +106,7 @@ const Entity: FC = () => {
     if (selectedRecords.length === 1) {
       fetchEntityUser(selectedRecords[0].id);
     }
-    else{
+    else {
       setUsers([]);
     }
   }, [selectedRecords]);
@@ -237,7 +238,7 @@ const Entity: FC = () => {
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
-        
+
       }).catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: "loading", loading: false });
@@ -301,8 +302,8 @@ const Entity: FC = () => {
         </div>
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} 
-          loading={loading} renderedFrom="entityPage"/>
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+          loading={loading} renderedFrom="entityPage" />
 
         {isOpen && (
           <CreateEntity
@@ -312,18 +313,26 @@ const Entity: FC = () => {
           />
         )}
         {usersDialogOpen && !usersDialogLoding && (
-          <AssignUsersDialog
-            entitiesDialogOpen={usersDialogOpen}
-            handleCloseDialog={handleCloseDialog}
-            type="user"
-            ids={selectedRecords.map(rec => rec._id)}
-            assignedEntity={users}
-            regionalRole={false}
-            onSuccess={() => {
-              // fetchEntity();
-              handleCloseDialog();
-            }}
-          />
+          <Dialog
+            fullWidth
+            maxWidth="sm"
+            open={usersDialogOpen}
+            onClose={handleCloseDialog}
+            aria-labelledby="assign-roles-dialog"
+          >
+            <AssignUsersDialog
+              entitiesDialogOpen={usersDialogOpen}
+              handleCloseDialog={handleCloseDialog}
+              type="user"
+              ids={selectedRecords.map(rec => rec._id)}
+              assignedEntity={users}
+              regionalRole={false}
+              onSuccess={() => {
+                // fetchEntity();
+                handleCloseDialog();
+              }}
+            />
+          </Dialog>
         )}
       </CustomContainer >
     </Layout >
