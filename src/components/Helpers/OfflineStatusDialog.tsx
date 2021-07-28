@@ -51,7 +51,7 @@ export default function OfflineStatusDialog(props) {
                 <span className={classes.title}>Try Again!</span>
                 <div className={`${classes.contentBox} d-flex align-items-center flex-column text-center`} color="text.grey">
                     <IoCloudOfflineOutline size="40" color="text.grey"/>
-                    <h2 className={`mt-2 ${classes.msg}`} color="text.grey">Your network is unavailable.Check your data or wifi connection.</h2>
+                    <h2 className={`mt-2 ${classes.msg}`} color="text.grey">Your network is unavailable. Check your data or wifi connection.</h2>
                 </div>
             </DialogContent>
         </Dialog>
