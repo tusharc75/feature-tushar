@@ -57,13 +57,8 @@ const stepsLabel = ["Set Approval Process", "Assign Company Wide Role", "Assign 
 
 const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
     const toastConfig = useContext(CustomToastContext);
-    const [openApprovalProcessDialog, setOpenApprovalProcessDialog] = useState(false)
-    const [openCompanyWideRolesDialog, setCompanyWiseRolesDialog] = useState(false)
-    const [openRegionalRolesDialog, setOpenRegionalRolesDialog] = useState(false)
-    const [openDoaDialog, setOpenDoaDialog] = useState(false)
     const [activeStep, setActiveStep] = useState(0)
-    const [customDialogTitle, setCustomDialogTitle] = useState(stepsLabel[activeStep])
-    const [isAssigning, setIsAssigning] = useState(false);
+    
 
     const { state: { user, permissions }, } = useData();
     const [userPermissionsForApprovalProcess, setUserPermissionsForApprovalProcess] = useState({
@@ -74,50 +69,6 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
     })
     const classes = useStyles();
 
-    useEffect(() => {
-        getStepContent(activeStep)
-
-    }, [])
-    const handleSetApprovalProcess = () => {
-
-        const newData = {
-            _ids: userIds,
-            "approveAccount": userPermissionsForApprovalProcess.approveAccount,
-            "convertLeadToOpportunity": userPermissionsForApprovalProcess.convertLeadToOpportunity,
-            "doaSetup": userPermissionsForApprovalProcess.doaSetup,
-            "viewAndRestoreTrash": userPermissionsForApprovalProcess.viewAndRestoreTrash
-        };
-        axiosInstance()
-            .put("/user/permission-setups", newData)
-            .then(({ data }) => {
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "success",
-                    message: data.message,
-                });
-
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
-    }
-
-
-    const handleSaveUserSetUp = () => {
-        handleSetApprovalProcess();
-    }
-
-    const handleChangePermissions = (e) => {
-        setUserPermissionsForApprovalProcess((prevState) => ({ ...prevState, [e.target.name]: e.target.checked }));
-
-    };
-    const handleNext = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    };
-
-    const handleFinish = () => {
-        onSuccess();
-    }
 
     const getStepContent = (step: Number) => {
         switch (step) {
@@ -218,8 +169,6 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         )}
                     </div>
                 </div>
-
-
 
             </CustomDialogContent>
         </Dialog>
