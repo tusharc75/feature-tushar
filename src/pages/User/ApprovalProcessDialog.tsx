@@ -31,6 +31,7 @@ const ApprovalProcessDialog = ({
     handleCloseDialog,
     userIds,
     hasPermissionToUpdateApprovalProcess,
+    isRenderedFromUserSetUp = false
 }) => {
     const toastConfig = useContext(CustomToastContext);
     const [userPermissions, setUserPermissions] = useState({
@@ -39,7 +40,7 @@ const ApprovalProcessDialog = ({
         "doaSetup": false,
         "viewAndRestoreTrash": false
     })
-    
+
 
     const handleSetApprovalProcess = () => {
 
@@ -75,14 +76,16 @@ const ApprovalProcessDialog = ({
 
 
     return (
-        <Dialog
-            fullWidth
-            maxWidth="sm"
-            open={openApprovalProcessDialog}
-            onClose={handleCloseDialog}
-            aria-labelledby="set-approval-dialog"
-        >
-            <CustomDialogHeader title="Set Approval Process" onClose={handleCloseDialog} />
+        // <Dialog
+        //     fullWidth
+        //     maxWidth="sm"
+        //     open={openApprovalProcessDialog}
+        //     onClose={handleCloseDialog}
+        //     aria-labelledby="set-approval-dialog"
+        // >
+        <>
+            {!isRenderedFromUserSetUp && <CustomDialogHeader title="Set Approval Process" onClose={handleCloseDialog} />}
+
             <CustomDialogContent>
 
                 <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -115,23 +118,26 @@ const ApprovalProcessDialog = ({
                 </Grid>
             </CustomDialogContent>
             <CustomDialogFooter>
-                <Button
-                    onClick={handleCloseDialog}
-                    color="primary"
-                    size="small"
-                >
-                    Cancel
-                </Button>
+                {!isRenderedFromUserSetUp &&
+                    <Button
+                        onClick={handleCloseDialog}
+                        color="primary"
+                        size="small"
+                    >
+                        Cancel
+                    </Button>
+                }
                 <Button
                     onClick={handleSetApprovalProcess}
                     color="primary"
                     size="small"
                     variant="contained"
                 >
-                    Save
+                    {isRenderedFromUserSetUp ? "Save & Continue" : "Save"}
                 </Button>
             </CustomDialogFooter>
-        </Dialog>
+            {/* // </Dialog> */}
+        </>
     );
 };
 

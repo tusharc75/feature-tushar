@@ -27,7 +27,8 @@ const AssignRolesDialog = ({
   onSuccess,
   handleCloseDialog,
   userIds,
-  assignedRoles
+  assignedRoles,
+  isRenderedFromUserSetUp = false,
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [roles, setRoles] = useState([]);
@@ -97,14 +98,15 @@ const AssignRolesDialog = ({
   };
 
   return (
-    <Dialog
-      fullWidth
-      maxWidth="xs"
-      open={rolesDialogOpen}
-      onClose={handleCloseDialog}
-      aria-labelledby="assign-roles-dialog"
-    >
-      <CustomDialogHeader title="Assign roles" />
+    // <Dialog
+    //   fullWidth
+    //   maxWidth="xs"
+    //   open={rolesDialogOpen}
+    //   onClose={handleCloseDialog}
+    //   aria-labelledby="assign-roles-dialog"
+    // >
+    <>
+      {!isRenderedFromUserSetUp && <CustomDialogHeader title="Assign roles" />}
       <CustomDialogContent>
         {loadingRoles ? (
           <Loader text="Loading Roles" />
@@ -172,6 +174,7 @@ const AssignRolesDialog = ({
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
+        {!isRenderedFromUserSetUp && 
         <Button
           disabled={isAssigning}
           onClick={handleCloseDialog}
@@ -179,7 +182,7 @@ const AssignRolesDialog = ({
           size="small"
         >
           Cancel
-        </Button>
+        </Button>}
         <Button
           disabled={!selectedRoles.length || isAssigning}
           onClick={handleAssignRoles}
@@ -187,10 +190,12 @@ const AssignRolesDialog = ({
           size="small"
           variant="contained"
         >
-          {isAssigning ? <CircularProgress size={22} /> : "Save"}
+          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? "Save & Continue" : "Save"}
         </Button>
       </CustomDialogFooter>
-    </Dialog>
+      
+    {/* // </Dialog> */}
+    </>
   );
 };
 

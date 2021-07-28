@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, Box, Button, Typography, IconButton, Paper } from "@material-ui/core";
+import { Grid, Box, Button, Typography, IconButton, Paper, Dialog } from "@material-ui/core";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -223,23 +223,31 @@ const EntityDetailsPage = () => {
     setShowAssignUserDialog(false);
   };
 
-  const fieldsToShowInDetailPage = entityFields.filter((field)=>field.isRead);
-  const fieldsToShowInUpdateDialog = entityFields.filter((field)=>field.isUpdate);
+  const fieldsToShowInDetailPage = entityFields.filter((field) => field.isRead);
+  const fieldsToShowInUpdateDialog = entityFields.filter((field) => field.isUpdate);
   return (
     <>
       {showAssignUserDialog && (
-        <AssignUserDialog
-          entitiesDialogOpen={showAssignUserDialog}
-          handleCloseDialog={userDialogClose}
-          type="user"
-          ids={[id]}
-          assignedEntity={users}
-          regionalRole={false}
-          onSuccess={() => {
-            fetchEntityUser();
-            userDialogClose();
-          }}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="sm"
+          open={showAssignUserDialog}
+          onClose={userDialogClose}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignUserDialog
+            entitiesDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            type="user"
+            ids={[id]}
+            assignedEntity={users}
+            regionalRole={false}
+            onSuccess={() => {
+              fetchEntityUser();
+              userDialogClose();
+            }}
+          />
+        </Dialog>
       )}
       {openUpdateDialog && (
         <UpdateDetailsDialog
@@ -330,7 +338,7 @@ const EntityDetailsPage = () => {
                     >
                       <Typography variant="subtitle2">
                         Entity Detail
-                  </Typography>
+                      </Typography>
                     </Box>
                     <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
                   </>
@@ -347,7 +355,7 @@ const EntityDetailsPage = () => {
                   >
                     <Typography variant="subtitle2">
                       Assigned Users ({users.length || 0})
-                </Typography>
+                    </Typography>
                     {permissions.entity.isUpdate && (
                       <IconButton
                         title="Assign users"
