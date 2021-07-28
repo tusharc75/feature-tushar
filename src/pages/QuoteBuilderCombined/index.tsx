@@ -122,6 +122,7 @@ const QuoteBuilders = () => {
         renderCell: (params: any) => (
           <Typography
             title={params.value}
+            className="text-truncate"
           >
             {params.value}
           </Typography>

@@ -365,7 +365,7 @@ const ProjectSalesDetails = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               {!projectSalesData ? (
@@ -534,6 +534,24 @@ const ProjectSalesDetails = () => {
                   )}
                 </Box>
               </Box>
+             </Paper>
+             <Paper>
+              <Box my={1} />
+              <CustomerAccounts
+                isTeamMember={isTeamMember}
+                isManager={isManager}
+                ownerId={projectSalesData?.projectManager?.optionValue}
+                loading={loading}
+                handleOpenDialog={handleOpenDialog}
+                customerAccounts={customerAccounts}
+                customerContacts={customerContacts}
+                opportunities={opportunities}
+                quotes={quotes}
+                permissions={permissions?.projectSales}
+                fetchProjectData={getSalesData}
+                projectId={id}
+                users={teamUsers}
+              />
             </Paper>
           </div>
           <div>
@@ -575,31 +593,14 @@ const ProjectSalesDetails = () => {
                   handleActivityRefresh={() => { }}
                   emails={[]}
                 />
-          </Paper>
+              </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
                 Show Activities
               </a>}
           </div>
         </div>
-        <Box my={1} />
-        <CustomerAccounts
-          isTeamMember={isTeamMember}
-          isManager={isManager}
-          ownerId={projectSalesData?.projectManager?.optionValue}
-          loading={loading}
-          handleOpenDialog={handleOpenDialog}
-          customerAccounts={customerAccounts}
-          customerContacts={customerContacts}
-          opportunities={opportunities}
-          quotes={quotes}
-          permissions={permissions?.projectSales}
-          fetchProjectData={getSalesData}
-          projectId={id}
-          users={teamUsers}
-        />
       </Layout>
-
       {
         showConfirmBox ? (
           <ConfirmationDialog

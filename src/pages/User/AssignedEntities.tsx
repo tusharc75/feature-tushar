@@ -3,7 +3,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import { Grid, IconButton } from '@material-ui/core';
+import { Dialog, Grid, IconButton } from '@material-ui/core';
 import { ControlPoint } from '@material-ui/icons';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import RoleEngine from '../../components/Shared/RoleEngine';
@@ -121,17 +121,25 @@ export default function AssignedEntities({
     <>
 
       {showAssignEntityDialog && (
-        <AssignEntityDialog
-          entitiesDialogOpen={showAssignEntityDialog}
-          handleCloseDialog={handleCloseDialog}
-          type="entity"
-          ids={[userId, currentEntity?.entity._id]}
-          assignedEntity={entities}
-          regionalRole={true}
-          onSuccess={() => {
-            onSuccess();
-          }}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="sm"
+          open={showAssignEntityDialog}
+          onClose={handleCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignEntityDialog
+            entitiesDialogOpen={showAssignEntityDialog}
+            handleCloseDialog={handleCloseDialog}
+            type="entity"
+            ids={[userId, currentEntity?.entity._id]}
+            assignedEntity={entities}
+            regionalRole={true}
+            onSuccess={() => {
+              onSuccess();
+            }}
+          />
+        </Dialog>
       )}
       {showConfirmBox ? (
         <ConfirmationDialog
@@ -184,7 +192,7 @@ export default function AssignedEntities({
                         <Grid item xs={4}>
                           <Typography variant="subtitle2">
                             Assigned Region Wide Functional Roles ({currentEntity?.role?.length || "0"})
-                        </Typography>
+                          </Typography>
                         </Grid>
                         <Grid item xs={8} justify="flex-start">
                           {permissions.user.isDelete ? (

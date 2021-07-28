@@ -29,6 +29,12 @@ const useStyles = makeStyles((theme) => ({
     active: {
         background: "#53ac65",
     },
+    pbStepper: {
+        overflow: "none",
+        [theme.breakpoints.down("xs")]: {
+          overflow: "auto"
+        },
+      },
 }));
 
 
@@ -81,7 +87,7 @@ export default function CustomSteps({ steps, active }) {
 
     return (
         <div className={classes.root}>
-            <Stepper activeStep={active + 1}>
+            <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={active + 1}>
                 {steps.map((step, index) => {
                     const stepProps: any = {};
                     const labelProps: any = {};

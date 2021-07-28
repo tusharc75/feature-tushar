@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function QuoteDetailPage({ quoteData, quotePermissions, selectedEntity, ifQuoteApprovedAapproved, allowedToEdit, handleOpenUpdateDialog, handleSetSteps }) {
+export default function QuoteDetailPage({ quoteData, quotePermissions, selectedEntity, ifQuoteApprovedAapproved, allowedToEdit, handleOpenUpdateDialog,handleOpenCloneDialog, handleSetSteps }) {
     const classes = useStyles();
     const history = useHistory();
     const [loadingFields, setLoadingFields] = useState(false);
@@ -110,7 +110,7 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
                                 size="small"
                                 className="mr-1"
                                 startIcon={<BiLayerPlus />}
-                                onClick={handleClone}
+                                onClick={handleOpenCloneDialog}
                             >
                                 Clone
                             </Button>

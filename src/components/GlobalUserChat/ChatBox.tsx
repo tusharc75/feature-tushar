@@ -25,6 +25,30 @@ const ChatBox = ({ selectedChat }) => {
             username: "Ali Connors",
             message: "Sounds Perfect...!",
         },
+        {
+            username: "Ali Connors",
+            message: "Thanks, I am great! when do we meet?",
+        },
+        {
+            username: "Peter",
+            message: "At 6 o'clock Balaton Lake.",
+        },
+        {
+            username: "Ali Connors",
+            message: "Sounds Perfect...!",
+        },
+        {
+            username: "Ali Connors",
+            message: "Thanks, I am great! when do we meet?",
+        },
+        {
+            username: "Peter",
+            message: "At 6 o'clock Balaton Lake.",
+        },
+        {
+            username: "Ali Connors",
+            message: "Sounds Perfect...!",
+        },
     ]);
 
     const sendMessage = () => {
@@ -56,7 +80,7 @@ const ChatBox = ({ selectedChat }) => {
                     onChange={(e) => setMessageValue(e.target.value)}
                 />
                 <Box mr={1}>
-                <IconButton onClick={sendMessage} size="small">
+                <IconButton disabled={!messageValue} onClick={sendMessage} size="small">
                     <SendOutlined/>
                 </IconButton>
                 </Box>
