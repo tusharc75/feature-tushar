@@ -187,7 +187,8 @@ export default function Attachment(props) {
       {params.data.name}
     </a>
   );
-  const downloadFile = (fileUrl) => {
+  const downloadFile = (file) => {
+    const fileUrl = file.map(f => f.url)
     setIsDownloading(true);
     axiosInstance()
       .put(`user/download`,{
@@ -231,7 +232,7 @@ export default function Attachment(props) {
                         aria-label="Download"
                         color="primary"
                         disabled={isDownloading}
-                        onClick={() => downloadFile(params.data.fileUrl)}
+                        onClick={() => downloadFile(params.data.file)}
                     >
                         <GoArrowDown size={26} />
                     </IconButton>
