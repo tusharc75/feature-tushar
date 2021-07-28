@@ -734,6 +734,10 @@ function OpportunityDetailsPage() {
                     opportunityId={id}
                     accountId={opportunityData?.customerAccountName?.optionValue}
                     opportunityName={opportunityData?.opportunityName}
+                    marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                    subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                    currency={opportunityData?.currency}
+                    estimatedAmount={opportunityData?.estimatedAmount}
                     isRenderedFromOpportunity={true}
                     isAllowedToUpdate={allowedToEdit}
                   />
