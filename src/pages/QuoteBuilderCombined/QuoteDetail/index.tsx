@@ -119,7 +119,7 @@ export default function QuoteDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (quoteData && quoteData.versions[currentVersion].acceptedColumns) {
+    if (quoteData && quoteData.versions[currentVersion]?.acceptedColumns) {
       setColumnView(quoteData.versions[currentVersion].acceptedColumns)
     }
   }, [currentVersion])
@@ -196,7 +196,7 @@ export default function QuoteDetail() {
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
-  
+
   const handleOpenCloneDialog = () => {
     setOpenUpdateDialog(true);
     setIsQuoteClone(true);
@@ -339,32 +339,66 @@ export default function QuoteDetail() {
       }
     });
 
-    axiosInstance()
-      .put(
-        `/quote-builder/updateVersions/${quoteData._id}`,
-        { versions: notEndVersions, status: "Not Booked", processStatus: "End" }
-      )
-      .then(() => {
+    if (notEndVersions.length !== 0) {
 
-        axiosInstance()
-          .post(
-            `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
-            { TNC: previousVersionTNC }
-          )
-          .then(() => {
-            fetchQuoteData(0);
-            setQuoteReOpening(false);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setQuoteReOpening(false);
-          });
+      axiosInstance()
+        .put(
+          `/quote-builder/updateVersions/${quoteData._id}`,
+          { versions: notEndVersions, status: "Not Booked", processStatus: "End" }
+        )
+        .then(() => {
 
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setQuoteReOpening(false);
-      });
+          axiosInstance()
+            .post(
+              `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+              { TNC: previousVersionTNC , comment: `Auto-Cloned from Re-opened Version ${ifQuoteApproved.versionApproved}`}
+            )
+            .then(() => {
+              axiosInstance()
+                .post(`quote-builder/updateVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`, { TNC: previousVersionTNC, status: "Re-Open" })
+                .then(() => {
+                  fetchQuoteData(0);
+                  setQuoteReOpening(false);
+                })
+                .catch((err) => {
+                  toastConfig.setToastConfig(err);
+                  setQuoteReOpening(false);
+                });
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+              setQuoteReOpening(false);
+            });
+
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setQuoteReOpening(false);
+        });
+    }
+    else {
+      axiosInstance()
+        .post(
+          `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
+          { TNC: previousVersionTNC , comment: `Auto-Cloned from Re-opened Version ${ifQuoteApproved.versionApproved}` }
+        )
+        .then(() => {
+          axiosInstance()
+            .post(`quote-builder/updateVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`, { TNC: previousVersionTNC, status: "Re-Open" })
+            .then(() => {
+              fetchQuoteData(0);
+              setQuoteReOpening(false);
+            })
+            .catch((err) => {
+              toastConfig.setToastConfig(err);
+              setQuoteReOpening(false);
+            });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setQuoteReOpening(false);
+        });
+    }
 
   };
 
@@ -671,7 +705,7 @@ export default function QuoteDetail() {
             opportunityId={null}
             disableOwnerDropDown={true}
             disableCurrency={true}
-            quoteApproved={ifQuoteApproved.approved}
+            quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
           />
         )}
       </Layout>

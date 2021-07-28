@@ -53,7 +53,7 @@ export default function AllVersionStatus({ quoteId, quoteData, fetchQuoteData, h
                 headerName: "Comment",
                 flex: 1,
                 renderCell: (params: any) => (
-                    <Typography title={params.value}>{params.value}</Typography>
+                    <Typography title={params.value} className="text-truncate">{params.value}</Typography>
                 ),
             },
             {
