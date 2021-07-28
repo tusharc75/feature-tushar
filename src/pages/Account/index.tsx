@@ -26,7 +26,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -60,12 +60,12 @@ export default function Account(props) {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    account: { accountApi, accountResource, accountRoute },
+    account: { accountApi, accountResource, accountRoute, accountResourceLabel },
     accountBreadcrumb
   } = props;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -155,7 +155,7 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, filters, sorting]);
+  }, [page, limit, selectedType, type, filters, sorting, selectedEntity]);
 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -315,6 +315,10 @@ export default function Account(props) {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
 
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
     const updatedFilters = [];
     if (type !== options[0]) {
       updatedFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
@@ -363,9 +367,11 @@ export default function Account(props) {
   };
 
   const fetchAccounts = async () => {
+    if(selectedEntity){
+    dispatch({ type: 'loading', loading: true });
+
     const queryString = getQueryString();
 
-    dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
       gridApi.setRowData([]);
@@ -416,6 +422,7 @@ export default function Account(props) {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
       });
+    }
   };
 
   const cloneAccount = async (accountId) => {
@@ -576,7 +583,7 @@ export default function Account(props) {
       <Layout>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[{ title: accountBreadcrumb.title }]} />
+            <CustomBreadCrumbs routes={[{ title: routes[accountResource].title }]} />
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
@@ -594,7 +601,7 @@ export default function Account(props) {
             <Grid container className="header-panel" justify="space-between" alignContent="center">
               <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
                 <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{sidebarResource[accountResource]}</span>
+                  <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{routes[accountResource].title}</span>
                   <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                     {AccTypes && (
                       <ToggleButtonGroup

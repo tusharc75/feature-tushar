@@ -88,7 +88,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
 
       if (!values.hiddenField && module !== 'price-template' && module !== 'product-template'
-      && module !== "pdf-template") {
+        && module !== "pdf-template") {
         values.hiddenField = false;
       }
 
@@ -121,39 +121,36 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     _section.field.forEach((_field) => {
       let ele = { ..._field };
       if (!ele.fieldName) {
-        ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
+        ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
       }
       if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
         if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits &&
-            ele.displayUnits.forEach((_unit) => {
-              fields.push({
-                ...ele,
-                fieldLabel: ele.fieldLabel + ' (' + _unit + ')',
-                fieldName: ele.fieldName + '_' + _unit.toLowerCase()
-              });
+          ele.formulaUnits && ele.formulaUnits.forEach((_unit) => {
+            fields.push({
+              ...ele,
+              fieldLabel: ele.fieldLabel + ' (' + _unit + ')',
+              fieldName: ele.fieldName + '_' + _unit.toLowerCase()
             });
+          });
         } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
           ele.displayCurrency &&
             ele.displayCurrency.forEach((_currency) => {
-              ele.displayUnits &&
-                ele.displayUnits.forEach((_unit) => {
-                  fields.push({
-                    ...ele,
-                    fieldLabel: ele.fieldLabel + ' (' + _currency + '/' + _unit + ')',
-                    fieldName: ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()
-                  });
+              ele.formulaUnits && ele.formulaUnits.forEach((_unit) => {
+                fields.push({
+                  ...ele,
+                  fieldLabel: ele.fieldLabel + ' (' + _currency + '/' + _unit + ')',
+                  fieldName: ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()
                 });
-            });
-        } else if (ele.type === 'currencyAmount') {
-          ele.displayCurrency &&
-            ele.displayCurrency.forEach((_currency) => {
-              fields.push({
-                ...ele,
-                fieldLabel: ele.fieldLabel + ' (' + _currency + ')',
-                fieldName: ele.fieldName + '_' + _currency.toLowerCase()
               });
             });
+        } else if (ele.type === 'currencyAmount') {
+          ele.displayCurrency && ele.displayCurrency.forEach((_currency) => {
+            fields.push({
+              ...ele,
+              fieldLabel: ele.fieldLabel + ' (' + _currency + ')',
+              fieldName: ele.fieldName + '_' + _currency.toLowerCase()
+            });
+          });
         }
       } else {
         fields.push(ele);
@@ -188,7 +185,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             }
 
             // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
-            //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+            //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
             // }
 
             if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect' || fieldData.type === 'radio' || fieldData.type === 'process') {
@@ -208,10 +205,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }
               });
               ele.option = values.option;
-              // ele.option = values.option.map((item, idx) => ({
-              //   ...item,
-              //   order: idx + 1
-              // }));
             }
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
@@ -237,6 +230,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'converter' || fieldData.isConverter === true) {
               ele.units = values.units;
               ele.displayUnits = values.displayUnits;
+              ele.formulaUnits = values.formulaUnits;
               ele.option = values.option;
               if (fieldData.type === 'formula' || values.isFormula === true) {
                 ele.formulaOnConverter = values.formulaOnConverter;
@@ -292,29 +286,37 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     name="fieldLabel"
                     fullWidth
                     margin="dense"
-                    //disabled={!values["editAble"]}
+                    disabled={!values["editAble"]}
                     value={values['fieldLabel']}
                     error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
                     helperText={touched['fieldLabel'] && errors['fieldLabel']}
                     onChange={(e) => setFieldValue('fieldLabel', e.target.value.trimStart())}
                   />
-                  {/* {((module === "product-template" || module === "price-template") && values["editAble"]) &&
-              <Box display="flex" >
-                <Box mb={1}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isChangeFieldName"
-                        checked={isChangeFieldName}
-                        onChange={(e) => setIsChangeFieldName(e.target.checked)}
-                        color="primary"
+                  {((module === "product-template" || module === "price-template")) &&
+                    <Box mb={1}>
+                      <TextField
+                        variant="outlined"
+                        type="text"
+                        label="Field Name"
+                        name="fieldName"
+                        fullWidth
+                        margin="dense"
+                        disabled={true}
+                        value={values['fieldName'] ? values['fieldName'] : camelCase(values['fieldLabel'].replace(/[^a-zA-Z0-9]/g, ''))}
                       />
-                    }
-                    label="Change Field Name"
-                  />
-                </Box>
-              </Box>
-            } */}
+                      {/* <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isChangeFieldName"
+                            checked={isChangeFieldName}
+                            onChange={(e) => setIsChangeFieldName(e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Change Field Name"
+                      /> */}
+                    </Box>
+                  }
 
                   {(values['type'] === 'decimal' || values['type'] === 'formula' || values['type'] === 'converter') && (
                     <Grid spacing={3} container>
@@ -380,13 +382,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   )}
 
                   {values['type'] === 'currencyAmount' && <Currency values={values} setFieldValue={setFieldValue} refrence="form-builder" />}
-                  <DndProvider backend={HTML5Backend}>
-                    {(values['type'] === 'dropDown' ||
-                      values['type'] === 'multiSelect' ||
-                      values['type'] === 'radio' ||
-                      values['type'] === 'process') &&
-                      !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
-                  </DndProvider>
+
+                  {(values['type'] === 'dropDown' ||
+                    values['type'] === 'multiSelect' ||
+                    values['type'] === 'radio' ||
+                    values['type'] === 'process') &&
+                    !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
+
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
@@ -560,7 +562,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       <Box display="block">
                         {module === 'pdf-template' &&
                           ['multiLine', 'singleLine'].includes(fieldData.type) &&
-                          ['entity', 'customerAccountName', 'quoteDate', 'quoteName', 'version'].map((item) => (
+                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                              'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map((item) => (
                             <Chip
                               className="ml-1 cursor-pointer"
                               key={item}

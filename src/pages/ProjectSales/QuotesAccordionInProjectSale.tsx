@@ -24,7 +24,7 @@ import TrendingUpOutlinedIcon from "@material-ui/icons/TrendingUpOutlined";
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import { withStyles } from "@material-ui/core/styles";
 import axiosInstance from "../../axios/axiosInstance";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { IoCalendarOutline } from "react-icons/io5";
 import { useData } from "../../StateProvider/Provider";
 import { displayDate } from "../../services/util";
@@ -35,6 +35,7 @@ import { FaArrowAltCircleDown } from "react-icons/fa";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { formatAmountWithCurrency } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const Accordion = withStyles({
   root: {
@@ -109,7 +110,7 @@ export default function QuotesAccordionInProjectSale({
   onNewQuoteAdd,
 }) {
   const {
-    state: { selectedEntity },
+    state: { selectedEntity, user }, dispatch
   }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -131,6 +132,7 @@ export default function QuotesAccordionInProjectSale({
       break;
   }
   const { setToastConfig } = useContext(CustomToastContext);
+  const history = useHistory();
   const [expandQuote, setExpandQuote] = useState(expanded);
   const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -178,6 +180,36 @@ export default function QuotesAccordionInProjectSale({
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
+
+  const hasAccessToEntity = (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  }
+  const handleEntityChange = (id) => {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+  }
+
+  const isQuotePrivate = (obj) => {
+    return "privateAccess" in obj;
+  }
+  const quoteNameWithRedirect = (obj) => (
+    hasAccessToEntity(obj.entity) ?
+      obj.entity === selectedEntity ? (
+        < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
+          <Typography className="detailName">{obj.quoteName}</Typography>
+        </Link>) : (
+        < Link className="link" onClick={() => {
+          handleEntityChange(obj.entity)
+          history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`)
+        }}>
+          <Typography className="detailName">{obj.quoteName}</Typography>
+        </Link>) :
+      (<span className="d-flex gap-2 align-items-center">
+        <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+          <InfoOutlinedIcon fontSize="small" />
+        </Tooltip>
+      </span>)
+  )
   return (
     <>
       <Menu
@@ -266,27 +298,22 @@ export default function QuotesAccordionInProjectSale({
                           <CardContent className="detailListing">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={6}>
-                                {obj.entity === selectedEntity ? (
-                                  <Link
-                                    className="link"
-                                    to={`${routes.quoteBuilder.path}/detail/${obj._id}`}
-                                  >
-                                    <Typography className="detailName text-truncate">
-                                      {obj.quoteName}
-                                    </Typography>
-                                  </Link>
-                                ) : (
-                                  <span className="d-flex gap-2 align-items-center">
-                                    <Typography className="detailName">
-                                      {obj.quoteName}
-                                    </Typography>{" "}
-                                    <Tooltip
-                                      title={`${obj.quoteName} belongs to different entity`}
-                                    >
-                                      <InfoOutlinedIcon fontSize="small" />
-                                    </Tooltip>
-                                  </span>
-                                )}
+                                {
+                                  !isQuotePrivate(obj) ?
+                                    quoteNameWithRedirect(obj)
+                                    :
+                                    obj?.privateAccess === true ?
+                                      [...obj.collaborator, obj.owner].includes(user.user?._id) ?
+                                        quoteNameWithRedirect(obj)
+                                        :
+                                        (<span className="d-flex gap-2 align-items-center">
+                                          <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                            <InfoOutlinedIcon fontSize="small" />
+                                          </Tooltip>
+                                        </span>)
+                                      :
+                                      quoteNameWithRedirect(obj)
+                                }
                               </Grid>
                               <Grid item xs={6}>
                                 <Box display="flex" alignItems="center" justifyContent="flex-end">

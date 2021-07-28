@@ -9,6 +9,7 @@ import routes from "./Helpers/Routes";
 import { Link } from "react-router-dom";
 import { FiCheckCircle } from 'react-icons/fi'
 import { AiOutlineCloseCircle } from "react-icons/ai"
+import { isMobile, isTablet } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xs")]: {
       borderRadius: "4px",
       boxShadow: "2px 2px 4px #747474",
-      background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
+      background: "white",
       border: "#03232e",
       display: "flex",
       alignItems: "center",
@@ -40,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
   },
   labelColor: {
     color: "#fff",
+    [theme.breakpoints.down("xs")]: {
+      color: "#010c02",
+    }
   },
   skeleton: {
     marginRight: "10px",
@@ -148,11 +152,11 @@ const DetailsPageHeader = (props) => {
                           </Typography>
                           <Typography
                             align="center"
-                            className={classes.labelColor}
+                            className={`text-truncate ${classes.labelColor}`}
                             style={{ fontWeight: 500 }}
                           >
                             {mainPoints[key] || ""}
-                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: "white" }} /> : null}
+                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ?  "#010c02" : "white" }} /> : null}
                           </Typography>
                         </Box>
                       )) : null}

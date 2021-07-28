@@ -5,8 +5,8 @@ import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
 import IconButton from '@material-ui/core/IconButton';
@@ -33,10 +33,10 @@ import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
-import NewStepper from "../../components/Helpers/NewStepper";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import NewStepper from "../../../../components/Helpers/NewStepper";
+import CustomDialogFooter from "../../../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
 import { isMobile } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
@@ -230,11 +230,11 @@ const Steps = (props) => {
       <div
         className={clsx(classes.root, {
           [classes.active]: active,
-          [classes.completed]: completed || approvedQuote.approved,
+          [classes.completed]: completed ,
           [classes.rejected]: rejected,
         })}
       >
-        {icons[approvedQuote.approved ? "3" : String(status)]}
+        {icons[String(status)]}
       </div>
     );
   };
@@ -304,14 +304,14 @@ const Steps = (props) => {
     <div>
       <div className="position-relative">
         {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved ? (
+          approvedQuote.approved  && approvedQuote.versionApproved === version && (
           <div className="d-flex align-items-center justify-content-center flex-column m-3">
             <Typography className={classes.approved}>
               Quote version - {approvedQuote.versionApproved} of this quote has
               been Approved
             </Typography>
           </div>
-        ) : (
+        )}
           <>
             {/* {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
@@ -399,7 +399,6 @@ const Steps = (props) => {
               </div>
             )}
           </>
-        )}
         {/* 
         {activeStep !== steps.length - 1 && (
           <>
@@ -457,13 +456,13 @@ const Steps = (props) => {
             {!isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       <Button
                         variant="contained"
                         color="primary"
                         disabled={
-                          !allowedToEdit ||
+                          currentStep <= 0 || !allowedToEdit ||
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
                           versionStatus.includes("Sent for DOA") ||
@@ -494,7 +493,7 @@ const Steps = (props) => {
             {isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       <IconButton
                         color="primary"
@@ -526,7 +525,7 @@ const Steps = (props) => {
             {isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       {versionStatus.split(" ")[0] !== "Rejected" ? (
                         <IconButton
@@ -574,16 +573,16 @@ const Steps = (props) => {
                     className={clsx(classes.step, {
                       [classes.active]:
                         currentStep > i ||
-                        steps[currentStep] === "End" ||
-                        approvedQuote.approved,
+                        steps[currentStep] === "End" ,
                       [classes.currentStep]: currentStep === i,
                       [classes.inActive]: currentStep !== i,
                     })}
                   >
                     <StepLabel
+                      style={{color: "#555"}}
                       StepIconComponent={ColorlibStepIcon}
                       className={
-                        currentStep === i || approvedQuote.approved
+                        currentStep === i 
                           ? "currentStepColor"
                           : null
                       }
@@ -605,7 +604,7 @@ const Steps = (props) => {
             {!isMobile &&  activeStep !== steps.length - 1 && (
               <>
                 <div>
-                  {!approvedQuote.approved && (
+                  {(
                     <div>
                       {versionStatus.split(" ")[0] !== "Rejected" ? (
                         <Button

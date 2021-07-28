@@ -5,6 +5,7 @@ import SearchBox from "../../components/Helpers/SearchBox";
 import { FaUsers } from "react-icons/fa";
 
 import styles from "../Leads/Header.module.scss";
+import routes from "../../components/Helpers/Routes";
 
 const Header = (props) => {
   const {
@@ -23,7 +24,8 @@ const Header = (props) => {
     openDOADialog,
     entityRoleRedirectDetails,
     onEntityRoleRedirectDetailRemove,
-    unAssignUsersFromEntity
+    unAssignUsersFromEntity,
+    openUserSetupDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -39,7 +41,7 @@ const Header = (props) => {
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <FaUsers className="headerLogo" />{" "}
-        <span className="listingHeader">Users</span>
+        <span className="listingHeader">{routes.user.title}</span>
 
         {entityRoleRedirectDetails.id && (
           <Chip
@@ -161,6 +163,15 @@ const Header = (props) => {
                         Un-assign Entity
                       </MenuItem>
                     )}
+                    <MenuItem
+                        disabled={rolesActionDisabled}
+                        onClick={() => {
+                          openUserSetupDialog();
+                          closeActions();
+                        }}
+                      >
+                        User Setup
+                      </MenuItem>
                   </>
                 )}
               </Menu>

@@ -25,6 +25,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { AiOutlineCloseSquare } from "react-icons/ai";
+import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
+
 
 const ignoreField = ["priceTemplate"]
 
@@ -263,9 +265,17 @@ const CreateProduct = (props) => {
         setFields(fields)
         let newField = initialData.fields;
         newField.push(field)
+        var extraCalculatedValue: any = {}
+        if (field.type === "formula" || field.isFormula) {
+            var inputValues = {};
+            field.inputFields && field.inputFields.forEach((_f) => {
+                inputValues[_f] = ref.current.values[_f] ? ref.current.values[_f] : 0
+            })
+            extraCalculatedValue = autoCalculateSpecificFields(inputValues, ref.current.values, newField)
+        }
         setInitialData({
             fields: newField,
-            values: { ...getObjKeys('', newField), ...ref.current.values },
+            values: { ...getObjKeys('', newField), ...ref.current.values, ...extraCalculatedValue },
         });
         EvaluteproductFields(newField)
         setSectionName("")
@@ -449,6 +459,7 @@ const CreateProduct = (props) => {
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
                                                                         // {...rest}
+                                                                        selectedCurrencyCode={values["currency"]}
                                                                         startAdornment={
                                                                             currencySymbol ? (
                                                                                 <InputAdornment position="start">

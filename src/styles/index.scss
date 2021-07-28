@@ -29,7 +29,7 @@
   --teal: #1e7682;
   --theme-text: #fff;
   --grey: #838485;
-  --lightgrey: lightgrey;
+  --lightgrey: #ededed;
 
   --common-border-color: #dee2e6;
 
@@ -67,7 +67,9 @@
     )
   );
 }
-
+.ag-theme-material .ag-cell, .ag-theme-material .ag-full-width-row .ag-cell-wrapper.ag-row-group{
+  line-height: 26px;
+}
 .ag-theme-material .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
   border: 1px solid lightgray !important;
 }
@@ -556,6 +558,7 @@ body::-webkit-scrollbar-thumb {
   border-bottom: 1px solid #ecf1f3;
   background: #f5f5f5;
   min-height: auto !important;
+  margin-left: 4px;
 }
 
 .quote-tab {
@@ -751,8 +754,7 @@ body::-webkit-scrollbar-thumb {
   -webkit-gap: 0.25rem;
   font-weight: bold;
 }
-
-@supports not (-webkit-gap: 0.25rem) {
+@supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
@@ -907,4 +909,58 @@ body::-webkit-scrollbar-thumb {
   background: linear-gradient(to right,#fafafa00,rgba(255,255,255,0),#fafafa00);
   z-index: 1;
   content: "";
+}
+
+
+.grid-with-activity{
+  display: grid;
+  grid-template-columns: calc(100% - 550px) 550px;
+  column-gap: 10px;
+}
+
+.grid-without-activity{
+  display: grid;
+  grid-template-columns: 1fr 46px;
+}
+
+.grid-mobile{
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+}
+.activityHide {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.activityShow {
+  background: var(--secondary);
+  border-radius: 0;
+  color: white;
+  display: inline-block;
+  font-size: 1rem;
+  height: 50px;
+  line-height: 50px;
+  position: fixed;
+  right: 8px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+  transform-origin: bottom right;
+  width: 150px;
+  top: 45px;
+  cursor: pointer;
+
+  &:hover{
+      background: #163c1d;
+  }
 }

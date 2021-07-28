@@ -18,6 +18,7 @@ import {
   isObjectEmpty,
   gridLoadingTimeout,
   budget,
+  RESOURCE_LABEL,
 } from "../../constants/helpers";
 import routes from "./../../components/Helpers/Routes";
 import {
@@ -82,6 +83,8 @@ function Budget() {
     fetchBudgetList();
   }, [page, limit, filters, sorting]);
 
+  const columnState = JSON.parse(localStorage.getItem("budgetPage"));
+
   const columns = [
     {
       field: "name",
@@ -127,7 +130,15 @@ function Budget() {
       cellRenderer: "commonRenderer"
     },
   ];
-
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   const NameRenderer = params => (
     <>
       {
@@ -330,7 +341,7 @@ function Budget() {
               <Grid item className="d-flex align-items-center gap-1">
                 <MdContacts className="headerLogo" />
                 <span className="listingHeader">
-                  {sidebarResource["budget"]}
+                  {routes.budget.title}
                 </span>
               </Grid>
               <Grid className={styles.filter_side} item>
@@ -404,6 +415,7 @@ function Budget() {
               page={page}
               actionWidth={100}
               loading={loading}
+              renderedFrom="budgetPage"
             />
           </Box>
         </CustomContainer>

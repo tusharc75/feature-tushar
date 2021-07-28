@@ -41,7 +41,7 @@ import {
 } from "../../constants/helpers";
 import Activity from "../../components/Activity";
 import CreateProjectSales from "./CreateProjectSales";
-
+import { isMobile, isTablet } from 'react-device-detect';
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -69,6 +69,7 @@ const ProjectSalesDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState("");
+  const [showActivity, setActivityShow] = useState(true);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.projectSales,
   ]);
@@ -79,7 +80,9 @@ const ProjectSalesDetails = () => {
     nodes: [],
     colorPalette: null,
   });
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   useEffect(() => {
     //  When it is nodal structure tab
     initializeGraphData();
@@ -362,180 +365,201 @@ const ProjectSalesDetails = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className="detail-container">
-          <Grid container spacing={1}>
-            <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper>
-                {!projectSalesData ? (
-                  <Box padding={1}>
-                    <Skeleton variant="text" width="150px" height="30px" />
-                    <Box display="flex">
-                      <Skeleton
-                        style={{ borderRadius: 6 }}
-                        width="120px"
-                        height="80px"
-                      />
-                      <Box marginX={1} />
-                      <Skeleton
-                        style={{ borderRadius: 6 }}
-                        width="120px"
-                        height="80px"
-                      />
-                    </Box>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
+            <Paper>
+              {!projectSalesData ? (
+                <Box padding={1}>
+                  <Skeleton variant="text" width="150px" height="30px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
                   </Box>
-                ) : (
-                  <DetailsPageHeader
-                    heading={headingLbl}
-                    logo={undefined}
-                    mainPoints={mainPoints}
-                    showHeading={true}
-                  >
-                    {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                      >
-                        Edit
-                      </Button>
-                    ) : null}
-                    {permissions?.projectSales.isDelete && isManager ? (
-                      <DeleteButton
-                        text="Delete"
-                        onClick={() => {
-                          handleDeleteProject(id);
-                        }}
-                      />
-                    ) : null}
-                  </DetailsPageHeader>
-                )}
-                <Box>
-                  {loading ||
-                    !projectSalesFields.length ||
-                    !projectSalesData ? (
-                    <Grid container spacing={2} style={{ padding: "16px" }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <>
-                      <Tabs
-                        className="oms-tab"
-                        value={currentTabIndex}
-                        onChange={(index, newValue) => {
-                          setCurrentTabIndex(newValue);
-                        }}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        aria-label="icon tabs example"
-                      >
-                        <Tab
-                          label="Project Sales"
-                          aria-controls="a11y-tabpanel-0"
-                          id="a11y-tab-0"
-                        />
-                        <Tab
-                          label="OM-Neurons"
-                          aria-controls="a11y-tabpanel-1"
-                          id="a11y-tab-1"
-                        />
-                      </Tabs>
-                      {currentTabIndex === 0 && (
-                        <Box>
-                          <DetailsPage
-                            data={copyOfProjectSalesData}
-                            fields={fiteredFieldToShow}
-                          />
-                        </Box>
-                      )}
-
-                      {currentTabIndex === 1 && (
-                        <Box>
-                          <CustomNodalStructure
-                            id={id}
-                            graphData={graphData}
-                            loadingGraphData={loadingGraphData}
-                            onClick={(node) => {
-                              if (node && routes[node.route]) {
-                                history.push({
-                                  pathname: `${routes[node.route].path}/${node.id
-                                    }`,
-                                });
-                              }
-                            }}
-                          />
-                        </Box>
-                      )}
-                    </>
-                  )}
                 </Box>
-              </Paper>
-              <Box my={1} />
-              <Paper>
-                <Box style={{ padding: "0px", maxHeight: "450px" }}>
-                  <Box
-                    width="100%"
-                    padding={1}
-                    bgcolor="grey.200"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Typography variant="subtitle2">Project Team</Typography>
-                    {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
-                      <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={() => handleOpenDialog("user")}
-                      >
-                        <ControlPoint />
-                      </IconButton>
-                    ) : null}
-                  </Box>
-                  <Box padding={1}>
-                    {loading ? (
-                      [1, 2].map((i) => (
-                        <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
-                          <Box padding={1}>
-                            <Skeleton
-                              variant="text"
-                              width="100px"
-                              height="20px"
-                            />
-                            <Box marginTop={1} />
-                            <Skeleton
-                              variant="text"
-                              width="100%"
-                              height="15px"
-                            />
-                          </Box>
-                        </BoxWithBorder>
-                      ))
-                    ) : teamUsers.length ? (
+              ) : (
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  logo={undefined}
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                    isManager ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  ) : null}
+                  {permissions?.projectSales.isDelete && isManager ? (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => {
+                        handleDeleteProject(id);
+                      }}
+                    />
+                  ) : null}
+                </DetailsPageHeader>
+              )}
+              <Box>
+                {loading ||
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
+                  <Grid container spacing={2} style={{ padding: "16px" }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <>
+                    <Tabs
+                      className="oms-tab"
+                      value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Project Sales"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        label="OM-Neurons"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    </Tabs>
+                    {currentTabIndex === 0 && (
                       <Box>
-                        <TeamUsers
-                          managerId={
-                            projectSalesData.projectManager?.optionValue
-                          }
-                          permissions={permissions}
-                          data={teamUsers}
-                          removeUser={handleRemoveUser}
+                        <DetailsPage
+                          data={copyOfProjectSalesData}
+                          fields={fiteredFieldToShow}
                         />
-                        <Box marginY={1} />
-                      </Box>
-                    ) : (
-                      <Box textAlign="center" padding={2}>
-                        No Users
                       </Box>
                     )}
-                  </Box>
+
+                    {currentTabIndex === 1 && (
+                      <Box>
+                        <CustomNodalStructure
+                          id={id}
+                          graphData={graphData}
+                          loadingGraphData={loadingGraphData}
+                          onClick={(node) => {
+                            if (node && routes[node.route]) {
+                              history.push({
+                                pathname: `${routes[node.route].path}/${node.id
+                                  }`,
+                              });
+                            }
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </>
+                )}
+              </Box>
+            </Paper>
+            <Box my={1} />
+            <Paper>
+              <Box style={{ padding: "0px", maxHeight: "450px" }}>
+                <Box
+                  width="100%"
+                  padding={1}
+                  bgcolor="grey.200"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography variant="subtitle2">Project Team</Typography>
+                  {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                    isManager ? (
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={() => handleOpenDialog("user")}
+                    >
+                      <ControlPoint />
+                    </IconButton>
+                  ) : null}
                 </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4}>
-              <div>
+                <Box padding={1}>
+                  {loading ? (
+                    [1, 2].map((i) => (
+                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton
+                            variant="text"
+                            width="100%"
+                            height="15px"
+                          />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : teamUsers.length ? (
+                    <Box>
+                      <TeamUsers
+                        managerId={
+                          projectSalesData.projectManager?.optionValue
+                        }
+                        permissions={permissions}
+                        data={teamUsers}
+                        removeUser={handleRemoveUser}
+                      />
+                      <Box marginY={1} />
+                    </Box>
+                  ) : (
+                    <Box textAlign="center" padding={2}>
+                      No Users
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+             </Paper>
+             <Paper>
+              <Box my={1} />
+              <CustomerAccounts
+                isTeamMember={isTeamMember}
+                isManager={isManager}
+                ownerId={projectSalesData?.projectManager?.optionValue}
+                loading={loading}
+                handleOpenDialog={handleOpenDialog}
+                customerAccounts={customerAccounts}
+                customerContacts={customerContacts}
+                opportunities={opportunities}
+                quotes={quotes}
+                permissions={permissions?.projectSales}
+                fetchProjectData={getSalesData}
+                projectId={id}
+                users={teamUsers}
+              />
+            </Paper>
+          </div>
+          <div>
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  Hide Activities
+                </a>}
                 <Activity
                   resourceId={id}
                   resource={projectSales.projectSalesRoute}
@@ -569,47 +593,35 @@ const ProjectSalesDetails = () => {
                   handleActivityRefresh={() => { }}
                   emails={[]}
                 />
-              </div>
-            </Grid>
-          </Grid>
-          <Box my={1} />
-          <CustomerAccounts
-            isTeamMember={isTeamMember}
-            isManager={isManager}
-            ownerId={projectSalesData?.projectManager?.optionValue}
-            loading={loading}
-            handleOpenDialog={handleOpenDialog}
-            customerAccounts={customerAccounts}
-            customerContacts={customerContacts}
-            opportunities={opportunities}
-            quotes={quotes}
-            permissions={permissions?.projectSales}
-            fetchProjectData={getSalesData}
-            projectId={id}
-            users={teamUsers}
-          />
+              </Paper>
+              :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                Show Activities
+              </a>}
+          </div>
         </div>
       </Layout>
-
-      {showConfirmBox ? (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={
-            deleteRec
-              ? `Are you sure you want to delete this ${projectSalesData.projectName}`
-              : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-                : ""
-          }
-          onClose={() => {
-            setShowConfirmBox(false);
-            if (deleteRec) setDeleteRec(null);
-            if (removeUserRec) setRemoveUserRec(null);
-          }}
-          onOk={deleteRec ? DeleteProject : removeUserRec ? RemoveUser : null}
-          okBtnLoading={isDeleting}
-        />
-      ) : null}
+      {
+        showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={
+              deleteRec
+                ? `Are you sure you want to delete this ${projectSalesData.projectName}`
+                : removeUserRec
+                  ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                  : ""
+            }
+            onClose={() => {
+              setShowConfirmBox(false);
+              if (deleteRec) setDeleteRec(null);
+              if (removeUserRec) setRemoveUserRec(null);
+            }}
+            onOk={deleteRec ? DeleteProject : removeUserRec ? RemoveUser : null}
+            okBtnLoading={isDeleting}
+          />
+        ) : null
+      }
     </>
   );
 };

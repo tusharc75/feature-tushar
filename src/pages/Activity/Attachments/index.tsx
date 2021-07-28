@@ -19,13 +19,14 @@ import { AddOutlined } from '@material-ui/icons';
 import { Button, Tooltip, IconButton, MenuItem, Menu } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, RESOURCE_LABEL } from '../../../constants/helpers';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import CustomAgGrid from '../../../components/AgGridComponents/CustomAgGrid';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
 import { CommonRenderer, CommonRendererWithCopy } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { GoArrowDown } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
+import routes from '../../../components/Helpers/Routes';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -173,7 +174,7 @@ export default function Attachment(props) {
         .then(({ data }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [referenceId]);
 
@@ -186,31 +187,34 @@ export default function Attachment(props) {
       {params.data.name}
     </a>
   );
-  const downloadFile = (fileName) => {
+  const downloadFile = (file) => {
+    const fileUrl = file.map(f => f.url)
     setIsDownloading(true);
     axiosInstance()
-      .get(`user/download?fileName=${fileName}`, {
+      .put(`user/download`,{
+        files:fileUrl
+      }, {
         responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        // onDownloadProgress: (progressEvent) => {
+        //   let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
 
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-            setTimeout(() => {
-              setIsDownloading(false);
-            }, 2000);
-          }
-        }
+        //   if (percentCompleted === 100) {
+        //     toastConfig.setToastConfig({
+        //       message: 'File Downloaded Successfully',
+        //       open: true,
+        //       type: 'success'
+        //     });
+        //     setTimeout(() => {
+        //       setIsDownloading(false);
+        //     }, 2000);
+        //   }
+        // }
       })
       .then(({ data }) => {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', fileName);
+        link.setAttribute('download', "download.zip");
         document.body.appendChild(link);
         link.click();
         setTimeout(() => setIsDownloading(false), 2000);
@@ -222,17 +226,17 @@ export default function Attachment(props) {
   };
   const ActionsRenderer = (params) => (
     <>
-      {/* <Tooltip title="Download">
+      <Tooltip title="Download">
                     <IconButton
                         size="small"
                         aria-label="Download"
                         color="primary"
                         disabled={isDownloading}
-                        onClick={() => downloadFile(params.data.fileUrl)}
+                        onClick={() => downloadFile(params.data.file)}
                     >
                         <GoArrowDown size={26} />
                     </IconButton>
-                </Tooltip> */}
+                </Tooltip>
       {params.data.canEdit ? (
         <Tooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
@@ -307,6 +311,7 @@ export default function Attachment(props) {
             const { createdBy, updatedBy, ...rest } = u;
             return {
               ...rest,
+              fileUrl:u.fileUrl,
               canEdit: u.canEdit,
               createdByDate: u.createdBy.date ?? '',
               updatedByDate: u?.updatedBy?.date ?? ''
@@ -382,13 +387,13 @@ export default function Attachment(props) {
   return (
     <Layout>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[{ title: 'Attachment' }]} />
+        <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
       </Grid>
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={5} className="d-flex align-items-center gap-1">
-              <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">Attachment ({rowCount})</span>
+              <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} ({rowCount})</span>
             </Grid>
             <Grid item xs={7} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>

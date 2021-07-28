@@ -49,6 +49,7 @@ export default function ManageQuoteDialog({
   onSuccess,
   onClose,
   isNew,
+  isClone = false,
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
@@ -62,6 +63,10 @@ export default function ManageQuoteDialog({
   opportunityName = null,
   isRenderedFromCustomerAccount = false,
   contacts = null,
+  marketSegmentId = null,
+  subMarketSegmentId = null,
+  currency = null,
+  estimatedAmount = null,
   disableCurrency = false,
   quoteApproved = false,
 }) {
@@ -355,6 +360,10 @@ export default function ManageQuoteDialog({
           setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
+        if (marketSegmentId && marketSegmentDropdownData) {
+          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
+        }
+
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
@@ -372,6 +381,13 @@ export default function ManageQuoteDialog({
               _f.fieldData.fieldName,
               opportunityId
             );
+          }
+
+          if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName,marketSegmentId)
+          }
+          if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName,subMarketSegmentId)
           }
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
@@ -392,18 +408,62 @@ export default function ManageQuoteDialog({
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity) {
           initialData["quoteName"] = opportunityName;
+          initialData["currency"] = currency;
+          initialData["estimatedAmount"] = estimatedAmount;
         }
-        setEntityData({
-          fields: newFields,
-          initialValues: isNew
-            ? initialData
-            : getObjKeysWithValues(dataToUpdate, newFields),
-        });
+
+        if (isClone) {
+          let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate))
+          const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
+          setEntityData({
+            fields: newFields,
+            initialValues: getObjKeysWithValues(rest, newFields),
+          })
+        }
+        else {
+          setEntityData({
+            fields: newFields,
+            initialValues: isNew
+              ? initialData
+              : getObjKeysWithValues(dataToUpdate, newFields),
+          })
+        }
       });
   };
 
   const onSubmit = (values) => {
-    isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+    isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+  };
+
+  const handleCloneQuote = (values) => {
+    if (
+      accountId &&
+      accountResource !== customerAccount.accountResource &&
+      !isRenderedFromOpportunity
+    )
+      values["supplierAccountName"] = [accountId];
+    setLoading(true);
+    if (values.customerContactName === "") {
+      values.customerContactName = [];
+    }
+    axiosInstance()
+      .post(`${qbApi}?entity=${selectedEntity}`, values)
+      .then(({ data }) => {
+        const newId = data.data._id;
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+        history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+        setLoading(false);
+        // onSuccess(newId);
+        onClose()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
+      });
   };
 
   const handleCreateQuote = (values) => {
@@ -582,7 +642,7 @@ export default function ManageQuoteDialog({
         fullScreen={isMobile || isTablet}
       >
         <CustomDialogHeader
-          title={isNew ? "Create Quote" : `Editing ${dataToUpdate.quoteName}`}
+          title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
           onClose={onClose}
         />
 
@@ -1058,6 +1118,7 @@ export default function ManageQuoteDialog({
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
                                         // {...rest}
+                                        selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
                                             <InputAdornment position="start">
@@ -1443,9 +1504,22 @@ export default function ManageQuoteDialog({
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      if (Object.keys(customError).length > 0) {
-                        return;
-                      } else submitForm();
+                      const err = Object.keys({ ...errors, ...customError });
+                      if (err.length) {
+                        const input = document.querySelector(
+                          `input[name=${err[0]}]`,
+                        );
+
+                        input.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                          inline: 'start',
+                        });
+                      }
+                      // if (Object.keys(customError).length > 0) {
+                      //   return;
+                      // } else 
+                      submitForm();
                     }}
                   >
                     Save

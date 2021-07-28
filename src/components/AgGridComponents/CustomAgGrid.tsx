@@ -139,11 +139,6 @@ export default function CustomAgGrid({
     setGridApi(params.api);
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
-    if (selectedRecords.length) {
-      params.api.forEachNode(function (node) {
-        node.setSelected(selectedRecords.some((o) => o._id === node.data._id));
-      });
-    }
     if (handleGridReady) handleGridReady(params);
     const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
@@ -156,6 +151,17 @@ export default function CustomAgGrid({
     const columnState = JSON.stringify(params.columnApi.getColumnState());
     localStorage.setItem(renderedFrom, columnState);
   };
+
+  useEffect(() => {
+    if (clientSideGridApi && selectedRecords.length) {
+          clientSideGridApi.forEachNode(function (node) {
+            node.setSelected(
+              selectedRecords.some((o) => o._id === node.data._id)
+            );
+        });
+    }
+    
+  },[clientSideGridApi, selectedRecords])
 
   var customFilterParams = {
     filterOptions: ['contains'],
