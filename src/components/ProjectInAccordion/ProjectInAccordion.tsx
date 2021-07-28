@@ -85,7 +85,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     const [
         showCreateProjectSalesDialog,
         setShowCreateProjectSalesDialog,
-    ] = useState(false);
+    ] = useState(false)
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -117,6 +117,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     useEffect(() => {
         setExpandProject(projectSales && projectSales?.length !== 0 ? true : false);
     }, [projectSales]);
+
     const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -272,3 +273,4 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
         )}
     </>
 }
+
