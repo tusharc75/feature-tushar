@@ -214,7 +214,7 @@ export default function QuoteProcess(props) {
     }, [currentVersion, DOAreq]);
 
     useEffect(() => {
-        dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion].TNC });
+        dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion]?.TNC });
 
         axiosInstance()
             .get(`/doa-request`)
@@ -1254,7 +1254,7 @@ export default function QuoteProcess(props) {
                                     </Button>
                                 )}
                                 <Button
-                                    disabled={quoteData.versions[currentVersion]?.processStatus === "End" || !allowedToEdit || isCloning || loading}
+                                    disabled={!allowedToEdit || isCloning || loading}
                                     variant="contained"
                                     type="button"
                                     size="small"

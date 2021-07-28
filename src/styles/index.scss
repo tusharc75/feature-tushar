@@ -914,7 +914,7 @@ body::-webkit-scrollbar-thumb {
 
 .grid-with-activity{
   display: grid;
-  grid-template-columns: 1fr 550px;
+  grid-template-columns: calc(100% - 550px) 550px;
   column-gap: 10px;
 }
 

@@ -362,7 +362,7 @@ const LeadDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               {!leadData ? (
