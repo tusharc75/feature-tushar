@@ -63,7 +63,7 @@ const ChatBox = ({ selectedChat }) => {
                 {messages.map((data, i) => (
                     <div key={i} className={`message-container ${data.username === selectedChat.username ? "my-message": ""}`}>
                         <div
-                            className={`message-outlet`}>
+                            className={`message-outlet ${data.username === selectedChat.username ? "my-color": ""}`}>
                         <Typography>
                             {data.message}
                         </Typography>
@@ -80,7 +80,7 @@ const ChatBox = ({ selectedChat }) => {
                     onChange={(e) => setMessageValue(e.target.value)}
                 />
                 <Box mr={1}>
-                <IconButton disabled={!messageValue} onClick={sendMessage} size="small">
+                <IconButton color="primary" disabled={!messageValue} onClick={sendMessage} size="small">
                     <SendOutlined/>
                 </IconButton>
                 </Box>

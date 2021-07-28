@@ -91,7 +91,9 @@ export default function QuoteDetail() {
   const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
   const [relatedTo, setRelatedTo] = useState({});
-  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: qbResource }]);
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([
+    { id: id, type: qbResource }
+  ]);
 
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
@@ -218,6 +220,11 @@ export default function QuoteDetail() {
               { title: `${data?.quoteName}` },
             ]);
             setQuoteData(data);
+            setTypeCreateProjectSalesDialog((prevState) => ([...prevState,
+            { id: data?.customerAccountName?.optionValue, type: customerAccount.accountResource },
+            { id: data?.opportunity?.optionValue, type: opportunity.opportunityResource }
+            ]));
+
             setAllowedToEdit(
               [...(data.collaborator ?? []), data.owner].some(
                 (d) => d?.optionValue === user?.user?._id

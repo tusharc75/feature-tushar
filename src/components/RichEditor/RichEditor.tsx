@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import { RichUtils, EditorState, AtomicBlockUtils } from 'draft-js';
+import { RichUtils, EditorState, AtomicBlockUtils, Modifier } from 'draft-js';
 import "./RichEditorStyle.scss";
 import {
   BsTypeBold,
@@ -18,6 +18,10 @@ import Typography from "@material-ui/core/Typography";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { imageUploadMaxSize } from "../../constants/helpers"
+import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
+import FormatAlignCenterIcon from '@material-ui/icons/FormatAlignCenter';
+import FormatAlignRightIcon from '@material-ui/icons/FormatAlignRight';
+
 const imagePlugin = createImagePlugin();
 const plugins = [imagePlugin];
 
@@ -76,20 +80,20 @@ export function RichTextEditor(props) {
   }
 
   return (
-    <div className="RichEditor-root" style={style ? { ...style } : null}>
-      <div className="container">
-        <BlockStyleControls
-          editorState={editorState}
-          onToggle={toggleBlockType}
-          onChange={onChange}
-        />
-        <InlineStyleControls
-          editorState={editorState}
-          onToggle={toggleInlineStyle}
-        />
-      </div>
-      <div className={className} onClick={focus}>
-        {/* <Editor
+      <div className="RichEditor-root" style={style ? { ...style } : null}>
+        <div className="container">
+          <BlockStyleControls
+            editorState={editorState}
+            onToggle={toggleBlockType}
+            onChange={onChange}
+          />
+          <InlineStyleControls
+            editorState={editorState}
+            onToggle={toggleInlineStyle}
+          />
+        </div>
+        <div className={className} onClick={focus}>
+          {/* <Editor
           blockStyleFn={getBlockStyle}
           customStyleMap={styleMap}
           editorState={editorState}
@@ -102,20 +106,20 @@ export function RichTextEditor(props) {
           spellCheck={true}
           handleReturn={handleReturn}
         /> */}
-        <Editor
-          editorState={editorState}
-          onChange={onChange}
-          plugins={plugins}
-          ref={editorRef}
-          handleKeyCommand={handleKeyCommand}
-          spellCheck={true}
-          placeholder={placeholder || ''}
-          onTab={onTab}
-          customStyleMap={styleMap}
-          blockStyleFn={getBlockStyle}
-        />
+          <Editor
+            editorState={editorState}
+            onChange={onChange}
+            plugins={plugins}
+            ref={editorRef}
+            handleKeyCommand={handleKeyCommand}
+            spellCheck={true}
+            placeholder={placeholder || ''}
+            onTab={onTab}
+            customStyleMap={styleMap}
+            blockStyleFn={getBlockStyle}
+          />
+        </div>
       </div>
-    </div>
   );
 
 }
@@ -220,6 +224,16 @@ const BlockStyleControls = props => {
       });
   };
 
+  const alignText = (alignment) => {
+    const currentContent = editorState.getCurrentContent();
+    const selection = editorState.getSelection();
+
+    if ((selection.getEndOffset() - selection.getStartOffset()) === 0) {
+      const textWithEntity = Modifier.insertText(currentContent, selection, `[${alignment}]***Enter Text Here***[/${alignment}]`, null);
+      onChange(EditorState.push(editorState, textWithEntity, 'insert-characters'));
+    }
+  }
+
   const BLOCK_TYPES = [
     { label: 'Huge', style: 'header-one', message: "Heading Huge" },
     { label: 'Large', style: 'header-two', message: "Heading Large" },
@@ -228,6 +242,9 @@ const BlockStyleControls = props => {
     // { label: 'H5', style: 'header-five' },
     // { label: 'H6', style: 'header-six' },
     // { label: 'Code Block', style: 'code-block', message: "Code-block" },
+    { label: 'Left', style: '', icon: <FormatAlignLeftIcon fontSize="small" onClick={() => { alignText('left') }} /> },
+    { label: 'Center', style: '', icon: <FormatAlignCenterIcon fontSize="small" onClick={() => { alignText('center') }} /> },
+    { label: 'Right', style: '', icon: <FormatAlignRightIcon fontSize="small" onClick={() => { alignText('right') }} /> },
     {
       label: 'Image', icon:
         <>
