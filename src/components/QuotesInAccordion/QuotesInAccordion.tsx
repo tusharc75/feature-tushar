@@ -81,7 +81,8 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate }) {
+export default function QuotesInAccordion({ 
+    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null,subMarketSegmentId = null,currency = null,estimatedAmount = null,}) {
     const history = useHistory();
     const {
         state: { selectedEntity, user }, dispatch
@@ -332,6 +333,10 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 onSuccess={onSuccess}
                 accountId={accountId}
                 contactId={contactId}
+                marketSegmentId={marketSegmentId}
+                subMarketSegmentId={subMarketSegmentId}
+                currency={currency}
+                estimatedAmount={estimatedAmount}
                 opportunityId={opportunityId}
                 accountResource={accountResource}
                 disableOwnerDropDown={isCreateOwnerDisable}
