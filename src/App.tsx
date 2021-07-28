@@ -104,7 +104,7 @@ function App() {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
     if (isSlowInternetConnection == "true") {
       toast.setToastConfig({
-        open: true, type: "warning", message: "Slow or no internet connection.",
+        open: true, type: "error", message: "Slow or no internet connection.",
         anchorOrigin: {
           vertical: 'bottom',
           horizontal: 'right',
