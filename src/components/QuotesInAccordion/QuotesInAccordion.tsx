@@ -143,6 +143,25 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
     const isQuotePrivate = (obj) => {
         return "privateAccess" in obj;
     }
+
+    const quoteNameWithRedirect = (obj) => (
+        hasAccessToEntity(obj.entity) ?
+            obj.entity === selectedEntity ? (
+                < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
+                    <Typography className="detailName">{obj.quoteName}</Typography>
+                </Link>) : (
+                < Link className="link" onClick={() => {
+                    handleEntityChange(obj.entity)
+                    history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`)
+                }}>
+                    <Typography className="detailName">{obj.quoteName}</Typography>
+                </Link>) :
+            (<span className="d-flex gap-2 align-items-center">
+                <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+                    <InfoOutlinedIcon fontSize="small" />
+                </Tooltip>
+            </span>)
+    )
     return <>
         <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
             <AccordionSummary
@@ -240,44 +259,16 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                                                                 {
                                                                     !isQuotePrivate(obj) ?
-                                                                        hasAccessToEntity(obj.entity) ?
-                                                                            obj.entity === selectedEntity ? (
-                                                                                < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
-                                                                                    <Typography className="detailName">{obj.quoteName}</Typography>
-                                                                                </Link>) : (
-                                                                                < Link className="link" onClick={() => {
-                                                                                    handleEntityChange(obj.entity)
-                                                                                    history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`)
-                                                                                }}>
-                                                                                    <Typography className="detailName">{obj.quoteName}</Typography>
-                                                                                </Link>) :
+                                                                        quoteNameWithRedirect(obj)
+                                                                        :
+                                                                        [...obj.collaborator, obj.owner].includes(user.user?._id) ?
+                                                                            quoteNameWithRedirect(obj)
+                                                                            :
                                                                             (<span className="d-flex gap-2 align-items-center">
-                                                                                <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+                                                                                <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
                                                                                     <InfoOutlinedIcon fontSize="small" />
                                                                                 </Tooltip>
                                                                             </span>)
-                                                                        :
-                                                                        [...obj.collaborator, obj.owner].includes(user.user?._id) ?
-                                                                            hasAccessToEntity(obj.entity) ?
-                                                                                obj.entity === selectedEntity ? (
-                                                                                    < Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
-                                                                                        <Typography className="detailName">{obj.quoteName}</Typography>
-                                                                                    </Link>) : (
-                                                                                    < Link className="link" onClick={() => {
-                                                                                        handleEntityChange(obj.entity)
-                                                                                        history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`)
-                                                                                    }}>
-                                                                                        <Typography className="detailName">{obj.quoteName}</Typography>
-                                                                                    </Link>) :
-                                                                                (<span className="d-flex gap-2 align-items-center">
-                                                                                    <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} belongs to different entity`}>
-                                                                                        <InfoOutlinedIcon fontSize="small" />
-                                                                                    </Tooltip>
-                                                                                </span>) : (<span className="d-flex gap-2 align-items-center">
-                                                                                    <Typography className="detailName">{obj.quoteName}</Typography> <Tooltip title={`${obj.quoteName} is a Private Quote`}>
-                                                                                        <InfoOutlinedIcon fontSize="small" />
-                                                                                    </Tooltip>
-                                                                                </span>)
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={5} sm={4}>
