@@ -13,7 +13,11 @@ import { SiMicrosoftoffice } from "react-icons/si";
 const LogIn = (props) => {
   const { instance, accounts, inProgress } = useMsal();
   const account = useAccount(accounts[0] || {});
-
+  const azureLogin = async() => {
+    try{
+      await instance.loginPopup()
+    }catch(e){}
+  }
   return (
     <>
       <AuthenticatedTemplate>
@@ -23,7 +27,7 @@ const LogIn = (props) => {
           startIcon={<SiMicrosoftoffice />}
           variant="outlined"
           color="primary"
-          onClick={() => instance.logout()}
+          onClick={() =>instance.logout()}
         >
           Log Out
         </Button>
@@ -34,7 +38,7 @@ const LogIn = (props) => {
           fullWidth
           variant="contained"
           color="secondary"
-          onClick={() => instance.loginPopup()}
+          onClick={azureLogin}
         >
           Office 365 Login
         </Button>
