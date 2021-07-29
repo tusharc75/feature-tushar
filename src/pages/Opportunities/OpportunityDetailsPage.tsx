@@ -45,6 +45,7 @@ import FormTypes from '../../components/Helpers/FormTypes';
 
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -745,11 +746,11 @@ function OpportunityDetailsPage() {
               </div>
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 {!opportunityData ? (
                   <Box>
@@ -796,7 +797,7 @@ function OpportunityDetailsPage() {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon"/>
               </a>}
           </div>
         </div>
