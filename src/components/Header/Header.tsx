@@ -30,7 +30,7 @@ import { useHistory, Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
+import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
@@ -298,6 +298,9 @@ const Header = ({ toggleDrawer }) => {
       socket.on("data", (data) => {
         setChatNotificationList(data);
         chatNotification.setCount(chatNotification.count + 1);
+      });
+      socket.on("new", (data) => {
+         dispatch({type: SET_CHATTER, payload: data})
       });
     }
     return () => {
