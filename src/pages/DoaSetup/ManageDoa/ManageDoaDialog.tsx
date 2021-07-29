@@ -66,11 +66,12 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage" }) => {
+const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage", isRenderedFromUserSetUp = false }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
+    const [check, setCheck] = useState(false);
     const [currencyData, setCurrencyData] = useState<any[]>([]);
     const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "");
     const [currencySymbol, setCurrencySymbol] = useState(
@@ -80,14 +81,12 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             ).symbolNative
             : null);
 
+    const tempUserList = from === "UserDetailPage" ? userList.filter(v => v.id !== userSelected[0]) : userList.filter(v => v.id !== "self")
     const fetchDoa = useCallback(() => {
-
         doa.length > 0 ?
             setUsers(doa) :
-            from === "UserDetailPage" ?
-                setUsers(([{ id: userList.find(v => v.id == userSelected[0]).id, name: userList.find(v => v.id == userSelected[0]).name, amount: 0 }]))
-                : setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
-    }, [open]);
+            setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+    }, []);
 
     useEffect(() => {
         fetchDoa();
@@ -145,17 +144,35 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
         setCurrencyData(sortedArr);
     }, []);
 
+    const validate = (values) => {
+        let errors = null;
+        let minTemp = values.users.reduce(function (previous, current) {
+            return previous.amount < current.amount ? previous : current;
+        });
+
+        if (values.users.length > 0) {
+            let tempUser = values.users.find(item => item.id === userSelected[0] || item.id === "self")
+            if (tempUser && tempUser.amount !== minTemp.amount) {
+                errors = "Too many characters!";
+            }
+
+        }
+
+        return errors;
+    };
+
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            scroll="body"
-            maxWidth="md"
-            fullWidth
-        >
+        // <Dialog
+        //     open={open}
+        //     onClose={onClose}
+        //     scroll="body"
+        //     maxWidth="md"
+        //     fullWidth
+        // >
+        <>
             {!loading &&
                 <>
-                    <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />
+                    {!isRenderedFromUserSetUp && <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />}
                     <Grid container className={classes.doaBox}>
                         <Grid item xs={6} md={6} sm={6}>
                             <ToggleButtonGroup size="small"
@@ -213,9 +230,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                     <div className={classes.doaUsersStyle}>
                         <Formik
                             initialValues={{ users: users }}
-                            onSubmit={() => { }}
-                            render={({ values,
-                                errors }) => (
+                            enableReinitialize={true}
+                            onSubmit={() => { }}>
+                            {({ values }) => (
                                 <>
                                     <DialogContent className={classes.contentBox}>
                                         <Form>
@@ -268,7 +285,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                             size="small"
                                                                                             style={{ minWidth: 200 }}
                                                                                             value={userList.find(v => v.name == userVal.name) ? userList.find(v => v.name == userVal.name) : ""}
-                                                                                            options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
+                                                                                            options={(selectedType === 2) ? userList.filter(element => !values.users.map(e => e.name).includes(element.name)) : tempUserList.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                             getOptionLabel={(option: any) => option?.name ? option?.name : ""}
                                                                                             onChange={(event, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
@@ -308,12 +325,19 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                 name="amount"
                                                                                                 placeholder="Enter Amount"
                                                                                                 value={userVal.amount}
-                                                                                                onChange={(e) => arrayHelpers.replace(index, {
-                                                                                                    ...values.users[index],
-                                                                                                    ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                                                                })}
-
+                                                                                                onChange={(e) => {
+                                                                                                    arrayHelpers.replace(index, {
+                                                                                                        ...values.users[index],
+                                                                                                        ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                                    })
+                                                                                                }}
+                                                                                                // error={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined}
+                                                                                                // helperText={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined ? " User is Required" : ""}
+                                                                                                required
                                                                                             />
+                                                                                            {validate(values) && check && (userVal.id === userSelected[0] || userVal.id === "self") && (
+                                                                                                <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
+                                                                                            )}
                                                                                         </Grid>
                                                                                     }
                                                                                     <Grid item md={2}>
@@ -362,13 +386,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
 
                                     <CustomDialogFooter>
 
-                                        <Button
-                                            size="small"
-                                            onClick={onClose}
-                                            variant="contained"
-                                        >
-                                            Cancel
-                                        </Button>
+                                        {!isRenderedFromUserSetUp &&
+                                            <Button
+                                                size="small"
+                                                onClick={onClose}
+                                                variant="contained"
+                                            >
+                                                Cancel
+                                            </Button>}
                                         <Button
                                             variant="contained"
                                             color="primary"
@@ -379,19 +404,21 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                 values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
                                             }
                                             onClick={() => {
-                                                handleSubmit(values.users)
+                                                validate(values) ? setCheck(true)
+                                                    : handleSubmit(values.users)
                                             }}
                                         >
-                                            Save
+                                            {isRenderedFromUserSetUp ? "Save & Finish" : "Save"}
                                         </Button>
                                     </CustomDialogFooter>
                                 </>
                             )}
-                        />
+                        </Formik>
                     </div>
                 </>
             }
-        </Dialog>
+            {/* </Dialog> */}
+        </>
     )
 }
 

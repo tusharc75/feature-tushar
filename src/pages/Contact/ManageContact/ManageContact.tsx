@@ -128,13 +128,37 @@ export default function ManageContact(props) {
     );
   };
 
-  const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
+  const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId, selectedEntity) => {
     setCollaboratorDataSource(
       getCollaboratorDropdownDataSource(
         selectedOwnerId,
         ownerCollaboratorCommonDataSource
       )
     );
+
+    if(selectedEntity && collaboratorDataSource){
+     
+      let newTempArray = []
+     
+      selectedEntity.map(d=>{
+        getCollaboratorDropdownDataSource(
+          selectedOwnerId,
+          ownerCollaboratorCommonDataSource
+        ).map(item=>{
+          if(item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId){
+            newTempArray.push(item)
+          }
+        })
+        setCollaboratorDataSource(newTempArray)
+        // setCollaboratorDataSource(
+        //   getCollaboratorDropdownDataSource(
+        //   selectedOwnerId,
+        //   ownerCollaboratorCommonDataSource
+        // ).filter(item => item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId)) 
+        
+        
+      })
+    }
   };
   //  Owner, Collaborator Code - End
 
@@ -309,7 +333,7 @@ export default function ManageContact(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
-                                            values.owner
+                                            values.owner, values.entity ? values.entity : "" 
                                           )
                                         }
                                       />
@@ -489,6 +513,18 @@ export default function ManageContact(props) {
                       }
                       onClick={(e) => {
                         e.preventDefault();
+                        const err = Object.keys(errors);
+                        if (err.length) {
+                          const input = document.querySelector(
+                            `input[name=${err[0]}]`,
+                          );
+
+                          input.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'start',
+                          });
+                        }
                         submitForm();
                       }}
                     >

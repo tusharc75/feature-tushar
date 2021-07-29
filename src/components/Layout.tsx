@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
 import Sidebar from "./Sidebar/Sidebar";
+import GlobalUserChat from "./GlobalUserChat";
 
 const useStyles = makeStyles(() => ({
   content: {
@@ -48,6 +49,7 @@ const Layout = ({ children, width }) => {
           {children}
         </motion.div>
       </Box>
+      <GlobalUserChat/>
     </div>
   );
 };

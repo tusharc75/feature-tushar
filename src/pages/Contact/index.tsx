@@ -49,7 +49,7 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user }
+    state: { user, selectedEntity }
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute, contactResourceLabel },
@@ -148,7 +148,7 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
   const ConcatedNameRenderer = (params) => (
     <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
@@ -239,6 +239,10 @@ export default function Contact(props) {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${selectedType}`;
 
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
     if (accountDetails.accountId) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName('accountName'), term: accountDetails.accountId }])}`;
     }
@@ -267,51 +271,53 @@ export default function Contact(props) {
   };
 
   const getContacts = () => {
-    const queryString = getQueryString();
-    dispatch({ type: 'loading', loading: true });
+    if (selectedEntity) {
+      dispatch({ type: 'loading', loading: true });
+      const queryString = getQueryString();
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+      if (gridApi) {
+        gridApi.setRowData([]);
+      }
 
-    axiosInstance()
-      .get(`${contactApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
+      axiosInstance()
+        .get(`${contactApi}${queryString}`)
+        .then(({ data: { data, count } }) => {
+          let rows = data.map((u) => {
+            const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
 
-          return {
-            ...restProperties,
-            id: u._id,
+            return {
+              ...restProperties,
+              id: u._id,
 
-            canDelete: u.owner?.optionValue === user?.user._id,
+              canDelete: u.owner?.optionValue === user?.user._id,
 
-            accountId: u.accountName?.optionValue,
-            accountName: u.accountName?.optionLabel,
+              accountId: u.accountName?.optionValue,
+              accountName: u.accountName?.optionLabel,
 
-            entity: entity?.optionLabel,
-            relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+              entity: entity?.optionLabel,
+              relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+              relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
+              owner: u.owner?.optionLabel,
+              ownerId: u.owner?.optionValue,
 
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
-          };
-        });
+              createdBy: u.createdBy?.user?.concatedName,
+              createdByDate: u.createdBy?.date,
+              updatedBy: u.updatedBy?.user?.concatedName,
+              updatedByDate: u.updatedBy?.date
+            };
+          });
 
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
+          dispatch({ type: 'initialize', data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
           dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-      });
+        });
+    }
   };
 
   const handleSingleDeleteContacts = async () => {
@@ -387,7 +393,7 @@ export default function Contact(props) {
     <Layout>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[contactBreadcrumb]} />
+          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -406,7 +412,7 @@ export default function Contact(props) {
           <Grid className={styles.filter_side_container} container justify="space-between">
             <Grid item className="d-flex align-items-center gap-1">
               <MdContacts className="headerLogo" />
-              <span className="listingHeader">{RESOURCE_LABEL[contactResourceLabel]}</span>
+              <span className="listingHeader">{routes[contactResource].title}</span>
               {ContactTypes && (
                 <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                   {ContactTypes.map((k, index) => {

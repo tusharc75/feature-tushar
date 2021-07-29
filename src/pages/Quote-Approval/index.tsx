@@ -514,7 +514,7 @@ const QuoteApproval = () => {
                                 <div className="mt-1">
                                     <Grid container alignItems="center">
                                         <Grid item xs={12} md={4} sm={4}>
-                                            <h2>Total : {sellingPrice} {currency}</h2>
+                                            <h2>Total : {sellingPrice.toFixed(4)} {currency}</h2>
                                         </Grid>
                                         { showUnlockAction &&
                                             <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
@@ -526,6 +526,7 @@ const QuoteApproval = () => {
                                                     color="primary"
                                                     size="medium"
                                                     startIcon={<FcUnlock />}
+                                                    disabled={!Boolean(versionDetails)}
                                                     onClick={()=>{
                                                     setShowValidationDialog(true);
                                                     }}>

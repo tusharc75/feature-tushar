@@ -26,6 +26,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import { isMobile, isTablet } from 'react-device-detect';
 import { Dialog } from '@material-ui/core';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import { IoIosArrowDropright,IoIosArrowDropleft } from 'react-icons/io';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,6 +49,7 @@ const LeadDetailsPage = () => {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
+  const [showActivity, setActivityShow] = useState(true);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -72,6 +74,9 @@ const LeadDetailsPage = () => {
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
 
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   // useEffect(() => {
   //   if (id && user) {
   //     fetchLeadData();
@@ -358,8 +363,8 @@ const LeadDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} className="gap-2">
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
             <Paper>
               {!leadData ? (
                 <div>
@@ -440,39 +445,46 @@ const LeadDetailsPage = () => {
               {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
               {/* <LeadInAccordion recordsPerLine={3} /> */}
             </Paper>
-          </Grid>
-
-          <Grid item xs={12} sm={12} md={4} lg={4} className="gap-2">
-            <Paper>
-              {!leadData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i, index) => (
-                    <Skeleton key={index} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ['Attachment', 'Case']}
-                    relatedTo={[
-                      {
-                        type: leadResource,
-                        referenceId: leadData._id,
-                        access: true
-                      }
-                    ]}
-                    resourceId={leadData._id}
-                    resource={leadResource}
-                    handleActivityRefresh={() => { }}
-                    emails={[leadData?.email ?? '']}
-                  />
-                </div>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
+          </div>
+          <div className="position-relative">
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </a>}
+                {!leadData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i, index) => (
+                      <Skeleton key={index} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ['Attachment', 'Case']}
+                      relatedTo={[
+                        {
+                          type: leadResource,
+                          referenceId: leadData._id,
+                          access: true
+                        }
+                      ]}
+                      resourceId={leadData._id}
+                      resource={leadResource}
+                      handleActivityRefresh={() => { }}
+                      emails={[leadData?.email ?? '']}
+                    />
+                  </div>
+                )}
+              </Paper>
+              :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon"/>
+              </a>}
+          </div>
+        </div>
 
         {convertLeadToOpportunityConfirmationDialog.open ? (
           <ConfirmationDialog

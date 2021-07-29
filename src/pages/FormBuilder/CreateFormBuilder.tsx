@@ -1,10 +1,9 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, Typography, Divider, TextField, Button, Menu, MenuItem, CircularProgress, Checkbox } from "@material-ui/core";
+import { Box, Typography, Button, CircularProgress } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
-import Loader from "../../components/Loader";
 import queryString from "query-string";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -83,7 +82,7 @@ const CreateFormBuilder = (props) => {
                 _field_data._id = _field_data._id.toString();
                 _field_data.sectionName = _section.sectionName
                 if (!isNaN(_field._id)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
                 }
                 _field_data.order = ++order
                 data.push(_field_data)

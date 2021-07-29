@@ -11,6 +11,7 @@ import { GiAbstract055 } from "react-icons/gi";
 import CustomContainer from "../../components/CustomContainer";
 import { dateFormat, gridLoadingTimeout, gridPageSizes, RESOURCE_LABEL } from "../../constants/helpers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import routes from "../../components/Helpers/Routes";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -121,6 +122,7 @@ const DOARequest = () => {
     sorting,
     selectedRecords,
   } = state;
+  const columnState = JSON.parse(localStorage.getItem("doaRequestPage"));
 
   const [columns, setColumns] = useState([
     {
@@ -149,6 +151,16 @@ const DOARequest = () => {
       show: true,
     },
   ]);
+
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   useEffect(() => {
     fetchProductBuilder();
@@ -236,7 +248,7 @@ const DOARequest = () => {
     <Layout>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[{ title: "DOA Requests" }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.DOARequest.title }]} />
         </Grid>
       </Grid>
       <CustomContainer>
@@ -244,7 +256,7 @@ const DOARequest = () => {
           <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
               <GiAbstract055 />{" "}
-              <span className="listingHeader">{RESOURCE_LABEL.DOARequest}</span>
+              <span className="listingHeader">{routes.DOARequest.title}</span>
             </Grid>
           </Grid>
         </div>
@@ -262,6 +274,7 @@ const DOARequest = () => {
             allowSelection={false}
             allowAction={false}
             loading={loading}
+            renderedFrom="doaRequestPage"
           />
       </CustomContainer>
     </Layout>

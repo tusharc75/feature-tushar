@@ -122,12 +122,22 @@ const QuoteBuilders = () => {
         renderCell: (params: any) => (
           <Typography
             title={params.value}
+            className="text-truncate"
           >
             {params.value}
           </Typography>
         ),
       },
-
+      {
+        field: "processStatus", headerName: "Conclusion", flex: 1,
+        renderCell: (params: any) => (
+          <Typography
+            title={params.value}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
 
       {
         field: "totalCost", headerName: "Total Cost", flex: 1,
@@ -670,7 +680,7 @@ const QuoteBuilders = () => {
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
-              heading="Quotes"
+              heading={routes.quoteBuilder.title}
               showTransferEntityDialog={handleTransferEntityDialog}
 
             >

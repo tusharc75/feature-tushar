@@ -633,6 +633,7 @@ export default function ManageOpportunityDialog({
                                       "estimatedAmount" ? (
                                       <FormTypes
                                         // {...rest}
+                                        selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
                                             <InputAdornment position="start">
@@ -924,6 +925,18 @@ export default function ManageOpportunityDialog({
                     }
                     onClick={(e) => {
                       e.preventDefault();
+                      const err = Object.keys(errors);
+                      if (err.length) {
+                        const input = document.querySelector(
+                          `input[name=${err[0]}]`,
+                        );
+
+                        input.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                          inline: 'start',
+                        });
+                      }
                       submitForm();
                     }}
                   >

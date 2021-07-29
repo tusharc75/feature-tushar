@@ -19,7 +19,7 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { customerAccount, customerContact, opportunity } from "../../constants/helpers"
+import { customerAccount, customerContact, opportunity, quoteBuilder } from "../../constants/helpers"
 import { startCase } from "lodash";
 import SearchBox from "../Helpers/SearchBox";
 const AssignProjectSalesDialog = ({
@@ -48,6 +48,11 @@ const AssignProjectSalesDialog = ({
             setId(type.find(item => item.type === customerContact.contactResource).id)
             setAddAPI("customer-contacts")
         }
+        else if (type.some(item => item?.type === quoteBuilder.qbResource)) {
+            setResource(quoteBuilder.qbResource)
+            setId(type.find(item => item.type === quoteBuilder.qbResource).id)
+            setAddAPI("quotes")
+        }
         else if (type.some(item => item?.type === opportunity.opportunityResource)) {
             setResource(opportunity.opportunityResource)
             setId(type.find(item => item.type === opportunity.opportunityResource).id)
@@ -55,10 +60,10 @@ const AssignProjectSalesDialog = ({
         }
         else {
             setResource(customerAccount.accountResource)
-            setId(type.find(item => item.type === customerAccount.accountResource).id)
+            setId(type.find(item => item.type === customerAccount.accountResource)?.id)
             setAddAPI("customer-accounts")
-
         }
+
         let api = type.some(item => item?.type === customerContact.contactResource) ?
             `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${type.find(item => item.type === customerAccount.accountResource).id}"}]`
             : `/project-sales`

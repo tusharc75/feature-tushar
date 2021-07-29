@@ -29,7 +29,7 @@
   --teal: #1e7682;
   --theme-text: #fff;
   --grey: #838485;
-  --lightgrey: lightgrey;
+  --lightgrey: #ededed;
 
   --common-border-color: #dee2e6;
 
@@ -67,7 +67,10 @@
     )
   );
 }
-
+.ag-theme-material .ag-cell,
+.ag-theme-material .ag-full-width-row .ag-cell-wrapper.ag-row-group {
+  line-height: 26px;
+}
 .ag-theme-material .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
   border: 1px solid lightgray !important;
 }
@@ -459,6 +462,7 @@ body::-webkit-scrollbar-thumb {
 
   &.single {
     padding: 2px;
+    margin-left: 12px;
   }
 }
 
@@ -556,6 +560,7 @@ body::-webkit-scrollbar-thumb {
   border-bottom: 1px solid #ecf1f3;
   background: #f5f5f5;
   min-height: auto !important;
+  margin-left: 4px;
 }
 
 .quote-tab {
@@ -751,8 +756,7 @@ body::-webkit-scrollbar-thumb {
   -webkit-gap: 0.25rem;
   font-weight: bold;
 }
-
-@supports not (-webkit-gap: 0.25rem) {
+@supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
@@ -881,7 +885,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* Style your items */
-.my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+.my-masonry-grid_column > div {
+  /* change div to reference your elements you put in <Masonry> */
   margin-bottom: 30px;
 }
 
@@ -903,8 +908,61 @@ body::-webkit-scrollbar-thumb {
   width: 100%;
   height: 44px;
   background-color: transparent;
-  background: -webkit-linear-gradient(to right,#fafafa00,rgba(255,255,255,0),#fafafa00);
-  background: linear-gradient(to right,#fafafa00,rgba(255,255,255,0),#fafafa00);
+  background: -webkit-linear-gradient(to right, #fafafa00, rgba(255, 255, 255, 0), #fafafa00);
+  background: linear-gradient(to right, #fafafa00, rgba(255, 255, 255, 0), #fafafa00);
   z-index: 1;
   content: "";
+}
+
+.grid-with-activity {
+  display: grid;
+  grid-template-columns: calc(100% - 550px) 550px;
+  column-gap: 10px;
+}
+
+.grid-without-activity {
+  display: grid;
+  grid-template-columns: 1fr 26px;
+}
+
+.grid-mobile {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+}
+.activityHide {
+  position: absolute;
+  left: -6px;
+  top: 11px;
+  cursor: pointer;
+  font-size: 26px;
+  color: #636663;
+
+  & .icon {
+    background: whitesmoke;
+    border-radius: 50%;
+    box-shadow: 1px 3px 3px #ab9b9b;
+  }
+}
+
+.activityShow {
+  background: whitesmoke;
+  height: 100vh;
+  position: fixed;
+  right: 9px;
+  transform-origin: bottom right;
+  width: 25px;
+  top: 53px;
+  font-size: 28px;
+  border-left: 2px solid #e6dddd;
+
+  & .icon{
+    left: -10px;
+    position: absolute;
+    top: 54px;
+    background: whitesmoke;
+    border-radius: 50px;
+    color: #636663;
+    box-shadow: 1px 3px 3px #ab9b9b;
+  }
 }

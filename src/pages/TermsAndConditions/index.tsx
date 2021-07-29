@@ -25,6 +25,7 @@ import ManageTermsAndCondition from './ManageTermsAndCondition'
 import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import routes from '../../components/Helpers/Routes';
 
 let termsTimeout
 export default function TermsAndCondition(props) {
@@ -194,7 +195,7 @@ export default function TermsAndCondition(props) {
                     <Grid container className={styles.filter_side_container}>
                         <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
                             <IoDocumentTextOutline className="headerLogo" />{" "}
-                            <span className="listingHeader">{RESOURCE_LABEL.termsAndConditions}</span>
+                            <span className="listingHeader">{routes.termsAndConditions.title}</span>
                         </Grid>
 
                         <Grid item xs={6} className={styles.filter_side}>

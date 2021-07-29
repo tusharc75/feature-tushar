@@ -479,6 +479,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                         ) : field.fieldName.trim() === "amount" ? (
                                           <FormTypes
                                             // {...rest}
+                                            selectedCurrencyCode={values["currency"]}
                                             startAdornment={
                                               currencySymbol ? (
                                                 <InputAdornment position="start">

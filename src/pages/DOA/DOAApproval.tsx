@@ -25,6 +25,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import { isMobile, isTablet } from "react-device-detect";
 import DOAReasonDialog from "./DOAReasonDialog"
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -147,9 +148,12 @@ const DOAApproval = () => {
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
+  const [showActivity, setActivityShow] = useState(true);
   var DOALimit = 0;
   var DOAsetup = false;
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   useEffect(() => {
     if (id) {
       fetchQuote();
@@ -291,8 +295,8 @@ const DOAApproval = () => {
           ]}
         />
       </div>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8}>
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+        <div>
           <Paper className="subContainer">
             <Grid container className="detailHeader">
               <Grid
@@ -471,22 +475,32 @@ const DOAApproval = () => {
               </Grid>
             </Grid>
           </Paper>
-        </Grid>
-        <Grid item xs={12} sm={12} md={4} lg={4}>
-          <Activity
-            resourceId={QData?.quoteBuilderId}
-            resource="DOA"
-            relatedTo={[
-              {
-                type: "DOA",
-                referenceId: QData?.quoteBuilderId,
-                access: true,
-              },
-            ]}
-            handleActivityRefresh={() => { }}
-          />
-        </Grid>
-      </Grid>
+        </div>
+        <div className="position-relative">
+          {showActivity ?
+            <Paper>
+              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                <IoIosArrowDropright className="icon" />
+              </a>}
+              <Activity
+                resourceId={QData?.quoteBuilderId}
+                resource="DOA"
+                relatedTo={[
+                  {
+                    type: "DOA",
+                    referenceId: QData?.quoteBuilderId,
+                    access: true,
+                  },
+                ]}
+                handleActivityRefresh={() => { }}
+              />
+            </Paper>
+            :
+            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              <IoIosArrowDropleft className="icon"/>
+            </a>}
+        </div>
+      </div>
       {
         showAIDialog && (
           <Dialog
