@@ -71,6 +71,7 @@ export default function ManageQuoteDialog({
   disableCurrency = false,
   quoteApproved = false,
   isRenderedFromProjectSales = false,
+  cloneQuoteWithVersionNumber = 0
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -386,10 +387,10 @@ export default function ManageQuoteDialog({
           }
 
           if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName,marketSegmentId)
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, marketSegmentId)
           }
           if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName,subMarketSegmentId)
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, subMarketSegmentId)
           }
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
@@ -457,7 +458,9 @@ export default function ManageQuoteDialog({
           type: "success",
           message: data.message,
         });
-        history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+
+          history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+        
         setLoading(false);
         // onSuccess(newId);
         onClose()

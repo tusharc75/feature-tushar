@@ -999,14 +999,14 @@ export default function QuoteProcess(props) {
                         });
                 }
                 else {
-                    let body = {
-                        acceptedColumns: quoteData.versions[currentVersion].acceptedColumns,
-                        status: quoteData.versions[currentVersion].status,
-                        TNC: quoteData.versions[currentVersion].TNC
-                    };
-                    axiosInstance()
-                        .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-                        .then(() => {
+                    // let body = {
+                    //     acceptedColumns: quoteData.versions[currentVersion].acceptedColumns,
+                    //     status: quoteData.versions[currentVersion].status,
+                    //     TNC: quoteData.versions[currentVersion].TNC
+                    // };
+                    // axiosInstance()
+                    //     .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+                    //     .then(() => {
                             axiosInstance()
                                 .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
                                 .then(({ data }) => {
@@ -1028,10 +1028,10 @@ export default function QuoteProcess(props) {
                                 .catch((err) => {
                                     setGeneratingFile(false);
                                 });
-                        })
-                        .catch((err) => {
-                            setGeneratingFile(false);
-                        });
+                        // })
+                        // .catch((err) => {
+                        //     setGeneratingFile(false);
+                        // });
                 }
             }
         }
@@ -1328,6 +1328,7 @@ export default function QuoteProcess(props) {
                         id={quoteData._id}
                         version={currentVersion}
                         Refresh={fetchQuoteData}
+                        quoteData={quoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
                         versionProcessStatus={quoteData.versions[currentVersion]?.processStatus}

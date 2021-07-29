@@ -1,7 +1,7 @@
 import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid, Button, Typography } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button, Typography, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -59,10 +59,22 @@ function a11yProps(index: any) {
   };
 }
 
+const useStyles = makeStyles((theme) => ({
+  reasonDialog: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+  paper: {
+    width: '80%',
+    maxHeight: 435,
+  },
+}));
+
 
 
 export default function QuoteDetail() {
-
+  const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
@@ -78,6 +90,7 @@ export default function QuoteDetail() {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(0);
+  const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isQuoteClone, setIsQuoteClone] = useState(false);
   const [columnView, setColumnView] = useState([]);
@@ -86,7 +99,8 @@ export default function QuoteDetail() {
   const [versionStatus, setVersionStatus] = useState("Building Quote");
   const [processStatus, setProcessStatus] = useState("New");
   const [updatingVersion, setUpdatingVersion] = useState(false);
-  const [pdfFileName, setPdfFileName] = useState("");
+  const [reopenReasonDialog, setReopenReasonDialog] = useState(false);
+  const [reopenReason, setReopenReason] = useState("");
   const [quoteReOpening, setQuoteReOpening] = useState(false);
 
   const [showActivity, setActivityShow] = useState(true);
@@ -188,6 +202,13 @@ export default function QuoteDetail() {
     setCurrentVersion(versionNumber)
     setTabValue(2)
   }
+
+  const handleCloneQuoteWithVersionFromAllVersion = (versionNumber) => {
+    setCloneQuoteWithVersionNumber(versionNumber)
+    setOpenUpdateDialog(true);
+    setIsQuoteClone(true)
+  }
+  
 
   const handleChangeVersion = (event) => {
     setCurrentVersion(parseInt(event.target.value));
@@ -337,7 +358,7 @@ export default function QuoteDetail() {
   };
 
   const handleReOpenQuote = () => {
-    const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.acceptedColumns
+    const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.TNC
     setQuoteReOpening(true);
 
     let notEndVersions = []
@@ -359,11 +380,18 @@ export default function QuoteDetail() {
           axiosInstance()
             .post(
               `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
-              { TNC: previousVersionTNC , comment: `Auto-Cloned from Re-opened Version ${ifQuoteApproved.versionApproved}`}
+              { TNC: previousVersionTNC, comment: [`Auto-Cloned from Re-opened Version ${ifQuoteApproved.versionApproved}`] }
             )
             .then(() => {
+              let comment = quoteData.versions[currentVersion]?.comment
+              if (typeof comment === 'string') {
+                comment = [comment, reopenReason];
+              }
+              else {
+                comment.push(reopenReason)
+              }
               axiosInstance()
-                .post(`quote-builder/updateVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`, { TNC: previousVersionTNC, status: "Re-Open" })
+                .post(`quote-builder/updateVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`, { TNC: previousVersionTNC, status: "Re-Open", comment: comment })
                 .then(() => {
                   fetchQuoteData(0);
                   setQuoteReOpening(false);
@@ -388,7 +416,7 @@ export default function QuoteDetail() {
       axiosInstance()
         .post(
           `/quote-builder/createVersion/${quoteData._id}?version=${ifQuoteApproved.versionApproved}`,
-          { TNC: previousVersionTNC , comment: `Auto-Cloned from Re-opened Version ${ifQuoteApproved.versionApproved}` }
+          { TNC: previousVersionTNC, comment: [`Auto-Cloned from Re-opened Version ${ifQuoteApproved.versionApproved}`] }
         )
         .then(() => {
           axiosInstance()
@@ -433,6 +461,10 @@ export default function QuoteDetail() {
       });
   };
 
+  const handleReopenReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setReopenReason(event.target.value);
+  };
+
 
 
   return (
@@ -475,7 +507,7 @@ export default function QuoteDetail() {
                       size="small"
                       startIcon={<HiPencil />}
                       disabled={quoteReOpening}
-                      onClick={handleReOpenQuote}
+                      onClick={() => setReopenReasonDialog(true)}
                     >
                       Re-Open
                     </Button>
@@ -567,8 +599,10 @@ export default function QuoteDetail() {
                       {(quoteData && <AllVersionStatus
                         quoteId={id}
                         quoteData={quoteData}
+                        quotePermissions={permissions[qbResource]}
                         fetchQuoteData={fetchQuoteData}
                         handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
+                        handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
                       />)}
                     </Suspense>
                   </TabPanel>
@@ -715,8 +749,44 @@ export default function QuoteDetail() {
             disableOwnerDropDown={true}
             disableCurrency={true}
             quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
+            cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
           />
         )}
+        {reopenReasonDialog && (
+          <div className={classes.reasonDialog}>
+            <Dialog
+              maxWidth="xs"
+              open={reopenReasonDialog}
+              aria-labelledby="confirmation-dialog-title"
+              classes={{
+                paper: classes.paper,
+              }}
+              id="confirmation-dialog"
+              keepMounted
+            >
+              <DialogTitle id="confirmation-dialog-title" className="text-white">Reason for Re-Open</DialogTitle>
+              <DialogContent dividers>
+                <TextField
+                  fullWidth
+                  id="outlined-multiline-static"
+                  label="Reason"
+                  multiline
+                  value={reopenReason}
+                  onChange={handleReopenReasonChange}
+                  rows={4}
+                  variant="outlined"
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">Close</Button>
+                <Button size="small" onClick={handleReOpenQuote} color="primary">Save</Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+
+        )
+
+        }
       </Layout>
     </>
   );
