@@ -138,6 +138,7 @@ const Steps = (props) => {
     reminderLoading = false,
     hideReminderButton = false,
     DOAData = null,
+    quoteData
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -230,7 +231,7 @@ const Steps = (props) => {
       <div
         className={clsx(classes.root, {
           [classes.active]: active,
-          [classes.completed]: completed || approvedQuote.approved,
+          [classes.completed]: completed ,
           [classes.rejected]: rejected,
         })}
       >
@@ -260,12 +261,17 @@ const Steps = (props) => {
 
   const manualSendToCustomer = () => {
     if (selectedOption) {
+      let tempComment = quoteData.versions[version]?.comment
+      if (typeof tempComment === 'string') {
+        tempComment = [tempComment];
+      }
       let dataObj = {
         status: selectedOption + " by Customer",
         manual: true,
+        comment:tempComment
       };
       if (selectedOption === "Invalid") {
-        dataObj["comment"] = comment;
+        dataObj.comment.push(comment);
       }
       axiosInstance()
         .post(
