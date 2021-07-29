@@ -4,11 +4,10 @@ import { Paper } from '@material-ui/core'
 import { IconButton } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { GoArrowDown } from "react-icons/go"
-import GetAppIcon from '@material-ui/icons/GetApp';
-
 
 export default function ImageAttachments(props) {
-    const { imageAttachments, onImageClick, onDelete, emailId, isRenderedFrom = false } = props
+    const { imageAttachments, onImageClick, onDelete, emailId, isRenderedFrom = false, isCreateOnly = false } = props
+
     return (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
             {
@@ -17,49 +16,43 @@ export default function ImageAttachments(props) {
                         {imageAttachments.map((attachment, i) => {
                             return <>
                                 <Grid item key={`attachment${i}`} sm={8} xs={12} md={6} xl={6}>
-                                    <Paper className={emailStyles.fileContainer}>
+                                    <Paper className={emailStyles.container}>
                                         <img src={attachment} alt={attachment}
                                             onClick={() => onImageClick(attachment)}
                                             className={emailStyles.image} />
-                                        {isRenderedFrom === false ?
-                                            (<div className={emailStyles.overlay}>
-                                                <IconButton>
-                                                    {
-                                                        emailId ? <a href={`${attachment}`} download={true} >
-                                                            <GoArrowDown color="white" size={25} />
-                                                        </a> : <DeleteIcon className={emailStyles.deleteIcon}
-                                                            onClick={() => onDelete(attachment)}
-                                                        />
-                                                    }
-                                                </IconButton>
-                                            </div>)
-                                            :
 
-                                            emailId ? <div style={{ display: 'flex', justifyContent: 'space-between', width: '30%', float: 'right', marginTop: '5px', bottom: '0' }}>
-                                                <>
-                                                    <IconButton style={{ paddingBottom: '1px' }}>
-                                                        {
-                                                            <a href={`${attachment}`}
-                                                                download={true}>
-                                                                <GetAppIcon />
+                                        <>
+                                            {
+                                                isCreateOnly && emailId ?
+                                                    <div className={emailStyles.overlay}>
+                                                        <IconButton>
+                                                            <a href={`${attachment}`} download={true} >
+                                                                <GoArrowDown color="white" size={25} />
                                                             </a>
-                                                        }
-                                                    </IconButton>
-                                                    <IconButton onClick={() => onDelete(attachment)}>
-                                                        {
-                                                            <DeleteIcon color='error' />
-
-                                                        }
-                                                    </IconButton>
-                                                </></div> :
-                                                <IconButton onClick={() => onDelete(attachment)} >
-                                                    {
-                                                        <DeleteIcon color='error' />
-
-                                                    }
-                                                </IconButton>
-
-                                        }
+                                                        </IconButton>
+                                                    </div> : emailId ? <>
+                                                        <div className={emailStyles.overlay}
+                                                            style={{ display: 'flex', justifyContent: 'space-between', marginRight: '3%', width: '100px' }}>
+                                                            <IconButton>
+                                                                <a href={`${attachment}`} download={true} >
+                                                                    <GoArrowDown color="white" size={25} style={{ marginTop: '7px' }} />
+                                                                </a>
+                                                            </IconButton>
+                                                            <IconButton>
+                                                                <DeleteIcon className={emailStyles.deleteIcon}
+                                                                    onClick={() => onDelete(attachment)} />
+                                                            </IconButton>
+                                                        </div>
+                                                    </>
+                                                        : <div className={emailStyles.overlay}>
+                                                            <IconButton>
+                                                                <DeleteIcon className={emailStyles.deleteIcon}
+                                                                    onClick={() => onDelete(attachment)}
+                                                                />
+                                                            </IconButton>
+                                                        </div>
+                                            }
+                                        </>
                                     </Paper>
                                 </Grid>
                             </>
