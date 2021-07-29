@@ -4,7 +4,7 @@
         .MuiStepLabel-iconContainer {
             display: none;
         }
-        .MuiStepLabel-label{
+        .MuiStepLabel-label {
             font-size: 11px;
         }
     }
@@ -22,6 +22,10 @@
         font-size: 1rem;
     }
     .listingHeader {
+        font-size: 1rem;
+    }
+
+    .listingHeaderActivity {
         font-size: 1rem;
     }
     .MuiToggleButton-sizeSmall {
@@ -97,7 +101,15 @@
         background: white !important;
         color: #163340 !important;
         border-radius: 0;
-  }
+    }
+    .stepper-box {
+        background: #eeeeee;
+        padding: 4px;
+
+        & .mainview {
+            width: 98vw;
+        }
+    }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -133,16 +145,16 @@
 
 /* Extra small devices -Activity And detail changes(phones, 1300px and down) */
 @media only screen and (max-width: 1300px) {
-   .grid-with-activity{
+    .grid-with-activity {
         display: grid;
         grid-template-rows: 1fr 1fr;
         gap: 10px;
         grid-template-columns: none;
-   }
-   .activityHide{
-       display: none;
-   }
-   .detail-container{
-       height: auto;
-   }
+    }
+    .activityHide {
+        display: none;
+    }
+    .detail-container {
+        height: auto;
+    }
 }
