@@ -25,6 +25,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from "react-device-detect";
+import { IoIosArrowDropright,IoIosArrowDropleft } from 'react-icons/io';
 import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectInAccordion"
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
@@ -664,10 +665,11 @@ export default function QuoteDetail() {
               )}
             </Paper>
           </div>
-          <div>   {showActivity ?
+          <div className="position-relative">
+               {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                Hide Activities
+                <IoIosArrowDropright className="icon" />
               </a>}
               {!quoteData ? (
                 <Box>
@@ -712,7 +714,7 @@ export default function QuoteDetail() {
               )}
             </Paper> :
             !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              Show Activities
+              <IoIosArrowDropleft className="icon"/>
             </a>}
           </div>
         </div>

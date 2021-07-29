@@ -98,7 +98,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                 // data.fileUrl = url
                                 otherAttachments.push({ name: file.name, url: file.url })
                             }
-                            else{
+                            else {
                                 filteredAttachments.push({ name: file.name, url: file.url })
                             }
                         })
@@ -235,35 +235,16 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         {otherAttachments.map((attachment, i) => {
                             return <>
                                 <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                                    <TextField
-                                        variant="outlined"
-                                        type="text"
-                                        label="Name"
-                                        required={true}
-                                        disabled={!canEdit}
-                                        name="name"
-                                        fullWidth
-                                        margin="dense"
-                                        value={attachment.name}
-                                        error={attachment.name === ""}
-                                        helperText={attachment.name === "" ? "*required" : ""}
-                                        onChange={(e) => {
-                                            let tempAttachmentData = [...otherAttachments]
-                                            tempAttachmentData[i].name = e.target.value.trimStart()
-                                            setOtherAttachments(tempAttachmentData)
-
-                                        }}
-                                    />
                                     <Paper className={emailStyles.fileContainer}>
                                         <img src={getFileIconSrc(attachment.url)}
                                             className={emailStyles.file}
                                             alt="attchment" />
                                         <Typography noWrap variant="body2" >
-                                            {attachment ? attachment.url.substring(attachment.url.lastIndexOf("/") + 1,) : "attachment"}
+                                            {attachment ? attachment?.name ? attachment?.name : attachment.url.substring(attachment.url.lastIndexOf("/") + 1,) : "attachment"}
                                         </Typography>
                                         < div className={emailStyles.fileOverlay}>
                                             <Typography variant="subtitle2" >
-                                                {attachment ? attachment.url.substring(attachment.url.lastIndexOf("/") + 1,) : "attachment"}
+                                                {attachment ? attachment?.name ? attachment?.name : attachment.url.substring(attachment.url.lastIndexOf("/") + 1,) : "attachment"}
                                             </Typography>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
                                                 {attachmentId ? <>

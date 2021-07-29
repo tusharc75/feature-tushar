@@ -32,7 +32,6 @@ import { displayDate } from "../../../constants/helpers"
 const NoteSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter note title"),
-    fileUrl: Yup.string().required("please upload attachment"),
 });
 
 
@@ -276,7 +275,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             <FormTypes
                                                 label="File"
                                                 name="fileUrl"
-                                                required={true}
+                                                required={false}
                                                 type="fileUpload"
                                                 values={values}
                                                 errors={errors}
@@ -291,7 +290,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                                 imageOrFileUploadCompletePercentage={(completePercentage) => {
                                                     setUploadingImageOrFileProgress(completePercentage);
                                                 }}
-                                                showErrorMessage={true}
+                                                showErrorMessage={false}
                                             />
                                         </Grid>
                                         {renderFileThumbnails}
@@ -302,6 +301,16 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                                 setOpen(true)
                                             }}
                                             onDelete={handleDeleteFileImageAttachment}
+                                            emailId={noteId}
+                                            isRenderedFrom={true}
+                                        />
+                                        <ImageAttachments
+                                            imageAttachments={imageAttachments}
+                                            onImageClick={(attachment) => {
+                                                setImageSource(attachment)
+                                                setOpen(true)
+                                            }}
+                                            onDelete={handleDeleteImageAttachment}
                                             emailId={noteId}
                                             isRenderedFrom={true}
                                         />
@@ -340,16 +349,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                                     </button>
                                                 ]}
                                             />
-                                            <ImageAttachments
-                                                imageAttachments={imageAttachments}
-                                                onImageClick={(attachment) => {
-                                                    setImageSource(attachment)
-                                                    setOpen(true)
-                                                }}
-                                                onDelete={handleDeleteImageAttachment}
-                                                emailId={noteId}
-                                                isRenderedFrom={true}
-                                            />
+
                                         </Box>
 
                                         {noteId && <Fragment>
@@ -377,6 +377,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     <Button size="small" type="button" color="primary" onClick={handleDialogClose}>Cancel</Button>
                     <Button size="small" type="button" color="primary" variant="contained"
                         onClick={() => {
+
                             if (Object.keys(errors).length) {
                                 Object.keys(errors).map(k => {
                                     setFieldTouched(k, true)
@@ -384,7 +385,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                             }
                             else submitForm()
                         }}
-                        disabled={uploadingImageOrFileProgress > 0 || (fileImageAttachments.length == 0 && otherAttachments.length == 0)}>Save</Button>
+                        disabled={uploadingImageOrFileProgress > 0}>Save</Button>
                 </CustomDialogFooter>
                 {
                     open ?

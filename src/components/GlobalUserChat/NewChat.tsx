@@ -5,7 +5,8 @@ import { Autocomplete } from '@material-ui/lab'
 import axiosInstance from '../../axios/axiosInstance'
 
 const NewChat = (props) => {
-    const { setChatterId, setNewChat, setSelectedChat, users } = props;
+    
+    const { setNewChat, setSelectedChat, users, userId } = props;
     
     const [newUsers, setNewUsers] = useState([])
     
@@ -14,6 +15,12 @@ const NewChat = (props) => {
         axiosInstance().post("/chatter/user-to-user", {users: newUsers.map(d => d.id)})
             .then(({ data: { data } }) => {
                 setNewChat(false)
+                const chatData = {
+                    id: data._id,
+                    chatTitle: data.users.filter(d => d._id !== userId)
+                        .map(_d => `${_d.firstName} ${_d.lastName}`).join(", ")
+                }
+                setSelectedChat(chatData)
             })
         .catch(() => {})
     }
@@ -41,7 +48,7 @@ const NewChat = (props) => {
                 renderInput={(params) => (
                     <TextField
                     {...params}
-                    label="Select user"
+                    label="Select recipients"
                     variant="outlined"
                     inputProps={{
                         ...params.inputProps,
