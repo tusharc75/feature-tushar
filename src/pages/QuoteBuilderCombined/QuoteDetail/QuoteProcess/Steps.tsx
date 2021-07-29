@@ -230,11 +230,11 @@ const Steps = (props) => {
       <div
         className={clsx(classes.root, {
           [classes.active]: active,
-          [classes.completed]: completed ,
+          [classes.completed]: completed || approvedQuote.approved,
           [classes.rejected]: rejected,
         })}
       >
-        {icons[String(status)]}
+         {icons[approvedQuote.approved ? "3" : String(status)]}
       </div>
     );
   };
@@ -499,6 +499,7 @@ const Steps = (props) => {
                         color="primary"
                         disabled={
                           !allowedToEdit ||
+                          approvedQuote.approved ||
                           versionStatus.includes("Rejected by Customer") ||
                           (steps.length === 5 && currentStep > 3) ||
                           versionStatus.includes("Sent for DOA") ||
@@ -573,7 +574,7 @@ const Steps = (props) => {
                     className={clsx(classes.step, {
                       [classes.active]:
                         currentStep > i ||
-                        steps[currentStep] === "End" ,
+                        steps[currentStep] === "End" || approvedQuote.approved,
                       [classes.currentStep]: currentStep === i,
                       [classes.inActive]: currentStep !== i,
                     })}
@@ -582,7 +583,7 @@ const Steps = (props) => {
                       style={{color: "#555"}}
                       StepIconComponent={ColorlibStepIcon}
                       className={
-                        currentStep === i 
+                        currentStep === i || approvedQuote.approved
                           ? "currentStepColor"
                           : null
                       }
@@ -626,10 +627,8 @@ const Steps = (props) => {
                             !allowedToEdit ||
                             loading ||
                             !nextStep ||
-                            versionStatus.includes("Accepted  by DOA")
-                            // || versionStatus.includes("Sent to Customer") ||
-                            // steps[currentStep] === "Send To Customer" ||
-                            // versionStatus === "Sent to Customer"
+                            versionStatus.includes("Accepted  by DOA")||
+                            approvedQuote.approved
                           }
                           endIcon={<IoIosArrowDroprightCircle />}
                         >
