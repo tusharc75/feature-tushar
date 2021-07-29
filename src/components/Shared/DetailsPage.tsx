@@ -64,6 +64,7 @@ interface DetailProps {
   fields: any[];
 }
 
+const unlinkFields = ['Market Segment','Budget','Product Category'];
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
@@ -242,7 +243,7 @@ const Details = (props: DetailProps) => {
   const renderData = (val: any, fieldData: any) => {
     const value = normalizeValues(val, fieldData);
 
-    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup) {
+    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
           <Typography className={classes.fieldText} variant="body2">
