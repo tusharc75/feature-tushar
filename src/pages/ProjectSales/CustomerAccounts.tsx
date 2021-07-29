@@ -702,6 +702,10 @@ const CustomerAccounts = (props) => {
                                 onNewQuoteAdd={(id) => {
                                   saveQuoteToProject(id);
                                 }}
+                                currency={currency}
+                                estimatedAmount={estimatedAmount}
+                                marketSegmentId={marketSegmentId}
+                                subMarketSegmentId={subMarketSegmentId}
 
                               />
                             )
