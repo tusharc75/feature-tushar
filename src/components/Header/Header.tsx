@@ -145,7 +145,12 @@ const useStyles = makeStyles((theme) => ({
   },
   notificationHeightWithData: {
     minWidth: 300,
-    maxHeight: `calc(100vh - 200px)`,
+  },
+  notificationContent: {
+    maxHeight: "640px",
+    overflow: "auto",
+    border: "1px solid #eadfdf",
+    margin: "2px"
   },
   markAll: {
     textAlign: "center",
@@ -156,7 +161,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end",
     paddingRight: "10px",
     "&:hover": {
-     textDecoration: "underline"
+      textDecoration: "underline"
     }
   }
 }));
@@ -277,8 +282,8 @@ const Header = ({ toggleDrawer }) => {
         token,
       },
       transports: ['websocket', "pooling"],
-      reconnectionAttempts:5,
-      reconnectionDelay:5000
+      reconnectionAttempts: 5,
+      reconnectionDelay: 5000
     });
     setSocket(s);
   }, [user]);
@@ -431,12 +436,12 @@ const Header = ({ toggleDrawer }) => {
 
   window.addEventListener('storage', (event) => {
     if (event.storageArea == localStorage) {
-         let token = localStorage.getItem('token');
-         if(token == undefined) { 
-            window.location.reload();
-          }
+      let token = localStorage.getItem('token');
+      if (token == undefined) {
+        window.location.reload();
+      }
     }
-});
+  });
 
   const logoutUser = async () => {
     try {
@@ -518,8 +523,7 @@ const Header = ({ toggleDrawer }) => {
           }`}
         style={{ position: "relative" }}
       >
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`}
-          style={{ position: "sticky", top: 0 }}>
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
           <Typography
             onClick={() => {
               axiosInstance()
@@ -551,68 +555,67 @@ const Header = ({ toggleDrawer }) => {
             <span>Mark all as read</span>
           </Typography>
         </div>
+        <div className={classes.notificationContent}>
+          {data.map((d, index) => {
+            return (
+              <div
+                style={{
+                  borderBottom: d.read
+                    ? "1px solid lightgrey"
+                    : "1px solid white",
+                }}
+                className={`${d.read == true ? "" : "light-grey-bg"
+                  } p-3 cursor-pointer`}
+                key={index}
+                onClick={() => {
+                  if (d.read == false) {
+                    axiosInstance()
+                      .put("/user/notification/read", {
+                        toggle: true,
+                        notificationId: d.notificationId,
+                      })
+                      .then(() => { })
+                      .catch((error) => {
+                        toastConfig.setToastConfig(error);
+                      });
+                  }
 
-        {data.map((d, index) => {
-          return (
-            <div
-              style={{
-                borderBottom: d.read
-                  ? "1px solid lightgrey"
-                  : "1px solid white",
-              }}
-              className={`${d.read == true ? "" : "light-grey-bg"
-                } p-3 cursor-pointer`}
-              key={index}
-              onClick={() => {
-                if (d.read == false) {
-                  axiosInstance()
-                    .put("/user/notification/read", {
-                      toggle: true,
-                      notificationId: d.notificationId,
-                    })
-                    .then(() => { })
-                    .catch((error) => {
-                      toastConfig.setToastConfig(error);
-                    });
-                }
+                  handleFullScreenNotificationClose();
+                  handleMobileScreenNotificationClose();
 
-                handleFullScreenNotificationClose();
-                handleMobileScreenNotificationClose();
+                  if (d?.entity) {
+                    handleSelectedEnity(d.entity);
+                  }
 
-                if (d?.entity) {
-                  handleSelectedEnity(d.entity);
-                }
-
-                history.push(
-                  d.resourceId
-                    ? `${d.resourcePath}/${d.resourceId}`
-                    : d.resourcePath
-                );
-              }}
-            >
-              {
-                <>
-                  <Grid container>
-                    <Grid item xs={2} md={2}>
-                      <Avatar
-                        style={{ height: 30, width: 30 }}
-                        src={d?.avatar}
-                      ></Avatar>
+                  history.push(
+                    d.resourceId
+                      ? `${d.resourcePath}/${d.resourceId}`
+                      : d.resourcePath
+                  );
+                }}
+              >
+                {
+                  <>
+                    <Grid container>
+                      <Grid item xs={2} md={2}>
+                        <Avatar
+                          style={{ height: 30, width: 30 }}
+                          src={d?.avatar}
+                        ></Avatar>
+                      </Grid>
+                      <Grid item xs={10} md={10}>
+                        <h6>{displayCardDate(d?.date)}</h6>
+                        <h4>{d.title}</h4>
+                        <h5>{d.description}</h5>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={10} md={10}>
-                      <h6>{displayCardDate(d?.date)}</h6>
-                      <h4>{d.title}</h4>
-                      <h5>{d.description}</h5>
-                    </Grid>
-                  </Grid>
-                </>
-              }
-            </div>
-          );
-        })}
+                  </>
+                }
+              </div>
+            );
+          })}
 
-
-
+        </div>
         {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
       </Button> */}
@@ -629,65 +632,6 @@ const Header = ({ toggleDrawer }) => {
           }`}
         style={{ position: "relative" }}
       >
-        {data.map((d, index) => {
-          return (
-            <div
-              style={{
-                borderBottom: d.read
-                  ? "1px solid lightgrey"
-                  : "1px solid white",
-              }}
-              className={`${d.read == true ? "" : "light-grey-bg"
-                } p-3 cursor-pointer`}
-              key={index}
-              onClick={() => {
-                if (d.read == false) {
-                  axiosInstance()
-                    .put("/user/user-notification/read", {
-                      toggle: true,
-                      notificationId: d.notificationId,
-                    })
-                    .then(() => { })
-                    .catch((error) => {
-                      toastConfig.setToastConfig(error);
-                    });
-                }
-
-                handleFullScreenChatNotificationClose();
-                handleMobileScreenChatNotificationClose();
-
-                if (d?.entity) {
-                  handleSelectedEnity(d.entity);
-                }
-
-                history.push(
-                  d.resourceId
-                    ? `${d.resourcePath}/${d.resourceId}`
-                    : d.resourcePath
-                );
-              }}
-            >
-              {
-                <>
-                  <Grid container>
-                    <Grid item xs={2} md={2}>
-                      <Avatar
-                        style={{ height: 30, width: 30 }}
-                        src={d?.avatar}
-                      ></Avatar>
-                    </Grid>
-                    <Grid item xs={10} md={10}>
-                      <h6>{displayCardDate(d?.date)}</h6>
-                      <h4>{d.title}</h4>
-                      <h5>{d.description}</h5>
-                    </Grid>
-                  </Grid>
-                </>
-              }
-            </div>
-          );
-        })}
-
         <div className={`${classes.markAll} d-flex align-items-center gap-1`}
           style={{ position: "sticky", top: 0 }}>
           <Typography
@@ -722,6 +666,66 @@ const Header = ({ toggleDrawer }) => {
           </Typography>
         </div>
 
+        <div className={classes.notificationContent}>
+          {data.map((d, index) => {
+            return (
+              <div
+                style={{
+                  borderBottom: d.read
+                    ? "1px solid lightgrey"
+                    : "1px solid white",
+                }}
+                className={`${d.read == true ? "" : "light-grey-bg"
+                  } p-3 cursor-pointer`}
+                key={index}
+                onClick={() => {
+                  if (d.read == false) {
+                    axiosInstance()
+                      .put("/user/user-notification/read", {
+                        toggle: true,
+                        notificationId: d.notificationId,
+                      })
+                      .then(() => { })
+                      .catch((error) => {
+                        toastConfig.setToastConfig(error);
+                      });
+                  }
+
+                  handleFullScreenChatNotificationClose();
+                  handleMobileScreenChatNotificationClose();
+
+                  if (d?.entity) {
+                    handleSelectedEnity(d.entity);
+                  }
+
+                  history.push(
+                    d.resourceId
+                      ? `${d.resourcePath}/${d.resourceId}`
+                      : d.resourcePath
+                  );
+                }}
+              >
+                {
+                  <>
+                    <Grid container>
+                      <Grid item xs={2} md={2}>
+                        <Avatar
+                          style={{ height: 30, width: 30 }}
+                          src={d?.avatar}
+                        ></Avatar>
+                      </Grid>
+                      <Grid item xs={10} md={10}>
+                        <h6>{displayCardDate(d?.date)}</h6>
+                        <h4>{d.title}</h4>
+                        <h5>{d.description}</h5>
+                      </Grid>
+                    </Grid>
+                  </>
+                }
+              </div>
+            );
+          })}
+        </div>
         {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
       </Button> */}
