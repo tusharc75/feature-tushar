@@ -67,8 +67,10 @@ export default function ManageQuoteDialog({
   subMarketSegmentId = null,
   currency = null,
   estimatedAmount = null,
+  doaCollaboratorResources = null,
   disableCurrency = false,
   quoteApproved = false,
+  isRenderedFromProjectSales = false,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -406,7 +408,7 @@ export default function ManageQuoteDialog({
           }
         });
         let initialData = getObjKeys("", newFields);
-        if (isRenderedFromOpportunity) {
+        if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
           initialData["quoteName"] = opportunityName;
           initialData["currency"] = currency;
           initialData["estimatedAmount"] = estimatedAmount;

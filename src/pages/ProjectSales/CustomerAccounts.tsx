@@ -109,6 +109,10 @@ const CustomerAccounts = (props) => {
     isTeamMember,
     isManager,
     ownerId,
+    currency = null, 
+    marketSegmentId = null,
+    subMarketSegmentId = null,
+    estimatedAmount = null,
   } = props;
 
   const classes = useStyles();
@@ -554,6 +558,10 @@ const CustomerAccounts = (props) => {
                                 onNewQuoteAdd={(id) => {
                                   saveQuoteToProject(id);
                                 }}
+                                currency={currency}
+                                estimatedAmount={estimatedAmount}
+                                marketSegmentId={marketSegmentId}
+                                subMarketSegmentId={subMarketSegmentId}
                               
                               />
                             )
