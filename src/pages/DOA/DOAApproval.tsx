@@ -25,6 +25,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import { isMobile, isTablet } from "react-device-detect";
 import DOAReasonDialog from "./DOAReasonDialog"
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -475,11 +476,11 @@ const DOAApproval = () => {
             </Grid>
           </Paper>
         </div>
-        <div>
+        <div className="position-relative">
           {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                Hide Activities
+                <IoIosArrowDropright className="icon" />
               </a>}
               <Activity
                 resourceId={QData?.quoteBuilderId}
@@ -496,7 +497,7 @@ const DOAApproval = () => {
             </Paper>
             :
             !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              Show Activities
+              <IoIosArrowDropleft className="icon"/>
             </a>}
         </div>
       </div>
