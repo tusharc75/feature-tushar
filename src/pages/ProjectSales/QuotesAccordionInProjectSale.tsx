@@ -108,6 +108,10 @@ export default function QuotesAccordionInProjectSale({
   isTeamMember,
   isManager,
   onNewQuoteAdd,
+  currency,
+  estimatedAmount,
+  marketSegmentId,
+  subMarketSegmentId,
 }) {
   const {
     state: { selectedEntity, user }, dispatch
@@ -445,6 +449,11 @@ export default function QuotesAccordionInProjectSale({
           accountResource={accountResource}
           disableOwnerDropDown={true}
           isRenderedFromCustomerAccount={true}
+          currency={currency}
+          estimatedAmount={estimatedAmount}
+          marketSegmentId={marketSegmentId}
+          subMarketSegmentId={subMarketSegmentId}
+          isRenderedFromProjectSales={true}
         />
       )}
     </>

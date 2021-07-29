@@ -109,6 +109,10 @@ const CustomerAccounts = (props) => {
     isTeamMember,
     isManager,
     ownerId,
+    currency = null, 
+    marketSegmentId = null,
+    subMarketSegmentId = null,
+    estimatedAmount = null,
   } = props;
 
   const classes = useStyles();
@@ -509,8 +513,72 @@ const CustomerAccounts = (props) => {
                          * LEFT SIDE
                          */}
 
-                        <Grid item xs={12} sm={12} md={12} lg={12}>
-                          <Paper style={{ overflow: "hidden"}}>
+                        <Grid item xs={12} sm={12} md={8} lg={8}>
+                          {/*TODO: Heirarchy Table */}
+                          {permissions?.isRead && (
+                            <OpportunityAccordianProjectSales
+                              opportunities={opportunities.filter(
+                                (o) => o.customerAccountName === c._id
+                              )}
+                              onNewOpportunityAdd={(id) => {
+                                saveOppToProject(id);
+                              }}
+                              permissions={permissions}
+                              accountId={c._id}
+                              accountName={c.accountName}
+                              resource={"customerAccount"}
+                              isRedirect={false}
+                              expanded={true}
+                              collaborators={collaborators}
+                              users={collaborators.map((u) => ({
+                                ...u,
+                                default: u.optionValue === ownerId,
+                              }))}
+                              projectId={projectId}
+                              addExisting={handleOpenDialog}
+                              fetchProjectData={fetchProjectData}
+                              isTeamMember={isTeamMember}
+                              isManager={isManager}
+                            />
+                          )}
+                          {
+                            permissions.isRead && (
+                              <QuotesAccordionInProjectSale 
+                                expanded={true}
+                                quotes={quotes.filter((q) => q.customerAccountName === c._id)}
+                                recordsPerLine={3}
+                                accountId={c._id}
+                                accountResource={"customerAccount"}
+                                permissions={permissions}
+                                projectId={projectId}
+                                addExisting={handleOpenDialog}
+                                fetchProjectData={fetchProjectData}
+                                isTeamMember={isTeamMember}
+                                isManager={isManager}
+                                onNewQuoteAdd={(id) => {
+                                  saveQuoteToProject(id);
+                                }}
+                                currency={currency}
+                                estimatedAmount={estimatedAmount}
+                                marketSegmentId={marketSegmentId}
+                                subMarketSegmentId={subMarketSegmentId}
+                              
+                              />
+                            )
+                          }
+                          {/* <QuotesInAccordion /> */}
+                          {/* <ProjectInAccordion
+                            recordsPerLine={3}
+                            projectSales={null} /> */}
+
+                          {/* <ProductBuilderInAccordion /> */}
+                        </Grid>
+                        {/**
+                         * RIGHT SIDE
+                         */}
+
+                        <Grid item xs={12} sm={12} md={4} lg={4}>
+                          <Paper style={{ overflow: "hidden", marginTop: 15 }}>
                             <Box style={{ padding: "0px", maxHeight: "450px" }}>
                               <Box
                                 width="100%"
@@ -634,6 +702,10 @@ const CustomerAccounts = (props) => {
                                 onNewQuoteAdd={(id) => {
                                   saveQuoteToProject(id);
                                 }}
+                                currency={currency}
+                                estimatedAmount={estimatedAmount}
+                                marketSegmentId={marketSegmentId}
+                                subMarketSegmentId={subMarketSegmentId}
 
                               />
                             )
