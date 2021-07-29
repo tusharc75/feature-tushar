@@ -49,7 +49,7 @@ const Layout = ({ children, width }) => {
           {children}
         </motion.div>
       </Box>
-      {/* <GlobalUserChat/> */}
+      <GlobalUserChat/>
     </div>
   );
 };

@@ -42,6 +42,7 @@ import {
 import Activity from "../../components/Activity";
 import CreateProjectSales from "./CreateProjectSales";
 import { isMobile, isTablet } from 'react-device-detect';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -534,8 +535,8 @@ const ProjectSalesDetails = () => {
                   )}
                 </Box>
               </Box>
-             </Paper>
-             <Paper>
+            </Paper>
+            <Paper>
               <Box my={1} />
               <CustomerAccounts
                 isTeamMember={isTeamMember}
@@ -558,11 +559,11 @@ const ProjectSalesDetails = () => {
               />
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 <Activity
                   resourceId={id}
@@ -600,10 +601,12 @@ const ProjectSalesDetails = () => {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon" />
               </a>}
           </div>
+
         </div>
+
       </Layout>
       {
         showConfirmBox ? (

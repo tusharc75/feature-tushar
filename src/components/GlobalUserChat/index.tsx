@@ -1,19 +1,15 @@
 import React, {useState, useEffect} from 'react'
-import { Badge, Box, Fab, Typography } from '@material-ui/core'
+import { Badge, Box, Fab } from '@material-ui/core'
 import { Chat, Clear } from '@material-ui/icons'
 import io, { Socket } from "socket.io-client";
 
 import ChatsPopover from './ChatsPopover'
 import { backendApi } from '../../config';
-import { useData } from '../../StateProvider/Provider';
 import "./chatStyles.scss"
-import axiosInstance from '../../axios/axiosInstance';
 
 const GlobalUserChat = () => {
-    const {state: {user: {user:{_id: id}}}} = useData()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [socket, setSocket] = useState<Socket>(null);
-    const [chatterId, setChatterId] = useState("")
     const open = Boolean(anchorEl)
 
     const handleOpenPopup = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -30,30 +26,7 @@ const GlobalUserChat = () => {
         transports: ['websocket',"pooling"]
         });
         setSocket(s);
-    }, [id]);
-
-
-    // Socket listening for data
-    useEffect(() => {
-        if (socket && id) {
-            socket.on("connect", () => {
-            socket.emit("join", id);
-            });
-
-            socket.on("data", (data) => {
-                console.log(data)
-            });
-
-            return () => {
-            if (socket) {
-                socket.disconnect()
-                socket.off("connect");
-            }
-            };
-        };
-        
-    }, [socket, id]);
-
+    }, []);
 
 
     return (
@@ -69,11 +42,11 @@ const GlobalUserChat = () => {
               </Fab>
               </Badge>
                 {open &&
-                    <ChatsPopover open={open}
+                    <ChatsPopover
+                    socket={socket}    
+                    open={open}
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
-                    chatterId={chatterId}
-                    setChatterId={setChatterId}
                     
                 />}
           </Box>

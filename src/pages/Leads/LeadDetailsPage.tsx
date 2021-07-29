@@ -26,6 +26,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import { isMobile, isTablet } from 'react-device-detect';
 import { Dialog } from '@material-ui/core';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import { IoIosArrowDropright,IoIosArrowDropleft } from 'react-icons/io';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -445,11 +446,11 @@ const LeadDetailsPage = () => {
               {/* <LeadInAccordion recordsPerLine={3} /> */}
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 {!leadData ? (
                   <Box>
@@ -480,7 +481,7 @@ const LeadDetailsPage = () => {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon"/>
               </a>}
           </div>
         </div>
