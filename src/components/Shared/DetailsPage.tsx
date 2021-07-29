@@ -15,7 +15,7 @@ import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase, orderBy } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
-import { getObjKeysWithValues } from "../../constants/helpers";
+import { getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Skeleton } from "@material-ui/lab";
@@ -64,7 +64,7 @@ interface DetailProps {
   fields: any[];
 }
 
-const unlinkFields = ['Market Segment','Budget','Product Category'];
+const unlinkFields = [sidebarResource.marketSegment,sidebarResource.budget,sidebarResource.productCategory];
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
