@@ -456,7 +456,7 @@ export default function ManageQuoteDialog({
         versionNumber: cloneQuoteWithVersionNumber
       }
     }
-    const apiUrl = isClone && cloneQuoteWithVersionNumber > 0 ? `${qbApi}/create/clone-v` : `${qbApi}?entity=${selectedEntity}`
+    const apiUrl = cloneQuoteWithVersionNumber > 0 ? `${qbApi}/create/clone-v` : `${qbApi}?entity=${selectedEntity}`
     axiosInstance()
       .post(apiUrl, values)
       .then(({ data }) => {
