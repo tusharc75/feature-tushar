@@ -56,9 +56,11 @@ const ChatsPopover = (props) => {
                         .map(_d => `${_d.firstName} ${_d.lastName}`).join(", "),
                     message: d?.message,
                 }))
-             setChatterIds(data.map(d => d.id))
-             setUserChats(data)
-             dispatch({type: SET_CHATTER, payload: null})
+                setChatterIds(data.map(d => d.id))
+                setUserChats(data)
+                if (chatter) {
+                    dispatch({type: SET_CHATTER, payload: null})
+                }
          })
         .catch(() => { })
     }, [chatter])

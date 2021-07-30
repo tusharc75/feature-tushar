@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {Box, IconButton, Typography} from '@material-ui/core'
 import { SendOutlined } from '@material-ui/icons';
 import axiosInstance from '../../axios/axiosInstance';
@@ -7,10 +7,6 @@ const ChatBox = ({ selectedChat, sendMessage, socket }) => {
     const [messageValue, setMessageValue] = useState("");
     const [currentUser, setCurrentUser] = useState("")
     const [messages, setMessages] = useState([]);
-
-    const getMessages = useMemo(() => {
-        
-    },[])
 
     useEffect(() => {
       getChatterInfo()
