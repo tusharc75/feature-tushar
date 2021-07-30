@@ -9,7 +9,10 @@ import {
 
 
 
-const ChatList = ({socket, chat, setSelectedChat, userId}) => {
+const ChatList = ({ socket, chat, setSelectedChat, userId }) => {
+  
+
+    const formatTime = (time) => new Date(time).toTimeString().split(":");
     
     return (
       <Fragment>
@@ -25,8 +28,19 @@ const ChatList = ({socket, chat, setSelectedChat, userId}) => {
           primary={<p className="chat-listTitle">{chat.chatTitle}</p>}
           secondary={
             <Fragment>
-              <p className="chat-listSubtitle">{`${chat?.message?.userid === userId ? "You: " : ""} 
-              ${chat.message?.message ? chat.message?.message : "\'New chat\'"}`}</p>
+              <div title={chat.message?.message} className="chat-listSubtext">
+                <div className="chat-listSubtitle">
+                  <p className="who">
+                    {chat?.message?.userid === userId ? "You:" : ""}
+                  </p>
+                  <p className="msg">
+                   {chat.message?.message ? chat.message?.message : "\'New chat\'"}
+                  </p>
+                </div>
+                {chat.message?.message && <p className="message-time">
+                    {`${formatTime(chat.message.date)[0]}:${formatTime(chat.message.date)[1]}`}
+                </p>}
+              </div>
               </Fragment>
           }
           />
