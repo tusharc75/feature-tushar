@@ -15,25 +15,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
 
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        margin: 10
-    },
-    screenHeightAuto: {
-        minHeight: window.innerHeight - 220,
-        maxHeight: window.innerHeight - 220,
-        overflow: "auto"
-    },
-    screenHeight: {
-        minHeight: window.innerHeight - 200,
-        maxHeight: window.innerHeight - 200,
-    },
-}));
-
-
-
 const CreateFormBuilder = (props) => {
 
     const { state: { user, permissions } }: any = useData();
@@ -103,7 +84,6 @@ const CreateFormBuilder = (props) => {
         });
     };
 
-    const classes = useStyles();
     return (<Layout>
         <Grid container className="headerbox">
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: routes.quoteBuilder.title }]} />

@@ -1,15 +1,27 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useContext, useCallback, useEffect} from 'react'
 import { Badge, Box, Fab } from '@material-ui/core'
 import { Chat, Clear } from '@material-ui/icons'
-import io, { Socket } from "socket.io-client";
 
 import ChatsPopover from './ChatsPopover'
-import { backendApi } from '../../config';
+import { useData } from '../../StateProvider/Provider'
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext'
+import axiosInstance from '../../axios/axiosInstance'
+import { SET_CHATTER } from '../../StateProvider/actionTypes'
 import "./chatStyles.scss"
 
 const GlobalUserChat = () => {
+    const {state:{user:{user}, chatter}, dispatch} = useData()
+    const {
+        socket,
+        setChatList,
+        chatterIds,
+        setChatterIds,
+        messages,
+        setMessages,
+        selectedChat,
+        setCurrentUser
+    } = useContext(GlobalChatContext)
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    const [socket, setSocket] = useState<Socket>(null);
     const open = Boolean(anchorEl)
 
     const handleOpenPopup = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -17,16 +29,79 @@ const GlobalUserChat = () => {
     }
 
 
+         useEffect(() => {
+       if (socket !== null) {
+           socket.on("data", (data) => {
+               console.log(messages)
+               getChats()
+               getChatterInfo()
+           })
+           
+           return () => {
+               socket.off("data")
+           }
+       }
+         }, [socket])
+    
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const s = io(`${backendApi}/users/room`, {
-        auth: {token},
-        reconnectionAttempts:5,
-        reconnectionDelay:5000,
-        transports: ['websocket',"pooling"]
-        });
-        setSocket(s);
-    }, []);
+        getChatterInfo()
+        if(selectedChat === null){ setMessages([])}
+    },[selectedChat])
+    
+    const getChatterInfo = () => {
+        if (selectedChat) {
+            axiosInstance().get(`/chatter/${selectedChat.id}`)
+                .then(({ data: {data} }) => {
+                    setMessages(data.Messages)
+                    setCurrentUser(data.currentUser)
+            })
+            .catch(() => {})
+        }
+    }
+    
+    const getChats = useCallback(() => {
+            axiosInstance().get("/chatter/user-to-user/my")
+            .then(({ data: { data } }) => {
+                data = data.map(d => ({
+                    id: d.id,
+                    chatTitle: d.users.filter(d => d._id !== user._id)
+                    .map(_d => `${_d.firstName} ${_d.lastName}`).join(", "),
+                    message: d?.message,
+                    timeStamp: new Date(d?.message.date).getTime()
+                }))
+
+                
+                // const sortedArry =
+                // data.sort((a, b) => (a.timeStamp > b.timeStamp) ? 1 : ((b.timeStamp > a.timeStamp) ? -1: 0))
+                
+                // console.log(sortedArry)
+                setChatList(data)
+                setChatterIds(data.map(d => d.id))
+                if (chatter) {
+                    dispatch({type: SET_CHATTER, payload: null})
+                }
+            })
+            .catch(() => { })
+        
+    }, [chatter])
+
+   
+    useEffect(() => {
+        getChats()
+    }, [getChats])
+
+
+     const joinRooms = () => {
+        if (chatterIds.length && socket !== null) {
+            chatterIds.forEach((chatterId) => {
+                socket.emit("join", chatterId)
+             })
+        }
+    }
+    
+    useEffect(() => {
+        joinRooms()
+    }, [chatterIds, socket])
 
 
     return (
@@ -43,7 +118,6 @@ const GlobalUserChat = () => {
               </Badge>
                 {open &&
                     <ChatsPopover
-                    socket={socket}    
                     open={open}
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
