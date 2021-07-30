@@ -75,7 +75,7 @@ function OpportunityDetailsPage() {
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [filteredArr, setFilteredArr] = useState([]);
-
+  const [parentLead, setParentLead] = useState({leadName:'',leadId:''})
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [messageDialog, setMessageDialog] = useState({
@@ -249,13 +249,14 @@ function OpportunityDetailsPage() {
 
         if (data[sidebarResource.lead] && data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]) {
           let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')][0];
-          setMainPoints((prevState) => ({
-            ...prevState,
-            'Parent Lead': {
-              leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`,
-              leadId: tempName._id
-            }
-          }));
+          setParentLead({leadName:`${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`,leadId:tempName._id})
+          // setMainPoints((prevState) => ({
+          //   ...prevState,
+          //   'Parent Lead': {
+          //     leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`,
+          //     leadId: tempName._id
+          //   }
+          // }));
         }
 
         setQuotes(
@@ -595,7 +596,7 @@ function OpportunityDetailsPage() {
   }
 
   let filteredOpportunityFields = opportunityFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
-
+  
   return (
     <>
       <Layout>
@@ -618,7 +619,7 @@ function OpportunityDetailsPage() {
                 <DetailsPageHeader
                   heading={headingLbl}
                   logo={opportunityData?.leadLogo ? opportunityData.leadLogo : undefined}
-                  mainPoints={mainPoints}
+                  mainPoints={Object.assign(mainPoints,{'Parent Lead':parentLead})}
                   showHeading={true}
                 >
                   {allowedToEdit ? (

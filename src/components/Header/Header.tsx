@@ -183,7 +183,6 @@ const Header = ({ toggleDrawer }) => {
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
   const [entitiesEl, setEntitiesEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
 
@@ -300,7 +299,7 @@ const Header = ({ toggleDrawer }) => {
         chatNotification.setCount(chatNotification.count + 1);
       });
       socket.on("new", (data) => {
-         dispatch({type: SET_CHATTER, payload: data})
+        dispatch({ type: SET_CHATTER, payload: data })
       });
     }
     return () => {
@@ -473,6 +472,32 @@ const Header = ({ toggleDrawer }) => {
     }
   };
 
+  const hasAccessToEntity =async (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  }
+
+  const handleEntityChange = async (id) => {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+  }
+
+  const handleRedirect = (id, resourceId, resourcePath) => (
+    id === selectedEntity ?
+    history.push(
+      resourceId
+        ? `${resourcePath}/${resourceId}`
+        : resourcePath
+    )
+  
+    :hasAccessToEntity(id) ? handleEntityChange(id) && history.push(
+      resourceId
+        ? `${resourcePath}/${resourceId}`
+        : resourcePath
+    ):''
+
+  )
+
+
   function handleListKeyDown(event) {
     if (event.key === "Tab") {
       event.preventDefault();
@@ -583,15 +608,16 @@ const Header = ({ toggleDrawer }) => {
                   handleFullScreenNotificationClose();
                   handleMobileScreenNotificationClose();
 
-                  if (d?.entity) {
-                    handleSelectedEnity(d.entity);
+                  if(d?.entity){
+                   handleRedirect(d?.entity,d?.resourceId,d?.resourcePath)
+                  }else{
+                    history.push(
+                      d?.resourceId
+                        ? `${d?.resourcePath}/${d?.resourceId}`
+                        : d?.resourcePath
+                    )
                   }
-
-                  history.push(
-                    d.resourceId
-                      ? `${d.resourcePath}/${d.resourceId}`
-                      : d.resourcePath
-                  );
+                    
                 }}
               >
                 {
@@ -694,15 +720,16 @@ const Header = ({ toggleDrawer }) => {
                   handleFullScreenChatNotificationClose();
                   handleMobileScreenChatNotificationClose();
 
-                  if (d?.entity) {
-                    handleSelectedEnity(d.entity);
+                  if(d?.entity){
+                    handleRedirect(d?.entity,d?.resourceId,d?.resourcePath)
+                  }else{
+                    history.push(
+                      d?.resourceId
+                        ? `${d?.resourcePath}/${d?.resourceId}`
+                        : d?.resourcePath
+                    )
                   }
-
-                  history.push(
-                    d.resourceId
-                      ? `${d.resourcePath}/${d.resourceId}`
-                      : d.resourcePath
-                  );
+                    
                 }}
               >
                 {
