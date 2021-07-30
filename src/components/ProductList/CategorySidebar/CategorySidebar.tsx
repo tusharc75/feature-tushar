@@ -74,7 +74,7 @@ function CategorySidebar() {
 
   return (
     <div className={styles.sidebar_nav}>
-      <Paper component="form" className={classes.root} id={styles.hello}>
+      <Paper component="form" className={`d-flex ${classes.root}`} id={styles.hello}>
         <InputBase className={classes.input} placeholder="Search By Category" inputProps={{ 'aria-label': 'search' }} />
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
           <SearchIcon />

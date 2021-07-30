@@ -1,14 +1,13 @@
 .sidebar_nav {
   width: 25rem;
-  //margin-top: 1rem;
   padding: 1rem 0.5rem 0 0.5rem;
-  max-height: 45rem;
+  height: calc(100vh - 56px);
   overflow-y: scroll;
 
 }
 
 .single_category {
-  margin: 0.8rem;
+  margin: 4px;
   display: flex;
   align-items: center;
   height: 2rem;
@@ -26,19 +25,25 @@
 
 }
 .padding_in_ratings{
-  padding: 0.3rem 0.5rem;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e9e6e6;
+  text-align: left;
+  padding: 3px 10px 0 7px;
+  font-size: 20px;
+  font-weight: bolder;
+  color: #041918;
 }
 .single_category_checkBox{
   width: 15px !important;
   height: 15px !important;
 }
 .font_size{
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: var(--primary) ;
+  font-size: 15px;
+  color: #818a8d;
 }
 .rating {
-  padding: 0.4rem 0.5rem;
+  padding: 4px 5px;
   display: flex;
   justify-content: space-between;
 }
