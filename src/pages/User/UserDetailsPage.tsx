@@ -19,7 +19,8 @@ import {
   Table,
   TableBody,
   TableCell,
-  makeStyles
+  makeStyles,
+  Dialog
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
@@ -429,20 +430,20 @@ const UserDetailsPage = () => {
 
   const handleResetPassword = async () => {
     axiosInstance()
-        .post(`/user/forget-password`, {
-            email: userData.email,
-        })
-        .then(({ data }) => {
-            toastConfig.setToastConfig({
-                message: data.message,
-                type: 'success',
-                open: true,
-            });
-        })
-        .catch((err) => {
-            toastConfig.setToastConfig(err);
+      .post(`/user/forget-password`, {
+        email: userData.email,
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          message: data.message,
+          type: 'success',
+          open: true,
         });
-};
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   const isLoggedInUserBrandAdmin = 'userType' in user?.user;
   return (
@@ -455,31 +456,47 @@ const UserDetailsPage = () => {
         }} userId={userData._id} dataToUpdate={userData} isNew={false} />
       )}
       {rolesDialogOpen && (
-        <AssignRolesDialog
-          rolesDialogOpen={rolesDialogOpen}
-          handleCloseDialog={handleCloseDialog}
-          userIds={[id]}
-          assignedRoles={globalRoles}
-          onSuccess={() => {
-            handleCloseDialog();
-            fetchUserData();
-            getRoleUnion();
-          }}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={rolesDialogOpen}
+          onClose={handleCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignRolesDialog
+            rolesDialogOpen={rolesDialogOpen}
+            handleCloseDialog={handleCloseDialog}
+            userIds={[id]}
+            assignedRoles={globalRoles}
+            onSuccess={() => {
+              handleCloseDialog();
+              fetchUserData();
+              getRoleUnion();
+            }}
+          />
+        </Dialog>
       )}
       {showAssignEntityDialog && (
-        <AssignEntityDialog
-          entitiesDialogOpen={showAssignEntityDialog}
-          handleCloseDialog={entityDialogClose}
-          type="entity"
-          ids={[id]}
-          assignedEntity={entities}
-          regionalRole={false}
-          onSuccess={() => {
-            fetchUserData();
-            entityDialogClose();
-          }}
-        />
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showAssignEntityDialog}
+          onClose={entityDialogClose}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignEntityDialog
+            entitiesDialogOpen={showAssignEntityDialog}
+            handleCloseDialog={entityDialogClose}
+            type="entity"
+            ids={[id]}
+            assignedEntity={entities}
+            regionalRole={false}
+            onSuccess={() => {
+              fetchUserData();
+              entityDialogClose();
+            }}
+          />
+        </Dialog>
       )}
       <Layout>
         <Grid container className="headerbox">
@@ -592,57 +609,57 @@ const UserDetailsPage = () => {
                     {
                       userData?.proxyDOA && <Box hidden={currentTabIndex !== 2}>
                         {/* <div className="detail-box"> */}
-                          {/* <h3 className="form-label-style" title="DOA Proxy">
+                        {/* <h3 className="form-label-style" title="DOA Proxy">
                             DOA Proxy
                           </h3> */}
 
-                          <TableContainer>
-                            <Table aria-label="DOA Proxy Table" size="small">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>
-                                    <h4
-                                      title="assignedTo"
-                                      className={classes.detailLabel}
-                                    >
-                                      Assigned To
-                                    </h4>
-                                  </TableCell>
+                        <TableContainer>
+                          <Table aria-label="DOA Proxy Table" size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>
+                                  <h4
+                                    title="assignedTo"
+                                    className={classes.detailLabel}
+                                  >
+                                    Assigned To
+                                  </h4>
+                                </TableCell>
 
-                                  <TableCell align="center">
-                                    <h4
-                                      title="startDate"
-                                      className={classes.detailLabel}
-                                    >
-                                      Start Date
-                                    </h4>
-                                  </TableCell>
+                                <TableCell align="center">
+                                  <h4
+                                    title="startDate"
+                                    className={classes.detailLabel}
+                                  >
+                                    Start Date
+                                  </h4>
+                                </TableCell>
 
-                                  <TableCell align="center">
-                                    <h4
-                                      title="endDate"
-                                      className={classes.detailLabel}
-                                    >
-                                      End Date
-                                    </h4>
-                                  </TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                <TableRow key={userData.proxyDOA.user}>
-                                  <TableCell>
-                                    <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>{userData.proxyDOA.optionLabel}</Link>
-                                  </TableCell>
-                                  <TableCell align="center">
-                                    <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
-                                  </TableCell>
-                                  <TableCell align="center">
-                                    <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
-                                  </TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
+                                <TableCell align="center">
+                                  <h4
+                                    title="endDate"
+                                    className={classes.detailLabel}
+                                  >
+                                    End Date
+                                  </h4>
+                                </TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              <TableRow key={userData.proxyDOA.user}>
+                                <TableCell>
+                                  <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>{userData.proxyDOA.optionLabel}</Link>
+                                </TableCell>
+                                <TableCell align="center">
+                                  <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                </TableCell>
+                                <TableCell align="center">
+                                  <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
 
                         {/* </div> */}
                       </Box>
@@ -1032,21 +1049,31 @@ const UserDetailsPage = () => {
         />
       ) : null}
       {doaDialogOpen && (
-        <DoaDialog
-          userList={userList}
-          doa={doa}
-          doaCurrency={doaCurrency}
-          userSelected={[id]}
+        <Dialog
           open={doaDialogOpen}
-          onSuccess={() => {
-            setDoaDialogOpen(false);
-            fetchDoa();
-          }}
           onClose={() => {
             setDoaDialogOpen(false);
           }}
-          doaType={doaType}
-        />
+          scroll="body"
+          maxWidth="md"
+          fullWidth
+        >
+          <DoaDialog
+            userList={userList}
+            doa={doa}
+            doaCurrency={doaCurrency}
+            userSelected={[id]}
+            open={doaDialogOpen}
+            onSuccess={() => {
+              setDoaDialogOpen(false);
+              fetchDoa();
+            }}
+            onClose={() => {
+              setDoaDialogOpen(false);
+            }}
+            doaType={doaType}
+          />
+        </Dialog>
       )}
 
       {

@@ -48,15 +48,15 @@ const AssignProjectSalesDialog = ({
             setId(type.find(item => item.type === customerContact.contactResource).id)
             setAddAPI("customer-contacts")
         }
-        else if (type.some(item => item?.type === opportunity.opportunityResource)) {
-            setResource(opportunity.opportunityResource)
-            setId(type.find(item => item.type === opportunity.opportunityResource).id)
-            setAddAPI("opportunities")
-        }
         else if (type.some(item => item?.type === quoteBuilder.qbResource)) {
             setResource(quoteBuilder.qbResource)
             setId(type.find(item => item.type === quoteBuilder.qbResource).id)
             setAddAPI("quotes")
+        }
+        else if (type.some(item => item?.type === opportunity.opportunityResource)) {
+            setResource(opportunity.opportunityResource)
+            setId(type.find(item => item.type === opportunity.opportunityResource).id)
+            setAddAPI("opportunities")
         }
         else {
             setResource(customerAccount.accountResource)

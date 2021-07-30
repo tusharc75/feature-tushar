@@ -1,5 +1,5 @@
 import { getPermissions } from "../constants/helpers";
-import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY } from "./actionTypes";
+import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER } from "./actionTypes";
 
 export const initialState = {
   user: null,
@@ -7,7 +7,8 @@ export const initialState = {
   token: localStorage.getItem("token"),
   role: null,
   selectedEntity: null,
-  permissions: null
+  permissions: null,
+  chatter: null
 };
 
 const reducer = (state = initialState, action) => {
@@ -20,6 +21,9 @@ const reducer = (state = initialState, action) => {
 
     case USER_LOADING:
       return { ...state, userLoading: action.payload };
+    
+    case SET_CHATTER:
+      return { ...state, chatter: action.payload };
 
     case SET_SELECTED_ENTITY:
       localStorage.setItem("selectedEntity", action.payload);

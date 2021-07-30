@@ -45,6 +45,7 @@ import FormTypes from '../../components/Helpers/FormTypes';
 
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -601,7 +602,7 @@ function OpportunityDetailsPage() {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               {!opportunityData ? (
@@ -734,6 +735,10 @@ function OpportunityDetailsPage() {
                     opportunityId={id}
                     accountId={opportunityData?.customerAccountName?.optionValue}
                     opportunityName={opportunityData?.opportunityName}
+                    marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                    subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                    currency={opportunityData?.currency}
+                    estimatedAmount={opportunityData?.estimatedAmount}
                     isRenderedFromOpportunity={true}
                     isAllowedToUpdate={allowedToEdit}
                   />
@@ -741,11 +746,11 @@ function OpportunityDetailsPage() {
               </div>
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 {!opportunityData ? (
                   <Box>
@@ -792,7 +797,7 @@ function OpportunityDetailsPage() {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon"/>
               </a>}
           </div>
         </div>

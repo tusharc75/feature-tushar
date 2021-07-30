@@ -42,6 +42,7 @@ import {
 import Activity from "../../components/Activity";
 import CreateProjectSales from "./CreateProjectSales";
 import { isMobile, isTablet } from 'react-device-detect';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -365,7 +366,7 @@ const ProjectSalesDetails = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               {!projectSalesData ? (
@@ -534,8 +535,8 @@ const ProjectSalesDetails = () => {
                   )}
                 </Box>
               </Box>
-             </Paper>
-             <Paper>
+            </Paper>
+            <Paper>
               <Box my={1} />
               <CustomerAccounts
                 isTeamMember={isTeamMember}
@@ -547,6 +548,10 @@ const ProjectSalesDetails = () => {
                 customerContacts={customerContacts}
                 opportunities={opportunities}
                 quotes={quotes}
+                currency={projectSalesData?.currency}
+                estimatedAmount={projectSalesData?.amount}
+                marketSegmentId={projectSalesData?.marketSegment?.optionValue}
+                subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
                 permissions={permissions?.projectSales}
                 fetchProjectData={getSalesData}
                 projectId={id}
@@ -554,11 +559,11 @@ const ProjectSalesDetails = () => {
               />
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 <Activity
                   resourceId={id}
@@ -596,10 +601,12 @@ const ProjectSalesDetails = () => {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon" />
               </a>}
           </div>
+
         </div>
+
       </Layout>
       {
         showConfirmBox ? (

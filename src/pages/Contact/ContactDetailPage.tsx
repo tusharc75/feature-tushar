@@ -39,6 +39,7 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from '../../components/ProcessFlow';
 import LeadInAccordion from '../../components/LeadsInAccordion/LeadsInAccordion';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import { IoIosArrowDropright,IoIosArrowDropleft  } from 'react-icons/io';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -537,7 +538,7 @@ const ContactDetailsPage = (props) => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               <DetailsPageHeader
@@ -663,11 +664,11 @@ const ContactDetailsPage = (props) => {
               </div>
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 {!isObjectEmpty(contactData) && (
                   <div>
@@ -777,7 +778,7 @@ const ContactDetailsPage = (props) => {
                 )}
               </Paper> : 
                !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              Show Activities
+              <IoIosArrowDropleft className="icon"/>
               </a> }
           </div>
         </div>

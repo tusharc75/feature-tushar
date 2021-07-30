@@ -1,69 +1,59 @@
-import { Fragment, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {Box, IconButton, Typography} from '@material-ui/core'
 import { SendOutlined } from '@material-ui/icons';
+import axiosInstance from '../../axios/axiosInstance';
 
-const ChatBox = ({ selectedChat }) => {
+const ChatBox = ({ selectedChat, sendMessage, socket }) => {
     const [messageValue, setMessageValue] = useState("");
-    const [messages, setMessages] = useState([
-        {
-            username: "Ali Connors",
-            message: "Hey!",
-        },
-        {
-            username: "Sandra Adams",
-            message: 'Hey! How are you?',
-        },
-        {
-            username: "Ali Connors",
-            message: "Thanks, I am great! when do we meet?",
-        },
-        {
-            username: "Peter",
-            message: "At 6 o'clock Balaton Lake.",
-        },
-        {
-            username: "Ali Connors",
-            message: "Sounds Perfect...!",
-        },
-        {
-            username: "Ali Connors",
-            message: "Thanks, I am great! when do we meet?",
-        },
-        {
-            username: "Peter",
-            message: "At 6 o'clock Balaton Lake.",
-        },
-        {
-            username: "Ali Connors",
-            message: "Sounds Perfect...!",
-        },
-        {
-            username: "Ali Connors",
-            message: "Thanks, I am great! when do we meet?",
-        },
-        {
-            username: "Peter",
-            message: "At 6 o'clock Balaton Lake.",
-        },
-        {
-            username: "Ali Connors",
-            message: "Sounds Perfect...!",
-        },
-    ]);
+    const [currentUser, setCurrentUser] = useState("")
+    const [messages, setMessages] = useState([]);
 
-    const sendMessage = () => {
-        setMessages([...messages, { username: selectedChat.username, message: messageValue.trim() }])
+    const getMessages = useMemo(() => {
+        
+    },[])
+
+    useEffect(() => {
+      getChatterInfo()
+    }, [selectedChat])
+    
+    useEffect(() => {
+       if (socket !== null) {
+           socket.on("data", (data) => {
+               //alert(JSON.stringify(data))
+               getChatterInfo()
+           })
+           
+           return () => {
+               socket.off("data")
+           }
+       }
+    }, [socket])
+
+    const sendMsg = (e) => {
+        e.preventDefault()
+        sendMessage(selectedChat.id, messageValue)
         setMessageValue("")
     }
+
+    const getChatterInfo = () => {
+        axiosInstance().get(`/chatter/${selectedChat.id}`)
+            .then(({ data: {data} }) => {
+                setMessages(data.Messages)
+                setCurrentUser(data.currentUser)
+        })
+        .catch(() => {})
+    }
+
+
 
 
     return (
         <div className="global-chatbox">
             <div className="chatbox-container">
                 {messages.map((data, i) => (
-                    <div key={i} className={`message-container ${data.username === selectedChat.username ? "my-message": ""}`}>
+                    <div key={i} className={`message-container ${data.userid === currentUser ? "my-message": ""}`}>
                         <div
-                            className={`message-outlet`}>
+                            className={`message-outlet ${data.userid === currentUser ? "my-color": ""}`}>
                         <Typography>
                             {data.message}
                         </Typography>
@@ -73,18 +63,18 @@ const ChatBox = ({ selectedChat }) => {
             </div>
 
             
-            <div className="chatbox-input">
+            <form onSubmit={sendMsg} className="chatbox-input">
                 <input
                     placeholder="Start Typing..."
                     value={messageValue}
                     onChange={(e) => setMessageValue(e.target.value)}
                 />
                 <Box mr={1}>
-                <IconButton disabled={!messageValue} onClick={sendMessage} size="small">
+                <IconButton color="primary" disabled={!messageValue} type="submit" size="small">
                     <SendOutlined/>
                 </IconButton>
                 </Box>
-            </div>
+            </form>
         </div>
     )
 }

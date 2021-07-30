@@ -135,7 +135,7 @@ export default function QuoteProcess(props) {
         "Qty",
         `Sales Price Per Unit ${quoteData?.currency}`,
         `Total Sales Price ${quoteData?.currency}`,
-      ]
+    ]
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const { qbResource, qbApi } = quoteBuilder;
@@ -214,7 +214,7 @@ export default function QuoteProcess(props) {
     }, [currentVersion, DOAreq]);
 
     useEffect(() => {
-        dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion].TNC });
+        dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion]?.TNC });
 
         axiosInstance()
             .get(`/doa-request`)
@@ -227,16 +227,16 @@ export default function QuoteProcess(props) {
                     requestedBy: doa.RequestedBy.firstName,
                     requestedById: doa.RequestedBy.id,
                 }));
-                if(data.length !== 0){
+                if (data.length !== 0) {
                     axiosInstance()
-                    .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
-                    .then(({ data: { data } }) => {
-                        setDOAApproved(data.canApprove)
-                        setDOARequestId(data.requestId)
-                    })
-                    .catch((err) => {
-                        // toastConfig.setToastConfig(err);
-                    });
+                        .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
+                        .then(({ data: { data } }) => {
+                            setDOAApproved(data.canApprove)
+                            setDOARequestId(data.requestId)
+                        })
+                        .catch((err) => {
+                            // toastConfig.setToastConfig(err);
+                        });
                 }
 
             })
@@ -403,14 +403,14 @@ export default function QuoteProcess(props) {
     }, [quoteData]);
 
     const getNormalizeKey = (key) => {
-         return key.includes("_")
-                    ? key.split("_").length === 2
-                        ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()}`
-                        : key.split("_").length === 3
-                        ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()}`
-                        : `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()} ${key.split("_")[3].toUpperCase()}`
-                    : startCase(key);
-    } 
+        return key.includes("_")
+            ? key.split("_").length === 2
+                ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()}`
+                : key.split("_").length === 3
+                    ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()}`
+                    : `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()} ${key.split("_")[3].toUpperCase()}`
+            : startCase(key);
+    }
 
     const productCalculationForDoa = (BuilderData) => {
         const inventory: { fieldName: string; fieldValue: any }[][] = [];
@@ -455,32 +455,32 @@ export default function QuoteProcess(props) {
         }));
 
         // if (ProcessStatus === "Price Builder") {
-            // let hasPrice = false;
-            // BuilderData.forEach((data) => {
-            //     if (
-            //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-            //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-            //         "undefined"
-            //     ) {
-            //         hasPrice = true;
-            //     } else {
-            //         hasPrice = false;
-            //     }
-            // });
-            // const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-            // let withZeroAmt = [];
-            // if (hasPrice) {
-            //     withZeroAmt = BuilderData.filter(
-            //         (d) =>
-            //             d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-            //     );
-            // }
+        // let hasPrice = false;
+        // BuilderData.forEach((data) => {
+        //     if (
+        //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+        //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+        //         "undefined"
+        //     ) {
+        //         hasPrice = true;
+        //     } else {
+        //         hasPrice = false;
+        //     }
+        // });
+        // const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+        // let withZeroAmt = [];
+        // if (hasPrice) {
+        //     withZeroAmt = BuilderData.filter(
+        //         (d) =>
+        //             d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+        //     );
+        // }
 
-            // if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-            //     setNextStep(true);
-            // } else {
-            //     setNextStep(false);
-            // }
+        // if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
+        //     setNextStep(true);
+        // } else {
+        //     setNextStep(false);
+        // }
         // }
         let colName = [];
         let dynamicTable = [];
@@ -511,7 +511,7 @@ export default function QuoteProcess(props) {
                                     labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
                                     labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
                                 })
-                                
+
                             } else {
                                 labels.push(fieldLabel)
                                 labelsWithVal[fieldLabel] = quoteRows[data.fieldName]
@@ -526,14 +526,14 @@ export default function QuoteProcess(props) {
                     })
                     dynamicTable.push(labelsWithVal)
                 }
-                
+
 
 
                 if (ignoredKeys.indexOf(key) === -1) {
                     let indexkey = key;
                     let currency = "";
                     if (key.includes("_")) {
-                        let splitKey = key.split("_") 
+                        let splitKey = key.split("_")
                         key = splitKey[0];
                         currency = splitKey[1].toUpperCase();
                     }
@@ -556,36 +556,36 @@ export default function QuoteProcess(props) {
                     //     //     });
                     //     // }
 
-                        if (currency === quoteData?.currency && key === "totalCost") {
-                            totalCost = totalCost + quoteRows[indexkey];
-                            CostCurrency = currency;
-                        } else if (
-                            currency === quoteData?.currency &&
-                            key === "totalSalesPrice"
-                        ) {
-                            totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                            SPCurrency = currency;
-                        } else if (
-                            currency === quoteData?.currency &&
-                            key === "totalProfit"
-                        ) {
-                            totalProfit = totalProfit + quoteRows[indexkey];
-                            ProfitCurrency = currency;
-                        } else if (
-                            currency === quoteData?.currency &&
-                            key === "totalMargin"
-                        ) {
-                            totalMargin = totalMargin + quoteRows[indexkey];
-                            MarginCurrency = currency;
-                        }
+                    if (currency === quoteData?.currency && key === "totalCost") {
+                        totalCost = totalCost + quoteRows[indexkey];
+                        CostCurrency = currency;
+                    } else if (
+                        currency === quoteData?.currency &&
+                        key === "totalSalesPrice"
+                    ) {
+                        totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+                        SPCurrency = currency;
+                    } else if (
+                        currency === quoteData?.currency &&
+                        key === "totalProfit"
+                    ) {
+                        totalProfit = totalProfit + quoteRows[indexkey];
+                        ProfitCurrency = currency;
+                    } else if (
+                        currency === quoteData?.currency &&
+                        key === "totalMargin"
+                    ) {
+                        totalMargin = totalMargin + quoteRows[indexkey];
+                        MarginCurrency = currency;
+                    }
                     // }
                 }
             });
 
-            
+
             inventory.push(inventorydata);
         });
-        
+
 
         setColName(colName)
         setDynamicTableData(dynamicTable);
@@ -710,7 +710,7 @@ export default function QuoteProcess(props) {
             //     col.fieldName === "Productname" ? "Product Name" : col.fieldName
             // );
 
-            
+
             // setColName(ColName);
             // const allData: any = [];
             // inventory.forEach((col) => {
@@ -819,7 +819,7 @@ export default function QuoteProcess(props) {
                         && res[k].toString().split(".")[1].length > 4
                         ? parseFloat(res[k]).toFixed(4)
                         : res[k]
-                    }
+                }
             })
 
 
@@ -884,72 +884,72 @@ export default function QuoteProcess(props) {
     };
 
     const handleViewPdf = (view = false, download = false) => {
-      setViewDownloadLoading(true)
-      let body = {
-        acceptedColumns: visibleColumns,
-        status: versionStatus,
-        TNC: state.selectedRecords
-      };
-    axiosInstance()
-      .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {
+        setViewDownloadLoading(true)
+        let body = {
+            acceptedColumns: visibleColumns,
+            status: versionStatus,
+            TNC: state.selectedRecords
+        };
         axiosInstance()
-            .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
-            .then(({ data }) => {
-                if (view && data.data.fileName) {
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            const file = new Blob([data], { type: "application/pdf" });
-                            const fileURL = URL.createObjectURL(file);
-                            const pdfWindow = window.open();
-                            pdfWindow.location.href = fileURL;
+            .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+            .then(() => {
+                axiosInstance()
+                    .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+                    .then(({ data }) => {
+                        if (view && data.data.fileName) {
+                            axiosInstance()
+                                .get(`user/download?fileName=${data.data.fileName}`, {
+                                    responseType: "blob",
+                                })
+                                .then(({ data }) => {
+                                    const file = new Blob([data], { type: "application/pdf" });
+                                    const fileURL = URL.createObjectURL(file);
+                                    const pdfWindow = window.open();
+                                    pdfWindow.location.href = fileURL;
+                                    setViewDownloadLoading(false)
+                                })
+                                .catch((err) => {
+                                    setViewDownloadLoading(false)
+                                    toastConfig.setToastConfig(err);
+                                });
+                        } else if (download && data.data.fileName) {
+                            axiosInstance()
+                                .get(`user/download?fileName=${data.data.fileName}`, {
+                                    responseType: "blob",
+                                })
+                                .then(({ data }) => {
+                                    const url = window.URL.createObjectURL(
+                                        new Blob([data], { type: "application/pdf" })
+                                    );
+                                    const link = document.createElement("a");
+                                    link.href = url;
+                                    link.setAttribute(
+                                        "download",
+                                        `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
+                                    );
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    setViewDownloadLoading(false)
+                                })
+                                .catch((err) => {
+                                    toastConfig.setToastConfig(err);
+                                    setViewDownloadLoading(false)
+                                });
+                        }
+                        else {
                             setViewDownloadLoading(false)
-                        })
-                        .catch((err) => {
-                            setViewDownloadLoading(false)
-                            toastConfig.setToastConfig(err);
-                        });
-                } else if (download && data.data.fileName) {
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            const url = window.URL.createObjectURL(
-                                new Blob([data], { type: "application/pdf" })
-                            );
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.setAttribute(
-                                "download",
-                                `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`
-                            );
-                            document.body.appendChild(link);
-                            link.click();
-                            setViewDownloadLoading(false)
-                        })
-                        .catch((err) => {
-                            toastConfig.setToastConfig(err);
-                            setViewDownloadLoading(false)
-                        });
-                }
-                else{
-                setViewDownloadLoading(false)
-                }
+                        }
+                    })
+                    .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                        setViewDownloadLoading(false)
+                    });
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
                 setViewDownloadLoading(false)
             });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setViewDownloadLoading(false)
-      });
-        
+
     };
 
 
@@ -981,21 +981,58 @@ export default function QuoteProcess(props) {
             setSendEmail(true);
             if (!pdfFileBase64) {
                 setGeneratingFile(true);
-                axiosInstance()
-                    .get(
-                        `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
-                        {
-                            responseType: "blob",
-                        }
-                    )
-                    .then(({ data }) => {
-                        setGeneratingFile(false);
-                        const file = new Blob([data], { type: "application/pdf" });
-                        generateBase64forFile(file, "pdf");
-                    })
-                    .catch((err) => {
-                        setGeneratingFile(false);
-                    });
+                if (quoteData.versions[currentVersion].PDF) {
+                    axiosInstance()
+                        .get(
+                            `user/download?fileName=${quoteData.versions[currentVersion].PDF}`,
+                            {
+                                responseType: "blob",
+                            }
+                        )
+                        .then(({ data }) => {
+                            setGeneratingFile(false);
+                            const file = new Blob([data], { type: "application/pdf" });
+                            generateBase64forFile(file, "pdf");
+                        })
+                        .catch((err) => {
+                            setGeneratingFile(false);
+                        });
+                }
+                else {
+                    // let body = {
+                    //     acceptedColumns: quoteData.versions[currentVersion].acceptedColumns,
+                    //     status: quoteData.versions[currentVersion].status,
+                    //     TNC: quoteData.versions[currentVersion].TNC
+                    // };
+                    // axiosInstance()
+                    //     .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+                    //     .then(() => {
+                            axiosInstance()
+                                .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+                                .then(({ data }) => {
+                                    axiosInstance().get(
+                                        `user/download?fileName=${data.data.fileName}`,
+                                        {
+                                            responseType: "blob",
+                                        }
+                                    )
+                                        .then(({ data }) => {
+                                            setGeneratingFile(false);
+                                            const file = new Blob([data], { type: "application/pdf" });
+                                            generateBase64forFile(file, "pdf");
+                                        })
+                                        .catch((err) => {
+                                            setGeneratingFile(false);
+                                        });
+                                })
+                                .catch((err) => {
+                                    setGeneratingFile(false);
+                                });
+                        // })
+                        // .catch((err) => {
+                        //     setGeneratingFile(false);
+                        // });
+                }
             }
         }
     };
@@ -1236,7 +1273,7 @@ export default function QuoteProcess(props) {
                                 </option>
                             ))}
                         </select>
-                        { (
+                        {(
                             <>
                                 {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                                     <Button
@@ -1254,7 +1291,7 @@ export default function QuoteProcess(props) {
                                     </Button>
                                 )}
                                 <Button
-                                    disabled={quoteData.versions[currentVersion]?.processStatus === "End" || !allowedToEdit || isCloning || loading}
+                                    disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                                     variant="contained"
                                     type="button"
                                     size="small"
@@ -1291,6 +1328,7 @@ export default function QuoteProcess(props) {
                         id={quoteData._id}
                         version={currentVersion}
                         Refresh={fetchQuoteData}
+                        quoteData={quoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
                         versionProcessStatus={quoteData.versions[currentVersion]?.processStatus}

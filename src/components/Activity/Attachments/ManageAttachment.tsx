@@ -89,15 +89,18 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 .get(`/attachment/${attachmentId}`)
                 .then(({ data: { data } }) => {
                     setCanEdit(data?.canEdit);
-                    if (data.fileUrl && data.fileUrl.length) {
+                    if (data.file && data.file.length) {
                         let otherAttachments = []
-                        let filteredAttachments = data.fileUrl.filter(url => {
-                            let isImageUrl = checkImageUrl(url)
+                        let filteredAttachments = []
+                        data.file.map(file => {
+                            let isImageUrl = checkImageUrl(file.url)
                             if (!isImageUrl) {
-                                data.fileUrl = url
-                                otherAttachments.push(url)
+                                // data.fileUrl = url
+                                otherAttachments.push({ name: file.name, url: file.url })
                             }
-                            return isImageUrl
+                            else {
+                                filteredAttachments.push({ name: file.name, url: file.url })
+                            }
                         })
                         // setImageAttachments(filteredAttachments)
                         setOtherAttachments([...otherAttachments, ...filteredAttachments])
@@ -128,7 +131,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const handleSave = (values) => {
         let request = {
             name: values.name,
-            fileUrl: values["fileUrl"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments],
+            file: values["fileUrl"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments],
             relatedTo: relatedTo
         }
         setLoading(true);
@@ -163,7 +166,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         }
     };
 
-    const downloadFile = (event, fileName) => {
+    const downloadFile = (event, file) => {
         if (event) {
             toastConfig.setToastConfig({
                 open: true,
@@ -174,7 +177,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         setDownloadProgress(0);
         setIsDownloading(true);
         axiosInstance()
-            .get(`user/download?fileName=${fileName}`, {
+            .get(`user/download?fileName=${file.url}`, {
                 responseType: "blob",
                 onDownloadProgress: (progressEvent) => {
                     let percentCompleted = Math.floor(
@@ -199,7 +202,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 const url = window.URL.createObjectURL(new Blob([data]));
                 const link = document.createElement("a");
                 link.href = url;
-                link.setAttribute("download", fileName);
+                link.setAttribute("download", file.url);
                 document.body.appendChild(link);
                 link.click();
                 setTimeout(() => setIsDownloading(false), 2000);
@@ -210,17 +213,19 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
             });
     };
     const onUploadFile = file => {
-        setOtherAttachments((prevState) => ([...prevState, file]))
+        setOtherAttachments((prevState) => ([...prevState, { name: file.split("_")[3] || file, url: file }]))
     }
-    const handleDeleteAttachment = (url) => {
-        setOtherAttachments(otherAttachments.filter(currentUrl => currentUrl !== url))
+    const handleDeleteAttachment = (file) => {
+        setOtherAttachments(otherAttachments.filter(current => current?.url !== file.url))
         setAttachemnetToDelete("");
         setShowConfirmationDialog(false)
     }
     const getFileIconSrc = file => {
-        let extension = file.substring(file.lastIndexOf("."),).toLowerCase()
-        let data = fileIcons.find(o => (o.extensions.indexOf(extension) >= 0))
-        if (data && data?.source) return data.source
+        if (file) {
+            let extension = file.substring(file.lastIndexOf("."),).toLowerCase()
+            let data = fileIcons.find(o => (o.extensions.indexOf(extension) >= 0))
+            if (data && data?.source) return data.source
+        }
     }
     const renderFileThumbnails = (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
@@ -231,15 +236,15 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                             return <>
                                 <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
                                     <Paper className={emailStyles.fileContainer}>
-                                        <img src={getFileIconSrc(attachment)}
+                                        <img src={getFileIconSrc(attachment.url)}
                                             className={emailStyles.file}
                                             alt="attchment" />
                                         <Typography noWrap variant="body2" >
-                                            {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
+                                            {attachment ? attachment?.name ? attachment?.name : attachment.url.substring(attachment.url.lastIndexOf("/") + 1,) : "attachment"}
                                         </Typography>
                                         < div className={emailStyles.fileOverlay}>
                                             <Typography variant="subtitle2" >
-                                                {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
+                                                {attachment ? attachment?.name ? attachment?.name : attachment.url.substring(attachment.url.lastIndexOf("/") + 1,) : "attachment"}
                                             </Typography>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
                                                 {attachmentId ? <>
@@ -424,8 +429,8 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 </CustomDialogContent>
                 <CustomDialogFooter>
                     <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
-                   <CustomButton
-                        type="button" 
+                    <CustomButton
+                        type="button"
                         color="primary"
                         disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
                         loading={loading}

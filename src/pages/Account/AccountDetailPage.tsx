@@ -74,6 +74,7 @@ import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import ProcessFlow from "../../components/ProcessFlow";
 import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -689,7 +690,7 @@ export default function AccountDetailPage(props) {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${isMobile || isTablet ? "grid-mobile" : (showActivity ? 'grid-with-activity' : 'grid-without-activity')}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
             <Paper>
               {
@@ -765,7 +766,6 @@ export default function AccountDetailPage(props) {
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
               />
-
               <Box>
                 {loading ? (
                   <Grid container spacing={2}>
@@ -836,80 +836,80 @@ export default function AccountDetailPage(props) {
                         />
                       </Box>
                     </TabPanel>
-                  </>
-                )}
-              </Box>
-              <div className="p-3">
-                {permissions?.opportunity?.isRead && (
-                  <OpportunityInAccordian
-                    opportunityPermissions={permissions.opportunity}
-                    opportunities={opportunities}
-                    onNewOpportunityAdd={() => {
-                      fetchRelatedData();
-                    }}
-                    accountId={accountData._id}
-                    accountName={accountData.accountName}
-                    recordsPerLine={3}
-                    resource={accountResource}
-                    isRedirect={false}
-                    isAllowedToUpdate={
-                      permissions &&
-                      permissions[accountResource] &&
-                      permissions[accountResource].isUpdate &&
-                      canEdit
-                    }
-                  />
-                )}
-                {permissions?.projectSales?.isRead &&
-                  accountResource == customerAccount.accountResource && (
-                    <ProjectInAccordion
-                      recordsPerLine={3}
-                      projectSales={projectSales}
-                      type={typeCreateProjectSalesDialog}
-                      fetchData={fetchRelatedData}
-                      permissions={permissions}
-                      isAddProjectSale={true}
-                      isAllowedToEdit={
-                        permissions &&
-                        permissions[accountResource] &&
-                        permissions[accountResource].isUpdate &&
-                        canEdit
-                      }
-                    />
-                  )}
-                {permissions?.quoteBuilder?.isRead &&
-                  accountResource == customerAccount.accountResource && (
-                    <QuotesInAccordion
-                      recordsPerLine={3}
-                      quotes={quotes}
-                      fetchData={fetchRelatedData}
-                      quoteBuilderPermission={permissions.quoteBuilder}
-                      accountId={id}
-                      accountResource={accountResource}
-                      isRenderedFromCustomerAccount={true}
-                      isAllowedToUpdate={
-                        permissions &&
-                        permissions[accountResource] &&
-                        permissions[accountResource].isUpdate &&
-                        canEdit
-                      }
-                    />
-                  )}
-                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-                {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
+                    <div className="p-3">
+                      {permissions?.opportunity?.isRead && (
+                        <OpportunityInAccordian
+                          opportunityPermissions={permissions.opportunity}
+                          opportunities={opportunities}
+                          onNewOpportunityAdd={() => {
+                            fetchRelatedData();
+                          }}
+                          accountId={accountData._id}
+                          accountName={accountData.accountName}
+                          recordsPerLine={3}
+                          resource={accountResource}
+                          isRedirect={false}
+                          isAllowedToUpdate={
+                            permissions &&
+                            permissions[accountResource] &&
+                            permissions[accountResource].isUpdate &&
+                            canEdit
+                          }
+                        />
+                      )}
+                      {permissions?.projectSales?.isRead &&
+                        accountResource == customerAccount.accountResource && (
+                          <ProjectInAccordion
+                            recordsPerLine={3}
+                            projectSales={projectSales}
+                            type={typeCreateProjectSalesDialog}
+                            fetchData={fetchRelatedData}
+                            permissions={permissions}
+                            isAddProjectSale={true}
+                            isAllowedToEdit={
+                              permissions &&
+                              permissions[accountResource] &&
+                              permissions[accountResource].isUpdate &&
+                              canEdit
+                            }
+                          />
+                        )}
+                      {permissions?.quoteBuilder?.isRead &&
+                        accountResource == customerAccount.accountResource && (
+                          <QuotesInAccordion
+                            recordsPerLine={3}
+                            quotes={quotes}
+                            fetchData={fetchRelatedData}
+                            quoteBuilderPermission={permissions.quoteBuilder}
+                            accountId={id}
+                            accountResource={accountResource}
+                            isRenderedFromCustomerAccount={true}
+                            isAllowedToUpdate={
+                              permissions &&
+                              permissions[accountResource] &&
+                              permissions[accountResource].isUpdate &&
+                              canEdit
+                            }
+                          />
+                        )}
+                      {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+                      {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
                   <LeadInAccordion
                     recordsPerLine={3}
                     lead={accountData.staticData?.lead}
                   />
                 )} */}
-              </div>
+                    </div>
+                  </>
+                )}
+              </Box>
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 <Grid container>
                   <Grid item xs={12}>
@@ -1070,11 +1070,11 @@ export default function AccountDetailPage(props) {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon"/>
               </a>}
           </div>
         </div>
-        <div>
+        <div >
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
