@@ -25,7 +25,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from "react-device-detect";
-import { IoIosArrowDropright,IoIosArrowDropleft } from 'react-icons/io';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectInAccordion"
 const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
 const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
@@ -208,7 +208,7 @@ export default function QuoteDetail() {
     setOpenUpdateDialog(true);
     setIsQuoteClone(true)
   }
-  
+
 
   const handleChangeVersion = (event) => {
     setCurrentVersion(parseInt(event.target.value));
@@ -666,56 +666,58 @@ export default function QuoteDetail() {
             </Paper>
           </div>
           <div className="position-relative">
-               {showActivity ?
-            <Paper>
-              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                <IoIosArrowDropright className="icon" />
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </a>}
+                {!quoteData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Skeleton key={i} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      resourceId={quoteData?._id}
+                      resource={quote.quoteResource}
+                      restrictedAddActivities={
+                        allowedToEdit ? [] : ["Attachment", "Case"]
+                      }
+                      relatedTo={[
+                        {
+                          type: quote.quoteResource,
+                          referenceId: quoteData?._id,
+                          access: true,
+                        },
+                        {
+                          type: quoteData?.customerAccountName
+                            ? customerAccount?.accountResource
+                            : supplierAccount?.accountResource,
+                          referenceId: quoteData?.customerAccountName
+                            ? quoteData?.customerAccountName?.optionValue
+                            : quoteData?.supplierAccountName?.optionValue,
+                          access: false,
+                        },
+                        {
+                          type: opportunity.opportunityResource,
+                          referenceId: quoteData.opportunity?.optionValue,
+                          access: false,
+                        },
+                      ]}
+                      handleActivityRefresh={() => { }}
+                      //   emails={contactsEmailsData}
+                      emails={null}
+                    />
+                  </div>
+                )}
+              </Paper> :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
               </a>}
-              {!quoteData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Skeleton key={i} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    restrictedAddActivities={
-                      allowedToEdit ? [] : ["Attachment", "Case"]
-                    }
-                    relatedTo={[
-                      {
-                        type: quote.quoteResource,
-                        referenceId: quoteData?._id,
-                        access: true,
-                      },
-                      {
-                        type: quoteData?.customerAccountName
-                          ? customerAccount?.accountResource
-                          : supplierAccount?.accountResource,
-                        referenceId: quoteData?.customerAccountName
-                          ? quoteData?.customerAccountName?.optionValue
-                          : quoteData?.supplierAccountName?.optionValue,
-                        access: false,
-                      },
-                      {
-                        type: opportunity.opportunityResource,
-                        referenceId: quoteData.opportunity?.optionValue,
-                        access: false,
-                      },
-                    ]}
-                    handleActivityRefresh={() => { }}
-                    //   emails={contactsEmailsData}
-                    emails={null}
-                  />
-                </div>
-              )}
-            </Paper> :
-            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon"/>
-            </a>}
           </div>
         </div>
         {showConfirmBox ? (

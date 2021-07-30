@@ -340,8 +340,8 @@ export default function ManageQuoteDialog({
         const newFields = [];
 
         const filterData = isNew
-          ? data.filter((d) => d.isCreate)
-          : data.filter((d) => d.isUpdate);
+          ? data.filter((d) => d?.isCreate)
+          : data.filter((d) => d?.isUpdate);
 
         //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
         const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
@@ -459,8 +459,8 @@ export default function ManageQuoteDialog({
           message: data.message,
         });
 
-          history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
-        
+        history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+
         setLoading(false);
         // onSuccess(newId);
         onClose()
@@ -714,19 +714,19 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.customerAccount
-                                              .isCreate && !accountFieldDisable
+                                              ?.isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                           sm={
                                             permissions.customerAccount
-                                              .isCreate && !accountFieldDisable
+                                              ?.isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                           md={
                                             permissions.customerAccount
-                                              .isCreate && !accountFieldDisable
+                                              ?.isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
@@ -766,7 +766,7 @@ export default function ManageQuoteDialog({
                                             }}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount.isCreate &&
+                                        {permissions.customerAccount?.isCreate &&
                                           !accountFieldDisable && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -804,17 +804,17 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.customerContact.isCreate
+                                            permissions.customerContact?.isCreate
                                               ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.customerContact.isCreate
+                                            permissions.customerContact?.isCreate
                                               ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.customerContact.isCreate
+                                            permissions.customerContact?.isCreate
                                               ? 10
                                               : 11
                                           }
@@ -845,7 +845,7 @@ export default function ManageQuoteDialog({
                                           // }}
                                           />
                                         </Grid>
-                                        {permissions.customerContact.isCreate &&
+                                        {permissions.customerContact?.isCreate &&
                                           contactId === null && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -882,19 +882,19 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.opportunity.isCreate &&
+                                            permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.opportunity.isCreate &&
+                                            permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.opportunity.isCreate &&
+                                            permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
                                               ? 10
                                               : 11
@@ -935,7 +935,7 @@ export default function ManageQuoteDialog({
                                           // }}
                                           />
                                         </Grid>
-                                        {permissions.opportunity.isCreate &&
+                                        {permissions.opportunity?.isCreate &&
                                           !isRenderedFromOpportunity && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -1193,15 +1193,15 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 10
                                               : 11
                                           }
                                         >
@@ -1239,7 +1239,7 @@ export default function ManageQuoteDialog({
                                           />
                                         </Grid>
                                         {
-                                          permissions.marketSegment.isCreate && (
+                                          permissions.marketSegment?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
                                                 title="Add Market Segment"
@@ -1273,15 +1273,15 @@ export default function ManageQuoteDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 10
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 10
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 10
                                                 : 11
                                             }
                                           >
@@ -1316,7 +1316,7 @@ export default function ManageQuoteDialog({
                                             />
                                           </Grid>
                                           {
-                                            permissions.marketSegment.isCreate && (
+                                            permissions.marketSegment?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
                                                   title="Add Sub Market Segment"
