@@ -3,7 +3,6 @@ import {
   Box,
   IconButton,
   InputBase,
-  makeStyles,
   Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
@@ -16,16 +15,6 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { backendApi } from './../../../config';
 import moment from "moment";
 
-const useStyles = makeStyles((theme) => ({
-  messageBubble: {
-    backgroundColor: "gray",
-    color: "white",
-    padding: theme.spacing(1, 2),
-    borderRadius: 16,
-    width: "max-content",
-  },
-}));
-
 const Chatter = (props) => {
   const { relatedTo } = props;
 
@@ -34,7 +23,6 @@ const Chatter = (props) => {
       user: { user },
     },
   } = useData();
-  const classes = useStyles();
 
   const { setToastConfig } = useContext(CustomToastContext);
   const [messages, setMessages] = useState([]);
@@ -44,19 +32,6 @@ const Chatter = (props) => {
   const [socket, setSocket] = useState<Socket>(null);
   const [isFocused, setFocused] = useState(false);
 
-  const msgBoxRef = useCallback(
-    (elem: HTMLElement) => {
-      if (elem) {
-        elem.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "start",
-        });
-      }
-    },
-    [messages]
-  );
-
   const getChatter = useCallback(() => {
     if (relatedTo && relatedTo.length) {
       setLoading(true);
@@ -64,7 +39,7 @@ const Chatter = (props) => {
         .get(`/chatter/resource?relatedTo=${JSON.stringify(relatedTo)}`)
         .then(({ data }) => {
           if (data.hasOwnProperty("data")) {
-            setMessages(data.data.Messages);
+            setMessages(data.data.Messages.reverse());
             setChatterId(data.data._id);
           } else {
             createChatter();
@@ -105,7 +80,7 @@ const Chatter = (props) => {
     });
 
     socket.on("data", (data) => {
-      setMessages(data.Messages);
+      setMessages(data.Messages.reverse());
     });
 
     return () => {
@@ -211,7 +186,7 @@ const Chatter = (props) => {
                 //     </Box>
                 //   </div>
                 // </Box>
-                <div key={idx} ref={msgBoxRef}>
+                <div key={idx}>
                   {user._id === data.userid ? (
                     <div className="chat-msg self">
                       <div className="cm-msg-text self">
