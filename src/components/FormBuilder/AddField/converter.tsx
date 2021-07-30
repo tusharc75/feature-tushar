@@ -37,7 +37,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
 
 
     const handleChangeUnit = (value) => {
-        setFieldValue("units", value.map((_f) => _f.trim()))
+        setFieldValue("units", value.map((_f) => _f.trim().replace(/[^a-zA-Z0-9/]/g, '')))
         let data = values["option"] ? [...values["option"]] : []
         if (data.length > value.length) {
             let index = 0;
