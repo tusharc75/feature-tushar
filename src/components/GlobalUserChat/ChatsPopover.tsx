@@ -42,7 +42,6 @@ const ChatsPopover = (props) => {
     const [users, setUsers] = useState([])
     const [userChats, setUserChats] = useState([])
     const [chatterIds, setChatterIds] = useState([])
-    const [availableChats, setAvailableChats] = useState([])
 
     const onClose = () => {
         setAnchorEl(null)
@@ -57,9 +56,6 @@ const ChatsPopover = (props) => {
                         .map(_d => `${_d.firstName} ${_d.lastName}`).join(", "),
                     message: d?.message,
                 }))
-              
-                const existingUsers = data.map(d => d.users.map(_d => _d._id))
-            setAvailableChats(existingUsers)
              setChatterIds(data.map(d => d.id))
              setUserChats(data)
              dispatch({type: SET_CHATTER, payload: null})
