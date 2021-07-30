@@ -453,7 +453,7 @@ export default function ManageQuoteDialog({
       values = {
         ...values,
         quoteId: dataToUpdate._id,
-        versionNumber: cloneQuoteWithVersionNumber
+        versionNumber: `${cloneQuoteWithVersionNumber}`
       }
     }
     const apiUrl = cloneQuoteWithVersionNumber > 0 ? `${qbApi}/create/clone-v` : `${qbApi}?entity=${selectedEntity}`
