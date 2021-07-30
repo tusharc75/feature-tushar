@@ -1,50 +1,25 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import {Box, IconButton, Typography} from '@material-ui/core'
 import { SendOutlined } from '@material-ui/icons';
 import axiosInstance from '../../axios/axiosInstance';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 
-const ChatBox = ({ selectedChat, sendMessage, socket }) => {
+const ChatBox = () => {
+    const {selectedChat, messages, currentUser} = useContext(GlobalChatContext)
     const [messageValue, setMessageValue] = useState("");
-    const [currentUser, setCurrentUser] = useState("")
-    const [messages, setMessages] = useState([]);
 
-    const getMessages = useMemo(() => {
-        
-    },[])
-
-    useEffect(() => {
-      getChatterInfo()
-    }, [selectedChat])
-    
-    useEffect(() => {
-       if (socket !== null) {
-           socket.on("data", (data) => {
-               //alert(JSON.stringify(data))
-               getChatterInfo()
-           })
-           
-           return () => {
-               socket.off("data")
-           }
-       }
-    }, [socket])
-
-    const sendMsg = (e) => {
+    const sendMessage = async (e) => {
         e.preventDefault()
-        sendMessage(selectedChat.id, messageValue)
-        setMessageValue("")
-    }
+        try {
+            await axiosInstance()
+                .put(`/chatter/${selectedChat.id}`, { message: messageValue });
+            setMessageValue("")
+        } catch (err) {
+           
+        }
+    };
 
-    const getChatterInfo = () => {
-        axiosInstance().get(`/chatter/${selectedChat.id}`)
-            .then(({ data: {data} }) => {
-                setMessages(data.Messages)
-                setCurrentUser(data.currentUser)
-        })
-        .catch(() => {})
-    }
-
-
+    const formatTime = (time) => new Date(time).toTimeString().split(":");
 
 
     return (
@@ -57,13 +32,16 @@ const ChatBox = ({ selectedChat, sendMessage, socket }) => {
                         <Typography>
                             {data.message}
                         </Typography>
+                            <p className="message-time">
+                                {`${formatTime(data.date)[0]}:${formatTime(data.date)[1]}`}
+                            </p>
                         </div>
                     </div>
                 ))}
             </div>
 
             
-            <form onSubmit={sendMsg} className="chatbox-input">
+            <form onSubmit={sendMessage} className="chatbox-input">
                 <input
                     placeholder="Start Typing..."
                     value={messageValue}

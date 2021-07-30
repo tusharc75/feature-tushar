@@ -77,6 +77,7 @@ const QuoteBuilders = () => {
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
     useState(false);
+  const [isClone, setIsClone] = useState(false);
   const [singleQuoteDelete, setSingleQuoteDelete] = useState({
     id: null,
     show: false,
@@ -266,7 +267,7 @@ const QuoteBuilders = () => {
     accountDetails,
   ]);
 
-  const getVersionStatus =  (id, currency) => {
+  const getVersionStatus = (id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
     // if(event){
     //   toastConfig.setToastConfig({
@@ -279,11 +280,11 @@ const QuoteBuilders = () => {
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-      //   toastConfig.setToastConfig({
-      //     open: true,
-      //     type: "success",
-      //     message: "Data Retreived successfully",
-      // });
+        //   toastConfig.setToastConfig({
+        //     open: true,
+        //     type: "success",
+        //     message: "Data Retreived successfully",
+        // });
         // setShowVersionsDialog(true);
         let quoteId = id;
         const newData = data.versions.map((d, index) => {
@@ -303,13 +304,13 @@ const QuoteBuilders = () => {
             comment: d.comment ? d.comment : "",
           };
         });
-        
+
         setVersionStatusData((prevState) => {
           return {
             ...prevState,
             data: newData,
           }
-          
+
         });
 
 
@@ -345,6 +346,11 @@ const QuoteBuilders = () => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const handleShowCloneQuoteDialog = () => {
+    setIsClone(true)
+    setshowCreateQuoteDialog(true)
+  }
 
   const QuoteNameRenderer = (params) => (
     <span>
@@ -583,6 +589,7 @@ const QuoteBuilders = () => {
 
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
+    setIsClone(false);
     fetchQuoteBuilder();
   };
 
@@ -682,6 +689,9 @@ const QuoteBuilders = () => {
               icon={<GiHiveMind className="headerLogo" />}
               heading={routes.quoteBuilder.title}
               showTransferEntityDialog={handleTransferEntityDialog}
+              showCloneQuoteDialog={() => {
+                handleShowCloneQuoteDialog()
+              }}
 
             >
               {accountDetails.accountId && (
@@ -759,18 +769,22 @@ const QuoteBuilders = () => {
           onSuccess={onSuccess}
           onClose={() => {
             setshowCreateQuoteDialog(false);
+            setIsClone(false)
           }}
-          isNew={true}
-          dataToUpdate={null}
+          isNew={isClone ? false : true}
+          dataToUpdate={isClone ? { ...selectedRecords[0], ...{ 'owner': { 'optionLabel': selectedRecords[0].owner, 'optionValue': selectedRecords[0].ownerId } } } : null}
+          isClone={isClone ? true : false}
           resource={null}
-          isRedirectTodetailPage={true}
+          isRedirectTodetailPage={isClone ? false : true}
           contactId={null}
           opportunityId={null}
           disableOwnerDropDown={true}
           contacts={null}
+          doaCollaboratorResources={user.user?.doa.map(obj => obj.user)}
           isRenderedFromOpportunity={false}
         />
       )}
+
 
       {showVersionsDialog && (
         <CustomDialogComponent
@@ -781,14 +795,14 @@ const QuoteBuilders = () => {
             setVersionStatusData((prevState) => ({ ...prevState, data: [] }))
           }}
         >
-        <CustomDialogContent>
-          {versionStatusData.data.length === 0 && (
+          <CustomDialogContent>
+            {versionStatusData.data.length === 0 && (
               <CommonSkeleton lenArray={arr} />
-          )}
-         { versionStatusData.data.length > 0 && 
-            <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
-          />}
-            </CustomDialogContent>
+            )}
+            {versionStatusData.data.length > 0 &&
+              <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
+              />}
+          </CustomDialogContent>
         </CustomDialogComponent>
       )}
       {showTransferEntityDialog && (
