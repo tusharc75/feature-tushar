@@ -81,7 +81,7 @@ export default function ManageQuoteDialog({
     state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner.optionValue
+    !isNew && user.user._id !== dataToUpdate?.owner?.optionValue
   );
 
   const [entityData, setEntityData] = useState({
