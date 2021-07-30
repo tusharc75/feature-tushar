@@ -16,6 +16,7 @@ import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
 
 const CreateFormBuilder = (props) => {
+
     const { state: { user, permissions } }: any = useData();
     const [formBuilderPermissions, setFormBuilderPermissions] = useState({
         isCreate: false,
@@ -87,7 +88,7 @@ const CreateFormBuilder = (props) => {
         <Grid container className="headerbox">
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: routes.quoteBuilder.title }]} />
         </Grid>
-        <div className="main-container">
+        <CustomContainer>
             {section ?
                 <Fragment>
                     <Box p={1} pb={0} ml={1} bgcolor="white" >
@@ -130,7 +131,7 @@ const CreateFormBuilder = (props) => {
                 :
                 <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
-        </div>
+        </CustomContainer>
     </Layout >
     );
 }
