@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import {
@@ -18,7 +18,7 @@ import ChatBox from './ChatBox';
 import NewChat from './NewChat';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import { SET_CHATTER } from '../../StateProvider/actionTypes';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -35,77 +35,33 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const ChatsPopover = (props) => {
     const classes = useStyles();
-    const {state: {user: { user}, chatter}, dispatch} = useData()
-    const { open, anchorEl, setAnchorEl, socket } = props;  
-    const [selectedChat, setSelectedChat] = useState(null)
+    const {socket, chatList, selectedChat, setSelectedChat} = useContext(GlobalChatContext)
+    const {state: {user: { user}}} = useData()
+    const { open, anchorEl, setAnchorEl } = props;  
     const [newChat, setNewChat] = useState(false)
     const [users, setUsers] = useState([])
-    const [userChats, setUserChats] = useState([])
-    const [chatterIds, setChatterIds] = useState([])
 
     const onClose = () => {
-        setAnchorEl(null)
+       setAnchorEl(null)
     }
 
-    const getChats = useCallback(() => {
-        axiosInstance().get("/chatter/user-to-user/my")
-            .then(({ data: { data } }) => {
-                data = data.map(d => ({
-                    id: d.id,
-                    chatTitle: d.users.filter(d => d._id !== user._id)
-                        .map(_d => `${_d.firstName} ${_d.lastName}`).join(", "),
-                    message: d?.message,
-                }))
-             setChatterIds(data.map(d => d.id))
-             setUserChats(data)
-             dispatch({type: SET_CHATTER, payload: null})
-         })
-        .catch(() => { })
-    }, [chatter])
-
     useEffect(() => {
-        getChats()
-    }, [getChats])
-
-
-      useEffect(() => {
-        fetchUsersList()
-      }, [])
+      fetchUsersList()
+    }, [])
     
         // Create connection between user with chatterID
-    const joinRooms = () => {
-        if (chatterIds.length && socket !== null) {
-            chatterIds.forEach((chatterId) => {
-                socket.emit("join", chatterId)
-             })
-        }
-    }
     
-    useEffect(() => {
-        joinRooms()
-    }, [chatterIds, socket])
-
 
     const fetchUsersList = () => {
         axiosInstance().get("/user?limit=0")
             .then(({ data: { data } }) => {
-                const allUsers = data.filter(d => d._id !== user._id)
-                                     .map(d => ({ id: d._id, avatar: d.avatar || "", name: d.concatedName }))
+                const allUsers =
+                    data.filter(d => d._id !== user._id)
+                        .map(d => ({ id: d._id, avatar: d.avatar || "", name: d.concatedName }))
                 setUsers(allUsers)
             })
         .catch(err => {})
     }
-
-
-    const sendMessage = async (chatterId:string, msg:string) => {
-        try {
-            await axiosInstance()
-                .put(`/chatter/${chatterId}`, { message: msg });
-        } catch (error) {
-           console.log(error)
-        }
-    };
-
 
 
     return (
@@ -151,7 +107,7 @@ const ChatsPopover = (props) => {
                             ? selectedChat?.chatTitle
                             : newChat
                                 ? "New chat"
-                                : `Chats (${userChats.length})`}
+                                : `Chats (${chatList.length})`}
                     </Typography>
 
                     <Tooltip title="Close chat">
@@ -173,13 +129,9 @@ const ChatsPopover = (props) => {
                         />
                         : selectedChat
                             ?
-                            <ChatBox
-                                selectedChat={selectedChat}
-                                sendMessage={sendMessage}
-                                socket={socket}
-                            />
+                            <ChatBox />
                             : <List disablePadding className={classes.listRoot}>
-                                {userChats.map(chat => (
+                                {chatList.map(chat => (
                                     <ChatList
                                         userId={user._id}
                                         socket={socket}

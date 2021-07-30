@@ -11,16 +11,24 @@
 
     .message-container {
       // display: flex;
-      // flex-direction: column-reverse;
+      // flex-direction: column;
 
       .message-outlet {
         width: fit-content;
-        border: 1px solid lightgray;
-        color: gray;
+        background-color: rgb(230, 230, 230);
+        color: rgb(32, 32, 32);
         border-radius: 18px;
-        padding: 6px;
+        padding: 6px 10px;
         margin-top: 10px;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+
+        .message-time {
+          align-self: flex-end;
+          font-size: 12px;
+          margin-left: 8px;
+        }
       }
 
       .my-color {
@@ -70,7 +78,29 @@
   font-weight: 600;
 }
 
-.chat-listSubtitle {
-  font-size: 14px;
-  font-weight: 500;
+.chat-listSubtext {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .chat-listSubtitle {
+    display: flex;
+    overflow: hidden;
+
+    .msg {
+      font-size: 14px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      margin-left: 4px;
+    }
+    .who {
+      font-weight: 500;
+    }
+  }
+
+  .message-time {
+    margin-left: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
 }

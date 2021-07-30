@@ -83,7 +83,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
         ],
         data: [],
     });
-    const [columns, setColumns] = useState([
+    const [columns,] = useState([
         { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "nameRenderer" },
         { field: "processStatus", headerName: "Conclusion", show: true, cellRenderer: "nameRenderer" },
