@@ -22,13 +22,11 @@ const useStyles = makeStyles((theme) => ({
     margin: 10,
   },
   screenHeightAuto: {
-    minHeight: window.innerHeight - 220,
-    maxHeight: window.innerHeight - 220,
-    overflow: "auto",
+    height: "calc(100vh - 194px)",
+    overflow: "auto"
   },
   screenHeight: {
-    minHeight: window.innerHeight - 200,
-    maxHeight: window.innerHeight - 200,
+    overflow: "auto"
   },
 }));
 
