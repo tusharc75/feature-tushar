@@ -861,11 +861,11 @@ const FormTypes = (props) => {
                   <TextField
                     {...rest}
                     variant="outlined"
-                    type="number"
+                    //type="number"
                     label={label + ' ' + _currency + '/' + _unit}
                     name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
                     required={required}
-                    value={values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]}
+                    value={(values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]).toLocaleString()}
                     error={
                       touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
                       Boolean(errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()])
@@ -878,7 +878,11 @@ const FormTypes = (props) => {
                     onChange={
                       onChange
                         ? onChange
-                        : (e) => handleCurrencyChangeWithConverterChange(name, _currency, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
+                        : (e) => {
+                          if (e.target.value === '' || (/^[0-9.,]+$/).test(e.target.value)) {
+                            handleCurrencyChangeWithConverterChange(name, _currency, _unit, e.target.value === "" ? 0 : parseFloat(e.target.value.replace(/,/g, '')))
+                          }
+                        }
                     }
                     InputProps={{
                       startAdornment: (
@@ -979,11 +983,11 @@ const FormTypes = (props) => {
                 <TextField
                   {...rest}
                   variant="outlined"
-                  type="number"
+                  //type="number"
                   label={label + ' ' + _currency}
                   name={name + '_' + _currency.toLowerCase()}
                   required={required}
-                  value={values[name + '_' + _currency.toLowerCase()]}
+                  value={(values[name + '_' + _currency.toLowerCase()]).toLocaleString()}
                   error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
                   helperText={touched[name + '_' + _currency.toLowerCase()] && errors[name + '_' + _currency.toLowerCase()]}
                   ref={inputNumberRef}
@@ -991,10 +995,12 @@ const FormTypes = (props) => {
                     onChange
                       ? onChange
                       : (e) => {
-                        if (fieldData.displayCurrency.length > 1) {
-                          handleCurrencyChange(name, _currency, parseFloat(e.target.value));
-                        } else {
-                          handleChange(name + '_' + _currency.toLowerCase(), parseFloat(e.target.value));
+                        if (e.target.value === '' || (/^[0-9.,]+$/).test(e.target.value)) {
+                          if (fieldData.displayCurrency.length > 1) {
+                            handleCurrencyChange(name, _currency, e.target.value === "" ? 0 : parseFloat(e.target.value.replace(/,/g, '')));
+                          } else {
+                            handleChange(name + '_' + _currency.toLowerCase(), e.target.value === "" ? 0 : parseFloat(e.target.value.replace(/,/g, '')));
+                          }
                         }
                       }
                   }
