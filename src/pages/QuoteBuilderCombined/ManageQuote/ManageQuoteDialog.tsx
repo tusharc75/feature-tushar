@@ -81,7 +81,7 @@ export default function ManageQuoteDialog({
     state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner.optionValue
+    !isNew && user.user._id !== dataToUpdate?.owner?.optionValue
   );
 
   const [entityData, setEntityData] = useState({
@@ -439,18 +439,26 @@ export default function ManageQuoteDialog({
   };
 
   const handleCloneQuote = (values) => {
+    setLoading(true);
     if (
       accountId &&
       accountResource !== customerAccount.accountResource &&
       !isRenderedFromOpportunity
     )
       values["supplierAccountName"] = [accountId];
-    setLoading(true);
     if (values.customerContactName === "") {
       values.customerContactName = [];
     }
+    if (cloneQuoteWithVersionNumber > 0) {
+      values = {
+        ...values,
+        quoteId: dataToUpdate._id,
+        versionNumber: cloneQuoteWithVersionNumber
+      }
+    }
+    const apiUrl = cloneQuoteWithVersionNumber > 0 ? `${qbApi}/create/clone-v` : `${qbApi}?entity=${selectedEntity}`
     axiosInstance()
-      .post(`${qbApi}?entity=${selectedEntity}`, values)
+      .post(apiUrl, values)
       .then(({ data }) => {
         const newId = data.data._id;
         toastConfig.setToastConfig({

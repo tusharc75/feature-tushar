@@ -20,6 +20,7 @@ import { Integrations } from "@sentry/tracing";
 import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
+import { GlobalChatProvider } from "./StateProvider/GlobalChatContext";
 
 // @ts-ignore
 if(process.env.REACT_APP_ENV !== 'local'){
@@ -44,7 +45,9 @@ ReactDOM.render(
           <CustomNotificationCountProvider>
             <CustomChatNotificationCountProvider>
               <MsalProvider instance={AzureInstance}>
+                <GlobalChatProvider>
                   <App />
+                </GlobalChatProvider>
               </MsalProvider>
             </CustomChatNotificationCountProvider>
           </CustomNotificationCountProvider>
