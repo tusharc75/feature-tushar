@@ -15,7 +15,7 @@ const ProductList = ({ products }) => {
           
             <CategorySidebar />
             
-            <Box className="detail-container">
+            <Box className={styles.detailContainerOne} >
                 <div className={`${styles.product_list_container}`}>
                     {
                         products.map((product, index: number) => (

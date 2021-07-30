@@ -1,28 +1,49 @@
 .sidebar_nav {
   width: 25rem;
-  margin-top: 1rem;
+  //margin-top: 1rem;
+  padding: 1rem 0.5rem 0 0.5rem;
   max-height: 45rem;
-
   overflow-y: scroll;
+
 }
 
 .single_category {
   margin: 0.8rem;
+  display: flex;
+  align-items: center;
+  height: 2rem;
 
   &_name {
     color: var(--colorContact);
     margin: 0.2rem;
     font-weight: 600;
+    //padding: 0 0.5rem;
   }
 
   &_icon {
     color: var(--colorContact);
   }
-}
 
+}
+.padding_in_ratings{
+  padding: 0.3rem 0.5rem;
+}
+.single_category_checkBox{
+  width: 15px !important;
+  height: 15px !important;
+}
+.font_size{
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--primary) ;
+}
 .rating {
+  padding: 0.4rem 0.5rem;
   display: flex;
   justify-content: space-between;
+}
+.rating_size{
+  font-size: 1.3rem !important;
 }
 @media screen and (max-width: 700px) {
   .sidebar_nav {
