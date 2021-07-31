@@ -66,7 +66,7 @@ export default function ProductDetails() {
           {productDetails ? (
             <div className={styles.product_container}>
               <div className={styles.product_image}>
-                <Box display="flex" justifyContent="center" alignItems="center">
+                <Box display="flex" justifyContent="center" alignItems="center" >
                   {productDetails.productImage ? (
                     <img
                       src={productDetails.productImage}
@@ -82,10 +82,56 @@ export default function ProductDetails() {
                 <header>
                   <h1 className={styles.title}>{productDetails.productName}</h1>
                   <span className={styles.avaibility}>
+                    <h3>Avaibility-&nbsp;</h3>
                     {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
                   </span>
                   <div className={styles.price}>
-                    <span className={styles.current}>
+                    <span className={styles.vendor}>
+                      <h5>Sold by: <span>Cactus Wellhead</span></h5>
+                    </span>
+
+
+                  </div>
+                  <div className={styles.set_width}> <hr/> </div>
+
+                  {/*<div className={styles.rate}>*/}
+                  {/*  <Rating*/}
+                  {/*    name="half-rating-read"*/}
+                  {/*    defaultValue={2.5}*/}
+                  {/*    precision={0.5}*/}
+                  {/*    value={productDetails.rating}*/}
+                  {/*    readOnly*/}
+                  {/*    size="small"*/}
+                  {/*  />*/}
+                  {/*</div>*/}
+                </header>
+                <article>
+                  {/*<h5>Description</h5>*/}
+                  <p>{productDetails?.description}</p>
+                </article>
+                <div className={styles.controls}>
+                  <div className={styles.controls_over}>
+                    <h5><li>MFG</li></h5>
+                    <a className="option">(UK 8)</a>
+                  </div>
+                  <div className={styles.controls_over}>
+                    <h5><li>Product Number</li></h5>
+                    <a className="option">(1)</a>
+                  </div>
+                  <div className={styles.controls_over}>
+                    <h5><li>Mesuring Unit</li></h5>
+                    <a className="option">(1)</a>
+                  </div>
+                  <div className={styles.controls_over}>
+                    <h5><li>Mesuring Unit</li></h5>
+                    <a className="option">(1)</a>
+                  </div>
+                </div>
+
+                {/*<div className={styles.set_width_2}> <hr/> </div>*/}
+                <div className={styles.price_and_discount}>
+                  <span className={styles.current}>
+                    <h2>$699.00</h2>
                       {
                         formatAmountWithCurrency(
                           productDetails.currency,
@@ -96,7 +142,9 @@ export default function ProductDetails() {
                         ).fullFormatAmount
                       }
                     </span>
-                    <span className={styles.before}>
+
+                  <span className={styles.before}>
+
                       {
                         formatAmountWithCurrency(
                           productDetails.currency,
@@ -104,42 +152,30 @@ export default function ProductDetails() {
                         ).fullFormatAmount
                       }
                     </span>
-                  </div>
-                  <div className={styles.rate}>
-                    <Rating
-                      name="half-rating-read"
-                      defaultValue={2.5}
-                      precision={0.5}
-                      value={productDetails.rating}
-                      readOnly
-                      size="small"
-                    />
-                  </div>
-                </header>
-                <article>
-                  <h5>Description</h5>
-                  <p>{productDetails?.description}</p>
-                </article>
-                <div className={styles.controls}>
-                  <div>
-                    <h5>MFG</h5>
-                    <a className="option">(UK 8)</a>
-                  </div>
-                  <div>
-                    <h5>Product Number</h5>
-                    <a className="option">(1)</a>
-                  </div>
-                  <div>
-                    <h5>Mesuring Unit</h5>
-                    <a className="option">(1)</a>
-                  </div>
+
                 </div>
-                <div className="footer">
+
+                <div className={styles.rate2}>
+                  <Rating
+                    name="half-rating-read"
+                    defaultValue={4.5}
+                    precision={0.5}
+                    value={productDetails.rating}
+                    readOnly
+                    size="small"
+                  />
+                  <p>4.4</p>
+                </div>
+
+
+
+
+                <div className={'footer' && styles.buttonLayout} >
                   <Button
                     variant="contained"
                     color="primary"
                     size="small"
-                    className="mr-2"
+                    className={styles.buttonStyle}
                     onClick={() => { }}
                     startIcon={<AddShoppingCartIcon />}
                   >
@@ -150,17 +186,19 @@ export default function ProductDetails() {
                       variant="contained"
                       color="primary"
                       size="small"
-                      className="mr-2"
+                      className={styles.buttonStyle}
                       startIcon={<AddShoppingCartIcon />}
                     >
                       Checkout
                     </Button>
                   </Link>
+                </div>
+                <div className={'footer' && styles.buttonLayout}>
                   <Button
                     variant="outlined"
                     color="secondary"
                     size="small"
-                    className="mr-2"
+                    className={styles.buttonStyleOne}
                   >
                     Add to Configure
                   </Button>
@@ -168,7 +206,7 @@ export default function ProductDetails() {
                     variant="outlined"
                     color="secondary"
                     size="small"
-                    className="mr-2"
+                    className={styles.buttonStyleOne}
                   >
                     Add to Planner
                   </Button>
