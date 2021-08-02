@@ -95,8 +95,8 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
         title={params.value}
         className="text-truncate link"
         onClick={() => {
-            fetchQuoteData(params.value);
-            handleChangeVersionFromAllVersion(params.value);
+            fetchQuoteData(params.data.versionNumber);
+            handleChangeVersionFromAllVersion(params.data.versionNumber);
         }}
     >
         {params.value}
