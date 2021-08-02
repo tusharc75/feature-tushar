@@ -84,14 +84,6 @@ function CategorySidebar() {
     </TreeItem>
   );
 
-  const showChildren = children => {
-    return children.map(o => {
-      return <TreeItem nodeId={o?._id} label={o.name}>
-        {productCategories[o.name] ? showChildren[o.name] : null}
-      </TreeItem>
-    })
-  }
-
   return (
     <div className={styles.sidebar_nav}>
       <Paper component="form" className={classes.root}>
