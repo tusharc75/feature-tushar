@@ -5,7 +5,7 @@ import SecureIcon from "@material-ui/icons/VerifiedUserOutlined";
 
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
-import { Button, IconButton, Box, Grid} from "@material-ui/core";
+import { Button, IconButton, Box, Grid } from "@material-ui/core";
 import ButtonDesign from "../Buttondesign/Buttondesign";
 import Product from "../ProductCard/ProductCard";
 import { product } from "../../../constants/helpers";
@@ -149,8 +149,8 @@ function MyCart() {
               <h3>Safe and Secure Payments.100% Authentic products.</h3>
             </div> */}
             <div className={styles.price_card_checkout_button}>
-                <Button variant="contained" color="secondary" onClick={() => { }}>
-                 Checkout
+              <Button variant="contained" color="secondary" onClick={() => { }}>
+                Checkout
               </Button>
             </div>
           </div>
@@ -159,7 +159,7 @@ function MyCart() {
           <h2>Sponsored Products Related To This Item </h2>
           <div className={`gap-3 ${styles.sponsored_items_list}`}>
             {products.map((product, index: number) => (
-                <Product key={index} product={product} />
+              <Product key={index} product={product} />
             ))}
           </div>
         </div>
