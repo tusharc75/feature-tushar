@@ -7,6 +7,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
@@ -145,6 +146,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
             {(values["units"] && values["units"].length > 0) && <Box mt={1}>
                 <Grid spacing={3} container>
                     <Grid item xs={12} sm={4} md={4}>
+                        
                         <FormControl variant="outlined" fullWidth margin="dense">
                             <InputLabel htmlFor="displayUnits">Display Units</InputLabel>
                             <Select
@@ -157,10 +159,28 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                                 multiple
                                 name="displayUnits"
                                 value={values["displayUnits"] ? values["displayUnits"] : []}
-                                onChange={(e) => setFieldValue("displayUnits", e.target.value)}
+                                onChange={(e:any) => {
+                                    const value:[] = e.target.value
+                                    if (value[value.length - 1] === "all") {
+                                        setFieldValue("displayUnits",
+                                            values["displayUnits"].length === values["units"].length ? [] : values["units"]);
+                                        return;
+                                    }
+                                    setFieldValue("displayUnits", value)
+                                }}
                                 renderValue={(selected: any) => selected.join(', ')}
                                 MenuProps={MenuProps}
                             >
+                                <MenuItem value="all">
+                                    <ListItemIcon>
+                                    <Checkbox
+                                        color="primary"
+                                        checked={values["units"].length > 0 && values["displayUnits"].length === values["units"].length}
+                                        indeterminate={values["displayUnits"].length > 0 && values["displayUnits"].length < values["units"].length}
+                                    />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Select All" />
+                                </MenuItem>
                                 {values["units"] && values["units"].map((_unit) => (
                                     <MenuItem key={_unit} value={_unit}>
                                         <Checkbox color="primary" checked={values["displayUnits"] && values["displayUnits"].indexOf(_unit) > -1} />
@@ -183,10 +203,28 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                                 multiple
                                 name="formulaUnits"
                                 value={values["formulaUnits"] ? values["formulaUnits"] : []}
-                                onChange={(e) => setFieldValue("formulaUnits", e.target.value)}
+                                onChange={(e:any) => {
+                                    const value: [] = e.target.value
+                                     if (value[value.length - 1] === "all") {
+                                        setFieldValue("formulaUnits",
+                                            values["formulaUnits"].length === values["units"].length ? [] : values["units"]);
+                                        return;
+                                    }
+                                    setFieldValue("formulaUnits", e.target.value)
+                                }}
                                 renderValue={(selected: any) => selected.join(', ')}
                                 MenuProps={MenuProps}
                             >
+                                <MenuItem value="all">
+                                    <ListItemIcon>
+                                    <Checkbox
+                                        color="primary"
+                                        checked={values["units"].length > 0 && values["formulaUnits"].length === values["units"].length}
+                                        indeterminate={values["formulaUnits"].length > 0 && values["formulaUnits"].length < values["units"].length}
+                                    />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Select All" />
+                                </MenuItem>
                                 {values["units"] && values["units"].map((_unit) => (
                                     <MenuItem key={_unit} value={_unit}>
                                         <Checkbox color="primary" checked={values["formulaUnits"] && values["formulaUnits"].indexOf(_unit) > -1} />
