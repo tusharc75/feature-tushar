@@ -1,3 +1,10 @@
+.global-chat {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1001;
+}
+
 .global-chatbox {
   height: 400px;
   overflow: hidden;
@@ -89,8 +96,6 @@
 
     .msg {
       font-size: 14px;
-      white-space: nowrap;
-      text-overflow: ellipsis;
       margin-left: 4px;
     }
     .who {
