@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
     Box,
     Button,
@@ -15,7 +15,7 @@ import {
     InputAdornment
 } from "@material-ui/core";
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import { Formik, Form, Field, FieldArray } from 'formik';
+import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
 import { Add, Delete } from "@material-ui/icons";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -125,11 +125,23 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
 
     const [filter, setFilter] = useState(doaType ? DOAType.find((d) => d.value === doaType).key : "Sequence");
     const [selectedType, setSelectedType] = useState(doaType ? doaType : DOAType.find((d) => d.key === "Sequence").value);
-
+    const formikRef = useRef<FormikProps<{ users: any[]; }>>();
     const handleFilter = (event, newFilter) => {
         if (newFilter !== null) {
             setFilter(newFilter);
             setSelectedType(DOAType.find((d) => d.key === newFilter).value);
+            if(newFilter === "Sequence"){
+                doa.length > 0 ?
+                setUsers(doa.filter(v => v.id !== userSelected[0] && v.id !== "self")) :
+                setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+            }
+            else{
+                doa.length > 0 ?
+                setUsers(doa) :
+                setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+
+            }
+            formikRef.current?.resetForm()
         }
     };
 
@@ -231,6 +243,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                         <Formik
                             initialValues={{ users: users }}
                             enableReinitialize={true}
+                            innerRef={formikRef}
                             onSubmit={() => { }}>
                             {({ values }) => (
                                 <>
