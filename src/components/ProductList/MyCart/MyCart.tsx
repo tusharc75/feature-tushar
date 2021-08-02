@@ -5,7 +5,7 @@ import SecureIcon from "@material-ui/icons/VerifiedUserOutlined";
 
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
-import { Button, IconButton, Box, Grid} from "@material-ui/core";
+import { Button, IconButton, Box, Grid } from "@material-ui/core";
 import ButtonDesign from "../Buttondesign/Buttondesign";
 import Product from "../ProductCard/ProductCard";
 import { product } from "../../../constants/helpers";
@@ -14,12 +14,14 @@ import axiosInstance from "../../../axios/axiosInstance";
 
 function MyCart() {
   const [products, setProducts] = useState([]);
+
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     axiosInstance()
       .get(`${product.api}?limit=0`)
       .then(({ data: { data } }) => {
+        data = data.map(obj => ({ ...obj, selected: false }))
         setProducts(data);
       })
       .catch((error) => {
@@ -54,14 +56,21 @@ function MyCart() {
     },
   ]);
   const [totalCount, setTotalCount] = useState(items.length);
+  const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
   const [totalPrice, setTotalPrice] = useState(15000);
+
+  useEffect(() => {
+    let count = products.filter(obj => obj.selected).length
+    if (count >= 4) setCheckoutLabel("Create Quote")
+  }, [])
 
   function handleDecrease(event, index) {
     if (items[index].itemCount > 0)
       items[index].itemCount = items[index].itemCount - 1;
     setItems([...items]);
-    let count = 0,
-      price = 0;
+
+    let count = 0, price = 0;
+
     items.map((item) => {
       count = count + item.itemCount;
       price = price + item.itemCount * item.itemPrice;
@@ -86,6 +95,22 @@ function MyCart() {
   }
   const FracImage =
     "https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png";
+
+  const onAddToCartItem = (item, data) => {
+    let count = 0
+    products.map(obj => {
+      if (obj._id === item._id) {
+        obj.selected = data.isAdd ? true : false
+      }
+      if (obj.selected) count = count + 1
+      return obj
+    })
+    if (count >= 4) {
+      setCheckoutLabel("Create Quote")
+    }
+    setProducts([...products])
+  }
+
   return (
     <Layout>
       <Grid container className="headerbox">
@@ -149,8 +174,8 @@ function MyCart() {
               <h3>Safe and Secure Payments.100% Authentic products.</h3>
             </div> */}
             <div className={styles.price_card_checkout_button}>
-                <Button variant="contained" color="secondary" onClick={() => { }}>
-                 Checkout
+              <Button variant="contained" color="secondary" onClick={() => { }}>
+                {checkoutLabel}
               </Button>
             </div>
           </div>
@@ -159,7 +184,15 @@ function MyCart() {
           <h2>Sponsored Products Related To This Item </h2>
           <div className={`gap-3 ${styles.sponsored_items_list}`}>
             {products.map((product, index: number) => (
-                <Product key={index} product={product} />
+              <>
+                {
+                  product.selected ?
+                    null :
+                    < Product key={index} product={product}
+                      onAddItem={onAddToCartItem}
+                    />
+                }
+              </>
             ))}
           </div>
         </div>

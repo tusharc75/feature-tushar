@@ -24,8 +24,9 @@ const useStyles = makeStyles({
   },
 });
 
-const ProductCard = (props: { product: any; }) => {
-  const { product } = props;
+const ProductCard = (props: { product: any, onAddItem: any }) => {
+  const { product, onAddItem } = props;
+
   const classes = useStyles();
   const history = useHistory()
 
@@ -60,7 +61,8 @@ const ProductCard = (props: { product: any; }) => {
               </>
             }
           </div>
-          <Button variant="outlined" color="secondary" size="small" onClick={() => { }} startIcon={<AddShoppingCartIcon />}>
+          <Button variant="outlined" color="secondary" size="small"
+            onClick={() => onAddItem(product, { isAdd: true })} startIcon={<AddShoppingCartIcon />}>
             Add to cart
           </Button>
         </Box>
@@ -71,6 +73,7 @@ const ProductCard = (props: { product: any; }) => {
 
 ProductCard.propTypes = {
   product: PropTypes.object,
+  onAddItem: PropTypes.func,
 };
 
 export default ProductCard;

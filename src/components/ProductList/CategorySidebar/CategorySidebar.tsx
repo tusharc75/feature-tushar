@@ -11,10 +11,13 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeItem from '@material-ui/lab/TreeItem';
 import Rating from '@material-ui/lab/Rating';
+import Box from '@material-ui/core/Box'
+
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
-    backgroundColor: theme.palette.background.paper
+    // width: '100%',
+    backgroundColor: theme.palette.background.paper,
+    marginBottom: "10px"
   },
   nested: {
     paddingLeft: theme.spacing(4)
@@ -37,38 +40,57 @@ function CategorySidebar() {
   const [valueTech, setValueTech] = useState(2);
   useEffect(() => {
     let queryString = `?limit=0`;
+
+
     axiosInstance()
       .get(`/product-category${queryString}`)
       .then(({ data: { data } }) => {
-        let newData = [];
 
-        data
-          .filter((d) => d.parentCategory === undefined)
-          .map((m) => {
-            newData.push({
-              id: m.id,
-              name: m.name,
-              children: []
-            });
-          });
+        let parentCategories = {}
+        data.map(o => {
+          if (o?.parentCategory) {
+            let label = o?.parentCategory?.optionLabel
+            if (parentCategories[label]) {
+              parentCategories[label].push(o)
+            }
+            else {
+              parentCategories[label] = [o]
+            }
+          }
+        })
 
-        data
-          .filter((f) => f.parentCategory)
-          .forEach((d) => {
-            const indexOfCategory = newData.findIndex((ff) => ff.id === d.parentCategory.optionValue);
+        data = data.map(obj => {
+          if (parentCategories[obj.name]) {
+            obj.children = parentCategories[obj.name]
+          }
+          else {
+            obj.children = []
+          }
+          return obj
+        })
 
-            newData[indexOfCategory].children.push(d);
-          });
+        let allCategories = data.filter(obj => !(obj?.parentCategory))
 
-        setProductCategories(newData);
+        setProductCategories(allCategories)
       });
   }, []);
 
+
+
   const renderTree = (nodes) => (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name} className={styles.single_category_name}>
+    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}
+      onClick={() => { }}>
       {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
     </TreeItem>
   );
+
+  const showChildren = children => {
+    return children.map(o => {
+      return <TreeItem nodeId={o?._id} label={o.name}>
+        {productCategories[o.name] ? showChildren[o.name] : null}
+      </TreeItem>
+    })
+  }
 
   return (
     <div className={styles.sidebar_nav}>
@@ -78,20 +100,18 @@ function CategorySidebar() {
         </IconButton>
         <InputBase className={classes.input} placeholder="Search By Category" inputProps={{ 'aria-label': 'search' }} />
       </Paper>
-      {productCategories.map((item) => (
-        <div className={styles.single_category}>
-          <TreeView
+      {
+        productCategories.map(obj => {
+          return <TreeView
             className={classes.root}
-            defaultCollapseIcon={<ExpandMoreIcon className={styles.single_category_icon} />}
+            defaultCollapseIcon={<ExpandMoreIcon />}
             defaultExpanded={['root']}
-            defaultExpandIcon={<ChevronRightIcon className={styles.single_category_icon} />}
+            defaultExpandIcon={<ChevronRightIcon />}
           >
-            {renderTree(item)}
+            {renderTree(obj)}
           </TreeView>
-          <hr />
-        </div>
-      ))}
-
+        })
+      }
       <h3 className={styles.single_category_name}>Ratings</h3>
       <div className={styles.rating}>
         <p className={styles.single_category_name}>Safety</p>
