@@ -105,25 +105,23 @@ const GlobalUserChat = () => {
 
 
     return (
-        <div>
-            <Box position="absolute" bottom={20} right={20} zIndex={1001}>
-                <Badge variant='dot' overlap="circle" badgeContent=" ">
-                <Fab id={open ? "chats-popover" : undefined}
-                    onClick={handleOpenPopup}
-                    size="small"
-                    color='primary'
-                    aria-label="Chats">
-                    {!open ? <Chat /> : <Clear />}
-              </Fab>
-              </Badge>
-                {open &&
-                    <ChatsPopover
-                    open={open}
-                    anchorEl={anchorEl}
-                    setAnchorEl={setAnchorEl}
-                    
-                />}
-          </Box>
+        <div className="global-chat">
+            <Badge variant='dot' overlap="circle" badgeContent=" ">
+            <Fab id={open ? "chats-popover" : undefined}
+                onClick={handleOpenPopup}
+                size="small"
+                color='primary'
+                aria-label="Chats">
+                {!open ? <Chat /> : <Clear />}
+            </Fab>
+            </Badge>
+            {open &&
+                <ChatsPopover
+                open={open}
+                anchorEl={anchorEl}
+                setAnchorEl={setAnchorEl}
+                
+            />}
         </div>
     )
 }
