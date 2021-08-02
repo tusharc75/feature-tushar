@@ -10,6 +10,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Properties } from './Properties';
+import { checkFieldDependency } from '../../constants/formulaUtility';
 
 import FieldList from './FieldList';
 
@@ -142,6 +143,16 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
 
     const deleteField = (fieldId) => {
         let data = [...section]
+        var result = checkFieldDependency(fieldId, sectionId, data)
+        if (result.error) {
+            if (window.confirm(result.message)) {
+                handleClose()
+            }
+            else {
+                handleClose()
+                return
+            }
+        }
         data.forEach((row) => {
             if (row.sectionId.toString() === sectionId.toString()) {
                 row.field = (row.field.filter(i => i._id.toString() !== fieldId.toString()))
