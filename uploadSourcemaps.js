@@ -7,12 +7,13 @@ function getFiles() {
   const assetsFile = path.resolve(BUILD_DIR, 'asset-manifest.json');
   const filePaths = require(assetsFile);
   const jsFilesRegex = /(\.js(.map)?)$/;
-  return Object.keys(filePaths)
+  const files = Object.keys(filePaths.files)
     .filter((f) => jsFilesRegex.test(f))
     .map((f) => ({
-      name: `~/${filePaths[f]}`,
-      path: path.resolve('build', filePaths[f])
+      name: `~/${filePaths.files[f]}`,
+      path: `${path.join('./build', path.resolve(BUILD_DIR, filePaths.files[f]))}`
     }));
+  return files;
 }
 
 upload({
