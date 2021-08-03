@@ -71,7 +71,9 @@ export default function ManageQuoteDialog({
   disableCurrency = false,
   quoteApproved = false,
   isRenderedFromProjectSales = false,
-  cloneQuoteWithVersionNumber = 0
+  cloneQuoteWithVersionNumber = 0,
+  isCreateQuoteFromCart = false,
+  onHandleSubmit = null
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -435,7 +437,8 @@ export default function ManageQuoteDialog({
   };
 
   const onSubmit = (values) => {
-    isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+    isCreateQuoteFromCart ? onHandleSubmit(values) :
+      isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
   };
 
   const handleCloneQuote = (values) => {
