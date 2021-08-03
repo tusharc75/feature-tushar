@@ -978,9 +978,9 @@ export default function QuoteProcess(props) {
         }
         if (Customerreq) {
             exportToCSV(true);
-            setSendEmail(true);
             if (!pdfFileBase64) {
                 setGeneratingFile(true);
+                setLoading(true)
                 if (quoteData.versions[currentVersion].PDF) {
                     axiosInstance()
                         .get(
@@ -993,8 +993,11 @@ export default function QuoteProcess(props) {
                             setGeneratingFile(false);
                             const file = new Blob([data], { type: "application/pdf" });
                             generateBase64forFile(file, "pdf");
+                            setSendEmail(true)
+                            setLoading(false)
                         })
                         .catch((err) => {
+                            setLoading(false)
                             setGeneratingFile(false);
                         });
                 }
@@ -1007,32 +1010,40 @@ export default function QuoteProcess(props) {
                     // axiosInstance()
                     //     .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
                     //     .then(() => {
-                            axiosInstance()
-                                .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+                    axiosInstance()
+                        .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+                        .then(({ data }) => {
+                            axiosInstance().get(
+                                `user/download?fileName=${data.data.fileName}`,
+                                {
+                                    responseType: "blob",
+                                }
+                            )
                                 .then(({ data }) => {
-                                    axiosInstance().get(
-                                        `user/download?fileName=${data.data.fileName}`,
-                                        {
-                                            responseType: "blob",
-                                        }
-                                    )
-                                        .then(({ data }) => {
-                                            setGeneratingFile(false);
-                                            const file = new Blob([data], { type: "application/pdf" });
-                                            generateBase64forFile(file, "pdf");
-                                        })
-                                        .catch((err) => {
-                                            setGeneratingFile(false);
-                                        });
+                                    setGeneratingFile(false);
+                                    const file = new Blob([data], { type: "application/pdf" });
+                                    generateBase64forFile(file, "pdf");
+                                    setSendEmail(true)
+                                    setLoading(false)
+
                                 })
                                 .catch((err) => {
+                                    setLoading(false)
                                     setGeneratingFile(false);
                                 });
-                        // })
-                        // .catch((err) => {
-                        //     setGeneratingFile(false);
-                        // });
+                        })
+                        .catch((err) => {
+                            setLoading(false)
+                            setGeneratingFile(false);
+                        });
+                    // })
+                    // .catch((err) => {
+                    //     setGeneratingFile(false);
+                    // });
                 }
+            }
+            else {
+                setSendEmail(true)
             }
         }
     };
