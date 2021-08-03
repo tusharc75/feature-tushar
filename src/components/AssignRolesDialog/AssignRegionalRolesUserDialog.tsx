@@ -213,7 +213,7 @@ const AssignRegionalRolesUserDialog = ({
             <CustomDialogContent>
                 {(loadingData ? (
                     <Loader text={`Loading User`} />
-                ) : user.length ? (
+                ) : userConst.length ? (
                     <>
                         <Grid container>
                             <Grid item xs={12} md={6} sm={6} >
