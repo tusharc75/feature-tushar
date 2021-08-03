@@ -978,9 +978,9 @@ export default function QuoteProcess(props) {
         }
         if (Customerreq) {
             exportToCSV(true);
-            setSendEmail(true);
             if (!pdfFileBase64) {
                 setGeneratingFile(true);
+                setLoading(true)
                 if (quoteData.versions[currentVersion].PDF) {
                     axiosInstance()
                         .get(
@@ -993,46 +993,57 @@ export default function QuoteProcess(props) {
                             setGeneratingFile(false);
                             const file = new Blob([data], { type: "application/pdf" });
                             generateBase64forFile(file, "pdf");
+                            setSendEmail(true)
+                            setLoading(false)
                         })
                         .catch((err) => {
+                            setLoading(false)
                             setGeneratingFile(false);
                         });
                 }
                 else {
-                    let body = {
-                        acceptedColumns: quoteData.versions[currentVersion].acceptedColumns,
-                        status: quoteData.versions[currentVersion].status,
-                        TNC: quoteData.versions[currentVersion].TNC
-                    };
+                    // let body = {
+                    //     acceptedColumns: quoteData.versions[currentVersion].acceptedColumns,
+                    //     status: quoteData.versions[currentVersion].status,
+                    //     TNC: quoteData.versions[currentVersion].TNC
+                    // };
+                    // axiosInstance()
+                    //     .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
+                    //     .then(() => {
                     axiosInstance()
-                        .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-                        .then(() => {
-                            axiosInstance()
-                                .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+                        .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
+                        .then(({ data }) => {
+                            axiosInstance().get(
+                                `user/download?fileName=${data.data.fileName}`,
+                                {
+                                    responseType: "blob",
+                                }
+                            )
                                 .then(({ data }) => {
-                                    axiosInstance().get(
-                                        `user/download?fileName=${data.data.fileName}`,
-                                        {
-                                            responseType: "blob",
-                                        }
-                                    )
-                                        .then(({ data }) => {
-                                            setGeneratingFile(false);
-                                            const file = new Blob([data], { type: "application/pdf" });
-                                            generateBase64forFile(file, "pdf");
-                                        })
-                                        .catch((err) => {
-                                            setGeneratingFile(false);
-                                        });
+                                    setGeneratingFile(false);
+                                    const file = new Blob([data], { type: "application/pdf" });
+                                    generateBase64forFile(file, "pdf");
+                                    setSendEmail(true)
+                                    setLoading(false)
+
                                 })
                                 .catch((err) => {
+                                    setLoading(false)
                                     setGeneratingFile(false);
                                 });
                         })
                         .catch((err) => {
+                            setLoading(false)
                             setGeneratingFile(false);
                         });
+                    // })
+                    // .catch((err) => {
+                    //     setGeneratingFile(false);
+                    // });
                 }
+            }
+            else {
+                setSendEmail(true)
             }
         }
     };
@@ -1328,6 +1339,7 @@ export default function QuoteProcess(props) {
                         id={quoteData._id}
                         version={currentVersion}
                         Refresh={fetchQuoteData}
+                        quoteData={quoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
                         versionProcessStatus={quoteData.versions[currentVersion]?.processStatus}

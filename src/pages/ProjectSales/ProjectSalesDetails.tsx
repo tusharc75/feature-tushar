@@ -548,6 +548,10 @@ const ProjectSalesDetails = () => {
                 customerContacts={customerContacts}
                 opportunities={opportunities}
                 quotes={quotes}
+                currency={projectSalesData?.currency}
+                estimatedAmount={projectSalesData?.amount}
+                marketSegmentId={projectSalesData?.marketSegment?.optionValue}
+                subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
                 permissions={permissions?.projectSales}
                 fetchProjectData={getSalesData}
                 projectId={id}

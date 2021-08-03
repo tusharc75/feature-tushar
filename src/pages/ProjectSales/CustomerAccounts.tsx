@@ -109,6 +109,10 @@ const CustomerAccounts = (props) => {
     isTeamMember,
     isManager,
     ownerId,
+    currency = null, 
+    marketSegmentId = null,
+    subMarketSegmentId = null,
+    estimatedAmount = null,
   } = props;
 
   const classes = useStyles();
@@ -503,14 +507,10 @@ const CustomerAccounts = (props) => {
                   </Tabs>
 
                   {customerAccounts.map((c, i) => (
-                    <Box mt={2} hidden={currentTabIndex !== i} key={c._id}>
+                    <Box hidden={currentTabIndex !== i} key={c._id}>
                       <Grid container spacing={1}>
-                        {/**
-                         * LEFT SIDE
-                         */}
-
                         <Grid item xs={12} sm={12} md={12} lg={12}>
-                          <Paper style={{ overflow: "hidden"}}>
+                          <Paper style={{ overflow: "hidden", marginTop: 15 }}>
                             <Box style={{ padding: "0px", maxHeight: "450px" }}>
                               <Box
                                 width="100%"
@@ -634,6 +634,10 @@ const CustomerAccounts = (props) => {
                                 onNewQuoteAdd={(id) => {
                                   saveQuoteToProject(id);
                                 }}
+                                currency={currency}
+                                estimatedAmount={estimatedAmount}
+                                marketSegmentId={marketSegmentId}
+                                subMarketSegmentId={subMarketSegmentId}
 
                               />
                             )
@@ -645,11 +649,6 @@ const CustomerAccounts = (props) => {
 
                           {/* <ProductBuilderInAccordion /> */}
                         </Grid>
-                        {/**
-                         * RIGHT SIDE
-                         */}
-
-
                       </Grid>
                     </Box>
                   ))}

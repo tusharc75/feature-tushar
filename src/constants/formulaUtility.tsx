@@ -1,4 +1,5 @@
 import { Parser as FormulaParser } from 'hot-formula-parser';
+import { uniq } from "lodash";
 
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
@@ -586,10 +587,72 @@ export const checkFormulaLoop = (fields) => {
         return { error: false, message: "sucess" }
     }
     catch (e) {
-        console.log(e)
         return { error: true, message: "error in formula" }
     }
 
+}
+
+
+export const checkFieldDependency = (fieldId, sectionId, section) => {
+    try {
+        var fieldData: any = {}
+        section.forEach((row) => {
+            if (row.sectionId.toString() === sectionId.toString()) {
+                if (row.field.filter(i => i._id.toString() === fieldId.toString()).length) {
+                    fieldData = row.field.filter(i => i._id.toString() === fieldId.toString())[0]
+                }
+            }
+        });
+        var fieldNames = []
+        if (fieldData.type === 'converter' || fieldData.type === 'currencyAmount' || fieldData.isConverter === true) {
+            if (fieldData.type !== 'currencyAmount' && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
+                fieldData.formulaUnits && fieldData.formulaUnits.forEach((_unit: any) => {
+                    fieldNames.push(fieldData.fieldName + '_' + _unit.toLowerCase())
+                })
+            }
+            else if (fieldData.type === 'currencyAmount' && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
+                fieldData.displayCurrency && fieldData.displayCurrency.forEach((_currency: any) => {
+                    fieldData.formulaUnits && fieldData.formulaUnits.forEach((_unit: any) => {
+                        fieldNames.push(fieldData.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase())
+                    });
+                });
+            }
+            else if (fieldData.type === 'currencyAmount') {
+                fieldData.displayCurrency && fieldData.displayCurrency.forEach((_currency: any) => {
+                    fieldNames.push(fieldData.fieldName + '_' + _currency.toLowerCase())
+                });
+            }
+        }
+        else {
+            fieldNames.push(fieldData.fieldName)
+        }
+        var used_Fields = []
+        section.forEach((row) => {
+            row.field.forEach((_field) => {
+                fieldNames.forEach((_fieldName) => {
+                    if (_field.inputFields && _field.inputFields.includes(_fieldName)) {
+                        used_Fields.push(_field.fieldLabel)
+                    }
+                    if (_field.formulaFields && _field.formulaFields.includes(_fieldName)) {
+                        used_Fields.push(_field.fieldLabel)
+                    }
+                    if (_field.formulainputFields && _field.formulainputFields.includes(_fieldName)) {
+                        used_Fields.push(_field.fieldLabel)
+                    }
+                })
+            });
+        });
+        if (used_Fields.length) {
+            used_Fields = uniq(used_Fields);
+            return { error: true, message: "This field used in " + used_Fields.join() + " fields. After delete formula afftect." }
+        }
+        else {
+            return { error: false, message: "" }
+        }
+    }
+    catch (e) {
+        return { error: true, message: "Error in Delete" }
+    }
 }
 
 // export const checkFormula = (formula) => {

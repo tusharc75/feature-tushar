@@ -210,6 +210,7 @@ export const CreateEmail = ({
         setSending(true);
         CreateNewEmail(payload)
           .then((data) => {
+
             toastConfig.setToastConfig({
               open: true,
               type: "success",
@@ -490,6 +491,7 @@ export const CreateEmail = ({
                                 setImageSource(attachment);
                                 setOpen(true);
                               }}
+                              isCreateOnly={true}
                               onDelete={handleDeleteImageAttachment}
                               emailId={emailId}
                             />
@@ -709,6 +711,7 @@ export const CreateEmail = ({
                                   setImageSource(attachment);
                                   setOpen(true);
                                 }}
+                                isCreateOnly={true}
                                 onDelete={handleDeleteFileImageAttachment}
                                 emailId={emailId}
                               />
@@ -775,6 +778,7 @@ export const CreateEmail = ({
                                     setImageSource(attachment);
                                     setOpen(true);
                                   }}
+                                  isCreateOnly={true}
                                   onDelete={handleDeleteImageAttachment}
                                   emailId={emailId}
                                 />

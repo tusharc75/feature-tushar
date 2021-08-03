@@ -1,69 +1,79 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import {Box, IconButton, Typography} from '@material-ui/core'
 import { SendOutlined } from '@material-ui/icons';
 import axiosInstance from '../../axios/axiosInstance';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 
-const ChatBox = ({ selectedChat, sendMessage, socket }) => {
+const ChatBox = (props) => {
+    const {selectedChat, socket} = useContext(GlobalChatContext)
     const [messageValue, setMessageValue] = useState("");
-    const [currentUser, setCurrentUser] = useState("")
     const [messages, setMessages] = useState([]);
+    const [currentUser, setCurrentUser] = useState("")
+    const [loading, setLoading] = useState(true)
 
-    const getMessages = useMemo(() => {
-        
-    },[])
+     useEffect(() => {
+         if (socket !== null) {
+             socket.on("data", (data: any) => {
+                 getChatterInfo()
+             })
 
-    useEffect(() => {
-      getChatterInfo()
-    }, [selectedChat])
-    
-    useEffect(() => {
-       if (socket !== null) {
-           socket.on("data", (data) => {
-               //alert(JSON.stringify(data))
-               getChatterInfo()
-           })
-           
-           return () => {
-               socket.off("data")
-           }
-       }
+             return () => {
+
+             }
+         }
     }, [socket])
 
-    const sendMsg = (e) => {
-        e.preventDefault()
-        sendMessage(selectedChat.id, messageValue)
-        setMessageValue("")
-    }
+    useEffect(() => {
+        getChatterInfo()
+    }, [selectedChat])
 
     const getChatterInfo = () => {
-        axiosInstance().get(`/chatter/${selectedChat.id}`)
-            .then(({ data: {data} }) => {
-                setMessages(data.Messages)
-                setCurrentUser(data.currentUser)
-        })
-        .catch(() => {})
+        if (selectedChat) {
+            axiosInstance()
+                .get(`/chatter/${selectedChat.id}`)
+                .then(({ data: { data } }) => {
+                    setLoading(false)
+                    setMessages(data.Messages)
+                    setCurrentUser(data.currentUser)
+                })
+                .catch(() => { })
+        }
     }
 
+    const sendMessage = async (e) => {
+        e.preventDefault()
+        try {
+            await axiosInstance()
+            .put(`/chatter/${selectedChat.id}`, { message: messageValue });
+        } catch (err) {
+            
+        }
+        setMessageValue("")
+    };
 
+    const formatTime = (time) => new Date(time).toTimeString().split(":");
 
 
     return (
         <div className="global-chatbox">
             <div className="chatbox-container">
-                {messages.map((data, i) => (
+                {loading ? "" : messages.map((data, i) => (
                     <div key={i} className={`message-container ${data.userid === currentUser ? "my-message": ""}`}>
                         <div
                             className={`message-outlet ${data.userid === currentUser ? "my-color": ""}`}>
                         <Typography>
                             {data.message}
                         </Typography>
+                            <p className="message-time">
+                                {`${formatTime(data.date)[0]}:${formatTime(data.date)[1]}`}
+                            </p>
                         </div>
                     </div>
                 ))}
             </div>
 
             
-            <form onSubmit={sendMsg} className="chatbox-input">
+            <form onSubmit={sendMessage} className="chatbox-input">
                 <input
                     placeholder="Start Typing..."
                     value={messageValue}

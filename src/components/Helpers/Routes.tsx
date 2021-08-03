@@ -173,6 +173,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.quotePdfTemplate?.title : RESOURCE_LABEL.quotePdfTemplate,
     path: "/quote-pdf-template",
   },
+  quotePdfTemplateDetail: {
+    title: storedRoutes ? storedRoutes.quotePdfTemplate?.title : RESOURCE_LABEL.quotePdfTemplate,
+    path: "/quote-pdf-template/detail",
+  },
   attachment: {
     title: storedRoutes ? storedRoutes.attachment?.title : RESOURCE_LABEL.attachment,
     path: "/attachment",

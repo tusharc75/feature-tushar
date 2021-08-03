@@ -106,6 +106,8 @@ export const UserDropdown = ({
       } else {
         setFieldValue(name, values.userId);
       }
+    }else{
+      multiple ? setFieldValue(name,[]) : setFieldValue(name,'')
     }
   };
 
