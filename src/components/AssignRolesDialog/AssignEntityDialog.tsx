@@ -69,6 +69,7 @@ const AssignEntityDialog = ({
   const classes = useStyles();
 
   const handleNext = () => {
+    setSearch('')
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
@@ -164,6 +165,7 @@ const AssignEntityDialog = ({
     setSearch(value);
     let resultData = [];
     let resultRole = [];
+    if (activeStep === 0){
     resultData = dataConst.filter((data) => {
       if (type === "entity") {
         return data.address?.toLowerCase().search(value.toLowerCase()) != -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) != -1
@@ -173,10 +175,12 @@ const AssignEntityDialog = ({
       }
     });
     setData(resultData)
+  }else{
     resultRole = roleConst.filter((data) => {
       return data.name.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
     });
     setRole(resultRole)
+  }
   
   };
 
