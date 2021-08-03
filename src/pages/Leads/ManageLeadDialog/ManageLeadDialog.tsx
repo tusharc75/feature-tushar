@@ -360,6 +360,7 @@ export default function ManageLeadDialog({
                                     >
                                       {field.fieldName === "owner" ? (
                                         <FormTypes
+                                          lookup={field.lookup}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -413,6 +414,7 @@ export default function ManageLeadDialog({
                                         />
                                       ) : field.fieldName === "collaborator" ? (
                                         <FormTypes
+                                          lookup={field.lookup}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -450,6 +452,7 @@ export default function ManageLeadDialog({
                                             }
                                           >
                                             <FormTypes
+                                              lookup={field.lookup}
                                               fields={leadData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -532,6 +535,7 @@ export default function ManageLeadDialog({
                                               }
                                             >
                                               <FormTypes
+                                                lookup={field.lookup}
                                                 fields={leadData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -594,6 +598,7 @@ export default function ManageLeadDialog({
                                           </Grid>
                                         </Grid> : (
                                           <FormTypes
+                                            lookup={field.lookup}
                                             // {...rest}
                                             values={values}
                                             errors={errors}
