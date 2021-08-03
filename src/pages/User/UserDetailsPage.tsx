@@ -588,7 +588,7 @@ const UserDetailsPage = () => {
                         id="a11y-tab-1"
                       />
                       {
-                        userData?.proxyDOA && <Tab
+                        userData?.proxyDOA?.optionValue && <Tab
                           label="DOA Proxy"
                           aria-controls="a11y-tabpanel-1"
                           id="a11y-tab-1"
