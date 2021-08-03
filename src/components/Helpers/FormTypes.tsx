@@ -152,6 +152,7 @@ const GreenSwitch = withStyles({
 const FormTypes = (props) => {
   const theme = useTheme();
   const {
+    lookup,
     type,
     label,
     name,
@@ -187,6 +188,7 @@ const FormTypes = (props) => {
     ...rest
   } = props;
   const [optionsList, setOptions] = React.useState([]);
+  const [option, setOptionsList] = React.useState(options);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
@@ -708,14 +710,14 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
-        options={options.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn])}
+        options={option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn])}
         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
         getOptionSelected={(option: any, val) => option.optionValue === val}
         value={
-          options.filter((data) => data.optionValue === values[name]).length
+          option.filter((data) => data.optionValue === values[name]).length
             ? values[fieldData.dropdowDependentOn] === ''
               ? ''
-              : options.filter((data) => data.optionValue === values[name])[0]
+              : option.filter((data) => data.optionValue === values[name])[0]
             : ''
         }
         onChange={
@@ -742,13 +744,45 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
-        options={options}
+        options={option}
+        freeSolo={type === 'dropDown' && !lookup}
         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
         getOptionSelected={(option: any, val) => option.optionValue === val}
         value={
-          options.filter((data) => data.optionValue === values[name]).length ? options.filter((data) => data.optionValue === values[name])[0] : ''
+          option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
         }
-        onChange={onChange ? onChange : (e, val) => handleChange(name, val && val.optionValue ? val.optionValue : '')}
+        onChange={onChange ? onChange : (e, val) => {
+            
+          if (!lookup && setFieldValue) {
+            if (typeof val === "string" && /^[a-zA-Z ]*$/.test(val)) {
+                 const newOptions = [...option,
+                  {
+                    order: option.length,
+                    default: false,
+                    optionLabel: val,
+                    optionValue: val
+                  }]
+                setOptionsList(newOptions)
+                handleChange(name, val)
+              } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                const newOptions = [...option,
+                  {
+                    order: option.length,
+                    default: false,
+                    optionLabel: val.inputValue,
+                    optionValue: val.inputValue
+                  }]
+                setOptionsList(newOptions)
+                handleChange(name, val.inputValue)
+
+              } else {
+                  handleChange(name, val && val.optionValue ? val.optionValue : '')
+               }
+          } else {
+            handleChange(name, val && val.optionValue ? val.optionValue : '')
+          }
+          
+        }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -1150,19 +1184,57 @@ const FormTypes = (props) => {
       <Autocomplete
         {...rest}
         multiple
+        freeSolo={!lookup}
         disableCloseOnSelect={true}
-        options={options}
+        options={option}
         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        value={values[name] ? options.filter((data: any) => values[name].includes(data.optionValue)) : []}
+        value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
         getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
         onChange={
           onChange
             ? onChange
-            : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+            : (e, value: any, reason) => {
+              if (!lookup) {
+                if (reason === "clear") {
+                  setFieldValue(name, [])
+                } else if (reason === 'remove-option' && values[name].length === 1) {
+                  setFieldValue(name, [])
+                }
+                value.forEach(val => {
+                if (typeof val === "string" && /^[a-zA-Z ]*$/.test(val)) {
+                 const newOptions = [...option,
+                  {
+                    order: option.length,
+                    default: false,
+                    optionLabel: val,
+                    optionValue: val
+                  }]
+                setOptionsList(newOptions)
+                setFieldValue(name, [...values[name], val])
+              } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                const newOptions = [...option,
+                  {
+                    order: option.length,
+                    default: false,
+                    optionLabel: val.inputValue,
+                    optionValue: val.inputValue
+                  }]
+                setOptionsList(newOptions)
+                setFieldValue(name, [...values[name], val.inputValue])
+
+              } else {
+                  setFieldValue(name, value.map((val) => val.optionValue));
+               }
+              })
+                
+              } else {
+                  setFieldValue(
+                    name,
+                    value.map((val) => val.optionValue)
+                  )
+              }
+          }
+              
         }
         renderInput={(params) => (
           <TextField

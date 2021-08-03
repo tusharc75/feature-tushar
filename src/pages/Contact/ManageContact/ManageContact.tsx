@@ -243,6 +243,7 @@ export default function ManageContact(props) {
                                   >
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -308,6 +309,7 @@ export default function ManageContact(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -362,6 +364,7 @@ export default function ManageContact(props) {
                                           }
                                         >
                                           <FormTypes
+                                            lookup={field.lookup}
                                             values={
                                               accountId
                                                 ? initializeAccountDropdown(
@@ -429,6 +432,7 @@ export default function ManageContact(props) {
                                       </Grid>
                                     ) : field.fieldName === "reportsTo" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -450,6 +454,7 @@ export default function ManageContact(props) {
                                       />
                                     ) : (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
