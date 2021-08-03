@@ -625,7 +625,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              handleChange(name, parseFloat(e.target.value));
             }
         }
       />
@@ -752,36 +752,36 @@ const FormTypes = (props) => {
           option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
         }
         onChange={onChange ? onChange : (e, val) => {
-            
+
           if (!lookup && setFieldValue) {
             if (typeof val === "string" && /^[a-zA-Z ]*$/.test(val)) {
-                 const newOptions = [...option,
-                  {
-                    order: option.length,
-                    default: false,
-                    optionLabel: val,
-                    optionValue: val
-                  }]
-                setOptionsList(newOptions)
-                handleChange(name, val)
-              } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                const newOptions = [...option,
-                  {
-                    order: option.length,
-                    default: false,
-                    optionLabel: val.inputValue,
-                    optionValue: val.inputValue
-                  }]
-                setOptionsList(newOptions)
-                handleChange(name, val.inputValue)
+              const newOptions = [...option,
+              {
+                order: option.length,
+                default: false,
+                optionLabel: val,
+                optionValue: val
+              }]
+              setOptionsList(newOptions)
+              handleChange(name, val)
+            } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+              const newOptions = [...option,
+              {
+                order: option.length,
+                default: false,
+                optionLabel: val.inputValue,
+                optionValue: val.inputValue
+              }]
+              setOptionsList(newOptions)
+              handleChange(name, val.inputValue)
 
-              } else {
-                  handleChange(name, val && val.optionValue ? val.optionValue : '')
-               }
+            } else {
+              handleChange(name, val && val.optionValue ? val.optionValue : '')
+            }
           } else {
             handleChange(name, val && val.optionValue ? val.optionValue : '')
           }
-          
+
         }}
         renderInput={(params) => (
           <TextField
@@ -914,7 +914,9 @@ const FormTypes = (props) => {
                         ? onChange
                         : (e) => {
                           if (e.target.value === '' || (/^[0-9.,]+$/).test(e.target.value)) {
-                            handleCurrencyChangeWithConverterChange(name, _currency, _unit, e.target.value === "" ? 0 : parseFloat(e.target.value.replace(/,/g, '')))
+                            handleCurrencyChangeWithConverterChange(name, _currency, _unit, e.target.value === "" ? 0 :
+                              e.target.value.slice(-1) === "." ? e.target.value.replace(/,/g, '') :
+                                parseFloat(e.target.value.replace(/,/g, '')))
                           }
                         }
                     }
@@ -1031,9 +1033,13 @@ const FormTypes = (props) => {
                       : (e) => {
                         if (e.target.value === '' || (/^[0-9.,]+$/).test(e.target.value)) {
                           if (fieldData.displayCurrency.length > 1) {
-                            handleCurrencyChange(name, _currency, e.target.value === "" ? 0 : parseFloat(e.target.value.replace(/,/g, '')));
+                            handleCurrencyChange(name, _currency, e.target.value === "" ? 0 :
+                              e.target.value.slice(-1) === "." ? e.target.value.replace(/,/g, '') :
+                                parseFloat(e.target.value.replace(/,/g, '')));
                           } else {
-                            handleChange(name + '_' + _currency.toLowerCase(), e.target.value === "" ? 0 : parseFloat(e.target.value.replace(/,/g, '')));
+                            handleChange(name + '_' + _currency.toLowerCase(), e.target.value === "" ? 0 :
+                              e.target.value.slice(-1) === "." ? e.target.value.replace(/,/g, '') :
+                                parseFloat(e.target.value.replace(/,/g, '')));
                           }
                         }
                       }
@@ -1117,7 +1123,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, e.target.value == '' ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              handleChange(name, parseFloat(e.target.value));
             }
         }
         InputProps={{
@@ -1201,40 +1207,40 @@ const FormTypes = (props) => {
                   setFieldValue(name, [])
                 }
                 value.forEach(val => {
-                if (typeof val === "string" && /^[a-zA-Z ]*$/.test(val)) {
-                 const newOptions = [...option,
-                  {
-                    order: option.length,
-                    default: false,
-                    optionLabel: val,
-                    optionValue: val
-                  }]
-                setOptionsList(newOptions)
-                setFieldValue(name, [...values[name], val])
-              } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                const newOptions = [...option,
-                  {
-                    order: option.length,
-                    default: false,
-                    optionLabel: val.inputValue,
-                    optionValue: val.inputValue
-                  }]
-                setOptionsList(newOptions)
-                setFieldValue(name, [...values[name], val.inputValue])
+                  if (typeof val === "string" && /^[a-zA-Z ]*$/.test(val)) {
+                    const newOptions = [...option,
+                    {
+                      order: option.length,
+                      default: false,
+                      optionLabel: val,
+                      optionValue: val
+                    }]
+                    setOptionsList(newOptions)
+                    setFieldValue(name, [...values[name], val])
+                  } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                    const newOptions = [...option,
+                    {
+                      order: option.length,
+                      default: false,
+                      optionLabel: val.inputValue,
+                      optionValue: val.inputValue
+                    }]
+                    setOptionsList(newOptions)
+                    setFieldValue(name, [...values[name], val.inputValue])
+
+                  } else {
+                    setFieldValue(name, value.map((val) => val.optionValue));
+                  }
+                })
 
               } else {
-                  setFieldValue(name, value.map((val) => val.optionValue));
-               }
-              })
-                
-              } else {
-                  setFieldValue(
-                    name,
-                    value.map((val) => val.optionValue)
-                  )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
               }
-          }
-              
+            }
+
         }
         renderInput={(params) => (
           <TextField
