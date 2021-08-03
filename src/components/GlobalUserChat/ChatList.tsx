@@ -1,30 +1,30 @@
-import {Fragment} from 'react'
+import { Fragment } from 'react'
 import {
-    ListItem,
-    ListItemText,
-    ListItemAvatar,
-    Avatar,
-    Typography
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Typography
 } from '@material-ui/core'
 
 
 
 const ChatList = ({ socket, chat, setSelectedChat, userId }) => {
-  
 
-    const formatTime = (time) => new Date(time).toTimeString().split(":");
-    
-    return (
-      <Fragment>
-        <ListItem
-            button
-            divider
-            onClick={() => setSelectedChat(chat)}
-            alignItems="flex-start">
-          {/* <ListItemAvatar>
+
+  const formatTime = (time) => new Date(time).toTimeString().split(":");
+
+  return (
+    <Fragment>
+      <ListItem
+        button
+        divider
+        onClick={() => setSelectedChat(chat)}
+        alignItems="flex-start">
+        {/* <ListItemAvatar>
           <Avatar alt="Remy Sharp" />
           </ListItemAvatar> */}
-          <ListItemText
+        <ListItemText
           primary={<p className="chat-listTitle">{chat.chatTitle}</p>}
           secondary={
             <Fragment>
@@ -33,20 +33,20 @@ const ChatList = ({ socket, chat, setSelectedChat, userId }) => {
                   <p className="who">
                     {chat?.message?.userid === userId ? "You:" : ""}
                   </p>
-                  <p className="msg">
-                   {chat.message?.message ? chat.message?.message : "\'New chat\'"}
+                  <p className="msg text-truncate">
+                    {chat.message?.message ? chat.message?.message : "\'New chat\'"}
                   </p>
                 </div>
                 {chat.message?.message && <p className="message-time">
-                    {`${formatTime(chat.message.date)[0]}:${formatTime(chat.message.date)[1]}`}
+                  {`${formatTime(chat.message.date)[0]}:${formatTime(chat.message.date)[1]}`}
                 </p>}
               </div>
-              </Fragment>
+            </Fragment>
           }
-          />
-        </ListItem>
-      </Fragment>
-    )
+        />
+      </ListItem>
+    </Fragment>
+  )
 }
 
 export default ChatList
