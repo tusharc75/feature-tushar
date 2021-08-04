@@ -998,6 +998,7 @@ export default function QuoteProcess(props) {
                             setLoading(false)
                         })
                         .catch((err) => {
+                            setSendEmail(true)
                             setLoading(false)
                             setGeneratingFile(false);
                         });
@@ -1029,11 +1030,13 @@ export default function QuoteProcess(props) {
 
                                 })
                                 .catch((err) => {
+                                    setSendEmail(true)
                                     setLoading(false)
                                     setGeneratingFile(false);
                                 });
                         })
                         .catch((err) => {
+                            setSendEmail(true)
                             setLoading(false)
                             setGeneratingFile(false);
                         });
