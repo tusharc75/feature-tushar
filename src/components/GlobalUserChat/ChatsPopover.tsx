@@ -106,7 +106,8 @@ const ChatsPopover = (props) => {
                             ? selectedChat?.chatTitle
                             : newChat
                                 ? "New chat"
-                                : `Chats (${chatList.length})`}
+                                : `Chats (${chatList.length})`
+                        }
                     </Typography>
 
                     <Tooltip title="Close chat">

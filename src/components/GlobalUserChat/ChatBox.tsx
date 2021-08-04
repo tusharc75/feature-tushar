@@ -61,13 +61,19 @@ const ChatBox = (props) => {
 
     return (
         <div className="global-chatbox">
+            {
+                selectedChat.chatTitle === "eQuip-t User" &&
+                <div className="not-found">
+                  <p>Accound Deleted</p>
+                </div>
+            }
             <div className="chatbox-container">
                 {loading ? "" : messages.map((data, i) => (
                     <div key={i} className={`message-container ${data.userid === currentUser ? "my-message" : ""}`}>
                         
                         <div
                             className={`message-outlet ${data.userid === currentUser ? "my-color ml-4": "mr-4"}`}>
-                            {chatUsers.length
+                            {chatUsers.length > 2
                             ? <p className="username">
                                     {!user(data)
                                         ? "eQuip-t User"
@@ -93,12 +99,13 @@ const ChatBox = (props) => {
             
             <form onSubmit={sendMessage} className="chatbox-input">
                 <input
+                    disabled={selectedChat.chatTitle==="eQuip-t User"}
                     placeholder="Start Typing..."
                     value={messageValue}
                     onChange={(e) => setMessageValue(e.target.value)}
                 />
                 <Box mr={1}>
-                <IconButton color="primary" disabled={!messageValue} type="submit" size="small">
+                <IconButton color="primary" disabled={!messageValue || selectedChat.chatTitle==="eQuip-t User"} type="submit" size="small">
                     <SendOutlined/>
                 </IconButton>
                 </Box>
