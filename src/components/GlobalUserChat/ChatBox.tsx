@@ -73,7 +73,7 @@ const ChatBox = (props) => {
                         
                         <div
                             className={`message-outlet ${data.userid === currentUser ? "my-color ml-4": "mr-4"}`}>
-                            {chatUsers?.length > 2
+                            {selectedChat && chatUsers?.length > 2
                             ? <p className="username">
                                     {!user(data)
                                         ? "eQuip-t User"
