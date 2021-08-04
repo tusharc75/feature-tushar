@@ -10,6 +10,7 @@ const ChatBox = (props) => {
     const [messages, setMessages] = useState([]);
     const [currentUser, setCurrentUser] = useState("")
     const [loading, setLoading] = useState(true)
+    const [chatUsers, setChatUsers] = useState([]);
 
      useEffect(() => {
          if (socket !== null) {
@@ -18,13 +19,16 @@ const ChatBox = (props) => {
              })
 
              return () => {
-
+                 socket.off("data")
              }
          }
     }, [socket])
 
     useEffect(() => {
-        getChatterInfo()
+        if (selectedChat) {
+            getChatterInfo()
+            setChatUsers(selectedChat.users)
+        }
     }, [selectedChat])
 
     const getChatterInfo = () => {
@@ -53,20 +57,34 @@ const ChatBox = (props) => {
 
     const formatTime = (time) => new Date(time).toTimeString().split(":");
 
+    const user = (data) => chatUsers.find(_d => _d?._id === data.userid)
 
     return (
         <div className="global-chatbox">
             <div className="chatbox-container">
                 {loading ? "" : messages.map((data, i) => (
-                    <div key={i} className={`message-container ${data.userid === currentUser ? "my-message": ""}`}>
+                    <div key={i} className={`message-container ${data.userid === currentUser ? "my-message" : ""}`}>
+                        
                         <div
-                            className={`message-outlet ${data.userid === currentUser ? "my-color": ""}`}>
-                        <Typography>
-                            {data.message}
-                        </Typography>
+                            className={`message-outlet ${data.userid === currentUser ? "my-color ml-4": "mr-4"}`}>
+                            {chatUsers.length
+                            ? <p className="username">
+                                    {!user(data)
+                                        ? "eQuip-t User"
+                                        : user(data)?._id !== currentUser && user(data)?.firstName
+                                    }
+                            </p>
+                            : null
+                            }
+                            <div className="msg-data">
+
+                            <Typography>
+                              {data.message}
+                            </Typography>
                             <p className="message-time">
                                 {`${formatTime(data.date)[0]}:${formatTime(data.date)[1]}`}
                             </p>
+                            </div>
                         </div>
                     </div>
                 ))}
