@@ -492,7 +492,7 @@ function App() {
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
+            <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
             <Route exact path={"/dashboards"}>
