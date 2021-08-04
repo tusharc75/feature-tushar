@@ -460,7 +460,7 @@ function App() {
             <PrivateRoute exact path={routes.quotePdfTemplate.path}>
               <QuotePdfTemplate />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quotePdfTemplate.path}/:id`}>
+            <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
               <CreateQuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>

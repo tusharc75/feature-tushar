@@ -4,19 +4,51 @@ import { SendOutlined } from '@material-ui/icons';
 import axiosInstance from '../../axios/axiosInstance';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 
-const ChatBox = () => {
-    const {selectedChat, messages, currentUser} = useContext(GlobalChatContext)
+const ChatBox = (props) => {
+    const {selectedChat, socket} = useContext(GlobalChatContext)
     const [messageValue, setMessageValue] = useState("");
+    const [messages, setMessages] = useState([]);
+    const [currentUser, setCurrentUser] = useState("")
+    const [loading, setLoading] = useState(true)
+
+     useEffect(() => {
+         if (socket !== null) {
+             socket.on("data", (data: any) => {
+                 getChatterInfo()
+             })
+
+             return () => {
+
+             }
+         }
+    }, [socket])
+
+    useEffect(() => {
+        getChatterInfo()
+    }, [selectedChat])
+
+    const getChatterInfo = () => {
+        if (selectedChat) {
+            axiosInstance()
+                .get(`/chatter/${selectedChat.id}`)
+                .then(({ data: { data } }) => {
+                    setLoading(false)
+                    setMessages(data.Messages)
+                    setCurrentUser(data.currentUser)
+                })
+                .catch(() => { })
+        }
+    }
 
     const sendMessage = async (e) => {
         e.preventDefault()
         try {
             await axiosInstance()
-                .put(`/chatter/${selectedChat.id}`, { message: messageValue });
-            setMessageValue("")
+            .put(`/chatter/${selectedChat.id}`, { message: messageValue });
         } catch (err) {
-           
+            
         }
+        setMessageValue("")
     };
 
     const formatTime = (time) => new Date(time).toTimeString().split(":");
@@ -25,7 +57,7 @@ const ChatBox = () => {
     return (
         <div className="global-chatbox">
             <div className="chatbox-container">
-                {messages.map((data, i) => (
+                {loading ? "" : messages.map((data, i) => (
                     <div key={i} className={`message-container ${data.userid === currentUser ? "my-message": ""}`}>
                         <div
                             className={`message-outlet ${data.userid === currentUser ? "my-color": ""}`}>

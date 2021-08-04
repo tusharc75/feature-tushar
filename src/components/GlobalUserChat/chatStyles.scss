@@ -16,6 +16,11 @@
     flex-direction: column-reverse;
     overflow-y: auto;
 
+    .loading-msg {
+      text-align: center;
+      margin-bottom: 95%;
+    }
+
     .message-container {
       // display: flex;
       // flex-direction: column;
@@ -101,6 +106,17 @@
     .who {
       font-weight: 500;
     }
+
+    .unseen {
+      font-weight: 700;
+    }
+  }
+
+  .count {
+    background-color: #163340;
+    padding: 2px 4px;
+    border-radius: 50%;
+    color: #ececec;
   }
 
   .message-time {

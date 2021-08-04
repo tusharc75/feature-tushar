@@ -207,6 +207,7 @@ export default function ManageAccount(props) {
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -272,6 +273,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -336,6 +338,7 @@ export default function ManageAccount(props) {
                                     : field.fieldName ===
                                       "isShippingAddressSameAsBillingAddress" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -366,6 +369,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "billingAddress" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -398,6 +402,7 @@ export default function ManageAccount(props) {
                                     ) : field.fieldName ===
                                       "shippingAddress" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -424,6 +429,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "parentAccount" ? (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -440,6 +446,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : (
                                       <FormTypes
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
