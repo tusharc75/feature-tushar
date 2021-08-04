@@ -8,6 +8,29 @@
 .global-chatbox {
   height: 400px;
   overflow: hidden;
+  position: relative;
+
+  .not-found {
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(126, 126, 126, 0.1);
+    display: grid;
+    place-items: center;
+
+    p {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ececec;
+      background-color: rgb(241, 0, 0);
+      border-radius: 20px;
+      padding: 4px 10px;
+      transform: rotateZ(-10deg);
+    }
+  }
 
   .chatbox-container {
     height: 360px;
