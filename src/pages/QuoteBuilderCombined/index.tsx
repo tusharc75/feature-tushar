@@ -780,7 +780,7 @@ const QuoteBuilders = () => {
           opportunityId={null}
           disableOwnerDropDown={true}
           contacts={null}
-          doaCollaboratorResources={user.user?.doa.map(obj => obj.user)}
+          doaCollaboratorResources={user.user?.doa?.map(obj => obj.user)}
           isRenderedFromOpportunity={false}
         />
       )}

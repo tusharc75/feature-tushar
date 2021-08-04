@@ -185,7 +185,7 @@ const FormTypes = (props) => {
     ...rest
   } = props;
   const [optionsList, setOptions] = React.useState([]);
-  const [option, setOptionsList] = React.useState(options);
+  const [option, setOptionsList] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
@@ -198,6 +198,10 @@ const FormTypes = (props) => {
   const [displayType, setDisplayType] = React.useState(null);
 
   const inputNumberRef = useRef(null);
+
+  useEffect(() => {
+    setOptionsList(options)
+  },[options])
 
   useEffect(() => {
     const ignoreScroll = (e) => {
@@ -450,8 +454,6 @@ const FormTypes = (props) => {
     //handleFormula(fieldName, value, {});
     //handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
-
-  console.log(options);
 
   const handleAddDisplayType = (displayType, field, displayValue) => {
     if (displayType === 'currency') {
@@ -743,48 +745,48 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
-        options={options}
-        // freeSolo={type === 'dropDown' && (!lookup || (!fieldData && !fieldData.lookup))}
+        options={option}
+        freeSolo={type === 'dropDown' && !lookup}
         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
         getOptionSelected={(option: any, val) => option.optionValue === val}
         value={
-          options.filter((data) => data.optionValue === values[name]).length ? options.filter((data) => data.optionValue === values[name])[0] : ''
+          option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
         }
         onChange={
           onChange
             ? onChange
             : (e, val) => {
-                // if (setFieldValue) {
-                //   if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                //     const newOptions = [
-                //       ...option,
-                //       {
-                //         order: option.length,
-                //         default: false,
-                //         optionLabel: val,
-                //         optionValue: val
-                //       }
-                //     ];
-                //     setOptionsList(newOptions);
-                //     handleChange(name, val);
-                //   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                //     const newOptions = [
-                //       ...option,
-                //       {
-                //         order: option.length,
-                //         default: false,
-                //         optionLabel: val.inputValue,
-                //         optionValue: val.inputValue
-                //       }
-                //     ];
-                //     setOptionsList(newOptions);
-                //     handleChange(name, val.inputValue);
-                //   } else {
-                //     handleChange(name, val && val.optionValue ? val.optionValue : '');
-                //   }
-                // } else {
+                if (!lookup && setFieldValue) {
+                  if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+                    const newOptions = [
+                      ...option,
+                      {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val,
+                        optionValue: val
+                      }
+                    ];
+                    setOptionsList(newOptions);
+                    handleChange(name, val);
+                  } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                    const newOptions = [
+                      ...option,
+                      {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val.inputValue,
+                        optionValue: val.inputValue
+                      }
+                    ];
+                    setOptionsList(newOptions);
+                    handleChange(name, val.inputValue);
+                  } else {
+                    handleChange(name, val && val.optionValue ? val.optionValue : '');
+                  }
+                } else {
                 handleChange(name, val && val.optionValue ? val.optionValue : '');
-                // }
+                }
               }
         }
         renderInput={(params) => (
