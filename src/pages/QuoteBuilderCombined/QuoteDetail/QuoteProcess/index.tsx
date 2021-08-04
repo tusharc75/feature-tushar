@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbox, TextField, IconButton, Tooltip, Dialog, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbox, TextField, IconButton, Tooltip, Dialog, Typography, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
@@ -205,6 +205,7 @@ export default function QuoteProcess(props) {
         open: false,
         message: null,
     });
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
     useEffect(() => {
         if (currentVersion !== 0) {
@@ -997,6 +998,7 @@ export default function QuoteProcess(props) {
                             setLoading(false)
                         })
                         .catch((err) => {
+                            setSendEmail(true)
                             setLoading(false)
                             setGeneratingFile(false);
                         });
@@ -1028,11 +1030,13 @@ export default function QuoteProcess(props) {
 
                                 })
                                 .catch((err) => {
+                                    setSendEmail(true)
                                     setLoading(false)
                                     setGeneratingFile(false);
                                 });
                         })
                         .catch((err) => {
+                            setSendEmail(true)
                             setLoading(false)
                             setGeneratingFile(false);
                         });
@@ -1173,6 +1177,19 @@ export default function QuoteProcess(props) {
     };
 
 
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleChangeVersionInQuote = (event) =>{
+        handleChangeVersion(event);
+        setAnchorEl(null);
+    }
+
     return (
         <>
             <Paper className={classes.bgProduct}>
@@ -1273,17 +1290,31 @@ export default function QuoteProcess(props) {
                                 Edit Information
                             </Button>
                         ) : null}
-                        <select
+                        <div>
+                            <Button 
                             className="customSelect mx-1"
-                            value={currentVersion}
-                            onChange={handleChangeVersion}
-                        >
-                            {Object.keys(quoteData.versions).map((team) => (
-                                <option key={team} value={team}>
-                                    {"Version : " + team}
-                                </option>
-                            ))}
-                        </select>
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            aria-controls="simple-menu" 
+                            aria-haspopup="true" 
+                            onClick={handleClick}>
+                                {`Version : ${currentVersion}`}
+                            </Button>
+                            <Menu
+                                id="simple-menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                            >
+                                {Object.keys(quoteData.versions).map((versionNumber) => (
+                                    <MenuItem onClick={handleChangeVersionInQuote} key={versionNumber} value={versionNumber}>
+                                        {"Version : " + versionNumber}
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </div>
                         {(
                             <>
                                 {currentVersion !== 1 && ifQuoteApproved.approved === false && (
