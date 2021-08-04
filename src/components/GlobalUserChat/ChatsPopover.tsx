@@ -45,10 +45,9 @@ const ChatsPopover = (props) => {
     }
 
     useEffect(() => {
-      fetchUsersList()
+        fetchUsersList()
+        getChats()
     }, [])
-    
-        // Create connection between user with chatterID
     
 
     const fetchUsersList = () => {
@@ -106,7 +105,8 @@ const ChatsPopover = (props) => {
                             ? selectedChat?.chatTitle
                             : newChat
                                 ? "New chat"
-                                : `Chats (${chatList.length})`}
+                                : `Chats (${chatList.length})`
+                        }
                     </Typography>
 
                     <Tooltip title="Close chat">
