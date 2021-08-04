@@ -11,7 +11,7 @@ import {
     Chip
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { quotePdfTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { quotePdfTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -40,6 +40,7 @@ const QuotePdfTemplate: FC = () => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
+    const { qbApi } = quoteBuilder;
 
     const {
         state: { user, permissions },
@@ -92,12 +93,27 @@ const QuotePdfTemplate: FC = () => {
         } else setRenderCount((preCount) => preCount + 1);
     }, [page, limit, filters, sorting]);
 
-    const previewPdfQuote = (quoteId) => {
+    const previewPdfTemplate = (templateId) => {
+
+        toastConfig.setToastConfig({
+            hideDuration: null,
+            open: true,
+            type: "info",
+            message: `Downloading preview file, Please wait...`,
+        });
+
         axiosInstance()
-            .get(`user/download/${quoteId}`, {
+            .get(`${qbApi}/getdummy/${templateId}`, {
                 responseType: "blob",
             })
             .then(({ data }) => {
+
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: "File downloaded Successfuly",
+                });
+
                 const file = new Blob([data], { type: "application/pdf" });
                 const fileURL = URL.createObjectURL(file);
                 const pdfWindow = window.open();
@@ -112,13 +128,13 @@ const QuotePdfTemplate: FC = () => {
         <Link className="link"
             to={`${routes.quotePdfTemplateDetail.path}/${params.data._id}`} title={params.value}>
             {params.value}
-        </Link> 
-        {/* &emsp;<Chip size="small" label="Preview"
+        </Link>
+        &emsp;<Chip size="small" label="Preview"
             color="primary"
             onClick={() => {
-                previewPdfQuote(params.data._id);
+                previewPdfTemplate(params.data._id);
             }}
-        /> */}
+        />
     </>;
 
     const ActionsRenderer = params => <>
