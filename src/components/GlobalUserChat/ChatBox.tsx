@@ -64,7 +64,7 @@ const ChatBox = (props) => {
             {
                 selectedChat.chatTitle === "eQuip-t User" &&
                 <div className="not-found">
-                  <p>Accound Deleted</p>
+                  <p>Account Deleted</p>
                 </div>
             }
             <div className="chatbox-container">
