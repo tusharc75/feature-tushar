@@ -161,6 +161,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",
   },
+  quoteBuilderDetail: {
+    title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
+    path: "/quotes/detail",
+  },
   budget: {
     title: storedRoutes ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
