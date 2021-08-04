@@ -114,7 +114,11 @@ const RatingAndReviewChart = () => {
                 <div className={styles.rating_category}>
                   <CircularProgressWithLabel variant="determinate" size={100} thickness={6} value={80} comment={'Easy to Use'} />
                   <CircularProgressWithLabel variant="determinate" size={100} thickness={6} value={75} comment={'Value for Money'} />
-                  <CircularProgressWithLabel variant="determinate" size={100} thickness={6} value={90} comment={'Regulated movement'} />
+                  <CircularProgressWithLabel className={styles.hide} variant="determinate" size={100} thickness={6} value={90} comment={'Regulated movement'} />
+                </div>
+                <div className={styles.rating_category_2}>
+                  <CircularProgressWithLabel variant="determinate" size={100} thickness={6} value={80} comment={'Easy to Use'} />
+                  <CircularProgressWithLabel variant="determinate" size={100} thickness={6} value={75} comment={'Value for Money'} />
                 </div>
                 <div className={styles.user_reviews}></div>
               </div>

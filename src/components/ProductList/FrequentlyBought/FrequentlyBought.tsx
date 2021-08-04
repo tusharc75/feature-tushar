@@ -4,9 +4,9 @@ import Checkbox from '@material-ui/core/Checkbox';
 // import ButtonDesign from "../../components/Buttondesign/Buttondesign";
 import { Button, IconButton } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import iphone12 from './iphone-12.jpeg';
-import ipadPro from './ipad-pro.jpg';
-import AppleWatch from './Apple-watch.jpeg';
+import iphone12 from '../../../assets/iphone-12.jpeg';
+import ipadPro from '../../../assets/ipad-pro.jpg';
+import AppleWatch from '../../../assets/Apple-watch.jpeg';
 
 function FrequentlyBought() {
   const [count, setCount] = useState(0);
