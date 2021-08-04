@@ -360,7 +360,8 @@ export default function QuoteDetail() {
   const handleReOpenQuote = () => {
     const previousVersionTNC = quoteData.versions[ifQuoteApproved.versionApproved]?.TNC
     setQuoteReOpening(true);
-
+    setReopenReasonDialog(false)
+    setReopenReason("")
     let notEndVersions = []
     Object.keys(quoteData.versions).forEach((v) => {
       if (quoteData.versions[v]?.processStatus !== "End") {
