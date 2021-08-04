@@ -451,8 +451,6 @@ const FormTypes = (props) => {
     //handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
 
-  console.log(options);
-
   const handleAddDisplayType = (displayType, field, displayValue) => {
     if (displayType === 'currency') {
       field.displayCurrency.push(displayValue);
