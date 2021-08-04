@@ -1305,9 +1305,9 @@ export default function QuoteProcess(props) {
                                 open={Boolean(anchorEl)}
                                 onClose={handleClose}
                             >
-                                {Object.keys(quoteData.versions).map((team) => (
-                                    <MenuItem onClick={handleChangeVersionInQuote} key={team} value={team}>
-                                        {"Version : " + team}
+                                {Object.keys(quoteData.versions).map((versionNumber) => (
+                                    <MenuItem onClick={handleChangeVersionInQuote} key={versionNumber} value={versionNumber}>
+                                        {"Version : " + versionNumber}
                                     </MenuItem>
                                 ))}
                             </Menu>
