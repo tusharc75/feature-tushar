@@ -35,7 +35,7 @@ export default function ProductDetails() {
     if (productDetails) {
       axiosInstance()
         .get(
-          `${product.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=3`
+          `${product.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=0`
         )
         .then(({ data: { data } }) => {
           setSimilarItems(data);
@@ -143,7 +143,7 @@ export default function ProductDetails() {
                       }
                     </span>
 
-                  <span className={styles.before}>
+                  <span className={styles.mrp_price}>
 
                       {
                         formatAmountWithCurrency(
@@ -155,7 +155,7 @@ export default function ProductDetails() {
 
                 </div>
 
-                <div className={styles.rate2}>
+                <div className={styles.user_rating}>
                   <Rating
                     name="half-rating-read"
                     defaultValue={4.5}
@@ -170,12 +170,12 @@ export default function ProductDetails() {
 
 
 
-                <div className={'footer' && styles.buttonLayout} >
+                <div className={'footer' && styles.button_layout} >
                   <Button
                     variant="contained"
                     color="primary"
                     size="small"
-                    className={styles.buttonStyle}
+                    className={styles.primary_buttons}
                     onClick={() => { }}
                     startIcon={<AddShoppingCartIcon />}
                   >
@@ -186,19 +186,19 @@ export default function ProductDetails() {
                       variant="contained"
                       color="primary"
                       size="small"
-                      className={styles.buttonStyle}
+                      className={styles.primary_buttons}
                       startIcon={<AddShoppingCartIcon />}
                     >
                       Checkout
                     </Button>
                   </Link>
                 </div>
-                <div className={'footer' && styles.buttonLayout}>
+                <div className={'footer' && styles.button_layout}>
                   <Button
                     variant="outlined"
                     color="secondary"
                     size="small"
-                    className={styles.buttonStyleOne}
+                    className={styles.secondary_buttons}
                   >
                     Add to Configure
                   </Button>
@@ -206,7 +206,7 @@ export default function ProductDetails() {
                     variant="outlined"
                     color="secondary"
                     size="small"
-                    className={styles.buttonStyleOne}
+                    className={styles.secondary_buttons}
                   >
                     Add to Planner
                   </Button>

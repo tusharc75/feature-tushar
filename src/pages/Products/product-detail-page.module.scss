@@ -45,7 +45,7 @@ $bgt: #e2e2e2;
         font-size: 2rem;
         color: var(--productRed);
     }
-    .before {
+    .mrp_price {
         text-decoration: line-through;
         font-size: 1rem;
         color: var(--grey);
@@ -55,7 +55,7 @@ $bgt: #e2e2e2;
     }
 
 }
-.rate2{
+.user_rating{
     padding: 0 8px;
     display: flex;
     align-items: flex-end;
@@ -103,7 +103,6 @@ $bgt: #e2e2e2;
             margin: 0;
         }
         .avaibility {
-            //text-transform: uppercase;
             font-weight: bold;
             color: var(--grey);
             font-weight: 700;
@@ -129,7 +128,6 @@ $bgt: #e2e2e2;
         }
 
         header {
-            //margin-bottom: 25px;
             padding-bottom: 20px;
             position: relative;
         }
@@ -146,22 +144,15 @@ $bgt: #e2e2e2;
         }
         .controls {
             margin: 1em 0;
-            //display: grid;
-            //grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             display: flex;
             flex-direction: column;
 
             div {
                 align-items: center;
-                //justify-content: center;
                 display: flex;
                 flex-direction: column;
                 text-align: center;
-                //border-left: 2px solid var(--common-border-color);
                 padding: 3px 20px;
-                //padding-left: 25px;
-                //padding-right: 25px;
-                //width: 100px;
             }
         }
         .rate {
@@ -177,14 +168,6 @@ $bgt: #e2e2e2;
         margin: 1rem 3rem 0 0;
     }
 }
-//.set_width_2{
-//    display: flex;
-//    padding-top: 25px;
-//    hr{
-//        width: 30rem;
-//        //margin: 1rem 3rem 0 0;
-//    }
-//}
 .controls_over{
     display: flex;
     flex-direction: row !important;
@@ -195,21 +178,21 @@ $bgt: #e2e2e2;
     justify-content: space-between;
     align-items: center;
 }
-.buttonLayout{
+.button_layout{
     padding: 1rem 0 0 0;
     display: flex;
     flex-wrap: wrap;
     width: 100%;
 }
 
-.buttonStyle{
+.primary_buttons{
     padding: 0.5rem 0 !important;
     width: 9.5rem;
     border-radius: 8px !important;
     margin: 0.3rem 0.5rem 0 0 !important;
 
 }
-.buttonStyleOne{
+.secondary_buttons{
     padding: 0.43rem 0 !important;
     width: 9.5rem;
     border-radius: 8px !important;
@@ -231,7 +214,6 @@ $bgt: #e2e2e2;
 .container_box{
     background: white;
     border-radius: 8px;
-    //width: ;
 }
 
 

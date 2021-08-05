@@ -10,15 +10,10 @@
   padding-top: 25px;
   display: grid;
   grid-template-columns: minmax(120px,200px) 35px minmax(120px,200px) 35px minmax(120px,200px);
-  // grid-template-columns: repeat();
   height: auto;
 }
 
 .wrapper {
-  //margin: 2rem;
-  //display: grid;
-  //gap: 1rem;
-  //grid-template-columns: 1fr;
   display: none;
 
 }
@@ -86,7 +81,7 @@
     background-color: var(--lightgrey);
   }
 }
-.setImage1{
+.frequently_bought_together_products{
   width: 100%;
   height: 100%;
 }
@@ -111,7 +106,7 @@
 
   }
 }
-.button_style{
+.add_to_selected_card_button{
   padding: 1rem 0;
   Button{
     padding: 0.5rem 2rem;
@@ -123,7 +118,7 @@
 .contain_all_items{
   padding: 0.8rem 0;
 }
-.items{
+.frequently_bought_products_primary{
   display: flex;
   align-items: center;
   .checkbox{
@@ -139,12 +134,12 @@
      }
   }
 }
-.items2{
+.frequently_bought_products_secondary{
   display: flex;
   align-items: center;
   .checkbox{
-    color: var(--primary) !important;
-    padding: 5px 5px 5px 1px !important;
+    color: var(--primary) !important ;
+    padding: 5px 5px 5px 1px ;
   }
   h5{
     padding-top: 4px;
@@ -171,8 +166,6 @@
   .items_flex{
     padding-top: 25px;
     display: flex;
-    // grid-template-columns: minmax(120px,200px) 35px minmax(120px,200px) 35px minmax(120px,200px);
-    // grid-template-columns: repeat();
     flex-direction: column;
     width: 70%;
     min-width: 150px;

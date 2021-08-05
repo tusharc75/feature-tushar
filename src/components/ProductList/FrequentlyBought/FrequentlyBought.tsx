@@ -61,40 +61,40 @@ function FrequentlyBought() {
         <div className={styles.items_flex}>
           <div>
             {' '}
-            <img src={ipadPro} className={styles.setImage1}></img>
+            <img src={ipadPro} className={styles.frequently_bought_together_products}></img>
           </div>
           <span className={styles.set_icon}>
             <AddIcon />
           </span>
           <div>
             {' '}
-            <img src={iphone12} className={styles.setImage1}></img>{' '}
+            <img src={iphone12} className={styles.frequently_bought_together_products}></img>{' '}
           </div>
           <span className={styles.set_icon}>
             <AddIcon />
           </span>
           <div>
-            <img src={AppleWatch} className={styles.setImage1}></img>
+            <img src={AppleWatch} className={styles.frequently_bought_together_products}></img>
           </div>
         </div>
         <div className={styles.total_price}>
           <h2>Total Price = &nbsp;</h2>
           <h3>$2,799.00</h3>
         </div>
-        <div className={styles.button_style}>
+        <div className={styles.add_to_selected_card_button}>
           <Button variant="contained" color="primary">
             ADD SELECTED TO CART
           </Button>
           <div className={styles.contain_all_items}>
-            <div className={styles.items}>
+            <div className={styles.frequently_bought_products_primary}>
               <Checkbox disabled checked inputProps={{ 'aria-label': 'disabled checked checkbox' }} size={'small'} className={styles.checkbox} />
               <p>This items: iPad pro 256Gb &nbsp;<span>$599.00</span></p>
             </div>
-            <div className={styles.items2}>
+            <div className={styles.frequently_bought_products_secondary}>
               <Checkbox defaultChecked size="small" inputProps={{ 'aria-label': 'checkbox with small size' }}  className={styles.checkbox}/> 
               <h5>Apple iphone 12 purple 128Gb 4GB A!4 Boinic chip 5nm &nbsp;<span>$799.00</span></h5>
             </div>
-            <div className={styles.items2}>
+            <div className={styles.frequently_bought_products_secondary}>
               <Checkbox defaultChecked size="small" inputProps={{ 'aria-label': 'checkbox with small size' }}  className={styles.checkbox}/> 
               <h5>Apple watch series 6 44mm nike addition &nbsp;<span>$399.00</span></h5>
             </div>
