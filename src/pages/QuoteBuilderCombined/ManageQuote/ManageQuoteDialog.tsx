@@ -1050,7 +1050,7 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                         <Grid item xs={1} sm={1} md={1}>
                                           <Tooltip
-                                            title="Download PDF Template"
+                                            title="Preview PDF Template"
                                             className="mt-1"
                                           >
                                             <IconButton
