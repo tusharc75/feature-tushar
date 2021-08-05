@@ -9,20 +9,18 @@ const ChatBox = (props) => {
     const [messageValue, setMessageValue] = useState("");
     const [messages, setMessages] = useState([]);
     const [currentUser, setCurrentUser] = useState("")
-    const [loading, setLoading] = useState(true)
+    // const [loading, setLoading] = useState(false)
     const [chatUsers, setChatUsers] = useState([]);
 
-     useEffect(() => {
-         if (socket !== null) {
-             socket.on("data", (data: any) => {
-                 getChatterInfo()
-             })
-
-             return () => {
-                 socket.off("data")
-             }
-         }
-    }, [socket])
+    useEffect(() => {
+        if (socket !== null) {
+            socket.on("data", (data: any) => {
+                if (selectedChat.id === data.chatterId) {
+                    setMessages([data, ...messages])
+                }
+            })
+        }
+    }, [socket, messages])
 
     useEffect(() => {
         if (selectedChat) {
@@ -36,11 +34,12 @@ const ChatBox = (props) => {
             axiosInstance()
                 .get(`/chatter/${selectedChat.id}`)
                 .then(({ data: { data } }) => {
-                    setLoading(false)
                     setMessages(data.Messages)
                     setCurrentUser(data.currentUser)
                 })
-                .catch(() => { })
+                .catch(() => {
+
+                 })
         }
     }
 
@@ -48,7 +47,8 @@ const ChatBox = (props) => {
         e.preventDefault()
         try {
             await axiosInstance()
-            .put(`/chatter/${selectedChat.id}`, { message: messageValue });
+                .put(`/chatter/${selectedChat.id}`, { message: messageValue });
+            
         } catch (err) {
             
         }
@@ -68,7 +68,7 @@ const ChatBox = (props) => {
                 </div>
             }
             <div className="chatbox-container">
-                {loading ? "" : messages.map((data, i) => (
+                {messages && messages.map((data, i) => (
                     <div key={i} className={`message-container ${data.userid === currentUser ? "my-message" : ""}`}>
                         
                         <div

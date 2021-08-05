@@ -46,7 +46,6 @@ const ChatsPopover = (props) => {
 
     useEffect(() => {
         fetchUsersList()
-        getChats()
     }, [])
     
 
