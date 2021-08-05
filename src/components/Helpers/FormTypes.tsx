@@ -775,8 +775,11 @@ const FormTypes = (props) => {
                         optionLabel: val,
                         optionValue: val
                       }
-                    setOptionsList([...option, newOption]);
-                    addFieldOption(newOption, fieldId)
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([...option, newOption]);
+                    }
                     handleChange(name, val);
                   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
                     const newOption = {
@@ -785,8 +788,10 @@ const FormTypes = (props) => {
                         optionLabel: val.inputValue,
                         optionValue: val.inputValue
                       }
-                    setOptionsList([...option, newOption]);
-                    addFieldOption(newOption, fieldId)
+                      if (!option?.find(o => o?.optionValue.includes(val.inputValue))) {
+                        setOptionsList([...option, newOption]);
+                        addFieldOption(newOption, fieldId)
+                    }
                     handleChange(name, val.inputValue);
                   } else {
                     if (val) {
@@ -794,8 +799,10 @@ const FormTypes = (props) => {
                         ...val,
                         optionLabel: val.optionValue,
                       }
-                      setOptionsList([newOption,...option]);
-                      addFieldOption(newOption, fieldId)
+                      if (!option?.find(o => o?.optionValue.includes(val.optionValue))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([newOption,...option]);
+                    }
                       handleChange(name, val && val.optionValue ? val.optionValue : '');
                     }
                   }
@@ -807,7 +814,7 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '') {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))) {
             filtered.push({
                 order: option.length,
                 default: false,
@@ -821,6 +828,7 @@ const FormTypes = (props) => {
         selectOnFocus
         clearOnBlur
         handleHomeEndKeys
+        forcePopupIcon={true}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -1256,7 +1264,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any, reason) => {
-                if (!lookup) {
+                if (!lookup  && setFieldValue) {
                   if (reason === 'clear') {
                     setFieldValue(name, []);
                   } else if (reason === 'remove-option' && values[name].length === 1) {
@@ -1264,34 +1272,43 @@ const FormTypes = (props) => {
                   }
                   value.forEach((val) => {
                     if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                      const newOptions = [
-                        ...option,
-                        {
-                          order: option.length,
-                          default: false,
-                          optionLabel: val,
-                          optionValue: val
-                        }
-                      ];
-                      setOptionsList(newOptions);
+                      const newOption = {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val,
+                        optionValue: val
+                      }
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([...option, newOption]);
+                    }
                       setFieldValue(name, [...values[name], val]);
                     } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                      const newOptions = [
-                        ...option,
-                        {
-                          order: option.length,
-                          default: false,
-                          optionLabel: val.inputValue,
-                          optionValue: val.inputValue
-                        }
-                      ];
-                      setOptionsList(newOptions);
+                       const newOption = {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val.inputValue,
+                        optionValue: val.inputValue
+                      }
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([...option, newOption]);
+                    }
                       setFieldValue(name, [...values[name], val.inputValue]);
                     } else {
-                      setFieldValue(
-                        name,
-                        value.map((val) => val.optionValue)
-                      );
+                      if (val) {
+                        const newOption = {
+                          ...val,
+                          optionLabel: val.optionValue,
+                        }
+                        if (!option?.find(o => o?.optionValue.includes(val.optionValue))) {
+                          addFieldOption(newOption, fieldId)
+                          setOptionsList([newOption,...option]);
+                        }
+                        setFieldValue(name, value.map((val) => val.optionValue));
+                      }
                     }
                   });
                 } else {
@@ -1302,6 +1319,21 @@ const FormTypes = (props) => {
                 }
               }
         }
+        filterOptions={(options, params) => {
+          const filtered = filter(options, params);
+
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))) {
+            filtered.push({
+                order: option.length,
+                default: false,
+                optionLabel: `Add "${params.inputValue}"`,
+                optionValue: params.inputValue
+            })
+          }
+
+          return filtered
+        }}
+        forcePopupIcon={true}
         renderInput={(params) => (
           <TextField
             {...params}
