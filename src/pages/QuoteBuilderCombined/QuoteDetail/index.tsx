@@ -27,9 +27,10 @@ import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from "react-device-detect";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectInAccordion"
-const AllVersionStatus = React.lazy(() => import("./AllVersionStatus"));
-const QuoteDetailPage = React.lazy(() => import("./QuoteDetailPage"));
-const QuoteProcess = React.lazy(() => import("./QuoteProcess/index"));
+import QuoteProcess from './QuoteProcess';
+import QuoteDetailPage from './QuoteDetailPage';
+import AllVersionStatus from './AllVersionStatus';
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -594,9 +595,6 @@ export default function QuoteDetail() {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-                    <Suspense fallback={
-                      <Loader minHeight="500px" text="Loading..." />
-                    }>
                       {(quoteData && <AllVersionStatus
                         quoteId={id}
                         quoteData={quoteData}
@@ -605,14 +603,10 @@ export default function QuoteDetail() {
                         handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
                         handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
                       />)}
-                    </Suspense>
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
                     <>
-                      <Suspense fallback={
-                        <Loader minHeight="500px" text="Loading..." />
-                      }>
                         {(quoteData && <QuoteDetailPage
                           quoteData={quoteData}
                           quotePermissions={permissions[qbResource]}
@@ -623,7 +617,6 @@ export default function QuoteDetail() {
                           handleOpenCloneDialog={handleOpenCloneDialog}
                           handleSetSteps={handleSetSteps}
                         />)}
-                      </Suspense>
                       {permissions?.projectSales?.isRead && (
                         <ProjectInAccordion
                           recordsPerLine={3}
@@ -639,9 +632,6 @@ export default function QuoteDetail() {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={2}>
-                    <Suspense fallback={
-                      <Loader minHeight="500px" text="Loading..." />
-                    }>
                       {(quoteData && <QuoteProcess
                         updatingVersion={updatingVersion}
                         handleVersionUpdate={handleVersionUpdate}
@@ -660,7 +650,6 @@ export default function QuoteDetail() {
                         columnView={columnView}
                         fetchTNC={fetchTermsAndConditions}
                       />)}
-                    </Suspense>
                   </TabPanel>
                 </>
               )}
@@ -782,7 +771,7 @@ export default function QuoteDetail() {
               </DialogContent>
               <DialogActions>
                 <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">Close</Button>
-                <Button size="small" onClick={handleReOpenQuote} color="primary">Save</Button>
+                <Button size="small" disabled={reopenReason === ""} onClick={handleReOpenQuote} color="primary">Save</Button>
               </DialogActions>
             </Dialog>
           </div>
