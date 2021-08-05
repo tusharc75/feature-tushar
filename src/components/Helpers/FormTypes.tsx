@@ -24,7 +24,7 @@ import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtils
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete, {createFilterOptions} from '@material-ui/lab/Autocomplete';
 import MuiPhoneInput from 'material-ui-phone-number';
 import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
@@ -48,6 +48,8 @@ import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
+
+const filter = createFilterOptions();
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -152,6 +154,7 @@ const FormTypes = (props) => {
     lookup,
     type,
     label,
+    fieldId,
     name,
     errors,
     values,
@@ -185,7 +188,7 @@ const FormTypes = (props) => {
     ...rest
   } = props;
   const [optionsList, setOptions] = React.useState([]);
-  const [option, setOptionsList] = React.useState(options);
+  const [option, setOptionsList] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
@@ -198,6 +201,10 @@ const FormTypes = (props) => {
   const [displayType, setDisplayType] = React.useState(null);
 
   const inputNumberRef = useRef(null);
+
+  useEffect(() => {
+    setOptionsList(options)
+  },[options])
 
   useEffect(() => {
     const ignoreScroll = (e) => {
@@ -385,6 +392,13 @@ const FormTypes = (props) => {
         }
       });
   };
+
+  const addFieldOption = (optionData, id) => {
+    axiosInstance().post("field/add-field-option", {
+      _id: id,
+      option: [optionData]
+    })
+  }
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -741,50 +755,72 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
-        options={options}
-        // freeSolo={type === 'dropDown' && (!lookup || (!fieldData && !fieldData.lookup))}
+        options={option}
+        freeSolo={type === 'dropDown' && !lookup}
         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
         getOptionSelected={(option: any, val) => option.optionValue === val}
         value={
-          options.filter((data) => data.optionValue === values[name]).length ? options.filter((data) => data.optionValue === values[name])[0] : ''
+          option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
         }
         onChange={
           onChange
             ? onChange
             : (e, val) => {
-                // if (setFieldValue) {
-                //   if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                //     const newOptions = [
-                //       ...option,
-                //       {
-                //         order: option.length,
-                //         default: false,
-                //         optionLabel: val,
-                //         optionValue: val
-                //       }
-                //     ];
-                //     setOptionsList(newOptions);
-                //     handleChange(name, val);
-                //   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                //     const newOptions = [
-                //       ...option,
-                //       {
-                //         order: option.length,
-                //         default: false,
-                //         optionLabel: val.inputValue,
-                //         optionValue: val.inputValue
-                //       }
-                //     ];
-                //     setOptionsList(newOptions);
-                //     handleChange(name, val.inputValue);
-                //   } else {
-                //     handleChange(name, val && val.optionValue ? val.optionValue : '');
-                //   }
-                // } else {
+                if (!lookup && setFieldValue) {
+                  if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+
+                    const newOption = {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val,
+                        optionValue: val
+                      }
+                    setOptionsList([...option, newOption]);
+                    addFieldOption(newOption, fieldId)
+                    handleChange(name, val);
+                  } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                    const newOption = {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val.inputValue,
+                        optionValue: val.inputValue
+                      }
+                    setOptionsList([...option, newOption]);
+                    addFieldOption(newOption, fieldId)
+                    handleChange(name, val.inputValue);
+                  } else {
+                    if (val) {
+                      const newOption = {
+                        ...val,
+                        optionLabel: val.optionValue,
+                      }
+                      setOptionsList([newOption,...option]);
+                      addFieldOption(newOption, fieldId)
+                      handleChange(name, val && val.optionValue ? val.optionValue : '');
+                    }
+                  }
+                } else {
                 handleChange(name, val && val.optionValue ? val.optionValue : '');
-                // }
+                }
               }
         }
+        filterOptions={(options, params) => {
+          const filtered = filter(options, params);
+
+          if (params.inputValue !== '') {
+            filtered.push({
+                order: option.length,
+                default: false,
+                optionLabel: `Add "${params.inputValue}"`,
+                optionValue: params.inputValue
+            })
+          }
+
+          return filtered
+        }}
+        selectOnFocus
+        clearOnBlur
+        handleHomeEndKeys
         renderInput={(params) => (
           <TextField
             {...params}
