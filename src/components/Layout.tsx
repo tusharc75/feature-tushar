@@ -11,8 +11,16 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: "100%",
     overflow: "hidden",
-    minHeight: "calc(100vh - 55px)",
+    height: "calc(100vh - 55px)",
   },
+  layout: {
+    flexGrow: 1,
+    width: "100%",
+    overflowX: "hidden",
+    overflowY: "auto",
+    height: "100%",
+    zIndex: 1
+  }
 }));
 
 const Layout = ({ children, width }) => {
@@ -46,7 +54,9 @@ const Layout = ({ children, width }) => {
           className={classes.content}
           onClick={handleToggleState}
         >
-          {children}
+          <div className={classes.layout}>
+           {children}
+          </div>
         </motion.div>
       </Box>
       <GlobalUserChat/>
