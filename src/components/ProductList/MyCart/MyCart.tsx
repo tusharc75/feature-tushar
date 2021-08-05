@@ -22,15 +22,6 @@ function MyCart() {
 
   useEffect(() => {
     fetchCart()
-    axiosInstance()
-      .get(`${product.api}?limit=0`)
-      .then(({ data: { data } }) => {
-        data = data.map(obj => ({ ...obj, selected: false }))
-        setProducts(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   }, []);
 
   const { state: { user } }: any = useData();
@@ -133,7 +124,7 @@ function MyCart() {
   }
 
   const onCheckout = () => {
-    if (checkoutLabel === "Create Quote" && addedCartItems.length >= 4) {
+    if (checkoutLabel === "Create Quote" && addedCartItems.length >= 1) {
       setshowCreateQuoteDialog(true)
     }
   }
@@ -234,28 +225,6 @@ function MyCart() {
             ))}
           </div>
         </div>
-        {showCreateQuoteDialog && (
-          <ManageQuoteDialog
-            open={showCreateQuoteDialog}
-            onSuccess={onSuccess}
-            onClose={() => {
-              setshowCreateQuoteDialog(false)
-            }}
-            isNew={true}
-            dataToUpdate={null}
-            isClone={false}
-            resource={null}
-            isRedirectTodetailPage={true}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            contacts={null}
-            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
-            isRenderedFromOpportunity={false}
-            isCreateQuoteFromCart={true}
-            onHandleSubmit={handleCreateQuote}
-          />
-        )}
       </Box>
     </Layout>
   );

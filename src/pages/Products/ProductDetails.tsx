@@ -13,12 +13,79 @@ import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import { BsImage } from "react-icons/bs";
 import RatingAndReviewChart from "../../components/ProductList/RatingAndReviewChart";
 import { Link } from "react-router-dom";
+import ManageQuoteDialog from "../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
+import { useData } from "../../StateProvider/Provider";
+import { useHistory } from "react-router-dom";
+import routes from "../../components/Helpers/Routes";
 
 export default function ProductDetails() {
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
+  const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
+  const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
+  const [addedCartItems, setAddedCartItems] = useState([])
+  const [products, setProducts] = useState([]);
   const toastConfig = useContext(CustomToastContext);
+  const { state: { user } }: any = useData();
+  const history = useHistory();
   let { id } = useParams();
+
+  useEffect(() => {
+    fetchCart()
+    fetchProducts()
+  }, []);
+
+  const fetchProducts = () => {
+    axiosInstance()
+      .get(`${product.api}?limit=0`)
+      .then(({ data: { data } }) => {
+        data = data.map(obj => ({ ...obj, selected: false }))
+        setProducts(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const fetchCart = () => {
+    axiosInstance()
+      .get(`/user/cart`).then(({ data: { data } }) => {
+
+        if (data) {
+          setAddedCartItems(data)
+        }
+        if (data && data.length >= 1) {
+          setCheckoutLabel("Create Quote")
+        }
+      })
+  }
+
+  const onCheckout = () => {
+    if (checkoutLabel === "Create Quote" && addedCartItems.length >= 1) {
+      console.log('Yes checkout ')
+      setshowCreateQuoteDialog(true)
+    }
+  }
+
+  const onAddToCartItem = (item) => {
+    let tempQuantity = 1
+    addedCartItems.some(o => {
+      if (o.productId === item._id) {
+        tempQuantity = tempQuantity + 1
+        return true
+      }
+    })
+
+    axiosInstance()
+      .post(`/user/cart`, {
+        products: [{
+          quantity: `${tempQuantity}`,
+          productId: item._id
+        }]
+      }).then(({ data }) => {
+        fetchCart()
+      })
+  }
 
   useEffect(() => {
     axiosInstance()
@@ -55,6 +122,17 @@ export default function ProductDetails() {
   const amountOfDiscount = (price: number, discount: any) => {
     return (price * discount) / 100 + " " + productDetails.currency;
   };
+
+  const handleCreateQuote = (values) => {
+    let selectedProductIds = addedCartItems.map(o => o.productId)
+
+    let selectedProducts = products.filter(obj => selectedProductIds.indexOf(obj._id) >= 0)
+    axiosInstance()
+      .post(`quote-builder/create/from-cart`, { ...values, products: selectedProducts })
+      .then(({ data: { data } }) => {
+        history.push(`${routes.quoteBuilder.path}/detail/${data?._id}`);
+      })
+  }
 
   return (
     <Layout>
@@ -140,8 +218,9 @@ export default function ProductDetails() {
                     color="primary"
                     size="small"
                     className="mr-2"
-                    onClick={() => { }}
+
                     startIcon={<AddShoppingCartIcon />}
+                    onClick={() => onAddToCartItem(productDetails)}
                   >
                     Add to cart
                   </Button>
@@ -152,8 +231,9 @@ export default function ProductDetails() {
                       size="small"
                       className="mr-2"
                       startIcon={<AddShoppingCartIcon />}
+                      onClick={onCheckout}
                     >
-                      Checkout
+                      {checkoutLabel}
                     </Button>
                   </Link>
                   <Button
@@ -185,6 +265,28 @@ export default function ProductDetails() {
           <div className="a_divider_inner"></div>
           <RatingAndReviewChart />
         </div>
+        {showCreateQuoteDialog && (
+          <ManageQuoteDialog
+            open={showCreateQuoteDialog}
+            onSuccess={() => { }}
+            onClose={() => {
+              setshowCreateQuoteDialog(false)
+            }}
+            isNew={true}
+            dataToUpdate={null}
+            isClone={false}
+            resource={null}
+            isRedirectTodetailPage={true}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            contacts={null}
+            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
+            isRenderedFromOpportunity={false}
+            isCreateQuoteFromCart={true}
+            onHandleSubmit={handleCreateQuote}
+          />
+        )}
       </Box>
     </Layout>
   );
