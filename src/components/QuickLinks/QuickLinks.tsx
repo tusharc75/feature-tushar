@@ -12,13 +12,13 @@ export interface IQuickLinks {
 }
 
 export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
-    return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2 px-3 pt-2 pb-3 bg-white">
-        <Typography variant="h6" className="mb-1">{title}</Typography>
+    return quickLinks && Array.isArray(quickLinks) ? <div data-testid="quick-link" className="d-flex flex-column gap-2 px-3 pt-2 pb-3 bg-white">
+        <Typography data-testid="title" variant="h6" className="mb-1">{title}</Typography>
         <Grid container spacing={1}>
             {
                 quickLinks.map((k, index) => {
-                    return <React.Fragment>
-                        <Grid item xs={6} sm={4} md={3} lg={3} spacing={2} key={index}>
+                    return <React.Fragment key={index}>
+                        <Grid item xs={6} sm={4} md={3} lg={3}>
                             <Paper className={`quickLinks ${k.class}`} onClick={k.onClick}>
                                 {k.to ? <>
                                     <Link key={index} to={k.to}
