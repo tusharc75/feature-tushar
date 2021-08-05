@@ -8,9 +8,10 @@ import {
     Menu,
     MenuItem,
     Tooltip,
+    Chip
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { quotePdfTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { quotePdfTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -39,6 +40,7 @@ const QuotePdfTemplate: FC = () => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
+    const { qbApi } = quoteBuilder;
 
     const {
         state: { user, permissions },
@@ -63,13 +65,13 @@ const QuotePdfTemplate: FC = () => {
     ];
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
 
@@ -91,11 +93,49 @@ const QuotePdfTemplate: FC = () => {
         } else setRenderCount((preCount) => preCount + 1);
     }, [page, limit, filters, sorting]);
 
+    const previewPdfTemplate = (templateId) => {
 
-    const NameRenderer = params => <Link className="link"
-        to={`${routes.quotePdfTemplate.path}/${params.data._id}`} title={params.value}>
-        {params.value}
-    </Link>;
+        toastConfig.setToastConfig({
+            hideDuration: null,
+            open: true,
+            type: "info",
+            message: `Downloading preview file, Please wait...`,
+        });
+
+        axiosInstance()
+            .get(`${qbApi}/getdummy/${templateId}`, {
+                responseType: "blob",
+            })
+            .then(({ data }) => {
+
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: "File downloaded Successfuly",
+                });
+
+                const file = new Blob([data], { type: "application/pdf" });
+                const fileURL = URL.createObjectURL(file);
+                const pdfWindow = window.open();
+                pdfWindow.location.href = fileURL;
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
+    const NameRenderer = params => <>
+        <Link className="link"
+            to={`${routes.quotePdfTemplateDetail.path}/${params.data._id}`} title={params.value}>
+            {params.value}
+        </Link>
+        &emsp;<Chip size="small" label="Preview"
+            color="primary"
+            onClick={() => {
+                previewPdfTemplate(params.data._id);
+            }}
+        />
+    </>;
 
     const ActionsRenderer = params => <>
         {permissions.quotePdfTemplate.isCreate &&
@@ -156,10 +196,10 @@ const QuotePdfTemplate: FC = () => {
 
     const CreateNew = (id, isClone) => {
         if (isClone) {
-            history.push(routes.quotePdfTemplate.path + "/" + id, { isClone: true })
+            history.push(routes.quotePdfTemplateDetail.path + "/" + id, { isClone: true })
         }
         else {
-            history.push(routes.quotePdfTemplate.path + "/0", { isClone: false })
+            history.push(routes.quotePdfTemplateDetail.path + "/0", { isClone: false })
         }
     }
 
@@ -315,7 +355,7 @@ const QuotePdfTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="quotePdfPage"/>
+                    loading={loading} renderedFrom="quotePdfPage" />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

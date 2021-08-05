@@ -13,9 +13,10 @@ const GlobalUserChat = () => {
     const { state: { user, chatter }, dispatch } = useData()
     const {
         socket,
-        setChatList,
         chatterIds,
+        setChatList,
         setChatterIds,
+        selectedChat,
     } = useContext(GlobalChatContext)
     const [unseen, setUnseen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -30,38 +31,32 @@ const GlobalUserChat = () => {
          if (socket !== null) {
              socket.on("data", () => {
                  getChats()
+                
              })
-
-             return () => {
-
-             }
          }
     }, [socket])
 
     const getChats = useCallback(() => {
-        axiosInstance().get("/chatter/user-to-user/my")
+        axiosInstance().get("/chatter/user-to-user/my?orderBy=desc&sortBy=message.date")
             .then(({ data: { data } }) => {
 
                 let newData = [];
                     data.forEach((d:any) => {
                         const obj = {
-                                    id: d.id,
-                                    chatTitle: d.users.filter(d => d._id !== user?.user?._id)
-                                        .map(_d => `${_d.firstName} ${_d.lastName}`).join(", "),
-                                    message: d?.message,
-                                    timeStamp: new Date(d?.message.date).getTime(),
-                                    ...d
-                                }
+                                id: d.id,
+                                chatTitle: d.users.filter(d => d._id !== user?.user?._id)
+                                    .map(_d => `${_d.firstName} ${_d.lastName}`)
+                                    .join(", "),
+                                message: d?.message,
+                                timeStamp: new Date(d?.message.date).getTime(),
+                                ...d
+                            }
                         newData.push(obj)
 
-                        if (d.unseen > 0) {
-                            setUnseen(true)                      
-                        } else {
-                            setUnseen(false)
-                        }
-                })
-
-
+                    })
+                
+                const yetUnseen = data?.filter(d => d.unseen > 0).length > 0 ? true : false
+                setUnseen(yetUnseen)
 
                 setChatList(newData)
                 setChatterIds(data.map(d => d.id))
@@ -71,7 +66,7 @@ const GlobalUserChat = () => {
             })
             .catch(() => { })
 
-    }, [chatter])
+    }, [chatter, selectedChat])
 
 
     useEffect(() => {
