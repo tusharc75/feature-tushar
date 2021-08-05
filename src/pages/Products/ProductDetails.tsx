@@ -140,6 +140,28 @@ export default function ProductDetails() {
 
       </Grid>
       <Box className="detail-container">
+        {showCreateQuoteDialog && (
+          <ManageQuoteDialog
+            open={showCreateQuoteDialog}
+            onSuccess={() => { }}
+            onClose={() => {
+              setshowCreateQuoteDialog(false)
+            }}
+            isNew={true}
+            dataToUpdate={null}
+            isClone={false}
+            resource={null}
+            isRedirectTodetailPage={true}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            contacts={null}
+            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
+            isRenderedFromOpportunity={false}
+            isCreateQuoteFromCart={true}
+            onHandleSubmit={handleCreateQuote}
+          />
+        )}
         <div className={styles.container_box}>
           {productDetails ? (
             <div className={styles.product_container}>
@@ -224,18 +246,18 @@ export default function ProductDetails() {
                   >
                     Add to cart
                   </Button>
-                  <Link to="/product/my-cart">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className="mr-2"
-                      startIcon={<AddShoppingCartIcon />}
-                      onClick={onCheckout}
-                    >
-                      {checkoutLabel}
-                    </Button>
-                  </Link>
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="mr-2"
+                    startIcon={<AddShoppingCartIcon />}
+                    onClick={onCheckout}
+                  >
+                    {checkoutLabel}
+                  </Button>
+
                   <Button
                     variant="outlined"
                     color="secondary"
@@ -265,28 +287,7 @@ export default function ProductDetails() {
           <div className="a_divider_inner"></div>
           <RatingAndReviewChart />
         </div>
-        {showCreateQuoteDialog && (
-          <ManageQuoteDialog
-            open={showCreateQuoteDialog}
-            onSuccess={() => { }}
-            onClose={() => {
-              setshowCreateQuoteDialog(false)
-            }}
-            isNew={true}
-            dataToUpdate={null}
-            isClone={false}
-            resource={null}
-            isRedirectTodetailPage={true}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            contacts={null}
-            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
-            isRenderedFromOpportunity={false}
-            isCreateQuoteFromCart={true}
-            onHandleSubmit={handleCreateQuote}
-          />
-        )}
+
       </Box>
     </Layout>
   );
