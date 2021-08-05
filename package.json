@@ -75,7 +75,10 @@
     "sourceMapBuild": "react-scripts --max_old_space_size=4096 build",
     "postbuild": "node uploadSourcemaps.js",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "commit": "cz",
+    "release": "standard-version",
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": [
@@ -97,6 +100,8 @@
     ]
   },
   "devDependencies": {
+    "@commitlint/cli": "^13.1.0",
+    "@commitlint/config-conventional": "^13.1.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -105,9 +110,13 @@
     "@types/jest": "^26.0.21",
     "@types/node": "^14.14.35",
     "@types/react-big-calendar": "^0.31.0",
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^7.0.1",
     "node-sass": "4.14.1",
     "prettier": "^2.3.2",
-    "sentry-files": "^1.0.1"
+    "sentry-files": "^1.0.1",
+    "standard-version": "^9.3.1"
   },
   "prettier": {
     "arrowParens": "always",
@@ -127,5 +136,10 @@
     "useTabs": false,
     "vueIndentScriptAndStyle": false,
     "rangeStart": 0
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
