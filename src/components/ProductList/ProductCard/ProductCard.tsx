@@ -36,6 +36,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
     return netPrice;
 
   }
+
   return (
     <div className={styles.product_card}>
       {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
@@ -49,6 +50,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
           : <BsImage className={styles.no_image} />
         }
       </Box>
+
       <div className={styles.text}>
         <h4 onClick={() => { history.push(`product/details/${product._id}`) }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
@@ -62,7 +64,9 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
             }
           </div>
           <Button variant="outlined" color="secondary" size="small"
-            onClick={() => onAddItem(product, { isAdd: true })} startIcon={<AddShoppingCartIcon />}>
+            // onClick={() => onAddItem(product, { isAdd: true })}
+            onClick={() => onAddItem(product)}
+            startIcon={<AddShoppingCartIcon />}>
             Add to cart
           </Button>
         </Box>
