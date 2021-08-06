@@ -69,7 +69,7 @@ function MyCart() {
     axiosInstance()
       .get(`${product.api}?limit=0`)
       .then(({ data: { data } }) => {
-        // setProductLoading(false)
+        setProductLoading(false)
         setProducts(data);
         setClonedProducts(data)
       })
