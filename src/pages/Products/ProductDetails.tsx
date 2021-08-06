@@ -258,7 +258,7 @@ export default function ProductDetails() {
                     {checkoutLabel}
                   </Button>
 
-                  <Button
+                  {/* <Button
                     variant="outlined"
                     color="secondary"
                     size="small"
@@ -273,7 +273,7 @@ export default function ProductDetails() {
                     className="mr-2"
                   >
                     Add to Planner
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </div>
