@@ -766,7 +766,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) => {
-                if (!lookup && setFieldValue) {
+              if (setFieldValue) {
+                  if (!lookup) {
                   if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
 
                     const newOption = {
@@ -807,14 +808,15 @@ const FormTypes = (props) => {
                     }
                   }
                 } else {
-                handleChange(name, val && val.optionValue ? val.optionValue : '');
+                  handleChange(name, val && val.optionValue ? val.optionValue : '');
+                }
                 }
               }
         }
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup) {
             filtered.push({
                 order: option.length,
                 default: false,
@@ -1264,7 +1266,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any, reason) => {
-                if (!lookup  && setFieldValue) {
+              if (setFieldValue) {
+                  if (!lookup) {
                   if (reason === 'clear') {
                     setFieldValue(name, []);
                   } else if (reason === 'remove-option' && values[name].length === 1) {
@@ -1317,12 +1320,14 @@ const FormTypes = (props) => {
                     value.map((val) => val.optionValue)
                   );
                 }
+                }
+                
               }
         }
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup) {
             filtered.push({
                 order: option.length,
                 default: false,
