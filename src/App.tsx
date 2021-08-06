@@ -86,7 +86,7 @@ import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
-import MyCart from "./components/ProductList/MyCart/myCart";
+import MyCart from "./components/ProductList/MyCart/MyCart";
 import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 import ErrorBoundaryComponent from "./ErrorBoundary"
 
