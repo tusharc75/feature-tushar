@@ -9,10 +9,8 @@ export const GlobalChatProvider = ({ children }) => {
 
     const [chatList, setChatList] = useState([]);
     const [chatterIds, setChatterIds] = useState([])
-    const [messages, setMessages] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null)
     const [socket, setSocket] = useState<Socket>(null);
-        const [currentUser, setCurrentUser] = useState("")
 
 
      useEffect(() => {
@@ -25,6 +23,10 @@ export const GlobalChatProvider = ({ children }) => {
         });
         setSocket(s);
      }, []);
+    
+    
+    
+    
 
 
     return (
@@ -37,9 +39,6 @@ export const GlobalChatProvider = ({ children }) => {
                 socket,
                 selectedChat,
                 setSelectedChat,
-                messages,
-                setMessages,
-                currentUser, setCurrentUser
             }}
         >
             {children}

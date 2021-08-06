@@ -20,6 +20,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { FixedSizeList } from 'react-window';
 
 const MenuProps = {
     PaperProps: {
@@ -31,11 +32,16 @@ const MenuProps = {
 
 export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
 
+
+    const [isUpdate, setUpdate] = useState(false);
+
+
     useEffect(() => {
         if (!values["option"] || values["option"].length === 0) {
             setFieldValue("option", [{ optionLabel: "Option 1", optionValue: "Option 1" }])
         }
     }, []);
+
 
     const onChangeValue = (index, fieldName, value) => {
         let data = [...values["option"]]
@@ -54,6 +60,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
             }
         }
         setFieldValue("option", data)
+        setUpdate(!isUpdate)
     };
 
 
@@ -122,6 +129,72 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
         return result;
     }
 
+    const Row = React.useMemo(() => {
+        return React.forwardRef(
+            (props2: any, ref2: any) => <div style={props2.style} ref={ref2}>
+                <Box bgcolor="white" border={1} p={1} borderColor="grey.300" width={"100%"} >
+                    <Box display="flex" flexDirection="row" >
+                        <Box minWidth={100}>
+                            <IconButton aria-label="setting" onClick={() => AddRemoveValue("add", props2.index)} >
+                                <AddCircleOutlineIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton aria-label="setting" onClick={() => AddRemoveValue("remove", props2.index)} >
+                                <RemoveCircleOutlineIcon fontSize="small" />
+                            </IconButton>
+                        </Box>
+                        <Box minWidth={200} maxWidth={200} pl={1}>
+                            <TextField
+                                key={props2.index}
+                                id="standard-basic"
+                                variant="outlined"
+                                margin="dense"
+                                fullWidth
+                                style={{ margin: 0 }}
+                                value={values["option"][props2.index].optionLabel}
+                                onChange={(event) => {
+                                    onChangeValue(props2.index, "optionLabel", event.target.value)
+                                }}
+                            />
+                        </Box>
+                        {values["inputFields"] && values["inputFields"].map((_row) => (
+                            <Box minWidth={200} maxWidth={200} pl={1}>
+                                {(fields.filter((_f) => _f.fieldName === _row).length) &&
+                                    fields.filter((_f) => _f.fieldName === _row)[0].type === "dropDown" ||
+                                    fields.filter((_f) => _f.fieldName === _row)[0].type === "vlookupDropdown" ?
+                                    <Select
+                                        id="demo-simple-select-outlined"
+                                        fullWidth
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={values["option"][props2.index][_row]}
+                                        onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
+                                    >
+                                        {fields.filter((_f) => _f.fieldName === _row)[0].option &&
+                                            fields.filter((_f) => _f.fieldName === _row)[0].option.map((_option) => {
+                                                return (<MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                                                    {_option.optionLabel}
+                                                </MenuItem>
+                                                );
+                                            })
+                                        }
+                                    </Select>
+                                    :
+                                    <TextField
+                                        id="standard-basic"
+                                        variant="outlined"
+                                        margin="dense"
+                                        fullWidth
+                                        style={{ margin: 0 }}
+                                        value={values["option"][props2.index][_row]}
+                                        onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
+                                    />
+                                }
+                            </Box>))}
+                    </Box>
+                </Box>
+            </div>,
+        );
+    }, [isUpdate]);
 
     return (
         <Box marginTop={2}>
@@ -137,7 +210,10 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                         <Chip variant="outlined" label={option} {...getTagProps({ index })} />
                     ))
                 }
-                onChange={(e, value) => setFieldValue("inputFields", convertLabeltoValue(value))}
+                onChange={(e, value) => {
+                    setFieldValue("inputFields", convertLabeltoValue(value))
+                    setUpdate(!isUpdate)
+                }}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -172,7 +248,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                         </Grid>
                     </Grid>
                 </Box>
-                <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" maxHeight={300} style={{ overflow: "auto" }}>
+                <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" >
                     <Box bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300" width={"100%"} >
                         <Box display="flex" flexDirection="row">
                             <Box minWidth={100} pl={2}>
@@ -188,6 +264,16 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                             ))}
                         </Box>
                     </Box>
+                    <FixedSizeList
+                        height={300}
+                        width={"100%"}
+                        itemSize={55}
+                        itemData={values["option"] && values["option"]}
+                        itemCount={values["option"] && values["option"].length}
+                    >
+                        {Row}
+                    </FixedSizeList>
+                    {/* 
                     {values["option"] && values["option"].map((data, index) => (
                         <Box key={index} bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300" width={"100%"} >
                             <Box display="flex" flexDirection="row" >
@@ -246,7 +332,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                                     </Box>))}
                             </Box>
                         </Box>
-                    ))}
+                    ))} */}
                 </Box>
             </Box>
             {!values["isVlookup"] &&

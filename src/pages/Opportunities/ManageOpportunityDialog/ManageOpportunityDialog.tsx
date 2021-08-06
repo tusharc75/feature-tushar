@@ -424,6 +424,8 @@ export default function ManageOpportunityDialog({
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             disabled={disableOwnerAndAccount}
                                             values={values}
                                             errors={errors}
@@ -479,6 +481,8 @@ export default function ManageOpportunityDialog({
                                       </Grid>
                                     ) : field.fieldName === "owner" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -532,6 +536,8 @@ export default function ManageOpportunityDialog({
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -553,6 +559,8 @@ export default function ManageOpportunityDialog({
                                       />
                                     ) : field.fieldName === "probability" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -584,6 +592,8 @@ export default function ManageOpportunityDialog({
                                     ) : field.fieldName === "lostReason" ? (
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
+                                          fieldId={field._id}
+                                          lookup={field.lookup}
                                           // {...rest}
                                           values={values}
                                           errors={errors}
@@ -602,6 +612,8 @@ export default function ManageOpportunityDialog({
                                       ) : null
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -632,6 +644,8 @@ export default function ManageOpportunityDialog({
                                     ) : field.fieldName.trim() ===
                                       "estimatedAmount" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
@@ -675,6 +689,8 @@ export default function ManageOpportunityDialog({
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -757,6 +773,8 @@ export default function ManageOpportunityDialog({
                                             }
                                           >
                                             <FormTypes
+                                              fieldId={field._id}
+                                              lookup={field.lookup}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -819,6 +837,8 @@ export default function ManageOpportunityDialog({
                                         </Grid>
                                       </Grid> : (
                                         <FormTypes
+                                          fieldId={field._id}
+                                          lookup={field.lookup}
                                           // {...rest}
                                           values={values}
                                           errors={errors}
@@ -854,6 +874,8 @@ export default function ManageOpportunityDialog({
                         ) : (
                           form.sectionFields.map((field) => (
                             <FormTypes
+                              fieldId={field._id}
+                              lookup={field.lookup}
                               // {...rest}
                               values={values}
                               errors={errors}

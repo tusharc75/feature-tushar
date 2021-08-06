@@ -161,6 +161,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",
   },
+  quoteBuilderDetail: {
+    title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
+    path: "/quotes/detail",
+  },
   budget: {
     title: storedRoutes ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
@@ -172,6 +176,10 @@ const routes = {
   quotePdfTemplate: {
     title: storedRoutes ? storedRoutes.quotePdfTemplate?.title : RESOURCE_LABEL.quotePdfTemplate,
     path: "/quote-pdf-template",
+  },
+  quotePdfTemplateDetail: {
+    title: storedRoutes ? storedRoutes.quotePdfTemplate?.title : RESOURCE_LABEL.quotePdfTemplate,
+    path: "/quote-pdf-template/detail",
   },
   attachment: {
     title: storedRoutes ? storedRoutes.attachment?.title : RESOURCE_LABEL.attachment,

@@ -312,7 +312,7 @@ const User: FC = () => {
       .get(`/user${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, role, entities, ...restProperties } = u;
+          const { createdBy, updatedBy, role, entities, permissions, ...restProperties } = u;
 
           const [firstCompanyWideRole, ...restCompanyWideRoles] = role;
           const allRegionalWideRoles = uniqBy(entities.map(d => d.role).flat(), "_id") as any[];
@@ -335,7 +335,8 @@ const User: FC = () => {
             restCompanyWideRoles: restCompanyWideRoles,
             regionalWideRoleId: firstRegionalWideRole?._id ?? "",
             regionalWideRole: firstRegionalWideRole?.name ?? "",
-            restRegionalWideRoles: restRegionalWideRoles
+            restRegionalWideRoles: restRegionalWideRoles,
+            doaSetup: permissions?.doaSetup
           };
           return res;
         });
@@ -628,6 +629,7 @@ const User: FC = () => {
               openUserSetupDialog={() => {
                 setOpenUserSetupDialog(true);
               }}
+              assignDoaDisabled = {selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
             />
           </div>
 

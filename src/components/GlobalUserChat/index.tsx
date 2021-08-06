@@ -11,17 +11,14 @@ import "./chatStyles.scss"
 
 const GlobalUserChat = () => {
     const { state: { user, chatter }, dispatch } = useData()
-
     const {
         socket,
-        setChatList,
         chatterIds,
+        setChatList,
         setChatterIds,
-        messages,
-        setMessages,
         selectedChat,
-        setCurrentUser
     } = useContext(GlobalChatContext)
+    const [unseen, setUnseen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const open = Boolean(anchorEl)
 
@@ -31,53 +28,37 @@ const GlobalUserChat = () => {
 
 
     useEffect(() => {
-        if (socket !== null) {
-            socket.on("data", (data) => {
-                console.log(messages)
-                getChats()
-                getChatterInfo()
-            })
-
-            return () => {
-                socket.off("data")
-            }
-        }
+         if (socket !== null) {
+             socket.on("data", () => {
+                 getChats()
+                
+             })
+         }
     }, [socket])
 
-    useEffect(() => {
-        getChatterInfo()
-        if (selectedChat === null) { setMessages([]) }
-    }, [selectedChat])
-
-    const getChatterInfo = () => {
-        if (selectedChat) {
-            axiosInstance().get(`/chatter/${selectedChat.id}`)
-                .then(({ data: { data } }) => {
-                    setMessages(data.Messages)
-                    setCurrentUser(data.currentUser)
-                })
-                .catch(() => { })
-        }
-    }
-
     const getChats = useCallback(() => {
-        axiosInstance().get("/chatter/user-to-user/my")
+        axiosInstance().get("/chatter/user-to-user/my?orderBy=desc&sortBy=message.date")
             .then(({ data: { data } }) => {
 
-                data = data.map(d => ({
-                    id: d.id,
-                    chatTitle: d.users.filter(d => d._id !== user?.user?._id)
-                        .map(_d => `${_d.firstName} ${_d.lastName}`).join(", "),
-                    message: d?.message,
-                    timeStamp: new Date(d?.message.date).getTime()
-                }))
+                let newData = [];
+                    data.forEach((d:any) => {
+                        const obj = {
+                                id: d.id,
+                                chatTitle: d.users.filter(d => d._id !== user?.user?._id)
+                                    .map(_d => `${_d.firstName} ${_d.lastName}`)
+                                    .join(", "),
+                                message: d?.message,
+                                timeStamp: new Date(d?.message.date).getTime(),
+                                ...d
+                            }
+                        newData.push(obj)
 
+                    })
+                
+                const yetUnseen = data?.filter(d => d.unseen > 0).length > 0 ? true : false
+                setUnseen(yetUnseen)
 
-                // const sortedArry =
-                // data.sort((a, b) => (a.timeStamp > b.timeStamp) ? 1 : ((b.timeStamp > a.timeStamp) ? -1: 0))
-
-                // console.log(sortedArry)
-                setChatList(data)
+                setChatList(newData)
                 setChatterIds(data.map(d => d.id))
                 if (chatter) {
                     dispatch({ type: SET_CHATTER, payload: null })
@@ -85,7 +66,7 @@ const GlobalUserChat = () => {
             })
             .catch(() => { })
 
-    }, [chatter])
+    }, [chatter, selectedChat])
 
 
     useEffect(() => {
@@ -108,7 +89,7 @@ const GlobalUserChat = () => {
 
     return (
         <div className="global-chat">
-            <Badge variant='dot' overlap="circle" badgeContent=" ">
+            <Badge color="secondary" badgeContent=" " invisible={!unseen} variant="dot">
                 <Fab id={open ? "chats-popover" : undefined}
                     onClick={handleOpenPopup}
                     size="small"
@@ -122,7 +103,7 @@ const GlobalUserChat = () => {
                     open={open}
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
-
+                    getChats={getChats}
                 />}
         </div>
     )

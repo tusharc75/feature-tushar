@@ -243,6 +243,8 @@ export default function ManageContact(props) {
                                   >
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
+                                        field={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -308,6 +310,8 @@ export default function ManageContact(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        field={field._id}
+                                        lookup={field.lookup}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -362,6 +366,8 @@ export default function ManageContact(props) {
                                           }
                                         >
                                           <FormTypes
+                                            field={field._id}
+                                            lookup={field.lookup}
                                             values={
                                               accountId
                                                 ? initializeAccountDropdown(
@@ -429,6 +435,8 @@ export default function ManageContact(props) {
                                       </Grid>
                                     ) : field.fieldName === "reportsTo" ? (
                                       <FormTypes
+                                        field={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -450,6 +458,8 @@ export default function ManageContact(props) {
                                       />
                                     ) : (
                                       <FormTypes
+                                        field={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}

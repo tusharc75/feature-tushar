@@ -146,7 +146,7 @@ const QuoteApproval = () => {
             body = { status: "Accepted by Customer", signature: signedDocumentBase64 , token : token}
         }
         else {
-            body = { status: "Rejected by Customer", comment: comment }
+            body = { status: "Rejected by Customer", comment: comment, token : token }
         }
         axios.post(backendApi + "/quote-builder/updateStatusfromCustomer/" + id + location, body)
             .then(() => {

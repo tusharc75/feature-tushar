@@ -35,6 +35,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import AddIcon from "@material-ui/icons/AddCircle";
+import GetAppIcon from '@material-ui/icons/GetApp';
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
@@ -646,6 +647,37 @@ export default function ManageQuoteDialog({
     setCustomError({ ...tempErrors });
   };
 
+  const previewPdfTemplate = (templateId) => {
+
+    toastConfig.setToastConfig({
+      hideDuration: null,
+      open: true,
+      type: "info",
+      message: `Downloading preview file, Please wait...`,
+    });
+
+    axiosInstance()
+      .get(`${qbApi}/getdummy/${templateId}`, {
+        responseType: "blob",
+      })
+      .then(({ data }) => {
+
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: "File downloaded Successfuly",
+        });
+
+        const file = new Blob([data], { type: "application/pdf" });
+        const fileURL = URL.createObjectURL(file);
+        const pdfWindow = window.open();
+        pdfWindow.location.href = fileURL;
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   return (
     <>
       <Dialog
@@ -698,6 +730,8 @@ export default function ManageQuoteDialog({
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "quoteName" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -743,6 +777,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -831,6 +867,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -912,6 +950,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -978,8 +1018,68 @@ export default function ManageQuoteDialog({
                                           </Grid>
                                         ) : null}
                                       </Grid>
+                                    ) : field.fieldName === "pDFTemplate" ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={10}
+                                          sm={10}
+                                          md={10}
+                                        >
+                                          <FormTypes
+                                            lookup={field.lookup}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={
+                                              field?.isTooltip || false
+                                            }
+                                            tooltipMessage={
+                                              field?.tooltipMessage
+                                            }
+                                            doNotShowInfoTooltip={true}
+                                            size="small"
+                                          />
+                                        </Grid>
+                                        <Grid item xs={1} sm={1} md={1}>
+                                          <Tooltip
+                                            title="Preview PDF Template"
+                                            className="mt-1"
+                                          >
+                                            <IconButton
+                                              disabled={!values.pDFTemplate}
+                                              onClick={() => {
+                                                previewPdfTemplate(values.pDFTemplate)
+                                              }}
+                                              size="small"
+                                            >
+                                              <GetAppIcon color={values.pDFTemplate ? "primary" : "disabled" } />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </Grid>
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip
+                                              title={
+                                                field?.tooltipMessage ?? ""
+                                              }
+                                            >
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
                                     ) : field.fieldName === "owner" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1033,6 +1133,8 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1054,6 +1156,8 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "probability" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -1085,6 +1189,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "lostReason" ? (
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
+                                          fieldId={field._id}
+                                          lookup={field.lookup}
                                           // {...rest}
                                           values={values}
                                           errors={errors}
@@ -1103,6 +1209,8 @@ export default function ManageQuoteDialog({
                                       ) : null
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         disabled={disableCurrency}
                                         values={values}
                                         errors={errors}
@@ -1133,6 +1241,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "estimatedAmount" ||
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
@@ -1165,6 +1275,8 @@ export default function ManageQuoteDialog({
                                       "invoicedDate",
                                     ].indexOf(field?.fieldName) >= 0 ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -1217,6 +1329,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1297,6 +1411,8 @@ export default function ManageQuoteDialog({
                                             }
                                           >
                                             <FormTypes
+                                              fieldId={field._id}
+                                              lookup={field.lookup}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1359,6 +1475,8 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                       </Grid> : (
                                         <FormTypes
+                                          fieldId={field._id}
+                                          lookup={field.lookup}
                                           // {...rest}
                                           values={values}
                                           errors={errors}
@@ -1394,6 +1512,8 @@ export default function ManageQuoteDialog({
                         ) : (
                           form.sectionFields.map((field) => (
                             <FormTypes
+                              fieldId={field._id}
+                              lookup={field.lookup}
                               // {...rest}
                               values={values}
                               errors={errors}

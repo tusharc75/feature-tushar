@@ -101,18 +101,18 @@ const AssignRegionalRolesUserDialog = ({
 
 
     const handleSearch = (e) => {
-        let value = e.target.value.toLowerCase();
+        let value = e.target.value;
         setSearch(value);
         let resultUser = [];
         let resultEntity = [];
 
         resultUser = userConst.filter((data) => {
-            return data.concatedName?.search(value) != -1 || data.email?.search(value) != -1;
+            return data.concatedName?.toLowerCase().search(value.toLowerCase()) != -1 || data.email?.toLowerCase().search(value.toLowerCase()) != -1;
 
         });
         setUser(resultUser)
         resultEntity = entityConst.filter((data) => {
-            return data.address?.search(value) != -1 || data.entityName?.search(value) != -1
+            return data.address?.toLowerCase().search(value.toLowerCase()) != -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) != -1
         });
         setEntity(resultEntity)
     };
@@ -213,7 +213,7 @@ const AssignRegionalRolesUserDialog = ({
             <CustomDialogContent>
                 {(loadingData ? (
                     <Loader text={`Loading User`} />
-                ) : user.length ? (
+                ) : userConst.length ? (
                     <>
                         <Grid container>
                             <Grid item xs={12} md={6} sm={6} >

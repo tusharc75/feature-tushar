@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from 'react';
-import PropTypes from 'prop-types'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import {
     Popover,
@@ -37,7 +36,7 @@ const ChatsPopover = (props) => {
     const classes = useStyles();
     const {socket, chatList, selectedChat, setSelectedChat} = useContext(GlobalChatContext)
     const {state: {user: { user}}} = useData()
-    const { open, anchorEl, setAnchorEl } = props;  
+    const { open, anchorEl, setAnchorEl, getChats } = props;  
     const [newChat, setNewChat] = useState(false)
     const [users, setUsers] = useState([])
 
@@ -46,10 +45,8 @@ const ChatsPopover = (props) => {
     }
 
     useEffect(() => {
-      fetchUsersList()
+        fetchUsersList()
     }, [])
-    
-        // Create connection between user with chatterID
     
 
     const fetchUsersList = () => {
@@ -107,7 +104,8 @@ const ChatsPopover = (props) => {
                             ? selectedChat?.chatTitle
                             : newChat
                                 ? "New chat"
-                                : `Chats (${chatList.length})`}
+                                : `Chats (${chatList.length})`
+                        }
                     </Typography>
 
                     <Tooltip title="Close chat">
@@ -129,14 +127,16 @@ const ChatsPopover = (props) => {
                         />
                         : selectedChat
                             ?
-                            <ChatBox />
+                            <ChatBox getChats={getChats} />
                             : <List disablePadding className={classes.listRoot}>
-                                {chatList.map(chat => (
+                                {chatList.map((chat, i) => (
                                     <ChatList
+                                        key={i}
                                         userId={user._id}
                                         socket={socket}
                                         chat={chat}
                                         setSelectedChat={setSelectedChat}
+                                        getChats={getChats}
                                     />
                                 ))}
                             </List>}
@@ -145,16 +145,6 @@ const ChatsPopover = (props) => {
         </Popover>
        
     )
-}
-
-ChatsPopover.propTypes = {
-    open: PropTypes.bool,
-    anchorEl: PropTypes.any,
-    socket: PropTypes.any,
-    setAnchorEl: PropTypes.func,
-    setChatterId: PropTypes.func,
-    chatterId: PropTypes.string
-
 }
 
 

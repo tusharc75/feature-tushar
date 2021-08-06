@@ -4,37 +4,93 @@ import { SendOutlined } from '@material-ui/icons';
 import axiosInstance from '../../axios/axiosInstance';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 
-const ChatBox = () => {
-    const {selectedChat, messages, currentUser} = useContext(GlobalChatContext)
+const ChatBox = (props) => {
+    const {selectedChat, socket} = useContext(GlobalChatContext)
     const [messageValue, setMessageValue] = useState("");
+    const [messages, setMessages] = useState([]);
+    const [currentUser, setCurrentUser] = useState("")
+    // const [loading, setLoading] = useState(false)
+    const [chatUsers, setChatUsers] = useState([]);
+
+    useEffect(() => {
+        if (socket !== null) {
+            socket.on("data", (data: any) => {
+                if (selectedChat.id === data.chatterId) {
+                    setMessages([data, ...messages])
+                }
+            })
+        }
+    }, [socket, messages])
+
+    useEffect(() => {
+        if (selectedChat) {
+            getChatterInfo()
+            setChatUsers(selectedChat.users)
+        }
+    }, [selectedChat])
+
+    const getChatterInfo = () => {
+        if (selectedChat) {
+            axiosInstance()
+                .get(`/chatter/${selectedChat.id}`)
+                .then(({ data: { data } }) => {
+                    setMessages(data.Messages)
+                    setCurrentUser(data.currentUser)
+                })
+                .catch(() => {
+
+                 })
+        }
+    }
 
     const sendMessage = async (e) => {
         e.preventDefault()
         try {
             await axiosInstance()
                 .put(`/chatter/${selectedChat.id}`, { message: messageValue });
-            setMessageValue("")
+            
         } catch (err) {
-           
+            
         }
+        setMessageValue("")
     };
 
     const formatTime = (time) => new Date(time).toTimeString().split(":");
 
+    const user = (data) => chatUsers.find(_d => _d?._id === data.userid)
 
     return (
         <div className="global-chatbox">
+            {
+                selectedChat.chatTitle === "eQuip-t User" &&
+                <div className="not-found">
+                  <p>Account Deleted</p>
+                </div>
+            }
             <div className="chatbox-container">
-                {messages.map((data, i) => (
-                    <div key={i} className={`message-container ${data.userid === currentUser ? "my-message": ""}`}>
+                {messages && messages.map((data, i) => (
+                    <div key={i} className={`message-container ${data.userid === currentUser ? "my-message" : ""}`}>
+                        
                         <div
-                            className={`message-outlet ${data.userid === currentUser ? "my-color": ""}`}>
-                        <Typography>
-                            {data.message}
-                        </Typography>
+                            className={`message-outlet ${data.userid === currentUser ? "my-color ml-4": "mr-4"}`}>
+                            {selectedChat && chatUsers?.length > 2
+                            ? <p className="username">
+                                    {!user(data)
+                                        ? "eQuip-t User"
+                                        : user(data)?._id !== currentUser && user(data)?.firstName
+                                    }
+                            </p>
+                            : null
+                            }
+                            <div className="msg-data">
+
+                            <Typography>
+                              {data.message}
+                            </Typography>
                             <p className="message-time">
                                 {`${formatTime(data.date)[0]}:${formatTime(data.date)[1]}`}
                             </p>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -43,12 +99,13 @@ const ChatBox = () => {
             
             <form onSubmit={sendMessage} className="chatbox-input">
                 <input
+                    disabled={selectedChat.chatTitle==="eQuip-t User"}
                     placeholder="Start Typing..."
                     value={messageValue}
                     onChange={(e) => setMessageValue(e.target.value)}
                 />
                 <Box mr={1}>
-                <IconButton color="primary" disabled={!messageValue} type="submit" size="small">
+                <IconButton color="primary" disabled={!messageValue || selectedChat.chatTitle==="eQuip-t User"} type="submit" size="small">
                     <SendOutlined/>
                 </IconButton>
                 </Box>
