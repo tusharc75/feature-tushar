@@ -203,35 +203,35 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
             {
               quoteDOA ?
                 (quoteDOA.map((label) => (
-                  <Step key={label.id}>
-                    <StepLabel StepIconComponent={label.status === "approve" ?
+                  <Step key={label?.id}>
+                    <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove
-                      : label.status === "pending" ?
+                      : label?.status === "pending" ?
                         QontoStepIconForPending :
                         QontoStepIconForReject
                     }>
                       <div style={{ color: "#09445A" }}>
                         <Link
-                          title={label.name}
+                          title={label?.name}
                           className="link"
-                          to={`${routes.userDetail.path}/${label.id}`}
+                          to={`${routes.userDetail.path}/${label?.id}`}
                         >
-                          {`${label.firstName} ${label.lastName}`}
+                          {`${label?.firstName} ${label?.lastName}`}
                         </Link>
                       </div>
                     </StepLabel>
                   </Step>
                 )))
                 : (steps.map((label) => (
-                  <Step key={label.id}>
+                  <Step key={label?.id}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
                       <div style={{ color: "#09445A" }}>
                       <Link
-                          title={label.name}
+                          title={label?.name}
                           className="link"
-                          to={`${routes.userDetail.path}/${label.id}`}
+                          to={`${routes.userDetail.path}/${label?.id}`}
                         >
-                          {`${label.firstName} ${label.lastName}`}
+                          {`${label?.firstName} ${label?.lastName}`}
                         </Link>
                       </div>
                       {doaCurrency && <div style={{ color: "#09445A" }}>{
@@ -239,7 +239,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                           ? getUniqueCurrencies().filter(
                             (data) => data?.currencyCode === doaCurrency
                           )[0].symbolNative
-                          : null}{label.amount}
+                          : null}{label?.amount}
                       </div>}
 
                     </StepLabel>
