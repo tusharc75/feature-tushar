@@ -43,6 +43,7 @@ import { displayCardDate } from "../../constants/helpers";
 import ChatIcon from "@material-ui/icons/Chat";
 import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import { backendApi } from "../../config";
+import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -170,6 +171,7 @@ const Header = ({ toggleDrawer }) => {
   const { instance, accounts, inProgress } = useMsal();
   const account = useAccount(accounts[0] || {});
 
+
   const {
     state: { user, selectedEntity },
     dispatch,
@@ -197,10 +199,25 @@ const Header = ({ toggleDrawer }) => {
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
+  const [cartCount, setCartCount] = useState(0)
 
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] =
     React.useState(null);
+
+  useEffect(() => {
+    fetchCart()
+  }, [])
+
+  const fetchCart = () => {
+    axiosInstance()
+      .get(`/user/cart`).then(({ data: { data } }) => {
+
+        if (data) {
+          setCartCount(data.length)
+        }
+      })
+  }
 
   const handleFullScreenNotificationClick = (event) => {
     setFullScreenNotificationAnchorEl(event.currentTarget);
@@ -472,7 +489,7 @@ const Header = ({ toggleDrawer }) => {
     }
   };
 
-  const hasAccessToEntity =async (id) => {
+  const hasAccessToEntity = async (id) => {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
   }
@@ -483,17 +500,17 @@ const Header = ({ toggleDrawer }) => {
 
   const handleRedirect = (id, resourceId, resourcePath) => (
     id === selectedEntity ?
-    history.push(
-      resourceId
-        ? `${resourcePath}/${resourceId}`
-        : resourcePath
-    )
-  
-    :hasAccessToEntity(id) ? handleEntityChange(id) && history.push(
-      resourceId
-        ? `${resourcePath}/${resourceId}`
-        : resourcePath
-    ):''
+      history.push(
+        resourceId
+          ? `${resourcePath}/${resourceId}`
+          : resourcePath
+      )
+
+      : hasAccessToEntity(id) ? handleEntityChange(id) && history.push(
+        resourceId
+          ? `${resourcePath}/${resourceId}`
+          : resourcePath
+      ) : ''
 
   )
 
@@ -608,16 +625,16 @@ const Header = ({ toggleDrawer }) => {
                   handleFullScreenNotificationClose();
                   handleMobileScreenNotificationClose();
 
-                  if(d?.entity){
-                   handleRedirect(d?.entity,d?.resourceId,d?.resourcePath)
-                  }else{
+                  if (d?.entity) {
+                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath)
+                  } else {
                     history.push(
                       d?.resourceId
                         ? `${d?.resourcePath}/${d?.resourceId}`
                         : d?.resourcePath
                     )
                   }
-                    
+
                 }}
               >
                 {
@@ -720,16 +737,16 @@ const Header = ({ toggleDrawer }) => {
                   handleFullScreenChatNotificationClose();
                   handleMobileScreenChatNotificationClose();
 
-                  if(d?.entity){
-                    handleRedirect(d?.entity,d?.resourceId,d?.resourcePath)
-                  }else{
+                  if (d?.entity) {
+                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath)
+                  } else {
                     history.push(
                       d?.resourceId
                         ? `${d?.resourcePath}/${d?.resourceId}`
                         : d?.resourcePath
                     )
                   }
-                    
+
                 }}
               >
                 {
@@ -1083,6 +1100,20 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenNotificationId}
                 aria-label="settings"
                 color="inherit"
+                onClick={() => {
+                  history.push({
+                    pathname: "/product/my-cart",
+                  })
+                }}
+              >
+                <Badge color="secondary" badgeContent={cartCount} >
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+              <IconButton
+                aria-describedby={fullScreenNotificationId}
+                aria-label="settings"
+                color="inherit"
                 onClick={handleFullScreenNotificationClick}
               >
                 <Badge
@@ -1133,8 +1164,7 @@ const Header = ({ toggleDrawer }) => {
               >
                 <Badge
                   badgeContent={chatNotification ? chatNotification.count : 0}
-                  color="secondary"
-                >
+                  color="secondary">
                   <ChatIcon />
                 </Badge>
               </IconButton>
