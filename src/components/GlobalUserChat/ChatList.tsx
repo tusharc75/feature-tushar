@@ -10,14 +10,7 @@ import axiosInstance from '../../axios/axiosInstance'
 
 
 const ChatList = (props) => {
-  const { socket, chat, setSelectedChat, userId, getChats } = props
-
-
-  useEffect(() => {
-    getChats()
-  }, [socket])
-
-
+  const { chat, setSelectedChat, userId } = props
 
   const onChatClick = () => {
     setSelectedChat(chat)

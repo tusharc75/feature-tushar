@@ -25,7 +25,6 @@ import CustomAgGridEditable, {
 } from "../../components/AgGridComponents/CustomAgGridEditable";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import BulkEditDialog from "./BulkEditDialog";
-import _ from "lodash";
 import Loader from "../Loader";
 import { handleAutoCalculation } from "../../constants/formulaUtility";
 import { gridLoadingTimeout } from "../../constants/helpers";
@@ -500,7 +499,7 @@ const ProductBuilder = (props) => {
     if (selectedRecords.length === 0) {
       return true;
     } else if (
-      _.uniq(_.map(selectedRecords, "priceTemplate.optionValue")).length ===
+      uniq(map(selectedRecords, "priceTemplate.optionValue")).length ===
       1 &&
       stage === "cost"
     ) {

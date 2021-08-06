@@ -45,10 +45,8 @@ const ChatsPopover = (props) => {
     }
 
     useEffect(() => {
-      fetchUsersList()
+        fetchUsersList()
     }, [])
-    
-        // Create connection between user with chatterID
     
 
     const fetchUsersList = () => {

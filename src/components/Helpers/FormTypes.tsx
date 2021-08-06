@@ -24,7 +24,7 @@ import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtils
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete, {createFilterOptions} from '@material-ui/lab/Autocomplete';
 import MuiPhoneInput from 'material-ui-phone-number';
 import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
@@ -48,6 +48,8 @@ import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
+
+const filter = createFilterOptions();
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -152,6 +154,7 @@ const FormTypes = (props) => {
     lookup,
     type,
     label,
+    fieldId,
     name,
     errors,
     values,
@@ -389,6 +392,13 @@ const FormTypes = (props) => {
         }
       });
   };
+
+  const addFieldOption = (optionData, id) => {
+    axiosInstance().post("field/add-field-option", {
+      _id: id,
+      option: [optionData]
+    })
+  }
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -758,37 +768,67 @@ const FormTypes = (props) => {
             : (e, val) => {
                 if (!lookup && setFieldValue) {
                   if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                    const newOptions = [
-                      ...option,
-                      {
+
+                    const newOption = {
                         order: option.length,
                         default: false,
                         optionLabel: val,
                         optionValue: val
                       }
-                    ];
-                    setOptionsList(newOptions);
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([...option, newOption]);
+                    }
                     handleChange(name, val);
                   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                    const newOptions = [
-                      ...option,
-                      {
+                    const newOption = {
                         order: option.length,
                         default: false,
                         optionLabel: val.inputValue,
                         optionValue: val.inputValue
                       }
-                    ];
-                    setOptionsList(newOptions);
+                      if (!option?.find(o => o?.optionValue.includes(val.inputValue))) {
+                        setOptionsList([...option, newOption]);
+                        addFieldOption(newOption, fieldId)
+                    }
                     handleChange(name, val.inputValue);
                   } else {
-                    handleChange(name, val && val.optionValue ? val.optionValue : '');
+                    if (val) {
+                      const newOption = {
+                        ...val,
+                        optionLabel: val.optionValue,
+                      }
+                      if (!option?.find(o => o?.optionValue.includes(val.optionValue))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([newOption,...option]);
+                    }
+                      handleChange(name, val && val.optionValue ? val.optionValue : '');
+                    }
                   }
                 } else {
                 handleChange(name, val && val.optionValue ? val.optionValue : '');
                 }
               }
         }
+        filterOptions={(options, params) => {
+          const filtered = filter(options, params);
+
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))) {
+            filtered.push({
+                order: option.length,
+                default: false,
+                optionLabel: `Add "${params.inputValue}"`,
+                optionValue: params.inputValue
+            })
+          }
+
+          return filtered
+        }}
+        selectOnFocus
+        clearOnBlur
+        handleHomeEndKeys
+        forcePopupIcon={true}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -1224,7 +1264,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any, reason) => {
-                if (!lookup) {
+                if (!lookup  && setFieldValue) {
                   if (reason === 'clear') {
                     setFieldValue(name, []);
                   } else if (reason === 'remove-option' && values[name].length === 1) {
@@ -1232,34 +1272,43 @@ const FormTypes = (props) => {
                   }
                   value.forEach((val) => {
                     if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                      const newOptions = [
-                        ...option,
-                        {
-                          order: option.length,
-                          default: false,
-                          optionLabel: val,
-                          optionValue: val
-                        }
-                      ];
-                      setOptionsList(newOptions);
+                      const newOption = {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val,
+                        optionValue: val
+                      }
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([...option, newOption]);
+                    }
                       setFieldValue(name, [...values[name], val]);
                     } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                      const newOptions = [
-                        ...option,
-                        {
-                          order: option.length,
-                          default: false,
-                          optionLabel: val.inputValue,
-                          optionValue: val.inputValue
-                        }
-                      ];
-                      setOptionsList(newOptions);
+                       const newOption = {
+                        order: option.length,
+                        default: false,
+                        optionLabel: val.inputValue,
+                        optionValue: val.inputValue
+                      }
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                        addFieldOption(newOption, fieldId)
+                        setOptionsList([...option, newOption]);
+                    }
                       setFieldValue(name, [...values[name], val.inputValue]);
                     } else {
-                      setFieldValue(
-                        name,
-                        value.map((val) => val.optionValue)
-                      );
+                      if (val) {
+                        const newOption = {
+                          ...val,
+                          optionLabel: val.optionValue,
+                        }
+                        if (!option?.find(o => o?.optionValue.includes(val.optionValue))) {
+                          addFieldOption(newOption, fieldId)
+                          setOptionsList([newOption,...option]);
+                        }
+                        setFieldValue(name, value.map((val) => val.optionValue));
+                      }
                     }
                   });
                 } else {
@@ -1270,6 +1319,21 @@ const FormTypes = (props) => {
                 }
               }
         }
+        filterOptions={(options, params) => {
+          const filtered = filter(options, params);
+
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))) {
+            filtered.push({
+                order: option.length,
+                default: false,
+                optionLabel: `Add "${params.inputValue}"`,
+                optionValue: params.inputValue
+            })
+          }
+
+          return filtered
+        }}
+        forcePopupIcon={true}
         renderInput={(params) => (
           <TextField
             {...params}
