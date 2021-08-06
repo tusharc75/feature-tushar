@@ -86,7 +86,7 @@ import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
-import MyCart from "./components/ProductList/MyCart/MyCart";
+import MyCart from "./components/ProductList/MyCart/myCart";
 import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 import ErrorBoundaryComponent from "./ErrorBoundary"
 
@@ -460,7 +460,7 @@ function App() {
             <PrivateRoute exact path={routes.quotePdfTemplate.path}>
               <QuotePdfTemplate />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quotePdfTemplate.path}/:id`}>
+            <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
               <CreateQuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
@@ -492,7 +492,7 @@ function App() {
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quoteBuilder.path}/detail/:id`}>
+            <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
             <Route exact path={"/dashboards"}>
