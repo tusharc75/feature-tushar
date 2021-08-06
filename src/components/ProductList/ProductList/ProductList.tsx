@@ -51,21 +51,6 @@ const ProductList = ({ products }) => {
     }
     return (
         <>
-<<<<<<< HEAD
-        <div className={styles.wrapper}>
-          
-            <CategorySidebar />
-            
-            <Box className={styles.detailContainerOne} >
-                <div className={`${styles.product_list_container}`}>
-                    {
-                        products.map((product, index: number) => (
-                            <Product key={index} product={product} />
-                        ))
-                    }
-                </div>
-            </Box>
-=======
             <div className={styles.wrapper}>
 
                 <CategorySidebar />
@@ -82,7 +67,6 @@ const ProductList = ({ products }) => {
                         }
                     </div>
                 </Box>
->>>>>>> bfb144557923bbf916b055b04ec8c54f5401a29e
             </div>
         </>
     );

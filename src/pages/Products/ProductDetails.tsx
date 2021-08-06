@@ -219,11 +219,11 @@ export default function ProductDetails() {
                     <a className="option">(1)</a>
                   </div>
                   <div className={styles.controls_over}>
-                    <h5><li>Mesuring Unit</li></h5>
+                    <h5><li>Measuring Unit</li></h5>
                     <a className="option">(1)</a>
                   </div>
                   <div className={styles.controls_over}>
-                    <h5><li>Mesuring Unit</li></h5>
+                    <h5><li>Measuring Unit</li></h5>
                     <a className="option">(1)</a>
                   </div>
                 </div>
@@ -275,19 +275,12 @@ export default function ProductDetails() {
                     variant="contained"
                     color="primary"
                     size="small"
-<<<<<<< HEAD
                     className={styles.primary_buttons}
-                    onClick={() => { }}
-=======
-                    className="mr-2"
-
->>>>>>> bfb144557923bbf916b055b04ec8c54f5401a29e
                     startIcon={<AddShoppingCartIcon />}
                     onClick={() => onAddToCartItem(productDetails)}
                   >
                     Add to cart
                   </Button>
-<<<<<<< HEAD
                   <Link to="/product/my-cart">
                     <Button
                       variant="contained"
@@ -301,9 +294,6 @@ export default function ProductDetails() {
                   </Link>
                 </div>
                 <div className={'footer' && styles.button_layout}>
-=======
-
->>>>>>> bfb144557923bbf916b055b04ec8c54f5401a29e
                   <Button
                     variant="contained"
                     color="primary"
