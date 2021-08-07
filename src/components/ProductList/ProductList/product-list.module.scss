@@ -4,13 +4,16 @@
   grid-gap: 20px;
   align-items: stretch;
   padding: 15px;
+  flex: 1;
 }
 .wrapper {
   display: flex;
+  background: white;
 }
 @media screen and (max-width: 700px) {
   .wrapper {
     display: flex;
     flex-direction: column;
+    background: white;
   }
 }
