@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.0.5...v1.1.0) (2021-08-07)
+
+
+### Features
+
+* breadcrumb in product and proroduct details page ([cd47ce7](https://bitbucket.org/vebholic/oms_frontend/commit/cd47ce71d83f148b06135f00b22b9506340313ec))
+
 ### [1.0.5](https://bitbucket.org/vebholic/oms_frontend/compare/v1.0.4...v1.0.5) (2021-08-06)
 
 
