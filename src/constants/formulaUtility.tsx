@@ -16,6 +16,9 @@ const matchIf = (string) => {
 let loop_count = 0;
 
 export const checkFormula = (formula, inputFields) => {
+    if (formula === "") {
+        return false
+    }
     let isValid = true
     const replaceFieldName = []
     try {
@@ -38,6 +41,10 @@ export const checkFormula = (formula, inputFields) => {
         })
         fs['f1'] = new Function(...argument, formula);
         let result = fs['f1'].apply(null, values);
+        console.log(result)
+        if (result === undefined) {
+            isValid = false
+        }
     }
     catch (e) {
         isValid = false

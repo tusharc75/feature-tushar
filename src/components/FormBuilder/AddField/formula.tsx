@@ -23,7 +23,7 @@ const MenuProps = {
   },
 };
 
-export const Formula = ({ fields, values, setFieldValue, _id }) => {
+export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);
   const inputRef = useRef<any>();
 
@@ -142,6 +142,9 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
               variant="outlined"
               label="Input Parameters"
               placeholder="Input Parameters"
+              name="inputFields"
+              error={touched['inputFields'] && Boolean(errors['inputFields'])}
+              helperText={touched['inputFields'] && errors['inputFields']}
             />
           )}
         />
@@ -172,6 +175,8 @@ export const Formula = ({ fields, values, setFieldValue, _id }) => {
           placeholder="Formula (return field1 + field2)"
           inputRef={inputRef}
           value={values["formula"]}
+          error={touched['formula'] && Boolean(errors['formula'])}
+          helperText={touched['formula'] && errors['formula']}
           onKeyPress={(event) => {
             event.stopPropagation();
           }}

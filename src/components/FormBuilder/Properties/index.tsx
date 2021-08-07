@@ -11,8 +11,6 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -32,6 +30,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import FormTypes from '../../Helpers/FormTypes';
 import { startCase } from 'lodash';
+import { checkFormula } from "../../../constants/formulaUtility";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required('please enter field label')
@@ -59,7 +58,9 @@ const LookupResource = [
 ];
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
-  const [initialValues, setInitialValues] = useState(fieldData);
+
+  const [initialValues, setInitialValues] = useState({ ...fieldData });
+
   const inputRef = useRef(null);
   const [cursorPosition, setCursorPosition] = useState<any>({
     selectionStart: 0,
@@ -256,6 +257,60 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     handleClose();
   };
 
+  function validate(values) {
+    const errors = {};
+    if (values.type === 'formula' || values.isFormula === true) {
+      if (!values.inputFields || values.inputFields.length === 0) {
+        errors["inputFields"] = "Please select input parameters";
+      }
+      let inputValues = {};
+      values.inputFields && values.inputFields.forEach((_input) => {
+        inputValues[_input] = 1;
+      });
+      if (!checkFormula(values.formula, inputValues)) {
+        errors["formula"] = "Please enter valid formula";
+      }
+    }
+    if (values.type === 'currencyAmount') {
+      if (!values.displayCurrency || values.displayCurrency.length === 0) {
+        errors["displayCurrency"] = "Please select currency";
+      }
+    }
+    if (values.type === 'converter' || values.isConverter === true) {
+      if (!values.units || values.units.length === 0) {
+        errors["units"] = "Please enter units";
+      }
+      if (!values.displayUnits || values.displayUnits.length === 0) {
+        errors["displayUnits"] = "Please select display unit";
+      }
+    }
+    if (values.isMulitFormula) {
+      if (!values.formulaFields || values.formulaFields.length === 0) {
+        errors["formulaFields"] = "Please select formul fields";
+      }
+      if (!values.formulainputFields || values.formulainputFields.length === 0) {
+        errors["formulainputFields"] = "Please select input parameters";
+      }
+      if (values.formulaFields && values.formulaFields.length) {
+        let inputValues = {};
+        values.formulainputFields && values.formulainputFields.forEach((_input) => {
+          inputValues[_input] = 1;
+        });
+        Object.keys(values.formulaoption).forEach((_formula) => {
+          if (!checkFormula(values.formulaoption[_formula] ? values.formulaoption[_formula] : "", inputValues))
+            errors["formulaoption_" + _formula] = "Please enter valid formula";
+        });
+      }
+    }
+    if (values.type === 'vlookupDropdown' || values.isVlookup) {
+      if (!values.inputFields || values.inputFields.length === 0) {
+        errors["inputFields"] = "Please select input parameters";
+      }
+    }
+    console.log(errors)
+    return errors;
+  }
+
   const onKeyPress = (event) => {
     if (event.which === 13) {
       event.preventDefault();
@@ -271,7 +326,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       open={true}
       fullWidth
     >
-      <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
+      <Formik
+        enableReinitialize={true}
+        initialValues={initialValues}
+        validationSchema={FieldSchema}
+        onSubmit={handleSave}
+        validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Fragment>
             <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
@@ -292,6 +352,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     helperText={touched['fieldLabel'] && errors['fieldLabel']}
                     onChange={(e) => setFieldValue('fieldLabel', e.target.value.trimStart())}
                   />
+
                   {((module === "product-template" || module === "price-template")) &&
                     <Box mb={1}>
                       <TextField
@@ -317,35 +378,48 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       /> */}
                     </Box>
                   }
-
-                  {(values['type'] === 'decimal' || values['type'] === 'formula' || values['type'] === 'converter') && (
-                    <Grid spacing={3} container>
-                      {values['type'] === 'formula' && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <FormControl fullWidth margin="dense" variant="outlined">
-                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={values['returnType']}
-                              onChange={(e) => setFieldValue('returnType', e.target.value)}
-                              label="Return Type"
-                              name="returnType"
-                            >
-                              <MenuItem value="decimal">Decimal</MenuItem>
-                              <MenuItem value="string">String</MenuItem>
-                              <MenuItem value="boolean">Boolean</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      )}
-                      {(values['type'] === 'decimal' || values['returnType'] === 'decimal') && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <DecimalPlaces values={values} setFieldValue={setFieldValue} />
-                        </Grid>
-                      )}
-                    </Grid>
-                  )}
+                  {values['type'] === 'currencyAmount' &&
+                    <Currency
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      refrence="form-builder"
+                      touched={touched}
+                      errors={errors}
+                    />}
+                  {(values['type'] === 'decimal'
+                    || values['type'] === 'formula'
+                    || values['type'] === 'converter'
+                    || values['type'] === 'currencyAmount') && (
+                      <Grid spacing={3} container>
+                        {values['type'] === 'formula' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values['returnType']}
+                                onChange={(e) => setFieldValue('returnType', e.target.value)}
+                                label="Return Type"
+                                name="returnType"
+                              >
+                                <MenuItem value="decimal">Decimal</MenuItem>
+                                <MenuItem value="string">String</MenuItem>
+                                <MenuItem value="boolean">Boolean</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                        {(values['type'] === 'decimal'
+                          || values['type'] === 'converter'
+                          || values['type'] === 'currencyAmount'
+                          || values['returnType'] === 'decimal') && (
+                            <Grid item xs={12} sm={6} md={6}>
+                              <DecimalPlaces values={values} setFieldValue={setFieldValue} />
+                            </Grid>
+                          )}
+                      </Grid>
+                    )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -380,15 +454,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       )}
                     </Fragment>
                   )}
-
-                  {values['type'] === 'currencyAmount' && <Currency values={values} setFieldValue={setFieldValue} refrence="form-builder" />}
-
                   {(values['type'] === 'dropDown' ||
                     values['type'] === 'multiSelect' ||
                     values['type'] === 'radio' ||
                     values['type'] === 'process') &&
-                    !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
-
+                    !values['lookup'] &&
+                    <Option values={values}
+                      setFieldValue={setFieldValue}
+                      fields={fields} _id={fieldData._id}
+                    />}
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
@@ -403,6 +477,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               checked={values['isFormula']}
                               onChange={(e) => {
                                 setFieldValue('isFormula', e.target.checked);
+                                setFieldValue('inputFields', "");
+                                setFieldValue('formula', "");
                               }}
                               color="primary"
                             />
@@ -412,7 +488,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       </>
                     )}
                   {(values['type'] === 'formula' || values['isFormula']) && (
-                    <Formula fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} />
+                    <Formula
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      _id={fieldData._id}
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
                     <Fragment>
@@ -424,6 +507,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             checked={values['isConverter']}
                             onChange={(e) => {
                               setFieldValue('isConverter', e.target.checked);
+                              setFieldValue('units', []);
+                              setFieldValue('displayUnits', []);
+                              setFieldValue('formulaUnits', []);
                             }}
                             color="primary"
                           />
@@ -433,7 +519,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     </Fragment>
                   )}
                   {(values['type'] === 'converter' || values['isConverter']) && (
-                    <Converter fields={fields} values={values} setFieldValue={setFieldValue} />
+                    <Converter
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
@@ -449,6 +541,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               checked={values['isMulitFormula']}
                               onChange={(e) => {
                                 setFieldValue('isMulitFormula', e.target.checked);
+                                setFieldValue('formulaFields', []);
+                                setFieldValue('formulainputFields', []);
+                                setFieldValue('formulaoption', {});
                               }}
                               color="primary"
                             />
@@ -457,7 +552,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       </>
                     )}
-                  {values['isMulitFormula'] && <MultipleFormula fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} />}
+                  {values['isMulitFormula'] &&
+                    <MultipleFormula
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      _id={fieldData._id}
+                      touched={touched}
+                      errors={errors}
+                    />}
 
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
@@ -482,7 +585,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       </>
                     )}
                   {(values['isVlookup'] || values['type'] === 'vlookupDropdown') && (
-                    <Vlookup fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} />
+                    <Vlookup
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      errors={errors}
+                      _id={fieldData._id} />
                   )}
 
                   <Box pt={1} pb={1}>
@@ -562,26 +671,26 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       <Box display="block">
                         {module === 'pdf-template' &&
                           ['multiLine', 'singleLine'].includes(fieldData.type) &&
-                            ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
-                              'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map((item) => (
-                            <Chip
-                              className="ml-1 cursor-pointer"
-                              key={item}
-                              label={startCase(item)}
-                              onClick={() => {
-                                const value = values?.defaultValue;
-                                if (typeof value === 'string') {
-                                  const defVal = [
-                                    value.slice(0, cursorPosition.selectionStart),
-                                    `{{${item}}}`,
-                                    value.slice(cursorPosition.selectionStart)
-                                  ].join('');
+                          ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                            'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map((item) => (
+                              <Chip
+                                className="ml-1 cursor-pointer"
+                                key={item}
+                                label={startCase(item)}
+                                onClick={() => {
+                                  const value = values?.defaultValue;
+                                  if (typeof value === 'string') {
+                                    const defVal = [
+                                      value.slice(0, cursorPosition.selectionStart),
+                                      `{{${item}}}`,
+                                      value.slice(cursorPosition.selectionStart)
+                                    ].join('');
 
-                                  setFieldValue('defaultValue', defVal);
-                                }
-                              }}
-                            />
-                          ))}
+                                    setFieldValue('defaultValue', defVal);
+                                  }
+                                }}
+                              />
+                            ))}
                         <TextField
                           inputRef={inputRef}
                           variant="outlined"
