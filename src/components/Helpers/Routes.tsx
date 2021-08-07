@@ -209,6 +209,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: "/note",
   },
+  productList: {
+    title: "Products",
+    path: "/product-list",
+  },
 };
 
 export default routes;
