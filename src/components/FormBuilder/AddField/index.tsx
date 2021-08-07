@@ -1,9 +1,6 @@
 import React, { useState, Fragment, useRef } from 'react';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -13,9 +10,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -28,10 +22,10 @@ import { Formula } from "./formula";
 import { Converter } from "./converter";
 import { Currency } from "./currency";
 import { Option } from "../AddField/option";
-import Divider from '@material-ui/core/Divider';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import axiosInstance from "../../../axios/axiosInstance";
+import { checkFormula } from "../../../constants/formulaUtility";
 
 const FieldSchema = Yup.object().shape({
   type: Yup.string()
@@ -52,7 +46,6 @@ const MenuProps = {
 export const AddField = (props) => {
 
   const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
-
 
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
@@ -178,9 +171,41 @@ export const AddField = (props) => {
         errors["sectionName"] = "Please select section name";
       }
     }
+    if (values.type === 'formula' || values.isFormula === true) {
+      if (!values.inputFields || values.inputFields.length === 0) {
+        errors["inputFields"] = "Please select input parameters";
+      }
+      let inputValues = {};
+      values.inputFields && values.inputFields.forEach((_input) => {
+        inputValues[_input] = 1;
+      });
+      if (!checkFormula(values.formula, inputValues)) {
+        errors["formula"] = "Please enter valid formula";
+      }
+    }
+    if (values.type === 'currencyAmount') {
+      if (!values.displayCurrency || values.displayCurrency.length === 0) {
+        errors["displayCurrency"] = "Please select currency";
+      }
+    }
+    if (values.type === 'converter' || values.isConverter === true) {
+      if (!values.units || values.units.length === 0) {
+        errors["units"] = "Please enter units";
+      }
+      if (!values.displayUnits || values.displayUnits.length === 0) {
+        errors["displayUnits"] = "Please select display unit";
+      }
+    }
+    if (values.isMulitFormula) {
+      if (!values.formulaFields || values.formulaFields.length === 0) {
+        errors["formulaFields"] = "Please select formul fields";
+      }
+      if (!values.formulainputFields || values.formulainputFields.length === 0) {
+        errors["formulainputFields"] = "Please select input parameters";
+      }
+    }
     return errors;
   }
-
 
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth
     fullScreen={isMobile || isTablet}
@@ -293,6 +318,8 @@ export const AddField = (props) => {
                 values={values}
                 setFieldValue={setFieldValue}
                 refrence={refrence}
+                touched={touched}
+                errors={errors}
               />}
 
               {(values["type"] === "currencyAmount" || values["type"] === "percent") &&
@@ -310,18 +337,23 @@ export const AddField = (props) => {
                   label="Formula"
                 />}
 
-              {(values["type"] === "formula" || values["isFormula"]) && <Formula
-                fields={new_fields}
-                values={values}
-                setFieldValue={setFieldValue}
-                _id={fieldData && fieldData._id ? fieldData._id : ""}
-              />}
+              {(values["type"] === "formula" || values["isFormula"]) &&
+                <Formula
+                  fields={new_fields}
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  _id={fieldData && fieldData._id ? fieldData._id : ""}
+                  touched={touched}
+                  errors={errors}
+                />}
 
               {values["type"] === "vlookupDropdown" &&
                 <Vlookup
                   fields={new_fields}
                   values={values}
                   setFieldValue={setFieldValue}
+                  touched={touched}
+                  errors={errors}
                   _id={fieldData && fieldData._id ? fieldData._id : ""}
                 />}
 
@@ -347,6 +379,8 @@ export const AddField = (props) => {
                 fields={new_fields}
                 values={values}
                 setFieldValue={setFieldValue}
+                touched={touched}
+                errors={errors}
               />}
 
               {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
