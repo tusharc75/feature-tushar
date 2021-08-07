@@ -413,7 +413,7 @@ export default function CustomAgGridEditable({
               count={rowCount}
               page={page}
               className="agPagination"
-              onChangePage={(event, newPage) => {
+              onPageChange={(event, newPage) => {
                 dispatch({ type: "pageChange", page: newPage });
 
                 if (clientSideGridApi) {

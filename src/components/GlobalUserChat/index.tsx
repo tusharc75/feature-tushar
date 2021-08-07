@@ -1,82 +1,110 @@
-import React, {useState, useEffect} from 'react'
-import { Badge, Box, Fab, Typography } from '@material-ui/core'
+import React, { useState, useContext, useCallback, useEffect } from 'react'
+import { Badge, Box, Fab } from '@material-ui/core'
 import { Chat, Clear } from '@material-ui/icons'
-import io, { Socket } from "socket.io-client";
 
 import ChatsPopover from './ChatsPopover'
-import { backendApi } from '../../config';
-import { useData } from '../../StateProvider/Provider';
+import { useData } from '../../StateProvider/Provider'
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext'
+import axiosInstance from '../../axios/axiosInstance'
+import { SET_CHATTER } from '../../StateProvider/actionTypes'
 import "./chatStyles.scss"
-import axiosInstance from '../../axios/axiosInstance';
 
 const GlobalUserChat = () => {
-    const {state: {user: {user:{_id: id}}}} = useData()
+    const { state: { user, chatter }, dispatch } = useData()
+    const {
+        socket,
+        chatterIds,
+        setChatList,
+        setChatterIds,
+        selectedChat,
+    } = useContext(GlobalChatContext)
+    const [unseen, setUnseen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    const [socket, setSocket] = useState<Socket>(null);
-    const [chatterId, setChatterId] = useState("")
     const open = Boolean(anchorEl)
 
     const handleOpenPopup = (e: React.MouseEvent<HTMLButtonElement>) => {
-         setAnchorEl(e.currentTarget)
+        setAnchorEl(e.currentTarget)
     }
 
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const s = io(`${backendApi}/users/room`, {
-        auth: {token},
-        reconnectionAttempts:5,
-        reconnectionDelay:5000,
-        transports: ['websocket',"pooling"]
-        });
-        setSocket(s);
-    }, [id]);
+         if (socket !== null) {
+             socket.on("data", () => {
+                 getChats()
+                
+             })
+         }
+    }, [socket])
+
+    const getChats = useCallback(() => {
+        axiosInstance().get("/chatter/user-to-user/my?orderBy=desc&sortBy=message.date")
+            .then(({ data: { data } }) => {
+
+                let newData = [];
+                    data.forEach((d:any) => {
+                        const obj = {
+                                id: d.id,
+                                chatTitle: d.users.filter(d => d._id !== user?.user?._id)
+                                    .map(_d => `${_d.firstName} ${_d.lastName}`)
+                                    .join(", "),
+                                message: d?.message,
+                                timeStamp: new Date(d?.message.date).getTime(),
+                                ...d
+                            }
+                        newData.push(obj)
+
+                    })
+                
+                const yetUnseen = data?.filter(d => d.unseen > 0).length > 0 ? true : false
+                setUnseen(yetUnseen)
+
+                setChatList(newData)
+                setChatterIds(data.map(d => d.id))
+                if (chatter) {
+                    dispatch({ type: SET_CHATTER, payload: null })
+                }
+            })
+            .catch(() => { })
+
+    }, [chatter, selectedChat])
 
 
-    // Socket listening for data
     useEffect(() => {
-        if (socket && id) {
-            socket.on("connect", () => {
-            socket.emit("join", id);
-            });
+        getChats()
+    }, [getChats])
 
-            socket.on("data", (data) => {
-                console.log(data)
-            });
 
-            return () => {
-            if (socket) {
-                socket.disconnect()
-                socket.off("connect");
-            }
-            };
-        };
-        
-    }, [socket, id]);
+    const joinRooms = () => {
+        if (chatterIds.length && socket !== null) {
+            chatterIds.forEach((chatterId) => {
+                socket.emit("join", chatterId)
+            })
+        }
+    }
 
+    useEffect(() => {
+        joinRooms()
+    }, [chatterIds, socket])
 
 
     return (
-        <div>
-            <Box position="absolute" bottom={20} right={20} zIndex={1001}>
-                <Badge variant='dot' overlap="circle" badgeContent=" ">
+        <div className="global-chat">
+            <Badge color="secondary" badgeContent=" " invisible={!unseen} variant="dot">
                 <Fab id={open ? "chats-popover" : undefined}
                     onClick={handleOpenPopup}
                     size="small"
                     color='primary'
                     aria-label="Chats">
                     {!open ? <Chat /> : <Clear />}
-              </Fab>
-              </Badge>
-                {open &&
-                    <ChatsPopover open={open}
+                </Fab>
+            </Badge>
+            {open &&
+                <ChatsPopover
+                    open={open}
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
-                    chatterId={chatterId}
-                    setChatterId={setChatterId}
-                    
+                    getChats={getChats}
                 />}
-          </Box>
         </div>
     )
 }

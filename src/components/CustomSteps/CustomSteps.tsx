@@ -4,7 +4,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { FaCheckCircle } from 'react-icons/fa';
-
+import { isMobile } from "react-device-detect";
 const useStyles = makeStyles((theme) => ({
     root: {
         // width: "98%",
@@ -32,9 +32,9 @@ const useStyles = makeStyles((theme) => ({
     pbStepper: {
         overflow: "none",
         [theme.breakpoints.down("xs")]: {
-          overflow: "auto"
+            overflow: "auto"
         },
-      },
+    },
 }));
 
 
@@ -100,7 +100,7 @@ export default function CustomSteps({ steps, active }) {
                     return (
                         <Step
                             key={index} {...stepProps}
-                            style={{ width: `${100 / steps.length}%` }}
+                            style={isMobile ? { width: "50%" } : { width: `${100 / steps.length}%` }}
                             className={`${index <= active ? classes.active : (index === (active + 1)) ? classes.currentStep : classes.inActive}`}
                         //className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}
                         >

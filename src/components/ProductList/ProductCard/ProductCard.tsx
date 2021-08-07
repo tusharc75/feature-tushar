@@ -24,8 +24,9 @@ const useStyles = makeStyles({
   },
 });
 
-const ProductCard = (props: { product: any; }) => {
-  const { product } = props;
+const ProductCard = (props: { product: any, onAddItem: any }) => {
+  const { product, onAddItem } = props;
+
   const classes = useStyles();
   const history = useHistory()
 
@@ -35,6 +36,7 @@ const ProductCard = (props: { product: any; }) => {
     return netPrice;
 
   }
+
   return (
     <div className={styles.product_card}>
       {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
@@ -48,6 +50,7 @@ const ProductCard = (props: { product: any; }) => {
           : <BsImage className={styles.no_image} />
         }
       </Box>
+
       <div className={styles.text}>
         <h4 onClick={() => { history.push(`product/details/${product._id}`) }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
@@ -60,7 +63,10 @@ const ProductCard = (props: { product: any; }) => {
               </>
             }
           </div>
-          <Button variant="outlined" color="secondary" size="small" onClick={() => { }} startIcon={<AddShoppingCartIcon />}>
+          <Button variant="outlined" color="secondary" size="small"
+            // onClick={() => onAddItem(product, { isAdd: true })}
+            onClick={() => onAddItem(product)}
+            startIcon={<AddShoppingCartIcon />}>
             Add to cart
           </Button>
         </Box>
@@ -71,6 +77,7 @@ const ProductCard = (props: { product: any; }) => {
 
 ProductCard.propTypes = {
   product: PropTypes.object,
+  onAddItem: PropTypes.func,
 };
 
 export default ProductCard;

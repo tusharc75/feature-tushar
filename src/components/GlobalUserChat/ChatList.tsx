@@ -1,55 +1,67 @@
-import {Fragment} from 'react'
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { Fragment, useEffect } from 'react'
 import {
-    Divider,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemAvatar,
-    Avatar
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Typography
 } from '@material-ui/core'
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-      backgroundColor: theme.palette.background.paper,
-    },
-    inline: {
-      display: 'inline',
-    },
-  }),
-);
+import axiosInstance from '../../axios/axiosInstance'
 
 
-const ChatList = ({staticData, setSelectedChat}) => {
-    const classes = useStyles();
-    return (
-        <div>
-            <List className={classes.root}>
-                {staticData.map((d,i) => (
-                    <Fragment key={i}>
-                    <ListItem button
-                            onClick={() => setSelectedChat(d)}
-                            alignItems="flex-start">
-                    <ListItemAvatar>
-                    <Avatar alt="Remy Sharp" />
-                    </ListItemAvatar>
-                    <ListItemText
-                    primary={d.username}
-                    secondary={
-                        <Fragment>                                
-                            {d.message}
-                        </Fragment>
-                    }
-                    />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-                </Fragment>
-                ))}
-            </List>
-        </div>
-    )
+const ChatList = (props) => {
+  const { chat, setSelectedChat, userId } = props
+
+  const onChatClick = () => {
+    setSelectedChat(chat)
+
+    if (chat.unseen > 0) {
+      axiosInstance().put(`chatter/mark-read/${chat.id}`)
+    }
+  }
+
+  const formatTime = (time) => new Date(time).toTimeString().split(":");
+
+  return (
+    <Fragment>
+      <ListItem
+        button
+        divider
+        onClick={onChatClick}
+        alignItems="flex-start">
+        {/* <ListItemAvatar>
+          <Avatar alt="Remy Sharp" />
+          </ListItemAvatar> */}
+        <ListItemText
+          primary={
+            <Fragment>
+              <p className="chat-listTitle">{chat.chatTitle}</p>
+            </Fragment>}
+              
+          secondary={
+            <Fragment>
+              <div title={chat.message?.message} className="chat-listSubtext">
+                <div className="chat-listSubtitle">
+                  <p className={`who ${chat?.unseen > 0 ? "unseen" : ""}`}>
+                    {chat?.message?.userid === userId ? "You:" : ""}
+                  </p>
+                  <p className={`msg text-truncate ${chat?.unseen > 0 ? "unseen" : ""}`}>
+                    {chat.message?.message ? chat.message?.message : "\'New chat\'"}
+                  </p>
+                </div>
+                {chat?.unseen > 0
+                  ? <p className={`message-time count ${chat?.unseen > 0 ? "unseen" : ""}`}>{chat?.unseen}</p>
+                  : chat.message?.message
+                  && <p className="message-time">
+                  {`${formatTime(chat.message.date)[0]}:${formatTime(chat.message.date)[1]}`}
+                </p>}
+              </div>
+            </Fragment>
+          }
+        />
+      </ListItem>
+    </Fragment>
+  )
 }
 
 export default ChatList

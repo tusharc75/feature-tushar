@@ -48,7 +48,8 @@ function QuoteHeader(props) {
     icon,
     heading,
     children,
-    showTransferEntityDialog
+    showTransferEntityDialog,
+    showCloneQuoteDialog
 
   } = props;
   return (
@@ -139,6 +140,15 @@ function QuoteHeader(props) {
                     }}
                   >Transfer Entity</MenuItem>
                 }
+                <MenuItem
+                  disabled={selectedRecords.length !== 1}
+                  onClick={() => {
+                    closeActions();
+                    showCloneQuoteDialog()
+                  }}
+                >
+                  Clone
+                </MenuItem>
               </Menu>
             </>
           )}

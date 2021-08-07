@@ -35,6 +35,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import AddIcon from "@material-ui/icons/AddCircle";
+import GetAppIcon from '@material-ui/icons/GetApp';
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageOpportunityDialog from "../../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
@@ -67,8 +68,13 @@ export default function ManageQuoteDialog({
   subMarketSegmentId = null,
   currency = null,
   estimatedAmount = null,
+  doaCollaboratorResources = null,
   disableCurrency = false,
   quoteApproved = false,
+  isRenderedFromProjectSales = false,
+  cloneQuoteWithVersionNumber = 0,
+  isCreateQuoteFromCart = false,
+  onHandleSubmit = null
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -78,7 +84,7 @@ export default function ManageQuoteDialog({
     state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner.optionValue
+    !isNew && user.user._id !== dataToUpdate?.owner?.optionValue
   );
 
   const [entityData, setEntityData] = useState({
@@ -337,8 +343,8 @@ export default function ManageQuoteDialog({
         const newFields = [];
 
         const filterData = isNew
-          ? data.filter((d) => d.isCreate)
-          : data.filter((d) => d.isUpdate);
+          ? data.filter((d) => d?.isCreate)
+          : data.filter((d) => d?.isUpdate);
 
         //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
         const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
@@ -384,10 +390,10 @@ export default function ManageQuoteDialog({
           }
 
           if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName,marketSegmentId)
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, marketSegmentId)
           }
           if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName,subMarketSegmentId)
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, subMarketSegmentId)
           }
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
@@ -406,7 +412,7 @@ export default function ManageQuoteDialog({
           }
         });
         let initialData = getObjKeys("", newFields);
-        if (isRenderedFromOpportunity) {
+        if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
           initialData["quoteName"] = opportunityName;
           initialData["currency"] = currency;
           initialData["estimatedAmount"] = estimatedAmount;
@@ -432,22 +438,31 @@ export default function ManageQuoteDialog({
   };
 
   const onSubmit = (values) => {
-    isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
+    isCreateQuoteFromCart ? onHandleSubmit(values) :
+      isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
   };
 
   const handleCloneQuote = (values) => {
+    setLoading(true);
     if (
       accountId &&
       accountResource !== customerAccount.accountResource &&
       !isRenderedFromOpportunity
     )
       values["supplierAccountName"] = [accountId];
-    setLoading(true);
     if (values.customerContactName === "") {
       values.customerContactName = [];
     }
+    if (cloneQuoteWithVersionNumber > 0) {
+      values = {
+        ...values,
+        quoteId: dataToUpdate._id,
+        versionNumber: `${cloneQuoteWithVersionNumber}`
+      }
+    }
+    const apiUrl = cloneQuoteWithVersionNumber > 0 ? `${qbApi}/create/clone-v` : `${qbApi}?entity=${selectedEntity}`
     axiosInstance()
-      .post(`${qbApi}?entity=${selectedEntity}`, values)
+      .post(apiUrl, values)
       .then(({ data }) => {
         const newId = data.data._id;
         toastConfig.setToastConfig({
@@ -455,7 +470,9 @@ export default function ManageQuoteDialog({
           type: "success",
           message: data.message,
         });
+
         history.push(`${routes.quoteBuilder.path}/detail/${newId}`);
+
         setLoading(false);
         // onSuccess(newId);
         onClose()
@@ -630,6 +647,37 @@ export default function ManageQuoteDialog({
     setCustomError({ ...tempErrors });
   };
 
+  const previewPdfTemplate = (templateId) => {
+
+    toastConfig.setToastConfig({
+      hideDuration: null,
+      open: true,
+      type: "info",
+      message: `Downloading preview file, Please wait...`,
+    });
+
+    axiosInstance()
+      .get(`${qbApi}/getdummy/${templateId}`, {
+        responseType: "blob",
+      })
+      .then(({ data }) => {
+
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: "File downloaded Successfuly",
+        });
+
+        const file = new Blob([data], { type: "application/pdf" });
+        const fileURL = URL.createObjectURL(file);
+        const pdfWindow = window.open();
+        pdfWindow.location.href = fileURL;
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   return (
     <>
       <Dialog
@@ -682,6 +730,8 @@ export default function ManageQuoteDialog({
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "quoteName" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -709,24 +759,26 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.customerAccount
-                                              .isCreate && !accountFieldDisable
+                                              ?.isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                           sm={
                                             permissions.customerAccount
-                                              .isCreate && !accountFieldDisable
+                                              ?.isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                           md={
                                             permissions.customerAccount
-                                              .isCreate && !accountFieldDisable
+                                              ?.isCreate && !accountFieldDisable
                                               ? 10
                                               : 11
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -761,7 +813,7 @@ export default function ManageQuoteDialog({
                                             }}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount.isCreate &&
+                                        {permissions.customerAccount?.isCreate &&
                                           !accountFieldDisable && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -799,22 +851,24 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.customerContact.isCreate
+                                            permissions.customerContact?.isCreate
                                               ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.customerContact.isCreate
+                                            permissions.customerContact?.isCreate
                                               ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.customerContact.isCreate
+                                            permissions.customerContact?.isCreate
                                               ? 10
                                               : 11
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -840,7 +894,7 @@ export default function ManageQuoteDialog({
                                           // }}
                                           />
                                         </Grid>
-                                        {permissions.customerContact.isCreate &&
+                                        {permissions.customerContact?.isCreate &&
                                           contactId === null && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -877,25 +931,27 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.opportunity.isCreate &&
+                                            permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.opportunity.isCreate &&
+                                            permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.opportunity.isCreate &&
+                                            permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
                                               ? 10
                                               : 11
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -930,7 +986,7 @@ export default function ManageQuoteDialog({
                                           // }}
                                           />
                                         </Grid>
-                                        {permissions.opportunity.isCreate &&
+                                        {permissions.opportunity?.isCreate &&
                                           !isRenderedFromOpportunity && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -962,8 +1018,68 @@ export default function ManageQuoteDialog({
                                           </Grid>
                                         ) : null}
                                       </Grid>
+                                    ) : field.fieldName === "pDFTemplate" ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={10}
+                                          sm={10}
+                                          md={10}
+                                        >
+                                          <FormTypes
+                                            lookup={field.lookup}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={
+                                              field?.isTooltip || false
+                                            }
+                                            tooltipMessage={
+                                              field?.tooltipMessage
+                                            }
+                                            doNotShowInfoTooltip={true}
+                                            size="small"
+                                          />
+                                        </Grid>
+                                        <Grid item xs={1} sm={1} md={1}>
+                                          <Tooltip
+                                            title="Preview PDF Template"
+                                            className="mt-1"
+                                          >
+                                            <IconButton
+                                              disabled={!values.pDFTemplate}
+                                              onClick={() => {
+                                                previewPdfTemplate(values.pDFTemplate)
+                                              }}
+                                              size="small"
+                                            >
+                                              <GetAppIcon color={values.pDFTemplate ? "primary" : "disabled" } />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </Grid>
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip
+                                              title={
+                                                field?.tooltipMessage ?? ""
+                                              }
+                                            >
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
                                     ) : field.fieldName === "owner" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1017,6 +1133,8 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1038,6 +1156,8 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "probability" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -1069,6 +1189,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "lostReason" ? (
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
+                                          fieldId={field._id}
+                                          lookup={field.lookup}
                                           // {...rest}
                                           values={values}
                                           errors={errors}
@@ -1087,6 +1209,8 @@ export default function ManageQuoteDialog({
                                       ) : null
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         disabled={disableCurrency}
                                         values={values}
                                         errors={errors}
@@ -1117,6 +1241,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "estimatedAmount" ||
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
@@ -1149,6 +1275,8 @@ export default function ManageQuoteDialog({
                                       "invoicedDate",
                                     ].indexOf(field?.fieldName) >= 0 ? (
                                       <FormTypes
+                                        fieldId={field._id}
+                                        lookup={field.lookup}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -1188,19 +1316,21 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 10
                                               : 11
                                           }
                                         >
                                           <FormTypes
+                                            fieldId={field._id}
+                                            lookup={field.lookup}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1234,7 +1364,7 @@ export default function ManageQuoteDialog({
                                           />
                                         </Grid>
                                         {
-                                          permissions.marketSegment.isCreate && (
+                                          permissions.marketSegment?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
                                                 title="Add Market Segment"
@@ -1268,19 +1398,21 @@ export default function ManageQuoteDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 10
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 10
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 10
                                                 : 11
                                             }
                                           >
                                             <FormTypes
+                                              fieldId={field._id}
+                                              lookup={field.lookup}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1311,7 +1443,7 @@ export default function ManageQuoteDialog({
                                             />
                                           </Grid>
                                           {
-                                            permissions.marketSegment.isCreate && (
+                                            permissions.marketSegment?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
                                                   title="Add Sub Market Segment"
@@ -1343,6 +1475,8 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                       </Grid> : (
                                         <FormTypes
+                                          fieldId={field._id}
+                                          lookup={field.lookup}
                                           // {...rest}
                                           values={values}
                                           errors={errors}
@@ -1378,6 +1512,8 @@ export default function ManageQuoteDialog({
                         ) : (
                           form.sectionFields.map((field) => (
                             <FormTypes
+                              fieldId={field._id}
+                              lookup={field.lookup}
                               // {...rest}
                               values={values}
                               errors={errors}

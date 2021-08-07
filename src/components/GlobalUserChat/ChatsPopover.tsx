@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import PropTypes from 'prop-types'
+import { useState, useEffect, useContext } from 'react';
+import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import {
     Popover,
     Box,
@@ -7,6 +7,7 @@ import {
     Divider,
     IconButton,
     Tooltip,
+    List,
 } from '@material-ui/core'
 import { Create, Clear, ArrowBack } from '@material-ui/icons';
 
@@ -15,43 +16,50 @@ import ChatList from './ChatList';
 import ChatBox from './ChatBox';
 import NewChat from './NewChat';
 import axiosInstance from '../../axios/axiosInstance';
+import { useData } from '../../StateProvider/Provider';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    listRoot: {
+      width: '100%',
+      backgroundColor: theme.palette.background.paper,
+    },
+    inline: {
+      display: 'inline',
+    },
+  }),
+);
 
 const ChatsPopover = (props) => {
-    const { open, anchorEl, setAnchorEl, chatterId, setChatterId } = props;  
-    const [selectedChat, setSelectedChat] = useState(null)
+    const classes = useStyles();
+    const {socket, chatList, selectedChat, setSelectedChat} = useContext(GlobalChatContext)
+    const {state: {user: { user}}} = useData()
+    const { open, anchorEl, setAnchorEl, getChats } = props;  
     const [newChat, setNewChat] = useState(false)
     const [users, setUsers] = useState([])
 
     const onClose = () => {
-        setAnchorEl(null)
+       setAnchorEl(null)
     }
 
-    const staticData = []
-
-    const getChats = useCallback(() => {
-        axiosInstance().get("/chatter/user-to-user/my")
-            .then(({ data: { data } }) => {
-             
-         })
-        .catch(() => { })
-    }, [chatterId])
-
     useEffect(() => {
-        getChats()
-    }, [getChats])
-
-      useEffect(() => {
         fetchUsersList()
-    },[])
-
+    }, [])
+    
 
     const fetchUsersList = () => {
         axiosInstance().get("/user?limit=0")
             .then(({ data: { data } }) => {
-                setUsers(data.map(d => ({id: d._id, avatar: d.avatar || "", name: d.concatedName})))
+                const allUsers =
+                    data.filter(d => d._id !== user._id)
+                        .map(d => ({ id: d._id, avatar: d.avatar || "", name: d.concatedName }))
+                setUsers(allUsers)
             })
         .catch(err => {})
     }
+
 
     return (
         <Popover id={open ? "chats-popover" : undefined}
@@ -76,7 +84,7 @@ const ChatsPopover = (props) => {
                                 setNewChat(false)
                            }} size="small"
                          > 
-                            <ArrowBack color='disabled' />
+                            <ArrowBack color='action' />
                         </IconButton>
                         </Tooltip>
                         : 
@@ -85,23 +93,24 @@ const ChatsPopover = (props) => {
                             if(selectedChat) setSelectedChat(null)
                             setNewChat(!newChat)
                         }} size="small">
-                            <Create color='disabled' />
+                            <Create color='action' />
                         </IconButton> 
                             
                         </Tooltip>
                     }
 
-                    <Typography variant='h6' color="textSecondary">
+                    <Typography variant='h6' color="textPrimary" className="text-truncate">
                         {selectedChat
-                            ? selectedChat?.username
+                            ? selectedChat?.chatTitle
                             : newChat
                                 ? "New chat"
-                                : `Chats (${staticData.length})`}
+                                : `Chats (${chatList.length})`
+                        }
                     </Typography>
 
                     <Tooltip title="Close chat">
                     <IconButton onClick={onClose} size="small">
-                        <Clear/>
+                        <Clear color="action"/>
                     </IconButton>
                     </Tooltip>
                 </Box>
@@ -111,31 +120,31 @@ const ChatsPopover = (props) => {
                 <Box height={400} style={{overflowY: "auto"}}>
                     {newChat
                         ? <NewChat
+                            userId={user._id}
                             setNewChat={setNewChat}
                             setSelectedChat={setSelectedChat}
                             users={users}
-                            setChatterId={setChatterId}
                         />
-                        : selectedChat ?
-                        <ChatBox selectedChat={selectedChat} />
-                        : <ChatList
-                            staticData={staticData}
-                            setSelectedChat={setSelectedChat}
-                        />}
+                        : selectedChat
+                            ?
+                            <ChatBox getChats={getChats} />
+                            : <List disablePadding className={classes.listRoot}>
+                                {chatList.map((chat, i) => (
+                                    <ChatList
+                                        key={i}
+                                        userId={user._id}
+                                        socket={socket}
+                                        chat={chat}
+                                        setSelectedChat={setSelectedChat}
+                                        getChats={getChats}
+                                    />
+                                ))}
+                            </List>}
                 </Box>
             </Box>
         </Popover>
        
     )
-}
-
-ChatsPopover.propTypes = {
-    open: PropTypes.bool,
-    anchorEl: PropTypes.any,
-    setAnchorEl: PropTypes.func,
-    setChatterId: PropTypes.func,
-    chatterId: PropTypes.string
-
 }
 
 

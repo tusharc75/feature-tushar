@@ -137,7 +137,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                             </Grid>
                         })
                     }
-                </Grid> : <Typography className="m-2">No Contacts found</Typography>
+                </Grid> : <Typography className="m-2 text-center">No Contacts found</Typography>
             }
         </>
     }

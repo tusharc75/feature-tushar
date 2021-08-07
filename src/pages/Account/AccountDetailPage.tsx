@@ -74,6 +74,7 @@ import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import ProcessFlow from "../../components/ProcessFlow";
 import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -904,11 +905,11 @@ export default function AccountDetailPage(props) {
               </Box>
             </Paper>
           </div>
-          <div>
+          <div className="position-relative">
             {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  Hide Activities
+                  <IoIosArrowDropright className="icon" />
                 </a>}
                 <Grid container>
                   <Grid item xs={12}>
@@ -1069,11 +1070,11 @@ export default function AccountDetailPage(props) {
               </Paper>
               :
               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                Show Activities
+                <IoIosArrowDropleft className="icon"/>
               </a>}
           </div>
         </div>
-        <div>
+        <div >
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
