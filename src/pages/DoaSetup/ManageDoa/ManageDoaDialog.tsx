@@ -94,20 +94,28 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
 
     const handleSubmit = async (values) => {
         let doaArray;
-        selectedType === 2 ?
+        if (selectedType === 2) {
             doaArray = values.sort((a, b) => a.amount - b.amount).filter(item => item.name != "" && item.name != undefined && item.id != "" && item.id != undefined).map(item => {
                 return {
                     user: item.id,
                     amount: item.amount ? Number(item.amount) : 0
                 };
             })
-
-            :
+            let self_index = doaArray.findIndex(x => x.user === userSelected[0] || x.user === "self");
+            if (self_index > 0) {
+                var element = doaArray[self_index];
+                doaArray.splice(self_index, 1);
+                doaArray.splice(0, 0, element);
+            }
+        }
+        else {
             doaArray = values.filter(item => item.name != "" && item.name != undefined && item.id != "" && item.id != undefined).map(item => {
                 return {
                     user: item.id,
                 };
             });
+        }
+
 
         const userDoa = { _ids: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
         setLoading(true)
@@ -130,15 +138,15 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
         if (newFilter !== null) {
             setFilter(newFilter);
             setSelectedType(DOAType.find((d) => d.key === newFilter).value);
-            if(newFilter === "Sequence"){
+            if (newFilter === "Sequence") {
                 doa.length > 0 ?
-                setUsers(doa.filter(v => v.id !== userSelected[0] && v.id !== "self")) :
-                setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+                    setUsers(doa.filter(v => v.id !== userSelected[0] && v.id !== "self")) :
+                    setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
             }
-            else{
+            else {
                 doa.length > 0 ?
-                setUsers(doa) :
-                setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+                    setUsers(doa) :
+                    setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
 
             }
             formikRef.current?.resetForm()
@@ -417,8 +425,13 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                 values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
                                             }
                                             onClick={() => {
-                                                validate(values) ? setCheck(true)
-                                                    : handleSubmit(values.users)
+                                                if (values.users.length === 0) {
+                                                    handleSubmit(values.users)
+                                                }
+                                                else {
+                                                    validate(values) ? setCheck(true)
+                                                        : handleSubmit(values.users)
+                                                }
                                             }}
                                         >
                                             {isRenderedFromUserSetUp ? "Save & Finish" : "Save"}
