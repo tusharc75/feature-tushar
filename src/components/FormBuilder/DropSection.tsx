@@ -60,6 +60,11 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                 if (type === FieldList.CURRENCYAMOUNT.type) {
                     insert_object.displayCurrency = ["CUR"]
                 }
+                if (type === FieldList.CONVERTER.type) {
+                    insert_object.units = []
+                    insert_object.displayUnits = []
+                    insert_object.formulaUnits = []
+                }
                 if (index !== null) {
                     row.field.splice(index, 0, insert_object);
                 }
@@ -256,7 +261,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                                 id="standard-basic"
                                 variant="outlined"
                                 margin="dense"
-                                disabled={module==="pdf-template"}
+                                disabled={module === "pdf-template"}
                                 value={data.sectionName}
                                 onChange={(event) => onChangeSectionName(data.sectionId, event.target.value)}
                             />

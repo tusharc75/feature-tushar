@@ -8,6 +8,8 @@ import CategorySidebar from "../CategorySidebar/CategorySidebar"
 import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import axiosInstance from "../../../axios/axiosInstance";
 import Layout from '../../Layout';
+import CustomContainer from '../../CustomContainer';
+import routes from '../../Helpers/Routes';
 
 const ProductList = ({ products }) => {
 
@@ -50,13 +52,16 @@ const ProductList = ({ products }) => {
             })
     }
     return (
-        <>
-            <div className={styles.wrapper}>
+        <Layout>
+            <Grid container className="headerbox">
+                <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
+            </Grid>
+            <Box className="detail-container">
+                <div className={styles.wrapper}>
 
-                <CategorySidebar />
+                    <CategorySidebar />
 
 
-                <Box className="detail-container">
                     <div className={`${styles.product_list_container}`}>
                         {
                             products.map((product, index: number) => (
@@ -66,9 +71,31 @@ const ProductList = ({ products }) => {
                             ))
                         }
                     </div>
-                </Box>
-            </div>
-        </>
+                </div>
+            </Box>
+        </Layout>
+
+        // <Layout>
+        //     <Grid container className="headerbox">
+        //         <CustomBreadCrumbs routes={[{ title: "Hi" }]} />
+        //     </Grid>
+        //     <Box className="detail-container">
+        //         <div className={styles.wrapper}>
+
+        //             <CategorySidebar />
+
+        //             <div className={`${styles.product_list_container}`}>
+        //                 {
+        //                     products.map((product, index: number) => (
+        //                         <Product key={index} product={product}
+        //                             onAddItem={onAddToCartItem}
+        //                         />
+        //                     ))
+        //                 }
+        //             </div>
+        //         </div>
+        //     </Box>
+        // </Layout>
     );
 }
 

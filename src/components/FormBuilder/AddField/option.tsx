@@ -10,20 +10,17 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import * as XLSX from "xlsx";
-import { isMobile, isTablet } from "react-device-detect";
 import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { XYCoord } from "dnd-core";
 import update from "immutability-helper";
 import { DragIndicator } from "@material-ui/icons";
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
+  
   const [options, setOptions] = useState(values.option || []);
 
   const onChangeValue = (index, field, value) => {

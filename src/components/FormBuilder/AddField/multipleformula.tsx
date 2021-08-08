@@ -1,35 +1,42 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import FormControl from "@material-ui/core/FormControl";
 import Chip from "@material-ui/core/Chip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import { startCase } from "lodash";
 import { Button, Typography } from "@material-ui/core";
 import { checkFormula } from "../../../constants/formulaUtility";
 
-export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
+export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
+
+  useEffect(() => {
+    values["formulaFields"] && values["formulaFields"].forEach((_f) => {
+      setFieldValue("formulaoption_" + _f, values["formulaoption"][_f] ? values["formulaoption"][_f] : "");
+    });
+  }, [values["formulaFields"]]);
+
   let inputRef = useRef([]);
+
   const [isMyInputFocused, setIsMyInputFocused] = useState(null);
   const [formulaError, setFormulaError] = useState(null);
 
   const handleCheckSyntax = () => {
     if (values["formulaoption"] && values["formulaoption"].length !== 0) {
       let inputValues = {};
-      let invalidFormulas = " "
-      values["formulainputFields"] &&
-        values["formulainputFields"].forEach((_input) => {
-          inputValues[_input] = 1;
-        });
+      let invalidFormulas = ""
+      values["formulainputFields"] && values["formulainputFields"].forEach((_input) => {
+        inputValues[_input] = 1;
+      });
       Object.keys(values["formulaoption"]).forEach((_formula) => {
-        if (!checkFormula(values["formulaoption"][_formula], inputValues))
+        if (!checkFormula(values["formulaoption"][_formula] ? values["formulaoption"][_formula] : "", inputValues))
           invalidFormulas = invalidFormulas + `${_formula} `
       });
-      invalidFormulas !== " " ? setFormulaError(" Invalid formulas are " + invalidFormulas) : setFormulaError(" All formulas are valid ")
+      invalidFormulas !== "" ? setFormulaError(" Invalid formulas are " + invalidFormulas) : setFormulaError(" All formulas are valid ")
     }
   };
+
   const onChangeValue = (index, fieldName, value) => {
-    let data = values["formulaoption"] ? values["formulaoption"] : {};
+    const data = values["formulaoption"] ? { ...values["formulaoption"] } : {};
     data[fieldName] = value;
     setFieldValue("formulaoption", data);
   };
@@ -106,6 +113,17 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
     }
   };
 
+  const handleChangeFormulaField = (value) => {
+    const convertedValue = convertLabeltoValue(value);
+    setFieldValue("formulaFields", convertedValue)
+    var formulaoption = {};
+    let oldformulaoption = values["formulaoption"] ? values["formulaoption"] : {};
+    convertedValue && convertedValue.forEach((_f) => {
+      formulaoption[_f] = oldformulaoption[_f] ? oldformulaoption[_f] : ""
+    });
+    setFieldValue("formulaoption", formulaoption);
+  }
+
   return (
     <Box>
       <FormControl variant="outlined" fullWidth margin="dense">
@@ -137,9 +155,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
               />
             ))
           }
-          onChange={(e, value) =>
-            setFieldValue("formulaFields", convertLabeltoValue(value))
-          }
+          onChange={(e, value) => handleChangeFormulaField(value)}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -147,6 +163,9 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
               variant="outlined"
               label="Formula Fields"
               placeholder="Formula Fields"
+              name="formulaFields"
+              error={touched['formulaFields'] && Boolean(errors['formulaFields'])}
+              helperText={touched['formulaFields'] && errors['formulaFields']}
             />
           )}
         />
@@ -188,6 +207,9 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
               variant="outlined"
               label="Input Parameters"
               placeholder="Input Parameters"
+              name="formulainputFields"
+              error={touched['formulainputFields'] && Boolean(errors['formulainputFields'])}
+              helperText={touched['formulainputFields'] && errors['formulainputFields']}
             />
           )}
         />
@@ -227,7 +249,8 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
                       </td>
                       <td className="pt-2">
                         <TextField
-                          id="standard-basic"
+                          name={"formulaoption_" + _field}
+                          id={"formulaoption_" + _field}
                           variant="outlined"
                           margin="dense"
                           fullWidth
@@ -235,7 +258,6 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
                           rows={2}
                           placeholder="Formula (return field1 + field2)"
                           style={{ margin: 0 }}
-                          name={_field}
                           inputRef={inputRef.current[i]}
                           //onBlur={() => setIsMyInputFocused(null)}
                           onFocus={() => setIsMyInputFocused(i)}
@@ -250,21 +272,24 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id }) => {
                           onChange={(event) =>
                             onChangeValue(i, _field, event.target.value)
                           }
+                          error={touched["formulaoption_" + _field] && Boolean(errors["formulaoption_" + _field])}
+                          helperText={touched["formulaoption_" + _field] && errors["formulaoption_" + _field]}
                         />
                       </td>
                     </tr>
                   ))}
-                {<>
-                  {formulaError && (
-                    <Typography variant="caption" display="block">
-                      {formulaError}
-                    </Typography>
-                  )}
-                  <Button size="small" onClick={handleCheckSyntax} color="primary">
-                    Check Syntax
-                  </Button>
-                </>
-                }
+                {<tr>
+                  <td colSpan={2}>
+                    {formulaError && (
+                      <Typography variant="caption" display="block">
+                        {formulaError}
+                      </Typography>
+                    )}
+                    <Button size="small" onClick={handleCheckSyntax} color="primary">
+                      Check Syntax
+                    </Button>
+                  </td>
+                </tr>}
               </>
             </tbody>
           </table>

@@ -30,11 +30,10 @@ const MenuProps = {
     },
 };
 
-export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
+export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors }) => {
 
 
     const [isUpdate, setUpdate] = useState(false);
-
 
     useEffect(() => {
         if (!values["option"] || values["option"].length === 0) {
@@ -150,7 +149,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                                 margin="dense"
                                 fullWidth
                                 style={{ margin: 0 }}
-                                value={values["option"][props2.index].optionLabel}
+                                value={values["option"][props2.index] && values["option"][props2.index].optionLabel}
                                 onChange={(event) => {
                                     onChangeValue(props2.index, "optionLabel", event.target.value)
                                 }}
@@ -220,7 +219,11 @@ export const Vlookup = ({ fields, values, setFieldValue, _id }) => {
                         margin="dense"
                         variant="outlined"
                         label="Input Parameters"
-                        placeholder="Input Parameters" />
+                        placeholder="Input Parameters"
+                        name="inputFields"
+                        error={touched['inputFields'] && Boolean(errors['inputFields'])}
+                        helperText={touched['inputFields'] && errors['inputFields']}
+                    />
                 )}
             />
             <Box marginTop={1} marginBottom={2}>

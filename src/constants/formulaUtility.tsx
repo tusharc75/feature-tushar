@@ -16,6 +16,9 @@ const matchIf = (string) => {
 let loop_count = 0;
 
 export const checkFormula = (formula, inputFields) => {
+    if (formula === "") {
+        return false
+    }
     let isValid = true
     const replaceFieldName = []
     try {
@@ -38,6 +41,10 @@ export const checkFormula = (formula, inputFields) => {
         })
         fs['f1'] = new Function(...argument, formula);
         let result = fs['f1'].apply(null, values);
+        console.log(result)
+        if (result === undefined) {
+            isValid = false
+        }
     }
     catch (e) {
         isValid = false
@@ -102,14 +109,6 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
     resultValues[name] = value;
     try {
         loop_count = 0;
-        if (fieldData && fieldData.isMulitFormula) {
-            resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
-        }
-        if (fieldData.type === "vlookupDropdown" || fieldData.isVlookup) {
-            resultValues = handleVlookup(fieldData, fields, values, name, value, resultValues);
-        }
-        resultValues = handleFormula(fieldData, fields, values, name, value, resultValues, true);
-        resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, value, resultValues);
         if (fieldData.type !== 'currencyAmount' && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
             resultValues = handleConverter(fieldData, fields, values, fieldData.fieldName, unit, value, resultValues);
 
@@ -119,6 +118,14 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         else if (fieldData.type === 'currencyAmount') {
             resultValues = handleCurrency(fieldData, fields, values, fieldData.fieldName, currency, value, resultValues);
         }
+        if (fieldData && fieldData.isMulitFormula) {
+            resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
+        }
+        if (fieldData.type === "vlookupDropdown" || fieldData.isVlookup) {
+            resultValues = handleVlookup(fieldData, fields, values, name, value, resultValues);
+        }
+        resultValues = handleFormula(fieldData, fields, values, name, value, resultValues, true);
+        resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, value, resultValues);
         if (fieldData.type === 'dropDown') {
             fields && fields.filter((_f) => _f.type === "dropDown" && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach(_r => {
                 resultValues[_r.fieldName] = ""
@@ -143,7 +150,6 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
     }
     catch (e) {
     }
-
     return resultValues
 }
 
@@ -158,12 +164,11 @@ const handleMulitFormula = (fieldData, fields, values, resultValues) => {
             resultValues[_field] = calValue;
             let _field_result = fields.filter((_f) => _f.fieldName === _field.split("_")[0])
             if (_field_result.length) {
-                resultValues = handleFormula(_field_result[0], fields, values, _field, calValue, resultValues, false);
                 if (_field_result[0].type !== 'currencyAmount' && (_field_result[0].type === 'converter' || _field_result[0].isConverter === true)) {
-                    resultValues = handleConverter(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), calValue, resultValues);
+                    resultValues = handleConverter(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1], calValue, resultValues);
 
                 } else if (_field_result[0].type === 'currencyAmount' && (_field_result[0].type === 'converter' || _field_result[0].isConverter === true)) {
-                    resultValues = handleCurrencyConverter(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), _field.split("_")[2].toUpperCase(), calValue, resultValues);
+                    resultValues = handleCurrencyConverter(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), _field.split("_")[2], calValue, resultValues);
                 }
                 else if (_field_result[0].type === 'currencyAmount') {
                     resultValues = handleCurrency(_field_result[0], fields, values, _field_result[0].fieldName, _field.split("_")[1].toUpperCase(), calValue, resultValues);
@@ -171,6 +176,7 @@ const handleMulitFormula = (fieldData, fields, values, resultValues) => {
                 if (_field_result[0].isMulitFormula) {
                     resultValues = handleMulitFormula(_field_result[0], fields, values, resultValues);
                 }
+                resultValues = handleFormula(_field_result[0], fields, values, _field, calValue, resultValues, false);
             }
         }
     });
@@ -178,8 +184,8 @@ const handleMulitFormula = (fieldData, fields, values, resultValues) => {
 };
 
 const handleFormula = (fieldData, fields, values, name, value, resultValues, isOverride) => {
-    if (fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length) {
-        fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).forEach((_data) => {
+    if (fields && fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields.includes(name)).length) {
+        fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields.includes(name)).forEach((_data) => {
             if (_data.inputFields.includes(name)) {
                 loop_count++
                 if (loop_count > 100) {
@@ -327,7 +333,13 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
 };
 
 const handleConverter = (fieldData, fields, values, name, _unit, value, resultValues) => {
-    let indexConverter = fieldData.units.indexOf(_unit);
+    let indexConverter = -1;
+    fieldData.units.forEach((_f, index) => {
+        if (_f.toLowerCase() === _unit.toLowerCase()) {
+            indexConverter = index;
+            return;
+        }
+    })
     if (indexConverter >= 0) {
         for (var x_unit in fieldData.option[indexConverter]) {
             if (x_unit !== _unit && (fieldData.displayUnits.includes(x_unit) || (fieldData.formulaUnits && fieldData.formulaUnits.includes(x_unit)))) {
@@ -367,7 +379,13 @@ const handleCurrencyConverter = (fieldData, fields, values, name, _currency, _un
     //     resultValues[name + "_" + _unit.toLowerCase()] = value;
     //     resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
     // }
-    let indexConverter = fieldData.units.indexOf(_unit);
+    let indexConverter = -1;
+    fieldData.units.forEach((_f, index) => {
+        if (_f.toLowerCase() === _unit.toLowerCase()) {
+            indexConverter = index;
+            return;
+        }
+    })
     let indexCurrency = fieldData.currency.indexOf(_currency);
     if (indexConverter >= 0 && indexCurrency >= 0) {
         for (var x_unit in fieldData.option[indexConverter]) {
