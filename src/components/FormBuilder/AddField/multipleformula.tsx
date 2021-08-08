@@ -1,19 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
-import TextField from "@material-ui/core/TextField";
-import Box from "@material-ui/core/Box";
-import FormControl from "@material-ui/core/FormControl";
-import Chip from "@material-ui/core/Chip";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Button, Typography } from "@material-ui/core";
-import { checkFormula } from "../../../constants/formulaUtility";
+import React, { useState, useRef, useEffect } from 'react';
+import TextField from '@material-ui/core/TextField';
+import Box from '@material-ui/core/Box';
+import FormControl from '@material-ui/core/FormControl';
+import Chip from '@material-ui/core/Chip';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Button, Typography } from '@material-ui/core';
+import { checkFormula } from '../../../constants/formulaUtility';
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
-
   useEffect(() => {
-    values["formulaFields"] && values["formulaFields"].forEach((_f) => {
-      setFieldValue("formulaoption_" + _f, values["formulaoption"][_f] ? values["formulaoption"][_f] : "");
-    });
-  }, [values["formulaFields"]]);
+    values['formulaFields'] &&
+      values['formulaFields'].forEach((_f) => {
+        setFieldValue('formulaoption_' + _f, values['formulaoption'][_f] ? values['formulaoption'][_f] : '');
+      });
+  }, [values['formulaFields']]);
 
   let inputRef = useRef([]);
 
@@ -21,41 +21,38 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
   const [formulaError, setFormulaError] = useState(null);
 
   const handleCheckSyntax = () => {
-    if (values["formulaoption"] && values["formulaoption"].length !== 0) {
+    if (values['formulaoption'] && values['formulaoption'].length !== 0) {
       let inputValues = {};
-      let invalidFormulas = ""
-      values["formulainputFields"] && values["formulainputFields"].forEach((_input) => {
-        inputValues[_input] = 1;
+      let invalidFormulas = '';
+      values['formulainputFields'] &&
+        values['formulainputFields'].forEach((_input) => {
+          inputValues[_input] = 1;
+        });
+      Object.keys(values['formulaoption']).forEach((_formula) => {
+        if (!checkFormula(values['formulaoption'][_formula] ? values['formulaoption'][_formula] : '', inputValues))
+          invalidFormulas = invalidFormulas + `${_formula} `;
       });
-      Object.keys(values["formulaoption"]).forEach((_formula) => {
-        if (!checkFormula(values["formulaoption"][_formula] ? values["formulaoption"][_formula] : "", inputValues))
-          invalidFormulas = invalidFormulas + `${_formula} `
-      });
-      invalidFormulas !== "" ? setFormulaError(" Invalid formulas are " + invalidFormulas) : setFormulaError(" All formulas are valid ")
+      invalidFormulas !== '' ? setFormulaError(' Invalid formulas are ' + invalidFormulas) : setFormulaError(' All formulas are valid ');
     }
   };
 
   const onChangeValue = (index, fieldName, value) => {
-    const data = values["formulaoption"] ? { ...values["formulaoption"] } : {};
+    const data = values['formulaoption'] ? { ...values['formulaoption'] } : {};
     data[fieldName] = value;
-    setFieldValue("formulaoption", data);
+    setFieldValue('formulaoption', data);
   };
 
   const handleAddInputField = (field) => {
     if (isMyInputFocused || isMyInputFocused === 0) {
-      let pushPosition =
-        inputRef.current[isMyInputFocused].current.selectionStart;
+      let pushPosition = inputRef.current[isMyInputFocused].current.selectionStart;
       let fieldName = inputRef.current[isMyInputFocused].current.name;
-      let data = values["formulaoption"] ? values["formulaoption"] : {};
+      fieldName = fieldName.replace('formulaoption_', '');
+      let data = values['formulaoption'] ? values['formulaoption'] : {};
       if (!data[fieldName]) {
-        data[fieldName] = "";
+        data[fieldName] = '';
       }
-      data[fieldName] = [
-        data[fieldName].slice(0, pushPosition),
-        field,
-        data[fieldName].slice(pushPosition),
-      ].join("");
-      setFieldValue("formulaoption", data);
+      data[fieldName] = [data[fieldName].slice(0, pushPosition), field, data[fieldName].slice(pushPosition)].join('');
+      setFieldValue('formulaoption', data);
       inputRef.current[isMyInputFocused].current.focus();
     }
   };
@@ -63,15 +60,8 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
   const convertLabeltoValue = (value) => {
     const result = [];
     value.forEach((_v) => {
-      if (
-        fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)
-          .length
-      ) {
-        result.push(
-          fields.filter(
-            (data) => data.fieldLabel === _v || data.fieldName === _v
-          )[0].fieldName
-        );
+      if (fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v).length) {
+        result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldName);
       } else {
         result.push(_v);
       }
@@ -83,11 +73,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
     const result = [];
     value.forEach((_v) => {
       if (fields.filter((data) => data.fieldName === _v).length) {
-        result.push(
-          fields.filter(
-            (data) => data.fieldLabel === _v || data.fieldName === _v
-          )[0].fieldLabel
-        );
+        result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldLabel);
       } else {
         result.push(_v);
       }
@@ -95,34 +81,30 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
     return result;
   };
 
-  if (values["formulaFields"] && values["formulaFields"].length) {
-    inputRef.current =
-      values["formulaFields"] &&
-      values["formulaFields"].map(
-        (_field, index) => (inputRef.current[index] = React.createRef())
-      );
+  if (values['formulaFields'] && values['formulaFields'].length) {
+    inputRef.current = values['formulaFields'] && values['formulaFields'].map((_field, index) => (inputRef.current[index] = React.createRef()));
   }
 
   const generateLabel = (label) => {
     const data = fields?.find((d) => d.fieldName === label);
     if (data) {
       return `${data.fieldLabel} - ${label}`;
-    }
-    else {
+    } else {
       return `${label}`;
     }
   };
 
   const handleChangeFormulaField = (value) => {
     const convertedValue = convertLabeltoValue(value);
-    setFieldValue("formulaFields", convertedValue)
+    setFieldValue('formulaFields', convertedValue);
     var formulaoption = {};
-    let oldformulaoption = values["formulaoption"] ? values["formulaoption"] : {};
-    convertedValue && convertedValue.forEach((_f) => {
-      formulaoption[_f] = oldformulaoption[_f] ? oldformulaoption[_f] : ""
-    });
-    setFieldValue("formulaoption", formulaoption);
-  }
+    let oldformulaoption = values['formulaoption'] ? values['formulaoption'] : {};
+    convertedValue &&
+      convertedValue.forEach((_f) => {
+        formulaoption[_f] = oldformulaoption[_f] ? oldformulaoption[_f] : '';
+      });
+    setFieldValue('formulaoption', formulaoption);
+  };
 
   return (
     <Box>
@@ -140,20 +122,10 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
               })
           }
           getOptionLabel={(option) => option}
-          value={
-            values["formulaFields"]
-              ? convertValuetoLabel(values["formulaFields"])
-              : []
-          }
+          value={values['formulaFields'] ? convertValuetoLabel(values['formulaFields']) : []}
           freeSolo
           renderTags={(value: string[], getTagProps) =>
-            value.map((option: string, index: number) => (
-              <Chip
-                variant="outlined"
-                label={option}
-                {...getTagProps({ index })}
-              />
-            ))
+            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
           }
           onChange={(e, value) => handleChangeFormulaField(value)}
           renderInput={(params) => (
@@ -182,24 +154,12 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
             })
           }
           getOptionLabel={(option) => option}
-          value={
-            values["formulainputFields"]
-              ? convertValuetoLabel(values["formulainputFields"])
-              : []
-          }
+          value={values['formulainputFields'] ? convertValuetoLabel(values['formulainputFields']) : []}
           freeSolo
           renderTags={(value: string[], getTagProps) =>
-            value.map((option: string, index: number) => (
-              <Chip
-                variant="outlined"
-                label={option}
-                {...getTagProps({ index })}
-              />
-            ))
+            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
           }
-          onChange={(e, value) =>
-            setFieldValue("formulainputFields", convertLabeltoValue(value))
-          }
+          onChange={(e, value) => setFieldValue('formulainputFields', convertLabeltoValue(value))}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -214,43 +174,28 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
           )}
         />
       </FormControl>
-      {values["formulainputFields"] && values["formulainputFields"].length > 0 && (
+      {values['formulainputFields'] && values['formulainputFields'].length > 0 && (
         <Box pt={0.5} pb={0.5}>
-          {values["formulainputFields"].map((_field) => (
-            <Chip
-              className="ml-1 cursor-pointer"
-              key={_field}
-              label={generateLabel(_field)}
-              onClick={() => handleAddInputField(_field)}
-            />
+          {values['formulainputFields'].map((_field) => (
+            <Chip className="ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
           ))}
         </Box>
       )}
-      {values["formulaFields"] && values["formulaFields"].length > 0 && (
-        <Box
-          marginTop={1}
-          border={1}
-          p={1}
-          borderColor="grey.300"
-          maxHeight={300}
-          style={{ overflow: "auto" }}
-        >
-          <table style={{ width: "100%" }}>
+      {values['formulaFields'] && values['formulaFields'].length > 0 && (
+        <Box marginTop={1} border={1} p={1} borderColor="grey.300" maxHeight={300} style={{ overflow: 'auto' }}>
+          <table style={{ width: '100%' }}>
             <tbody>
               <>
-                {values["formulaFields"] &&
-                  values["formulaFields"].map((_field, i) => (
+                {values['formulaFields'] &&
+                  values['formulaFields'].map((_field, i) => (
                     <tr key={i}>
-                      <td
-                        className="pt-2"
-                        style={{ paddingRight: 10, width: "50px" }}
-                      >
+                      <td className="pt-2" style={{ paddingRight: 10, width: '50px' }}>
                         {_field}
                       </td>
                       <td className="pt-2">
                         <TextField
-                          name={"formulaoption_" + _field}
-                          id={"formulaoption_" + _field}
+                          name={'formulaoption_' + _field}
+                          id={'formulaoption_' + _field}
                           variant="outlined"
                           margin="dense"
                           fullWidth
@@ -264,32 +209,28 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                           onKeyPress={(event) => {
                             event.stopPropagation();
                           }}
-                          value={
-                            values["formulaoption"] &&
-                            values["formulaoption"][_field] &&
-                            values["formulaoption"][_field]
-                          }
-                          onChange={(event) =>
-                            onChangeValue(i, _field, event.target.value)
-                          }
-                          error={touched["formulaoption_" + _field] && Boolean(errors["formulaoption_" + _field])}
-                          helperText={touched["formulaoption_" + _field] && errors["formulaoption_" + _field]}
+                          value={values['formulaoption'] && values['formulaoption'][_field] && values['formulaoption'][_field]}
+                          onChange={(event) => onChangeValue(i, _field, event.target.value)}
+                          error={touched['formulaoption_' + _field] && Boolean(errors['formulaoption_' + _field])}
+                          helperText={touched['formulaoption_' + _field] && errors['formulaoption_' + _field]}
                         />
                       </td>
                     </tr>
                   ))}
-                {<tr>
-                  <td colSpan={2}>
-                    {formulaError && (
-                      <Typography variant="caption" display="block">
-                        {formulaError}
-                      </Typography>
-                    )}
-                    <Button size="small" onClick={handleCheckSyntax} color="primary">
-                      Check Syntax
-                    </Button>
-                  </td>
-                </tr>}
+                {
+                  <tr>
+                    <td colSpan={2}>
+                      {formulaError && (
+                        <Typography variant="caption" display="block">
+                          {formulaError}
+                        </Typography>
+                      )}
+                      <Button size="small" onClick={handleCheckSyntax} color="primary">
+                        Check Syntax
+                      </Button>
+                    </td>
+                  </tr>
+                }
               </>
             </tbody>
           </table>
