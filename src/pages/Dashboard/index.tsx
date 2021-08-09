@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import { Container, Grid, Paper, Box, Typography } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { Container, Grid, Paper, Box, Typography } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 
-import Layout from "../../components/Layout";
-import { useData } from "../../StateProvider/Provider";
-import { kebabCase } from "lodash";
+import Layout from '../../components/Layout';
+import { useData } from '../../StateProvider/Provider';
+import { kebabCase } from 'lodash';
 
 function Dashboard() {
   const {
-    state: { user },
+    state: { user }
   } = useData();
   const [sections, setSections] = useState([]);
 
@@ -27,7 +27,7 @@ function Dashboard() {
 
       return {
         head: sec,
-        items: list,
+        items: list
       };
     });
     setSections(data);
@@ -35,7 +35,7 @@ function Dashboard() {
 
   const handleRoutes = (item) => {
     return `/${kebabCase(item.name)}`;
-    
+
     //  Use below code to handle special route cases
     // switch (item.name) {
 
@@ -45,8 +45,7 @@ function Dashboard() {
     //   default:
     //     return `/${kebabCase(item.name)}`;
     // }
-
-  }
+  };
 
   return (
     <Layout>
@@ -61,25 +60,22 @@ function Dashboard() {
                       <Box textAlign="center" marginBottom={2}>
                         <Typography variant="h6">{section.head}</Typography>
                       </Box>
-                      <Box height="150px" style={{ overflowY: "auto" }}>
+                      <Box height="150px" style={{ overflowY: 'auto' }}>
                         {section.items.map((item) => (
                           <>
                             <Box marginY={1} key={item.name} component="div">
                               <Typography paragraph>
-                                <Link to={handleRoutes(item)}>
-                                  {item.resourceLabel || item.name}
-                                </Link>
+                                <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                               </Typography>
                             </Box>
-                            {
-                              item.name === "Product" && <Box marginY={1} key={item.name} component="div">
+                            {/*Only show product list if environment is local || development*/}
+                            {['local', 'development'].includes(process.env.REACT_APP_ENV) && item.name === 'Product' && (
+                              <Box marginY={1} key={item.name} component="div">
                                 <Typography paragraph>
-                                  <Link to={`/product-list`}>
-                                    Product List
-                                  </Link>
+                                  <Link to={`/product-list`}>Product List</Link>
                                 </Typography>
                               </Box>
-                            }
+                            )}
                           </>
                         ))}
                       </Box>

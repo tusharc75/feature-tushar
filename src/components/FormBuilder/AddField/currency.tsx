@@ -13,10 +13,9 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { DecimalPlaces } from './decimalPlaces';
 
 
-export const Currency = ({ values, setFieldValue, refrence }) => {
+export const Currency = ({ values, setFieldValue, refrence, touched, errors }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [currency, setCurrency] = useState([]);
@@ -47,11 +46,14 @@ export const Currency = ({ values, setFieldValue, refrence }) => {
                     {...params}
                     margin="dense"
                     variant="outlined"
+                    name="displayCurrency"
                     label="Currency"
-                    placeholder="Currency" />
+                    placeholder="Currency"
+                    error={touched['displayCurrency'] && Boolean(errors['displayCurrency'])}
+                    helperText={touched['displayCurrency'] && errors['displayCurrency']}
+                />
             )}
         />
-        <DecimalPlaces values={values} setFieldValue={setFieldValue} />
     </Box>
     );
 }
