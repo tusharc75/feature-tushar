@@ -17,6 +17,7 @@ import ManageQuoteDialog from "../../pages/QuoteBuilderCombined/ManageQuote/Mana
 import { useData } from "../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 
 export default function ProductDetails() {
   const [productDetails, setProductDetails] = useState(null);
@@ -137,7 +138,7 @@ export default function ProductDetails() {
   return (
     <Layout>
       <Grid container className="headerbox">
-
+        <CustomBreadCrumbs routes={[routes.productList, { title: productDetails?.productName }]} />
       </Grid>
       <Box className="detail-container">
         {showCreateQuoteDialog && (

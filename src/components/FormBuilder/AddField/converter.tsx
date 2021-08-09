@@ -11,6 +11,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 const MenuProps = {
   PaperProps: {
@@ -27,7 +28,8 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export const Converter = ({ fields, values, setFieldValue }) => {
+export const Converter = ({ fields, values, setFieldValue, touched, errors }) => {
+
   const onChangeValue = (index, fieldName, value) => {
     let data = values['option'] ? [...values['option']] : [];
     data[index][fieldName] = value;
@@ -87,7 +89,7 @@ export const Converter = ({ fields, values, setFieldValue }) => {
       <Autocomplete
         multiple
         disableCloseOnSelect={true}
-        id="units"
+        id="autocompleteunits"
         options={[]}
         value={values['units'] ? values['units'] : []}
         freeSolo
@@ -95,7 +97,17 @@ export const Converter = ({ fields, values, setFieldValue }) => {
           value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
         }
         onChange={(e, value) => handleChangeUnit(value)}
-        renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Units" placeholder="Units" />}
+        renderInput={(params) =>
+          <TextField
+            {...params}
+            margin="dense"
+            name="units"
+            variant="outlined"
+            label="Units"
+            placeholder="Units"
+            error={touched['units'] && Boolean(errors['units'])}
+            helperText={touched['units'] && errors['units']}
+          />}
       />
       {values['units'] && values['units'].length > 0 && (
         <Box marginTop={1} border={1} p={1} borderColor="grey.300" maxHeight={300} style={{ overflow: 'auto' }}>
@@ -140,7 +152,7 @@ export const Converter = ({ fields, values, setFieldValue }) => {
         <Box mt={1}>
           <Grid spacing={3} container>
             <Grid item xs={12} sm={4} md={4}>
-              <FormControl variant="outlined" fullWidth margin="dense">
+              <FormControl variant="outlined" fullWidth margin="dense" error={touched['displayUnits'] && Boolean(errors['displayUnits'])}>
                 <InputLabel htmlFor="displayUnits">Display Units</InputLabel>
                 <Select
                   inputProps={{
@@ -191,16 +203,18 @@ export const Converter = ({ fields, values, setFieldValue }) => {
                       </MenuItem>
                     ))}
                 </Select>
+                <FormHelperText>{touched['displayUnits'] && errors['displayUnits']}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
-              <FormControl variant="outlined" fullWidth margin="dense">
+              <FormControl variant="outlined" fullWidth margin="dense" error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}>
                 <InputLabel htmlFor="formulaUnits">Formula Units</InputLabel>
                 <Select
                   inputProps={{
                     name: 'formulaUnits',
                     id: 'formulaUnits'
                   }}
+                  error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}
                   margin="dense"
                   label="Formula Units"
                   multiple
@@ -245,9 +259,9 @@ export const Converter = ({ fields, values, setFieldValue }) => {
                       </MenuItem>
                     ))}
                 </Select>
+                <FormHelperText>{touched['formulaUnits'] && errors['formulaUnits']}</FormHelperText>
               </FormControl>
             </Grid>
-
             {values['isFormula'] && (
               <Grid item xs={12} sm={4} md={4}>
                 <FormControl fullWidth margin="dense" variant="outlined">

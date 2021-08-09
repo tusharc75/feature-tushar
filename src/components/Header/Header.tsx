@@ -1,5 +1,5 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
-import { fade, makeStyles } from "@material-ui/core/styles";
+import React, { useState, useRef, useContext, useEffect } from 'react';
+import { alpha, makeStyles } from '@material-ui/core/styles';
 import {
   Slide,
   AppBar,
@@ -13,156 +13,149 @@ import {
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover,
-} from "@material-ui/core";
+  Popover
+} from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import Avatar from "@material-ui/core/Avatar";
-import {
-  Menu as MenuIcon,
-  MoreVert as MoreIcon,
-  Clear as ClearIcon,
-  Notifications,
-  HelpOutline,
-  ExpandMore,
-} from "@material-ui/icons";
-import io, { Socket } from "socket.io-client";
-import { useHistory, Link } from "react-router-dom";
-import { useData } from "../../StateProvider/Provider";
-import { SVG } from "../../assets";
-import UserProfile from "./../UserProfile";
-import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
-import "./Header.scss";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import routes from "../Helpers/Routes";
-import { useAccount, useMsal } from "@azure/msal-react";
-import { isEmpty } from "lodash";
-import { FiCheckCircle } from "react-icons/fi";
-import { displayCardDate } from "../../constants/helpers";
-import ChatIcon from "@material-ui/icons/Chat";
-import { CustomChatNotificationCountContext } from "../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
-import { backendApi } from "../../config";
-import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
+import Avatar from '@material-ui/core/Avatar';
+import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore } from '@material-ui/icons';
+import io, { Socket } from 'socket.io-client';
+import { useHistory, Link } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
+import { SVG } from '../../assets';
+import UserProfile from './../UserProfile';
+import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
+import './Header.scss';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import routes from '../Helpers/Routes';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { isEmpty } from 'lodash';
+import { FiCheckCircle } from 'react-icons/fi';
+import { displayCardDate } from '../../constants/helpers';
+import ChatIcon from '@material-ui/icons/Chat';
+import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import { backendApi } from '../../config';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   appBar: {
-    zIndex: theme.zIndex.drawer + 1,
+    zIndex: theme.zIndex.drawer + 1
   },
   toolbar: {
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down('xs')]: {
       paddingLeft: 0,
-      paddingRight: 0,
-    },
+      paddingRight: 0
+    }
   },
   menuButton: {
-    marginRight: theme.spacing(2),
+    marginRight: theme.spacing(2)
   },
 
   logo: {
-    width: "140px",
+    width: '140px'
   },
 
   search: {
-    position: "relative",
+    position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
-    "&:hover": {
-      backgroundColor: fade(theme.palette.common.white, 0.25),
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.common.white, 0.25)
     },
     margin: theme.spacing(0, 2),
-    width: "100%",
-    display: "none",
-    [theme.breakpoints.up("md")]: {
-      display: "block",
-    },
+    width: '100%',
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'block'
+    }
   },
 
   searchIcon: {
     padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   inputRoot: {
-    color: "inherit",
+    color: 'inherit'
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
+    transition: theme.transitions.create('width'),
+    width: '100%'
   },
 
   sectionDesktop: {
-    display: "none",
-    [theme.breakpoints.up("sm")]: {
-      display: "flex",
-      alignItems: "center",
-    },
+    display: 'none',
+    [theme.breakpoints.up('sm')]: {
+      display: 'flex',
+      alignItems: 'center'
+    }
   },
   sectionMobile: {
-    display: "flex",
-    [theme.breakpoints.up("md")]: {
-      display: "none",
-    },
+    display: 'flex',
+    [theme.breakpoints.up('md')]: {
+      display: 'none'
+    }
   },
   servicesButton: {
-    display: "flex",
-    [theme.breakpoints.down("xs")]: {
-      display: "none",
-    },
+    display: 'flex',
+    [theme.breakpoints.down('xs')]: {
+      display: 'none'
+    }
   },
   brandLogo: {
-    maxWidth: "10%",
-    height: "45px",
-    borderRadius: "4px",
+    maxWidth: '10%',
+    height: '45px',
+    borderRadius: '4px'
   },
   entitySelect: {
-    fontSize: "16px",
-    display: "flex",
-    alignItems: "center",
-    cursor: "pointer",
-    maxWidth: "195px",
-    padding: theme.spacing(1, 0, 1, 1),
+    fontSize: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    maxWidth: '195px',
+    padding: theme.spacing(1, 0, 1, 1)
   },
   entityName: {
-    maxWidth: "200px",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
+    maxWidth: '200px',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap'
   },
   notificationHeight: {
     minWidth: 300,
     minHeight: 200,
-    maxHeight: `calc(100vh - 200px)`,
+    maxHeight: `calc(100vh - 200px)`
   },
   notificationHeightWithData: {
-    minWidth: 300,
+    minWidth: 300
   },
   notificationContent: {
-    maxHeight: "640px",
-    overflow: "auto",
-    border: "1px solid #eadfdf",
-    margin: "2px"
+    maxHeight: '640px',
+    overflow: 'auto',
+    border: '1px solid #eadfdf',
+    margin: '2px'
   },
   markAll: {
-    textAlign: "center",
-    color: "#a59e9e",
-    padding: "5px",
-    display: "flex !important",
-    alignItems: "center !important",
-    justifyContent: "flex-end",
-    paddingRight: "10px",
-    "&:hover": {
-      textDecoration: "underline"
+    textAlign: 'center',
+    color: '#a59e9e',
+    padding: '5px',
+    display: 'flex !important',
+    alignItems: 'center !important',
+    justifyContent: 'flex-end',
+    paddingRight: '10px',
+    '&:hover': {
+      textDecoration: 'underline'
     }
   }
 }));
@@ -171,14 +164,13 @@ const Header = ({ toggleDrawer }) => {
   const { instance, accounts, inProgress } = useMsal();
   const account = useAccount(accounts[0] || {});
 
-
   const {
     state: { user, selectedEntity },
-    dispatch,
+    dispatch
   }: any = useData();
   const classes = useStyles();
   const history = useHistory();
-  const isMobile = useMediaQuery("(max-width:599px)");
+  const isMobile = useMediaQuery('(max-width:599px)');
   const [isSearch, setSearch] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
@@ -199,32 +191,31 @@ const Header = ({ toggleDrawer }) => {
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
-  const [cartCount, setCartCount] = useState(0)
+  const [cartCount, setCartCount] = useState(0);
 
   // For FullScreen Notification - Start
-  const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] =
-    React.useState(null);
+  const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
 
   useEffect(() => {
-    fetchCart()
-  }, [])
+    fetchCart();
+  }, []);
 
   const fetchCart = () => {
     axiosInstance()
-      .get(`/user/cart`).then(({ data: { data } }) => {
-
+      .get(`/user/cart`)
+      .then(({ data: { data } }) => {
         if (data) {
-          setCartCount(data.length)
+          setCartCount(data.length);
         }
-      })
-  }
+      });
+  };
 
   const handleFullScreenNotificationClick = (event) => {
     setFullScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
     axiosInstance()
-      .get("/user/notification")
+      .get('/user/notification')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -241,23 +232,18 @@ const Header = ({ toggleDrawer }) => {
   };
 
   const fullScreenNotificationOpen = Boolean(fullScreenNotificationAnchorEl);
-  const fullScreenNotificationId = fullScreenNotificationOpen
-    ? "full-screen-notification"
-    : undefined;
+  const fullScreenNotificationId = fullScreenNotificationOpen ? 'full-screen-notification' : undefined;
   // For FullScreen Notification - End
 
   // For MobileScreen Notification - Start
-  const [
-    mobileScreenNotificationAnchorEl,
-    setMobileScreenNotificationAnchorEl,
-  ] = React.useState(null);
+  const [mobileScreenNotificationAnchorEl, setMobileScreenNotificationAnchorEl] = React.useState(null);
 
   const handleMobileScreenNotificationClick = async (event) => {
     setMobileScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
     await axiosInstance()
-      .get("/user/notification")
+      .get('/user/notification')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -273,31 +259,23 @@ const Header = ({ toggleDrawer }) => {
     setMobileScreenNotificationAnchorEl(null);
   };
 
-  const mobileScreenNotificationOpen = Boolean(
-    mobileScreenNotificationAnchorEl
-  );
-  const mobileScreenNotificationId = mobileScreenNotificationOpen
-    ? "mobile-screen-notification"
-    : undefined;
+  const mobileScreenNotificationOpen = Boolean(mobileScreenNotificationAnchorEl);
+  const mobileScreenNotificationId = mobileScreenNotificationOpen ? 'mobile-screen-notification' : undefined;
   // For MobileScreen Notification - End
 
-  const [loadingChatNotifications, setLoadingChatNotifications] =
-    useState(false);
+  const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
   const [chatNotificationList, setChatNotificationList] = useState([]);
 
   // For FullScreen Chat Notification - Start
-  const [
-    fullScreenChatNotificationAnchorEl,
-    setFullScreenChatNotificationAnchorEl,
-  ] = React.useState(null);
+  const [fullScreenChatNotificationAnchorEl, setFullScreenChatNotificationAnchorEl] = React.useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     const s = io(`${backendApi}/user`, {
       auth: {
-        token,
+        token
       },
-      transports: ['websocket', "pooling"],
+      transports: ['websocket', 'pooling'],
       reconnectionAttempts: 5,
       reconnectionDelay: 5000
     });
@@ -307,23 +285,23 @@ const Header = ({ toggleDrawer }) => {
   // Socket listening for data
   useEffect(() => {
     if (socket && user) {
-      socket.on("connect", () => {
-        socket.emit("join", user.user._id);
+      socket.on('connect', () => {
+        socket.emit('join', user.user._id);
       });
 
-      socket.on("data", (data) => {
+      socket.on('data', (data) => {
         setChatNotificationList(data);
         chatNotification.setCount(chatNotification.count + 1);
       });
-      socket.on("new", (data) => {
-        dispatch({ type: SET_CHATTER, payload: data })
+      socket.on('new', (data) => {
+        dispatch({ type: SET_CHATTER, payload: data });
       });
     }
     return () => {
       if (socket) {
         socket.disconnect();
-        socket.off("connect");
-        socket.off("data");
+        socket.off('connect');
+        socket.off('data');
       }
     };
   }, [socket, user]);
@@ -333,7 +311,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingChatNotifications(true);
 
     axiosInstance()
-      .get("/user/user-notification")
+      .get('/user/user-notification')
       .then(({ data: { data } }) => {
         setChatNotificationList(data);
         setLoadingChatNotifications(false);
@@ -349,26 +327,19 @@ const Header = ({ toggleDrawer }) => {
     setFullScreenChatNotificationAnchorEl(null);
   };
 
-  const fullScreenChatNotificationOpen = Boolean(
-    fullScreenChatNotificationAnchorEl
-  );
-  const fullScreenChatNotificationId = fullScreenChatNotificationOpen
-    ? "full-screen-chat-notification"
-    : undefined;
+  const fullScreenChatNotificationOpen = Boolean(fullScreenChatNotificationAnchorEl);
+  const fullScreenChatNotificationId = fullScreenChatNotificationOpen ? 'full-screen-chat-notification' : undefined;
   // For FullScreen Notification - End
 
   // For MobileScreen Notification - Start
-  const [
-    mobileScreenChatNotificationAnchorEl,
-    setMobileScreenChatNotificationAnchorEl,
-  ] = React.useState(null);
+  const [mobileScreenChatNotificationAnchorEl, setMobileScreenChatNotificationAnchorEl] = React.useState(null);
 
   const handleMobileScreenChatNotificationClick = async (event) => {
     setMobileScreenChatNotificationAnchorEl(event.currentTarget);
     setLoadingChatNotifications(true);
 
     await axiosInstance()
-      .get("/user/user-notification")
+      .get('/user/user-notification')
       .then(({ data: { data } }) => {
         setChatNotificationList(data);
         setLoadingChatNotifications(false);
@@ -384,12 +355,8 @@ const Header = ({ toggleDrawer }) => {
     setMobileScreenChatNotificationAnchorEl(null);
   };
 
-  const mobileScreenChatNotificationOpen = Boolean(
-    mobileScreenChatNotificationAnchorEl
-  );
-  const mobileScreenChatNotificationId = mobileScreenChatNotificationOpen
-    ? "mobile-screen-chat-notification"
-    : undefined;
+  const mobileScreenChatNotificationOpen = Boolean(mobileScreenChatNotificationAnchorEl);
+  const mobileScreenChatNotificationId = mobileScreenChatNotificationOpen ? 'mobile-screen-chat-notification' : undefined;
   // For MobileScreen Notification - End
 
   const handleMobileMenuClose = () => {
@@ -439,12 +406,12 @@ const Header = ({ toggleDrawer }) => {
 
     if (option && option.profile) {
       history.push({
-        pathname: routes.profilePage.path,
+        pathname: routes.profilePage.path
       });
     }
     if (option && option.brandConfiguration) {
       history.push({
-        pathname: routes.brandConfiguration.path,
+        pathname: routes.brandConfiguration.path
       });
     }
     setOpen(false);
@@ -463,25 +430,25 @@ const Header = ({ toggleDrawer }) => {
     try {
       if (!isEmpty(account)) {
         await instance.logoutPopup({
-          account: account,
+          account: account
         });
       }
     } catch (e) {
       toastConfig.setToastConfig({
         open: true,
-        type: "error",
-        message: "Need to logout from Azure",
+        type: 'error',
+        message: 'Need to logout from Azure'
       });
     } finally {
       await axiosInstance()
-        .get("/user/logout")
+        .get('/user/logout')
         .then(() => {
-          history.push("/");
+          history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
           // localStorage.removeItem("token");
           localStorage.clear();
-          history.push("/login");
+          history.push('/login');
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -492,45 +459,35 @@ const Header = ({ toggleDrawer }) => {
   const hasAccessToEntity = async (id) => {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
-  }
+  };
 
   const handleEntityChange = async (id) => {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
-  }
+  };
 
-  const handleRedirect = (id, resourceId, resourcePath) => (
-    id === selectedEntity ?
-      history.push(
-        resourceId
-          ? `${resourcePath}/${resourceId}`
-          : resourcePath
-      )
-
-      : hasAccessToEntity(id) ? handleEntityChange(id) && history.push(
-        resourceId
-          ? `${resourcePath}/${resourceId}`
-          : resourcePath
-      ) : ''
-
-  )
-
+  const handleRedirect = (id, resourceId, resourcePath) =>
+    id === selectedEntity
+      ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : hasAccessToEntity(id)
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
-    if (event.key === "Tab") {
+    if (event.key === 'Tab') {
       event.preventDefault();
       setOpen(false);
     }
   }
 
-  const supportMenuId = "support-menu";
+  const supportMenuId = 'support-menu';
 
   const supportMenu = (
     <Menu
       anchorEl={supportAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       keepMounted
       id={supportMenuId}
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isSupportMenuOpen}
       onClose={supportMenuClose}
     >
@@ -539,15 +496,15 @@ const Header = ({ toggleDrawer }) => {
     </Menu>
   );
 
-  const servicesMenuId = "arcelor-menu";
+  const servicesMenuId = 'arcelor-menu';
 
   const arcelorMenu = (
     <Menu
       anchorEl={servicesAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       keepMounted
       id={servicesMenuId}
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isArcelorMenuOpen}
       onClose={closeServicesMenu}
     >
@@ -558,18 +515,12 @@ const Header = ({ toggleDrawer }) => {
 
   const NotificationContent = ({ data }) => {
     return (
-      <div
-        className={`${data.length == 0
-          ? classes.notificationHeight
-          : classes.notificationHeightWithData
-          }`}
-        style={{ position: "relative" }}
-      >
+      <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
         <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
           <Typography
             onClick={() => {
               axiosInstance()
-                .put("/user/notification/all-read", { toggle: true })
+                .put('/user/notification/all-read', { toggle: true })
                 .then(({ data }) => {
                   let updatedNotificationList = [];
                   notificationList.map((notification) => {
@@ -581,7 +532,7 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig({
                     open: true,
                     message: data.message,
-                    type: "success",
+                    type: 'success'
                   });
 
                   setFullScreenNotificationAnchorEl(null);
@@ -602,21 +553,18 @@ const Header = ({ toggleDrawer }) => {
             return (
               <div
                 style={{
-                  borderBottom: d.read
-                    ? "1px solid lightgrey"
-                    : "1px solid white",
+                  borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
                 }}
-                className={`${d.read == true ? "" : "light-grey-bg"
-                  } p-3 cursor-pointer`}
+                className={`${d.read == true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}
                 onClick={() => {
                   if (d.read == false) {
                     axiosInstance()
-                      .put("/user/notification/read", {
+                      .put('/user/notification/read', {
                         toggle: true,
-                        notificationId: d.notificationId,
+                        notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -626,25 +574,17 @@ const Header = ({ toggleDrawer }) => {
                   handleMobileScreenNotificationClose();
 
                   if (d?.entity) {
-                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath)
+                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
                   } else {
-                    history.push(
-                      d?.resourceId
-                        ? `${d?.resourcePath}/${d?.resourceId}`
-                        : d?.resourcePath
-                    )
+                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
                   }
-
                 }}
               >
                 {
                   <>
                     <Grid container>
                       <Grid item xs={2} md={2}>
-                        <Avatar
-                          style={{ height: 30, width: 30 }}
-                          src={d?.avatar}
-                        ></Avatar>
+                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}></Avatar>
                       </Grid>
                       <Grid item xs={10} md={10}>
                         <h6>{displayCardDate(d?.date)}</h6>
@@ -657,7 +597,6 @@ const Header = ({ toggleDrawer }) => {
               </div>
             );
           })}
-
         </div>
         {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
@@ -668,19 +607,12 @@ const Header = ({ toggleDrawer }) => {
 
   const ChatNotificationContent = ({ data }) => {
     return (
-      <div
-        className={`${data.length == 0
-          ? classes.notificationHeight
-          : classes.notificationHeightWithData
-          }`}
-        style={{ position: "relative" }}
-      >
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`}
-          style={{ position: "sticky", top: 0 }}>
+      <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
+        <div className={`${classes.markAll} d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
           <Typography
             onClick={() => {
               axiosInstance()
-                .put("/user/user-notification/all-read", { toggle: true })
+                .put('/user/user-notification/all-read', { toggle: true })
                 .then(({ data }) => {
                   let updatedNotificationList = [];
                   chatNotificationList.map((notification) => {
@@ -692,7 +624,7 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig({
                     open: true,
                     message: data.message,
-                    type: "success",
+                    type: 'success'
                   });
 
                   setFullScreenChatNotificationAnchorEl(null);
@@ -714,21 +646,18 @@ const Header = ({ toggleDrawer }) => {
             return (
               <div
                 style={{
-                  borderBottom: d.read
-                    ? "1px solid lightgrey"
-                    : "1px solid white",
+                  borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
                 }}
-                className={`${d.read == true ? "" : "light-grey-bg"
-                  } p-3 cursor-pointer`}
+                className={`${d.read == true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}
                 onClick={() => {
                   if (d.read == false) {
                     axiosInstance()
-                      .put("/user/user-notification/read", {
+                      .put('/user/user-notification/read', {
                         toggle: true,
-                        notificationId: d.notificationId,
+                        notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -738,25 +667,17 @@ const Header = ({ toggleDrawer }) => {
                   handleMobileScreenChatNotificationClose();
 
                   if (d?.entity) {
-                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath)
+                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
                   } else {
-                    history.push(
-                      d?.resourceId
-                        ? `${d?.resourcePath}/${d?.resourceId}`
-                        : d?.resourcePath
-                    )
+                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
                   }
-
                 }}
               >
                 {
                   <>
                     <Grid container>
                       <Grid item xs={2} md={2}>
-                        <Avatar
-                          style={{ height: 30, width: 30 }}
-                          src={d?.avatar}
-                        ></Avatar>
+                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}></Avatar>
                       </Grid>
                       <Grid item xs={10} md={10}>
                         <h6>{displayCardDate(d?.date)}</h6>
@@ -777,60 +698,55 @@ const Header = ({ toggleDrawer }) => {
     );
   };
 
-  const entitiesMenuId = "entities-menu";
+  const entitiesMenuId = 'entities-menu';
 
   const entitiesMenu = (
     <Menu
       anchorEl={entitiesEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       keepMounted
       id={entitiesMenuId}
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isEntitiesMenuOpen}
       onClose={closeEntitiesMenu}
       PaperProps={{
         style: {
           maxHeight: 48 * 4.5,
-          width: "25ch",
-        },
+          width: '25ch'
+        }
       }}
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>
-              {curEntity.entityName}
-            </Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && (
-              <Chip size="small" label="Current" color="primary" />
-            )}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
 
-  const curEntity =
-    user?.entity?.find((en) => en._id === selectedEntity) || null;
+  const curEntity = user?.entity?.find((en) => en._id === selectedEntity) || null;
 
-  const mobileMenuId = "primary-search-account-menu-mobile";
+  const mobileMenuId = 'primary-search-account-menu-mobile';
 
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       id={mobileMenuId}
       keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
@@ -838,32 +754,16 @@ const Header = ({ toggleDrawer }) => {
         <p>Services</p> <ExpandMore />
       </MenuItem> */}
       {selectedEntity && (
-        <MenuItem
-          disabled={!selectedEntity}
-          onClick={openEntitiesMenu}
-          className="d-flex justify-content-space-between"
-        >
-          <span className={classes.entityName}>
-            {curEntity && curEntity.entityName}
-          </span>
+        <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu} className="d-flex justify-content-space-between">
+          <span className={classes.entityName}>{curEntity && curEntity.entityName}</span>
           <ExpandMore />
         </MenuItem>
       )}
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem
-        onClick={
-          mobileScreenChatNotificationAnchorEl == null
-            ? handleMobileScreenChatNotificationClick
-            : () => { }
-        }
-      >
-        <Badge
-          badgeContent={chatNotification ? chatNotification.count : 0}
-          color="secondary"
-          aria-describedby={mobileScreenChatNotificationId}
-        >
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl == null ? handleMobileScreenChatNotificationClick : () => {}}>
+        <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
           <ChatIcon />
         </Badge>
         <Box component="span" mx={1} />
@@ -875,18 +775,16 @@ const Header = ({ toggleDrawer }) => {
           anchorEl={mobileScreenChatNotificationAnchorEl}
           onClose={handleMobileScreenChatNotificationClose}
           anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
+            vertical: 'bottom',
+            horizontal: 'center'
           }}
           transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
+            vertical: 'top',
+            horizontal: 'center'
           }}
         >
           {loadingChatNotifications ? (
-            <Typography className="m-3">
-              Loading Chat Notifications...
-            </Typography>
+            <Typography className="m-3">Loading Chat Notifications...</Typography>
           ) : chatNotificationList.length == 0 ? (
             <Typography className="m-3">No Chat Notifications found</Typography>
           ) : (
@@ -895,18 +793,8 @@ const Header = ({ toggleDrawer }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem
-        onClick={
-          mobileScreenNotificationAnchorEl == null
-            ? handleMobileScreenNotificationClick
-            : () => { }
-        }
-      >
-        <Badge
-          badgeContent={notification ? notification.count : 0}
-          color="secondary"
-          aria-describedby={mobileScreenNotificationId}
-        >
+      <MenuItem onClick={mobileScreenNotificationAnchorEl == null ? handleMobileScreenNotificationClick : () => {}}>
+        <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
           <Notifications />
         </Badge>
         <Box component="span" mx={1} />
@@ -918,12 +806,12 @@ const Header = ({ toggleDrawer }) => {
           anchorEl={mobileScreenNotificationAnchorEl}
           onClose={handleMobileScreenNotificationClose}
           anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
+            vertical: 'bottom',
+            horizontal: 'center'
           }}
           transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
+            vertical: 'top',
+            horizontal: 'center'
           }}
         >
           {loadingNotifications ? (
@@ -977,12 +865,7 @@ const Header = ({ toggleDrawer }) => {
       <Slide direction="down" in={isSearch}>
         <AppBar position="fixed" style={{ zIndex: 10000 }}>
           <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="close search"
-              onClick={() => setSearch(false)}
-            >
+            <IconButton edge="start" color="inherit" aria-label="close search" onClick={() => setSearch(false)}>
               <ClearIcon />
             </IconButton>
 
@@ -1012,22 +895,12 @@ const Header = ({ toggleDrawer }) => {
         <Toolbar className={classes.toolbar}>
           <Box component="div" display="flex" alignItems="center" flexGrow={1}>
             <div className={classes.sectionMobile}>
-              <IconButton
-                aria-label="help"
-                color="inherit"
-                title="Menu"
-                onClick={toggleDrawer}
-              >
+              <IconButton aria-label="help" color="inherit" title="Menu" onClick={toggleDrawer}>
                 <MenuIcon />
               </IconButton>
             </div>
             <Link to="/">
-              <img
-                className={classes.logo}
-                src={SVG("LogoPng")}
-                alt="equip logo"
-                title="eQuipt Logo"
-              />
+              <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
             </Link>
             <Box marginLeft={2} className={classes.servicesButton}>
               {/* <Button
@@ -1045,14 +918,10 @@ const Header = ({ toggleDrawer }) => {
                     aria-controls={entitiesMenuId}
                     color="inherit"
                     onClick={openEntitiesMenu}
-                    title={
-                      curEntity && `Selected entity - ${curEntity.entityName}`
-                    }
+                    title={curEntity && `Selected entity - ${curEntity.entityName}`}
                     className={classes.entitySelect}
                   >
-                    <span className={classes.entityName}>
-                      {curEntity && curEntity.entityName}
-                    </span>
+                    <span className={classes.entityName}>{curEntity && curEntity.entityName}</span>
                     <Box component="span" mr={1} />
                     <ExpandMore />
                   </Box>
@@ -1086,40 +955,34 @@ const Header = ({ toggleDrawer }) => {
               Support <ExpandMore />
             </Button>
           </div> */}
-          {user?.brandLogo ? (
-            <img
-              src={user.brandLogo}
-              alt="brand"
-              className={classes.brandLogo}
-            ></img>
-          ) : null}
+          {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} /> : null}
 
           <div className={classes.sectionDesktop}>
             <div>
-              <IconButton
-                aria-describedby={fullScreenNotificationId}
-                aria-label="settings"
-                color="inherit"
-                onClick={() => {
-                  history.push({
-                    pathname: "/product/my-cart",
-                  })
-                }}
-              >
-                <Badge color="secondary" badgeContent={cartCount} >
-                  <ShoppingCartIcon />
-                </Badge>
-              </IconButton>
+              {/*Only show cart icon if environment is local || development*/}
+              {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
+                <IconButton
+                  aria-describedby={fullScreenNotificationId}
+                  aria-label="settings"
+                  color="inherit"
+                  onClick={() => {
+                    history.push({
+                      pathname: '/product/my-cart'
+                    });
+                  }}
+                >
+                  <Badge color="secondary" badgeContent={cartCount}>
+                    <ShoppingCartIcon />
+                  </Badge>
+                </IconButton>
+              )}
               <IconButton
                 aria-describedby={fullScreenNotificationId}
                 aria-label="settings"
                 color="inherit"
                 onClick={handleFullScreenNotificationClick}
               >
-                <Badge
-                  badgeContent={notification ? notification.count : 0}
-                  color="secondary"
-                >
+                <Badge badgeContent={notification ? notification.count : 0} color="secondary">
                   <Notifications />
                 </Badge>
               </IconButton>
@@ -1131,22 +994,18 @@ const Header = ({ toggleDrawer }) => {
                 anchorEl={fullScreenNotificationAnchorEl}
                 onClose={handleFullScreenNotificationClose}
                 anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "center",
+                  vertical: 'bottom',
+                  horizontal: 'center'
                 }}
                 transformOrigin={{
-                  vertical: "top",
-                  horizontal: "center",
+                  vertical: 'top',
+                  horizontal: 'center'
                 }}
               >
                 {loadingNotifications ? (
-                  <Typography className="m-3">
-                    Loading Notifications...
-                  </Typography>
+                  <Typography className="m-3">Loading Notifications...</Typography>
                 ) : notificationList.length == 0 ? (
-                  <Typography className="m-3">
-                    No Notifications found
-                  </Typography>
+                  <Typography className="m-3">No Notifications found</Typography>
                 ) : (
                   <NotificationContent data={notificationList} />
                 )}
@@ -1162,9 +1021,7 @@ const Header = ({ toggleDrawer }) => {
                 color="inherit"
                 onClick={handleFullScreenChatNotificationClick}
               >
-                <Badge
-                  badgeContent={chatNotification ? chatNotification.count : 0}
-                  color="secondary">
+                <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
                   <ChatIcon />
                 </Badge>
               </IconButton>
@@ -1176,22 +1033,18 @@ const Header = ({ toggleDrawer }) => {
                 anchorEl={fullScreenChatNotificationAnchorEl}
                 onClose={handleFullScreenChatNotificationClose}
                 anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "center",
+                  vertical: 'bottom',
+                  horizontal: 'center'
                 }}
                 transformOrigin={{
-                  vertical: "top",
-                  horizontal: "center",
+                  vertical: 'top',
+                  horizontal: 'center'
                 }}
               >
                 {loadingChatNotifications ? (
-                  <Typography className="m-3">
-                    Loading Chat Notifications...
-                  </Typography>
+                  <Typography className="m-3">Loading Chat Notifications...</Typography>
                 ) : chatNotificationList.length == 0 ? (
-                  <Typography className="m-3">
-                    No Chat Notifications found
-                  </Typography>
+                  <Typography className="m-3">No Chat Notifications found</Typography>
                 ) : (
                   <ChatNotificationContent data={chatNotificationList} />
                 )}
@@ -1220,13 +1073,7 @@ const Header = ({ toggleDrawer }) => {
             </IconButton>
           </div> */}
 
-          <UserProfile
-            anchorRef={anchorRef}
-            open={open}
-            onToggle={handleToggle}
-            onClose={handleClose}
-            onListKeyDown={handleListKeyDown}
-          />
+          <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
 
           {isMobile && (
             <IconButton

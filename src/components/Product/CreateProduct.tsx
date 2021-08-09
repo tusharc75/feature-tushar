@@ -556,6 +556,9 @@ const CreateProduct = (props) => {
                                                                             <Box display="flex" >
                                                                                 <Box flexGrow={1}  >
                                                                                     <FormTypes
+                                                                                       {...field}
+                                                                                        productTemplateId={values?.productTemplate}
+                                                                                        priceTemplateId={values?.priceTemplate}
                                                                                         fields={initialData.fields}
                                                                                         fieldData={field}
                                                                                         values={values}

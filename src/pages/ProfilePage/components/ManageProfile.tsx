@@ -536,6 +536,7 @@ export default function ManageProfile(props) {
                                 setShowAddProxyDialog(false);
                                 onFetchUserData();
                             }).catch((error) => {
+                                setShowAddProxyDialog(false);
                                 toastConfig.setToastConfig(error);
                             })
                         }}
