@@ -368,7 +368,10 @@ const CreateProduct = (props) => {
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
                                       <Box display="flex">
                                         <Box flexGrow={1}>
-                                          <FormTypes
+                                            <FormTypes
+                                            {...field}
+                                            productTemplateId={values?.productTemplate}
+                                            priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
                                             fieldData={field}
                                             values={values}
