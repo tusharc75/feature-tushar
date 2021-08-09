@@ -207,8 +207,7 @@ export default function ManageAccount(props) {
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -274,8 +273,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -340,8 +338,7 @@ export default function ManageAccount(props) {
                                     : field.fieldName ===
                                       "isShippingAddressSameAsBillingAddress" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -372,8 +369,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "billingAddress" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -406,8 +402,7 @@ export default function ManageAccount(props) {
                                     ) : field.fieldName ===
                                       "shippingAddress" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -434,8 +429,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "parentAccount" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -452,8 +446,7 @@ export default function ManageAccount(props) {
                                       />
                                     ) : (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
                                         values={values}
                                         errors={errors}

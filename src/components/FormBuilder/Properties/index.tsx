@@ -93,6 +93,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.hiddenField = false;
       }
 
+      if (!values.addAdditionalOption && module !== 'price-template' && module !== 'product-template'
+        && module !== "pdf-template" && (fieldData==="multiSelect"||fieldData==="dropDown") && !fieldData.lookup) {
+        values.addAdditionalOption = false;
+      }
+
       if (values.type === 'process') {
         if (!values.showAdditionalInfoPopup) {
           values.showAdditionalInfoPopup = false;
@@ -178,6 +183,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
             ele.isDefaultValue = values.isDefaultValue
+
+            if (values.hasOwnProperty("addAdditionalOption")) {
+              ele.addAdditionalOption = values.addAdditionalOption
+            }
 
             if (ele.isDefaultValue) {
               ele.defaultValue = values.defaultValue
@@ -749,6 +758,21 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         }
                         label="Hidden Field"
+                      />
+                    ) : null}
+                    {module !== 'price-template' && module !== 'product-template'
+                      && module !== "pdf-template" && (fieldData.type === "multiSelect"
+                      || fieldData.type === "dropDown") && fieldData.lookup !== true ? (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isAdditionalOption"
+                            checked={values['addAdditionalOption']}
+                            onChange={(e) => setFieldValue('addAdditionalOption', e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Add Additional Option"
                       />
                     ) : null}
                     {fieldData.type === 'process' && (
