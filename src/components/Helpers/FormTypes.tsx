@@ -48,6 +48,7 @@ import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
+import {useLocation, useHistory} from 'react-router-dom'
 
 const filter = createFilterOptions();
 
@@ -151,10 +152,11 @@ const GreenSwitch = withStyles({
 const FormTypes = (props) => {
   const theme = useTheme();
   const {
+    addAdditionalOption,
     lookup,
     type,
     label,
-    fieldId,
+    _id:fieldId,
     name,
     errors,
     values,
@@ -201,6 +203,9 @@ const FormTypes = (props) => {
   const [displayType, setDisplayType] = React.useState(null);
 
   const inputNumberRef = useRef(null);
+
+  const { id } = useHistory()
+  const { pathnames } = useLocation()
 
   useEffect(() => {
     setOptionsList(options)
@@ -394,6 +399,9 @@ const FormTypes = (props) => {
   };
 
   const addFieldOption = (optionData, id) => {
+    let templateId = null
+    
+
     axiosInstance().post("field/add-field-option", {
       _id: id,
       option: [optionData]
@@ -777,11 +785,13 @@ const FormTypes = (props) => {
                         optionValue: val
                       }
                       
-                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption ) {
                         addFieldOption(newOption, fieldId)
                         setOptionsList([...option, newOption]);
                     }
-                    handleChange(name, val);
+                    if (addAdditionalOption) {
+                      handleChange(name, val);
+                    }
                   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
                     const newOption = {
                         order: option.length,
@@ -789,22 +799,25 @@ const FormTypes = (props) => {
                         optionLabel: val.inputValue,
                         optionValue: val.inputValue
                       }
-                      if (!option?.find(o => o?.optionValue.includes(val.inputValue))) {
+                      if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && addAdditionalOption) {
                         setOptionsList([...option, newOption]);
                         addFieldOption(newOption, fieldId)
                     }
-                    handleChange(name, val.inputValue);
+                    if (addAdditionalOption) {
+                      handleChange(name, val.inputValue);
+                    }
                   } else {
                     if (val) {
                       const newOption = {
                         ...val,
                         optionLabel: val.optionValue,
                       }
-                      if (!option?.find(o => o?.optionValue.includes(val.optionValue))) {
+                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && addAdditionalOption) {
                         addFieldOption(newOption, fieldId)
                         setOptionsList([newOption,...option]);
-                    }
+                      }
                       handleChange(name, val && val.optionValue ? val.optionValue : '');
+                      
                     }
                   }
                 } else {
@@ -816,7 +829,7 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup && addAdditionalOption) {
             filtered.push({
                 order: option.length,
                 default: false,
@@ -1282,11 +1295,13 @@ const FormTypes = (props) => {
                         optionValue: val
                       }
                       
-                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
                         addFieldOption(newOption, fieldId)
                         setOptionsList([...option, newOption]);
-                    }
-                      setFieldValue(name, [...values[name], val]);
+                      }
+                      if (addAdditionalOption) {
+                        setFieldValue(name, [...values[name], val]);
+                       }
                     } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
                        const newOption = {
                         order: option.length,
@@ -1295,22 +1310,25 @@ const FormTypes = (props) => {
                         optionValue: val.inputValue
                       }
                       
-                      if (!option?.find(o => o?.optionValue.includes(val))) {
+                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
                         addFieldOption(newOption, fieldId)
                         setOptionsList([...option, newOption]);
-                    }
-                      setFieldValue(name, [...values[name], val.inputValue]);
+                      }
+                      if (addAdditionalOption) {
+                        setFieldValue(name, [...values[name], val.inputValue]);
+                      }
                     } else {
                       if (val) {
                         const newOption = {
                           ...val,
                           optionLabel: val.optionValue,
                         }
-                        if (!option?.find(o => o?.optionValue.includes(val.optionValue))) {
+                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && addAdditionalOption) {
                           addFieldOption(newOption, fieldId)
                           setOptionsList([newOption,...option]);
                         }
-                        setFieldValue(name, value.map((val) => val.optionValue));
+
+                        setFieldValue(name, value.filter(v => v.optionValue).map((val) => val.optionValue));
                       }
                     }
                   });
@@ -1327,7 +1345,7 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup && addAdditionalOption) {
             filtered.push({
                 order: option.length,
                 default: false,
