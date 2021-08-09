@@ -93,8 +93,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.hiddenField = false;
       }
 
-      if (!values.addAdditionalOption && module !== 'price-template' && module !== 'product-template'
-        && module !== "pdf-template" && (fieldData==="multiSelect"||fieldData==="dropDown") && !fieldData.lookup) {
+      if (!values.addAdditionalOption && (fieldData.type==="multiSelect"||fieldData.type==="dropDown") && !fieldData.lookup) {
         values.addAdditionalOption = false;
       }
 
@@ -760,9 +759,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {module !== 'price-template' && module !== 'product-template'
-                      && module !== "pdf-template" && (fieldData.type === "multiSelect"
-                      || fieldData.type === "dropDown") && fieldData.lookup !== true ? (
+                    {(fieldData.type==="multiSelect"||fieldData.type==="dropDown") && !fieldData.lookup ? (
                       <FormControlLabel
                         control={
                           <Checkbox
