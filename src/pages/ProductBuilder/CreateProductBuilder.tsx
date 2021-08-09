@@ -40,6 +40,7 @@ const CreateProductBuilder = () => {
 
   const [isUpdating] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
+  const [currency, setCurrency] = useState("")
 
   useEffect(() => {
     fetchOneProductBuilder();
@@ -50,6 +51,7 @@ const CreateProductBuilder = () => {
       .get(`/productBuilder/` + id)
       .then(({ data: { data } }) => {
         setInitialValues(data);
+        setCurrency(data?.currency)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -209,6 +211,7 @@ const CreateProductBuilder = () => {
                     <Box mt={1}>
                       {isUpdating ? null : (
                         <ProductBuilder
+                          currency={currency}
                           permissions={permissions}
                           createdBy={values?.createdBy?.user}
                           productBuilderId={id}
@@ -230,6 +233,7 @@ const CreateProductBuilder = () => {
                     <Box mt={1}>
                       {isUpdating ? null : (
                         <ProductBuilder
+                          currency={currency}
                           permissions={permissions}
                           createdBy={values?.createdBy?.user}
                           productBuilderId={id}
@@ -284,6 +288,7 @@ const CreateProductBuilder = () => {
                     <Box mt={1}>
                       {isUpdating ? null : (
                         <ProductBuilder
+                          currency={currency}
                           permissions={permissions}
                           createdBy={values?.createdBy?.user}
                           productBuilderId={id}
