@@ -386,7 +386,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .ag-grid-listing-grid {
-  height: calc(100vh - 280px);
+  height: calc(100vh - 260px);
   margin: 0 6px 0;
 }
 
@@ -923,6 +923,11 @@ body::-webkit-scrollbar-thumb {
 .grid-without-activity {
   display: grid;
   grid-template-columns: 1fr 26px;
+}
+.grid-product-category {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  column-gap: 10px;
 }
 
 .grid-mobile {
