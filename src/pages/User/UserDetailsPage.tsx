@@ -55,7 +55,8 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import { FcFlowChart } from 'react-icons/fc';
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import AssignedEntities from "./AssignedEntities";
-
+import { isMobile, isTablet } from "react-device-detect";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -113,6 +114,7 @@ const UserDetailsPage = () => {
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([])
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
+  const [showActivity, setActivityShow] = useState(true);
 
   useEffect(() => {
     if (id) {
@@ -139,7 +141,9 @@ const UserDetailsPage = () => {
     },
   ].filter((d) => d.show);
 
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   const fetchUserData = async () => {
     setLoading(true);
 
@@ -502,8 +506,8 @@ const UserDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
             <Paper>
               {!userData ? (
                 <div>
@@ -966,64 +970,72 @@ const UserDetailsPage = () => {
                 />
               </div>
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="fixedRightPanel">
-              <Box className="detailHeader">
-                <h2 className="listingHeader single">Approval Process</h2>
-              </Box>
-              <Box padding={2}>
-                <FormControl component="fieldset" fullWidth>
-                  <FormGroup>
-                    {loading ? (
-                      [1, 2, 3, 4].map((i) => (
-                        <Box
-                          padding={1}
-                          marginBottom={2}
-                          display="flex"
-                          key={i}
-                        >
-                          <Skeleton
-                            style={{ borderRadius: 16 }}
-                            width="30px"
-                            height="30px"
-                          />
-                          <Box marginX={1} />
-                          <Skeleton
-                            variant="text"
-                            width="80%"
-                            height="30px"
-                          />
-                        </Box>
+          </div>
+          <div className="position-relative">
+            {showActivity ?
+              <Paper className="fixedRightPanel">
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </a>}
+                <Box className="detailHeader">
+                  <h2 className="listingHeader single">Approval Process</h2>
+                </Box>
+                <Box padding={2}>
+                  <FormControl component="fieldset" fullWidth>
+                    <FormGroup>
+                      {loading ? (
+                        [1, 2, 3, 4].map((i) => (
+                          <Box
+                            padding={1}
+                            marginBottom={2}
+                            display="flex"
+                            key={i}
+                          >
+                            <Skeleton
+                              style={{ borderRadius: 16 }}
+                              width="30px"
+                              height="30px"
+                            />
+                            <Box marginX={1} />
+                            <Skeleton
+                              variant="text"
+                              width="80%"
+                              height="30px"
+                            />
+                          </Box>
 
-                      ))
-                    ) : userPermissions ? (
-                      Object.keys(userPermissions).map((key) => (
-                        <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
-                          <FormControlLabel
-                            key={key}
-                            control={
-                              <Switch
-                                checked={userPermissions[key]}
-                                name={key}
-                                disabled={!hasPermissionToUpdateApprovalProcess}
-                                onChange={handleChangePermissions}
-                              />
-                            }
-                            label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
-                          />
-                        </Tooltip>
-                      ))
-                    ) : (
-                      <Typography>There are no permissions</Typography>
-                    )}
-                  </FormGroup>
-                </FormControl>
-              </Box>
-              <QuickLinks quickLinks={quickLinks} />
-            </Paper>
-          </Grid>
-        </Grid>
+                        ))
+                      ) : userPermissions ? (
+                        Object.keys(userPermissions).map((key) => (
+                          <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
+                            <FormControlLabel
+                              key={key}
+                              control={
+                                <Switch
+                                  checked={userPermissions[key]}
+                                  name={key}
+                                  disabled={!hasPermissionToUpdateApprovalProcess}
+                                  onChange={handleChangePermissions}
+                                />
+                              }
+                              label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
+                            />
+                          </Tooltip>
+                        ))
+                      ) : (
+                        <Typography>There are no permissions</Typography>
+                      )}
+                    </FormGroup>
+                  </FormControl>
+                </Box>
+                <QuickLinks quickLinks={quickLinks} />
+              </Paper>
+              :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </a>}
+          </div>
+        </div>
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog
