@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Product from '../ProductCard/ProductCard';
 // import { mockData } from '../../assets/mockData';
 import styles from './product-list.module.scss'
-import { Grid, Box } from "@material-ui/core";
+import { Grid, Box, Paper } from "@material-ui/core";
 import CategorySidebar from "../CategorySidebar/CategorySidebar"
 import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import axiosInstance from "../../../axios/axiosInstance";
@@ -51,17 +51,18 @@ const ProductList = ({ products }) => {
                 fetchCart()
             })
     }
-    return (
-        <Layout>
-            <Grid container className="headerbox">
-                <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
-            </Grid>
-            <Box className="detail-container">
-                <div className={styles.wrapper}>
-
+    return (<>
+        <Grid container className="headerbox">
+            <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
+        </Grid>
+        <div className="detail-container grid-product-category">
+            <div>
+                <Paper>
                     <CategorySidebar />
-
-
+                </Paper>
+            </div>
+            <div className="position-relative">
+                <Paper>
                     <div className={`${styles.product_list_container}`}>
                         {
                             products.map((product, index: number) => (
@@ -71,10 +72,10 @@ const ProductList = ({ products }) => {
                             ))
                         }
                     </div>
-                </div>
-            </Box>
-        </Layout>
-
+                </Paper>
+            </div>
+        </div>
+    </>
         // <Layout>
         //     <Grid container className="headerbox">
         //         <CustomBreadCrumbs routes={[{ title: "Hi" }]} />

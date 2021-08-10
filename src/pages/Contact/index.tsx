@@ -31,6 +31,7 @@ import {
 } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import contactClass from './contact.module.scss'
 
 const ContactTypes = [
   {
@@ -408,35 +409,43 @@ export default function Contact(props) {
       </Grid>
 
       <CustomContainer>
-        <div className="header-panel">
-          <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item className="d-flex align-items-center gap-1">
-              <MdContacts className="headerLogo" />
-              <span className="listingHeader">{routes[contactResource].title}</span>
-              {ContactTypes && (
-                <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
-                  {ContactTypes.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-              )}
-              {accountDetails.accountId && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Account: ${accountDetails.accountName}`}
-                  onDelete={() => {
-                    setAccountDetails({ accountId: null, accountName: null });
-                    // getContacts();
-                  }}
-                />
-              )}
+        <div className={`${contactClass['contact_header_inner_container']}`}>
+          <Grid container className="header-panel" justify="space-between" alignContent="center">
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+              <Grid container>
+                <Grid item md={4} sm={4} xs={12} className="d-flex align-items-center gap-1" >
+                  <MdContacts className="headerLogo" />
+                  <span className="listingHeader">{routes[contactResource].title}</span>
+                </Grid>
+                <Grid item md={4} sm={4} xs={12}>
+                  {ContactTypes && (
+                    <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
+                      {ContactTypes.map((k, index) => {
+                        return (
+                          <ToggleButton value={k.key} key={index}>
+                            {k.key}
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+                </Grid>
+                <Grid item md={4} sm={4} xs={12}>
+                  {accountDetails.accountId && (
+                    <Chip
+                      className="ml-3"
+                      color="primary"
+                      label={`Account: ${accountDetails.accountName}`}
+                      onDelete={() => {
+                        setAccountDetails({ accountId: null, accountName: null });
+                        // getContacts();
+                      }}
+                    />
+                  )}
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid className={styles.filter_side} item>
+            <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
                 {contactPermissions.isCreate && (
