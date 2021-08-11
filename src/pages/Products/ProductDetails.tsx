@@ -140,7 +140,7 @@ export default function ProductDetails() {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[routes.productList, { title: productDetails?.productName }]} />
       </Grid>
-      <Box className="detail-container">
+      <Box className="main-container">
         {showCreateQuoteDialog && (
           <ManageQuoteDialog
             open={showCreateQuoteDialog}

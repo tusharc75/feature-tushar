@@ -1,6 +1,13 @@
 .custom_grid {
   background-color: var(--aliceblue);
 }
+.contact_header_inner_container
+  .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between
+  .MuiBox-root.MuiBox-root-40.account_header {
+  display: flex;
+  gap: 0.25rem;
+}
+
 @media only screen and (max-width: 599px) {
   .custom_grid {
     width: 100% !important;
