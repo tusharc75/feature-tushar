@@ -404,9 +404,15 @@ const FormTypes = (props) => {
   const addFieldOption = (optionData) => {
 
     const data = {
-      _id: productTemplateId || priceTemplateId ? fieldData._id : fieldId,
+      _id: productTemplateId || priceTemplateId
+        ? fieldData._id
+        : fieldData
+          ? fieldData._id
+          : fieldId,
       option: [optionData]
     }
+
+    console.log(data)
 
     if (productTemplateId && priceTemplateId) {
       data["productTemplate"] = productTemplateId
@@ -847,7 +853,7 @@ const FormTypes = (props) => {
                       optionValue: val
                     }
 
-                    if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
+                    if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                       addFieldOption(newOption)
                       setOptionsList([...option, newOption]);
                     }
@@ -861,7 +867,7 @@ const FormTypes = (props) => {
                       optionLabel: val.inputValue,
                       optionValue: val.inputValue
                     }
-                    if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && addAdditionalOption) {
+                    if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                       setOptionsList([...option, newOption]);
                       addFieldOption(newOption)
                     }
@@ -874,7 +880,7 @@ const FormTypes = (props) => {
                         ...val,
                         optionLabel: val.optionValue,
                       }
-                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && addAdditionalOption) {
+                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([newOption, ...option]);
                       }
@@ -891,7 +897,8 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup && addAdditionalOption) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))
+            && !lookup && (addAdditionalOption || fieldData?.addAdditionalOption)) {
             filtered.push({
               order: option.length,
               default: false,
@@ -1022,7 +1029,9 @@ const FormTypes = (props) => {
                     label={label + ' ' + _currency + '/' + _unit}
                     name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
                     required={required}
-                    value={values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString()}
+                    value={values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] ?
+                      values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString() :
+                      values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]}
                     error={
                       touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
                       Boolean(errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()])
@@ -1153,7 +1162,9 @@ const FormTypes = (props) => {
                   label={label + ' ' + _currency}
                   name={name + '_' + _currency.toLowerCase()}
                   required={required}
-                  value={values[name + '_' + _currency.toLowerCase()].toLocaleString()}
+                  value={values[name + '_' + _currency.toLowerCase()] ?
+                    values[name + '_' + _currency.toLowerCase()].toLocaleString()
+                    : values[name + '_' + _currency.toLowerCase()]}
                   error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
                   helperText={touched[name + '_' + _currency.toLowerCase()] && errors[name + '_' + _currency.toLowerCase()]}
                   ref={inputNumberRef}
@@ -1357,7 +1368,7 @@ const FormTypes = (props) => {
                         optionValue: val
                       }
 
-                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([...option, newOption]);
                       }
@@ -1372,7 +1383,7 @@ const FormTypes = (props) => {
                         optionValue: val.inputValue
                       }
 
-                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([...option, newOption]);
                       }
@@ -1385,7 +1396,7 @@ const FormTypes = (props) => {
                           ...val,
                           optionLabel: val.optionValue,
                         }
-                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && addAdditionalOption) {
+                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                           addFieldOption(newOption)
                           setOptionsList([newOption, ...option]);
                         }
@@ -1407,7 +1418,8 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup && addAdditionalOption) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))
+            && !lookup && (addAdditionalOption || fieldData?.addAdditionalOption)) {
             filtered.push({
               order: option.length,
               default: false,

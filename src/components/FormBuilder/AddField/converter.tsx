@@ -31,9 +31,9 @@ const useStyles = makeStyles(() => ({
 export const Converter = ({ fields, values, setFieldValue, touched, errors }) => {
 
   const onChangeValue = (index, fieldName, value) => {
-    let data = values['option'] ? [...values['option']] : [];
+    let data = values['unitoption'] ? [...values['unitoption']] : [];
     data[index][fieldName] = value;
-    setFieldValue('option', data);
+    setFieldValue('unitoption', data);
   };
 
   const handleChangeUnit = (value) => {
@@ -41,7 +41,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
       'units',
       value.map((_f) => _f.trim().replace(/[^a-zA-Z0-9/]/g, ''))
     );
-    let data = values['option'] ? [...values['option']] : [];
+    let data = values['unitoption'] ? [...values['unitoption']] : [];
     if (data.length > value.length) {
       let index = 0;
       let deleteindex = 0;
@@ -62,7 +62,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
       });
       newOptions.push(row);
     });
-    setFieldValue('option', newOptions);
+    setFieldValue('unitoption', newOptions);
     if (values['displayUnits']) {
       const result = [];
       values['displayUnits'].forEach((_unit) => {
@@ -137,7 +137,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                             margin="dense"
                             fullWidth
                             style={{ margin: 0 }}
-                            value={values['option'] && values['option'][i] && values['option'][i][_unit]}
+                            value={values['unitoption'] && values['unitoption'][i] && values['unitoption'][i][_unit]}
                             onChange={(event) => onChangeValue(i, _unit, event.target.value)}
                           />
                         </td>

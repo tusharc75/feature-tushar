@@ -84,7 +84,7 @@ const CreateFormBuilder = () => {
 
     return (<Fragment>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[routes.formBuilder, { title: routes.quoteBuilder.title }]} />
+            <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]} />
         </Grid>
         <CustomContainer>
             {section ?

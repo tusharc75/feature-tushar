@@ -55,13 +55,14 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                     insert_object.decimalPlaces = 2
                 }
                 if (type === FieldList.VLOOKUPDROPDOWN.type) {
-                    insert_object.inputFields = []
+                    insert_object.vlookupInputFields = []
                 }
                 if (type === FieldList.CURRENCYAMOUNT.type) {
                     insert_object.displayCurrency = ["CUR"]
                 }
                 if (type === FieldList.CONVERTER.type) {
                     insert_object.units = []
+                    insert_object.unitoption = []
                     insert_object.displayUnits = []
                     insert_object.formulaUnits = []
                 }

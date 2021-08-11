@@ -73,6 +73,7 @@ const DOARequest = lazy(() => import("./pages/DOA"));
 const CurrencyConverter = lazy(() => import("./pages/CurrencyConverter"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const KpiDashboard = lazy(() => import("./pages/KpiDashboard"));
+const KpiDashboards = lazy(() => import("./pages/KpiDashboard/Dashboard"));
 const EditDashboard = lazy(() => import("./pages/KpiDashboard/EditDashboards"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
 const CreateFormBuilder = lazy(() => import("./pages/FormBuilder/CreateFormBuilder"));
@@ -497,6 +498,9 @@ function App() {
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
+            <Route exact path={"/dashboard"}>
+              <KpiDashboards />
+            </Route>
             <Route exact path={"/dashboards"}>
               <KpiDashboard />
             </Route>
