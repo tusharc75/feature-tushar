@@ -78,9 +78,9 @@ const ProtectedRoute = ({ children, ...rest }) => {
             </div>
           ) : access ? (
             <Layout>
-              <Suspense fallback={<div>Loading...</div>}>
+              {/* <Suspense fallback={<div>Loading...</div>}> */}
                 {children}
-              </Suspense>
+              {/* </Suspense> */}
             </Layout>
           ) : (
             <Unauthorized />

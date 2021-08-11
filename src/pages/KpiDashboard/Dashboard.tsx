@@ -128,7 +128,7 @@ const Dashboard = () => {
       const [selectedDate, handleDateChange] = useState(new Date());
 
     return (
-        <Layout>
+        <Fragment>
              <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[{ title: "Dashboard", path: "/dashboard" }]} />
             </Grid>
@@ -240,7 +240,7 @@ const Dashboard = () => {
                     </Box>
                     </Paper>
                 </div>
-        </Layout>
+        </Fragment>
     )
 }
 
