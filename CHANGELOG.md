@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.4.0...v1.5.0) (2021-08-11)
+
+
+### Features
+
+* code Splitting Code Commented ([c5f65d8](https://bitbucket.org/vebholic/oms_frontend/commit/c5f65d8027a532127cb81367973da0ec418a0ddd))
+
+## [1.4.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.3.2...v1.4.0) (2021-08-11)
+
+
+### Features
+
+* **dashboard.tsx:** dashboards ([52ee0fc](https://bitbucket.org/vebholic/oms_frontend/commit/52ee0fc56c522fbde9f5f9a93a32013be39f8f25))
+* formula changes ([b1f5ac8](https://bitbucket.org/vebholic/oms_frontend/commit/b1f5ac8bef90095f1d4b036bd51d776638fae43e))
+* free Style Multi Select Added ([b0b2d1d](https://bitbucket.org/vebholic/oms_frontend/commit/b0b2d1dd83297c7f611128668c7c8433b65b4dec))
+
+
+### Bug Fixes
+
+* **formbuilder:** fix resource name ([b335cf1](https://bitbucket.org/vebholic/oms_frontend/commit/b335cf11a737b0a02a66085057edd84f6fea50c5))
+* **formtypes.tsx:** minor fix ([c4416d8](https://bitbucket.org/vebholic/oms_frontend/commit/c4416d8f2dfb4526460491738a82653ab6ae1ef3))
+* **formtypes:** conflict resolve ([a052f42](https://bitbucket.org/vebholic/oms_frontend/commit/a052f42fa145e20d64e9ad6fd8b9daf61a72a655))
+* **globaluserchat:** date formatting ([a2aaa3f](https://bitbucket.org/vebholic/oms_frontend/commit/a2aaa3f2d2f966c740bd8e2cebf678030845a403))
+* **reminder:** update status ([eac5b6e](https://bitbucket.org/vebholic/oms_frontend/commit/eac5b6e3b60bd61185eaccad94b4ef2e4ce6c56b))
+
+## [1.2.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.0.5...v1.2.0) (2021-08-07)
+
 ### [1.3.2](https://bitbucket.org/vebholic/oms_frontend/compare/v1.3.1...v1.3.2) (2021-08-10)
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useCallback, useContext, Fragment } from "react";
 import { Box, Button, Dialog, Grid } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import moment from "moment";
@@ -71,7 +71,7 @@ const Event = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <CustomBreadCrumbs
           routes={[{ title: "Activity", path: "/activity" }, { title: "Event" }]}
@@ -117,7 +117,7 @@ const Event = () => {
           </Box>
         </div>
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

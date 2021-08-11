@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from '../../../components/Layout';
@@ -231,7 +231,7 @@ const Note = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item xs={6}>
           <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
@@ -350,7 +350,7 @@ const Note = () => {
           />
         </Dialog>
       )}
-    </Layout>
+    </Fragment>
   );
 };
 

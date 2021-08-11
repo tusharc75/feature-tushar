@@ -39,7 +39,7 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from '../../components/ProcessFlow';
 import LeadInAccordion from '../../components/LeadsInAccordion/LeadsInAccordion';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { IoIosArrowDropright,IoIosArrowDropleft  } from 'react-icons/io';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -473,288 +473,287 @@ const ContactDetailsPage = (props) => {
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   return (
     <>
-      <Layout>
-        {openUpdateDialog && showAtLast ? (
-          // <UpdateDetailsDialog
-          //     title={`Editing  ${contactData.firstName}`}
-          //     openDialog={openUpdateDialog}
-          //     onClose={closeUpdateDialog}
-          //     data={contactData}
-          //     fields={contactFields}
-          //     isUpdating={isUpdating}
-          //     handleUpdate={handleUpdateContact}
-          // />
-          <ManageContact
-            isNew={false}
-            open={openUpdateDialog}
-            onClose={closeUpdateDialog}
-            contactData={{
-              fields: contactFields.map((f) => {
+      {openUpdateDialog && showAtLast ? (
+        // <UpdateDetailsDialog
+        //     title={`Editing  ${contactData.firstName}`}
+        //     openDialog={openUpdateDialog}
+        //     onClose={closeUpdateDialog}
+        //     data={contactData}
+        //     fields={contactFields}
+        //     isUpdating={isUpdating}
+        //     handleUpdate={handleUpdateContact}
+        // />
+        <ManageContact
+          isNew={false}
+          open={openUpdateDialog}
+          onClose={closeUpdateDialog}
+          contactData={{
+            fields: contactFields.map((f) => {
+              return f.fieldData;
+            }),
+            initialValues: getObjKeysWithValues(
+              contactData,
+              contactFields.map((f) => {
                 return f.fieldData;
-              }),
-              initialValues: getObjKeysWithValues(
-                contactData,
-                contactFields.map((f) => {
-                  return f.fieldData;
-                })
-              )
-            }}
-            loading={loading}
-            handleSubmit={handleUpdateContact}
-            contactId={contactData._id}
-            account={props?.account}
-            // contactResource={contactResource}
-            accountResource={accountResource}
-            contactResource={contactResource}
-          // contactApi={contactApi}
-          />
-        ) : openUpdateDialog ? (
-          <ManageContact
-            isNew={false}
-            open={openUpdateDialog}
-            onClose={closeUpdateDialog}
-            contactData={{
-              fields: filteredContactFields.map((f) => {
+              })
+            )
+          }}
+          loading={loading}
+          handleSubmit={handleUpdateContact}
+          contactId={contactData._id}
+          account={props?.account}
+          // contactResource={contactResource}
+          accountResource={accountResource}
+          contactResource={contactResource}
+        // contactApi={contactApi}
+        />
+      ) : openUpdateDialog ? (
+        <ManageContact
+          isNew={false}
+          open={openUpdateDialog}
+          onClose={closeUpdateDialog}
+          contactData={{
+            fields: filteredContactFields.map((f) => {
+              return f.fieldData;
+            }),
+            initialValues: getObjKeysWithValues(
+              contactData,
+              filteredContactFields.map((f) => {
                 return f.fieldData;
-              }),
-              initialValues: getObjKeysWithValues(
-                contactData,
-                filteredContactFields.map((f) => {
-                  return f.fieldData;
-                })
-              )
-            }}
-            loading={loading}
-            handleSubmit={handleUpdateContact}
-            contactId={contactData._id}
-            account={props?.account}
-            // contactResource={contactResource}
-            accountResource={accountResource}
-            contactResource={contactResource}
-          // contactApi={contactApi}
-          />
-        ) : null}
+              })
+            )
+          }}
+          loading={loading}
+          handleSubmit={handleUpdateContact}
+          contactId={contactData._id}
+          account={props?.account}
+          // contactResource={contactResource}
+          accountResource={accountResource}
+          contactResource={contactResource}
+        // contactApi={contactApi}
+        />
+      ) : null}
 
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
-          <div>
-            <Paper>
-              <DetailsPageHeader
-                heading={headingLbl}
-                logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
-                mainPoints={mainPoints}
-                // style={{ marginTop: "150px", minHeight: "200px" }}
-                showHeading={true}
-              >
-                {contactPermissions.isUpdate && canEdit ? (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                    Edit
-                  </Button>
-                ) : null}
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={customizedRoutes} />
+      </Grid>
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+        <div>
+          <Paper>
+            <DetailsPageHeader
+              heading={headingLbl}
+              logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
+              mainPoints={mainPoints}
+              // style={{ marginTop: "150px", minHeight: "200px" }}
+              showHeading={true}
+            >
+              {contactPermissions.isUpdate && canEdit ? (
+                <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
+                  Edit
+                </Button>
+              ) : null}
 
-                {contactPermissions.isDelete &&
-                  contactData?.owner?.optionValue &&
-                  user?.user?._id &&
-                  contactData.owner.optionValue === user.user._id ? (
-                  <DeleteButton text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
-                ) : null}
-              </DetailsPageHeader>
-              <ProcessFlow
-                disableBackNext={contactPermissions.isUpdate && canEdit ? false : true}
-                steps={steps}
-                activeStep={activeStep}
-                handleMarkAsCompleted={handleMarkAsCompleted}
-              />
-              <Box>
-                {loading ? (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <>
-                    <Tabs
-                      className="oms-tab"
-                      value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                      <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-                    </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      {showAtLast ? (
-                        <DetailsPage data={contactData} fields={contactFields} />
-                      ) : (
-                        <DetailsPage data={contactData} fields={filteredContactFields} />
-                      )}
-                      {/* <DetailsPage data={contactData} fields={contactFields} /> */}
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer
-                        data={orgChartData}
-                        onClick={(id) => {
-                          history.push(`/${contactApi}/detail/${id}`);
-                        }}
-                      />
-                    </Box>
-                  </>
-                )}
-              </Box>
-              <div className="p-3">
-                {permissions?.opportunity?.isRead && (
-                  <OpportunityInAccordian
-                    opportunityPermissions={permissions.opportunity}
-                    opportunities={opportunities}
-                    onNewOpportunityAdd={() => {
-                      fetchRelatedData();
+              {contactPermissions.isDelete &&
+                contactData?.owner?.optionValue &&
+                user?.user?._id &&
+                contactData.owner.optionValue === user.user._id ? (
+                <DeleteButton text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
+              ) : null}
+            </DetailsPageHeader>
+            <ProcessFlow
+              disableBackNext={contactPermissions.isUpdate && canEdit ? false : true}
+              steps={steps}
+              activeStep={activeStep}
+              handleMarkAsCompleted={handleMarkAsCompleted}
+            />
+            <Box>
+              {loading ? (
+                <Grid container spacing={2}>
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                    <Grid item sm={6} md={6}>
+                      <Skeleton variant="text" width="100px" height="16px" />
+                      <Box marginY={1} />
+                      <Skeleton width="100%" height="50px" />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <>
+                  <Tabs
+                    className="oms-tab"
+                    value={currentTabIndex}
+                    onChange={(index, newValue) => {
+                      setCurrentTabIndex(newValue);
                     }}
-                    accountId={contactData?.accountName?.optionValue}
-                    accountName={contactData?.accountName?.optionLabel}
-                    recordsPerLine={3}
-                    resource={accountResource}
-                    isRedirect={false}
-                    contactId={id}
-                    contactResource={contactResource}
-                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
-                  />
-                )}
-                {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
-                  <ProjectInAccordion
-                    recordsPerLine={3}
-                    projectSales={projectSales}
-                    type={typeCreateProjectSalesDialog}
-                    fetchData={fetchRelatedData}
-                    permissions={permissions}
-                    isAddProjectSale={true}
-                    isAllowedToEdit={contactPermissions.isUpdate && canEdit}
-                  />
-                )}
-                {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
-                  <QuotesInAccordion
-                    recordsPerLine={3}
-                    quotes={quotes}
-                    fetchData={fetchRelatedData}
-                    quoteBuilderPermission={permissions.quoteBuilder}
-                    accountId={contactData?.accountName?.optionValue}
-                    contactId={id}
-                    accountResource={accountResource}
-                    isRenderedInCustomerContact={true}
-                    isRenderedFromCustomerAccount={true}
-                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
-                  />
-                )}
-                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-                {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
+                    indicatorColor="primary"
+                    textColor="primary"
+                    aria-label="icon tabs example"
+                  >
+                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                  </Tabs>
+                  <Box hidden={currentTabIndex !== 0}>
+                    {showAtLast ? (
+                      <DetailsPage data={contactData} fields={contactFields} />
+                    ) : (
+                      <DetailsPage data={contactData} fields={filteredContactFields} />
+                    )}
+                    {/* <DetailsPage data={contactData} fields={contactFields} /> */}
+                  </Box>
+                  <Box hidden={currentTabIndex !== 1}>
+                    <OrgChartContainer
+                      data={orgChartData}
+                      onClick={(id) => {
+                        history.push(`/${contactApi}/detail/${id}`);
+                      }}
+                    />
+                  </Box>
+                </>
+              )}
+            </Box>
+            <div className="p-3">
+              {permissions?.opportunity?.isRead && (
+                <OpportunityInAccordian
+                  opportunityPermissions={permissions.opportunity}
+                  opportunities={opportunities}
+                  onNewOpportunityAdd={() => {
+                    fetchRelatedData();
+                  }}
+                  accountId={contactData?.accountName?.optionValue}
+                  accountName={contactData?.accountName?.optionLabel}
+                  recordsPerLine={3}
+                  resource={accountResource}
+                  isRedirect={false}
+                  contactId={id}
+                  contactResource={contactResource}
+                  isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                />
+              )}
+              {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
+                <ProjectInAccordion
+                  recordsPerLine={3}
+                  projectSales={projectSales}
+                  type={typeCreateProjectSalesDialog}
+                  fetchData={fetchRelatedData}
+                  permissions={permissions}
+                  isAddProjectSale={true}
+                  isAllowedToEdit={contactPermissions.isUpdate && canEdit}
+                />
+              )}
+              {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
+                <QuotesInAccordion
+                  recordsPerLine={3}
+                  quotes={quotes}
+                  fetchData={fetchRelatedData}
+                  quoteBuilderPermission={permissions.quoteBuilder}
+                  accountId={contactData?.accountName?.optionValue}
+                  contactId={id}
+                  accountResource={accountResource}
+                  isRenderedInCustomerContact={true}
+                  isRenderedFromCustomerAccount={true}
+                  isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                />
+              )}
+              {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+              {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion
                     recordsPerLine={3}
                     lead={contactData.staticData.lead} />
                 )} */}
-              </div>
-            </Paper>
-          </div>
-          <div className="position-relative">
-            {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </a>}
-                {!isObjectEmpty(contactData) && (
-                  <div>
-                    <Activity
-                      resourceId={contactData._id}
-                      resource={contactRoute}
-                      restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
-                      relatedTo={[
-                        {
-                          type: accountResource,
-                          referenceId: contactData?.accountName?.optionValue,
-                          access: false
-                        },
-                        {
-                          type: contactResource,
-                          referenceId: contactData._id,
-                          access: true
-                        }
-                      ]}
-                      handleActivityRefresh={() => { }}
-                      emails={[contactData?.email ?? '']}
-                    />
-                  </div>
-                )}
-                <QuickLinks quickLinks={quickLinks} />
-                {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
-                  <Grid item xs={12}>
-                    <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
-                      <div className={`${contactClass.detail_page_div3}`}>
-                        <div className={`${contactClass.leads_data}`}>
-                          <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
-                            Related Lead
-                          </Typography>
-                        </div>
-                        <Box className={`${contactClass.custom_box1}`}>
-                          <Card className="contactCard">
-                            <CardContent className="detailListing">
-                              <List>
-                                <ListItem>
-                                  <ListItemAvatar>
-                                    <div
-                                      data-initials={[
-                                        contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
-                                        contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
-                                      ]
-                                        .filter((f) => f)
-                                        .join('')}
-                                    ></div>
-                                  </ListItemAvatar>
-                                  <ListItemText
-                                    className="ml-2"
-                                    primary={
-                                      <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
-                                        {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
-                                      </Link>
-                                    }
-                                    secondary={
-                                      <React.Fragment>
-                                        <Typography component="p" variant="body2" className="cardDetail">
-                                          {contactData?.staticData?.lead?.title && (
-                                            <span className="d-flex gap-2 align-items-center">
-                                              <FiStar size="15" />
-                                              {contactData?.staticData?.lead?.title}
-                                            </span>
-                                          )}
-                                          {contactData?.staticData?.lead?.email && (
-                                            <span className="d-flex gap-2 align-items-center">
-                                              <AiOutlineMail size="15" />
-                                              {contactData?.staticData?.lead?.email}
-                                            </span>
-                                          )}
-                                          {contactData?.staticData?.lead?.phone && (
-                                            <span className="d-flex gap-2 align-items-center">
-                                              <BiPhone size="15" />
-                                              {contactData?.staticData?.lead?.phone}
-                                            </span>
-                                          )}
-                                        </Typography>
-                                      </React.Fragment>
-                                    }
-                                  />
-                                </ListItem>
-                              </List>
-                            </CardContent>
-                          </Card>
-                          {/* <Card>
+            </div>
+          </Paper>
+        </div>
+        <div className="position-relative">
+          {showActivity ?
+            <Paper>
+              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                <IoIosArrowDropright className="icon" />
+              </a>}
+              {!isObjectEmpty(contactData) && (
+                <div>
+                  <Activity
+                    resourceId={contactData._id}
+                    resource={contactRoute}
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
+                    relatedTo={[
+                      {
+                        type: accountResource,
+                        referenceId: contactData?.accountName?.optionValue,
+                        access: false
+                      },
+                      {
+                        type: contactResource,
+                        referenceId: contactData._id,
+                        access: true
+                      }
+                    ]}
+                    handleActivityRefresh={() => { }}
+                    emails={[contactData?.email ?? '']}
+                  />
+                </div>
+              )}
+              <QuickLinks quickLinks={quickLinks} />
+              {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+                <Grid item xs={12}>
+                  <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
+                    <div className={`${contactClass.detail_page_div3}`}>
+                      <div className={`${contactClass.leads_data}`}>
+                        <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
+                          Related Lead
+                        </Typography>
+                      </div>
+                      <Box className={`${contactClass.custom_box1}`}>
+                        <Card className="contactCard">
+                          <CardContent className="detailListing">
+                            <List>
+                              <ListItem>
+                                <ListItemAvatar>
+                                  <div
+                                    data-initials={[
+                                      contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                      contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
+                                    ]
+                                      .filter((f) => f)
+                                      .join('')}
+                                  ></div>
+                                </ListItemAvatar>
+                                <ListItemText
+                                  className="ml-2"
+                                  primary={
+                                    <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                      {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
+                                    </Link>
+                                  }
+                                  secondary={
+                                    <React.Fragment>
+                                      <Typography component="p" variant="body2" className="cardDetail">
+                                        {contactData?.staticData?.lead?.title && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <FiStar size="15" />
+                                            {contactData?.staticData?.lead?.title}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.email && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <AiOutlineMail size="15" />
+                                            {contactData?.staticData?.lead?.email}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.phone && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <BiPhone size="15" />
+                                            {contactData?.staticData?.lead?.phone}
+                                          </span>
+                                        )}
+                                      </Typography>
+                                    </React.Fragment>
+                                  }
+                                />
+                              </ListItem>
+                            </List>
+                          </CardContent>
+                        </Card>
+                        {/* <Card>
                             <CardContent className="detailListing">
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={12} sm={12}>
@@ -771,83 +770,82 @@ const ContactDetailsPage = (props) => {
                               </Grid>
                             </CardContent>
                           </Card> */}
-                        </Box>
-                      </div>
-                    </BoxWithBorder>
-                  </Grid>
-                )}
-              </Paper> : 
-               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon"/>
-              </a> }
-          </div>
+                      </Box>
+                    </div>
+                  </BoxWithBorder>
+                </Grid>
+              )}
+            </Paper> :
+            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              <IoIosArrowDropleft className="icon" />
+            </a>}
         </div>
-        {showConfirmBox ? (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this Contact ?`}
-            onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteContact}
-          />
-        ) : null}
+      </div>
+      {showConfirmBox ? (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this Contact ?`}
+          onClose={() => setShowConfirmBox(false)}
+          onOk={handleDeleteContact}
+        />
+      ) : null}
 
-        {orgChartInFullScreenDialog && (
-          <FullScreenDialog
-            heading="Org Chart"
-            open={orgChartInFullScreenDialog}
-            close={() => {
+      {orgChartInFullScreenDialog && (
+        <FullScreenDialog
+          heading="Org Chart"
+          open={orgChartInFullScreenDialog}
+          close={() => {
+            setOrgChartInFullScreenDialog(false);
+          }}
+        >
+          <OrgChartContainer
+            data={orgChartData}
+            onClick={(id) => {
               setOrgChartInFullScreenDialog(false);
+              history.push(`/${contactApi}/detail/${id}`);
             }}
-          >
-            <OrgChartContainer
-              data={orgChartData}
-              onClick={(id) => {
-                setOrgChartInFullScreenDialog(false);
-                history.push(`/${contactApi}/detail/${id}`);
-              }}
-            />
-          </FullScreenDialog>
-        )}
-        {openAdditionalDialog && (
-          // <Dialog
-          //   disableBackdropClick={true}
-          //   fullWidth
-          //   maxWidth="sm"
-          //   open={openAdditionalDialog}
-          //   onClose={() => setOpenAdditionalDialog(false)}
-          //   aria-labelledby="form-dialog-title"
-          //   fullScreen={isMobile || isTablet}
-          // >
-          //   <CustomDialogHeader
-          //     title="Additonal Information"
-          //     onClose={() => setOpenAdditionalDialog(false)}
-          //   ></CustomDialogHeader>
-          //   {sectionFields.map((item) => (
-          //     <CustomDialogContent>{item}</CustomDialogContent>
-          //   ))}
-
-          //   <CustomDialogFooter>
-          //     <Button
-          //       color="primary"
-          //       size="small"
-          //       onClick={() => setOpenAdditionalDialog(false)}
-          //     >
-          //       Close
-          //     </Button>
-          //     <Button color="primary" size="small" onClick={handleSave}>
-          //       Save
-          //     </Button>
-          //   </CustomDialogFooter>
-          // </Dialog>
-          <AdditionalDialogPopUp
-            open={openAdditionalDialog}
-            close={() => setOpenAdditionalDialog(false)}
-            handleSave={handleSave}
-            title="Additional Information"
-            fieldData={sectionFields}
           />
-        )}
-      </Layout>
+        </FullScreenDialog>
+      )}
+      {openAdditionalDialog && (
+        // <Dialog
+        //   disableBackdropClick={true}
+        //   fullWidth
+        //   maxWidth="sm"
+        //   open={openAdditionalDialog}
+        //   onClose={() => setOpenAdditionalDialog(false)}
+        //   aria-labelledby="form-dialog-title"
+        //   fullScreen={isMobile || isTablet}
+        // >
+        //   <CustomDialogHeader
+        //     title="Additonal Information"
+        //     onClose={() => setOpenAdditionalDialog(false)}
+        //   ></CustomDialogHeader>
+        //   {sectionFields.map((item) => (
+        //     <CustomDialogContent>{item}</CustomDialogContent>
+        //   ))}
+
+        //   <CustomDialogFooter>
+        //     <Button
+        //       color="primary"
+        //       size="small"
+        //       onClick={() => setOpenAdditionalDialog(false)}
+        //     >
+        //       Close
+        //     </Button>
+        //     <Button color="primary" size="small" onClick={handleSave}>
+        //       Save
+        //     </Button>
+        //   </CustomDialogFooter>
+        // </Dialog>
+        <AdditionalDialogPopUp
+          open={openAdditionalDialog}
+          close={() => setOpenAdditionalDialog(false)}
+          handleSave={handleSave}
+          title="Additional Information"
+          fieldData={sectionFields}
+        />
+      )}
     </>
   );
 };

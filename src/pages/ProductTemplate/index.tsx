@@ -1,4 +1,4 @@
-import { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
     Box,
     Button,
@@ -266,7 +266,7 @@ const ProductTemplate: FC = () => {
     };
 
     return (
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.productTemplate]} />
@@ -333,7 +333,7 @@ const ProductTemplate: FC = () => {
                     />
                 }
             </CustomContainer >
-        </Layout >
+        </Fragment >
     );
 
 };

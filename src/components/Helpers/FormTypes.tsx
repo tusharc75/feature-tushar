@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
   CircularProgress,
   FormControl,
   FormControlLabel,
@@ -743,6 +744,55 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
+  ) : type === "freeStyleMultiSelect" ? (
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+      <Autocomplete
+        {...rest}
+        multiple
+        disableCloseOnSelect={true}
+        freeSolo
+        options={[]}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              variant="outlined"
+              label={option}
+              {...getTagProps({ index })}
+            />
+          ))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            margin="dense"
+            label={getLabel(label)}
+            name={name}
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+            required={required}
+          />
+        )}
+        value={values[name]}
+        onBlur={(e: any) => {
+          if (e.target.value && e.target.value.trim() !== "") {
+            setFieldValue(name, [
+              ...values[name],
+              e.target.value,
+            ]);
+          }
+        }}
+        onChange={(e, value: any) => {
+          let valuesToInsert = [];
+          for (var val of value) {
+            if (val && val.trim() !== "") {
+              valuesToInsert.push(val);
+            }
+          }
+          setFieldValue(name, valuesToInsert);
+        }}
+      />
+    </InfoLabel>
   ) : type === 'dropDown' && fieldData && fieldData.isDependentDropdown ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
@@ -797,29 +847,29 @@ const FormTypes = (props) => {
                   if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
 
                     const newOption = {
-                        order: option.length,
-                        default: false,
-                        optionLabel: val,
-                        optionValue: val
-                      }
-                      
-                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
-                        addFieldOption(newOption)
-                        setOptionsList([...option, newOption]);
+                      order: option.length,
+                      default: false,
+                      optionLabel: val,
+                      optionValue: val
+                    }
+
+                    if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                      addFieldOption(newOption)
+                      setOptionsList([...option, newOption]);
                     }
                     if (addAdditionalOption) {
                       handleChange(name, val);
                     }
                   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
                     const newOption = {
-                        order: option.length,
-                        default: false,
-                        optionLabel: val.inputValue,
-                        optionValue: val.inputValue
-                      }
-                      if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
-                        setOptionsList([...option, newOption]);
-                        addFieldOption(newOption)
+                      order: option.length,
+                      default: false,
+                      optionLabel: val.inputValue,
+                      optionValue: val.inputValue
+                    }
+                    if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                      setOptionsList([...option, newOption]);
+                      addFieldOption(newOption)
                     }
                     if (addAdditionalOption) {
                       handleChange(name, val.inputValue);
@@ -830,7 +880,7 @@ const FormTypes = (props) => {
                         ...val,
                         optionLabel: val.optionValue,
                       }
-                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
+                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([newOption, ...option]);
                       }
@@ -1317,8 +1367,8 @@ const FormTypes = (props) => {
                         optionLabel: val,
                         optionValue: val
                       }
-                      
-                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
+
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([...option, newOption]);
                       }
@@ -1332,8 +1382,8 @@ const FormTypes = (props) => {
                         optionLabel: val.inputValue,
                         optionValue: val.inputValue
                       }
-                      
-                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
+
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([...option, newOption]);
                       }
@@ -1346,7 +1396,7 @@ const FormTypes = (props) => {
                           ...val,
                           optionLabel: val.optionValue,
                         }
-                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
+                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                           addFieldOption(newOption)
                           setOptionsList([newOption, ...option]);
                         }

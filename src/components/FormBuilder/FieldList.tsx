@@ -129,6 +129,11 @@ const FieldList = {
     type: "process",
     icon: "far fa-calendar-check",
   },
+  FREESTYLEMULTISELECT: {
+    label: "Free Style Multi Select",
+    type: "freeStyleMultiSelect",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

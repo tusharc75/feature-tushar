@@ -1056,7 +1056,7 @@ export default function ManageQuoteDialog({
                                               }}
                                               size="small"
                                             >
-                                              <GetAppIcon color={values.pDFTemplate ? "primary" : "disabled" } />
+                                              <GetAppIcon color={values.pDFTemplate ? "primary" : "disabled"} />
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
@@ -1146,6 +1146,34 @@ export default function ManageQuoteDialog({
                                           onCollabOwnerMultiselectOpen(
                                             values["owner"]
                                           );
+                                        }}
+                                      />
+                                    ) : field.fieldName === "privateAccess" ? (
+                                      <FormTypes
+                                        {...field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onChange={(e) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            e.target.checked
+                                          );
+                                          if (e.target.checked) {
+                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d=>d.optionValue)
+                                              setFieldValue("collaborator", [
+                                                ...values["collaborator"]].concat(doaUserDataTemp)
+                                              );
+                                          }
                                         }}
                                       />
                                     ) : field.fieldName === "probability" ? (

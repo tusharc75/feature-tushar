@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, lazy, Suspense, useState } from "react";
+import React, { useContext, useEffect, lazy, useState, Fragment, Suspense } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import ReactGA from "react-ga";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
@@ -25,6 +25,8 @@ import {
 import CustomToaster from "./components/Helpers/CustomToast";
 import PrivateRoute from "./components/PrivateRoute";
 import { useData } from "./StateProvider/Provider";
+import ErrorBoundaryComponent from "./ErrorBoundary"
+import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 
 import Login from "./pages/Auth/Login";
 import AzureLogin from "./pages/Auth/AzureLogin";
@@ -88,8 +90,6 @@ import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyCart from "./components/ProductList/MyCart/MyCart";
-import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
-import ErrorBoundaryComponent from "./ErrorBoundary"
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -228,7 +228,9 @@ function App() {
     }
 
     return !user ? (
-      <Comp />
+      // <Suspense fallback={<div>Loading...</div>}>
+        <Comp />
+      // </Suspense>
     ) : (
       <Redirect
         to={{

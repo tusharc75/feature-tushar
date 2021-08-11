@@ -421,7 +421,7 @@ export default function CustomAgGridEditable({
                 }
               }}
               rowsPerPage={limit}
-              onChangeRowsPerPage={(event) => {
+              onRowsPerPageChange={(event) => {
                 dispatch({ type: "pageSizeChange", limit: event.target.value });
 
                 if (clientSideGridApi) {

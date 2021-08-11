@@ -93,7 +93,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.hiddenField = false;
       }
 
-      if (!values.addAdditionalOption && (fieldData.type==="multiSelect"||fieldData.type==="dropDown") && !fieldData.lookup) {
+      if (!values.addAdditionalOption && (fieldData.type === "multiSelect" || fieldData.type === "dropDown") && !fieldData.lookup) {
         values.addAdditionalOption = false;
       }
 
@@ -640,10 +640,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         onChange={(e) => setFieldValue('tooltipMessage', e.target.value.trimStart())}
                       />
                     )}
+                    
                     <FormControlLabel
                       control={
                         <Checkbox
                           name="isDefaultValue"
+                          disabled={values['type'] === "freeStyleMultiSelect"}
                           checked={values['isDefaultValue']}
                           onChange={(e) => setFieldValue('isDefaultValue', e.target.checked)}
                           color="primary"
@@ -651,10 +653,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Default Value"
                     />
+
                     <FormControlLabel
                       control={
                         <Checkbox
                           name="Uneditable"
+                          disabled={values['type'] === "freeStyleMultiSelect"}
                           checked={values['isUneditable']}
                           onChange={(e) => setFieldValue('isUneditable', e.target.checked)}
                           color="primary"
@@ -758,7 +762,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {(fieldData.type==="multiSelect"||fieldData.type==="dropDown") && !fieldData.lookup ? (
+                    {(fieldData.type === "multiSelect" || fieldData.type === "dropDown") && !fieldData.lookup ? (
                       <FormControlLabel
                         control={
                           <Checkbox

@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import React, { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
   Dialog,
   Grid,
@@ -268,7 +268,7 @@ const Entity: FC = () => {
 
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.entity]} />
@@ -335,7 +335,7 @@ const Entity: FC = () => {
           </Dialog>
         )}
       </CustomContainer >
-    </Layout >
+    </Fragment >
   );
 
 };
