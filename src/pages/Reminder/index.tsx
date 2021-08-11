@@ -59,10 +59,11 @@ const Reminder = () => {
   }, []);
 
   useEffect(() => {
+    if (!selectedActivity)
     fetchTasks();
     fetchEvents();
     fetchCases();
-  }, []);
+  }, [selectedActivity]);
 
   const dynamicChip = (data: string, type: string = null) => (
     <Chip

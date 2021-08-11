@@ -403,9 +403,15 @@ const FormTypes = (props) => {
   const addFieldOption = (optionData) => {
 
     const data = {
-      _id: productTemplateId || priceTemplateId ? fieldData._id : fieldId,
+      _id: productTemplateId || priceTemplateId
+        ? fieldData._id
+        : fieldData
+          ? fieldData._id
+          : fieldId,
       option: [optionData]
     }
+
+    console.log(data)
 
     if (productTemplateId && priceTemplateId) {
       data["productTemplate"] = productTemplateId
@@ -791,29 +797,29 @@ const FormTypes = (props) => {
                   if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
 
                     const newOption = {
-                      order: option.length,
-                      default: false,
-                      optionLabel: val,
-                      optionValue: val
-                    }
-
-                    if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
-                      addFieldOption(newOption)
-                      setOptionsList([...option, newOption]);
+                        order: option.length,
+                        default: false,
+                        optionLabel: val,
+                        optionValue: val
+                      }
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
+                        addFieldOption(newOption)
+                        setOptionsList([...option, newOption]);
                     }
                     if (addAdditionalOption) {
                       handleChange(name, val);
                     }
                   } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
                     const newOption = {
-                      order: option.length,
-                      default: false,
-                      optionLabel: val.inputValue,
-                      optionValue: val.inputValue
-                    }
-                    if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && addAdditionalOption) {
-                      setOptionsList([...option, newOption]);
-                      addFieldOption(newOption)
+                        order: option.length,
+                        default: false,
+                        optionLabel: val.inputValue,
+                        optionValue: val.inputValue
+                      }
+                      if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
+                        setOptionsList([...option, newOption]);
+                        addFieldOption(newOption)
                     }
                     if (addAdditionalOption) {
                       handleChange(name, val.inputValue);
@@ -824,7 +830,7 @@ const FormTypes = (props) => {
                         ...val,
                         optionLabel: val.optionValue,
                       }
-                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && addAdditionalOption) {
+                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([newOption, ...option]);
                       }
@@ -841,7 +847,8 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup && addAdditionalOption) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))
+            && !lookup && (addAdditionalOption || fieldData?.addAdditionalOption)) {
             filtered.push({
               order: option.length,
               default: false,
@@ -1310,8 +1317,8 @@ const FormTypes = (props) => {
                         optionLabel: val,
                         optionValue: val
                       }
-
-                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([...option, newOption]);
                       }
@@ -1325,8 +1332,8 @@ const FormTypes = (props) => {
                         optionLabel: val.inputValue,
                         optionValue: val.inputValue
                       }
-
-                      if (!option?.find(o => o?.optionValue.includes(val)) && addAdditionalOption) {
+                      
+                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
                         addFieldOption(newOption)
                         setOptionsList([...option, newOption]);
                       }
@@ -1339,7 +1346,7 @@ const FormTypes = (props) => {
                           ...val,
                           optionLabel: val.optionValue,
                         }
-                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && addAdditionalOption) {
+                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption ||fieldData?.addAdditionalOption)) {
                           addFieldOption(newOption)
                           setOptionsList([newOption, ...option]);
                         }
@@ -1361,7 +1368,8 @@ const FormTypes = (props) => {
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue)) && !lookup && addAdditionalOption) {
+          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))
+            && !lookup && (addAdditionalOption || fieldData?.addAdditionalOption)) {
             filtered.push({
               order: option.length,
               default: false,

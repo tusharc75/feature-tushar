@@ -71,6 +71,7 @@ import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 import Dashboard from "./pages/Dashboard";
 import KpiDashboard from "./pages/KpiDashboard";
+import KpiDashboards from "./pages/KpiDashboard/Dashboard";
 import EditDashboard from "./pages/KpiDashboard/EditDashboards";
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
@@ -495,6 +496,9 @@ function App() {
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
+            <Route exact path={"/dashboard"}>
+              <KpiDashboards />
+            </Route>
             <Route exact path={"/dashboards"}>
               <KpiDashboard />
             </Route>
