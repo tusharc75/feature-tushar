@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.4.0...v1.5.0) (2021-08-11)
+
+
+### Features
+
+* code Splitting Code Commented ([c5f65d8](https://bitbucket.org/vebholic/oms_frontend/commit/c5f65d8027a532127cb81367973da0ec418a0ddd))
+
 ## [1.4.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.3.2...v1.4.0) (2021-08-11)
 
 
