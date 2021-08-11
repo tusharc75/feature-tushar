@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Tabs, Tab, Paper, useTheme } from "@material-ui/core";
 
@@ -43,7 +43,7 @@ const AddNewOpportunity = () => {
   ];
 
   return (
-    <Layout>
+    <Fragment>
       <div className={classes.root}>
         <OpportunityNavLinks
           OpportunityDashboard={true}
@@ -102,7 +102,7 @@ const AddNewOpportunity = () => {
           </TabPanel>
         </Container>
       </div>
-    </Layout>
+    </Fragment>
   );
 };
 

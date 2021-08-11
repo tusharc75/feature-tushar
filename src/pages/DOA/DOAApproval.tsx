@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useReducer } from "react";
+import { useEffect, useState, useContext, useReducer, Fragment } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
@@ -286,7 +286,7 @@ const DOAApproval = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <div className="headerbox">
         <CustomBreadCrumbs
           routes={[
@@ -540,7 +540,7 @@ const DOAApproval = () => {
           accepted={quoteStatusChangeData}
         />
       )}
-    </Layout>
+    </Fragment>
   );
 };
 

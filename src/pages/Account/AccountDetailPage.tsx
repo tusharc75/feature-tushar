@@ -686,7 +686,6 @@ export default function AccountDetailPage(props) {
 
   return (
     <>
-      <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -1217,7 +1216,6 @@ export default function AccountDetailPage(props) {
             />
           )}
         </div>
-      </Layout>
     </>
   );
 }

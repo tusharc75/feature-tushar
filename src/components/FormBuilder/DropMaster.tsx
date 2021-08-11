@@ -5,15 +5,6 @@ import { DropSection } from './DropSection';
 import update from 'immutability-helper';
 import { Typography } from '@material-ui/core';
 
-const dropstyle = {
-    backgroundColor: "#e3f2fd",
-    borderColor: "#90caf9",
-    borderStyle: "dashed",
-    cursor: 'move',
-    height: "150px"
-}
-
-
 export const DropMaster = ({ module, screenHeight, section, setSection, addSection, addDeleteField, extraFields }) => {
 
     const [sectionHoverIndex, setSectionHoverIndex] = useState(null);

@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import React, { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import { Tooltip, IconButton, Grid } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
@@ -404,7 +404,7 @@ const Roles: FC = () => {
           />
 
       )}
-      <Layout>
+      <Fragment>
 
         <Grid container className="headerbox">
           <Grid item md={12} sm={12} xs={12}>
@@ -453,7 +453,7 @@ const Roles: FC = () => {
             onOk={handleDeleteRole}
           />
         ) : null}
-      </Layout>
+      </Fragment>
     </>
   );
 };

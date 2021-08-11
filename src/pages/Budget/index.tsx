@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useReducer } from "react";
+import { useContext, useEffect, useState, useReducer, Fragment } from "react";
 import ManageBudgetDialog from "./ManageBudgetDialog";
 import Layout from "../../components/Layout";
 import { Box, Button, Menu, MenuItem, Grid } from "@material-ui/core";
@@ -314,7 +314,7 @@ function Budget() {
           budgetId={showManageBudgetDialog.id}
         />
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[{ title: routes.budget.title }]} />
@@ -428,7 +428,7 @@ function Budget() {
             onOk={handleDelete}
           />
         }
-      </Layout>
+      </Fragment>
     </>
   );
 }

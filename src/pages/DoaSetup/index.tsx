@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Box,
@@ -446,7 +446,7 @@ export default function Doa() {
 
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[routes.doa]} />
       </Grid>
@@ -560,6 +560,6 @@ export default function Doa() {
           </BoxWithBorder>
         </Container>
       </Box>
-    </Layout>
+    </Fragment>
   )
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { Container, Grid, Paper, Box, Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
@@ -48,7 +48,7 @@ function Dashboard() {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Container>
         <Box marginY={2}>
           <Grid container spacing={2}>
@@ -87,7 +87,7 @@ function Dashboard() {
           </Grid>
         </Box>
       </Container>
-    </Layout>
+    </Fragment>
   );
 }
 

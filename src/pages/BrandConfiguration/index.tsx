@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect, Fragment } from 'react'
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
@@ -93,7 +93,7 @@ export default function BrandConfiguration(props) {
                 />
             )
         }
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[routes.brandConfiguration]} />
             </Grid>
@@ -137,6 +137,6 @@ export default function BrandConfiguration(props) {
                     </Paper>
                 </Grid>
             </Grid>
-        </Layout>
+        </Fragment>
     </>
 }

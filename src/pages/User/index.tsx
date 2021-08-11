@@ -1,4 +1,4 @@
-import { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import { Tooltip, IconButton, Grid, Dialog } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
@@ -582,7 +582,7 @@ const User: FC = () => {
           />
         </Dialog>
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.user]} />
@@ -674,7 +674,7 @@ const User: FC = () => {
                 : handleDeleteUser}
           />
         ) : null}
-      </Layout>
+      </Fragment>
     </>
   );
 };

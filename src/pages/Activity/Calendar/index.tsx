@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Fragment } from "react";
 import {
   Box,
   Button,
@@ -137,7 +137,7 @@ const BigCalendar = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
@@ -289,7 +289,7 @@ const BigCalendar = () => {
           </Dialog>
         )}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

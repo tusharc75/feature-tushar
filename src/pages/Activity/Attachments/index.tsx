@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from '../../../components/Layout';
@@ -385,7 +385,7 @@ export default function Attachment(props) {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
       </Grid>
@@ -491,6 +491,6 @@ export default function Attachment(props) {
           />
         ) : null}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 }

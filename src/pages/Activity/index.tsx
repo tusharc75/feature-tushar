@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Box, Grid, makeStyles, Paper } from "@material-ui/core";
 import Layout from "../../components/Layout";
 import CustomTabs from "../../components/Helpers/CustomTabs";
@@ -59,7 +59,7 @@ const Activity = ({ type }) => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item xs={12}>
           <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
@@ -94,7 +94,7 @@ const Activity = ({ type }) => {
         </Box>
       </CustomContainer>
 
-    </Layout>
+    </Fragment>
   );
 };
 
