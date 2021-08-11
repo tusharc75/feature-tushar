@@ -250,8 +250,8 @@ const Dashboard = () => {
    
 
     return (
-      <Layout>
-         <MuiPickersUtilsProvider utils={DateFnsUtils}>
+     <MuiPickersUtilsProvider utils={DateFnsUtils}>
+         <Layout>
              <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[{ title: "Dashboard", path: "/dashboard" }]} />
             </Grid>
@@ -500,8 +500,8 @@ const Dashboard = () => {
                     </Box>
                     </Paper>
                 </div>
-              </MuiPickersUtilsProvider>
         </Layout>
+      </MuiPickersUtilsProvider>
     )
 }
 
