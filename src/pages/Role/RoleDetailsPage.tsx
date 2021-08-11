@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import {
   Box,
   Button,
@@ -298,7 +298,7 @@ const RoleDetailsPage = () => {
 
       )}
 
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -570,7 +570,7 @@ const RoleDetailsPage = () => {
             </Paper>
           </Grid>
         </Grid>
-      </Layout>
+      </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

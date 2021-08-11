@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Fragment } from "react";
 import { Box, Chip, Grid, Paper, Typography } from "@material-ui/core";
 import moment from "moment";
 
@@ -59,10 +59,11 @@ const Reminder = () => {
   }, []);
 
   useEffect(() => {
+    if (!selectedActivity)
     fetchTasks();
     fetchEvents();
     fetchCases();
-  }, []);
+  }, [selectedActivity]);
 
   const dynamicChip = (data: string, type: string = null) => (
     <Chip
@@ -115,7 +116,7 @@ const Reminder = () => {
           fetchBoard={() => {}}
         />
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[{ title: routes.reminder.title }]} />
         </Grid>
@@ -285,7 +286,7 @@ const Reminder = () => {
             </Box>
           </Paper>
         </div>
-      </Layout>
+      </Fragment>
     </>
   );
 };

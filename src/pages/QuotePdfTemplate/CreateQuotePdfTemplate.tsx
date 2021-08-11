@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { TextField, Grid, Box, Button, CircularProgress, FormControlLabel, Checkbox } from '@material-ui/core';
 
 import { useParams, useHistory } from 'react-router-dom';
@@ -217,7 +217,7 @@ const CreateQuotePdfTemplate = () => {
 
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs
@@ -341,7 +341,7 @@ const CreateQuotePdfTemplate = () => {
           </Box>
         )}
       </div>
-    </Layout>
+    </Fragment>
   );
 };
 

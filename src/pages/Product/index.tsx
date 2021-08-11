@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
@@ -340,7 +340,7 @@ const Product = () => {
         }
     };
 
-    return (<Layout>
+    return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
@@ -441,7 +441,7 @@ const Product = () => {
                 onOk={handleDelete}
             />
         }
-    </Layout>
+    </Fragment>
     );
 }
 

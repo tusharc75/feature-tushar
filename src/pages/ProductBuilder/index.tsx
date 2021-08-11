@@ -214,7 +214,7 @@ const ProductBuilder = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs
@@ -321,7 +321,7 @@ const ProductBuilder = () => {
         )}
         {isCreate && <CreateNewDialog handleClose={() => setIsCreate(false)} />}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

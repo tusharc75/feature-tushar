@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
@@ -184,7 +184,7 @@ export default function TermsAndCondition(props) {
 
     return (
 
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <Grid item xs={12}>
                     <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
@@ -287,7 +287,7 @@ export default function TermsAndCondition(props) {
                     />
                 ) : null}
             </CustomContainer>
-        </Layout>
+        </Fragment>
 
 
     )

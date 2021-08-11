@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, Fragment } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -136,7 +136,7 @@ export default function ProductDetails() {
   }
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[routes.productList, { title: productDetails?.productName }]} />
       </Grid>
@@ -290,7 +290,7 @@ export default function ProductDetails() {
         </div>
 
       </Box>
-    </Layout>
+    </Fragment>
   );
 }
 

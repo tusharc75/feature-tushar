@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Grid, Paper } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
@@ -359,7 +359,7 @@ const LeadDetailsPage = () => {
           onOk={handleDeleteLead}
         />
       ) : null}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -541,7 +541,7 @@ const LeadDetailsPage = () => {
             fieldData={sectionFields}
           />
         )}
-      </Layout>
+      </Fragment>
     </>
   );
 };
