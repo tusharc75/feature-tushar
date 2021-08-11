@@ -306,8 +306,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             }
                                           >
                                             <FormTypes
-                                              fieldId={field._id}
-                                              lookup={field.lookup}
+                                              {...field}
                                               fields={initialData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -389,8 +388,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                               }
                                             >
                                               <FormTypes
-                                                fieldId={field._id}
-                                                lookup={field.lookup}
+                                                {...field}
                                                 fields={initialData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -453,9 +451,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           </Grid>
                                         </Grid> : field.fieldName === "currency" ? (
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
-                                            // {...rest}
+                                            {...field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -512,9 +508,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             size="small"
                                           />
                                         ) : <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
-                                          // {...rest}
+                                          {...field}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -540,9 +534,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                       ) : (
                         form.sectionFields.map((field) => (
                           <FormTypes
-                            fieldId={field._id}
-                            lookup={field.lookup}
-                            // {...rest}
+                            {...field}
                             values={values}
                             errors={errors}
                             touched={touched}

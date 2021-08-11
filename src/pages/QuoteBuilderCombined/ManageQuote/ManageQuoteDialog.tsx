@@ -730,8 +730,7 @@ export default function ManageQuoteDialog({
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "quoteName" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -777,8 +776,7 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -867,8 +865,7 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -950,8 +947,7 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1027,7 +1023,7 @@ export default function ManageQuoteDialog({
                                           md={10}
                                         >
                                           <FormTypes
-                                            lookup={field.lookup}
+                                            {...field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1078,8 +1074,7 @@ export default function ManageQuoteDialog({
                                       </Grid>
                                     ) : field.fieldName === "owner" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1133,8 +1128,7 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1156,8 +1150,7 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "probability" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -1189,9 +1182,7 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "lostReason" ? (
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
-                                          // {...rest}
+                                          {...field}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1209,8 +1200,7 @@ export default function ManageQuoteDialog({
                                       ) : null
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         disabled={disableCurrency}
                                         values={values}
                                         errors={errors}
@@ -1241,8 +1231,7 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "estimatedAmount" ||
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
@@ -1275,8 +1264,7 @@ export default function ManageQuoteDialog({
                                       "invoicedDate",
                                     ].indexOf(field?.fieldName) >= 0 ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
                                         values={values}
                                         errors={errors}
@@ -1329,8 +1317,7 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1411,8 +1398,7 @@ export default function ManageQuoteDialog({
                                             }
                                           >
                                             <FormTypes
-                                              fieldId={field._id}
-                                              lookup={field.lookup}
+                                              {...field}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1475,9 +1461,7 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                       </Grid> : (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
-                                          // {...rest}
+                                          {...field}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1512,9 +1496,7 @@ export default function ManageQuoteDialog({
                         ) : (
                           form.sectionFields.map((field) => (
                             <FormTypes
-                              fieldId={field._id}
-                              lookup={field.lookup}
-                              // {...rest}
+                              {...field}
                               values={values}
                               errors={errors}
                               touched={touched}

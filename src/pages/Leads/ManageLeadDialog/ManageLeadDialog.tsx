@@ -360,8 +360,7 @@ export default function ManageLeadDialog({
                                     >
                                       {field.fieldName === "owner" ? (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
+                                          {...field}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -415,8 +414,7 @@ export default function ManageLeadDialog({
                                         />
                                       ) : field.fieldName === "collaborator" ? (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
+                                          {...field}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -454,8 +452,7 @@ export default function ManageLeadDialog({
                                             }
                                           >
                                             <FormTypes
-                                              fieldId={field._id}
-                                              lookup={field.lookup}
+                                              {...field}
                                               fields={leadData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -538,8 +535,7 @@ export default function ManageLeadDialog({
                                               }
                                             >
                                               <FormTypes
-                                                fieldId={field._id}
-                                                lookup={field.lookup}
+                                                {...field}
                                                 fields={leadData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -602,9 +598,7 @@ export default function ManageLeadDialog({
                                           </Grid>
                                         </Grid> : (
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
-                                            // {...rest}
+                                            {...field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
