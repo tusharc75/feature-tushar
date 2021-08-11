@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
@@ -186,7 +186,7 @@ const KpiDashboard = () => {
         }
     };
 
-    return (<Layout>
+    return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
@@ -262,7 +262,7 @@ const KpiDashboard = () => {
             }
             {isCreate && <CreateNewDialog handleClose={() => setIsCreate(false)} />}
         </CustomContainer>
-    </Layout>
+    </Fragment>
     );
 }
 

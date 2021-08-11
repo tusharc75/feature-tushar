@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
@@ -79,7 +79,7 @@ const EditDashboards = (props) => {
         }
     }
 
-    return (<Layout>
+    return (<Fragment>
         <Grid container className="headerbox">
             <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: "Dashboards", path: "/dashboards" },
@@ -115,7 +115,7 @@ const EditDashboards = (props) => {
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </CustomContainer>
-    </Layout>
+    </Fragment>
     );
 }
 

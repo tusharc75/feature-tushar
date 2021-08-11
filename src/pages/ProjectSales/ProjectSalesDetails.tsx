@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback, useEffect } from "react";
+import { useState, useContext, useCallback, useEffect, Fragment } from "react";
 import {
   Grid,
   Paper,
@@ -362,7 +362,7 @@ const ProjectSalesDetails = () => {
           accountId={currentAccountId}
         />
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -607,7 +607,7 @@ const ProjectSalesDetails = () => {
 
         </div>
 
-      </Layout>
+      </Fragment>
       {
         showConfirmBox ? (
           <ConfirmationDialog

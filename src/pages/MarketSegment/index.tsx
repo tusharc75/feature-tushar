@@ -231,7 +231,7 @@ const MarketSegment = () => {
         dispatch({ type: "search", search: e.target.value });
     };
 
-    return (<Layout>
+    return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.marketSegment.title }]} />
@@ -318,7 +318,7 @@ const MarketSegment = () => {
                     }}
                 />}
         </CustomContainer>
-    </Layout>
+    </Fragment>
     );
 }
 

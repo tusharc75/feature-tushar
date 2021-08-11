@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Grid, Tooltip, IconButton } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -439,7 +439,7 @@ const Leads = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.lead]} />
@@ -567,7 +567,7 @@ const Leads = () => {
           />
         )}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useReducer } from "react";
+import React, { useEffect, useState, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
@@ -59,7 +59,7 @@ const FormBuilder = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[routes.formBuilder]} />
@@ -80,7 +80,7 @@ const FormBuilder = () => {
           isClientSideGrid={true} loading={loading} />
 
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

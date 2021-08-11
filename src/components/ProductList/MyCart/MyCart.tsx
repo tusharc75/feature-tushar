@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, Fragment } from "react";
 import Layout from "../../Layout";
 import styles from "./my-cart.module.scss";
 import SecureIcon from "@material-ui/icons/VerifiedUserOutlined";
@@ -217,7 +217,7 @@ function MyCart() {
   })
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
 
       </Grid>
@@ -356,7 +356,7 @@ function MyCart() {
           />
         )}
       </Box>
-    </Layout >
+    </Fragment >
   );
 }
 

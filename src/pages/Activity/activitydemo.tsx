@@ -30,7 +30,7 @@ const Activitydemo = () => {
     //         { name: "ROMIT SADARIA", type: "opportunity", referenceId: "605222343c58e828945d22db", access: true },
     //     ]
 
-    return (<Layout>
+    return (
         <Grid container spacing={3}>
             <Grid xs={4} item>
                 <Activity relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} />
@@ -39,10 +39,6 @@ const Activitydemo = () => {
                 {refresh && <UpcomingActivity relatedTo={relatedTo} />}
             </Grid>
         </Grid>
-        {/* <Box p={2}>
-            <ProductBuilder relatedTo={relatedTo} />
-        </Box> */}
-    </Layout>
     );
 }
 

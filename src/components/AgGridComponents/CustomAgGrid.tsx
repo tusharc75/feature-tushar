@@ -366,7 +366,7 @@ export default function CustomAgGrid({
                 }
               }}
               rowsPerPage={limit}
-              onChangeRowsPerPage={(event) => {
+              onRowsPerPageChange={(event) => {
                 dispatch({ type: 'pageSizeChange', limit: event.target.value });
 
                 if (clientSideGridApi) {

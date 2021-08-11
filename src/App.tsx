@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, lazy, Suspense, useState } from "react";
+import React, { useContext, useEffect, lazy, useState, Fragment, Suspense } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import ReactGA from "react-ga";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
@@ -25,70 +25,70 @@ import {
 import CustomToaster from "./components/Helpers/CustomToast";
 import PrivateRoute from "./components/PrivateRoute";
 import { useData } from "./StateProvider/Provider";
-
-import Login from "./pages/Auth/Login";
-import AzureLogin from "./pages/Auth/AzureLogin";
-import Leads from "./pages/Leads";
-import LeadDetailsPage from "./pages/Leads/LeadDetailsPage";
-import NewLead from "./pages/Leads/NewLead";
-import Opportunities from "./pages/Opportunities";
-import AddNewOpportunity from "./pages/Opportunities/AddNewOpportunity";
-import Doa from "./pages/DoaSetup";
-import Contact from "./pages/Contact";
-import Account from "./pages/Account/index";
-import AccountDetailPage from "./pages/Account/AccountDetailPage";
-import ContactDetailPage from "./pages/Contact/ContactDetailPage";
-import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
-import Activitydemo from "./pages/Activity/activitydemo";
-import Activity from "./pages/Activity";
-import Note from "./pages/Activity/Note";
-import Email from "./pages/Activity/Email";
-import Attachments from "./pages/Activity/Attachments";
-import Calender from "./pages/Activity/Calendar";
-import PasswordSetup from "./pages/Auth/PasswordSetup";
-import ForgetPassword from "./pages/Auth/ForgetPassword";
-import ProductCategory from "./pages/ProductCategory";
-import ProductTemplate from "./pages/ProductTemplate";
-import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
-import User from "./pages/User";
-import Entity from "./pages/Entity";
-import EntityDetailPage from "./pages/Entity/EntityDetailPage";
-import UserDetailsPage from "./pages/User/UserDetailsPage";
-import ProjectSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
-import ProjectSales from "./pages/ProjectSales";
-import Roles from "./pages/Role";
-import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
-import Product from "./pages/Product";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import PriceTemplate from "./pages/PriceTemplate";
-import CreatePriceTemplate from "./pages/PriceTemplate/CreatePriceTemplate";
-import ProductBuilder from "./pages/ProductBuilder";
-import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
-import BrandConfiguration from "./pages/BrandConfiguration";
-import QuoteApproval from "./pages/Quote-Approval";
-import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail/index";
-import DOARequest from "./pages/DOA";
-import CurrencyConverter from "./pages/CurrencyConverter";
-import Dashboard from "./pages/Dashboard";
-import KpiDashboard from "./pages/KpiDashboard";
-import EditDashboard from "./pages/KpiDashboard/EditDashboards";
-import FormBuilder from "./pages/FormBuilder";
-import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
-import UserProfilePage from "./pages/ProfilePage/index";
-import DOAapproval from "./pages/DOA/DOAApproval";
-import QuoteBuilderCombined from "./pages/QuoteBuilderCombined";
-import Reminder from "./pages/Reminder";
-import ResetPassword from "./pages/Auth/ResetPassword";
-import NotFound from "./pages/NotFound";
-import Products from "./pages/Products";
-import ProductDetails from "./pages/Products/ProductDetails";
-import MarketSegment from "./pages/MarketSegment";
-import Budget from "./pages/Budget";
-import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
-import QuotePdfTemplate from "./pages/QuotePdfTemplate";
-import MyCart from "./components/ProductList/MyCart/MyCart";
-import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 import ErrorBoundaryComponent from "./ErrorBoundary"
+import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
+
+const Login = lazy(() => import("./pages/Auth/Login"));
+const AzureLogin = lazy(() => import("./pages/Auth/AzureLogin"));
+const Leads = lazy(() => import("./pages/Leads"));
+const LeadDetailsPage = lazy(() => import("./pages/Leads/LeadDetailsPage"));
+const NewLead = lazy(() => import("./pages/Leads/NewLead"));
+const Opportunities = lazy(() => import("./pages/Opportunities"));
+const AddNewOpportunity = lazy(() => import("./pages/Opportunities/AddNewOpportunity"));
+const Doa = lazy(() => import("./pages/DoaSetup"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Account = lazy(() => import("./pages/Account/index"));
+const AccountDetailPage = lazy(() => import("./pages/Account/AccountDetailPage"));
+const ContactDetailPage = lazy(() => import("./pages/Contact/ContactDetailPage"));
+const OpportunityDetailsPage = lazy(() => import("./pages/Opportunities/OpportunityDetailsPage"));
+const Activitydemo = lazy(() => import("./pages/Activity/activitydemo"));
+const Activity = lazy(() => import("./pages/Activity"));
+const Note = lazy(() => import("./pages/Activity/Note"));
+const Email = lazy(() => import("./pages/Activity/Email"));
+const Attachments = lazy(() => import("./pages/Activity/Attachments"));
+const Calender = lazy(() => import("./pages/Activity/Calendar"));
+const PasswordSetup = lazy(() => import("./pages/Auth/PasswordSetup"));
+const ForgetPassword = lazy(() => import("./pages/Auth/ForgetPassword"));
+const ProductCategory = lazy(() => import("./pages/ProductCategory"));
+const ProductTemplate = lazy(() => import("./pages/ProductTemplate"));
+const CreateProductTemplate = lazy(() => import("./pages/ProductTemplate/CreateProductTemplate"));
+const User = lazy(() => import("./pages/User"));
+const Entity = lazy(() => import("./pages/Entity"));
+const EntityDetailPage = lazy(() => import("./pages/Entity/EntityDetailPage"));
+const UserDetailsPage = lazy(() => import("./pages/User/UserDetailsPage"));
+const ProjectSalesDetails = lazy(() => import("./pages/ProjectSales/ProjectSalesDetails"));
+const ProjectSales = lazy(() => import("./pages/ProjectSales"));
+const Roles = lazy(() => import("./pages/Role"));
+const RoleDetailsPage = lazy(() => import("./pages/Role/RoleDetailsPage"));
+const Product = lazy(() => import("./pages/Product"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const PriceTemplate = lazy(() => import("./pages/PriceTemplate"));
+const CreatePriceTemplate = lazy(() => import("./pages/PriceTemplate/CreatePriceTemplate"));
+const ProductBuilder = lazy(() => import("./pages/ProductBuilder"));
+const CreateProductBuilder = lazy(() => import("./pages/ProductBuilder/CreateProductBuilder"));
+const BrandConfiguration = lazy(() => import("./pages/BrandConfiguration"));
+const QuoteApproval = lazy(() => import("./pages/Quote-Approval"));
+const QuoteDetail = lazy(() => import("./pages/QuoteBuilderCombined/QuoteDetail/index"));
+const DOARequest = lazy(() => import("./pages/DOA"));
+const CurrencyConverter = lazy(() => import("./pages/CurrencyConverter"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const KpiDashboard = lazy(() => import("./pages/KpiDashboard"));
+const EditDashboard = lazy(() => import("./pages/KpiDashboard/EditDashboards"));
+const FormBuilder = lazy(() => import("./pages/FormBuilder"));
+const CreateFormBuilder = lazy(() => import("./pages/FormBuilder/CreateFormBuilder"));
+const UserProfilePage = lazy(() => import("./pages/ProfilePage/index"));
+const DOAapproval = lazy(() => import("./pages/DOA/DOAApproval"));
+const QuoteBuilderCombined = lazy(() => import("./pages/QuoteBuilderCombined"));
+const Reminder = lazy(() => import("./pages/Reminder"));
+const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Products = lazy(() => import("./pages/Products"));
+const ProductDetails = lazy(() => import("./pages/Products/ProductDetails"));
+const MarketSegment = lazy(() => import("./pages/MarketSegment"));
+const Budget = lazy(() => import("./pages/Budget"));
+const CreateQuotePdfTemplate = lazy(() => import("./pages/QuotePdfTemplate/CreateQuotePdfTemplate"));
+const QuotePdfTemplate = lazy(() => import("./pages/QuotePdfTemplate"));
+const MyCart = lazy(() => import("./components/ProductList/MyCart/MyCart"));
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -227,7 +227,9 @@ function App() {
     }
 
     return !user ? (
-      <Comp />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Comp />
+      </Suspense>
     ) : (
       <Redirect
         to={{

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import Layout from '../../components/Layout';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
@@ -391,7 +391,7 @@ export default function Contact(props) {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
@@ -572,6 +572,6 @@ export default function Contact(props) {
           ) : null}
         </Box>
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 }

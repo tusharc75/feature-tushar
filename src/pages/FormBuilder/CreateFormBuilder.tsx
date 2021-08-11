@@ -1,7 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
-import { makeStyles } from '@material-ui/core/styles';
 import { Box, Typography, Button, CircularProgress } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
@@ -15,9 +13,9 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
 
-const CreateFormBuilder = (props) => {
+const CreateFormBuilder = () => {
 
-    const { state: { user, permissions } }: any = useData();
+    const { state: { permissions } }: any = useData();
     const [formBuilderPermissions, setFormBuilderPermissions] = useState({
         isCreate: false,
         isUpdate: false,
@@ -84,7 +82,7 @@ const CreateFormBuilder = (props) => {
         });
     };
 
-    return (<Layout>
+    return (<Fragment>
         <Grid container className="headerbox">
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: routes.quoteBuilder.title }]} />
         </Grid>
@@ -132,7 +130,7 @@ const CreateFormBuilder = (props) => {
                 <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
         </CustomContainer>
-    </Layout >
+    </Fragment >
     );
 }
 

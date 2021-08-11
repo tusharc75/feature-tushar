@@ -1,4 +1,4 @@
-import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
+import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
 import { Paper, Box, Tabs, Tab, Grid, Button, Typography, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
@@ -471,7 +471,7 @@ export default function QuoteDetail() {
 
   return (
     <>
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -779,7 +779,7 @@ export default function QuoteDetail() {
         )
 
         }
-      </Layout>
+      </Fragment>
     </>
   );
 }
