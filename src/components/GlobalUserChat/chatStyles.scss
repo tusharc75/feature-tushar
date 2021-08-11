@@ -126,6 +126,7 @@
   align-items: center;
 
   .chat-listSubtitle {
+    flex: 0.8;
     display: flex;
     overflow: hidden;
 
@@ -150,7 +151,8 @@
   }
 
   .message-time {
-    margin-left: 12px;
+    text-align: right;
+    flex: 0.2;
     font-size: 12px;
     font-weight: 500;
   }
