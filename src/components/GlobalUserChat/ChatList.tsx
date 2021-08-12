@@ -37,7 +37,7 @@ const ChatList = (props) => {
         <ListItemText
           primary={
             <Fragment>
-              <p title={chat.chatTitle} className="chat-listTitle text-truncate">{chat.chatTitle}</p>
+              <p title={chat.chatTitle} className={`chat-listTitle text-truncate ${chat?.unseen > 0 ? "new-msg" : ""}`}>{chat.chatTitle}</p>
             </Fragment>}
               
           secondary={
@@ -51,10 +51,8 @@ const ChatList = (props) => {
                     {chat.message?.message ? chat.message?.message : "\'New chat\'"}
                   </p>
                 </div>
-                {chat?.unseen > 0
-                  ? <p className={`message-time count ${chat?.unseen > 0 ? "unseen" : ""}`}>{chat?.unseen}</p>
-                  : chat.message?.message
-                  && <p className="message-time">
+                {chat.message?.message
+                  && <p className={`message-time ${chat?.unseen > 0 ? "new-msg" : ""}`}>
                   {formatTime(chat.message.date)}
                 </p>}
               </div>

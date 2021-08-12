@@ -117,7 +117,13 @@
 
 .chat-listTitle {
   font-size: 16px;
+  font-weight: 400;
+  color: #6b6b6b;
+}
+
+.new-msg {
   font-weight: 600;
+  color: #303030;
 }
 
 .chat-listSubtext {
@@ -144,10 +150,9 @@
   }
 
   .count {
-    background-color: #163340;
-    padding: 2px 4px;
-    border-radius: 50%;
-    color: #ececec;
+    color: #163340;
+    font-weight: 700 !important;
+    font-size: 14px !important;
   }
 
   .message-time {
