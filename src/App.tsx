@@ -498,10 +498,10 @@ function App() {
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
-            <Route exact path={"/dashboard"}>
+            <Route exact path={"/dashboards"}>
               <KpiDashboards />
             </Route>
-            <Route exact path={"/dashboards"}>
+            {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />
             </Route>
             <Route exact path={"/dashboard/detail/:id"}>
@@ -509,7 +509,7 @@ function App() {
             </Route>
             <Route exact path={"/dashboard/:id"}>
               <EditDashboard edit={false} />
-            </Route>
+            </Route> */}
             //Route available for customers to Accept Reject Quote
             <Route exact path={"/quote-approval/:id"}>
               <QuoteApproval />
