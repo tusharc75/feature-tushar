@@ -15,9 +15,10 @@ import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase, orderBy } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
-import { getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
+import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "../../StateProvider/Provider";
 import { Skeleton } from "@material-ui/lab";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
@@ -68,7 +69,9 @@ const unlinkFields = [sidebarResource.marketSegment,sidebarResource.budget,sideb
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
-
+  const {
+    state: { user, selectedEntity, permissions }
+  }: any = useData();
   const { data, fields } = props;
   const [isDownloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -242,8 +245,7 @@ const Details = (props: DetailProps) => {
    */
   const renderData = (val: any, fieldData: any) => {
     const value = normalizeValues(val, fieldData);
-
-    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && !unlinkFields.includes(fieldData.lookupResource)) {
+    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && permissions[camelCase(fieldData.lookupResource)]?.isRead && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
           <Typography className={classes.fieldText} variant="body2">
