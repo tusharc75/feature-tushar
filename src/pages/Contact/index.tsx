@@ -50,7 +50,7 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions}
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute, contactResourceLabel },
@@ -75,10 +75,10 @@ export default function Contact(props) {
     accountName: history.location?.state?.accountName
   });
   const [contactPermissions, setContactPermissions] = useState<any>({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions[contactResource]?.isCreate,
+    isUpdate: permissions[contactResource]?.isUpdate,
+    isRead: permissions[contactResource]?.isRead,
+    isDelete: permissions[contactResource]?.isDelete,
   });
 
   const [filter, setFilter] = useState('All Contacts');
@@ -272,7 +272,6 @@ export default function Contact(props) {
   };
 
   const getContacts = () => {
-    if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
 
@@ -318,7 +317,7 @@ export default function Contact(props) {
           toastConfig.setToastConfig(err);
           dispatch({ type: 'loading', loading: false });
         });
-    }
+    
   };
 
   const handleSingleDeleteContacts = async () => {

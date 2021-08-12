@@ -90,11 +90,11 @@ export default function Account(props) {
   const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 });
 
   const [accountPermissions, setAccountPermissions] = useState({
-    isCreate: false,
-    isRead: false,
-    isUpdate: false,
-    isDelete: false,
-    approveAccount: false
+    isCreate: permissions[accountResource]?.isCreate,
+    isRead: permissions[accountResource]?.isRead,
+    isUpdate: permissions[accountResource]?.isUpdate,
+    isDelete: permissions[accountResource]?.isDelete,
+    approveAccount: false,
   });
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
@@ -367,7 +367,6 @@ export default function Account(props) {
   };
 
   const fetchAccounts = async () => {
-    if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
 
       const queryString = getQueryString();
@@ -422,7 +421,6 @@ export default function Account(props) {
           toastConfig.setToastConfig(err);
           dispatch({ type: 'loading', loading: false });
         });
-    }
   };
 
   const cloneAccount = async (accountId) => {
