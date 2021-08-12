@@ -52,7 +52,7 @@ const ChatList = (props) => {
                   </p>
                 </div>
                 {chat.message?.message
-                  && <p className="message-time">
+                  && <p className={`message-time ${chat?.unseen > 0 ? "new-msg" : ""}`}>
                   {formatTime(chat.message.date)}
                 </p>}
               </div>
