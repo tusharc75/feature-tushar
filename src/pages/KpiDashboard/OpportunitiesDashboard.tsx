@@ -104,11 +104,11 @@ const OpportunitiesDashboard = () => {
       {opportunityData && leadData && (
         <Box p={2} bgcolor="#efefef">
           <Grid container spacing={2}>
-            <Grid item sm={8}>
+            <Grid item xs={12} md={8}>
               <Grid container spacing={2}>
-                <Grid item sm={4}>
+                <Grid item xs={12} sm={4}>
                   <Paper variant="outlined">
-                    <Box width="200px" height="200px" p={2}>
+                    <Box minWidth="200px" height="200px" p={2}>
                       <Typography color="secondary" variant="h5">
                         {opportunityData?.currentMonth.created}
                       </Typography>
@@ -129,7 +129,7 @@ const OpportunitiesDashboard = () => {
                     </Box>
                   </Paper>
                 </Grid>
-                <Grid item sm={4}>
+                <Grid item xs={12} sm={4}>
                   <Paper variant="outlined">
                     <Box width="200px" height="200px" p={2}>
                       <Typography color="secondary" variant="h5">
@@ -152,7 +152,7 @@ const OpportunitiesDashboard = () => {
                     </Box>
                   </Paper>
                 </Grid>
-                <Grid item sm={4}>
+                <Grid item xs={12} sm={4}>
                   <Paper variant="outlined">
                     <Box width="200px" height="200px" p={2}>
                       <Typography color="secondary" variant="h5">
@@ -175,7 +175,7 @@ const OpportunitiesDashboard = () => {
                     </Box>
                   </Paper>
                 </Grid>
-                <Grid item sm={4}>
+                <Grid item xs={12} sm={4}>
                   <Paper variant="outlined">
                     <Box width="200px" height="200px" p={2}>
                       <Typography color="secondary" variant="h5">
@@ -197,7 +197,7 @@ const OpportunitiesDashboard = () => {
                     </Box>
                   </Paper>
                 </Grid>
-                <Grid item sm={4}>
+                <Grid item xs={12} sm={4}>
                   <Paper variant="outlined">
                     <Box width="200px" height="200px" p={2}>
                       <Typography color="secondary" variant="h5">
@@ -221,7 +221,7 @@ const OpportunitiesDashboard = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item sm={4}>
+            <Grid item xs={12} md={4}>
               <Paper variant="outlined">
                 <Box p={2}>
                   <Typography variant="h5">Leaderboard</Typography>

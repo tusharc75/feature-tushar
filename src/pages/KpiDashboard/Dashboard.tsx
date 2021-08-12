@@ -55,22 +55,6 @@ const linChartData = {
   ]
 };
 
-// Table Data
-
-const tableData = [
-  { region: 'Alabama', sales: '$150.00' },
-  { region: 'Delaware', sales: '$144.00' },
-  { region: 'Ohio', sales: '$125.00' },
-  { region: 'Colorado', sales: '$117.00' },
-  { region: 'Calofornia', sales: '$105.00' },
-  { region: 'Virgina', sales: '$101.00' },
-  { region: 'Connecticut', sales: '$99.00' },
-  { region: 'Texas', sales: '$87.00' },
-  { region: 'Pensylvania', sales: '$82.00' },
-  { region: 'South Carolina', sales: '$75.00' },
-  { region: 'Georgia', sales: '$70.00' }
-];
-
 const Dashboard = () => {
   const [selectedDate, handleDateChange] = useState(new Date());
   const [regionSales, setRegionSales] = useState([]);
@@ -90,8 +74,8 @@ const Dashboard = () => {
     subMarketSegment: {},
     productCategory: {},
     between: {
-      from: new Date(),
-      to: new Date()
+      from: null,
+      to: null
     }
   });
 
@@ -111,15 +95,24 @@ const Dashboard = () => {
 
     let url = '?';
     for (const k of Object.keys(params)) {
+
       if (params[k]) {
-        url = `${url}${k}=${params[k]}&`;
+        if (k === "between" && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== "between") {
+          url = `${url}${k}=${params[k]}&`;
+        }
+  
       }
+
+
     }
 
     axiosInstance()
       .get(`dashboard/sales${url}`)
       .then(({ data: { data } }) => {
-        const saleData = [].sort();
+        const saleData = []
         const labels = [];
 
         for (let d of data) {
@@ -143,6 +136,13 @@ const Dashboard = () => {
         });
       })
       .catch((err) => {});
+
+    return () => {
+      setSalesData({
+        labels: [],
+        datasets: []
+        })
+      }
   }, [salesFilter]);
 
   const fetchRegionalSalesData = useCallback(() => {
@@ -157,10 +157,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchSalesData();
-    fetchRegionalSalesData();
   }, [fetchSalesData]);
 
   useEffect(() => {
+    fetchRegionalSalesData();
     fetchEntities();
     fetchMarketSegment();
     fetchProductCategory();
