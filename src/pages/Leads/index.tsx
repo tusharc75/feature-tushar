@@ -49,6 +49,7 @@ const Leads = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
@@ -56,10 +57,10 @@ const Leads = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
   const [leadsPermissions, setLeadsPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions[leadResource]?.isCreate,
+    isUpdate: permissions[leadResource]?.isUpdate,
+    isRead: permissions[leadResource]?.isRead,
+    isDelete: permissions[leadResource]?.isDelete,
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -69,7 +70,6 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const { leadResource, leadApi } = lead;
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
   // const [showGridFilters, setShowGridFilters] = useState(true)

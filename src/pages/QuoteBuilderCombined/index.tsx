@@ -69,10 +69,10 @@ const QuoteBuilders = () => {
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [quotePermissions, setQuotePermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
+    isCreate: permissions?.quoteBuilder?.isCreate,
+    isUpdate: permissions?.quoteBuilder?.isUpdate,
+    isRead: permissions?.quoteBuilder?.isRead,
+    isDelete: permissions?.quoteBuilder?.isDelete,
   });
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
