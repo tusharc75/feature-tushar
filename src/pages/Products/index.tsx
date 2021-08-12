@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, Fragment } from 'react'
 import axiosInstance from '../../axios/axiosInstance';
 import Layout from '../../components/Layout';
 import ProductList from '../../components/ProductList/ProductList/ProductList';
@@ -19,10 +19,10 @@ export default function Products() {
     }, [])
 
     return (
-        <Layout>
+        <Fragment>
             {
                 products && <ProductList products={products} />
             }
-        </Layout>
+        </Fragment>
     )
 }

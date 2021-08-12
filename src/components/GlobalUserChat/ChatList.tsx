@@ -6,6 +6,8 @@ import {
   Avatar,
   Typography
 } from '@material-ui/core'
+import moment from 'moment'
+
 import axiosInstance from '../../axios/axiosInstance'
 
 
@@ -20,7 +22,7 @@ const ChatList = (props) => {
     }
   }
 
-  const formatTime = (time) => new Date(time).toTimeString().split(":");
+  const formatTime = (time) => moment(time).fromNow(true);
 
   return (
     <Fragment>
@@ -35,7 +37,7 @@ const ChatList = (props) => {
         <ListItemText
           primary={
             <Fragment>
-              <p className="chat-listTitle">{chat.chatTitle}</p>
+              <p title={chat.chatTitle} className={`chat-listTitle text-truncate ${chat?.unseen > 0 ? "new-msg" : ""}`}>{chat.chatTitle}</p>
             </Fragment>}
               
           secondary={
@@ -49,11 +51,9 @@ const ChatList = (props) => {
                     {chat.message?.message ? chat.message?.message : "\'New chat\'"}
                   </p>
                 </div>
-                {chat?.unseen > 0
-                  ? <p className={`message-time count ${chat?.unseen > 0 ? "unseen" : ""}`}>{chat?.unseen}</p>
-                  : chat.message?.message
-                  && <p className="message-time">
-                  {`${formatTime(chat.message.date)[0]}:${formatTime(chat.message.date)[1]}`}
+                {chat.message?.message
+                  && <p className={`message-time ${chat?.unseen > 0 ? "new-msg" : ""}`}>
+                  {formatTime(chat.message.date)}
                 </p>}
               </div>
             </Fragment>

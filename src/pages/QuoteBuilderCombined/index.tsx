@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
@@ -650,7 +650,7 @@ const QuoteBuilders = () => {
 
   return (
     <>
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.quoteBuilder]} />
@@ -761,7 +761,7 @@ const QuoteBuilders = () => {
             />
           ) : null}
         </CustomContainer>
-      </Layout>
+      </Fragment>
 
       {showCreateQuoteDialog && (
         <ManageQuoteDialog

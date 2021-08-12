@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Layout from "../../components/Layout";
@@ -225,7 +225,7 @@ const PriceTemplate = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs
@@ -410,7 +410,7 @@ const PriceTemplate = () => {
           /> : null
         }
       </div>
-    </Layout>
+    </Fragment>
   );
 };
 

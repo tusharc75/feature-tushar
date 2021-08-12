@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import React, { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
     Box,
     Button,
@@ -299,7 +299,7 @@ const QuotePdfTemplate: FC = () => {
 
 
     return (
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.quotePdfTemplate]} />
@@ -366,7 +366,7 @@ const QuotePdfTemplate: FC = () => {
                     />
                 }
             </CustomContainer >
-        </Layout >
+        </Fragment >
     );
 
 };

@@ -1,6 +1,8 @@
 import { useEffect, useState, useContext } from 'react'
 import {Box, IconButton, Typography} from '@material-ui/core'
 import { SendOutlined } from '@material-ui/icons';
+import moment from 'moment'
+
 import axiosInstance from '../../axios/axiosInstance';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 
@@ -55,7 +57,7 @@ const ChatBox = (props) => {
         setMessageValue("")
     };
 
-    const formatTime = (time) => new Date(time).toTimeString().split(":");
+    const formatTime = (time) => moment(time).fromNow(true);
 
     const user = (data) => chatUsers.find(_d => _d?._id === data.userid)
 
@@ -70,8 +72,9 @@ const ChatBox = (props) => {
             <div className="chatbox-container">
                 {messages && messages.map((data, i) => (
                     <div key={i} className={`message-container ${data.userid === currentUser ? "my-message" : ""}`}>
-                        
+
                         <div
+                            title={moment(data.date).format("DD, MMM YYYY")}
                             className={`message-outlet ${data.userid === currentUser ? "my-color ml-4": "mr-4"}`}>
                             {selectedChat && chatUsers?.length > 2
                             ? <p className="username">
@@ -88,7 +91,7 @@ const ChatBox = (props) => {
                               {data.message}
                             </Typography>
                             <p className="message-time">
-                                {`${formatTime(data.date)[0]}:${formatTime(data.date)[1]}`}
+                                {formatTime(data.date)}
                             </p>
                             </div>
                         </div>

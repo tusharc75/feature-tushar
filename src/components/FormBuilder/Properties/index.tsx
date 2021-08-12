@@ -93,7 +93,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.hiddenField = false;
       }
 
-      if (!values.addAdditionalOption && (fieldData.type==="multiSelect"||fieldData.type==="dropDown") && !fieldData.lookup) {
+      if (!values.addAdditionalOption && (fieldData.type === "multiSelect" || fieldData.type === "dropDown") && !fieldData.lookup) {
         values.addAdditionalOption = false;
       }
 
@@ -232,15 +232,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               values.option.forEach((ele) => {
                 ele.optionValue = ele.optionLabel;
               });
-              ele.inputFields = values.inputFields;
               ele.option = values.option;
+              ele.vlookupInputFields = values.vlookupInputFields;
               ele.isvlookupReverse = values.isvlookupReverse;
             }
             if (fieldData.type === 'converter' || fieldData.isConverter === true) {
+              ele.unitoption = values.unitoption;
               ele.units = values.units;
               ele.displayUnits = values.displayUnits;
               ele.formulaUnits = values.formulaUnits;
-              ele.option = values.option;
               if (fieldData.type === 'formula' || values.isFormula === true) {
                 ele.formulaOnConverter = values.formulaOnConverter;
               }
@@ -311,11 +311,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
     }
     if (values.type === 'vlookupDropdown' || values.isVlookup) {
-      if (!values.inputFields || values.inputFields.length === 0) {
-        errors["inputFields"] = "Please select input parameters";
+      if (!values.vlookupInputFields || values.vlookupInputFields.length === 0) {
+        errors["vlookupInputFields"] = "Please select input parameters";
       }
     }
-    console.log(errors)
     return errors;
   }
 
@@ -641,10 +640,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         onChange={(e) => setFieldValue('tooltipMessage', e.target.value.trimStart())}
                       />
                     )}
+                    
                     <FormControlLabel
                       control={
                         <Checkbox
                           name="isDefaultValue"
+                          disabled={values['type'] === "freeStyleMultiSelect"}
                           checked={values['isDefaultValue']}
                           onChange={(e) => setFieldValue('isDefaultValue', e.target.checked)}
                           color="primary"
@@ -652,10 +653,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Default Value"
                     />
+
                     <FormControlLabel
                       control={
                         <Checkbox
                           name="Uneditable"
+                          disabled={values['type'] === "freeStyleMultiSelect"}
                           checked={values['isUneditable']}
                           onChange={(e) => setFieldValue('isUneditable', e.target.checked)}
                           color="primary"
@@ -759,7 +762,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {(fieldData.type==="multiSelect"||fieldData.type==="dropDown") && !fieldData.lookup ? (
+                    {(fieldData.type === "multiSelect" || fieldData.type === "dropDown") && !fieldData.lookup ? (
                       <FormControlLabel
                         control={
                           <Checkbox

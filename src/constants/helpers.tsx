@@ -501,6 +501,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`).nullable()
         : yup.string().nullable();
+    } else if (input.type === "freeStyleMultiSelect") {
+      schema[input.fieldName] = input.required
+        ? yup.array().required(`${input.fieldLabel} is required`)
+        : yup.array();
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)

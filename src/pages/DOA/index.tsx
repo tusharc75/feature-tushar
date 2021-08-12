@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import Layout from "../../components/Layout";
 import { useHistory, Link } from "react-router-dom";
@@ -245,7 +245,7 @@ const DOARequest = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[{ title: routes.DOARequest.title }]} />
@@ -277,7 +277,7 @@ const DOARequest = () => {
             renderedFrom="doaRequestPage"
           />
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

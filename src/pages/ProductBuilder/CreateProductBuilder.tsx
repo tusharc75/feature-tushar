@@ -72,7 +72,7 @@ const CreateProductBuilder = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs
@@ -312,7 +312,7 @@ const CreateProductBuilder = () => {
           </Box>
         )}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

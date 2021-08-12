@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Box,
@@ -82,7 +82,7 @@ const NewLead = () => {
     { title: "Delete", bg: theme.palette.primary.main, color: "#fff" }, //  darkBg
   ];
   return (
-    <Layout>
+    <Fragment>
       {/* Links Section */}
       <NavLinks ButtonProps={buttonProps} />
 
@@ -541,7 +541,7 @@ const NewLead = () => {
       >
         &copy; 2020, equipt.com, Inc, or its affiliates
       </Typography>
-    </Layout>
+    </Fragment>
   );
 };
 
