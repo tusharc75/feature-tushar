@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.5.0...v1.6.0) (2021-08-13)
+
+
+### Features
+
+* **dashboard:** dashboard changes ([ca31b73](https://bitbucket.org/vebholic/oms_frontend/commit/ca31b732069d967b79189930325b8454a38ec72a))
+* **dashboard:** filters ([6a62b8c](https://bitbucket.org/vebholic/oms_frontend/commit/6a62b8c8dcf8652f9078f015228eff8d1e0e703c))
+* **dashboard:** kpi dashboard ([9bb39af](https://bitbucket.org/vebholic/oms_frontend/commit/9bb39af00a3f673dde432f0695d3c84932ccbcfc))
+* **manage quote dialog:** private access and doa resource sync ([0ca5786](https://bitbucket.org/vebholic/oms_frontend/commit/0ca57862b4d1cc91726d480f9e0d4708b8facae6))
+
+
+### Bug Fixes
+
+* **chatlist:** new message counts ([4bd236a](https://bitbucket.org/vebholic/oms_frontend/commit/4bd236a7221c460bd4194483bff99acd463bd884))
+* **chatlist:** new message fix ([c7ea95a](https://bitbucket.org/vebholic/oms_frontend/commit/c7ea95abb8f3053e19d9975314923cd15ef046ea))
+* **chatlist:** new msg fix ([7ca92ad](https://bitbucket.org/vebholic/oms_frontend/commit/7ca92ad919a6a57ac8ba2ffd23547b63a99f5608))
+* **dashboard:** conflict ([cc2f126](https://bitbucket.org/vebholic/oms_frontend/commit/cc2f126c2c57c2976b1135b4a19f1e8f3f24cb71))
+* **dashboard:** conflict fix ([7fb3e42](https://bitbucket.org/vebholic/oms_frontend/commit/7fb3e428cc656d0bc785a7eb0b3d21e06930e3f2))
+* **DetailPage:** unlink lookup resource based on isRead permission ([5c89dc9](https://bitbucket.org/vebholic/oms_frontend/commit/5c89dc9bcb4e6ba1de9c0e15a621406b8d74276c))
+* **mycart.tsx:** ui changes in Checkout Page ([89fa188](https://bitbucket.org/vebholic/oms_frontend/commit/89fa18805fe4c390836b30c0fe0e71916b6487cd))
+* **permissionCheck:** permission issue of delete ([77bbbbc](https://bitbucket.org/vebholic/oms_frontend/commit/77bbbbc0e99b0e8389825376522c46d6d9f5bac0))
+
+## [1.1.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.0.4...v1.1.0) (2021-08-06)
+
+
+### Features
+
+* **product list:** add styles in product list components ([815780e](https://bitbucket.org/vebholic/oms_frontend/commit/815780e5ee1968fc38b2be4ffc0ea4c699f2b3de))
+
 ## [1.5.0](https://bitbucket.org/vebholic/oms_frontend/compare/v1.4.0...v1.5.0) (2021-08-11)
 
 
