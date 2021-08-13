@@ -307,6 +307,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           >
                                             <FormTypes
                                               {...field}
+                                              disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                              isNew={Boolean(projectSalesId)}
                                               fields={initialData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -389,6 +391,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             >
                                               <FormTypes
                                                 {...field}
+                                                disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                                isNew={Boolean(projectSalesId)}
                                                 fields={initialData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -452,6 +456,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                         </Grid> : field.fieldName === "currency" ? (
                                           <FormTypes
                                             {...field}
+                                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -480,6 +486,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : field.fieldName.trim() === "amount" ? (
                                           <FormTypes
+                                           disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                           isNew={Boolean(projectSalesId)}
                                             fieldId={field._id}
                                             lookup={field.lookup}
                                             // {...rest}
@@ -509,6 +517,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : <FormTypes
                                           {...field}
+                                          isNew={Boolean(projectSalesId)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -523,7 +532,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                           imageOrFileUploadCompletePercentage={null}
-                                          disabled={projectSalesId && field.fieldName === "projectManager"}
+                                          disabled={projectSalesId && field.fieldName === "projectManager" || (!projectSalesId && field.disableOnEdit)}
                                         />
                                   }
                                 </Grid>
@@ -535,6 +544,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                         form.sectionFields.map((field) => (
                           <FormTypes
                             {...field}
+                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                            isNew={Boolean(projectSalesId)}
                             values={values}
                             errors={errors}
                             touched={touched}
