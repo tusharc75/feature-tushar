@@ -67,7 +67,7 @@ const Dashboard = () => {
     datasets: []
   });
   const [salesFilter, setSalesFilter] = useState({
-    allEntity: false,
+    allEntity: true,
     byMonth: false,
     entity: {},
     marketSegment: {},
@@ -114,24 +114,35 @@ const Dashboard = () => {
       .then(({ data: { data } }) => {
         const saleData = []
         const labels = [];
+        const budget = []
 
         for (let d of data) {
           saleData.push(d.totalSell);
           labels.push(moment(d.date).format('MMM/YY'));
+          budget.push(d.budget)
         }
 
         setSalesData({
           labels,
           datasets: [
+             {
+              type: 'line',
+              label: 'Budget',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 2,
+              fill: false,
+              data: budget
+            },
             {
               type: 'line',
               label: 'Total Sales',
-              borderColor: 'rgb(54, 162, 235)',
+              borderColor: 'rgb(54, 162, 235, 0.1)',
               backgroundColor: 'rgb(255, 99, 132, 0.8)',
               borderWidth: 2,
               fill: true,
               data: saleData
-            }
+            },
+           
           ]
         });
       })
@@ -149,7 +160,7 @@ const Dashboard = () => {
     axiosInstance()
       .get('dashboard/regionalsales')
       .then(({ data: { data } }) => {
-        data = data.sort((a, b) => a.totalSell - b.totalSell);
+        data = data.sort((a, b) => b.totalSell - a.totalSell);
         setRegionSales(data.map((d) => ({ region: d.region, sales: d.totalSell })));
       })
       .catch((err) => {});
