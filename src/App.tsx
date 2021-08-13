@@ -89,7 +89,7 @@ import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
-import MyCart from "./components/ProductList/MyCart/MyCart";
+import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -530,7 +530,7 @@ function App() {
               <ProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path="/product/my-cart">
-              <MyCart />
+              <MyOwnCart />
             </PrivateRoute>
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
