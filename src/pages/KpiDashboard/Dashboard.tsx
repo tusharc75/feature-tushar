@@ -27,36 +27,10 @@ import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
 import { entity, marketSegment } from '../../constants/helpers';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
+import ConvertedLeads from './ConvertedLeads';
 
-const linChartData = {
-  labels: ['1', '2', '3', '4', '5', '6'],
-  datasets: [
-    {
-      label: '# of Votes',
-      data: [12, 19, 3, 5, 2, 3],
-      fill: false,
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgba(255, 99, 132, 0.2)'
-    },
-    {
-      label: '# of No Votes',
-      data: [5, 1, 3, 7, 12, 15],
-      fill: false,
-      backgroundColor: 'rgb(23, 99, 132)',
-      borderColor: 'rgba(23, 99, 132, 0.2)'
-    },
-    {
-      label: '# More Votes',
-      data: [5, 3, 8, 4, 7, 12],
-      fill: false,
-      backgroundColor: 'rgb(200, 204, 140)',
-      borderColor: 'rgba(200, 204, 140, 0.2)'
-    }
-  ]
-};
 
 const Dashboard = () => {
-  const [selectedDate, handleDateChange] = useState(new Date());
   const [regionSales, setRegionSales] = useState([]);
   const [entities, setEntities] = useState([]);
   const [productCategory, setProductCategory] = useState([]);
@@ -74,8 +48,8 @@ const Dashboard = () => {
     subMarketSegment: {},
     productCategory: {},
     between: {
-      from: null,
-      to: null
+      from: new Date(moment().subtract(3, 'months').calendar()),
+      to: new Date()
     }
   });
 
@@ -318,7 +292,7 @@ const Dashboard = () => {
                       size="small"
                       disableFuture
                       openTo="year"
-                      format="dd/MM/yyyy"
+                      format="MM/dd/yyyy"
                       label="From"
                       views={['year', 'month', 'date']}
                       value={salesFilter.between.from}
@@ -334,7 +308,7 @@ const Dashboard = () => {
                       size="small"
                       disableFuture
                       openTo="year"
-                      format="dd/MM/yyyy"
+                      format="MM/dd/yyyy"
                       label="To"
                       views={['year', 'month', 'date']}
                       value={salesFilter.between.to}
@@ -393,45 +367,7 @@ const Dashboard = () => {
               <Box my={2} p={2} width="100%" maxWidth="800px" textAlign="center"></Box>
 
               <Box my={2}>
-                <Box width="800px">
-                  <Grid container spacing={4}>
-                    <Grid xs={12} sm={4} item>
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={['All opportunities', 'All Leads']}
-                        autoHighlight
-                        getOptionLabel={(option) => option}
-                        renderInput={(params) => <TextField {...params} label="Graphs" variant="outlined" />}
-                      />
-                    </Grid>
-                    <Grid xs={12} sm={4} item>
-                      <DatePicker
-                        inputVariant="outlined"
-                        fullWidth
-                        size="small"
-                        disableFuture
-                        openTo="year"
-                        format="dd/MM/yyyy"
-                        label="Date Created By"
-                        views={['year', 'month', 'date']}
-                        value={selectedDate}
-                        onChange={handleDateChange}
-                      />
-                    </Grid>
-                    <Grid xs={12} sm={4} item>
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={['Active', 'Inactive']}
-                        autoHighlight
-                        getOptionLabel={(option) => option}
-                        renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
-                      />
-                    </Grid>
-                  </Grid>
-                  <Chart type="line" data={linChartData} />
-                </Box>
+                <ConvertedLeads Chart={Chart} />
               </Box>
             </Box>
           </Paper>
