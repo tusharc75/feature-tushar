@@ -1,12 +1,26 @@
-.rating_and_review_chart_outer {
-  margin: 1rem auto;
-  width: 55%;
+.box_set{
+  display: flex;
+  margin: 0 auto;
+  justify-content: center;
 }
-
+.box_width{
+  width: 87%;
+}
+.display{
+  display: flex;
+}
+.rating_and_review_chart_outer {
+  margin: 1rem 0;
+}
+.rating_category_2{
+  display: none;
+}
 .rating_chart {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1.5fr ;
+  grid-template-columns: minmax(120px,0.5fr) minmax(120px,1fr) minmax(120px,1fr);
   gap: 0.25rem;
+
+
   -webkit-gap: 0.25rem;
 }
 @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
@@ -44,23 +58,105 @@
 }
 
 .reviews{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
   font-weight: bold !important;
-  font-size: 14px !important;
-  color: #5b5a5a !important;
-  flex-direction: row;
+  font-size: 10px !important;
+  color: var(--grey) !important;
 }
 
 .rating_category{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+.box_size{
+  width: 120px;
+  min-width: 50px;
+  max-width: 140px;
+  height: auto;
+
+}
+.user_name_review{
+  display: flex;
+  justify-content: space-between;
+}
+.user_name_review_child{
+  display: flex;
+  align-items: center;
+     h3{
+        padding-left: 15px;
+     }
+    
 }
 
+.user_rating_style{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 12px 1px 12px;
+  background-color: #1FB31F;
+  border-radius: 3px;
+  color: white !important;
+  h2{
+    padding-right: 5px;
+    font-size: 15px;
+  }
+  .set_icon{
+    font-size: 15px !important;
+    padding: 0;
+    margin-bottom: 2px;
+  }
+}
+.text_style{
+  line-height: 20px;
+  height: 30px;
+  overflow: hidden;
+     a{
+       display: block;
+     }
+}
+
+@media only screen and (max-width: 900px){
+  .rating_chart {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr;
+    gap: 0.25rem;
+  
+  
+    -webkit-gap: 0.25rem;
+  }
+  .rating_category{
+    display: flex;
+    grid-column: 1/3;
+    justify-content: space-between;
+    
+  }
+}
 @media only screen and (max-width: 768px) {
   .rating_and_review_chart_outer {
    width: 94%;
   }
   .rating_chart {
-    grid-template-rows: 1fr 1.5fr 1.5fr ;
-    grid-template-columns: none;
+    grid-template-columns: 1fr;
   }
+  .total_rating{
+    grid-column: 1/3;
+  }
+  .display{
+    display: flex;
+    justify-content: center;
+  }
+}
+@media only screen and (max-width: 368px){
+  .rating_category{
+      display: none;    
+    }
+    .rating_category_2{
+      display: flex;
+      grid-column: 1/3;
+    justify-content: space-between;   
+    }
+  
 }
