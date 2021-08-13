@@ -17,7 +17,6 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -61,7 +60,6 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-
 
   useEffect(() => {
     if (initialData.fields.length > 0) {

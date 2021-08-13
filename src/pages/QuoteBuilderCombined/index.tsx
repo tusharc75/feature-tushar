@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, useReducer, Fragment } from "re
 import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
-import Layout from "../../components/Layout";
 import axiosInstance from "../../axios/axiosInstance";
 import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";

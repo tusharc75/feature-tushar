@@ -52,6 +52,7 @@ const Login = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+
   useEffect(() => {
     if (!isEmpty(account)) {
       (async () => {

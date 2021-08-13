@@ -1,9 +1,9 @@
-import { useEffect, useReducer, useState, useContext, Fragment } from "react";
+import { useState, useContext, Fragment } from "react";
 import { Box, Button, makeStyles } from "@material-ui/core";
 import CustomAgGrid from "../../../../components/AgGridComponents/CustomAgGrid";
 import AddIcon from "@material-ui/icons/Add";
 import axiosInstance from "../../../../axios/axiosInstance";
-import { gridLoadingTimeout, termsAndCondition } from "../../../../constants/helpers";
+import { termsAndCondition } from "../../../../constants/helpers";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageTermsAndCondition from "../../../TermsAndConditions/ManageTermsAndCondition";
 
@@ -14,7 +14,6 @@ const useStyles = makeStyles((theme) => ({
     right: "0",
   },
 }));
-
 
 export default function AdditionalData({
   state,

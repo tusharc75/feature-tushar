@@ -9,7 +9,7 @@ import { BiLayerPlus } from "react-icons/bi";
 import { HiPencil } from "react-icons/hi";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     detailBox: {
         border: "1px solid #163340",
     },
@@ -25,7 +25,7 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
     const history = useHistory();
     const [loadingFields, setLoadingFields] = useState(false);
     const [quoteFields, setQuoteFields] = useState([]);
-    const { qbResource, qbApi } = quoteBuilder;
+    const { qbApi } = quoteBuilder;
     const toastConfig = useContext(CustomToastContext);
 
 

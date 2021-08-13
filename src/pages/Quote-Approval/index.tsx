@@ -1,10 +1,9 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState, useContext } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
-import { Dialog, Grid, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from "@material-ui/core";
+import { Grid, TableCell, Tooltip } from "@material-ui/core";
 import {
     Button,
-    Table,
     makeStyles
 } from "@material-ui/core";
 import axios from 'axios'
@@ -17,23 +16,12 @@ import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import { displayDate } from "../../services/util";
 import { formatAmountWithCurrency } from "../../constants/helpers";
-import { AiOutlineEye } from 'react-icons/ai';
 import styles from './quote-approval.module.scss'
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import {FcUnlock} from 'react-icons/fc';
-import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CodeValidation from "./CodeValidation";
 import axiosInstance from "../../axios/axiosInstance";
-
-const StyledTableCell = withStyles(() =>
-    createStyles({
-        head: {
-            backgroundColor: "#1abd9c",
-            color: "white",
-        }
-    }),
-)(TableCell);
 
 const useStyles = makeStyles(() => ({
     header: {
