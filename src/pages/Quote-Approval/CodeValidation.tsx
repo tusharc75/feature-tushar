@@ -1,33 +1,15 @@
-import React, { useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core'
 import { isMobile, isTablet } from 'react-device-detect'
-import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, simplifyValues, yupSchema } from '../../constants/helpers'
+import { CustomDialogTransition } from '../../constants/helpers'
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader'
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Form, Formik } from 'formik'
-import FormTypes from '../../components/Helpers/FormTypes'
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter'
 import CustomButton from '../../components/Helpers/CustomButton'
 import axiosInstance from '../../axios/axiosInstance'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexWrap: 'wrap',
-    },
-    textField: {
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      width: '25ch',
-    },
-  }),
-);
-
 const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, handleSave }) => {
-    const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [showPasswordField, setShowPasswordField] = useState(false);
     const [disableResendCode, setDisableResendCode] = useState(false);
@@ -42,7 +24,6 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
             .split("").map((char) => char = "x")
             .join("")
         + email.substring(email.indexOf("@"), email.length);
-
 
     const handleSendCodeToEmail = () => {
         axiosInstance()

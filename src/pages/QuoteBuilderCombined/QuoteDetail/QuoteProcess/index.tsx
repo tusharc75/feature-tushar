@@ -12,7 +12,6 @@ import Loader from "../../../../components/Loader";
 import ProductBuilder from "../../../../components/productBuilder";
 import { currencyCodeToSymbol, CustomDialogTransition, customerAccount, customerContact, formatAmountWithCurrency, opportunity, quote, quoteBuilder, sidebarResource, supplierAccount } from "../../../../constants/helpers";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
-import ProductGrid from "./ProductGrid";
 import Steps from "./Steps";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
@@ -33,7 +32,7 @@ import { useData } from "../../../../StateProvider/Provider";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
-import { camelCase, capitalize, isEqual, lowerCase, startCase } from "lodash";
+import { camelCase, isEqual, startCase } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {

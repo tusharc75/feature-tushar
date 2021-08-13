@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import {
   Grid,
   Box,
@@ -28,7 +28,6 @@ import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory, Link } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";

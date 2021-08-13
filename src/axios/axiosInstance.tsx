@@ -1,6 +1,14 @@
 import axios from 'axios';
 import { backendApi } from './../config';
 
+const ERROR_CODE = {
+    permissionError: '1001',
+    forbiddenError: '1002',
+    authorizationError: '1003',
+    invalidUserError: '1004'
+};
+Object.freeze(ERROR_CODE);
+
 export default (history = null, passedHeaders = null) => {
     let headers: any = passedHeaders ? passedHeaders : {};
 
@@ -60,6 +68,7 @@ export default (history = null, passedHeaders = null) => {
                     reject({ open: true, type: "error", message: err.error });
                 })
             }
+
             if (error.message == "Network Error") {
                 return new Promise((resolve, reject) => {
                     reject({ open: true, type: "error", message: "Api Not Working" });
@@ -72,17 +81,23 @@ export default (history = null, passedHeaders = null) => {
                 })
             }
 
-            if (error.response.status === 401) {
-                clearTokenAndRedirectToHome();
-                return new Promise((resolve, reject) => {
-                    reject({ open: true, type: "error", message: error.response.data.message });
-                });
-
+            if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
+                //@ts-ignore
+                window.location = "/";
             }
             else {
-                return new Promise((resolve, reject) => {
-                    reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
-                })
+                if (error.response.status === 401) {
+                    clearTokenAndRedirectToHome();
+                    return new Promise((resolve, reject) => {
+                        reject({ open: true, type: "error", message: error.response.data.message });
+                    });
+
+                }
+                else {
+                    return new Promise((resolve, reject) => {
+                        reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
+                    })
+                }
             }
 
             // reject(error);
