@@ -3,6 +3,10 @@
   bottom: 15px;
   left: 70px;
   z-index: 1001;
+
+  @media screen and (max-width: 960px) {
+    left: 15px;
+  }
 }
 
 .global-chatbox {
