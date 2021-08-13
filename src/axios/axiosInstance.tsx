@@ -81,7 +81,7 @@ export default (history = null, passedHeaders = null) => {
                 })
             }
 
-            if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.code)) {
+            if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
                 //@ts-ignore
                 window.location = "/";
             }
