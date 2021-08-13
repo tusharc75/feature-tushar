@@ -83,16 +83,12 @@ export default function ManageQuoteDialog({
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-  const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate?.owner?.optionValue
-  );
 
   const [entityData, setEntityData] = useState({
     fields: [],
     initialValues: {},
   });
 
-  const [quoteFields, setQuoteFields] = useState([]);
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
@@ -332,7 +328,6 @@ export default function ManageQuoteDialog({
     axiosInstance()
       .get(`/field?resource=Quotes&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        setQuoteFields(data.map((f) => f.fieldData));
 
         if (!quoteApproved) {
           data = data.filter(
