@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, useReducer } from 'react';
 import { Grid, Chip } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayDate } from '../../services/util';
 import OpportunitiesHeader from './OpportunitiesHeader';
@@ -86,7 +85,7 @@ const Opportunities = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });

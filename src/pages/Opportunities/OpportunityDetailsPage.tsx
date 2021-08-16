@@ -2,9 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Box, Button, Grid, Paper } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useHistory, useParams } from 'react-router-dom';
-import TabPanel from '../../components/TabPanel';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import Layout from '../../components/Layout';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -15,7 +13,6 @@ import Activity from '../../components/Activity';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
-import { Formik, Form } from 'formik';
 import { cloneDeep } from 'lodash';
 import {
   customerAccount,
@@ -28,11 +25,7 @@ import {
   processFieldName,
   formatAmountWithCurrency
 } from '../../constants/helpers';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Dialog } from '@material-ui/core';
 import { opportunity, sidebarResource } from '../../constants/helpers';
 import OpportunityContacts from './OpportunityContacts';
 import AssignContactsDialog from './AssignContactsDialog';
@@ -41,8 +34,6 @@ import AssignSupplierContactsDialog from './AssignSupplierContactsDialog';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import ProcessFlow from '../../components/ProcessFlow';
-import FormTypes from '../../components/Helpers/FormTypes';
-
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
@@ -74,9 +65,7 @@ function OpportunityDetailsPage() {
   const [showActivity, setActivityShow] = useState(true);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
-  const [filteredArr, setFilteredArr] = useState([]);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' })
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -107,10 +96,6 @@ function OpportunityDetailsPage() {
     }
     setOpenUpdateDialog(true);
   };
-
-  // const closeUpdateDialog = () => {
-  //   setOpenUpdateDialog(false);
-  // };
 
   let { id } = useParams();
 
@@ -155,22 +140,6 @@ function OpportunityDetailsPage() {
     )
       fetchSupplierContactData(false);
   }, [opportunityData]);
-
-  // useEffect(() => {
-  //   if (steps.length > 0) {
-  //     const processSteps = opportunityFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
-  //     if (processSteps && processSteps.isRead && opportunityData) {
-  //       setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
-  //       const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === opportunityData[processFieldName]);
-  //       setActiveStep(currentStepToShow);
-  //       if (currentStepToShow === steps.length - 1) {
-  //         setShowAtLast(true);
-  //       } else {
-  //         setShowAtLast(false);
-  //       }
-  //     }
-  //   }
-  // }, [steps]);
 
   const fetchOpportunityData = () => {
     if (selectedEntity) {
@@ -250,13 +219,6 @@ function OpportunityDetailsPage() {
         if (data[sidebarResource.lead] && data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]) {
           let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')][0];
           setParentLead({ leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id })
-          // setMainPoints((prevState) => ({
-          //   ...prevState,
-          //   'Parent Lead': {
-          //     leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`,
-          //     leadId: tempName._id
-          //   }
-          // }));
         }
 
         setQuotes(
@@ -300,9 +262,6 @@ function OpportunityDetailsPage() {
     } else {
       setShowAddSupplierContactsDialog(showDialog);
     }
-    // else if (supplierAccountOptions && supplierAccountOptions.length) {
-    //   ids = [...supplierAccountOptions.map(option => option.optionValue)]
-    // }
   };
   const getContactEmails = (contacts) => {
     return contacts.reduce((emails, contact) => {
@@ -489,7 +448,6 @@ function OpportunityDetailsPage() {
   };
 
   const handleAssignContacts = async (newAddedContactId, contactType, contacts) => {
-    // allContacts.filter(f => f.isChecked).map(m => m._id)
     let previousIds = [];
     if (contacts) {
       contacts.map((obj) => {
@@ -520,7 +478,6 @@ function OpportunityDetailsPage() {
   };
 
   const handleSave = (data) => {
-    setIsProcessing(true);
     setShowAtLast(true);
     setOpenAdditionalDialog(false);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
@@ -548,17 +505,13 @@ function OpportunityDetailsPage() {
       .put(`/opportunity?entity=${selectedEntity}`, updatedData)
       .then(() => {
         fetchOpportunityData();
-        // setActiveStep(activeStep + 1)
-        setIsProcessing(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsProcessing(false);
       });
   };
 
   const handleMarkAsCompleted = (data) => {
-    setIsProcessing(true);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
@@ -579,13 +532,10 @@ function OpportunityDetailsPage() {
         .put(`/opportunity?entity=${selectedEntity}`, updatedData)
         .then(() => {
           fetchOpportunityData();
-          // setActiveStep(activeStep + 1)
-          setIsProcessing(false);
           setShowAtLast(false);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsProcessing(false);
         });
     }
   };
@@ -594,8 +544,6 @@ function OpportunityDetailsPage() {
   if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
     selectedSupplierAccounts = opportunityData.supplierAccountName.map((s) => s.optionValue);
   }
-
-  let filteredOpportunityFields = opportunityFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
   return (
     <>
@@ -641,19 +589,6 @@ function OpportunityDetailsPage() {
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
             />
-            {/* {loading ? (
-                <Box padding={2}>
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              ) : ( */}
 
             {loading ? (
               <Grid container spacing={2}>
@@ -810,15 +745,6 @@ function OpportunityDetailsPage() {
           onOk={handleDeleteOpportunity}
         />
       ) : null}
-      {/* {openUpdateDialog ? (
-            <ManageOpportunity
-              isNew={false}
-              open={openUpdateDialog}
-              onClose={closeUpdateDialog}     
-              entityData={{ fields: opportunityFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })) }}
-              handleSubmit={handleUpdateOpportunity}
-            />
-          ): null} */}
 
       {openUpdateDialog && (
         <ManageOpportunityDialog
@@ -902,19 +828,6 @@ function OpportunityDetailsPage() {
       )}
       {openAdditionalDialog && (
         <>
-          {/* <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
-                  onClick={() => setOpenAdditionalDialog(false)}
-                >
-                  Close
-                </Button>
-                <Button color="primary" size="small" onClick={handleSave}>
-                  Save
-                </Button>
-              </CustomDialogFooter> */}
-
           <AdditionalDialogPopUp
             open={openAdditionalDialog}
             close={() => setOpenAdditionalDialog(false)}
