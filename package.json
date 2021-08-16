@@ -35,8 +35,6 @@
     "hot-formula-parser": "^4.0.0",
     "html-to-draftjs": "^1.5.0",
     "immutability-helper": "^3.1.1",
-    "jspdf": "^2.3.1",
-    "jspdf-autotable": "^3.5.14",
     "lodash": "^4.17.20",
     "material-table": "^1.69.2",
     "material-ui-phone-number": "^2.2.6",
@@ -79,7 +77,8 @@
     "eject": "react-scripts eject",
     "commit": "cz",
     "release": "standard-version",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "analyze": "SET \"GENERATE_SOURCEMAP=true\" && yarn build && source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
     "extends": [
@@ -118,6 +117,7 @@
     "prettier": "^2.3.2",
     "react-test-renderer": "^17.0.2",
     "sentry-files": "^1.0.1",
+    "source-map-explorer": "^2.5.2",
     "standard-version": "^9.3.1"
   },
   "prettier": {

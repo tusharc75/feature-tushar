@@ -107,7 +107,7 @@ const CreateQuotePdfTemplate = () => {
     setSection(_data);
   }, []);
   useEffect(() => {
-    if (id && id != 0) {
+    if (id && id !== 0) {
       (async () => {
         try {
           const res = await axiosInstance().get(`/quote-pdf-template/${id}`);

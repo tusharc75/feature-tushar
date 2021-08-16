@@ -1,15 +1,13 @@
-import React, { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
   Dialog,
   Grid,
   IconButton,
-  Link as MuiLink,
   Tooltip,
 } from "@material-ui/core";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { entity, gridLoadingTimeout, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
@@ -31,7 +29,6 @@ let entityTimeout;
 
 const Entity: FC = () => {
 
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -46,14 +43,12 @@ const Entity: FC = () => {
     isDelete: false,
   });
 
-
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
-  const [singleSelectEntity, setSingleSelectEntity] = useState(null);
+
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -68,14 +63,13 @@ const Entity: FC = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
     });
   }
   //  Grid Variables - End
-
 
   const { entityResource, entityApi } = entity;
 
@@ -117,9 +111,7 @@ const Entity: FC = () => {
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${entityId}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
-        setSingleSelectEntity(entityId)
         setUsersDialogLoding(false)
-
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -187,7 +179,7 @@ const Entity: FC = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter

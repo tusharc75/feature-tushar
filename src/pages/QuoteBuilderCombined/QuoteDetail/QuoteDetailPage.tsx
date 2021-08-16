@@ -87,17 +87,6 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
         }
     };
 
-    const handleClone = () => {
-        axiosInstance()
-            .post(`${qbApi}/clone/${quoteData._id}`)
-            .then(({ data }) => {
-                history.push(`${routes.quoteBuilder.path}/detail/${data.data._id}`);
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-    };
-
     return (
         <div className={`position-relative ${classes.detailBox}`}>
             {quoteData  && (

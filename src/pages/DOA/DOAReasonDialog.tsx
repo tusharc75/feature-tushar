@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import {
     Button,
     Checkbox,
@@ -9,15 +9,10 @@ import {
     ListItemIcon,
     ListItemText,
     TextField,
-    Typography,
 } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
-import Loader from "../../components/Loader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const DOAReasonDialog = ({
     reasonDialogOpen,
@@ -28,8 +23,6 @@ const DOAReasonDialog = ({
 
     const [selectedRec, setSelectedRec] = useState(null);
     const [isAssigning, setAssigning] = useState(false);
-    const { setToastConfig } = useContext(CustomToastContext);
-    const history = useHistory();
 
     const reasons = ["Price Too High", "Price Too Low", "Incorrect Data", "Not Needed", "DOA", "Others"]
     const [value, setValue] = React.useState('');
