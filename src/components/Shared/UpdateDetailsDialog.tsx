@@ -148,7 +148,7 @@ const UpdateDetailsDialog = (props) => {
                               disabled={
                                 field.fieldData.type === "email" ||
                                 !field.isUpdate ||
-                                fromProjectSales(field.fieldData.fieldName)
+                                fromProjectSales(field.fieldData.fieldName) || field.fieldData.disableOnEdit
                               }
                               startAdornment={
                                 <InputAdornment position="start">

@@ -362,6 +362,8 @@ const CreateProduct = (props) => {
                                                                         }
                                                                     >
                                                                         <FormTypes
+                                                                            isNew={Boolean(productId)}
+                                                                            disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             errors={errors}
@@ -427,6 +429,8 @@ const CreateProduct = (props) => {
                                                             field.fieldName === "currency" ? (
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
+                                                                        isNew={Boolean(productId)}
+                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                         // {...rest}
                                                                         values={values}
                                                                         errors={errors}
@@ -458,6 +462,8 @@ const CreateProduct = (props) => {
                                                             ) : field.fieldName === "mrp" ? (
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
+                                                                        isNew={Boolean(productId)}
+                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                         // {...rest}
                                                                         selectedCurrencyCode={values["currency"]}
                                                                         startAdornment={
@@ -487,6 +493,8 @@ const CreateProduct = (props) => {
                                                             ) : field.fieldName === "productTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
+                                                                        isNew={Boolean(productId)}
+                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                         fields={initialData.fields}
                                                                         fieldData={field}
                                                                         values={values}
@@ -512,6 +520,8 @@ const CreateProduct = (props) => {
                                                                 : field.fieldName === "priceTemplate" ?
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                         <FormTypes
+                                                                            isNew={Boolean(productId)}
+                                                                            disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             values={values}
@@ -535,6 +545,8 @@ const CreateProduct = (props) => {
                                                                     </Grid> :
                                                                     (field.type === "converter" || field.type === "currencyAmount" || field.isConverter) ?
                                                                         <FormTypes
+                                                                            isNew={Boolean(productId)}
+                                                                            disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             values={values}
@@ -556,6 +568,8 @@ const CreateProduct = (props) => {
                                                                             <Box display="flex" >
                                                                                 <Box flexGrow={1}  >
                                                                                     <FormTypes
+                                                                                        isNew={Boolean(productId)}
+                                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                                        {...field}
                                                                                         productTemplateId={values?.productTemplate}
                                                                                         priceTemplateId={values?.priceTemplate}

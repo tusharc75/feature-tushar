@@ -424,8 +424,9 @@ export default function ManageOpportunityDialog({
                                           }
                                         >
                                           <FormTypes
+                                            isNew={isNew}
                                             {...field}
-                                            disabled={disableOwnerAndAccount}
+                                            disabled={disableOwnerAndAccount || (!isNew && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -480,6 +481,7 @@ export default function ManageOpportunityDialog({
                                       </Grid>
                                     ) : field.fieldName === "owner" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         values={values}
                                         errors={errors}
@@ -525,7 +527,7 @@ export default function ManageOpportunityDialog({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={disableOwnerSelection}
+                                        disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() => {
                                           onOwnerDropdownOpen(
                                             values["collaborator"]
@@ -534,7 +536,9 @@ export default function ManageOpportunityDialog({
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -556,8 +560,10 @@ export default function ManageOpportunityDialog({
                                       />
                                     ) : field.fieldName === "probability" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         // {...rest}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -588,8 +594,10 @@ export default function ManageOpportunityDialog({
                                     ) : field.fieldName === "lostReason" ? (
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
+                                          isNew={isNew}
                                           {...field}
                                           // {...rest}
+                                          disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -607,8 +615,10 @@ export default function ManageOpportunityDialog({
                                       ) : null
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         // {...rest}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -638,8 +648,10 @@ export default function ManageOpportunityDialog({
                                     ) : field.fieldName.trim() ===
                                       "estimatedAmount" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         // {...rest}
+                                        disabled={!isNew && field.disableOnEdit}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
@@ -682,7 +694,9 @@ export default function ManageOpportunityDialog({
                                           }
                                         >
                                           <FormTypes
+                                            isNew={isNew}
                                             {...field}
+                                            disabled={!isNew && field.disableOnEdit}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -765,7 +779,9 @@ export default function ManageOpportunityDialog({
                                             }
                                           >
                                             <FormTypes
+                                              isNew={isNew}
                                               {...field}
+                                              disabled={!isNew && field.disableOnEdit}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -828,8 +844,10 @@ export default function ManageOpportunityDialog({
                                         </Grid>
                                       </Grid> : (
                                         <FormTypes
+                                          isNew={isNew}
                                           {...field}
                                           // {...rest}
+                                          disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -864,8 +882,10 @@ export default function ManageOpportunityDialog({
                         ) : (
                           form.sectionFields.map((field) => (
                             <FormTypes
+                              isNew={isNew}
                               {...field}
                               // {...rest}
+                              disabled={!isNew && field.disableOnEdit}
                               values={values}
                               errors={errors}
                               touched={touched}
