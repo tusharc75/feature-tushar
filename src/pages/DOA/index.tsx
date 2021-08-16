@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
-import Layout from "../../components/Layout";
-import { useHistory, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import moment from "moment";
 import { GiAbstract055 } from "react-icons/gi";
 import CustomContainer from "../../components/CustomContainer";
-import { dateFormat, gridLoadingTimeout, gridPageSizes, RESOURCE_LABEL } from "../../constants/helpers";
+import { gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import routes from "../../components/Helpers/Routes";
 
@@ -105,7 +103,6 @@ const intialState = {
 
 const DOARequest = () => {
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const [productBuilder, setProductBuilder] = useState([]);
   const [gridApi, setGridApi] = useState(null);
 
@@ -116,11 +113,7 @@ const DOARequest = () => {
     loading,
     page,
     limit,
-    pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
+    pageSizes
   } = state;
   const columnState = JSON.parse(localStorage.getItem("doaRequestPage"));
 
@@ -260,22 +253,22 @@ const DOARequest = () => {
             </Grid>
           </Grid>
         </div>
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            allowSelection={false}
-            allowAction={false}
-            loading={loading}
-            renderedFrom="doaRequestPage"
-          />
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          actionWidth={150}
+          allowSelection={false}
+          allowAction={false}
+          loading={loading}
+          renderedFrom="doaRequestPage"
+        />
       </CustomContainer>
     </Fragment>
   );

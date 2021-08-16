@@ -1,19 +1,13 @@
-import React, { useEffect, useState, useContext, Fragment } from "react";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { useEffect, useState, useContext, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import Button from '@material-ui/core/Button';
-import { Link } from "react-router-dom";
-import Layout from "../../components/Layout";
 import { Autocomplete } from "@material-ui/lab";
-import { Avatar, Box, TextField, Typography } from "@material-ui/core";
-import Loader from "../../components/Loader";
+import { Box, TextField } from "@material-ui/core";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { FaWpforms } from 'react-icons/fa';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
@@ -23,7 +17,7 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import { getUniqueCurrencies } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   tdWidth: {
     maxWidth: 120,
     minWidth: 120
@@ -38,7 +32,7 @@ const CurrencyConverter = () => {
   const [option, setOption] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { state: { user, permissions } }: any = useData();
+  const { state: { permissions } }: any = useData();
   const [currencyConverterPermissions, setCurrencyConverterPermissions] = useState({
     isCreate: false,
     isUpdate: false,
