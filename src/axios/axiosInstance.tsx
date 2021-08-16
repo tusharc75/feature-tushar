@@ -4,8 +4,8 @@ import { backendApi } from './../config';
 const ERROR_CODE = {
     permissionError: '1001',
     forbiddenError: '1002',
-    authorizationError: '1003',
-    invalidUserError: '1004'
+    // authorizationError: '1003',
+    // invalidUserError: '1004'
 };
 Object.freeze(ERROR_CODE);
 
