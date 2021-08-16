@@ -88,6 +88,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.defaultValue = '';
       }
 
+      if (!values.disableOnEdit) {
+        values.disableOnEdit = false;
+      }
+
       if (!values.hiddenField && module !== 'price-template' && module !== 'product-template'
         && module !== "pdf-template") {
         values.hiddenField = false;
@@ -95,6 +99,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
       if (!values.addAdditionalOption && (fieldData.type === "multiSelect" || fieldData.type === "dropDown") && !fieldData.lookup) {
         values.addAdditionalOption = false;
+      }
+
+      if (!values.unique &&
+        (fieldData.type === "multiLine" || fieldData.type === "singleLine"
+          || fieldData.type === "mobileNumber" ||fieldData.type === "number")) {
+        values.unique = false;
       }
 
       if (values.type === 'process') {
@@ -182,6 +192,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
             ele.isDefaultValue = values.isDefaultValue
+            ele.disableOnEdit = values.disableOnEdit
+            ele.unique = values.unique
 
             if (values.hasOwnProperty("addAdditionalOption")) {
               ele.addAdditionalOption = values.addAdditionalOption
@@ -666,6 +678,30 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Uneditable"
                     />
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="disableEdit"
+                          checked={values['disableOnEdit']}
+                          onChange={(e) => setFieldValue('disableOnEdit', e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label="Disable On Edit"
+                    />
+
+                    {initialValues.hasOwnProperty("unique") && <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isUnique"
+                          checked={values['unique']}
+                          onChange={(e) => setFieldValue('unique', e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label="Unique"
+                    />}
 
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
                       <FormTypes

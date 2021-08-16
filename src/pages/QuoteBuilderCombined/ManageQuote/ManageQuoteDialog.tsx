@@ -726,13 +726,14 @@ export default function ManageQuoteDialog({
                                     {field.fieldName === "quoteName" ? (
                                       <FormTypes
                                         {...field}
+                                        isNew={isNew}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        disabled={isRenderedFromOpportunity}
+                                        disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
                                         options={field.option}
                                         setFieldValue={setFieldValue}
                                         required={field.required}
@@ -772,6 +773,7 @@ export default function ManageQuoteDialog({
                                         >
                                           <FormTypes
                                             {...field}
+                                            isNew={isNew}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -779,7 +781,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={accountFieldDisable}
+                                            disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
                                             // setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -861,6 +863,7 @@ export default function ManageQuoteDialog({
                                         >
                                           <FormTypes
                                             {...field}
+                                            isNew={isNew}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -870,7 +873,7 @@ export default function ManageQuoteDialog({
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
                                             setFieldValue={setFieldValue}
-                                            disabled={contactId ? true : false}
+                                            disabled={contactId ? true : false || (!isNew && field.disableOnEdit)}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -943,6 +946,7 @@ export default function ManageQuoteDialog({
                                         >
                                           <FormTypes
                                             {...field}
+                                            isNew={isNew}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -950,7 +954,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={opportunityDataSource}
-                                            disabled={isRenderedFromOpportunity}
+                                            disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -1019,6 +1023,8 @@ export default function ManageQuoteDialog({
                                         >
                                           <FormTypes
                                             {...field}
+                                            isNew={isNew}
+                                            disabled={(!isNew && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1114,7 +1120,8 @@ export default function ManageQuoteDialog({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={disableOwnerDropDown}
+                                        isNew={isNew}
+                                        disabled={disableOwnerDropDown || (!isNew && field.disableOnEdit)}
                                         onOpen={() => {
                                           onOwnerDropdownOpen(
                                             values["collaborator"]
@@ -1124,6 +1131,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
                                         {...field}
+                                        isNew={isNew}
+                                        disabled={(!isNew && field.disableOnEdit)}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1146,6 +1155,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "privateAccess" ? (
                                       <FormTypes
                                         {...field}
+                                        isNew={isNew}
+                                        disabled={(!isNew && field.disableOnEdit)}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1175,6 +1186,8 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         // {...rest}
+                                        isNew={isNew}
+                                        disabled={(!isNew && field.disableOnEdit)}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1206,6 +1219,8 @@ export default function ManageQuoteDialog({
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
                                           {...field}
+                                          isNew={isNew}
+                                          disabled={(!isNew && field.disableOnEdit)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1224,7 +1239,8 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
                                         {...field}
-                                        disabled={disableCurrency}
+                                        isNew={isNew}
+                                        disabled={disableCurrency || (!isNew && field.disableOnEdit)}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1256,6 +1272,8 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         // {...rest}
+                                        isNew={isNew}
+                                        disabled={(!isNew && field.disableOnEdit)}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
@@ -1289,6 +1307,8 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         // {...rest}
+                                        isNew={isNew}
+                                        disabled={(!isNew && field.disableOnEdit)}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1341,6 +1361,8 @@ export default function ManageQuoteDialog({
                                         >
                                           <FormTypes
                                             {...field}
+                                            isNew={isNew}
+                                            disabled={(!isNew && field.disableOnEdit)}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1422,6 +1444,8 @@ export default function ManageQuoteDialog({
                                           >
                                             <FormTypes
                                               {...field}
+                                              isNew={isNew}
+                                              disabled={(!isNew && field.disableOnEdit)}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1485,6 +1509,8 @@ export default function ManageQuoteDialog({
                                       </Grid> : (
                                         <FormTypes
                                           {...field}
+                                          isNew={isNew}
+                                            disabled={(!isNew && field.disableOnEdit)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1520,6 +1546,8 @@ export default function ManageQuoteDialog({
                           form.sectionFields.map((field) => (
                             <FormTypes
                               {...field}
+                              isNew={isNew}
+                              disabled={(!isNew && field.disableOnEdit)}
                               values={values}
                               errors={errors}
                               touched={touched}
