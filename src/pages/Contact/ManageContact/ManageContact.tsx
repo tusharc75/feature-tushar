@@ -243,6 +243,7 @@ export default function ManageContact(props) {
                                   >
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         values={values}
                                         errors={errors}
@@ -299,7 +300,7 @@ export default function ManageContact(props) {
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={disableOwnerSelection}
+                                        disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
                                           !fromProject &&
                                           onOwnerDropdownOpen(
@@ -309,8 +310,10 @@ export default function ManageContact(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         multiple
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -364,6 +367,7 @@ export default function ManageContact(props) {
                                           }
                                         >
                                           <FormTypes
+                                            isNew={isNew}
                                             {...field}
                                             values={
                                               accountId
@@ -373,7 +377,7 @@ export default function ManageContact(props) {
                                                 )
                                                 : values
                                             }
-                                            disabled={fromProject}
+                                            disabled={fromProject || (!isNew && field.disableOnEdit)}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -411,7 +415,7 @@ export default function ManageContact(props) {
                                                 <IconButton
                                                   onClick={onCreateAccount}
                                                   size="small"
-                                                  disabled={fromProject}
+                                                  disabled={fromProject || (!isNew && field.disableOnEdit)}
                                                 >
                                                   <AddIcon color="primary" />
                                                 </IconButton>
@@ -432,7 +436,9 @@ export default function ManageContact(props) {
                                       </Grid>
                                     ) : field.fieldName === "reportsTo" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -454,7 +460,9 @@ export default function ManageContact(props) {
                                       />
                                     ) : (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}

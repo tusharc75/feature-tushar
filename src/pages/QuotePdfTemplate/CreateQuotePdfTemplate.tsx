@@ -1,14 +1,10 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { TextField, Grid, Box, Button, CircularProgress, FormControlLabel, Checkbox } from '@material-ui/core';
-
 import { useParams, useHistory } from 'react-router-dom';
-
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-
 import { FormBuilder } from '../../components/FormBuilder';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import Layout from '../../components/Layout';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { camelCase, map, uniq } from 'lodash';
 import axiosInstance from '../../axios/axiosInstance';
@@ -20,8 +16,6 @@ const PdfTemplateSchema = Yup.object().shape({
   showPageNumberInFooter: Yup.boolean()
 });
 
-
-
 const CreateQuotePdfTemplate = () => {
   const history = useHistory();
   const { id } = useParams();
@@ -29,70 +23,70 @@ const CreateQuotePdfTemplate = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
   const [seedData] = useState([
-  {
-    _id: '60e57ae7801802b66486e326',
-    fieldLabel: 'Header Column 1',
-    type: 'singleLine',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 4,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'headerColumn1',
-    sectionName: 'Header'
-  },
-  {
-    _id: '60e57ae7801802b66486e327',
-    fieldLabel: 'Header Column 2',
-    type: 'imageUpload',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 5,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'headerColumn2',
-    sectionName: 'Header'
-  },
-  {
-    _id: '60e57ae7801802b66486e328',
-    fieldLabel: 'Footer Column 1',
-    type: 'multiLine',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 6,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'footerColumn1',
-    sectionName: 'Footer'
-  },
-  {
-    _id: '60e57ae7801802b66486e329',
-    fieldLabel: 'Footer Column 2',
-    type: 'singleLine',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 7,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'footerColumn2',
-    sectionName: 'Footer'
-  }
+    {
+      _id: '60e57ae7801802b66486e326',
+      fieldLabel: 'Header Column 1',
+      type: 'singleLine',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 4,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'headerColumn1',
+      sectionName: 'Header'
+    },
+    {
+      _id: '60e57ae7801802b66486e327',
+      fieldLabel: 'Header Column 2',
+      type: 'imageUpload',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 5,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'headerColumn2',
+      sectionName: 'Header'
+    },
+    {
+      _id: '60e57ae7801802b66486e328',
+      fieldLabel: 'Footer Column 1',
+      type: 'multiLine',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 6,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'footerColumn1',
+      sectionName: 'Footer'
+    },
+    {
+      _id: '60e57ae7801802b66486e329',
+      fieldLabel: 'Footer Column 2',
+      type: 'singleLine',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 7,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'footerColumn2',
+      sectionName: 'Footer'
+    }
   ])
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
@@ -113,7 +107,7 @@ const CreateQuotePdfTemplate = () => {
     setSection(_data);
   }, []);
   useEffect(() => {
-    if (id && id != 0) {
+    if (id && id !== 0) {
       (async () => {
         try {
           const res = await axiosInstance().get(`/quote-pdf-template/${id}`);

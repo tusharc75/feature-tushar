@@ -1,19 +1,17 @@
-import React, { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
     Box,
     Button,
     Grid,
     IconButton,
-    Link as MuiLink,
     Menu,
     MenuItem,
     Tooltip,
     Chip
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { quotePdfTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
+import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import styles from "../Leads/Header.module.scss";
@@ -43,7 +41,7 @@ const QuotePdfTemplate: FC = () => {
     const { qbApi } = quoteBuilder;
 
     const {
-        state: { user, permissions },
+        state: { permissions },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
 
@@ -66,14 +64,13 @@ const QuotePdfTemplate: FC = () => {
     if (columnState) {
         columns.map((item) => {
             columnState.map((d) => {
-                if (d.colId == item.field) {
+                if (d.colId === item.field) {
                     item.show = !d.hide;
                 }
             });
         });
     }
     //  Grid Variables - End
-
 
     const { quotePdfTemplateApi } = quotePdfTemplate;
 
@@ -232,7 +229,7 @@ const QuotePdfTemplate: FC = () => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter

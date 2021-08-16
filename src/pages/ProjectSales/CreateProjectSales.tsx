@@ -17,7 +17,6 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -61,7 +60,6 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -307,6 +305,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           >
                                             <FormTypes
                                               {...field}
+                                              disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                              isNew={Boolean(projectSalesId)}
                                               fields={initialData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -389,6 +389,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             >
                                               <FormTypes
                                                 {...field}
+                                                disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                                isNew={Boolean(projectSalesId)}
                                                 fields={initialData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -452,6 +454,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                         </Grid> : field.fieldName === "currency" ? (
                                           <FormTypes
                                             {...field}
+                                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -480,6 +484,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : field.fieldName.trim() === "amount" ? (
                                           <FormTypes
+                                           disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                           isNew={Boolean(projectSalesId)}
                                             fieldId={field._id}
                                             lookup={field.lookup}
                                             // {...rest}
@@ -509,6 +515,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : <FormTypes
                                           {...field}
+                                          isNew={Boolean(projectSalesId)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -523,7 +530,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                           imageOrFileUploadCompletePercentage={null}
-                                          disabled={projectSalesId && field.fieldName === "projectManager"}
+                                          disabled={projectSalesId && field.fieldName === "projectManager" || (!projectSalesId && field.disableOnEdit)}
                                         />
                                   }
                                 </Grid>
@@ -535,6 +542,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                         form.sectionFields.map((field) => (
                           <FormTypes
                             {...field}
+                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                            isNew={Boolean(projectSalesId)}
                             values={values}
                             errors={errors}
                             touched={touched}

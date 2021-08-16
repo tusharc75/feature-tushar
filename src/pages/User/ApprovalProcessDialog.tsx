@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 import {
     Box,
     Button,
-    Dialog,
     FormControl,
     FormGroup,
     Grid,
@@ -41,9 +40,7 @@ const ApprovalProcessDialog = ({
         "viewAndRestoreTrash": false
     })
 
-
     const handleSetApprovalProcess = () => {
-
         const newData = {
             _ids: userIds,
             "approveAccount": userPermissions.approveAccount,
@@ -51,6 +48,7 @@ const ApprovalProcessDialog = ({
             "doaSetup": userPermissions.doaSetup,
             "viewAndRestoreTrash": userPermissions.viewAndRestoreTrash
         };
+
         axiosInstance()
             .put("/user/permission-setups", newData)
             .then(({ data }) => {
@@ -72,17 +70,7 @@ const ApprovalProcessDialog = ({
 
     };
 
-
-
-
     return (
-        // <Dialog
-        //     fullWidth
-        //     maxWidth="sm"
-        //     open={openApprovalProcessDialog}
-        //     onClose={handleCloseDialog}
-        //     aria-labelledby="set-approval-dialog"
-        // >
         <>
             {!isRenderedFromUserSetUp && <CustomDialogHeader title="Set Approval Process" onClose={handleCloseDialog} />}
 
@@ -136,7 +124,6 @@ const ApprovalProcessDialog = ({
                     {isRenderedFromUserSetUp ? "Save & Continue" : "Save"}
                 </Button>
             </CustomDialogFooter>
-            {/* // </Dialog> */}
         </>
     );
 };

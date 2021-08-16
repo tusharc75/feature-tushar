@@ -89,9 +89,9 @@ import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
-import MyCart from "./components/ProductList/MyCart/MyCart";
 import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
+import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -506,10 +506,10 @@ function App() {
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
-            <Route exact path={"/dashboard"}>
+            <Route exact path={"/dashboards"}>
               <KpiDashboards />
             </Route>
-            <Route exact path={"/dashboards"}>
+            {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />
             </Route>
             <Route exact path={"/dashboard/detail/:id"}>
@@ -517,7 +517,7 @@ function App() {
             </Route>
             <Route exact path={"/dashboard/:id"}>
               <EditDashboard edit={false} />
-            </Route>
+            </Route> */}
             //Route available for customers to Accept Reject Quote
             <Route exact path={"/quote-approval/:id"}>
               <QuoteApproval />
@@ -538,7 +538,7 @@ function App() {
               <ProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path="/product/my-cart">
-              <MyCart />
+              <MyOwnCart />
             </PrivateRoute>
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />

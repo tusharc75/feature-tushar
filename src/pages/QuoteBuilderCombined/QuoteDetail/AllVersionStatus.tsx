@@ -1,8 +1,6 @@
 import { IconButton, Tooltip, Typography } from '@material-ui/core';
-import { DataGrid } from '@material-ui/data-grid'
-import React, { useContext, useReducer, useState } from 'react'
+import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomDataGridNoDataFound from '../../../components/Helpers/CustomDataGridNoDataFound'
 import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
 import { Link } from "react-router-dom";
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -14,11 +12,9 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
-    const [loadingVersions, setLoadingVersions] = useState(true);
     const [gridApi, setGridApi] = useState(null);
-    const [columnApi, setColumnApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
     const [versionStatusData, setVersionStatusData] = useState({
         columns: [
@@ -138,7 +134,6 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     }, [quoteId]);
 
     const getVersionStatus = () => {
-        setLoadingVersions(true);
         dispatch({ type: "loading", loading: true });
 
         if (gridApi) {
@@ -173,11 +168,9 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                 setTimeout(() => {
                     dispatch({ type: "loading", loading: false });
                 }, gridLoadingTimeout);
-                setLoadingVersions(false);
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
-                setLoadingVersions(false);
                 dispatch({ type: "loading", loading: false });
 
             });

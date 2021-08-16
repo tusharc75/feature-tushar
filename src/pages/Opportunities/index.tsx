@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, useReducer } from 'react';
 import { Grid, Chip } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayDate } from '../../services/util';
 import OpportunitiesHeader from './OpportunitiesHeader';
@@ -42,16 +41,17 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [opportunityPermissions, setOpportunityPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions[opportunityResource]?.isCreate,
+    isUpdate: permissions[opportunityResource]?.isUpdate,
+    isRead: permissions[opportunityResource]?.isRead,
+    isDelete: permissions[opportunityResource]?.isDelete
   });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
@@ -66,7 +66,6 @@ const Opportunities = () => {
     resource: history.location?.state?.resource
   });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { opportunityResource, opportunityApi } = opportunity;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -86,7 +85,7 @@ const Opportunities = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
