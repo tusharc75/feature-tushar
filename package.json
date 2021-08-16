@@ -35,6 +35,7 @@
     "hot-formula-parser": "^4.0.0",
     "html-to-draftjs": "^1.5.0",
     "immutability-helper": "^3.1.1",
+    "jspdf": "^2.3.1",
     "lodash": "^4.17.20",
     "material-table": "^1.69.2",
     "material-ui-phone-number": "^2.2.6",
@@ -70,7 +71,7 @@
     "start": "react-scripts start",
     "dev": "yarn install && react-scripts start",
     "build": "react-scripts --max_old_space_size=4096 build",
-    "winBuild": "set \"GENERATE_SOURCEMAP=false\" && react-scripts --max_old_space_size=4096 build",
+    "winBuild": "set \"GENERATE_SOURCEMAP=true\" && react-scripts --max_old_space_size=10240 build",
     "sourceMapBuild": "react-scripts --max_old_space_size=4096 build",
     "postbuild": "node uploadSourcemaps.js",
     "test": "react-scripts test",
@@ -78,7 +79,7 @@
     "commit": "cz",
     "release": "standard-version",
     "prepare": "husky install",
-    "analyze": "SET \"GENERATE_SOURCEMAP=true\" && yarn build && source-map-explorer 'build/static/js/*.js'"
+    "analyze": "yarn winBuild && source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
     "extends": [

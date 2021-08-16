@@ -1,18 +1,16 @@
-import React, { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
     Box,
     Button,
     Grid,
     IconButton,
-    Link as MuiLink,
     Menu,
     MenuItem,
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { priceTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { priceTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import styles from "../Leads/Header.module.scss";
@@ -23,12 +21,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import {
     CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+    UpdatedByRenderer} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { GiAbstract055 } from 'react-icons/gi';
@@ -137,7 +131,6 @@ const PriceTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-
     </>
 
     const frameworkComponents = {
@@ -147,7 +140,6 @@ const PriceTemplate: FC = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
     };
-
 
     const replaceFieldName = (field) => {
         switch (field) {
