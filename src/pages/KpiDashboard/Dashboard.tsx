@@ -135,7 +135,7 @@ const Dashboard = () => {
       .get('dashboard/regionalsales')
       .then(({ data: { data } }) => {
         data = data.sort((a, b) => b.totalSell - a.totalSell);
-        setRegionSales(data.map((d) => ({ region: d.region, sales: d.totalSell })));
+        setRegionSales(data.map((d) => ({ region: d.region, totalBookedValue: d.totalSell })));
       })
       .catch((err) => {});
   }, []);
