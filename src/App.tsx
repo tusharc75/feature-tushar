@@ -89,9 +89,9 @@ import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
+import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
-import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 
 function App() {
   const toast = useContext(CustomToastContext);
