@@ -293,6 +293,7 @@ const Dashboard = () => {
                       disableFuture
                       openTo="year"
                       format="MM/dd/yyyy"
+                      maxDate={salesFilter.between.from}
                       label="From"
                       views={['year', 'month', 'date']}
                       value={salesFilter.between.from}
@@ -306,6 +307,7 @@ const Dashboard = () => {
                       inputVariant="outlined"
                       fullWidth
                       size="small"
+                      minDate={salesFilter.between.from}
                       disableFuture
                       openTo="year"
                       format="MM/dd/yyyy"
