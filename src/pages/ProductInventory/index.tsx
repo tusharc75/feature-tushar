@@ -57,6 +57,7 @@ const ProductInventory = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
@@ -75,6 +76,7 @@ const ProductInventory = () => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                productName: u.product?.optionLabel,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
