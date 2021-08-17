@@ -29,14 +29,14 @@ export default (history = null, passedHeaders = null) => {
     function clearTokenAndRedirectToHome() {
         localStorage.removeItem('token');
 
-        if (history) {
-            history.push('/');
-        }
-        else {
-            // history.push('/');
-            //@ts-ignore
-            window.location = "/";
-        }
+        // if (history) {
+        //     history.push('/');
+        // }
+        // else {
+        //     // history.push('/');
+        //     //@ts-ignore
+        //     window.location = "/";
+        // }
     }
 
     axiosInstance.interceptors.request.use((request) => {
