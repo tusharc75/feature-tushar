@@ -30,6 +30,8 @@ const CreateProductCategory = (props) => {
 
             if (productCategoryId) {
                 axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
+                    let tempOptionArray = fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option
+                    fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option = tempOptionArray.filter(data => data.optionValue !== productCategoryId)
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
