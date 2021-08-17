@@ -13,7 +13,6 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
-import FormTypes from "../../components/Helpers/FormTypes";
 import CustomButton from "../../components/Helpers/CustomButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { isMobile, isTablet } from "react-device-detect";
@@ -24,17 +23,8 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-
-import {
-  EditorState,
-  ContentState,
-  convertToRaw,
-  convertFromRaw,
-} from "draft-js";
-import { RichTextEditor } from "../../components/RichEditor/RichEditor";
 import { termsAndConditionDocumentUploadMaxSize } from "../../constants/helpers";
-
-
+import TinyMce from "../../components/TinyMCE/TinyMce"
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {
@@ -47,6 +37,19 @@ const useStyles = makeStyles((theme) => ({
   fileUpload: {
     width: "50%",
   },
+  root: {
+    flexGrow: 1,
+  },
+  errorText: {
+    color: theme.palette.error.main,
+  },
+  buttonContainer: {
+    display: 'flex',
+    padding: '4px',
+    paddingLeft: '5px',
+    border: '1px solid lightgray',
+    borderBottom: '0'
+  }
 }));
 
 const TermsAndCondition = ({
@@ -57,14 +60,15 @@ const TermsAndCondition = ({
   editRecord,
   displayTitle
 }) => {
-  const [initialValues, setInitialValues] = useState({
-    TACName: "",
-    file: "",
-    editorState: EditorState.createEmpty(),
-  });
+
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
+  const [initialValues, setInitialValues] = useState({
+    TACName: "",
+    file: "",
+    description: "",
+  });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
@@ -79,9 +83,8 @@ const TermsAndCondition = ({
 
   useEffect(() => {
     if (editRecord && editRecord?._id) {
-      let state = convertFromRaw(JSON.parse(editRecord.description));
       setInitialValues({
-        editorState: EditorState.createWithContent(state),
+        description: editRecord.description,
         TACName: editRecord.TACName,
         file: editRecord?.file ?? "",
       });
@@ -89,9 +92,8 @@ const TermsAndCondition = ({
   }, [editRecord]);
 
   const handleSubmit = (values) => {
-    const description = convertToRaw(values.editorState.getCurrentContent());
     let request = {
-      description: JSON.stringify(description),
+      description: values.description,
       TACName: values.TACName,
       file: values?.file ?? "",
     };
@@ -138,19 +140,6 @@ const TermsAndCondition = ({
     }
   };
 
-  const appendData = (htmlData, setFieldValue) => {
-    if (htmlData) {
-      const blocksFromHtml = htmlToDraft(htmlData);
-      const { contentBlocks, entityMap } = blocksFromHtml;
-      const contentState = ContentState.createFromBlockArray(
-        contentBlocks,
-        entityMap
-      );
-      const editorState = EditorState.createWithContent(contentState);
-      setFieldValue("editorState", editorState);
-    }
-  };
-
   return (
     <Dialog
       disableBackdropClick={true}
@@ -168,6 +157,7 @@ const TermsAndCondition = ({
           ? `Edit ${editRecord?.TACName ?? ""}`
           : `Create ${displayTitle}`
           }`}
+        onClose={handleClose}
       ></CustomDialogHeader>
       {initialValues && (
         <Formik
@@ -219,26 +209,12 @@ const TermsAndCondition = ({
                               </FormControl>
                             </Box>
                           }
-                          <Box mt={2} className={classes.fileUpload}>
-                            <FormTypes
-                              label="File"
-                              name="file"
-                              isTooltip={true}
-                              required={false}
-                              type="fileUpload"
-                              accept=".docx"
-                              uploadFileUrl="/doc-parser"
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              size="small"
-                              setFieldValue={(name, file) =>
-                                setFieldValue("file", file)
-                              }
-                              onAppendData={(data) =>
-                                appendData(data, setFieldValue)
-                              }
-                              doNotShowUploadedFile={true}
+                          <Box mt={2}>
+                            <TinyMce
+                              onChange={(value) => {
+                                setFieldValue("description", value)
+                              }}
+                              initialValue={initialValues?.description}
                               fileUploadMaxSize={
                                 termsAndConditionDocumentUploadMaxSize
                               } //size in bytes
@@ -249,14 +225,6 @@ const TermsAndCondition = ({
                                   completePercentage
                                 );
                               }}
-                            />
-                          </Box>
-                          <Box mt={2}>
-                            <RichTextEditor
-                              editorState={values.editorState}
-                              onChange={setFieldValue}
-                              onBlur={handleBlur}
-                              placeholder={displayTitle}
                             />
                           </Box>
                         </Grid>
@@ -273,16 +241,9 @@ const TermsAndCondition = ({
                   variant="contained"
                   color="primary"
                   loading={loading}
+                  type="submit"
                   disabled={uploadingImageOrFileProgress > 0}
-                  onClick={() => {
-                    if (Object.keys(errors).length) {
-                      Object.keys(errors).forEach((key) => {
-                        setFieldTouched(key, true);
-                      });
-                      return;
-                    }
-                    handleSubmit(values);
-                  }}
+                  onClick={submitForm}
                 >
                   Save
                 </CustomButton>
@@ -295,4 +256,4 @@ const TermsAndCondition = ({
   );
 };
 
-export default TermsAndCondition;
+export default TermsAndCondition
