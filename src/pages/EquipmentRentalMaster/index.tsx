@@ -52,6 +52,7 @@ const EquipmentRentalMaster = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "rentalStartDate", headerName: "Rental Start Date", show: true, disabled: true, cellRenderer: "commonRenderer" },
@@ -73,6 +74,7 @@ const EquipmentRentalMaster = () => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                productName: u.product?.optionLabel,
                 rentalStartDate:u.createdBy?.date,
                 rentalBackDate:u.createdBy?.date,
                 warehouse:"warehouse",

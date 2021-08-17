@@ -63,8 +63,7 @@ const CreateProductInventory = (props) => {
             });
         }
         else {
-            const { product, ...rest } = values
-            axiosInstance().post(`${productInventory.api}`, rest).then(({ data: { data } }) => {
+            axiosInstance().post(`${productInventory.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
             }).catch((error) => {
