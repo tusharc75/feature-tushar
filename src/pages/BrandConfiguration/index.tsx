@@ -1,17 +1,16 @@
-import React, { useContext, useState, useEffect, Fragment } from 'react'
+import { useContext, useState, useEffect, Fragment } from 'react'
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { Grid, Box, Paper, Button, Divider, Typography } from '@material-ui/core'
+import { Grid, Paper, Button, Divider, Typography } from '@material-ui/core'
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import { userType } from '../../constants/helpers'
 
-export default function BrandConfiguration(props) {
+export default function BrandConfiguration() {
     const [brandDetails, setBrandDetails] = useState(null)
     const [loading, setLoading] = useState(false)
     const [isUpdating, setUpdating] = useState(false)
@@ -19,7 +18,7 @@ export default function BrandConfiguration(props) {
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const toastConfig = useContext(CustomToastContext);
     const {
-        state: { user, permissions },
+        state: { user },
     }: any = useData();
 
     useEffect(() => {
@@ -46,7 +45,7 @@ export default function BrandConfiguration(props) {
                 setBrandFields(data);
                 setLoading(false);
             })
-            .catch((err) => {
+            .catch(() => {
                 setLoading(false);
             });
     };

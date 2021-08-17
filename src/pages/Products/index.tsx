@@ -1,27 +1,35 @@
-import React, { useEffect, useState, useContext, Fragment } from 'react'
+import React, { useEffect, useState, useContext, Fragment, useCallback } from 'react'
 import axiosInstance from '../../axios/axiosInstance';
-import Layout from '../../components/Layout';
 import ProductList from '../../components/ProductList/ProductList/ProductList';
 import { product } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 export default function Products() {
 
+    const [page, setPage] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
     const [products, setProducts] = useState([]);
+
     const toastConfig = useContext(CustomToastContext);
 
-    useEffect(() => {
-        axiosInstance().get(`${product.api}?limit=0`).then(({ data: { data } }) => {
-            setProducts(data);
+    const fetchData = useCallback(() => {
+        axiosInstance().get(`${product.api}?page=${page}&limit=21`).then(({ data: { data, count } }) => {
+            setTotalCount(count);
+            setProducts(prevState => [...prevState, ...data]);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
-    }, [])
+    }, [page])
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData])
 
     return (
         <Fragment>
             {
-                products && <ProductList products={products} />
+                products && <ProductList products={products} fetchData={() => { setPage(prevState => prevState + 1) }} count={totalCount} />
             }
         </Fragment>
     )

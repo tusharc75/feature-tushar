@@ -7,11 +7,10 @@ import { Grid, Box, Paper } from "@material-ui/core";
 import CategorySidebar from "../CategorySidebar/CategorySidebar"
 import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import axiosInstance from "../../../axios/axiosInstance";
-import Layout from '../../Layout';
-import CustomContainer from '../../CustomContainer';
 import routes from '../../Helpers/Routes';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
-const ProductList = ({ products }) => {
+const ProductList = ({ products, fetchData, count }) => {
 
     const [addedCartItems, setAddedCartItems] = useState([])
     const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
@@ -32,7 +31,7 @@ const ProductList = ({ products }) => {
                 }
             })
     }
-    const onAddToCartItem = (item, data) => {
+    const onAddToCartItem = (item) => {
         let tempQuantity = 1
         addedCartItems.some(o => {
             if (o.productId === item._id) {
@@ -47,7 +46,7 @@ const ProductList = ({ products }) => {
                     quantity: `${tempQuantity}`,
                     productId: item._id
                 }]
-            }).then(({ data }) => {
+            }).then(() => {
                 fetchCart()
             })
     }
@@ -61,9 +60,25 @@ const ProductList = ({ products }) => {
                     <CategorySidebar />
                 </Paper>
             </div>
+
             <div className="position-relative">
-                <Paper>
+                <InfiniteScroll
+                    dataLength={count}
+                    height="calc(100vh - 115px)"
+                    next={() => {
+                        setTimeout(() => {
+                            fetchData();
+                        }, 1500)
+                    }}
+                    hasMore={products.length !== count}
+                    loader={
+                        <h3 className="text-center border mt-3 p-3 loading-dots">
+                            Loading more items
+                        </h3>
+                    }
+                >
                     <div className={`${styles.product_list_container}`}>
+
                         {
                             products.map((product, index: number) => (
                                 <Product key={index} product={product}
@@ -72,7 +87,8 @@ const ProductList = ({ products }) => {
                             ))
                         }
                     </div>
-                </Paper>
+
+                </InfiniteScroll>
             </div>
         </div>
     </>
