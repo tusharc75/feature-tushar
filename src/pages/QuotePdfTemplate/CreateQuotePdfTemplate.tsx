@@ -87,11 +87,10 @@ const CreateQuotePdfTemplate = () => {
       fieldName: 'footerColumn2',
       sectionName: 'Footer'
     }
-  ])
+  ]);
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
-
 
   useEffect(() => {
     const _data = [];
@@ -103,11 +102,11 @@ const CreateQuotePdfTemplate = () => {
         field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
-    console.log(_data)
+    console.log(_data);
     setSection(_data);
   }, []);
   useEffect(() => {
-    if (id && id !== 0) {
+    if (id && id !== '0') {
       (async () => {
         try {
           const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
@@ -119,8 +118,7 @@ const CreateQuotePdfTemplate = () => {
             const { _id, name, createdBy, updatedBy, ...rest } = data;
             setInitialValues(rest);
             setSection(data.section);
-          }
-          else {
+          } else {
             setInitialValues(data);
             setSection(data.section);
           }
@@ -187,12 +185,10 @@ const CreateQuotePdfTemplate = () => {
   };
 
   const handleExportFields = () => {
-    var dataStr =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(section));
-    var dlAnchorElem = document.getElementById("downloadAnchorElem");
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "template_field.json");
+    var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
+    var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', 'template_field.json');
     dlAnchorElem.click();
   };
 
@@ -208,8 +204,6 @@ const CreateQuotePdfTemplate = () => {
     reader.readAsBinaryString(f);
   };
 
-
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -221,17 +215,13 @@ const CreateQuotePdfTemplate = () => {
                 path: routes.quotePdfTemplate.path
               },
               {
-                title: (id === '0' || isClone === true) ? 'New' : initialValues && initialValues.name
+                title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
               }
             ]}
           />
         </Grid>
         <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
-          <label
-            htmlFor="importField"
-            style={{ color: "white" }}
-            className="cursor-pointer mr-3"
-          >
+          <label htmlFor="importField" style={{ color: 'white' }} className="cursor-pointer mr-3">
             Import Fields
             <input
               onClick={(e: any) => (e.target.value = null)}
@@ -239,21 +229,17 @@ const CreateQuotePdfTemplate = () => {
               name="importField"
               onChange={handleImportFields}
               style={{
-                opacity: "0",
-                position: "absolute",
-                zIndex: -1,
+                opacity: '0',
+                position: 'absolute',
+                zIndex: -1
               }}
               type="file"
             />
           </label>
-          <label
-            style={{ color: "white" }}
-            className="cursor-pointer"
-            onClick={handleExportFields}
-          >
+          <label style={{ color: 'white' }} className="cursor-pointer" onClick={handleExportFields}>
             Export Fields
           </label>
-          <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+          <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
         </Grid>
       </Grid>
       <div className="main-container">
