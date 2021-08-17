@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import { formatAmountWithCurrency, product } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";

@@ -157,6 +157,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.productTemplate?.title : RESOURCE_LABEL.productTemplate,
     path: "/product-template",
   },
+  productInventory: {
+    title: storedRoutes ? storedRoutes.productInventory?.title : RESOURCE_LABEL.productInventory,
+    path: "/product-inventory",
+  },
+  equipmentRentalMaster: {
+    title: storedRoutes ? storedRoutes.equipmentRentalMaster?.title : RESOURCE_LABEL.equipmentRentalMaster,
+    path: "/equipt-rental-master",
+  },
   quoteBuilder: {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",

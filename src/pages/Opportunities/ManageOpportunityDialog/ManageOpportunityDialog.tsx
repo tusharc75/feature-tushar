@@ -84,7 +84,6 @@ export default function ManageOpportunityDialog({
     useState(false);
   const [accountData, setAccountData] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState("")
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
@@ -103,7 +102,7 @@ export default function ManageOpportunityDialog({
 
       if (processSteps) {
         entityData.fields.map((d) => {
-          if (d.sectionName == processSteps.additionalInfoSection) {
+          if (d.sectionName === processSteps.additionalInfoSection) {
             setAdditionalFieldName(d.sectionName)
           }
         });
@@ -118,7 +117,7 @@ export default function ManageOpportunityDialog({
         if (dataToUpdate.process !== processSteps.option[len - 1]["optionValue"]) {
           entityData.fields.map((d) => {
             if (
-              d.sectionName == processSteps.additionalInfoSection) {
+              d.sectionName === processSteps.additionalInfoSection) {
 
               setAdditionalFieldName(d.sectionName)
             }
@@ -917,7 +916,6 @@ export default function ManageOpportunityDialog({
                       accountApi={customerAccount.accountApi}
                       isGetAccountData={true}
                       onGetAddedAccount={({ data }) => {
-                        setNewAddedAccountId(data._id);
                         updateAccountDropdown(data);
 
                         setFieldValue("customerAccountName", data._id);

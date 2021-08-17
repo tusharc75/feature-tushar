@@ -64,7 +64,7 @@ const QuotePdfTemplate: FC = () => {
     if (columnState) {
         columns.map((item) => {
             columnState.map((d) => {
-                if (d.colId == item.field) {
+                if (d.colId === item.field) {
                     item.show = !d.hide;
                 }
             });
@@ -229,7 +229,7 @@ const QuotePdfTemplate: FC = () => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter

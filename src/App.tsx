@@ -91,6 +91,8 @@ import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTempl
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 import AddressResource from "./pages/AddressResource";
+import ProductInventory from "./pages/ProductInventory";
+import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -451,6 +453,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.product.path}>
               <Product />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.productInventory.path}>
+              <ProductInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.equipmentRentalMaster.path}>
+              <EquipmentRentalMaster />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
