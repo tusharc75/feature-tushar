@@ -221,6 +221,10 @@ const routes = {
     title: "Products",
     path: "/product-list",
   },
+  address: {
+    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    path: "/address",
+  },
 };
 
 export default routes;

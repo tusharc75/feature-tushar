@@ -1,21 +1,5 @@
 import { Fragment, useState, useCallback, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  TableHead,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Container
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Grid, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, Container } from '@material-ui/core';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { startCase } from 'lodash';
@@ -28,7 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { entity, marketSegment } from '../../constants/helpers';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
 import ConvertedLeads from './ConvertedLeads';
-
+import Filters from './Filters';
 
 const Dashboard = () => {
   const [regionSales, setRegionSales] = useState([]);
@@ -69,37 +53,33 @@ const Dashboard = () => {
 
     let url = '?';
     for (const k of Object.keys(params)) {
-
       if (params[k]) {
-        if (k === "between" && salesFilter.between.from && salesFilter.between.to) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
           url = `${url}${k}=${params[k]}&`;
         }
-        if (k !== "between") {
+        if (k !== 'between') {
           url = `${url}${k}=${params[k]}&`;
         }
-  
       }
-
-
     }
 
     axiosInstance()
       .get(`dashboard/sales${url}`)
       .then(({ data: { data } }) => {
-        const saleData = []
+        const saleData = [];
         const labels = [];
-        const budget = []
+        const budget = [];
 
         for (let d of data) {
           saleData.push(d.totalSell);
           labels.push(moment(d.date).format('MMM/YY'));
-          budget.push(d.budget)
+          budget.push(d.budget);
         }
 
         setSalesData({
           labels,
           datasets: [
-             {
+            {
               type: 'line',
               label: 'Budget',
               borderColor: 'rgb(54, 162, 235)',
@@ -115,8 +95,7 @@ const Dashboard = () => {
               borderWidth: 2,
               fill: true,
               data: saleData
-            },
-           
+            }
           ]
         });
       })
@@ -126,8 +105,8 @@ const Dashboard = () => {
       setSalesData({
         labels: [],
         datasets: []
-        })
-      }
+      });
+    };
   }, [salesFilter]);
 
   const fetchRegionalSalesData = useCallback(() => {
@@ -191,145 +170,72 @@ const Dashboard = () => {
         </Grid>
         <div className="detail-container">
           <Paper>
-            <Container maxWidth="lg">
+            <Container maxWidth="xl">
               <Box py={2}>
-                <Grid container spacing={2}>
-                  <Grid item sm={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={salesFilter.allEntity}
-                          onChange={(e) => setSalesFilter({ ...salesFilter, allEntity: e.target.checked })}
-                          color="primary"
-                        />
-                      }
-                      label="All Entity"
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={salesFilter.byMonth}
-                          onChange={(e) => setSalesFilter({ ...salesFilter, byMonth: e.target.checked })}
-                          color="primary"
-                        />
-                      }
-                      label="By Month"
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <Autocomplete
-                      size="small"
-                      disabled={salesFilter.allEntity}
-                      fullWidth
-                      options={entities}
-                      autoHighlight
-                      value={salesFilter.entity}
-                      getOptionLabel={(option) => option.name || ''}
-                      getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                      onChange={(_, val) => {
-                        setSalesFilter({ ...salesFilter, entity: val });
-                      }}
-                      renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <Autocomplete
-                      size="small"
-                      fullWidth
-                      options={marketSegments}
-                      autoHighlight
-                      value={salesFilter.marketSegment}
-                      getOptionLabel={(option) => option.name || ''}
-                      getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                      onChange={(_, val) => {
-                        setSalesFilter({ ...salesFilter, marketSegment: val });
-                        if (val) {
-                          setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
-                        } else {
-                          setSubMarketSegments([]);
-                        }
-                      }}
-                      renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
-                    />
-                  </Grid>
-                  {salesFilter.marketSegment && (
-                    <Grid item sm={6}>
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={subMarketSegments}
-                        autoHighlight
-                        value={salesFilter.subMarketSegment}
-                        getOptionLabel={(option) => option.name || ''}
-                        getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                        onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
-                        renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
-                      />
-                    </Grid>
-                  )}
-                  <Grid item sm={6}>
-                    <Autocomplete
-                      size="small"
-                      fullWidth
-                      options={productCategory}
-                      autoHighlight
-                      value={salesFilter.productCategory}
-                      getOptionLabel={(option) => option.name || ''}
-                      getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                      onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
-                      renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
-                    />
-                  </Grid>
-                </Grid>
-
-                <Grid container spacing={2} className="mt-2">
-                  <Grid item xs={6}>
-                    <DatePicker
-                      inputVariant="outlined"
-                      fullWidth
-                      size="small"
-                      disableFuture
-                      openTo="year"
-                      format="MM/dd/yyyy"
-                      maxDate={salesFilter.between.from}
-                      label="From"
-                      views={['year', 'month', 'date']}
-                      value={salesFilter.between.from}
-                      onChange={(date) => {
-                        setSalesFilter({ ...salesFilter, between: { from: date, to: salesFilter.between.to } });
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <DatePicker
-                      inputVariant="outlined"
-                      fullWidth
-                      size="small"
-                      minDate={salesFilter.between.from}
-                      disableFuture
-                      openTo="year"
-                      format="MM/dd/yyyy"
-                      label="To"
-                      views={['year', 'month', 'date']}
-                      value={salesFilter.between.to}
-                      onChange={(date) => {
-                        setSalesFilter({ ...salesFilter, between: { to: date, from: salesFilter.between.from } });
-                      }}
-                    />
-                  </Grid>
-                </Grid>
+                <Filters
+                  entities={entities}
+                  marketSegments={marketSegments}
+                  subMarketSegments={subMarketSegments}
+                  productCategory={productCategory}
+                  setSubMarketSegment={setSubMarketSegments}
+                  salesFilter={salesFilter}
+                  setSalesFilter={setSalesFilter}
+                />
                 <Grid container spacing={2}>
                   <Grid item sm={8}>
-                    <Box textAlign="center">
-                      <Typography variant="h5">Total booked value in USD</Typography>
+                    <Box mb={2}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <Paper>
+                            <Box p={3} textAlign="center">
+                              <Typography variant="h6" color="textSecondary">
+                                Revenue
+                              </Typography>
+                              <Typography variant="h5" color="textPrimary">
+                                $95,879.00
+                              </Typography>
+                            </Box>
+                          </Paper>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Paper>
+                            <Box p={3} textAlign="center">
+                              <Typography variant="h6" color="textSecondary">
+                                Spend
+                              </Typography>
+                              <Typography variant="h5" color="textPrimary">
+                                $55,879.00
+                              </Typography>
+                            </Box>
+                          </Paper>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Paper>
+                            <Box p={3} textAlign="center">
+                              <Typography variant="h6" color="textSecondary">
+                                Profits
+                              </Typography>
+                              <Typography variant="h5" color="textPrimary">
+                                25%
+                              </Typography>
+                            </Box>
+                          </Paper>
+                        </Grid>
+                      </Grid>
                     </Box>
 
-                    <Chart type="bar" data={salesData} />
+                    <Paper elevation={2}>
+                      <Box p={2}>
+                        <Box textAlign="center">
+                          <Typography variant="h5">Total booked value in USD</Typography>
+                        </Box>
+
+                        <Chart type="bar" data={salesData} />
+                      </Box>
+                    </Paper>
                   </Grid>
                   <Grid item sm={4}>
-                    <Box mt={2}>
+                    {/* <Box mt={2}>
                       <TableContainer style={{ maxHeight: 450 }} component={Paper}>
                         <Table stickyHeader size="small">
                           <TableHead>
@@ -343,7 +249,7 @@ const Dashboard = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {regionSales.length > 0 &&
+                            {regionSales.length > 0 ? (
                               regionSales.map((data) => (
                                 <TableRow key={data.region}>
                                   {Object.keys(data).map((label, i) => (
@@ -352,11 +258,98 @@ const Dashboard = () => {
                                     </TableCell>
                                   ))}
                                 </TableRow>
-                              ))}
+                              ))
+                            ) : (
+                              <Typography>No Data</Typography>
+                            )}
                           </TableBody>
                         </Table>
                       </TableContainer>
-                    </Box>
+                    </Box> */}
+                    <Paper>
+                      <Box p={2}>
+                        <Typography variant="h6" color="textSecondary">
+                          Top Selling Product
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                <Grid container spacing={4}>
+                  <Grid item xs={6}>
+                    <Paper elevation={2}>
+                      <Box p={4}>
+                        <Typography variant="h6">Open Opportunities - Amount by Sales Rep</Typography>
+                        <Chart
+                          style={{ height: '100%' }}
+                          type="pie"
+                          data={{
+                            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                            datasets: [
+                              {
+                                label: '# of Votes',
+                                data: [12, 19, 3, 5, 2, 3],
+                                backgroundColor: [
+                                  'rgba(255, 99, 132, 0.8)',
+                                  'rgba(54, 162, 235, 0.8)',
+                                  'rgba(255, 206, 86, 0.8)',
+                                  'rgba(75, 192, 192, 0.8)',
+                                  'rgba(153, 102, 255, 0.8)',
+                                  'rgba(255, 159, 64, 0.8)'
+                                ],
+                                borderColor: [
+                                  'rgba(255, 99, 132, 1)',
+                                  'rgba(54, 162, 235, 1)',
+                                  'rgba(255, 206, 86, 1)',
+                                  'rgba(75, 192, 192, 1)',
+                                  'rgba(153, 102, 255, 1)',
+                                  'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1
+                              }
+                            ]
+                          }}
+                        />
+                      </Box>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Paper elevation={2}>
+                      <Box p={4}>
+                        <Typography variant="h6">Open Opportunities - Amount by Account</Typography>
+                        <Chart
+                          style={{ height: '100%' }}
+                          type="pie"
+                          data={{
+                            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                            datasets: [
+                              {
+                                label: '# of Votes',
+                                data: [12, 19, 3, 5, 2, 3],
+                                backgroundColor: [
+                                  'rgba(255, 99, 132, 0.8)',
+                                  'rgba(54, 162, 235, 0.8)',
+                                  'rgba(255, 206, 86, 0.8)',
+                                  'rgba(75, 192, 192, 0.8)',
+                                  'rgba(153, 102, 255, 0.8)',
+                                  'rgba(255, 159, 64, 0.8)'
+                                ],
+                                borderColor: [
+                                  'rgba(255, 99, 132, 1)',
+                                  'rgba(54, 162, 235, 1)',
+                                  'rgba(255, 206, 86, 1)',
+                                  'rgba(75, 192, 192, 1)',
+                                  'rgba(153, 102, 255, 1)',
+                                  'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1
+                              }
+                            ]
+                          }}
+                        />
+                      </Box>
+                    </Paper>
                   </Grid>
                 </Grid>
 
