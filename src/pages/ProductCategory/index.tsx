@@ -24,6 +24,7 @@ import {
     isObjectEmpty
 } from "../../constants/helpers";
 import {
+    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -154,8 +155,9 @@ const ProductCategory = () => {
     const columnState = JSON.parse(localStorage.getItem("productCategoryPage"));
     const columns = [
         { field: "name", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+        { field: "parentCategory", headerName: "Parent Category", show: true, disabled: true, cellRenderer: "parentCategoryRenderer" },
+        // { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+        // { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
     if (columnState) {
         columns.map((item) => {
@@ -209,8 +211,9 @@ const ProductCategory = () => {
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
+        parentCategoryRenderer: CommonRenderer,
+        // createdByRenderer: CreatedByRenderer,
+        // updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
     };
 
@@ -265,12 +268,13 @@ const ProductCategory = () => {
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, ...restProperties } = u;
+                const { createdBy, updatedBy, parentCategory, ...restProperties } = u;
 
                 let res = {
                     ...restProperties,
                     id: u._id,
 
+                    parentCategory: u.parentCategory?.optionLabel,
                     createdBy: u.createdBy?.user?.concatedName,
                     createdById: u.createdBy?.user?._id,
                     createdByDate: u.createdBy?.date,
