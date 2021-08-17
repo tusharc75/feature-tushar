@@ -92,7 +92,6 @@ const CreateQuotePdfTemplate = () => {
   const [deleteField, setDeleteField] = useState([]);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
 
-
   useEffect(() => {
     const _data = [];
     const _section = uniq(map(seedData, 'sectionName'));
@@ -103,11 +102,10 @@ const CreateQuotePdfTemplate = () => {
         field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
-    console.log(_data)
     setSection(_data);
   }, []);
   useEffect(() => {
-    if (id && id !== 0) {
+    if (id && id !== "0") {
       (async () => {
         try {
           const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
