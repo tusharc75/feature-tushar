@@ -36,6 +36,8 @@ const ManageMarketSegmentDialog = (props) => {
         axiosInstance().get(`/field?resource=Market Segment`).then(({ data: { data } }) => {
             const fieldsData = marketSegmentId ? data.filter(d => d.isUpdate).map((d: any) => d.fieldData) : data.filter(d => d.isCreate).map((d: any) => d.fieldData);
             if (marketSegmentId) {
+                let tempOptionArray = fieldsData.find(d => d.fieldName === "parentMarketSegment").option
+                fieldsData.find(d => d.fieldName === "parentMarketSegment").option = tempOptionArray.filter(data => data.optionValue !== marketSegmentId)
                 axiosInstance().get(`${marketSegment.marketSegmentApi}/` + marketSegmentId).then(({ data: { data } }) => {
                     setInitialData({
                         fields: fieldsData,

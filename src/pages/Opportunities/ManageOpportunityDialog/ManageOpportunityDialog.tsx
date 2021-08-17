@@ -446,7 +446,7 @@ export default function ManageOpportunityDialog({
                                             doNotShowInfoTooltip={true}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount.isCreate &&
+                                        {permissions.customerAccount.isCreate && !(disableOwnerAndAccount || (!isNew && field.disableOnEdit)) &&
                                           !accountId && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip

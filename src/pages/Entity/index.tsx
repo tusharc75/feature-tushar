@@ -36,13 +36,6 @@ const Entity: FC = () => {
   }: any = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
-  const [entityPermissions, setEntityPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
-
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
@@ -72,12 +65,6 @@ const Entity: FC = () => {
   //  Grid Variables - End
 
   const { entityResource, entityApi } = entity;
-
-  useEffect(() => {
-    if (permissions && permissions[entityResource]) {
-      setEntityPermissions(permissions[entityResource]);
-    }
-  }, [permissions]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -126,7 +113,7 @@ const Entity: FC = () => {
 
   const ActionsRenderer = params => <>
 
-    {entityPermissions.isUpdate ?
+    {permissions[entityResource]?.isUpdate ?
 
       <Tooltip title="Assign users">
         <IconButton
@@ -271,7 +258,7 @@ const Entity: FC = () => {
           sm={1}
           xs={2}>
           <ImportExportLinks
-            permissions={entityPermissions}
+            permissions={permissions[entityResource]}
             module="entity(s)"
             api={entityApi}
             afterImportCompleted={() => {
@@ -286,7 +273,7 @@ const Entity: FC = () => {
           <EntityHeader
             onSearch={handleSearch}
             searchVal={search}
-            entityPermissions={entityPermissions}
+            entityPermissions={permissions[entityResource]}
             onCreate={handleCreate}
             openUserDialog={handleOpenDialog}
             userActionDiabled={selectedRecords.length === 0} //single select entity can assign user
