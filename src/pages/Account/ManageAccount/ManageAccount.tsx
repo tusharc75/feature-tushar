@@ -207,6 +207,7 @@ export default function ManageAccount(props) {
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         values={values}
                                         errors={errors}
@@ -263,7 +264,7 @@ export default function ManageAccount(props) {
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={disableOwnerSelection}
+                                        disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
                                           !fromProject &&
                                           onOwnerDropdownOpen(
@@ -273,8 +274,10 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         multiple
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -338,7 +341,9 @@ export default function ManageAccount(props) {
                                     : field.fieldName ===
                                       "isShippingAddressSameAsBillingAddress" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -369,7 +374,9 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "billingAddress" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -402,6 +409,7 @@ export default function ManageAccount(props) {
                                     ) : field.fieldName ===
                                       "shippingAddress" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         values={values}
                                         errors={errors}
@@ -418,7 +426,7 @@ export default function ManageAccount(props) {
                                         size="small"
                                         disabled={
                                           values.isShippingAddressSameAsBillingAddress ===
-                                          true
+                                          true || (!isNew && field.disableOnEdit)
                                         }
                                         onChange={(event, newValue) => {
                                           setFieldValue(
@@ -429,7 +437,9 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "parentAccount" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -446,8 +456,10 @@ export default function ManageAccount(props) {
                                       />
                                     ) : (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
                                         // {...rest}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}

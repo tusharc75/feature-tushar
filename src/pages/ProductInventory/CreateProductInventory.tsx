@@ -10,28 +10,26 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "./../../constants/helpers";
+import { CustomDialogTransition, productInventory } from "./../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box } from '@material-ui/core';
 
-const CreateProductCategory = (props) => {
+const CreateProductInventory = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productCategoryId, onClose, onSuccess } = props;
+    const { productInventoryId, onClose, onSuccess } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-            if (productCategoryId) {
-                axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
-                    let tempOptionArray = fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option
-                    fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option = tempOptionArray.filter(data => data.optionValue !== productCategoryId)
+            if (productInventoryId) {
+                axiosInstance().get(`${productInventory.api}/` + productInventoryId).then(({ data: { data } }) => {
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -50,13 +48,13 @@ const CreateProductCategory = (props) => {
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    }, [productCategoryId]);
+    }, [productInventoryId]);
 
 
     const handleSubmit = (values) => {
-        if (productCategoryId) {
-            values._id = productCategoryId
-            axiosInstance().put(`/product-category`, values).then(({ data: { data } }) => {
+        if (productInventoryId) {
+            values._id = productInventoryId
+            axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {
@@ -65,7 +63,7 @@ const CreateProductCategory = (props) => {
             });
         }
         else {
-            axiosInstance().post(`/product-category`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`${productInventory.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
             }).catch((error) => {
@@ -97,7 +95,7 @@ const CreateProductCategory = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={productInventoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <InputField
@@ -132,4 +130,4 @@ const CreateProductCategory = (props) => {
     );
 }
 
-export default CreateProductCategory;
+export default CreateProductInventory;

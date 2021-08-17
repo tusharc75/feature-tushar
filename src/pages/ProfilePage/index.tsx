@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react'
 import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import Layout from "../../components/Layout";
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar'
 import { profileMenuItems } from '../../constants/helpers'

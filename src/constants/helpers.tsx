@@ -131,6 +131,8 @@ export const sidebarResource = {
   DOARequest: 'DOA Request',
   event: 'Event',
   dashboard: 'Dashboard',
+  productInventory: 'Product Inventory',
+  equipmentRentalMaster: "Equipt Rental Master"
 };
 
 export const RESOURCE_LABEL = {
@@ -169,7 +171,9 @@ export const RESOURCE_LABEL = {
   dashboard: 'Dashboards',
   budget: 'Budgets',
   marketSegment: 'Market Segments',
-  quotePdfTemplate: 'Quote PDF Templates'
+  quotePdfTemplate: 'Quote PDF Templates',
+  productInventory: 'Product Inventory',
+  equipmentRentalMaster: "Equipt Rental Master"
 };
 
 export const lead = {
@@ -260,6 +264,12 @@ export const product = {
   api: "/product",
   route: "/product",
   permission: "product",
+};
+
+export const productInventory = {
+  api: "/product-inventory",
+  route: "/product-inventory",
+  permission: "productInventory",
 };
 
 export const budget = {
@@ -723,7 +733,6 @@ export const getPermissions = (
         }
       });
     }
-
     localStorage.setItem("routes", JSON.stringify(routesAndTitle));
     return permissions;
   }

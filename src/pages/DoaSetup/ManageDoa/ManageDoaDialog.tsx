@@ -1,17 +1,14 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
     Box,
     Button,
     TextField,
     Grid,
     Container,
-    Dialog,
     DialogContent,
     IconButton,
     ButtonGroup,
     makeStyles,
-    Typography,
-    Avatar,
     InputAdornment
 } from "@material-ui/core";
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
@@ -95,7 +92,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
     const handleSubmit = async (values) => {
         let doaArray;
         if (selectedType === 2) {
-            doaArray = values.sort((a, b) => a.amount - b.amount).filter(item => item.name != "" && item.name != undefined && item.id != "" && item.id != undefined).map(item => {
+            doaArray = values.sort((a, b) => a.amount - b.amount).filter(item => item.name !== "" && item.name !== undefined && item.id !== "" && item.id !== undefined).map(item => {
                 return {
                     user: item.id,
                     amount: item.amount ? Number(item.amount) : 0
@@ -109,7 +106,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             }
         }
         else {
-            doaArray = values.filter(item => item.name != "" && item.name != undefined && item.id != "" && item.id != undefined).map(item => {
+            doaArray = values.filter(item => item.name !== "" && item.name !== undefined && item.id !== "" && item.id !== undefined).map(item => {
                 return {
                     user: item.id,
                 };
@@ -305,7 +302,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                             id="combo-box-demo"
                                                                                             size="small"
                                                                                             style={{ minWidth: 200 }}
-                                                                                            value={userList.find(v => v.name == userVal.name) ? userList.find(v => v.name == userVal.name) : ""}
+                                                                                            value={userList.find(v => v.name === userVal.name) ? userList.find(v => v.name === userVal.name) : ""}
                                                                                             options={(selectedType === 2) ? userList.filter(element => !values.users.map(e => e.name).includes(element.name)) : tempUserList.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                             getOptionLabel={(option: any) => option?.name ? option?.name : ""}
                                                                                             onChange={(event, newValue) => {
@@ -320,8 +317,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                 {...params}
                                                                                                 variant="outlined"
                                                                                                 name="nameField"
-                                                                                                error={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined}
-                                                                                                helperText={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined ? " User is Required" : ""}
+                                                                                                error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
+                                                                                                helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
                                                                                                 required
                                                                                             />}
                                                                                         />
@@ -352,8 +349,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                         ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                                     })
                                                                                                 }}
-                                                                                                // error={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined}
-                                                                                                // helperText={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined ? " User is Required" : ""}
+                                                                                                // error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
+                                                                                                // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
                                                                                                 required
                                                                                             />
                                                                                             {validate(values) && check && (userVal.id === userSelected[0] || userVal.id === "self") && (
@@ -366,7 +363,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                             <IconButton
                                                                                                 size="small"
                                                                                                 aria-label="add"
-                                                                                                disabled={values.users.length == userList.length}
+                                                                                                disabled={values.users.length === userList.length}
                                                                                                 onClick={() => {
                                                                                                     arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
                                                                                                 }
@@ -422,7 +419,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                             size="small"
                                             disabled={
                                                 currency === "" && selectedType === 2 ||
-                                                values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
+                                                values.users.filter(item => item.name === "" || item.name === undefined || item.id === "" || item.id === undefined).length > 0
                                             }
                                             onClick={() => {
                                                 if (values.users.length === 0) {

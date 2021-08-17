@@ -360,6 +360,7 @@ export default function ManageLeadDialog({
                                     >
                                       {field.fieldName === "owner" ? (
                                         <FormTypes
+                                          isNew={isNew}
                                           {...field}
                                           values={values}
                                           errors={errors}
@@ -405,7 +406,7 @@ export default function ManageLeadDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          disabled={disableOwnerSelection}
+                                          disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                           onOpen={() => {
                                             onOwnerDropdownOpen(
                                               values["collaborator"]
@@ -414,7 +415,9 @@ export default function ManageLeadDialog({
                                         />
                                       ) : field.fieldName === "collaborator" ? (
                                         <FormTypes
-                                          {...field}
+                                          isNew={isNew}
+                                            {...field}
+                                          disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -452,7 +455,9 @@ export default function ManageLeadDialog({
                                             }
                                           >
                                             <FormTypes
-                                              {...field}
+                                              isNew={isNew}
+                                                  {...field}
+                                              disabled={(!isNew && field.disableOnEdit)}
                                               fields={leadData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -535,7 +540,9 @@ export default function ManageLeadDialog({
                                               }
                                             >
                                               <FormTypes
+                                                isNew={isNew}
                                                 {...field}
+                                                disabled={(!isNew && field.disableOnEdit)}
                                                 fields={leadData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -598,11 +605,13 @@ export default function ManageLeadDialog({
                                           </Grid>
                                         </Grid> : (
                                           <FormTypes
+                                            isNew={isNew}
                                             {...field}
+                                            disabled={(!isNew && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
-                                            label={field.fieldLabel}
+                                            label={field.fieldLabel} 
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}

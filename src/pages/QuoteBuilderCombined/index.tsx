@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, useReducer, Fragment } from "re
 import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
-import Layout from "../../components/Layout";
 import axiosInstance from "../../axios/axiosInstance";
 import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -528,7 +527,7 @@ const QuoteBuilders = () => {
               ...restProperties
             } = u;
 
-            let count = Object.keys(u.versions).length;
+            let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
             let versionArray = []
             Object.keys(u.versions).forEach(key => {
@@ -553,7 +552,7 @@ const QuoteBuilders = () => {
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
               status: tempStatus,
-              versionCount: count,
+              versionCount: versionCount,
               versionData: versionArray,
               currency: u.currency,
               relatedOpportunity: u.opportunity?.optionLabel,

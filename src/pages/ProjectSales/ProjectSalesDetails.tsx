@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback, useEffect, Fragment } from "react";
+import { useState, useContext, useEffect, Fragment } from "react";
 import {
   Grid,
   Paper,
@@ -12,9 +12,7 @@ import { ControlPoint } from "@material-ui/icons";
 import { useParams, useHistory } from "react-router-dom";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-
 import TeamUsers from "./TeamUsers";
-import Layout from "../../components/Layout";
 import axiosInstance from "../../axios/axiosInstance";
 import { useData } from "../../StateProvider/Provider";
 import routes from "../../components/Helpers/Routes";
@@ -25,7 +23,6 @@ import DetailsPageHeader from "../../components/DetailsPageHeader";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerAccounts from "./CustomerAccounts";
@@ -43,6 +40,7 @@ import Activity from "../../components/Activity";
 import CreateProjectSales from "./CreateProjectSales";
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -51,7 +49,6 @@ const ProjectSalesDetails = () => {
     state: { user, permissions },
   }: any = useData();
   const [loading, setLoading] = useState(false);
-  const [isUpdating, setUpdating] = useState(false);
   const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
   const [projectSalesData, setProjectSalesData] = useState(null);
   const [projectSalesFields, setProjectSalesFields] = useState([]);
@@ -187,32 +184,6 @@ const ProjectSalesDetails = () => {
   };
 
   /**
-   * Handle updating the project data
-   * @param values
-   */
-  const handleUpdateProject = (values) => {
-    setUpdating(true);
-
-    axiosInstance()
-      .put(`${projectSales.projectSalesApi}`, { ...values, _id: id })
-      .then(({ data }) => {
-        getSalesData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
-
-        setUpdating(false);
-        closeUpdateDIalog();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
-
-  /**
    * Update Dialog For Sales Data
    */
   const handleOpenUpdateDialog = () => {
@@ -237,12 +208,12 @@ const ProjectSalesDetails = () => {
       setDeleting(true);
       axiosInstance()
         .put(`${projectSales.projectSalesApi}/remove`, { ids: [deleteRec] })
-        .then(({ data }) => {
+        .then(() => {
           setDeleting(false);
           setShowConfirmBox(false);
           history.goBack();
         })
-        .catch((err) => {
+        .catch(() => {
           setDeleting(false);
           setShowConfirmBox(false);
         });

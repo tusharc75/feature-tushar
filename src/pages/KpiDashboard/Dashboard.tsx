@@ -109,7 +109,7 @@ const Dashboard = () => {
             },
             {
               type: 'line',
-              label: 'Total Sales',
+              label: 'Total booked value',
               borderColor: 'rgb(54, 162, 235, 0.1)',
               backgroundColor: 'rgb(255, 99, 132, 0.8)',
               borderWidth: 2,
@@ -135,7 +135,7 @@ const Dashboard = () => {
       .get('dashboard/regionalsales')
       .then(({ data: { data } }) => {
         data = data.sort((a, b) => b.totalSell - a.totalSell);
-        setRegionSales(data.map((d) => ({ region: d.region, sales: d.totalSell })));
+        setRegionSales(data.map((d) => ({ region: d.region, totalBookedValue: d.totalSell })));
       })
       .catch((err) => {});
   }, []);
@@ -293,6 +293,7 @@ const Dashboard = () => {
                       disableFuture
                       openTo="year"
                       format="MM/dd/yyyy"
+                      maxDate={salesFilter.between.from}
                       label="From"
                       views={['year', 'month', 'date']}
                       value={salesFilter.between.from}
@@ -306,6 +307,7 @@ const Dashboard = () => {
                       inputVariant="outlined"
                       fullWidth
                       size="small"
+                      minDate={salesFilter.between.from}
                       disableFuture
                       openTo="year"
                       format="MM/dd/yyyy"
@@ -321,7 +323,7 @@ const Dashboard = () => {
                 <Grid container spacing={2}>
                   <Grid item sm={8}>
                     <Box textAlign="center">
-                      <Typography variant="h5">Sales by Month</Typography>
+                      <Typography variant="h5">Total booked value in USD</Typography>
                     </Box>
 
                     <Chart type="bar" data={salesData} />

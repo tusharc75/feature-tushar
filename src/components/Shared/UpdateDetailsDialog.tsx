@@ -142,49 +142,68 @@ const UpdateDetailsDialog = (props) => {
                             sm={6}
                             md={6}
                           >
-                            <FormTypes
-                              size="small"
-                              fullWidth
-                              disabled={
-                                field.fieldData.type === "email" ||
-                                !field.isUpdate ||
-                                fromProjectSales(field.fieldData.fieldName)
-                              }
-                              startAdornment={
-                                <InputAdornment position="start">
-                                  {currencySymbol ||
-                                    getUniqueCurrencies().find(
-                                      (val) =>
-                                        initialVals.currency ===
-                                        val.currencyCode
-                                    )?.symbolNative}
-                                </InputAdornment>
-                              }
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldData.fieldLabel}
-                              name={field.fieldData.fieldName}
-                              type={field.fieldData.type}
-                              options={field.fieldData.option}
-                              setFieldValue={setFieldValue}
-                              required={field.fieldData.required}
-                              isTooltip={field.fieldData.isTooltip}
-                              tooltipMessage={field.fieldData.tooltipMessage}
-                              imageOrFileUploadCompletePercentage={
-                                ["imageUpload", "fileUpload"].some(
-                                  (s) => s === field.fieldData.type
-                                )
-                                  ? (completePercentage) => {
+                            {field.fieldData.fieldName === "parent" ? (
+                              <FormTypes
+                                {...field}
+                                disabled={field.fieldData.disableOnEdit}
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                                label={field.fieldData.fieldLabel}
+                                name={field.fieldData.fieldName}
+                                type={field.fieldData.type}
+                                options={field.fieldData.option.filter(d => d.optionLabel !== values?.entityName)}
+                                setFieldValue={setFieldValue}
+                                required={field.fieldData.required}
+                                fullWidth
+                                isTooltip={field.fieldData?.isTooltip || false}
+                                tooltipMessage={field.fieldData?.tooltipMessage}
+                                size="small"
+                              />
+                            ) : (
+                              <FormTypes
+                                size="small"
+                                fullWidth
+                                disabled={
+                                  field.fieldData.type === "email" ||
+                                  !field.isUpdate ||
+                                  fromProjectSales(field.fieldData.fieldName) || field.fieldData.disableOnEdit
+                                }
+                                startAdornment={
+                                  <InputAdornment position="start">
+                                    {currencySymbol ||
+                                      getUniqueCurrencies().find(
+                                        (val) =>
+                                          initialVals.currency ===
+                                          val.currencyCode
+                                      )?.symbolNative}
+                                  </InputAdornment>
+                                }
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                                label={field.fieldData.fieldLabel}
+                                name={field.fieldData.fieldName}
+                                type={field.fieldData.type}
+                                options={field.fieldData.option}
+                                setFieldValue={setFieldValue}
+                                required={field.fieldData.required}
+                                isTooltip={field.fieldData.isTooltip}
+                                tooltipMessage={field.fieldData.tooltipMessage}
+                                imageOrFileUploadCompletePercentage={
+                                  ["imageUpload", "fileUpload"].some(
+                                    (s) => s === field.fieldData.type
+                                  )
+                                    ? (completePercentage) => {
                                       setUploadingImageOrFileProgress(
                                         completePercentage
                                       );
                                     }
-                                  : null
-                              }
-                              onChange={
-                                field.fieldData.fieldName === "currency"
-                                  ? (e, val) => {
+                                    : null
+                                }
+                                onChange={
+                                  field.fieldData.fieldName === "currency"
+                                    ? (e, val) => {
                                       if (val && val.currencyCode) {
                                         setFieldValue(
                                           field.fieldData.fieldName,
@@ -199,9 +218,11 @@ const UpdateDetailsDialog = (props) => {
                                         setCurrencySymbol(null);
                                       }
                                     }
-                                  : null
-                              }
-                            />
+                                    : null
+                                }
+                              />
+                            )
+                            }
                           </Grid>
                         ))}
                       </Grid>
@@ -228,7 +249,7 @@ const UpdateDetailsDialog = (props) => {
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                    Object.values(simplifyValues(values)).toString() ||
+                  Object.values(simplifyValues(values)).toString() ||
                   isUpdating ||
                   uploadingImageOrFileProgress > 0
                 }

@@ -9,7 +9,6 @@ import {
   UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
@@ -87,7 +86,7 @@ const User: FC = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });

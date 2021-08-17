@@ -1,24 +1,18 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { makeStyles } from "@material-ui/core/styles";
-import { FilterList, SortByAlpha, Search, AddOutlined } from "@material-ui/icons";
 import {
     Box,
     Grid,
-    Select,
     MenuItem,
-    FormControl,
-    IconButton,
     Button,
     Menu
 } from "@material-ui/core";
-import { Add, ExpandMore } from "@material-ui/icons";
+import { ExpandMore } from "@material-ui/icons";
 
 import styles from "../Leads/Header.module.scss"
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     filter_side: {
         display: "flex",
         justifyContent: "flex-end",
@@ -36,7 +30,6 @@ function DoaHeader(props) {
     const closeActions = () => {
         setAnchorEl(null);
     };
-
 
     const { onSearch, searchVal, onCreate,
         DoaPermissions, showConfirmBox, canDelete, icon, heading } = props

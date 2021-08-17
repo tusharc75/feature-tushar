@@ -1,43 +1,23 @@
-import React, { useState, useEffect, useContext } from 'react'
+import { useState } from 'react'
 import {
-    Box,
-    Button,
     Dialog,
-    FormControl,
-    FormGroup,
-    Grid,
-    Paper,
-    Tooltip,
-    Switch,
-    FormControlLabel,
-    CircularProgress,
     Stepper,
     StepLabel,
     Step,
     Typography,
     makeStyles,
-    StepContent,
     createStyles,
     Theme,
 } from "@material-ui/core";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { startCase } from "lodash";
 import ApprovalProcessDialog from './ApprovalProcessDialog';
 import { useData } from '../../StateProvider/Provider';
 import { userType } from '../../constants/helpers';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
-const approvalProcessLabels = {
-    "approveAccount": false,
-    "convertLeadToOpportunity": false,
-    "doaSetup": false,
-    "viewAndRestoreTrash": false
-}
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
@@ -56,19 +36,10 @@ const useStyles = makeStyles((theme: Theme) =>
 const stepsLabel = ["Set Approval Process", "Assign Company Wide Role", "Assign Regional Roles", "Assign DOA"]
 
 const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
-    const toastConfig = useContext(CustomToastContext);
     const [activeStep, setActiveStep] = useState(0)
     
-
     const { state: { user, permissions }, } = useData();
-    const [userPermissionsForApprovalProcess, setUserPermissionsForApprovalProcess] = useState({
-        "approveAccount": false,
-        "convertLeadToOpportunity": false,
-        "doaSetup": false,
-        "viewAndRestoreTrash": false
-    })
     const classes = useStyles();
-
 
     const getStepContent = (step: Number) => {
         switch (step) {
