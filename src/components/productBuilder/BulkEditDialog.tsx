@@ -99,7 +99,7 @@ const BulkEditDialog = (props) => {
 
     const handleSubmit = (values) => {
         for (const x in values) {
-            if (isNaN(values[x]) || values[x] === 0 || values[x] === "0" || values[x] === "") {
+            if (values[x] === 0 || values[x] === "0" || values[x] === "") {
                 delete values[x]
             }
         }
