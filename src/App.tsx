@@ -90,6 +90,7 @@ import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
+import AddressResource from "./pages/AddressResource";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -494,6 +495,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.address.path}>
+              <AddressResource />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
