@@ -16,6 +16,7 @@ import Grid from '@material-ui/core/Grid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CircularProgress from "@material-ui/core/CircularProgress"
 import 'tinymce/icons/default';
+import "./tinymce.scss"
 
 const useStyles = makeStyles((theme) => ({
     root: {
