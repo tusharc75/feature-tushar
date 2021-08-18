@@ -348,6 +348,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 >
                                                   <IconButton
                                                     onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                    disabled={!Boolean(projectSalesId) && field.disableOnEdit}
                                                     size="small"
                                                   >
                                                     <AddIcon color="primary" />
@@ -431,6 +432,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                       onClick={() => {
                                                         setShowAddMarketSegmentDialog(true);
                                                       }}
+                                                      disabled={!Boolean(projectSalesId) && field.disableOnEdit}
                                                       size="small"
                                                     >
                                                       <AddIcon color="primary" />
