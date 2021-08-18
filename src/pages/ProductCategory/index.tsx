@@ -24,6 +24,7 @@ import {
     isObjectEmpty
 } from "../../constants/helpers";
 import {
+    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -154,8 +155,9 @@ const ProductCategory = () => {
     const columnState = JSON.parse(localStorage.getItem("productCategoryPage"));
     const columns = [
         { field: "name", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+        { field: "parentCategory", headerName: "Parent Category", show: true, disabled: true, cellRenderer: "parentCategoryRenderer" },
+        // { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+        // { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
     if (columnState) {
         columns.map((item) => {
@@ -188,30 +190,31 @@ const ProductCategory = () => {
 
     </span>
 
-    const ActionsRenderer = params => <Fragment>
-        {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ?
-            <Tooltip title="Delete" >
-                <IconButton aria-label="Delete" onClick={() => {
-                    setDeleteRecord(params.data);
-                    setShowDeleteConfirmBox(true)
-                }}>
-                    <DeleteIcon
-                        fontSize="small" color="error" />
-                </IconButton>
-            </Tooltip> :
-            <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
-                <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
-                </IconButton>
-            </Tooltip>
-        }
-    </Fragment >
+    // const ActionsRenderer = params => <Fragment>
+    //     {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ?
+    //         <Tooltip title="Delete" >
+    //             <IconButton aria-label="Delete" onClick={() => {
+    //                 setDeleteRecord(params.data);
+    //                 setShowDeleteConfirmBox(true)
+    //             }}>
+    //                 <DeleteIcon
+    //                     fontSize="small" color="error" />
+    //             </IconButton>
+    //         </Tooltip> :
+    //         <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
+    //             <IconButton aria-label="Delete">
+    //                 <DeleteIcon fontSize="small" />
+    //             </IconButton>
+    //         </Tooltip>
+    //     }
+    // </Fragment >
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer
+        parentCategoryRenderer: CommonRenderer,
+        // createdByRenderer: CreatedByRenderer,
+        // updatedByRenderer: UpdatedByRenderer,
+        // actionsRenderer: ActionsRenderer
     };
 
     const replaceFieldName = (field) => {
@@ -265,12 +268,13 @@ const ProductCategory = () => {
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, ...restProperties } = u;
+                const { createdBy, updatedBy, parentCategory, ...restProperties } = u;
 
                 let res = {
                     ...restProperties,
                     id: u._id,
 
+                    parentCategory: u.parentCategory?.optionLabel,
                     createdBy: u.createdBy?.user?.concatedName,
                     createdById: u.createdBy?.user?._id,
                     createdByDate: u.createdBy?.date,
@@ -359,7 +363,7 @@ const ProductCategory = () => {
                             {productCategoryPermissions.isCreate &&
                                 <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {productCategoryPermissions.isDelete &&
+                            {/* {productCategoryPermissions.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
@@ -384,14 +388,14 @@ const ProductCategory = () => {
                                 onClose={closeActions}
                             >
                                 <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu>
+                            </Menu> */}
                         </Box>
                     </Grid>
                 </Grid>
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page}  allowAction={false}
                 loading={loading} renderedFrom="productCategoryPage"/>
 
             {showDeleteConfirmBox &&
@@ -405,6 +409,7 @@ const ProductCategory = () => {
 
             {open &&
                 <CreateProductCategory
+                    isUpdateDisabled={productCategoryId ? true : false}
                     productCategoryId={productCategoryId}
                     onClose={() => setOpen(false)}
                     onSuccess={() => {
