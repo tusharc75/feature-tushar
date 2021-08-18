@@ -184,7 +184,6 @@ export default function TermsAndCondition(props) {
     return (
 
         <Fragment>
-            {console.log(permissions)}
             <Grid container className="headerbox">
                 <Grid item xs={12}>
                     <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
