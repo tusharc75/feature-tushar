@@ -501,6 +501,7 @@ export default function ManageLeadDialog({
                                                 >
                                                   <IconButton
                                                     onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                    disabled={(!isNew && field.disableOnEdit)}
                                                     size="small"
                                                   >
                                                     <AddIcon color="primary" />
@@ -583,6 +584,7 @@ export default function ManageLeadDialog({
                                                       onClick={() => {
                                                         setShowAddMarketSegmentDialog(true);
                                                       }}
+                                                      disabled={(!isNew && field.disableOnEdit)}
                                                       size="small"
                                                     >
                                                       <AddIcon color="primary" />

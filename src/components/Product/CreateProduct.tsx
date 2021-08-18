@@ -405,6 +405,7 @@ const CreateProduct = (props) => {
                                                                                 >
                                                                                     <IconButton
                                                                                         onClick={() => { setShowAddProductCategoryDialog(true); }}
+                                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                                         size="small"
                                                                                     >
                                                                                         <AddIcon color="primary" />
