@@ -3,10 +3,10 @@ import { Editor } from '@tinymce/tinymce-react';
 import axiosInstance from '../../axios/axiosInstance';
 import { IconButton, Box, Button, Typography } from "@material-ui/core"
 import Dialog from "@material-ui/core/Dialog";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import { CustomDialogTransition, imageUploadMaxSize, documentUploadMaxSize } from "./../../constants/helpers";
+import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
+import { CustomDialogTransition, imageUploadMaxSize, documentUploadMaxSize } from "../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
 import { HiOutlinePhotograph } from "react-icons/hi"
 import { AiOutlineFileAdd, AiOutlineClose } from "react-icons/ai"
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function TinyMCE(props) {
-    const { onChange, initialValue, imageOrFileUploadCompletePercentage,
+    const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize } } = props
 
     const classes = useStyles();
@@ -370,9 +370,9 @@ export default function TinyMCE(props) {
                 }}
 
                 init={{
-                    height: 400,
-                    // width: "210mm",
-                    menubar: false,
+                    height: height,
+                    width: width,
+                    // menubar: false,
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
 

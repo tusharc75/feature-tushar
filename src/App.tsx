@@ -87,7 +87,7 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
-import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
+import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 import AddressResource from "./pages/AddressResource";
@@ -232,7 +232,7 @@ function App() {
 
     return !user ? (
       // <Suspense fallback={<div>Loading...</div>}>
-        <Comp />
+      <Comp />
       // </Suspense>
     ) : (
       <Redirect
