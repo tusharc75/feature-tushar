@@ -194,8 +194,8 @@ const Dashboard = () => {
           budget.push(d.budget);
         }
 
-        const revenue = data.reduce((acc, val) => acc.totalSell + val.totalSell);
-        const spend = data.reduce((acc, val) => acc.totalCost + val.totalCost);
+        const revenue = data.reduce((acc, val) => acc + val.totalSell,0);
+        const spend = data.reduce((acc, val) => acc + val.totalCost,0);
 
         const profit = Math.floor(((revenue - spend) / spend) * 100);
 
