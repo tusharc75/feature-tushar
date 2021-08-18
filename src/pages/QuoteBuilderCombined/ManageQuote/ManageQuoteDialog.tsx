@@ -821,9 +821,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={ accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -902,9 +903,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={contactId ? true : false || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={(contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -994,9 +996,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isRenderedFromOpportunity || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1175,10 +1178,10 @@ export default function ManageQuoteDialog({
                                             e.target.checked
                                           );
                                           if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d=>d.optionValue)
-                                              setFieldValue("collaborator", [
-                                                ...values["collaborator"]].concat(doaUserDataTemp)
-                                              );
+                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
+                                            setFieldValue("collaborator", [
+                                              ...values["collaborator"]].concat(doaUserDataTemp)
+                                            );
                                           }
                                         }}
                                       />
@@ -1404,9 +1407,10 @@ export default function ManageQuoteDialog({
                                               >
                                                 <IconButton
                                                   onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                  disabled={(!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1486,9 +1490,10 @@ export default function ManageQuoteDialog({
                                                     onClick={() => {
                                                       setShowAddMarketSegmentDialog(true);
                                                     }}
+                                                    disabled={(!isNew && field.disableOnEdit)}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -1510,7 +1515,7 @@ export default function ManageQuoteDialog({
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
-                                            disabled={(!isNew && field.disableOnEdit)}
+                                          disabled={(!isNew && field.disableOnEdit)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}

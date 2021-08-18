@@ -446,7 +446,7 @@ export default function ManageOpportunityDialog({
                                             doNotShowInfoTooltip={true}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount.isCreate && !(disableOwnerAndAccount || (!isNew && field.disableOnEdit)) &&
+                                        {permissions.customerAccount.isCreate &&
                                           !accountId && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -459,9 +459,10 @@ export default function ManageOpportunityDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={disableOwnerAndAccount || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={disableOwnerAndAccount || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -739,9 +740,10 @@ export default function ManageOpportunityDialog({
                                               >
                                                 <IconButton
                                                   onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                  disabled={!isNew && field.disableOnEdit}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -821,9 +823,10 @@ export default function ManageOpportunityDialog({
                                                     onClick={() => {
                                                       setShowAddMarketSegmentDialog(true);
                                                     }}
+                                                    disabled={!isNew && field.disableOnEdit}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
