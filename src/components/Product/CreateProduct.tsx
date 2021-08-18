@@ -363,7 +363,7 @@ const CreateProduct = (props) => {
                                                                     >
                                                                         <FormTypes
                                                                             isNew={Boolean(productId)}
-                                                                            disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                            disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             errors={errors}
@@ -405,10 +405,10 @@ const CreateProduct = (props) => {
                                                                                 >
                                                                                     <IconButton
                                                                                         onClick={() => { setShowAddProductCategoryDialog(true); }}
-                                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                                        disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                                         size="small"
                                                                                     >
-                                                                                        <AddIcon color={(!Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"}/>
+                                                                                        <AddIcon color={(Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"}/>
                                                                                     </IconButton>
                                                                                 </Tooltip>
                                                                             </Grid>
@@ -431,7 +431,7 @@ const CreateProduct = (props) => {
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
                                                                         isNew={Boolean(productId)}
-                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                        disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                         // {...rest}
                                                                         values={values}
                                                                         errors={errors}
@@ -464,7 +464,7 @@ const CreateProduct = (props) => {
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
                                                                         isNew={Boolean(productId)}
-                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                        disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                         // {...rest}
                                                                         selectedCurrencyCode={values["currency"]}
                                                                         startAdornment={
@@ -495,7 +495,7 @@ const CreateProduct = (props) => {
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
                                                                         isNew={Boolean(productId)}
-                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                        disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                         fields={initialData.fields}
                                                                         fieldData={field}
                                                                         values={values}
@@ -522,7 +522,7 @@ const CreateProduct = (props) => {
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                         <FormTypes
                                                                             isNew={Boolean(productId)}
-                                                                            disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                            disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             values={values}
@@ -547,7 +547,7 @@ const CreateProduct = (props) => {
                                                                     (field.type === "converter" || field.type === "currencyAmount" || field.isConverter) ?
                                                                         <FormTypes
                                                                             isNew={Boolean(productId)}
-                                                                            disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                            disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             values={values}
@@ -570,7 +570,7 @@ const CreateProduct = (props) => {
                                                                                 <Box flexGrow={1}  >
                                                                                     <FormTypes
                                                                                         isNew={Boolean(productId)}
-                                                                                        disabled={(!Boolean(productId) && field.disableOnEdit)}
+                                                                                        disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                                        {...field}
                                                                                         productTemplateId={values?.productTemplate}
                                                                                         priceTemplateId={values?.priceTemplate}
