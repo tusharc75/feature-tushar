@@ -122,10 +122,10 @@ const AddressResource = () => {
   }: any = useData();
 
   const [addressPermissions, setAddressPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions?.address?.isCreate,
+    isUpdate: permissions?.address?.isUpdate,
+    isRead: permissions?.address?.isRead,
+    isDelete: permissions?.address?.isDelete,
   });
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
