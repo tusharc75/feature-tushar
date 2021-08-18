@@ -808,7 +808,7 @@ export default function ManageQuoteDialog({
                                             }}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount?.isCreate &&
+                                        {permissions.customerAccount?.isCreate && 
                                           !accountFieldDisable && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
@@ -821,6 +821,7 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
                                                   <AddIcon color="primary" />
@@ -902,6 +903,7 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={contactId ? true : false || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
                                                   <AddIcon color="primary" />
@@ -994,6 +996,7 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
                                                   <AddIcon color="primary" />
@@ -1404,6 +1407,7 @@ export default function ManageQuoteDialog({
                                               >
                                                 <IconButton
                                                   onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                  disabled={(!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
                                                   <AddIcon color="primary" />
@@ -1486,6 +1490,7 @@ export default function ManageQuoteDialog({
                                                     onClick={() => {
                                                       setShowAddMarketSegmentDialog(true);
                                                     }}
+                                                    disabled={(!isNew && field.disableOnEdit)}
                                                     size="small"
                                                   >
                                                     <AddIcon color="primary" />
