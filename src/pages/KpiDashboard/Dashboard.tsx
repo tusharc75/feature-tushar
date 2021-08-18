@@ -1,50 +1,168 @@
-import { Fragment, useState, useCallback, useEffect } from 'react';
-import { Box, Grid, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, Container } from '@material-ui/core';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import { useState, useCallback, useEffect } from 'react';
+import { Box, Grid, Typography, Paper, List, ListItem, ListItemText, Container, ListItemSecondaryAction, CircularProgress } from '@material-ui/core';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { startCase } from 'lodash';
 import Chart from 'react-chartjs-2';
 import moment from 'moment';
 
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
-import { entity, marketSegment } from '../../constants/helpers';
+import { entity, marketSegment, customerAccount } from '../../constants/helpers';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
-import ConvertedLeads from './ConvertedLeads';
 import Filters from './Filters';
 
+import './dashboard.scss';
+
+const dummyData = {
+  labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+  datasets: [
+    {
+      label: '# of Votes',
+      data: [12, 19, 3, 5, 2, 3],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)'
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+      ],
+      borderWidth: 1
+    }
+  ]
+};
+
 const Dashboard = () => {
-  const [regionSales, setRegionSales] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [salesRevenue, setSalesRevenue] = useState({
+    revenue: 0,
+    spend: 0,
+    profit: 0
+  });
+  const [openQuoteData, setOpenQuoteData] = useState({
+    all: 0,
+    open: 0,
+    percent: 0
+  });
   const [entities, setEntities] = useState([]);
+  const [salesReps, setSalesReps] = useState([]);
+  const [customerAccounts, setCustomerAccounts] = useState([]);
   const [productCategory, setProductCategory] = useState([]);
   const [marketSegments, setMarketSegments] = useState([]);
   const [subMarketSegments, setSubMarketSegments] = useState([]);
+  const [allEntitySalesData, setAllEntitySalesData] = useState({
+    labels: [],
+    datasets: []
+  });
   const [salesData, setSalesData] = useState({
     labels: [],
     datasets: []
   });
+  const [oppSalesRep, setOppSalesRep] = useState({
+    labels: [],
+    datasets: []
+  });
+  const [oppAccount, setOppAccount] = useState({
+    labels: [],
+    datasets: []
+  });
+
   const [salesFilter, setSalesFilter] = useState({
-    allEntity: true,
-    byMonth: false,
     entity: {},
     marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
     subMarketSegment: {},
     productCategory: {},
     between: {
-      from: new Date(moment().subtract(3, 'months').calendar()),
+      from: new Date(moment().subtract(1, 'year').calendar()),
       to: new Date()
     }
   });
 
+  const fetchAllEntitiesData = useCallback(() => {
+    let params = {
+      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
+      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
+      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?allEntities=1&';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+
+    axiosInstance()
+      .get(`dashboard/sales${url}`)
+      .then(({ data: { data } }) => {
+        const saleData = [];
+        const labels = [];
+        const budget = [];
+
+        for (let d of data) {
+          saleData.push(d.totalSell);
+          labels.push(moment(d.date).format('MMM/YY'));
+          budget.push(d.budget);
+        }
+
+        setAllEntitySalesData({
+          labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Budget',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 2,
+              fill: false,
+              data: budget
+            },
+            {
+              type: 'line',
+              label: 'Total booked value',
+              borderColor: 'rgb(54, 162, 235, 0.1)',
+              backgroundColor: 'rgb(255, 99, 132, 0.8)',
+              borderWidth: 2,
+              fill: true,
+              data: saleData
+            }
+          ]
+        });
+      })
+      .catch((err) => {});
+  }, [salesFilter.customerAccount, salesFilter.subMarketSegment, salesFilter.marketSegment, salesFilter.between]);
+
+  useEffect(() => {
+    fetchAllEntitiesData();
+  }, [fetchAllEntitiesData]);
+
   const fetchSalesData = useCallback(() => {
     let params = {
-      allEntity: salesFilter.allEntity ? 1 : 0,
       entity: salesFilter.entity ? salesFilter.entity['id'] : '',
       marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
       subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
       productCategory: salesFilter.productCategory ? salesFilter.productCategory['id'] : '',
-      byMonth: salesFilter.byMonth ? 1 : 0,
+      salesRep: salesFilter.salesRep ? salesFilter.salesRep['id'] : '',
+      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -76,22 +194,24 @@ const Dashboard = () => {
           budget.push(d.budget);
         }
 
+        const revenue = data.reduce((acc, val) => acc.totalSell + val.totalSell);
+        const spend = data.reduce((acc, val) => acc.totalCost + val.totalCost);
+
+        const profit = Math.floor(((revenue - spend) / spend) * 100);
+
+        setSalesRevenue({
+          revenue,
+          spend,
+          profit
+        });
+
         setSalesData({
           labels,
           datasets: [
             {
               type: 'line',
-              label: 'Budget',
-              borderColor: 'rgb(54, 162, 235)',
-              borderWidth: 2,
-              fill: false,
-              data: budget
-            },
-            {
-              type: 'line',
               label: 'Total booked value',
-              borderColor: 'rgb(54, 162, 235, 0.1)',
-              backgroundColor: 'rgb(255, 99, 132, 0.8)',
+              borderColor: 'rgb(54, 162, 235)',
               borderWidth: 2,
               fill: true,
               data: saleData
@@ -109,25 +229,188 @@ const Dashboard = () => {
     };
   }, [salesFilter]);
 
-  const fetchRegionalSalesData = useCallback(() => {
+  useEffect(() => {
+    fetchSalesData();
+  }, [fetchSalesData]);
+
+  const fetchOpportunitySalesRep = useCallback(() => {
+    let params = {
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      status: 'open',
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
     axiosInstance()
-      .get('dashboard/regionalsales')
+      .get(`/dashboard/opportunities/sales-rep${url}`)
       .then(({ data: { data } }) => {
-        data = data.sort((a, b) => b.totalSell - a.totalSell);
-        setRegionSales(data.map((d) => ({ region: d.region, totalBookedValue: d.totalSell })));
+        const labels = [];
+        const datasets = [];
+
+        for (let d of data) {
+          labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          datasets.push(d.count);
+        }
+
+        setOppSalesRep({
+          labels,
+          datasets: [
+            {
+              label: '# of Votes',
+              data: datasets,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }
+          ]
+        });
+      })
+      .catch((err) => {});
+  }, []);
+
+  const fetchOpportunityContact = useCallback(() => {
+    let params = {
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      status: 'open',
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+    axiosInstance()
+      .get(`/dashboard/opportunities/customer-account${url}`)
+      .then(({ data: { data } }) => {
+        const labels = [];
+        const datasets = [];
+
+        for (let d of data) {
+          labels.push(d.customerAccount);
+          datasets.push(d.count);
+        }
+
+        setOppAccount({
+          labels,
+          datasets: [
+            {
+              label: '',
+              data: datasets,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }
+          ]
+        });
+      })
+      .catch((err) => {});
+  }, []);
+
+  const fetchOpenQuote = useCallback(() => {
+    let params = {
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+    axiosInstance()
+      .get(`/dashboard/open-quote${url}`)
+      .then(({ data: { data } }) => {
+        setOpenQuoteData({
+          all: data.count,
+          open: data.open,
+          percent: Math.floor((data.open / data.count) * 100)
+        });
       })
       .catch((err) => {});
   }, []);
 
   useEffect(() => {
-    fetchSalesData();
-  }, [fetchSalesData]);
+    fetchOpenQuote();
+    fetchOpportunitySalesRep();
+    fetchOpportunityContact();
+  }, [salesFilter.entity, salesFilter.between]);
+
+  const fetchTopProducts = useCallback(() => {
+    axiosInstance()
+      .get('dashboard/products')
+      .then(({ data: { data } }) => {
+        setTopProducts(data);
+      })
+      .catch((err) => {});
+  }, []);
 
   useEffect(() => {
-    fetchRegionalSalesData();
+    fetchTopProducts();
     fetchEntities();
     fetchMarketSegment();
     fetchProductCategory();
+    fetchSalesReps();
+    fetchCustomerAccount();
   }, []);
 
   const fetchEntities = () => {
@@ -162,6 +445,31 @@ const Dashboard = () => {
       .catch((err) => {});
   };
 
+  const fetchSalesReps = () => {
+    axiosInstance()
+      .get(`/user?limit=0`)
+      .then(({ data: { data } }) => {
+        data = data.map((d) => ({
+          id: d._id,
+          name: d.concatedName
+        }));
+        setSalesReps(data);
+      })
+      .catch((err) => {});
+  };
+  const fetchCustomerAccount = () => {
+    axiosInstance()
+      .get(`${customerAccount.accountApi}?limit=0`)
+      .then(({ data: { data } }) => {
+        data = data.map((d) => ({
+          id: d._id,
+          name: d.accountName
+        }));
+        setCustomerAccounts(data);
+      })
+      .catch((err) => {});
+  };
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Layout>
@@ -173,7 +481,10 @@ const Dashboard = () => {
             <Container maxWidth="xl">
               <Box py={2}>
                 <Filters
+                  moment={moment}
                   entities={entities}
+                  salesReps={salesReps}
+                  customerAccounts={customerAccounts}
                   marketSegments={marketSegments}
                   subMarketSegments={subMarketSegments}
                   productCategory={productCategory}
@@ -192,7 +503,7 @@ const Dashboard = () => {
                                 Revenue
                               </Typography>
                               <Typography variant="h5" color="textPrimary">
-                                $95,879.00
+                                ${salesRevenue.revenue.toLocaleString()}
                               </Typography>
                             </Box>
                           </Paper>
@@ -204,7 +515,7 @@ const Dashboard = () => {
                                 Spend
                               </Typography>
                               <Typography variant="h5" color="textPrimary">
-                                $55,879.00
+                                ${salesRevenue.spend.toLocaleString()}
                               </Typography>
                             </Box>
                           </Paper>
@@ -216,7 +527,7 @@ const Dashboard = () => {
                                 Profits
                               </Typography>
                               <Typography variant="h5" color="textPrimary">
-                                25%
+                                {salesRevenue.profit}%
                               </Typography>
                             </Box>
                           </Paper>
@@ -235,42 +546,79 @@ const Dashboard = () => {
                     </Paper>
                   </Grid>
                   <Grid item sm={4}>
-                    {/* <Box mt={2}>
-                      <TableContainer style={{ maxHeight: 450 }} component={Paper}>
-                        <Table stickyHeader size="small">
-                          <TableHead>
-                            <TableRow>
-                              {regionSales.length > 0 &&
-                                Object.keys(regionSales[0]).map((label, i) => (
-                                  <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                    {startCase(label)}
-                                  </TableCell>
-                                ))}
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {regionSales.length > 0 ? (
-                              regionSales.map((data) => (
-                                <TableRow key={data.region}>
-                                  {Object.keys(data).map((label, i) => (
-                                    <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                      {data[label]}
-                                    </TableCell>
-                                  ))}
-                                </TableRow>
-                              ))
-                            ) : (
-                              <Typography>No Data</Typography>
-                            )}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Box> */}
                     <Paper>
                       <Box p={2}>
                         <Typography variant="h6" color="textSecondary">
                           Top Selling Product
                         </Typography>
+                      </Box>
+
+                      <List>
+                        {topProducts.length ? (
+                          topProducts.map((product) => (
+                            <ListItem divider>
+                              <ListItemText primary={product.productCategory} />
+                              <ListItemSecondaryAction>
+                                <Typography variant="h6">{product.count}</Typography>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          ))
+                        ) : (
+                          <ListItem>
+                            <ListItemText primary={'No Data'} />
+                          </ListItem>
+                        )}
+                      </List>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                <Grid container spacing={2}>
+                  <Grid item sm={4}>
+                    <Paper>
+                      <Box mb={2} p={2} display="flex" alignItems="center">
+                        <Box flex={0.5}>
+                          <Box position="relative" display="inline-flex">
+                            <CircularProgress style={{ width: 100, height: 100 }} variant="determinate" value={openQuoteData.percent} />
+                            <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
+                              <Typography variant="h5" component="div" color="textSecondary">
+                                {openQuoteData.percent}%
+                              </Typography>
+                            </Box>
+                          </Box>{' '}
+                        </Box>
+
+                        <Box flex={0.5}>
+                          <Typography variant="h6" color="secondary">
+                            Open Quotes
+                          </Typography>
+                          <Box display="flex" alignItems="center">
+                            <Typography variant="h5" color="primary">
+                              {openQuoteData.open}/
+                            </Typography>
+                            <Typography variant="h6" color="textSecondary">
+                              {openQuoteData.all}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Paper>
+
+                    <Paper>
+                      <Box textAlign="center" p={2}>
+                        <Typography variant="h6">Open Opportunites - Amount by Sales Contact</Typography>
+                        <Chart type="doughnut" data={dummyData} />
+                      </Box>
+                    </Paper>
+                  </Grid>
+                  <Grid item sm={8}>
+                    <Paper elevation={2}>
+                      <Box p={2}>
+                        <Box textAlign="center">
+                          <Typography variant="h5">Total booked value in USD</Typography>
+                        </Box>
+
+                        <Chart type="bar" data={allEntitySalesData} />
                       </Box>
                     </Paper>
                   </Grid>
@@ -279,74 +627,39 @@ const Dashboard = () => {
                 <Grid container spacing={4}>
                   <Grid item xs={6}>
                     <Paper elevation={2}>
-                      <Box p={4}>
+                      <Box p={4} textAlign="center">
                         <Typography variant="h6">Open Opportunities - Amount by Sales Rep</Typography>
-                        <Chart
-                          style={{ height: '100%' }}
-                          type="pie"
-                          data={{
-                            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                            datasets: [
-                              {
-                                label: '# of Votes',
-                                data: [12, 19, 3, 5, 2, 3],
-                                backgroundColor: [
-                                  'rgba(255, 99, 132, 0.8)',
-                                  'rgba(54, 162, 235, 0.8)',
-                                  'rgba(255, 206, 86, 0.8)',
-                                  'rgba(75, 192, 192, 0.8)',
-                                  'rgba(153, 102, 255, 0.8)',
-                                  'rgba(255, 159, 64, 0.8)'
-                                ],
-                                borderColor: [
-                                  'rgba(255, 99, 132, 1)',
-                                  'rgba(54, 162, 235, 1)',
-                                  'rgba(255, 206, 86, 1)',
-                                  'rgba(75, 192, 192, 1)',
-                                  'rgba(153, 102, 255, 1)',
-                                  'rgba(255, 159, 64, 1)'
-                                ],
-                                borderWidth: 1
-                              }
-                            ]
-                          }}
-                        />
+                        <Chart type="pie" data={oppSalesRep} />
                       </Box>
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
                     <Paper elevation={2}>
-                      <Box p={4}>
+                      <Box p={4} textAlign="center">
                         <Typography variant="h6">Open Opportunities - Amount by Account</Typography>
                         <Chart
-                          style={{ height: '100%' }}
-                          type="pie"
-                          data={{
-                            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                            datasets: [
-                              {
-                                label: '# of Votes',
-                                data: [12, 19, 3, 5, 2, 3],
-                                backgroundColor: [
-                                  'rgba(255, 99, 132, 0.8)',
-                                  'rgba(54, 162, 235, 0.8)',
-                                  'rgba(255, 206, 86, 0.8)',
-                                  'rgba(75, 192, 192, 0.8)',
-                                  'rgba(153, 102, 255, 0.8)',
-                                  'rgba(255, 159, 64, 0.8)'
-                                ],
-                                borderColor: [
-                                  'rgba(255, 99, 132, 1)',
-                                  'rgba(54, 162, 235, 1)',
-                                  'rgba(255, 206, 86, 1)',
-                                  'rgba(75, 192, 192, 1)',
-                                  'rgba(153, 102, 255, 1)',
-                                  'rgba(255, 159, 64, 1)'
-                                ],
-                                borderWidth: 1
+                          type="bar"
+                          options={{
+                            indexAxis: 'y',
+                            // Elements options apply to all of the options unless overridden in a dataset
+                            // In this case, we are setting the border of each horizontal bar to be 2px wide
+                            elements: {
+                              bar: {
+                                borderWidth: 2
                               }
-                            ]
+                            },
+                            responsive: true,
+                            plugins: {
+                              legend: {
+                                position: 'right'
+                              },
+                              title: {
+                                display: true,
+                                text: ''
+                              }
+                            }
                           }}
+                          data={oppAccount}
                         />
                       </Box>
                     </Paper>
@@ -360,10 +673,6 @@ const Dashboard = () => {
             </Container>
             <Box p={2} display="flex" alignItems="center" flexDirection="column">
               <Box my={2} p={2} width="100%" maxWidth="800px" textAlign="center"></Box>
-
-              <Box my={2}>
-                <ConvertedLeads Chart={Chart} />
-              </Box>
             </Box>
           </Paper>
         </div>
