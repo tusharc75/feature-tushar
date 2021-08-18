@@ -305,7 +305,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           >
                                             <FormTypes
                                               {...field}
-                                              disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                              disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                               isNew={Boolean(projectSalesId)}
                                               fields={initialData.fields}
                                               fieldData={field}
@@ -348,10 +348,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 >
                                                   <IconButton
                                                     onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                    disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                                    disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                                     size="small"
                                                   >
-                                                    <AddIcon color={(!Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                    <AddIcon color={(Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -390,7 +390,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             >
                                               <FormTypes
                                                 {...field}
-                                                disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                                disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                                 isNew={Boolean(projectSalesId)}
                                                 fields={initialData.fields}
                                                 fieldData={field}
@@ -432,10 +432,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                       onClick={() => {
                                                         setShowAddMarketSegmentDialog(true);
                                                       }}
-                                                      disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                                       size="small"
                                                     >
-                                                      <AddIcon color={(!Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                      <AddIcon color={(Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>
@@ -456,7 +456,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                         </Grid> : field.fieldName === "currency" ? (
                                           <FormTypes
                                             {...field}
-                                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                             isNew={Boolean(projectSalesId)}
                                             values={values}
                                             errors={errors}
@@ -486,7 +486,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : field.fieldName.trim() === "amount" ? (
                                           <FormTypes
-                                           disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                           disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                            isNew={Boolean(projectSalesId)}
                                             fieldId={field._id}
                                             lookup={field.lookup}
@@ -544,7 +544,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                         form.sectionFields.map((field) => (
                           <FormTypes
                             {...field}
-                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
                             isNew={Boolean(projectSalesId)}
                             values={values}
                             errors={errors}
