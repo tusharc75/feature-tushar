@@ -70,9 +70,9 @@ export default function TermsAndCondition(props) {
                     setDeleteRec(params.data);
                     setShowDeleteConfirmBox(true)
                 }}
-                    disabled={actionsPermissions.isDelete ? false : true}
+                    disabled={permissions?.termsAndConditions?.isDelete ? false : true}
                 >
-                    <DeleteIcon color={actionsPermissions.isDelete ? "error" : "disabled"}
+                    <DeleteIcon color={permissions?.termsAndConditions?.isDelete ? "error" : "disabled"}
                     />
                 </IconButton>
             </Tooltip >
@@ -184,6 +184,7 @@ export default function TermsAndCondition(props) {
     return (
 
         <Fragment>
+            {console.log(permissions)}
             <Grid container className="headerbox">
                 <Grid item xs={12}>
                     <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
