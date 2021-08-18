@@ -125,7 +125,7 @@ const ProductInventoryDetailsPage = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {permissions?.entity?.isUpdate && (
+                  {permissions?.productInventory?.isUpdate && (
                     <Button
                       variant="contained"
                       color="primary"
