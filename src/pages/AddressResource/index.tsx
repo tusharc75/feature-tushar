@@ -144,7 +144,7 @@ const AddressResource = () => {
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
   const columns = [
-    { field: 'fullName', headerName: 'Full Name', show: true, disabled: true },
+    { field: 'fullName', headerName: 'Full Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'addressType', headerName: 'Address Type', show: true, disabled: true },
     { field: 'area', headerName: 'Area', show: true, disabled: true },
     { field: 'city', headerName: 'City', show: true, disabled: true },
