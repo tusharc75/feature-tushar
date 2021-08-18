@@ -95,7 +95,7 @@ const CreateProductInventory = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={productInventoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={productInventoryId ? "Update " + routes.productInventory.title : "Create " + routes.productInventory.title} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <InputField
