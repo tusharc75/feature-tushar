@@ -408,7 +408,7 @@ const CreateProduct = (props) => {
                                                                                         disabled={(!Boolean(productId) && field.disableOnEdit)}
                                                                                         size="small"
                                                                                     >
-                                                                                        <AddIcon color="primary" />
+                                                                                        <AddIcon color={(!Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"}/>
                                                                                     </IconButton>
                                                                                 </Tooltip>
                                                                             </Grid>

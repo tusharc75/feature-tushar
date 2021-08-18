@@ -504,7 +504,7 @@ export default function ManageLeadDialog({
                                                     disabled={(!isNew && field.disableOnEdit)}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={(!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -587,7 +587,7 @@ export default function ManageLeadDialog({
                                                       disabled={(!isNew && field.disableOnEdit)}
                                                       size="small"
                                                     >
-                                                      <AddIcon color="primary" />
+                                                      <AddIcon color={(!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>
