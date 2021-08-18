@@ -54,7 +54,7 @@ const ProductList = ({ products, fetchData, count }) => {
         <Grid container className="headerbox">
             <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
         </Grid>
-        <div className="detail-container grid-product-category">
+        <div className="detail-container grid-product-category pr-0">
             <div>
                 <Paper>
                     <CategorySidebar />
