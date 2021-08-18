@@ -3,7 +3,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import ProductList from '../../components/ProductList/ProductList/ProductList';
 import { product } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import InfiniteScroll from 'react-infinite-scroll-component';
 
 export default function Products() {
 
