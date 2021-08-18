@@ -351,7 +351,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                     disabled={!Boolean(projectSalesId) && field.disableOnEdit}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={(!Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -435,7 +435,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                       disabled={!Boolean(projectSalesId) && field.disableOnEdit}
                                                       size="small"
                                                     >
-                                                      <AddIcon color="primary" />
+                                                      <AddIcon color={(!Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>

@@ -462,7 +462,7 @@ export default function ManageOpportunityDialog({
                                                   disabled={disableOwnerAndAccount || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={disableOwnerAndAccount || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -743,7 +743,7 @@ export default function ManageOpportunityDialog({
                                                   disabled={!isNew && field.disableOnEdit}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -826,7 +826,7 @@ export default function ManageOpportunityDialog({
                                                     disabled={!isNew && field.disableOnEdit}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
