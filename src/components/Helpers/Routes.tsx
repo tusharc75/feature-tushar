@@ -171,7 +171,7 @@ const routes = {
   },
   equipmentRentalMaster: {
     title: storedRoutes ? storedRoutes.equipmentRentalMaster?.title : RESOURCE_LABEL.equipmentRentalMaster,
-    path: "/equipt-rental-master",
+    path: "/equiptment-rental-master",
   },
   quoteBuilder: {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
