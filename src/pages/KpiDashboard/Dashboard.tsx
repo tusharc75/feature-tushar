@@ -194,10 +194,10 @@ const Dashboard = () => {
           budget.push(d.budget);
         }
 
-        const revenue = data.reduce((acc, val) => acc + val.totalSell,0);
-        const spend = data.reduce((acc, val) => acc + val.totalCost,0);
+        const revenue = data.length > 1 ? data.map((d) => d.totalSell).reduce((acc, val) => acc + val) : data[0].totalSell;
+        const spend = data.length > 1 ? data.map((d) => d.totalCost).reduce((acc, val) => acc + val) : data[0].totalCost;
 
-        const profit = Math.floor(((revenue - spend) / spend) * 100);
+        const profit = revenue && spend ? Math.floor(((revenue - spend) / spend) * 100) : 0;
 
         setSalesRevenue({
           revenue,
@@ -503,7 +503,7 @@ const Dashboard = () => {
                                 Revenue
                               </Typography>
                               <Typography variant="h5" color="textPrimary">
-                                ${salesRevenue.revenue.toLocaleString()}
+                                ${salesRevenue.revenue?.toLocaleString()}
                               </Typography>
                             </Box>
                           </Paper>
@@ -515,7 +515,7 @@ const Dashboard = () => {
                                 Spend
                               </Typography>
                               <Typography variant="h5" color="textPrimary">
-                                ${salesRevenue.spend.toLocaleString()}
+                                ${salesRevenue.spend?.toLocaleString()}
                               </Typography>
                             </Box>
                           </Paper>
