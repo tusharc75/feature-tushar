@@ -16,6 +16,8 @@ import Box from "@material-ui/core/Box"
 import Typography from "@material-ui/core/Typography"
 import TinyMce from "./../../components/TinyMCE/index"
 import CircularProgress from "@material-ui/core/CircularProgress"
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
@@ -25,8 +27,10 @@ const PdfTemplateSchema = Yup.object().shape({
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
+        padding: theme.spacing(4)
     },
     paper: {
+        width: "100%",
         padding: theme.spacing(2),
         textAlign: 'center',
         color: theme.palette.text.secondary
@@ -61,8 +65,6 @@ export default function NewCreateQuotePdfTemplate(props) {
                     const {
                         data: { data }
                     } = res;
-
-                    console.log('data', data)
                     setInitialValues({
                         name: data?.name,
                         showPageNumberInFooter: data?.pageNumberInFooter,
@@ -131,7 +133,22 @@ export default function NewCreateQuotePdfTemplate(props) {
     }
 
     return <div className={classes.root}>
-        <Grid container spacing={3}>
+        <Grid container className="headerbox">
+            <Grid item md={4} sm={11} xs={10}>
+                <CustomBreadCrumbs
+                    routes={[
+                        {
+                            title: routes.quotePdfTemplate.title,
+                            path: routes.quotePdfTemplate.path
+                        },
+                        {
+                            title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
+                        }
+                    ]}
+                />
+            </Grid>
+        </Grid>
+        <CustomContainer styles={{ top: '10px' }}>
             <Paper className={classes.paper}>
                 {initialValues ? (
                     <Formik
@@ -162,7 +179,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                         </Button>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={3}>
+                                <Grid item xs={12} style={{ textAlign: 'left' }}>
                                     <FormControlLabel
                                         value={values['showPageNumberInFooter']}
                                         control={
@@ -180,7 +197,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                         )}
                     </Formik>) : null}
                 <Grid item xs={12}>
-                    <Box style={{ width: "1000px" }}>
+                    <Box>
                         <Typography variant="h5" component="h5">Header</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -194,29 +211,13 @@ export default function NewCreateQuotePdfTemplate(props) {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            showVariableDropdown={true}
                         />
                     </Box>
                 </Grid>
+
                 <Grid item xs={12}>
-                    <Box style={{ width: "1000px" }}>
-                        <Typography variant="h5" component="h5">Footer</Typography>
-                        <TinyMce
-                            onChange={(value) => {
-                                setDetails((prevState) => ({
-                                    ...prevState,
-                                    footer: value
-                                }))
-                            }}
-                            height={400}
-                            initialValue={initialValues?.footer}
-                            imageOrFileUploadCompletePercentage={(
-                                completePercentage
-                            ) => null}
-                        />
-                    </Box>
-                </Grid>
-                <Grid item xs={12}>
-                    <Box style={{ width: "1000px" }}>
+                    <Box>
                         <Typography variant="h5" component="h5">Below Table</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -230,11 +231,12 @@ export default function NewCreateQuotePdfTemplate(props) {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            showVariableDropdown={true}
                         />
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    <Box style={{ width: "1000px" }}>
+                    <Box>
                         <Typography variant="h5" component="h5">Above Table</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -248,13 +250,31 @@ export default function NewCreateQuotePdfTemplate(props) {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            showVariableDropdown={true}
                         />
                     </Box>
                 </Grid >
-
-
+                <Grid item xs={12}>
+                    <Box>
+                        <Typography variant="h5" component="h5">Footer</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    footer: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.footer}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                            showVariableDropdown={true}
+                        />
+                    </Box>
+                </Grid>
             </Paper>
-        </Grid >
+        </CustomContainer>
     </div >
 }
 

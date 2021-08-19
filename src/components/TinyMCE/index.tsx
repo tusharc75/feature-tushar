@@ -15,6 +15,12 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CircularProgress from "@material-ui/core/CircularProgress"
+import MenuItem from "@material-ui/core/MenuItem"
+import Menu from "@material-ui/core/Menu"
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Select from "@material-ui/core/Select"
+import FormControl from "@material-ui/core/FormControl"
+import InputLabel from "@material-ui/core/InputLabel"
 import 'tinymce/icons/default';
 import "./tinymce.scss"
 
@@ -31,12 +37,20 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: '5px',
         border: '1px solid lightgray',
         borderBottom: '0'
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+        marginTop: '-13px'
+    },
+    varibalesButton: {
+        margin: "0 5px"
     }
 }));
 
 export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
-        fileUploadMaxSize = { ...documentUploadMaxSize } } = props
+        fileUploadMaxSize = { ...documentUploadMaxSize }, showVariableDropdown = false } = props
 
     const classes = useStyles();
     const [imageDetails, setImageDetails] = useState({ width: "", height: "", alt: "" })
@@ -47,6 +61,7 @@ export default function TinyMCE(props) {
     const [isInitiated, setIsInitiated] = useState(false)
     const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
     const [isImgUploading, setImgUploading] = React.useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
     const { setToastConfig } = useContext(CustomToastContext);
 
     const editorRef = useRef(null);
@@ -184,6 +199,19 @@ export default function TinyMCE(props) {
         setImageDetails((prevState) => ({ ...prevState, [name]: value }))
     }
 
+    const handleVaribleSelect = (e) => {
+        const editorContent = editorRef.current.getContent()
+        let newTag = `<p>{{${e}}}</p>`
+        editorRef.current.setContent(`${editorContent}${newTag}`)
+        onChange(`${editorContent}${newTag}`)
+    }
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
     return <>
         <>
             {
@@ -345,14 +373,58 @@ export default function TinyMCE(props) {
 
                         </Fragment>
                         <span >
-                            <Button
-                                startIcon={<HiOutlinePhotograph />}
-                                size="small"
-                                variant="outlined"
-                                onClick={() => setIsUploadImage(true)}
-                            >
-                                Upload Image
-                            </Button>
+                            <Box display="flex" alignItems="center" >
+                                <Button
+                                    startIcon={<HiOutlinePhotograph />}
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => setIsUploadImage(true)}
+                                >
+                                    Upload Image
+                                </Button>
+                            </Box>
+                        </span>
+                        <span>
+                            {
+                                showVariableDropdown ?
+                                    <>
+                                        <Button
+                                            variant="outlined"
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            className={classes.varibalesButton}
+                                            aria-controls="action-menu"
+                                        >
+                                            Variables <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'left'
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+                                            {
+                                                ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                                                    'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map(o => {
+                                                        return <MenuItem
+                                                            onClick={() => handleVaribleSelect(o)}
+                                                            value={o}>{o}</MenuItem>
+                                                    })
+                                            }
+                                        </Menu>
+                                    </>
+
+
+                                    : null
+                                //  ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                                //  'version', 'quoteId', "currency", "expiryDate", "incoTerms"]
+                            }
                         </span>
                     </div>
                     : null}
