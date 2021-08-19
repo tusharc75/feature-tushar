@@ -198,7 +198,6 @@ const Dashboard = () => {
         const spend = data.length > 1 ? data.map((d) => d.totalCost).reduce((acc, val) => acc + val) : data[0].totalCost;
 
         const profit = revenue && spend ? Math.floor(((revenue - spend) / spend) * 100) : 0;
-        console.log(revenue, spend, profit);
 
         setSalesRevenue({
           revenue,
