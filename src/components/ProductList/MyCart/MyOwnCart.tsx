@@ -36,32 +36,9 @@ function MyOwnCart() {
     state: { user }
   }: any = useData();
   const history = useHistory();
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      itemDesc: 'Cactus Wellhead, Frac Tree, 7 1/16 Run, 3 1/16 wing,  10,000 psi, Temperature Class U, Material Class DD',
-      itemSeller: 'Cactus Wellhead',
-      itemPrice: 5000,
-      itemCount: 1
-    },
-    {
-      id: 2,
-      itemDesc: 'Cactus Wellhead, Frac Tree, 7 1/16 Run, 3 1/16 wing,  10,000 psi, Temperature Class U, Material Class DD',
-      itemSeller: 'Cactus Wellhead',
-      itemPrice: 5000,
-      itemCount: 1
-    },
-    {
-      id: 3,
-      itemDesc: 'Cactus Wellhead, Frac Tree, 7 1/16 Run, 3 1/16 wing,  10,000 psi, Temperature Class U, Material Class DD',
-      itemSeller: 'Cactus Wellhead',
-      itemPrice: 5000,
-      itemCount: 1
-    }
-  ]);
-  const [totalCount, setTotalCount] = useState(items.length);
+  const [totalCount, setTotalCount] = useState(0);
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
-  const [totalPrice, setTotalPrice] = useState(15000);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [addedCartItems, setAddedCartItems] = useState([]);
   const [productLoading, setProductLoading] = useState(false);
@@ -81,35 +58,6 @@ function MyOwnCart() {
       });
   };
 
-  function handleDecrease(event, index) {
-    if (items[index].itemCount > 0) items[index].itemCount = items[index].itemCount - 1;
-    setItems([...items]);
-
-    let count = 0,
-      price = 0;
-
-    items.map((item) => {
-      count = count + item.itemCount;
-      price = price + item.itemCount * item.itemPrice;
-    });
-
-    setTotalCount(count);
-    setTotalPrice(price);
-  }
-
-  function handleIncrease(event, index) {
-    items[index].itemCount = items[index].itemCount + 1;
-    setItems([...items]);
-    let count = 0,
-      price = 0;
-    items.map((item) => {
-      count = count + item.itemCount;
-      price = price + item.itemCount * item.itemPrice;
-    });
-
-    setTotalCount(count);
-    setTotalPrice(price);
-  }
   const FracImage = 'https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png';
 
   const onAddToCartItem = (item) => {
@@ -188,6 +136,7 @@ function MyOwnCart() {
       .then(({ data: { data } }) => {
         if (data) {
           setAddedCartItems(data);
+          setTotalCount(data.length)
         }
         if (data && data.length >= 1) {
           setCheckoutLabel('Create Quote');
@@ -216,9 +165,11 @@ function MyOwnCart() {
       });
   };
   const mappedCartItems = {};
+  let tempTotalPrice = 0
   addedCartItems.map((o) => {
     if (!mappedCartItems[o?.productId]) {
       mappedCartItems[o?.productId] = o?.quantity;
+      tempTotalPrice = tempTotalPrice + o?.mrp ? Number(o.mrp) : 0
     }
   });
 
@@ -249,23 +200,16 @@ function MyOwnCart() {
                           <div className={styles.card_price}>
                             {/* Price:{'  '} */}
                             {item?.currency ? currencyCodeToSymbol(item?.currency) : '$'}
-                            {mappedCartItems[item?._id] || ''}
+                            {item?.mrp || 0}
                           </div>
                           <div className={styles.card_seller}>
                             <strong> {item.productName}</strong>
                           </div>
                           <div className={styles.card_desc}>{item.description}</div>
                           <div className={styles.card_vendor}>
-                            <span>Sold by:</span> {item.itemSeller || 'Cactus Wellhead'}
+                            <span>Sold by:</span> {user?.user?.brandName}
                           </div>
                           <div className={styles.card_controls}>
-                            <IconButton onClick={() => onRemoveCartItem(item)} className={styles.card_qnt_button_min}>
-                              <RemoveCircleOutlineIcon className={styles.card_controls_set_icon} />
-                            </IconButton>{' '}
-                            {mappedCartItems[item?._id]}{' '}
-                            <IconButton onClick={() => onAddToCartItem(item)} className={styles.card_qnt_button_plus}>
-                              <AddCircleOutlineIcon className={styles.card_controls_set_icon} />
-                            </IconButton>
                             <Button
                               onClick={() => {
                                 onDeleteCartItem(item);
@@ -273,16 +217,6 @@ function MyOwnCart() {
                               className={styles.remove_product}
                             >
                               Remove
-                            </Button>
-                          </div>
-                          <div>
-                            <Button
-                              variant="contained"
-                              color="secondary"
-                              className={styles.card_add_to_favorite_button}
-                              startIcon={<FavoriteBorderIcon />}
-                            >
-                              Save for later
                             </Button>
                           </div>
                         </div>
@@ -311,7 +245,7 @@ function MyOwnCart() {
                     {' '}
                     Sub-Total <span> ({totalCount} items) </span>{' '}
                   </p>
-                  <h3 className={styles.price_card_price}>Rs. {totalPrice}.00</h3>
+                  <h3 className={styles.price_card_price}>Rs. {tempTotalPrice}.00</h3>
                 </div>
                 <div className={styles.price_card_summary_pickup}>
                   <p>Pickup</p>
@@ -323,7 +257,7 @@ function MyOwnCart() {
                 <hr />
                 <div className={styles.price_card_total}>
                   <h3>Total Amount</h3>
-                  <h3 className={styles.price_card_price}>Rs. {totalPrice}.00</h3>
+                  <h3 className={styles.price_card_price}>Rs. {tempTotalPrice}.00</h3>
                 </div>
               </div>
               {/* <div className={styles.price_card_secure_text}>
@@ -349,24 +283,24 @@ function MyOwnCart() {
               <div className={`gap-3 ${styles.sponsored_items_list}`}>
                 {productLoading
                   ? [...Array(7).keys()].map((o, index) => {
-                      return (
-                        <>
-                          <Box key={o} width={210} marginRight={0.5} my={5}>
-                            <Skeleton variant="rect" width={210} height={118} />
-                            <Box pt={0.5}>
-                              <Skeleton />
-                              <Skeleton width="60%" />
-                              <Skeleton style={{ float: 'right' }} width="40%" />
-                            </Box>
-                          </Box>
-                        </>
-                      );
-                    })
-                  : products.map((product, index: number) => (
+                    return (
                       <>
-                        <Product key={index} product={product} onAddItem={onAddToCartItem} />
+                        <Box key={o} width={210} marginRight={0.5} my={5}>
+                          <Skeleton variant="rect" width={210} height={118} />
+                          <Box pt={0.5}>
+                            <Skeleton />
+                            <Skeleton width="60%" />
+                            <Skeleton style={{ float: 'right' }} width="40%" />
+                          </Box>
+                        </Box>
                       </>
-                    ))}
+                    );
+                  })
+                  : products.map((product, index: number) => (
+                    <>
+                      <Product key={index} product={product} onAddItem={onAddToCartItem} />
+                    </>
+                  ))}
               </div>
             </div>
           </div>
