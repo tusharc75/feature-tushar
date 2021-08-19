@@ -1,22 +1,8 @@
 import { Fragment, useState, useEffect } from 'react';
-import {
-  Grid,
-  Checkbox,
-  FormControlLabel,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  Button,
-  Popover,
-  Box,
-  Typography,
-  MenuItem
-} from '@material-ui/core';
+import { Grid, TextField, FormControl, InputLabel, Select, Button, Popover, Box, MenuItem } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
-import FormTypes from '../../components/Helpers/FormTypes';
 
 const Filters = (props) => {
   const {
@@ -107,21 +93,6 @@ const Filters = (props) => {
           <Box width="250px">
             <Autocomplete
               size="small"
-              disabled={salesFilter.allEntity}
-              fullWidth
-              options={entities}
-              autoHighlight
-              value={salesFilter.entity}
-              getOptionLabel={(option) => option.name || ''}
-              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, entity: val });
-              }}
-              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-            />
-            <Box mt={1} />
-            <Autocomplete
-              size="small"
               fullWidth
               options={salesReps}
               autoHighlight
@@ -195,27 +166,26 @@ const Filters = (props) => {
       </Popover>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Grid container spacing={2}>
-            <Grid item xs={4} sm={2}>
-              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
-                Filters
-              </Button>
-            </Grid>
-            <Grid item xs={4} sm={4}>
-              <FormTypes
-                values={{ currency }}
-                size="small"
-                label="Currency"
-                name="currency"
-                type="currency"
-                isTooltip={false}
-                onChange={(e, val) => setCurrency(val.currencyCode)}
-                touched={{ currency: false }}
-                errors={{ currency: '' }}
-                required={false}
-              />
-            </Grid>
-          </Grid>
+          <Box display="flex">
+            <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+              Filters
+            </Button>
+            <Box mr={2} />
+            <Autocomplete
+              style={{ width: '200px' }}
+              size="small"
+              disabled={salesFilter.allEntity}
+              options={entities}
+              autoHighlight
+              value={salesFilter.entity}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, entity: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
+            />
+          </Box>
         </Grid>
         <Grid item xs={12} sm={6}>
           <Grid container spacing={2}>
