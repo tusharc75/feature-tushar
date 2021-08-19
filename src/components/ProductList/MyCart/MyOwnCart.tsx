@@ -20,11 +20,12 @@ import Typography from '@material-ui/core/Typography';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { BsInfoCircle } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
+import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
 
 function MyOwnCart() {
   const [products, setProducts] = useState([]);
   const [clonedProducts, setClonedProducts] = useState([]);
-
+  const { dispatch }: any = useData();
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -187,6 +188,7 @@ function MyOwnCart() {
       .get(`/user/cart`)
       .then(({ data: { data } }) => {
         if (data) {
+          dispatch({ type: SET_CART_COUNT, payload: data.length });
           setAddedCartItems(data);
         }
         if (data && data.length >= 1) {
@@ -349,24 +351,24 @@ function MyOwnCart() {
               <div className={`gap-3 ${styles.sponsored_items_list}`}>
                 {productLoading
                   ? [...Array(7).keys()].map((o, index) => {
-                      return (
-                        <>
-                          <Box key={o} width={210} marginRight={0.5} my={5}>
-                            <Skeleton variant="rect" width={210} height={118} />
-                            <Box pt={0.5}>
-                              <Skeleton />
-                              <Skeleton width="60%" />
-                              <Skeleton style={{ float: 'right' }} width="40%" />
-                            </Box>
-                          </Box>
-                        </>
-                      );
-                    })
-                  : products.map((product, index: number) => (
+                    return (
                       <>
-                        <Product key={index} product={product} onAddItem={onAddToCartItem} />
+                        <Box key={o} width={210} marginRight={0.5} my={5}>
+                          <Skeleton variant="rect" width={210} height={118} />
+                          <Box pt={0.5}>
+                            <Skeleton />
+                            <Skeleton width="60%" />
+                            <Skeleton style={{ float: 'right' }} width="40%" />
+                          </Box>
+                        </Box>
                       </>
-                    ))}
+                    );
+                  })
+                  : products.map((product, index: number) => (
+                    <>
+                      <Product key={index} product={product} onAddItem={onAddToCartItem} />
+                    </>
+                  ))}
               </div>
             </div>
           </div>
