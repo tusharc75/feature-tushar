@@ -369,6 +369,7 @@ export default function ManageBudgetDialog({
                                                                                         <FormTypes
                                                                                             fields={entityData.fields}
                                                                                             fieldData={field}
+                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                             errors={errors}
                                                                                             touched={touched}
                                                                                             label={field.fieldLabel}
@@ -407,9 +408,10 @@ export default function ManageBudgetDialog({
                                                                                                 >
                                                                                                     <IconButton
                                                                                                         onClick={() => { setShowAddProductCategoryDialog(true); }}
+                                                                                                        disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                         size="small"
                                                                                                     >
-                                                                                                        <AddIcon color="primary" />
+                                                                                                        <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                     </IconButton>
                                                                                                 </Tooltip>
                                                                                             </Grid>
@@ -448,6 +450,7 @@ export default function ManageBudgetDialog({
                                                                                             <FormTypes
                                                                                                 fields={entityData.fields}
                                                                                                 fieldData={field}
+                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                 errors={errors}
                                                                                                 touched={touched}
                                                                                                 label={field.fieldLabel}
@@ -489,9 +492,10 @@ export default function ManageBudgetDialog({
                                                                                                     >
                                                                                                         <IconButton
                                                                                                             onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                             size="small"
                                                                                                         >
-                                                                                                            <AddIcon color="primary" />
+                                                                                                            <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                         </IconButton>
                                                                                                     </Tooltip>
                                                                                                 </Grid>
@@ -530,6 +534,7 @@ export default function ManageBudgetDialog({
                                                                                                 <FormTypes
                                                                                                     fields={entityData.fields}
                                                                                                     fieldData={field}
+                                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                     errors={errors}
                                                                                                     touched={touched}
                                                                                                     label={field.fieldLabel}
@@ -568,9 +573,10 @@ export default function ManageBudgetDialog({
                                                                                                                 onClick={() => {
                                                                                                                     setShowAddMarketSegmentDialog(true);
                                                                                                                 }}
+                                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                                 size="small"
                                                                                                             >
-                                                                                                                <AddIcon color="primary" />
+                                                                                                                <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                             </IconButton>
                                                                                                         </Tooltip>
                                                                                                     </Grid>
