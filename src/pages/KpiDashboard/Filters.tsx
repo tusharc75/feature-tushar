@@ -1,10 +1,19 @@
-import { Fragment, useState, useEffect } from 'react';
-import { Grid, TextField, FormControl, InputLabel, Select, Button, Popover, Box, MenuItem } from '@material-ui/core';
+import { useState, useEffect } from 'react';
+import { Grid, TextField, FormControl, InputLabel, Select, Button, Popover, Box, MenuItem, AppBar } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
 
+const useStyles = makeStyles({
+  appBar: {
+    padding: 0,
+    height: 70
+  }
+});
+
 const Filters = (props) => {
+  const classes = useStyles();
   const {
     entities,
     marketSegments,
@@ -15,11 +24,12 @@ const Filters = (props) => {
     setSalesFilter,
     moment,
     salesReps,
-    customerAccounts
+    customerAccounts,
+    status,
+    setStatus
   } = props;
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
-  const [currency, setCurrency] = useState('');
   const [timeFrame, setTimeFrame] = useState<any>('1-year');
 
   const handleClickFilter = (event) => {
@@ -75,7 +85,7 @@ const Filters = (props) => {
   }, [timeFrame]);
 
   return (
-    <Fragment>
+    <AppBar className={classes.appBar} position="sticky" elevation={0} color="default">
       <Popover
         open={openFilter}
         anchorEl={filterAnchor}
@@ -164,93 +174,104 @@ const Filters = (props) => {
           </Box>
         </Box>
       </Popover>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <Box display="flex">
-            <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
-              Filters
-            </Button>
-            <Box mr={2} />
-            <Autocomplete
-              style={{ width: '200px' }}
-              size="small"
-              disabled={salesFilter.allEntity}
-              options={entities}
-              autoHighlight
-              value={salesFilter.entity}
-              getOptionLabel={(option) => option.name || ''}
-              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, entity: val });
-              }}
-              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Grid container spacing={2}>
-            <Grid item sm={4}>
-              <FormControl fullWidth size="small" variant="outlined">
-                <InputLabel id="duration">Select Duration</InputLabel>
-                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                  <MenuItem value={'custom'}>Custom</MenuItem>
+      <Box p={2}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <Box display="flex">
+              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                Filters
+              </Button>
+              <Box mr={2} />
+              <Autocomplete
+                style={{ width: '150px' }}
+                size="small"
+                disabled={salesFilter.allEntity}
+                options={entities}
+                autoHighlight
+                value={salesFilter.entity}
+                getOptionLabel={(option) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  setSalesFilter({ ...salesFilter, entity: val });
+                }}
+                renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
+              />
+              <Box mr={2} />
+              <FormControl style={{ width: '150px' }} size="small" variant="outlined">
+                <InputLabel id="status">Status</InputLabel>
+                <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
+                  <MenuItem value={'won'}>Won</MenuItem>
+                  <MenuItem value={'lost'}>Lost</MenuItem>
+                  <MenuItem value={'open'}>Open</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item sm={4}>
-              <KeyboardDatePicker
-                disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                disableFuture
-                openTo="year"
-                format="MM/dd/yyyy"
-                maxDate={salesFilter.between.from}
-                label="From"
-                views={['year', 'month', 'date']}
-                value={salesFilter.between.from}
-                onChange={(date) => {
-                  setSalesFilter({ ...salesFilter, between: { from: date, to: salesFilter.between.to } });
-                }}
-              />
-            </Grid>
-            <Grid item sm={4}>
-              <KeyboardDatePicker
-                disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                minDate={salesFilter.between.from}
-                disableFuture
-                openTo="year"
-                format="MM/dd/yyyy"
-                label="To"
-                views={['year', 'month', 'date']}
-                value={salesFilter.between.to}
-                onChange={(date) => {
-                  setSalesFilter({ ...salesFilter, between: { to: date, from: salesFilter.between.from } });
-                }}
-              />
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Grid container spacing={2}>
+              <Grid item sm={4}>
+                <FormControl fullWidth size="small" variant="outlined">
+                  <InputLabel id="duration">Select Duration</InputLabel>
+                  <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                    <MenuItem value={'custom'}>Custom</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item sm={4}>
+                <KeyboardDatePicker
+                  disabled={timeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  variant="inline"
+                  fullWidth
+                  size="small"
+                  disableFuture
+                  openTo="year"
+                  format="MM/dd/yyyy"
+                  maxDate={salesFilter.between.from}
+                  label="From"
+                  views={['year', 'month', 'date']}
+                  value={salesFilter.between.from}
+                  onChange={(date) => {
+                    setSalesFilter({ ...salesFilter, between: { from: date, to: salesFilter.between.to } });
+                  }}
+                />
+              </Grid>
+              <Grid item sm={4}>
+                <KeyboardDatePicker
+                  disabled={timeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  variant="inline"
+                  fullWidth
+                  size="small"
+                  minDate={salesFilter.between.from}
+                  disableFuture
+                  openTo="year"
+                  format="MM/dd/yyyy"
+                  label="To"
+                  views={['year', 'month', 'date']}
+                  value={salesFilter.between.to}
+                  onChange={(date) => {
+                    setSalesFilter({ ...salesFilter, between: { to: date, from: salesFilter.between.from } });
+                  }}
+                />
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <Grid container spacing={2}>
-        <Grid item sm={6}></Grid>
-        <Grid item sm={6}></Grid>
-        <Grid item sm={6}></Grid>
-        <Grid item sm={6}></Grid>
-        {salesFilter.marketSegment && <Grid item sm={6}></Grid>}
-        <Grid item sm={6}></Grid>
-      </Grid>
-    </Fragment>
+        <Grid container spacing={2}>
+          <Grid item sm={6}></Grid>
+          <Grid item sm={6}></Grid>
+          <Grid item sm={6}></Grid>
+          <Grid item sm={6}></Grid>
+          {salesFilter.marketSegment && <Grid item sm={6}></Grid>}
+          <Grid item sm={6}></Grid>
+        </Grid>
+      </Box>
+    </AppBar>
   );
 };
 
