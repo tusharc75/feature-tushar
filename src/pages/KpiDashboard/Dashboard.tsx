@@ -223,7 +223,7 @@ const Dashboard = () => {
   const fetchOpportunitySalesRep = useCallback(() => {
     let params = {
       entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      status: 'open',
+      status,
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -289,7 +289,7 @@ const Dashboard = () => {
   const fetchOpportunityContact = useCallback(() => {
     let params = {
       entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      status: 'open',
+      status,
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -322,7 +322,7 @@ const Dashboard = () => {
           labels,
           datasets: [
             {
-              label: '',
+              label: 'Customer Account',
               data: datasets,
               backgroundColor: [
                 'rgba(255, 99, 132, 0.8)',
@@ -354,6 +354,7 @@ const Dashboard = () => {
 
   const fetchOpenQuote = useCallback(() => {
     let params = {
+      status,
       entity: salesFilter.entity ? salesFilter.entity['id'] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
@@ -578,20 +579,21 @@ const Dashboard = () => {
         <div className="detail-container">
           <Paper>
             <Container maxWidth="xl">
+              <Filters
+                moment={moment}
+                entities={entities}
+                salesReps={salesReps}
+                customerAccounts={customerAccounts}
+                marketSegments={marketSegments}
+                subMarketSegments={subMarketSegments}
+                productCategory={productCategory}
+                setSubMarketSegment={setSubMarketSegments}
+                salesFilter={salesFilter}
+                setSalesFilter={setSalesFilter}
+                status={status}
+                setStatus={setStatus}
+              />
               <Box py={2}>
-                <Filters
-                  moment={moment}
-                  entities={entities}
-                  salesReps={salesReps}
-                  customerAccounts={customerAccounts}
-                  marketSegments={marketSegments}
-                  subMarketSegments={subMarketSegments}
-                  productCategory={productCategory}
-                  setSubMarketSegment={setSubMarketSegments}
-                  salesFilter={salesFilter}
-                  setSalesFilter={setSalesFilter}
-                />
-
                 <TopDashboard Chart={Chart} regionSales={regionSales} salesRevenue={salesRevenue} salesData={salesData} topProducts={topProducts} />
 
                 <Top2Dashboard topProducts={topProducts} allEntitySalesData={allEntitySalesData} openQuoteData={openQuoteData} Chart={Chart} />

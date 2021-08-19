@@ -82,7 +82,7 @@ const OpportunityDashboards = (props) => {
                       position: 'right'
                     },
                     title: {
-                      display: true,
+                      display: false,
                       text: ''
                     }
                   }
