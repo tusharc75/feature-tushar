@@ -1,16 +1,21 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
-import PDFTemplateSection from "./PdfTemplateSection"
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Checkbox from "@material-ui/core/Checkbox"
+import { useParams, useHistory } from 'react-router-dom';
+import routes from '../../components/Helpers/Routes';
+import Box from "@material-ui/core/Box"
+import Typography from "@material-ui/core/Typography"
+import TinyMce from "./../../components/TinyMCE/index"
+import CircularProgress from "@material-ui/core/CircularProgress"
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
@@ -34,33 +39,97 @@ const useStyles = makeStyles((theme) => ({
 
 export default function NewCreateQuotePdfTemplate(props) {
 
+    const { id } = useParams();
+    const history = useHistory();
     const [details, setDetails] = useState({
         header: "",
         footer: "",
         aboveTable: "",
         belowTable: ""
     })
-    const [initialValues, setInitialValues] = useState({})
-    const [isLoading, setIsLoading] = useState(false)
+    const [initialValues, setInitialValues] = useState(null)
+    const [isUpdating, setIsUpdating] = useState(false);
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
+    const [isClone] = useState(history.location.state?.isClone ? true : false);
+
+    useEffect(() => {
+        if (id && id !== '0') {
+            (async () => {
+                try {
+                    const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
+                    const {
+                        data: { data }
+                    } = res;
+
+                    console.log('data', data)
+                    setInitialValues({
+                        name: data?.name,
+                        showPageNumberInFooter: data?.pageNumberInFooter,
+                        header: data?.header,
+                        footer: data?.footer,
+                        aboveTable: data?.aboveTable,
+                        belowTable: data?.belowTable
+                    });
+                    setDetails({
+                        header: data?.header,
+                        footer: data?.footer,
+                        aboveTable: data?.aboveTable,
+                        belowTable: data?.belowTable
+                    })
+
+                } catch (e) {
+                    toastConfig.setToastConfig(e);
+                }
+            })();
+        }
+        else {
+            setInitialValues({
+                name: "",
+                showPageNumberInFooter: false,
+                header: "",
+                footer: "",
+                aboveTable: "",
+                belowTable: ""
+            })
+        }
+    }, [id]);
 
     const handleSubmit = (values) => {
-        console.log('values', values)
-        axiosInstance()
-            .post('/quote-pdf-template', {
-                ...details, name: values.name,
-                pageNumberInFooter: values.showPageNumberInFooter
-            })
-            .then(({ data: { data } }) => {
-                setIsLoading(false);
-                console.log(" line 41 ~ .then ~ data", data)
-            })
-            .catch((error) => {
-                setIsLoading(false);
-                toastConfig.setToastConfig(error);
-            });
+        setIsUpdating(true);
+        if (id === '0' || isClone === true) {
+            axiosInstance()
+                .post('/quote-pdf-template', {
+                    ...details, name: values.name,
+                    pageNumberInFooter: values.showPageNumberInFooter
+                })
+                .then(({ data: { data } }) => {
+                    history.push({ pathname: routes.quotePdfTemplate.path });
+                    setIsUpdating(false);
+                })
+                .catch((error) => {
+                    setIsUpdating(false);
+                    toastConfig.setToastConfig(error);
+                });
+        }
+        else {
+            axiosInstance()
+                .put('/quote-pdf-template', {
+                    _id: id,
+                    ...details, name: values.name,
+                    pageNumberInFooter: values.showPageNumberInFooter
+                })
+                .then(({ data: { data } }) => {
+                    setIsUpdating(false);
+                    history.push({ pathname: routes.quotePdfTemplate.path });
+                })
+                .catch((error) => {
+                    setIsUpdating(false);
+                    toastConfig.setToastConfig(error);
+                });
+        }
     }
+
     return <div className={classes.root}>
         <Grid container spacing={3}>
             <Paper className={classes.paper}>
@@ -87,10 +156,9 @@ export default function NewCreateQuotePdfTemplate(props) {
                                         />
                                     </Grid>
                                     <Grid item xs={6} className={classes.saveButtonContainer}>
-                                        <Button
-                                            onClick={submitForm}
-                                            variant="contained" color="primary" >
-                                            Save
+                                        <Button disabled={isUpdating} size="small" color="primary"
+                                            onClick={submitForm} variant="contained">
+                                            Save{isUpdating && <CircularProgress size={24} />}
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -108,56 +176,83 @@ export default function NewCreateQuotePdfTemplate(props) {
                                         label="Show page number in footer"
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <PDFTemplateSection
-                                        sectionName="header"
-                                        label="Header"
-                                        details={details}
-                                        setValue={(sectionName, value) => {
-                                            setDetails((prevState) => ({
-                                                ...prevState,
-                                                [sectionName]: value
-                                            }))
-                                        }
-                                        }
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <PDFTemplateSection
-                                        sectionName="footer"
-                                        details={details}
-                                        label="Footer"
-                                        setValue={(sectionName, value) => setDetails((prevState) => ({
-                                            ...prevState,
-                                            [sectionName]: value
-                                        }))}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <PDFTemplateSection
-                                        sectionName="belowTable"
-                                        details={details}
-                                        label="Below Table"
-                                        setValue={(sectionName, value) => setDetails((prevState) => ({
-                                            ...prevState,
-                                            [sectionName]: value
-                                        }))}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <PDFTemplateSection
-                                        sectionName="aboveTable"
-                                        details={details}
-                                        label="Above Table"
-                                        setValue={(sectionName, value) => setDetails((prevState) => ({
-                                            ...prevState,
-                                            [sectionName]: value
-                                        }))}
-                                    />
-                                </Grid >
                             </Form>
                         )}
                     </Formik>) : null}
+                <Grid item xs={12}>
+                    <Box style={{ width: "1000px" }}>
+                        <Typography variant="h5" component="h5">Header</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    header: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.header}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={12}>
+                    <Box style={{ width: "1000px" }}>
+                        <Typography variant="h5" component="h5">Footer</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    footer: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.footer}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={12}>
+                    <Box style={{ width: "1000px" }}>
+                        <Typography variant="h5" component="h5">Below Table</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    belowTable: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.belowTable}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={12}>
+                    <Box style={{ width: "1000px" }}>
+                        <Typography variant="h5" component="h5">Above Table</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    aboveTable: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.aboveTable}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                        />
+                    </Box>
+                </Grid >
+
+
             </Paper>
         </Grid >
     </div >
