@@ -109,6 +109,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
     path: "/product",
   },
+  productDetail: {
+    title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
+    path: "/product/detail",
+  },
   formBuilder: {
     title: storedRoutes ? storedRoutes.formBuilder?.title : RESOURCE_LABEL.formBuilder,
     path: "/form-builder",
