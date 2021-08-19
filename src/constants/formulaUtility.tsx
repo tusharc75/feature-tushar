@@ -423,13 +423,13 @@ export const extractFields = (fields) => {
         let ele = { ..._field }
         if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
             if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-                ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                ele.formulaUnits && ele.formulaUnits.forEach(_unit => {
                     result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _unit + ")", fieldName: ele.fieldName + "_" + _unit.toLowerCase() })
                 })
             }
             else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                 ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
-                    ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                    ele.formulaUnits && ele.formulaUnits.forEach(_unit => {
                         result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + "/" + _unit + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
                     })
                 })

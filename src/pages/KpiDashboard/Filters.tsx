@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import {
   Grid,
   Checkbox,
@@ -8,58 +8,234 @@ import {
   InputLabel,
   Select,
   Button,
-  Popper,
-  Fade,
-  Paper,
-  Typography
+  Popover,
+  Box,
+  Typography,
+  MenuItem
 } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { DatePicker } from '@material-ui/pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
+import FormTypes from '../../components/Helpers/FormTypes';
 
 const Filters = (props) => {
-  const { entities, marketSegments, subMarketSegments, productCategory, setSubMarketSegments, salesFilter, setSalesFilter } = props;
+  const {
+    entities,
+    marketSegments,
+    subMarketSegments,
+    productCategory,
+    setSubMarketSegments,
+    salesFilter,
+    setSalesFilter,
+    moment,
+    salesReps,
+    customerAccounts
+  } = props;
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
+  const [currency, setCurrency] = useState('');
+  const [timeFrame, setTimeFrame] = useState<any>('1-year');
 
   const handleClickFilter = (event) => {
     setFilterAnchor(event.currentTarget);
     setOpenFilter((prev) => !prev);
   };
 
+  useEffect(() => {
+    switch (timeFrame) {
+      case '1-month':
+        setSalesFilter({
+          ...salesFilter,
+          between: {
+            from: new Date(moment().subtract('1', 'month').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      case '3-months':
+        setSalesFilter({
+          ...salesFilter,
+          between: {
+            from: new Date(moment().subtract('3', 'months').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      case '6-months':
+        setSalesFilter({
+          ...salesFilter,
+          between: {
+            from: new Date(moment().subtract('6', 'months').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      case '1-year':
+        setSalesFilter({
+          ...salesFilter,
+          between: {
+            from: new Date(moment().subtract('1', 'year').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      default:
+        break;
+    }
+  }, [timeFrame]);
+
   return (
     <Fragment>
-      <Popper open={openFilter} placement="right-start" anchorEl={filterAnchor} transition>
-        {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={350}>
-            <Paper>
-              <Typography>The content of the Popper.</Typography>
-            </Paper>
-          </Fade>
-        )}
-      </Popper>
-      <Grid container>
+      <Popover
+        open={openFilter}
+        anchorEl={filterAnchor}
+        onClose={handleClickFilter}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+      >
+        <Box p={2}>
+          <Box width="250px">
+            <Autocomplete
+              size="small"
+              disabled={salesFilter.allEntity}
+              fullWidth
+              options={entities}
+              autoHighlight
+              value={salesFilter.entity}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, entity: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={salesReps}
+              autoHighlight
+              value={salesFilter.salesRep}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, salesRep: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={customerAccounts}
+              autoHighlight
+              value={salesFilter.customerAccount}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, customerAccount: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={marketSegments}
+              autoHighlight
+              value={salesFilter.marketSegment}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, marketSegment: val });
+                if (val) {
+                  setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
+                } else {
+                  setSubMarketSegments([]);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={subMarketSegments}
+              autoHighlight
+              value={salesFilter.subMarketSegment}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
+              renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={productCategory}
+              autoHighlight
+              value={salesFilter.productCategory}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
+              renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
+            />
+          </Box>
+        </Box>
+      </Popover>
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
-            Filters
-          </Button>
+          <Grid container spacing={2}>
+            <Grid item xs={4} sm={2}>
+              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                Filters
+              </Button>
+            </Grid>
+            <Grid item xs={4} sm={4}>
+              <FormTypes
+                values={{ currency }}
+                size="small"
+                label="Currency"
+                name="currency"
+                type="currency"
+                isTooltip={false}
+                onChange={(e, val) => setCurrency(val.currencyCode)}
+                touched={{ currency: false }}
+                errors={{ currency: '' }}
+                required={false}
+              />
+            </Grid>
+          </Grid>
         </Grid>
         <Grid item xs={12} sm={6}>
           <Grid container spacing={2}>
-            <Grid item>
+            <Grid item sm={4}>
               <FormControl fullWidth size="small" variant="outlined">
-                <InputLabel htmlFor="grouped-native-select">Select Time</InputLabel>
-                <Select native value={1} id="grouped-native-select">
-                  <option value={1}>Last 1 Year</option>
-                  <option value={2}>Last 6 Months</option>
-                  <option value={3}>Last 3 Months</option>
-                  <option value={4}>Last 1 Month</option>
+                <InputLabel id="duration">Select Duration</InputLabel>
+                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                  <MenuItem value={'custom'}>Custom</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item>
-              <DatePicker
+            <Grid item sm={4}>
+              <KeyboardDatePicker
+                disabled={timeFrame !== 'custom'}
                 inputVariant="outlined"
+                variant="inline"
                 fullWidth
                 size="small"
                 disableFuture
@@ -74,9 +250,11 @@ const Filters = (props) => {
                 }}
               />
             </Grid>
-            <Grid item>
-              <DatePicker
+            <Grid item sm={4}>
+              <KeyboardDatePicker
+                disabled={timeFrame !== 'custom'}
                 inputVariant="outlined"
+                variant="inline"
                 fullWidth
                 size="small"
                 minDate={salesFilter.between.from}
@@ -95,94 +273,12 @@ const Filters = (props) => {
         </Grid>
       </Grid>
       <Grid container spacing={2}>
-        <Grid item sm={6}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={salesFilter.allEntity}
-                onChange={(e) => setSalesFilter({ ...salesFilter, allEntity: e.target.checked })}
-                color="primary"
-              />
-            }
-            label="All Entity"
-          />
-        </Grid>
-        <Grid item sm={6}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={salesFilter.byMonth}
-                onChange={(e) => setSalesFilter({ ...salesFilter, byMonth: e.target.checked })}
-                color="primary"
-              />
-            }
-            label="By Month"
-          />
-        </Grid>
-        <Grid item sm={6}>
-          <Autocomplete
-            size="small"
-            disabled={salesFilter.allEntity}
-            fullWidth
-            options={entities}
-            autoHighlight
-            value={salesFilter.entity}
-            getOptionLabel={(option) => option.name || ''}
-            getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-            onChange={(_, val) => {
-              setSalesFilter({ ...salesFilter, entity: val });
-            }}
-            renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-          />
-        </Grid>
-        <Grid item sm={6}>
-          <Autocomplete
-            size="small"
-            fullWidth
-            options={marketSegments}
-            autoHighlight
-            value={salesFilter.marketSegment}
-            getOptionLabel={(option) => option.name || ''}
-            getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-            onChange={(_, val) => {
-              setSalesFilter({ ...salesFilter, marketSegment: val });
-              if (val) {
-                setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
-              } else {
-                setSubMarketSegments([]);
-              }
-            }}
-            renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
-          />
-        </Grid>
-        {salesFilter.marketSegment && (
-          <Grid item sm={6}>
-            <Autocomplete
-              size="small"
-              fullWidth
-              options={subMarketSegments}
-              autoHighlight
-              value={salesFilter.subMarketSegment}
-              getOptionLabel={(option) => option.name || ''}
-              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
-              renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
-            />
-          </Grid>
-        )}
-        <Grid item sm={6}>
-          <Autocomplete
-            size="small"
-            fullWidth
-            options={productCategory}
-            autoHighlight
-            value={salesFilter.productCategory}
-            getOptionLabel={(option) => option.name || ''}
-            getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-            onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
-            renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
-          />
-        </Grid>
+        <Grid item sm={6}></Grid>
+        <Grid item sm={6}></Grid>
+        <Grid item sm={6}></Grid>
+        <Grid item sm={6}></Grid>
+        {salesFilter.marketSegment && <Grid item sm={6}></Grid>}
+        <Grid item sm={6}></Grid>
       </Grid>
     </Fragment>
   );

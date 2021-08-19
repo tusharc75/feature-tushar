@@ -175,6 +175,7 @@ const Login = () => {
                     <Box display="flex" flexDirection="column" alignItems="center">
                       <Box mb={3}>
                         <TextField
+                          data-testid="email"
                           style={{ width: 260 }}
                           variant="outlined"
                           type="email"
@@ -189,6 +190,7 @@ const Login = () => {
                       </Box>
                       <Box>
                         <TextField
+                          data-testid="password"
                           style={{ width: 260 }}
                           variant="outlined"
                           type="password"

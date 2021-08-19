@@ -417,7 +417,7 @@ export default function ManageContact(props) {
                                                   size="small"
                                                   disabled={fromProject || (!isNew && field.disableOnEdit)}
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit)) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>

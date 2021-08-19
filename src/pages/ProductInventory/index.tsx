@@ -58,8 +58,8 @@ const ProductInventory = () => {
 
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -138,15 +138,11 @@ const ProductInventory = () => {
         });
     }
 
-    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <span className="link" onClick={() => {
-            setProductInventoryId(params.data.id);
-            setOpen(true);
-        }}>
-            <CustomRenderCell value={params.value} />
-        </span>
-
-    </span>
+    const NameRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+          {params.value}
+        </Link>
+      );
 
 
     const ActionsRenderer = params => (
