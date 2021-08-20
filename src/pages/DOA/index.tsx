@@ -103,7 +103,6 @@ const intialState = {
 
 const DOARequest = () => {
   const toastConfig = useContext(CustomToastContext);
-  const [productBuilder, setProductBuilder] = useState([]);
   const [gridApi, setGridApi] = useState(null);
 
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -117,7 +116,7 @@ const DOARequest = () => {
   } = state;
   const columnState = JSON.parse(localStorage.getItem("doaRequestPage"));
 
-  const [columns, setColumns] = useState([
+  const [columns] = useState([
     {
       field: "name",
       headerName: "Name",
@@ -229,7 +228,6 @@ const DOARequest = () => {
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
-        setProductBuilder(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
