@@ -60,7 +60,7 @@ export default function TinyMCE(props) {
     const { setToastConfig } = useContext(CustomToastContext);
 
     const editorRef = useRef(null);
-    const handleUploadFile = async (ev) => {
+    const handleUploadFile = (ev) => {
         if (ev.target.files && ev.target.files.length) {
             let files = ev.target.files;
 
@@ -136,7 +136,7 @@ export default function TinyMCE(props) {
             });
     };
 
-    const handleUploadImage = async (event) => {
+    const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
             if (file.size > imageUploadMaxSize.size) {
@@ -146,12 +146,6 @@ export default function TinyMCE(props) {
                     message: `Image must be less than ${imageUploadMaxSize.text} size`
                 });
             } else {
-                // if (checkImageUrl(file.type)) {
-                //     setUploadError(false)
-                //     let url = ""
-                //     url = (await toBase64(file)) + ""
-                //     setImageUrl(url)
-                // }
                 getFileUrl(file, "/user/upload-public", { isImage: true })
             }
 
