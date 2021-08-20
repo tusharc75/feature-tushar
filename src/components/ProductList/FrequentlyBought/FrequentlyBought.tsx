@@ -1,16 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styles from './frequently_bought.module.scss';
 import Checkbox from '@material-ui/core/Checkbox';
-// import ButtonDesign from "../../components/Buttondesign/Buttondesign";
-import { Button, IconButton } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import iphone12 from '../../../assets/iphone-12.jpeg';
-import ipadPro from '../../../assets/ipad-pro.jpg';
-import AppleWatch from '../../../assets/Apple-watch.jpeg';
+import axiosInstance from '../../../axios/axiosInstance';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import CircularProgress from "@material-ui/core/CircularProgress"
 
-function FrequentlyBought() {
+function FrequentlyBought({ id }) {
+  console.log('id', id)
+
+  const history = useHistory();
   const [count, setCount] = useState(0);
+  const [checkedItems, setCheckedItems] = useState([])
   const [totalPrice, setTotalPrice] = useState(0);
+  const [frequentData, setFrequentData] = useState([]);
+  const toastConfig = useContext(CustomToastContext);
+  const [loading, setLoading] = useState(false)
   const [items, setItems] = useState([
     {
       id: 1,
@@ -26,6 +33,83 @@ function FrequentlyBought() {
     }
   ]);
 
+  useEffect(() => {
+    if (id) fetchFrequentProducts()
+  }, [id])
+
+  const fetchCart = () => {
+    setLoading(true)
+    axiosInstance()
+      .get(`/user/cart`).then(({ data: { data } }) => {
+        let tempMappedQuantity = {}
+        if (data && data.length) {
+          data.forEach(o => {
+            tempMappedQuantity[o.productId] = o.quantity
+          })
+        }
+
+        let cartItems = frequentData.filter(o => (checkedItems.indexOf(o._id) >= 0)).map(o => {
+          return {
+            quantity: `${tempMappedQuantity[o._id] || 1}`,
+            productId: o._id
+          }
+        })
+        axiosInstance()
+          .post(`/user/cart`, {
+            products: [...cartItems]
+          })
+          .then(({ data }) => {
+            setLoading(false)
+            history.push("/product-list");
+          }).catch((error) => {
+            setLoading(false)
+            toastConfig.setToastConfig(error);
+          });
+      })
+  }
+
+  const fetchFrequentProducts = () => {
+    axiosInstance()
+      .get(`product/customer/frequent/${id}`)
+      .then(({ data: { data } }) => {
+        setFrequentData([...data])
+        let tPrice = 0
+        if (data && data.length) {
+          let items = data.map(o => {
+            tPrice = tPrice + parseInt(o?.mrp)
+            return o._id
+          })
+          setTotalPrice(tPrice)
+          setCheckedItems([...items])
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const changeTotalPrice = (checkedItems) => {
+    let tPrice = 0
+    frequentData.forEach(o => {
+      if (checkedItems.indexOf(o._id) >= 0) {
+        tPrice = tPrice + parseInt(o?.mrp)
+      }
+      return o._id
+    })
+    setTotalPrice(tPrice)
+  }
+
+  const handleCheckedItems = (e, id) => {
+    let items = [...checkedItems]
+    if (e.target.checked) {
+      items = [...items, id]
+    }
+    else {
+      items.splice(items.indexOf(id), 1)
+    }
+    changeTotalPrice(items)
+    setCheckedItems([...items])
+  }
   function countTrue4obj(obj) {
     let count = 0;
     for (var p in obj) {
@@ -51,7 +135,12 @@ function FrequentlyBought() {
     setTotalPrice(cost);
     setCount(total);
   };
+
+  const onAddSelectedToCart = () => {
+    fetchCart()
+  }
   const FracImage = 'https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png';
+
   return (
     <div className={styles.outerbox}>
       <div className={styles.set_width}>
@@ -59,48 +148,58 @@ function FrequentlyBought() {
           Frequently Bought Together
         </h2>
         <div className={styles.items_flex}>
-          <div>
-            {' '}
-            <img src={ipadPro} className={styles.frequently_bought_together_products}></img>
-          </div>
-          <span className={styles.set_icon}>
-            <AddIcon />
-          </span>
-          <div>
-            {' '}
-            <img src={iphone12} className={styles.frequently_bought_together_products}></img>{' '}
-          </div>
-          <span className={styles.set_icon}>
-            <AddIcon />
-          </span>
-          <div>
-            <img src={AppleWatch} className={styles.frequently_bought_together_products}></img>
-          </div>
+          {
+            frequentData && frequentData.length ?
+              frequentData.map((o, i) => {
+                return <>
+                  {
+                    checkedItems.indexOf(o._id) >= 0 ?
+                      <>
+                        <div>
+                          {' '}
+                          <img src={o?.productImage} alt={o?.productName} className={styles.frequently_bought_together_products}></img>
+                        </div>
+                        {
+                          i < checkedItems.length - 1 ?
+                            <span className={styles.set_icon}>
+                              <AddIcon />
+                            </span> : null
+                        }
+                      </> : null
+                  }
+                </>
+              }) : null
+          }
         </div>
+
         <div className={styles.total_price}>
           <h2>Total Price = &nbsp;</h2>
-          <h3>$2,799.00</h3>
+          <h3>${totalPrice}</h3>
         </div>
         <div className={styles.add_to_selected_card_button}>
-          <Button variant="contained" color="primary">
-            ADD SELECTED TO CART
+          <Button variant="contained" color="primary"
+            disabled={loading}
+            onClick={onAddSelectedToCart} >
+            {
+              loading ? <CircularProgress /> : null
+            } ADD SELECTED TO CART
           </Button>
           <div className={styles.contain_all_items}>
-            <div className={styles.frequently_bought_products_primary}>
-              <Checkbox disabled checked inputProps={{ 'aria-label': 'disabled checked checkbox' }} size={'small'} className={styles.checkbox} />
-              <p>This items: iPad pro 256Gb &nbsp;<span>$599.00</span></p>
-            </div>
-            <div className={styles.frequently_bought_products_secondary}>
-              <Checkbox defaultChecked size="small" inputProps={{ 'aria-label': 'checkbox with small size' }}  className={styles.checkbox}/> 
-              <h5>Apple iphone 12 purple 128Gb 4GB A!4 Boinic chip 5nm &nbsp;<span>$799.00</span></h5>
-            </div>
-            <div className={styles.frequently_bought_products_secondary}>
-              <Checkbox defaultChecked size="small" inputProps={{ 'aria-label': 'checkbox with small size' }}  className={styles.checkbox}/> 
-              <h5>Apple watch series 6 44mm nike addition &nbsp;<span>$399.00</span></h5>
-            </div>
+            {
+              frequentData && frequentData.length ?
+                frequentData.map((o, i) => {
+                  return <div className={styles.frequently_bought_products_primary}>
+                    <Checkbox checked={checkedItems.indexOf(o._id) >= 0}
+                      onChange={(e) => handleCheckedItems(e, o._id)}
+                      inputProps={{ 'aria-label': 'disabled checked checkbox' }} size={'small'} className={styles.checkbox} />
+                    <p>{o?.description} &nbsp;<span>${o?.mrp}</span></p>
+                  </div>
+                }) : null
+            }
           </div>
         </div>
       </div>
+
 
       <div className={styles.wrapper}>
         <div className={styles.card}>

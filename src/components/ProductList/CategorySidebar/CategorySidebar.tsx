@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
 import IconButton from '@material-ui/core/IconButton';
-import { Checkbox, Paper } from '@material-ui/core';
+import { Paper } from '@material-ui/core';
 import styles from './category-sidebar.module.scss';
 import TreeView from '@material-ui/lab/TreeView';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -23,9 +23,8 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(4)
   },
   input: {
-    marginLeft: theme.spacing(3),
-    flex: 1,
-    width: '70%'
+    marginLeft: theme.spacing(1),
+    flex: 1
   },
   iconButton: {
     padding: 10
@@ -87,12 +86,10 @@ const CategorySidebar = ({ fetchData }) => {
 
   return (
     <div className={styles.sidebar_nav}>
-      <Paper component="form" className={`d-flex ${classes.root}`}>
-        <InputBase className={classes.input} placeholder="Search By Category" inputProps={{ 'aria-label': 'search' }} />
+      <Paper component="form" className={classes.root}>
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
           <SearchIcon />
         </IconButton>
-
       </Paper>
       {
         productCategories.map(obj => {
@@ -108,51 +105,46 @@ const CategorySidebar = ({ fetchData }) => {
       }
       <h3 className={styles.single_category_name}>Ratings</h3>
       <div className={styles.rating}>
-        <p className={styles.single_category_name && styles.font_size}>Safety</p>
+        <p className={styles.single_category_name}>Safety</p>
         <Rating
           name="simple-controlled"
           value={valueSafety}
-          className={styles.rating_size}
           onChange={(event, newValueSafety) => {
             setValueSafety(newValueSafety);
           }}
-
         />
       </div>
       <div className={styles.rating}>
-        <p className={styles.single_category_name && styles.font_size}>Responsiveness</p>
+        <p className={styles.single_category_name}>Responsiveness</p>
         <Rating
           name="simple-controlled"
           value={valueRes}
-          className={styles.rating_size}
           onChange={(event, newValueRes) => {
             setValueRes(newValueRes);
           }}
         />
       </div>
       <div className={styles.rating}>
-        <p className={styles.single_category_name && styles.font_size}>Equipment Quality</p>
+        <p className={styles.single_category_name}>Equipment Quality</p>
         <Rating
           name="simple-controlled"
           value={valueQuality}
-          className={styles.rating_size}
           onChange={(event, newValueQuality) => {
             setValueQuality(newValueQuality);
           }}
         />
       </div>
       <div className={styles.rating}>
-        <p className={styles.single_category_name && styles.font_size}>Technical Support</p>
+        <p className={styles.single_category_name}>Technical Support</p>
         <Rating
           name="simple-controlled"
           value={valueTech}
-          className={styles.rating_size}
           onChange={(event, newValueTech) => {
             setValueTech(newValueTech);
           }}
         />
       </div>
-    </div>
+    </div >
   );
 }
 
