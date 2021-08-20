@@ -60,7 +60,7 @@ const ProductList = ({ products, fetchData, count }) => {
         <div className="detail-container grid-product-category pr-0">
             <div>
                 <Paper>
-                    <CategorySidebar />
+                    <CategorySidebar fetchData={fetchData} />
                 </Paper>
             </div>
 

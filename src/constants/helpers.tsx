@@ -832,19 +832,15 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         .format(amount)
         .replace(/^(\D+)/, "$1 "),
       fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
-        style: "currency",
+        //  style: "currency",
         currencyDisplay: "code",
       }).format(amount),
     };
   }
 
   let currencyData = filterCountries[0];
-  let combinedAllLanguages = filterCountries[0].languages;
 
   if (filterCountries.length > 1) {
-    combinedAllLanguages = [
-      ...new Set(filterCountries.map((m) => m.languages).flat()),
-    ];
 
     switch (currencyCode) {
       case "AUD":

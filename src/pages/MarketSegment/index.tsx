@@ -1,6 +1,5 @@
-import React, { useState, useEffect, Fragment, useContext, useReducer } from "react";
+import { useState, useEffect, Fragment, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
@@ -20,7 +19,6 @@ import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import {
     gridLoadingTimeout,
-    gridPageSizes,
     isObjectEmpty,
     marketSegment
 } from "../../constants/helpers";
@@ -42,7 +40,6 @@ const MarketSegment = () => {
     }: any = useData();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
-    const [showChildDialog, setShowChildDialog] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [marketSegmentId, setMarketSegmentId] = useState(null);
