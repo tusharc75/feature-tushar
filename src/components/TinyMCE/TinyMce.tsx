@@ -36,7 +36,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage,
-        fileUploadMaxSize = { ...documentUploadMaxSize } } = props
+        fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
+        onUploadImage = null, usePublicUrlforFileUpload = false,
+        doNotShowUploadFile = false
+    } = props
 
     const classes = useStyles();
     const [imageDetails, setImageDetails] = useState({ width: "", height: "", alt: "" })
@@ -73,7 +76,7 @@ export default function TinyMCE(props) {
         setImageUploadProgress(0);
         let formData = new FormData();
         formData.append('file', file);
-        let uploadUrl = api ? api : "/doc-parser"
+        let uploadUrl = api ? api : usePublicUrlforFileUpload ? "/user/upload-public" : "/doc-parser"
         setImgUploading(true);
         if (imageOrFileUploadCompletePercentage) {
             imageOrFileUploadCompletePercentage(1);
@@ -100,14 +103,19 @@ export default function TinyMCE(props) {
             .then(({ data }) => {
 
                 setImgUploading(false);
-                if (details && details.isImage) {
-                    setUploadError(false)
-                    setImageUrl(data.fileUrl)
+                if (onUploadFile) {
+                    onUploadFile(data.fileUrl)
                 }
                 else {
-                    const editorContent = editorRef.current.getContent()
-                    editorRef.current.setContent(`${editorContent}${data}`)
-                    onChange(`${editorContent}${data}`)
+                    if (details && details.isImage) {
+                        setUploadError(false)
+                        setImageUrl(data.fileUrl)
+                    }
+                    else {
+                        const editorContent = editorRef.current.getContent()
+                        editorRef.current.setContent(`${editorContent}${data}`)
+                        onChange(`${editorContent}${data}`)
+                    }
                 }
                 //data.fileUrl data.fileName
             })
@@ -320,30 +328,33 @@ export default function TinyMCE(props) {
             {
                 isInitiated ?
                     <div className={classes.buttonContainer} >
-                        <Fragment>
-                            <Box display="flex" alignItems="center" style={{ marginRight: '5px' }}>
-                                <input
-                                    id="file"
-                                    name="file"
-                                    onChange={handleUploadFile}
-                                    style={{ display: 'none' }}
-                                    onClick={(e: any) => (e.target.value = null)}
-                                    type="file"
-                                    accept=".docx,.doc"
-                                />
-                                <label htmlFor="file">
-                                    <Button
-                                        size="small"
-                                        variant="outlined"
-                                        component="span"
-                                        disabled={isImgUploading}
-                                        startIcon={<AiOutlineFileAdd />}>
-                                        Upload File
-                                    </Button>
-                                </label>
-                            </Box>
+                        {
+                            doNotShowUploadFile ? null :
+                                <Fragment>
+                                    <Box display="flex" alignItems="center" style={{ marginRight: '5px' }}>
+                                        <input
+                                            id="file"
+                                            name="file"
+                                            onChange={handleUploadFile}
+                                            style={{ display: 'none' }}
+                                            onClick={(e: any) => (e.target.value = null)}
+                                            type="file"
+                                            accept=".docx,.doc"
+                                        />
+                                        <label htmlFor="file">
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                component="span"
+                                                disabled={isImgUploading}
+                                                startIcon={<AiOutlineFileAdd />}>
+                                                Upload File
+                                            </Button>
+                                        </label>
+                                    </Box>
 
-                        </Fragment>
+                                </Fragment>
+                        }
                         <span >
                             <Button
                                 startIcon={<HiOutlinePhotograph />}
