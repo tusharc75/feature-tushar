@@ -191,8 +191,6 @@ export default function ProductDetails() {
                     <span className={styles.vendor}>
                       <h5>Sold by: <span>Cactus Wellhead</span></h5>
                     </span>
-
-
                   </div>
                   <div className={styles.set_width}> <hr /> </div>
 
@@ -330,7 +328,8 @@ export default function ProductDetails() {
             <span>Loading...</span>
           )}
           <div className="a_divider_inner"></div>
-          <FrequentlyBought />
+
+          <FrequentlyBought id={productDetails?._id} />
           <div className="a_divider_inner"></div>
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>

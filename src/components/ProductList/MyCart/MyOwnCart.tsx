@@ -1,12 +1,7 @@
-import React, { useContext, useEffect, useState, Fragment } from 'react';
-import Layout from '../../Layout';
+import { useContext, useEffect, useState, Fragment } from 'react';
 import styles from './my-cart.module.scss';
-import SecureIcon from '@material-ui/icons/VerifiedUserOutlined';
 import ManageQuoteDialog from '../../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import { Button, IconButton, Box, Grid } from '@material-ui/core';
-import ButtonDesign from '../Buttondesign/Buttondesign';
+import { Button, Box, Grid } from '@material-ui/core';
 import Product from '../ProductCard/ProductCard';
 import { product } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -17,7 +12,6 @@ import { useHistory } from 'react-router-dom';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { currencyCodeToSymbol } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { BsInfoCircle } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
