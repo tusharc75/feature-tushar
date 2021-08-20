@@ -105,6 +105,7 @@ const CreateQuotePdfTemplate = () => {
     console.log(_data);
     setSection(_data);
   }, []);
+
   useEffect(() => {
     if (id && id !== '0') {
       (async () => {
