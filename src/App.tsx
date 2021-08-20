@@ -88,6 +88,7 @@ import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
+import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 import AddressResource from "./pages/AddressResource";
@@ -234,7 +235,7 @@ function App() {
 
     return !user ? (
       // <Suspense fallback={<div>Loading...</div>}>
-        <Comp />
+      <Comp />
       // </Suspense>
     ) : (
       <Redirect
@@ -481,7 +482,7 @@ function App() {
               <QuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
-              <CreateQuotePdfTemplate />
+              <CreateNewQuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />

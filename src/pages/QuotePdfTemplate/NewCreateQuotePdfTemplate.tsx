@@ -1,0 +1,281 @@
+import { useState, useContext, useEffect } from 'react';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import FormControlLabel from "@material-ui/core/FormControlLabel"
+import Checkbox from "@material-ui/core/Checkbox"
+import { useParams, useHistory } from 'react-router-dom';
+import routes from '../../components/Helpers/Routes';
+import Box from "@material-ui/core/Box"
+import Typography from "@material-ui/core/Typography"
+import TinyMce from "./../../components/TinyMCE/index"
+import CircularProgress from "@material-ui/core/CircularProgress"
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
+
+const PdfTemplateSchema = Yup.object().shape({
+    name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    showPageNumberInFooter: Yup.boolean()
+});
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        flexGrow: 1,
+        padding: theme.spacing(4)
+    },
+    paper: {
+        width: "100%",
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        color: theme.palette.text.secondary
+    },
+    saveButtonContainer: {
+        textAlign: 'end',
+        marginBottom: '6px'
+    }
+}));
+
+export default function NewCreateQuotePdfTemplate(props) {
+
+    const { id } = useParams();
+    const history = useHistory();
+    const [details, setDetails] = useState({
+        header: "",
+        footer: "",
+        aboveTable: "",
+        belowTable: ""
+    })
+    const [initialValues, setInitialValues] = useState(null)
+    const [isUpdating, setIsUpdating] = useState(false);
+    const classes = useStyles();
+    const toastConfig = useContext(CustomToastContext);
+    const [isClone] = useState(history.location.state?.isClone ? true : false);
+
+    useEffect(() => {
+        if (id && id !== '0') {
+            (async () => {
+                try {
+                    const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
+                    const {
+                        data: { data }
+                    } = res;
+                    setInitialValues({
+                        name: data?.name,
+                        showPageNumberInFooter: data?.pageNumberInFooter,
+                        header: data?.header,
+                        footer: data?.footer,
+                        aboveTable: data?.aboveTable,
+                        belowTable: data?.belowTable
+                    });
+                    setDetails({
+                        header: data?.header,
+                        footer: data?.footer,
+                        aboveTable: data?.aboveTable,
+                        belowTable: data?.belowTable
+                    })
+
+                } catch (e) {
+                    toastConfig.setToastConfig(e);
+                }
+            })();
+        }
+        else {
+            setInitialValues({
+                name: "",
+                showPageNumberInFooter: false,
+                header: "",
+                footer: "",
+                aboveTable: "",
+                belowTable: ""
+            })
+        }
+    }, [id]);
+
+    const handleSubmit = (values) => {
+        setIsUpdating(true);
+        if (id === '0' || isClone === true) {
+            axiosInstance()
+                .post('/quote-pdf-template', {
+                    ...details, name: values.name,
+                    pageNumberInFooter: values.showPageNumberInFooter
+                })
+                .then(({ data: { data } }) => {
+                    history.push({ pathname: routes.quotePdfTemplate.path });
+                    setIsUpdating(false);
+                })
+                .catch((error) => {
+                    setIsUpdating(false);
+                    toastConfig.setToastConfig(error);
+                });
+        }
+        else {
+            axiosInstance()
+                .put('/quote-pdf-template', {
+                    _id: id,
+                    ...details, name: values.name,
+                    pageNumberInFooter: values.showPageNumberInFooter
+                })
+                .then(({ data: { data } }) => {
+                    setIsUpdating(false);
+                    history.push({ pathname: routes.quotePdfTemplate.path });
+                })
+                .catch((error) => {
+                    setIsUpdating(false);
+                    toastConfig.setToastConfig(error);
+                });
+        }
+    }
+
+    return <div className={classes.root}>
+        <Grid container className="headerbox">
+            <Grid item md={4} sm={11} xs={10}>
+                <CustomBreadCrumbs
+                    routes={[
+                        {
+                            title: routes.quotePdfTemplate.title,
+                            path: routes.quotePdfTemplate.path
+                        },
+                        {
+                            title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
+                        }
+                    ]}
+                />
+            </Grid>
+        </Grid>
+        <CustomContainer styles={{ top: '10px' }}>
+            <Paper className={classes.paper}>
+                {initialValues ? (
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={PdfTemplateSchema} onSubmit={handleSubmit}>
+                        {({ submitForm, touched, errors, setFieldValue, values }) => (
+                            <Form>
+                                <Grid container>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            variant="outlined"
+                                            type="text"
+                                            label="Quote PDF Template Name"
+                                            required={true}
+                                            name="name"
+                                            fullWidth
+                                            margin="dense"
+                                            value={values['name']}
+                                            error={touched['name'] && Boolean(errors['name'])}
+                                            helperText={touched['name'] && errors['name']}
+                                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6} className={classes.saveButtonContainer}>
+                                        <Button disabled={isUpdating} size="small" color="primary"
+                                            onClick={submitForm} variant="contained">
+                                            Save{isUpdating && <CircularProgress size={24} />}
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={12} style={{ textAlign: 'left' }}>
+                                    <FormControlLabel
+                                        value={values['showPageNumberInFooter']}
+                                        control={
+                                            <Checkbox
+                                                name="showPageNumberInFooter"
+                                                checked={values['showPageNumberInFooter']}
+                                                onChange={(e) => setFieldValue('showPageNumberInFooter', e.target.checked)}
+                                                color="primary"
+                                            />
+                                        }
+                                        label="Show page number in footer"
+                                    />
+                                </Grid>
+                            </Form>
+                        )}
+                    </Formik>) : null}
+                <Grid item xs={12}>
+                    <Box>
+                        <Typography variant="h5" component="h5">Header</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    header: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.header}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                            showVariableDropdown={true}
+                        />
+                    </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                    <Box>
+                        <Typography variant="h5" component="h5">Below Table</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    belowTable: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.belowTable}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                            showVariableDropdown={true}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={12}>
+                    <Box>
+                        <Typography variant="h5" component="h5">Above Table</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    aboveTable: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.aboveTable}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                            showVariableDropdown={true}
+                        />
+                    </Box>
+                </Grid >
+                <Grid item xs={12}>
+                    <Box>
+                        <Typography variant="h5" component="h5">Footer</Typography>
+                        <TinyMce
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    footer: value
+                                }))
+                            }}
+                            height={400}
+                            initialValue={initialValues?.footer}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                            showVariableDropdown={true}
+                        />
+                    </Box>
+                </Grid>
+            </Paper>
+        </CustomContainer>
+    </div >
+}
+
+

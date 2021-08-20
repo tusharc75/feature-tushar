@@ -17,6 +17,7 @@ import { useData } from "../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
 
 export default function ProductDetails() {
   const [productDetails, setProductDetails] = useState(null);
@@ -26,7 +27,7 @@ export default function ProductDetails() {
   const [addedCartItems, setAddedCartItems] = useState([])
   const [products, setProducts] = useState([]);
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user } }: any = useData();
+  const { state: { user }, dispatch }: any = useData();
   const history = useHistory();
   let { id } = useParams();
 
@@ -52,6 +53,7 @@ export default function ProductDetails() {
       .get(`/user/cart`).then(({ data: { data } }) => {
 
         if (data) {
+          dispatch({ type: SET_CART_COUNT, payload: data.length });
           setAddedCartItems(data)
         }
         if (data && data.length >= 1) {
@@ -192,7 +194,7 @@ export default function ProductDetails() {
 
 
                   </div>
-                  <div className={styles.set_width}> <hr/> </div>
+                  <div className={styles.set_width}> <hr /> </div>
 
                   {/*<div className={styles.rate}>*/}
                   {/*  <Rating*/}
@@ -232,26 +234,26 @@ export default function ProductDetails() {
                 <div className={styles.price_and_discount}>
                   <span className={styles.current}>
                     <h2>$699.00</h2>
-                      {
-                        formatAmountWithCurrency(
-                          productDetails.currency,
-                          calculateNetPrice(
-                            parseInt(productDetails.mrp),
-                            productDetails.discount
-                          )
-                        ).fullFormatAmount
-                      }
-                    </span>
+                    {
+                      formatAmountWithCurrency(
+                        productDetails.currency,
+                        calculateNetPrice(
+                          parseInt(productDetails.mrp),
+                          productDetails.discount
+                        )
+                      ).fullFormatAmount
+                    }
+                  </span>
 
                   <span className={styles.mrp_price}>
 
-                      {
-                        formatAmountWithCurrency(
-                          productDetails.currency,
-                          productDetails.mrp
-                        ).fullFormatAmount
-                      }
-                    </span>
+                    {
+                      formatAmountWithCurrency(
+                        productDetails.currency,
+                        productDetails.mrp
+                      ).fullFormatAmount
+                    }
+                  </span>
 
                 </div>
 
