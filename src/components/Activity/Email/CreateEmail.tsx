@@ -48,7 +48,7 @@ import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers";
 import { fileIcons } from "./FileIcons";
 import { toolbarConfig } from "./TextEditorToolbar";
 import { useData } from "../../../StateProvider/Provider";
-import TinyMce from "../../../components/TinyMCE/TinyMce"
+import TinyMce from "../../../components/TinyMCE"
 
 const emailSchemaHelper = Yup.array()
   .transform(function (value, originalValue) {
@@ -190,9 +190,9 @@ export const CreateEmail = ({
         to: values.to,
         cc: values.cc,
         subject: values.name,
-        attachment: values["file"]
+        attachment: (otherAttachments.length || fileImageAttachments.length)
           ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments]
-          : [...imageAttachments],
+          : [...imageAttachments]
       };
       if (azureAccount && azureAccount?.username) {
         payload["graphToken"] = await getAzureAcessToken(instance);
