@@ -17,6 +17,8 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import { uniq, map, orderBy } from 'lodash';
 import BoxWithBorder from "../../components/BoxWithBorder";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
+import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -32,17 +34,21 @@ const ProductDetailsPage = () => {
     const [productData, setProductData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
     const [productFields, setProductFields] = useState([]);
     const [mainPoints, setMainPoints] = useState(null);
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [fields, setFields] = useState([]);
+    const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
+
     const ignoreField = ["priceTemplate"]
 
 
     useEffect(() => {
         if (id) {
             getProductFieldsAndData();
+            getFrequentlyBoughtProduct();
         }
         // eslint-disable-next-line
     }, [id]);
@@ -99,6 +105,40 @@ const ProductDetailsPage = () => {
             .catch((err) => {
                 toastConfig.setToastConfig(err);
             });
+    };
+
+    const getFrequentlyBoughtProduct = () => {
+        axiosInstance()
+            .get(`${product.api}/frequent/` + id)
+            .then(({ data }) => {
+                setFrequentlyBoughtProduct(data.data);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
+
+    const unassignProduct = async (obj) => {
+        if (obj) {
+            const dataObj = {
+                "_id": id,
+                "frequentlyBoughtTogether": frequentlyBoughtProduct.filter(r => r._id !== obj._id).map(obj => obj._id)
+            };
+
+            await axiosInstance()
+                .put(`/product/frequent`, dataObj)
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                        message: data.message,
+                        type: "success",
+                        open: true,
+                    });
+                    getFrequentlyBoughtProduct()
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+        }
     };
 
     const handleOpenUpdateDialog = () => {
@@ -195,12 +235,12 @@ const ProductDetailsPage = () => {
                                     Frequently Bought Product
                                 </Typography>
 
-                                {permissions.role.isUpdate && (
+                                {permissions.product.isUpdate && (
                                     <IconButton
                                         title="Assign users"
                                         color="primary"
                                         size="small"
-                                        onClick={() => { }}
+                                        onClick={() => { setOpenAssignProductDialog(true) }}
                                     >
                                         <ControlPoint />
                                     </IconButton>
@@ -228,6 +268,15 @@ const ProductDetailsPage = () => {
                                             </BoxWithBorder>
                                         ))
 
+                                    ) : frequentlyBoughtProduct.length ? (
+                                        <>
+                                            <AssignedFrequentlyBoughtProduct
+                                                permissions={permissions.product}
+                                                product={frequentlyBoughtProduct}
+                                                unassignProduct={unassignProduct}
+                                            />
+                                            <Box marginY={1} />
+                                        </>
                                     ) : (
                                         <Box textAlign="center" padding={2}>
                                             <Typography>No Product has been assigned </Typography>
@@ -261,6 +310,18 @@ const ProductDetailsPage = () => {
                         getProductFieldsAndData()
                     }}
                     openFrom="productMaster"
+                />
+            }
+            {openAssignProductDialog &&
+                <AssignProductDialog
+                    productsDialogOpen={openAssignProductDialog}
+                    productId={id}
+                    handleCloseDialog={() => setOpenAssignProductDialog(false)}
+                    assignedProducts={frequentlyBoughtProduct}
+                    onSuccess={() => {
+                        getFrequentlyBoughtProduct();
+                        setOpenAssignProductDialog(false)
+                    }}
                 />
             }
         </>

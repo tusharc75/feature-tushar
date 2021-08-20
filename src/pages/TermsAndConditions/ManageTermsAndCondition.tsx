@@ -17,14 +17,13 @@ import CustomButton from "../../components/Helpers/CustomButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
-import htmlToDraft from "html-to-draftjs";
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import { termsAndConditionDocumentUploadMaxSize } from "../../constants/helpers";
-import TinyMce from "../../components/TinyMCE/TinyMce"
+import TinyMce from "./../../components/TinyMCE"
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {

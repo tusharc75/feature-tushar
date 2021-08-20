@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
-import { makeStyles } from "@material-ui/core/styles";
 import {
     Box,
     Grid,
@@ -12,15 +11,7 @@ import { ExpandMore } from "@material-ui/icons";
 
 import styles from "../Leads/Header.module.scss"
 
-const useStyles = makeStyles(() => ({
-    filter_side: {
-        display: "flex",
-        justifyContent: "flex-end",
-    },
-}));
-
 function DoaHeader(props) {
-    const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
 
     const openActions = (event) => {
@@ -31,7 +22,7 @@ function DoaHeader(props) {
         setAnchorEl(null);
     };
 
-    const { onSearch, searchVal, onCreate,
+    const { onSearch, searchVal,
         DoaPermissions, showConfirmBox, canDelete, icon, heading } = props
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">

@@ -7,7 +7,7 @@ import NewOpportunityStepper from "../../components/NewOpportunityStepper";
 import OpportunityNavLinks from "../../components/NavLinks";
 import Container from "../../components/CustomContainer";
 import TabPanel from "../../components/TabPanel";
-import { OpportunityInformation, Contacts } from "../../components/Tabs";
+// import { OpportunityInformation, Contacts } from "../../components/Tabs";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,25 +80,25 @@ const AddNewOpportunity = () => {
           </Paper>
 
           <TabPanel value={value} index={0}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <Contacts />
+            {/* <Contacts /> */}
           </TabPanel>
           <TabPanel value={value} index={2}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={4}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={5}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={6}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
         </Container>
       </div>
