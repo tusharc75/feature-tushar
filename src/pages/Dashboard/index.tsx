@@ -1,8 +1,6 @@
 import { useEffect, useState, Fragment } from 'react';
 import { Container, Grid, Paper, Box, Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-
-import Layout from '../../components/Layout';
 import { useData } from '../../StateProvider/Provider';
 import { kebabCase } from 'lodash';
 

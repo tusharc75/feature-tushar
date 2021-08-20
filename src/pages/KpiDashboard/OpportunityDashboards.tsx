@@ -1,5 +1,4 @@
-import React from 'react';
-import { Grid, Box, Paper, Typography, CircularProgress, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core';
+import { Grid, Box, Paper, Typography, CircularProgress } from '@material-ui/core';
 
 const dummyData = {
   labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],

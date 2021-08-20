@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import {
     Button,
     Checkbox,
@@ -22,7 +22,7 @@ const DOAReasonDialog = ({
 }) => {
 
     const [selectedRec, setSelectedRec] = useState(null);
-    const [isAssigning, setAssigning] = useState(false);
+    const [isAssigning] = useState(false);
 
     const reasons = ["Price Too High", "Price Too Low", "Incorrect Data", "Not Needed", "DOA", "Others"]
     const [value, setValue] = React.useState('');
