@@ -20,11 +20,12 @@ import Typography from '@material-ui/core/Typography';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { BsInfoCircle } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
+import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
 
 function MyOwnCart() {
   const [products, setProducts] = useState([]);
   const [clonedProducts, setClonedProducts] = useState([]);
-
+  const { dispatch }: any = useData();
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -135,6 +136,7 @@ function MyOwnCart() {
       .get(`/user/cart`)
       .then(({ data: { data } }) => {
         if (data) {
+          dispatch({ type: SET_CART_COUNT, payload: data.length });
           setAddedCartItems(data);
           setTotalCount(data.length)
         }

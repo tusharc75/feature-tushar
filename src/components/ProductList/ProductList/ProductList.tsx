@@ -9,12 +9,14 @@ import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from '../../Helpers/Routes';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
+import { useData } from "../../../StateProvider/Provider";
 
 const ProductList = ({ products, fetchData, count }) => {
 
     const [addedCartItems, setAddedCartItems] = useState([])
     const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
-
+    const { dispatch }: any = useData();
     useEffect(() => {
         fetchCart()
     }, [])
@@ -24,6 +26,7 @@ const ProductList = ({ products, fetchData, count }) => {
             .get(`/user/cart`).then(({ data: { data } }) => {
 
                 if (data) {
+                    dispatch({ type: SET_CART_COUNT, payload: data.length });
                     setAddedCartItems(data)
                 }
                 if (data && data.length >= 4) {
