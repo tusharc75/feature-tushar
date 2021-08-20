@@ -88,7 +88,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.defaultValue = '';
       }
 
-      if (!values.disableOnEdit) {
+      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
         values.disableOnEdit = false;
       }
 
@@ -653,17 +653,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       label="Uneditable"
                     />
 
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="disableEdit"
-                          checked={values['disableOnEdit']}
-                          onChange={(e) => setFieldValue('disableOnEdit', e.target.checked)}
-                          color="primary"
-                        />
-                      }
-                      label="Disable On Edit"
-                    />
+                    {initialValues.hasOwnProperty('disableOnEdit') && (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="disableEdit"
+                            checked={values['disableOnEdit']}
+                            onChange={(e) => setFieldValue('disableOnEdit', e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Disable On Edit"
+                      />
+                    )}
 
                     {initialValues.hasOwnProperty('unique') && (
                       <FormControlLabel

@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { Box, Grid, Paper, Container } from '@material-ui/core';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import Chart from 'react-chartjs-2';
 import moment from 'moment';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import Layout from '../../components/Layout';
@@ -14,6 +13,7 @@ import Filters from './Filters';
 import './dashboard.scss';
 import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
+import OpportunitiesDashboard from './OpportunitiesDashboard';
 
 const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
@@ -40,7 +40,8 @@ const Dashboard = () => {
   });
   const [salesData, setSalesData] = useState({
     labels: [],
-    datasets: []
+    datasets: [],
+    allData: []
   });
   const [oppSalesRep, setOppSalesRep] = useState({
     labels: [],
@@ -99,39 +100,53 @@ const Dashboard = () => {
         const labels = [];
         const budget = [];
         const allEntities = [];
+        const entityIds = [];
+
+        data = data.sort((a, b) => {
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+
+          return aDate - bDate;
+        });
 
         for (let d of data) {
           saleData.push(d.totalSell);
-          labels.push(moment(d.date).format('MMM/YY'));
+
+          if (!labels.includes(d.date)) {
+            labels.push(d.date);
+          }
           budget.push(d.budget);
-          allEntities.push({
-            type: 'line',
-            label: d.entity,
-            borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
-            borderWidth: 2
-          });
+
+          if (!entityIds.includes(d.entityId)) {
+            entityIds.push(d.entityId);
+          }
+
+          // allEntities.push({
+          //   type: 'line',
+          //   label: d.entity,
+          //   borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
+          //   borderWidth: 2
+          // });
         }
 
+        entityIds.forEach((id) => {
+          let obj = {};
+          const entitySale = data.filter((d) => d.entityId === id);
+
+          obj = {
+            type: 'line',
+            label: entitySale[0].entity,
+            borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
+            borderWidth: 2,
+            data: entitySale.map((e) => e.totalSell)
+          };
+
+          allEntities.push(obj);
+        });
+
         setAllEntitySalesData({
-          labels,
-          datasets: [
-            {
-              type: 'line',
-              label: 'Budget',
-              borderColor: 'rgb(54, 162, 235)',
-              borderWidth: 2,
-              fill: false,
-              data: budget
-            },
-            {
-              type: 'line',
-              label: 'Total booked value',
-              borderColor: 'rgb(255, 99, 132)',
-              borderWidth: 2,
-              fill: false,
-              data: saleData
-            }
-          ]
+          labels: labels.map((d) => moment(d).format('MMM/YY')),
+          datasets: allEntities
         });
       })
       .catch((err) => {});
@@ -192,6 +207,7 @@ const Dashboard = () => {
         });
 
         setSalesData({
+          allData: data,
           labels,
           datasets: [
             {
@@ -210,7 +226,8 @@ const Dashboard = () => {
     return () => {
       setSalesData({
         labels: [],
-        datasets: []
+        datasets: [],
+        allData: []
       });
     };
   }, [salesFilter]);
@@ -279,7 +296,7 @@ const Dashboard = () => {
         });
       })
       .catch((err) => {});
-  }, [salesFilter.entity, salesFilter.between]);
+  }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
     fetchOpportunitySalesRep();
@@ -345,7 +362,7 @@ const Dashboard = () => {
         });
       })
       .catch((err) => {});
-  }, [salesFilter.entity, salesFilter.between]);
+  }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
     fetchOpportunityContact();
@@ -382,7 +399,7 @@ const Dashboard = () => {
         });
       })
       .catch((err) => {});
-  }, [salesFilter.entity, salesFilter.between]);
+  }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
     fetchOpenQuote();
@@ -459,21 +476,34 @@ const Dashboard = () => {
       .then(({ data: { data } }) => {
         const won = [];
         const lost = [];
+        const open = [];
         const labels = [];
 
+        data = data.sort((a, b) => {
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+
+          return aDate - bDate;
+        });
+
         for (let d of data) {
-          if (d.outcome === '' || d.outcome === 'Won') {
+          if (d.outcome === 'Won') {
             won.push(d.count);
           }
           if (d.outcome === 'Lost') {
             lost.push(d.count);
           }
+          if (d.outcome === '') {
+            open.push(d.count);
+          }
 
-          labels.push(moment(d.date).format('MMM/YY'));
+          if (!labels.includes(d.date)) {
+            labels.push(d.date);
+          }
         }
 
         setOppTrends({
-          labels,
+          labels: labels.map((d) => moment(d).format('MMM/YY')),
           datasets: [
             {
               type: 'line',
@@ -492,6 +522,15 @@ const Dashboard = () => {
               borderWidth: 2,
               fill: true,
               data: lost
+            },
+            {
+              type: 'line',
+              label: 'Open',
+              borderColor: 'rgb(250, 155, 80)',
+              backgroundColor: 'rgb(250, 155, 80, 0.4)',
+              borderWidth: 2,
+              fill: true,
+              data: open
             }
           ]
         });
@@ -593,16 +632,16 @@ const Dashboard = () => {
                 setStatus={setStatus}
               />
               <Box py={2}>
-                <TopDashboard Chart={Chart} regionSales={regionSales} salesRevenue={salesRevenue} salesData={salesData} topProducts={topProducts} />
+                <TopDashboard regionSales={regionSales} salesRevenue={salesRevenue} salesData={salesData} />
 
-                <Top2Dashboard topProducts={topProducts} allEntitySalesData={allEntitySalesData} openQuoteData={openQuoteData} Chart={Chart} />
+                <Top2Dashboard allEntitySalesData={allEntitySalesData} />
 
                 <OpportunityDashboards
                   oppTrends={oppTrends}
+                  topProducts={topProducts}
                   oppAccount={oppAccount}
                   openQuoteData={openQuoteData}
                   oppSalesRep={oppSalesRep}
-                  Chart={Chart}
                 />
 
                 <Grid container spacing={4}>
@@ -610,9 +649,9 @@ const Dashboard = () => {
                   <Grid item xs={6}></Grid>
                 </Grid>
 
-                {/* <Box my={2}>
+                <Box my={2}>
                   <OpportunitiesDashboard />
-                </Box> */}
+                </Box>
               </Box>
             </Container>
             <Box p={2} display="flex" alignItems="center" flexDirection="column">
