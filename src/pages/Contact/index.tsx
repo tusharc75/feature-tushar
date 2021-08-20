@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer, Fragment } from 'react';
-import Layout from '../../components/Layout';
+import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom';
@@ -17,7 +16,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { sidebarResource, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -53,8 +52,7 @@ export default function Contact(props) {
     state: { user, selectedEntity, permissions}
   }: any = useData();
   const {
-    contact: { contactApi, contactResource, contactPermission, contactRoute, contactResourceLabel },
-    contactBreadcrumb,
+    contact: { contactApi, contactResource, contactPermission, contactRoute },
     account
   } = props;
   const [selectedType, setSelectedType] = useState(1);

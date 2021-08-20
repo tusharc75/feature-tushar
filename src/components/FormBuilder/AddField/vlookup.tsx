@@ -17,7 +17,6 @@ import { FixedSizeList } from 'react-window';
 
 export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors }) => {
 
-x
     const [isUpdate, setUpdate] = useState(false);
 
     useEffect(() => {
