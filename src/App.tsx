@@ -34,7 +34,7 @@ import Leads from "./pages/Leads";
 import LeadDetailsPage from "./pages/Leads/LeadDetailsPage";
 import NewLead from "./pages/Leads/NewLead";
 import Opportunities from "./pages/Opportunities";
-import AddNewOpportunity from "./pages/Opportunities/AddNewOpportunity";
+// import AddNewOpportunity from "./pages/Opportunities/AddNewOpportunity";
 import Doa from "./pages/DoaSetup";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account/index";
@@ -302,9 +302,9 @@ function App() {
             <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
               <OpportunityDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path="/new-opp">
+            {/* <PrivateRoute exact path="/new-opp">
               <AddNewOpportunity />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path="/doa">
               <Doa />
             </PrivateRoute>
