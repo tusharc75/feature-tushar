@@ -1,8 +1,101 @@
-import { Grid, Box, Paper, Typography, Table, TableBody, TableContainer, TableRow, TableCell, TableHead } from '@material-ui/core';
+import { useState } from 'react';
+import {
+  Grid,
+  Box,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableContainer,
+  TableRow,
+  TableCell,
+  TableHead,
+  Button,
+  Menu,
+  MenuItem
+} from '@material-ui/core';
+import { ImportExport } from '@material-ui/icons';
 import { startCase } from 'lodash';
+import Chart from 'react-chartjs-2';
+import PptxGenJs from 'pptxgenjs';
+import jsPDF from 'jspdf';
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
+import moment from 'moment';
 
 const TopDashboard = (props) => {
-  const { salesRevenue, salesData, Chart, regionSales } = props;
+  const { salesRevenue, salesData, regionSales } = props;
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (exportType) => () => {
+    switch (exportType) {
+      case 'ppt': {
+        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        const dataUrl = canvas.toDataURL('image/png');
+        const pptx = new PptxGenJs();
+        const slide = pptx.addSlide();
+        slide.addImage({ data: dataUrl, sizing: { type: 'contain', w: 4, h: 3 } });
+        pptx.writeFile();
+        break;
+      }
+
+      case 'pdf': {
+        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const doc = new jsPDF('portrait');
+        doc.setFontSize(20);
+        doc.text('Total Booked Value In USD', 60, 15);
+        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
+        doc.save('sales-chart.pdf');
+        break;
+      }
+
+      case 'excel': {
+        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const fileExtension = '.xlsx';
+        const wData = salesData.allData.map((d) => ({
+          Month: moment(d.date).format('MMM/YY'),
+          ['Total Sell']: d.totalSell.toLocaleString(),
+          ['Total Cost']: d.totalCost.toLocaleString(),
+          Budget: d.budget
+        }));
+        const ws = XLSX.utils.json_to_sheet(wData);
+        const wb = {
+          Sheets: {
+            data: ws,
+            chart: {
+              name: 'image.png',
+              data: dataUrl,
+              opts: { base64: true },
+              position: {
+                type: 'twoCellAnchor',
+                attrs: { editAs: 'oneCell' },
+                from: { col: 2, row: 2 },
+                to: { col: 6, row: 5 }
+              }
+            }
+          },
+          SheetNames: ['data', 'chart']
+        };
+        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const data = new Blob([excelBuffer], { type: fileType });
+        FileSaver.saveAs(data, 'sales-data' + fileExtension);
+        break;
+      }
+
+      default:
+        break;
+    }
+
+    setAnchorEl(null);
+  };
+
   return (
     <Grid container spacing={2}>
       <Grid item sm={8}>
@@ -49,11 +142,32 @@ const TopDashboard = (props) => {
 
         <Paper elevation={2}>
           <Box p={2}>
+            <Button onClick={handleClick} startIcon={<ImportExport />}>
+              Export to
+            </Button>
+            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+            </Menu>
             <Box textAlign="center">
               <Typography variant="h5">Total booked value in USD</Typography>
             </Box>
-
-            <Chart type="bar" data={salesData} />
+            <Chart
+              id="perEntityChart"
+              options={{
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                },
+                hover: {
+                  mode: 'index',
+                  intersect: false
+                }
+              }}
+              type="bar"
+              data={salesData}
+            />
           </Box>
         </Paper>
       </Grid>
