@@ -476,7 +476,7 @@ export const CreateEmail = ({
                               </Box>
                             )}
                             <Divider />
-                            <Box mt={2}>
+                            <Box mt={2} paddingLeft={3}>
                               <div
                                 dangerouslySetInnerHTML={{
                                   __html:
