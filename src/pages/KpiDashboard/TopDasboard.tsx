@@ -172,37 +172,39 @@ const TopDashboard = (props) => {
         </Paper>
       </Grid>
       <Grid item sm={4}>
-        <TableContainer style={{ maxHeight: 450 }} component={Paper}>
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                {regionSales.length > 0 &&
-                  Object.keys(regionSales[0]).map((label, i) => (
-                    <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                      {startCase(label)}
-                    </TableCell>
-                  ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {regionSales.length > 0 ? (
-                regionSales.map((data) => (
-                  <TableRow key={data.region}>
-                    {Object.keys(data).map((label, i) => (
+        <Box>
+          <TableContainer style={{ height: '500px' }} component={Paper}>
+            <Table stickyHeader size="small">
+              <TableHead>
+                <TableRow>
+                  {regionSales.length > 0 &&
+                    Object.keys(regionSales[0]).map((label, i) => (
                       <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                        {data[label]}
+                        {startCase(label)}
                       </TableCell>
                     ))}
-                  </TableRow>
-                ))
-              ) : (
-                <Box p={2}>
-                  <Typography>No Data for regional sales</Typography>
-                </Box>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {regionSales.length > 0 ? (
+                  regionSales.map((data) => (
+                    <TableRow key={data.region}>
+                      {Object.keys(data).map((label, i) => (
+                        <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                          {data[label]}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <Box p={2}>
+                    <Typography>No Data for regional sales</Typography>
+                  </Box>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
       </Grid>
     </Grid>
   );

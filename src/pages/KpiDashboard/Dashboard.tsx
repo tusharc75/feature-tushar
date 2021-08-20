@@ -14,6 +14,7 @@ import Filters from './Filters';
 import './dashboard.scss';
 import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
+import OpportunitiesDashboard from './OpportunitiesDashboard';
 
 const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
@@ -649,9 +650,9 @@ const Dashboard = () => {
                   <Grid item xs={6}></Grid>
                 </Grid>
 
-                {/* <Box my={2}>
+                <Box my={2}>
                   <OpportunitiesDashboard />
-                </Box> */}
+                </Box>
               </Box>
             </Container>
             <Box p={2} display="flex" alignItems="center" flexDirection="column">

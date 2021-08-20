@@ -4,7 +4,7 @@ import { Box, Paper, Typography } from '@material-ui/core';
 const Top2Dashboard = ({ allEntitySalesData }) => {
   return (
     <Paper elevation={2}>
-      <Box mb={2} p={2}>
+      <Box my={2} p={2}>
         <Box textAlign="center">
           <Typography variant="h5">Total booked value in USD</Typography>
         </Box>
