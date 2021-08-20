@@ -18,9 +18,6 @@ import CircularProgress from "@material-ui/core/CircularProgress"
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import Select from "@material-ui/core/Select"
-import FormControl from "@material-ui/core/FormControl"
-import InputLabel from "@material-ui/core/InputLabel"
 import 'tinymce/icons/default';
 import "./tinymce.scss"
 
@@ -37,11 +34,6 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: '5px',
         border: '1px solid lightgray',
         borderBottom: '0'
-    },
-    formControl: {
-        margin: theme.spacing(1),
-        minWidth: 120,
-        marginTop: '-13px'
     },
     varibalesButton: {
         margin: "0 5px"
@@ -418,12 +410,7 @@ export default function TinyMCE(props) {
                                                     })
                                             }
                                         </Menu>
-                                    </>
-
-
-                                    : null
-                                //  ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
-                                //  'version', 'quoteId', "currency", "expiryDate", "incoTerms"]
+                                    </> : null
                             }
                         </span>
                     </div>
