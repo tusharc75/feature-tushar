@@ -34,7 +34,14 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       </Box>
 
       <div className={styles.text}>
-        <h4 onClick={() => { history.push(`product/details/${product._id}`) }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
+        <h4 onClick={() => {
+          if (history?.location?.pathname && history?.location?.pathname.indexOf("my-cart") >= 0) {
+            history.push(`details/${product._id}`)
+          }
+          else {
+            history.push(`product/details/${product._id}`)
+          }
+        }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <div>
