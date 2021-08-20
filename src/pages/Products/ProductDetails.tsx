@@ -26,7 +26,6 @@ export default function ProductDetails() {
   const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
   const [addedCartItems, setAddedCartItems] = useState([])
   const [products, setProducts] = useState([]);
-  const [frequentData, setFrequentData] = useState([]);
   const toastConfig = useContext(CustomToastContext);
   const { state: { user }, dispatch }: any = useData();
   const history = useHistory();
