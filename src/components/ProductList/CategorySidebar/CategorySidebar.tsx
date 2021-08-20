@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function CategorySidebar() {
+const CategorySidebar = ({ fetchData }) => {
   const classes = useStyles();
   const [productCategories, setProductCategories] = useState([]);
   const [valueSafety, setValueSafety] = useState(2);
@@ -79,7 +79,7 @@ function CategorySidebar() {
 
   const renderTree = (nodes) => (
     <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}
-      onClick={null}>
+      onClick={() => { fetchData(nodes.name) }}>
       {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
     </TreeItem>
   );
@@ -90,7 +90,6 @@ function CategorySidebar() {
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
           <SearchIcon />
         </IconButton>
-        <InputBase className={classes.input} placeholder="Search By Category" inputProps={{ 'aria-label': 'search' }} />
       </Paper>
       {
         productCategories.map(obj => {
@@ -145,7 +144,7 @@ function CategorySidebar() {
           }}
         />
       </div>
-    </div>
+    </div >
   );
 }
 
