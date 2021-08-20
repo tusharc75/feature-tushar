@@ -242,15 +242,9 @@ const Product = () => {
     }
 
     const ProductNameRenderer = params => (
-        productPermissions.isUpdate ?
-            <Link className="link"
-                onClick={() => {
-                    OpenProduct(params.data._id);
-                    setIsClone(false)
-                }}>
-                <CustomRenderCell value={params?.value} />
-            </Link>
-            : params?.value
+        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
+            {params.value}
+        </Link>
     )
 
     const ActionsRenderer = params => (

@@ -88,12 +88,14 @@ import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
 import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
+import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 import AddressResource from "./pages/AddressResource";
 import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
 import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInventoryDetailsPage";
+import ProductDetailsPage from "./pages/Product/ProductDetailsPage";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -233,7 +235,7 @@ function App() {
 
     return !user ? (
       // <Suspense fallback={<div>Loading...</div>}>
-        <Comp />
+      <Comp />
       // </Suspense>
     ) : (
       <Redirect
@@ -455,6 +457,9 @@ function App() {
             <PrivateRoute exact path={routes.product.path}>
               <Product />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.productDetail.path + "/:id"}>
+              <ProductDetailsPage />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.productInventory.path}>
               <ProductInventory />
             </PrivateRoute>
@@ -477,7 +482,7 @@ function App() {
               <QuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
-              <CreateQuotePdfTemplate />
+              <CreateNewQuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />

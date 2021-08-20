@@ -109,6 +109,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
     path: "/product",
   },
+  productDetail: {
+    title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
+    path: "/product/detail",
+  },
   formBuilder: {
     title: storedRoutes ? storedRoutes.formBuilder?.title : RESOURCE_LABEL.formBuilder,
     path: "/form-builder",
@@ -167,7 +171,7 @@ const routes = {
   },
   equipmentRentalMaster: {
     title: storedRoutes ? storedRoutes.equipmentRentalMaster?.title : RESOURCE_LABEL.equipmentRentalMaster,
-    path: "/equipt-rental-master",
+    path: "/equiptment-rental-master",
   },
   quoteBuilder: {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
