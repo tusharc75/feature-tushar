@@ -1,34 +1,8 @@
-import { Grid, Box, Paper, Typography, CircularProgress } from '@material-ui/core';
-
-const dummyData = {
-  labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-  datasets: [
-    {
-      label: '# of Votes',
-      data: [12, 19, 3, 5, 2, 3],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)'
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-      ],
-      borderWidth: 1
-    }
-  ]
-};
+import Chart from 'react-chartjs-2';
+import { Grid, Box, Paper, Typography, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
 
 const OpportunityDashboards = (props) => {
-  const { openQuoteData, oppSalesRep, Chart, oppAccount, oppTrends } = props;
+  const { openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts } = props;
   return (
     <>
       <Grid container spacing={2}>
@@ -101,10 +75,28 @@ const OpportunityDashboards = (props) => {
         </Grid>
         <Grid item sm={4}>
           <Paper>
-            <Box textAlign="center" p={2}>
-              <Typography variant="h6">Open Opportunites by Sales Contact</Typography>
-              <Chart type="doughnut" data={dummyData} />
+            <Box p={2}>
+              <Typography variant="h6" color="textSecondary">
+                Top Selling Product Category
+              </Typography>
             </Box>
+
+            <List>
+              {topProducts.length ? (
+                topProducts.map((product) => (
+                  <ListItem divider>
+                    <ListItemText primary={product.productCategory} />
+                    <ListItemSecondaryAction>
+                      <Typography variant="h6">{product.count}</Typography>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))
+              ) : (
+                <ListItem>
+                  <ListItemText primary={'No Data'} />
+                </ListItem>
+              )}
+            </List>
           </Paper>
         </Grid>
       </Grid>
