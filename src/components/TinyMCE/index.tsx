@@ -21,24 +21,6 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import 'tinymce/icons/default';
 import "./tinymce.scss"
 
-const checkImageUrl = (extension) => {
-    let imageExtensions = [
-        "image/tif",
-        "image/tiff",
-        "image/bmp",
-        "image/jpg",
-        "image/jpeg",
-        "image/gif",
-        "image/png",
-        "image/eps",
-        "image/raw",
-        "image/cr2",
-        "image/nef",
-        "image/orf",
-        "image/sr2",
-    ];
-    return imageExtensions.indexOf(extension) >= 0;
-};
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -57,13 +39,6 @@ const useStyles = makeStyles((theme) => ({
         margin: "0 5px"
     }
 }));
-
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
 
 export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
