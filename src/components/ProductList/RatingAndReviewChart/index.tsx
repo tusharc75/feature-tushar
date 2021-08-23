@@ -1,14 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import {
   Avatar,
   Box,
-  CardHeader,
   CircularProgress,
   CircularProgressProps,
-  IconButton,
-  LinearProgress,
-  makeStyles,
   Typography
 } from '@material-ui/core';
 import { Rating } from '@material-ui/lab';

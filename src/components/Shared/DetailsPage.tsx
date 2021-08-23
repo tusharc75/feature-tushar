@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
-import { kebabCase, orderBy } from "lodash";
+import { kebabCase } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
 import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
@@ -70,7 +70,7 @@ const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user, selectedEntity, permissions }
+    state: { permissions }
   }: any = useData();
   const { data, fields } = props;
   const [isDownloading, setDownloading] = useState(false);

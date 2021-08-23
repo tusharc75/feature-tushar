@@ -33,7 +33,6 @@ function MyOwnCart() {
   const history = useHistory();
   const [totalCount, setTotalCount] = useState(0);
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
-  const [totalPrice, setTotalPrice] = useState(0);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [addedCartItems, setAddedCartItems] = useState([]);
   const [productLoading, setProductLoading] = useState(false);
@@ -73,41 +72,16 @@ function MyOwnCart() {
           }
         ]
       })
-      .then(({ data }) => {
+      .then(() => {
         fetchCart();
       });
-  };
-
-  const onRemoveCartItem = (item) => {
-    let tempQuantity = 1,
-      cartId;
-    addedCartItems.some((o) => {
-      if (o.productId === item._id) {
-        cartId = o.id;
-        tempQuantity = o.quantity - 1;
-        return true;
-      }
-    });
-    if (cartId) {
-      if (tempQuantity === 0) {
-        deleteCartItem(cartId);
-      } else {
-        axiosInstance()
-          .put(`/user/cart/${cartId}`, {
-            quantity: `${tempQuantity}`
-          })
-          .then(({ data }) => {
-            fetchCart();
-          });
-      }
-    }
   };
 
   const deleteCartItem = (cartId) => {
     if (cartId) {
       axiosInstance()
         .delete(`/user/cart/${cartId}`)
-        .then(({ data }) => {
+        .then(() => {
           fetchCart();
           setClonedProducts([...products]);
         });

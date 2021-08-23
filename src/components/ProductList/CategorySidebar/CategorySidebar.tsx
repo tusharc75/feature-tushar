@@ -1,7 +1,6 @@
 import axiosInstance from '../../../axios/axiosInstance';
-import React, { Children, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
 import IconButton from '@material-ui/core/IconButton';
 import { Paper } from '@material-ui/core';
@@ -11,7 +10,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeItem from '@material-ui/lab/TreeItem';
 import Rating from '@material-ui/lab/Rating';
-import Box from '@material-ui/core/Box'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,9 +36,9 @@ const CategorySidebar = ({ fetchData }) => {
   const [valueRes, setValueRes] = useState(2);
   const [valueQuality, setValueQuality] = useState(2);
   const [valueTech, setValueTech] = useState(2);
+
   useEffect(() => {
     let queryString = `?limit=0`;
-
 
     axiosInstance()
       .get(`/product-category${queryString}`)
@@ -74,8 +72,6 @@ const CategorySidebar = ({ fetchData }) => {
         setProductCategories(allCategories)
       });
   }, []);
-
-
 
   const renderTree = (nodes) => (
     <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}

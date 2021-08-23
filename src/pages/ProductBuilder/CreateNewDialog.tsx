@@ -1,7 +1,7 @@
-import React, { useState, Fragment, useContext } from "react";
+import { useState, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -22,13 +22,12 @@ const ProductBuilderSchema = Yup.object().shape({
         .required("please enter name"),
 });
 
-
 const CreateNewDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { handleClose } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ name: "" });
+    const [initialData] = useState({ name: "" });
     const history = useHistory();
 
     const handleSubmit = (values) => {

@@ -5,7 +5,7 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import { CustomDialogTransition } from "../../constants/helpers";
 
 const FullScreenDialog = (props) => {
-  const { open, close, children, heading, className = "", ...rest } = props;
+  const { open, close, children, heading, className = "" } = props;
 
   return (
     <Dialog
