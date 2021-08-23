@@ -9,7 +9,7 @@ export default function GridDeleteIcon({ hasDeletePermission, ownerId, userId, o
         <>
             {
                 hasDeletePermission ?
-                    ownerId == userId ?
+                    ownerId === userId ?
                         <Tooltip title="Delete" >
                             <IconButton size="small" aria-label="Delete" onClick={onDelete}>
                                 <DeleteIcon color="error" />

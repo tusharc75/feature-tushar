@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Typography, IconButton, Paper, Dialog } from "@material-ui/core";
-import { ControlPoint } from "@material-ui/icons";
+import { useState, useEffect, useContext, Fragment } from "react";
+import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -21,8 +20,7 @@ const ProductInventoryDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
-    dispatch,
+    state: { permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,7 +30,6 @@ const ProductInventoryDetailsPage = () => {
   const [productInventoryFields, setProductInventoryFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-
 
   useEffect(() => {
     if (id) {

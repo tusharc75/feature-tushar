@@ -973,9 +973,9 @@ const UserDetailsPage = () => {
           <div className="position-relative">
             {showActivity ?
               <Paper className="fixedRightPanel">
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span color="primary" className="activityHide" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
-                </a>}
+                </span>}
                 <Box className="detailHeader">
                   <h2 className="listingHeader single">Approval Process</h2>
                 </Box>
@@ -1030,9 +1030,9 @@ const UserDetailsPage = () => {
                 <QuickLinks quickLinks={quickLinks} />
               </Paper>
               :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              !isMobile && !isTablet && <span className="activityShow" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
-              </a>}
+              </span>}
           </div>
         </div>
       </Fragment>

@@ -29,8 +29,8 @@ function MyOwnCart() {
   }: any = useData();
   const history = useHistory();
   const [totalCount, setTotalCount] = useState(0);
-  const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
   const [totalPrice, setTotalPrice] = useState(0);
+  const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [cart, setCart] = useState([]);
   const [cartProducts, setCartProducts] = useState([]);
@@ -56,7 +56,7 @@ function MyOwnCart() {
           }
         ]
       })
-      .then(({ data }) => {
+      .then(() => {
         fetchCart();
       });
   };
@@ -66,7 +66,7 @@ function MyOwnCart() {
     if (cartId) {
       axiosInstance()
         .delete(`/user/cart/${cartId}`)
-        .then(({ data }) => {
+        .then(() => {
           fetchCart();
         });
     }

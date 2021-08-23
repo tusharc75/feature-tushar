@@ -12,13 +12,6 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
 
   const history = useHistory()
 
-  const calculateNetPrice = (price: number, discount: number) => {
-    let netPrice = price;
-    netPrice = (price * discount) / 100;
-    return netPrice;
-
-  }
-
   return (
     <div className={styles.product_card}>
       {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
