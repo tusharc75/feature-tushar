@@ -174,22 +174,6 @@ export default function ImportExportLinks({ permissions, module, api, refrenceId
       });
   };
 
-  const ImportInput = (
-    <input
-      onClick={(e: any) => (e.target.value = null)}
-      id="importFromExcel"
-      name="importFromExcel"
-      onChange={uploadData}
-      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-      style={{
-        opacity: "0",
-        position: "absolute",
-        zIndex: -1,
-      }}
-      type="file"
-    />
-  );
-
   return (
     <div className={module !== "builder" ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>

@@ -14,10 +14,8 @@ import { DeleteOutline } from "@material-ui/icons";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaPlusCircle } from 'react-icons/fa';
-import TableChartIcon from "@material-ui/icons/TableChart";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   marginLeft: {
     marginLeft: 10,
   },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { TablePagination } from "@material-ui/core";
 import { AgGridReact, AgGridColumn } from "ag-grid-react";
 import { isMobile, isTablet } from "react-device-detect";

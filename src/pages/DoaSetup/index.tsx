@@ -126,9 +126,9 @@ export default function Doa() {
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [doaPermissions, setDoaPermissions] = useState({ isCreate: true, isUpdate: true, isRead: true, isDelete: true });
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
-  const [deleteRec, setDeleteRec] = useState<any>({})
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [, setIsConformDialogVisible] = useState(false)
+  const [, setDeleteRec] = useState<any>({})
+  const [, setShowDeleteWarningConfirmBox] = useState(false)
   const [loading, setLoading] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
   const toastConfig = useContext(CustomToastContext);

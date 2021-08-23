@@ -6,7 +6,6 @@ import React, {
   useReducer,
 } from "react";
 import Grid from "@material-ui/core/Grid";
-import Layout from "../../components/Layout";
 import Button from "@material-ui/core/Button";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";

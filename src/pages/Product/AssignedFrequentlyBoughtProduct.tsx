@@ -8,7 +8,6 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
     root: {

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Typography, IconButton, Paper, Dialog } from "@material-ui/core";
+import { useState, useEffect, useContext, Fragment } from "react";
+import { Grid, Box, Button, Typography, IconButton, Paper } from "@material-ui/core";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -12,9 +12,8 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, product } from "../../constants/helpers";
+import { product } from "../../constants/helpers";
 import CreateProduct from "../../components/Product/CreateProduct";
-import { uniq, map, orderBy } from 'lodash';
 import BoxWithBorder from "../../components/BoxWithBorder";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
@@ -26,8 +25,7 @@ const ProductDetailsPage = () => {
     const { id } = useParams();
     const history = useHistory();
     const {
-        state: { permissions },
-        dispatch,
+        state: { permissions }
     }: any = useData();
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
@@ -38,12 +36,9 @@ const ProductDetailsPage = () => {
     const [productFields, setProductFields] = useState([]);
     const [mainPoints, setMainPoints] = useState(null);
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
-    const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [fields, setFields] = useState([]);
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
 
     const ignoreField = ["priceTemplate"]
-
 
     useEffect(() => {
         if (id) {
@@ -80,16 +75,7 @@ const ProductDetailsPage = () => {
                 axiosInstance().get(`/product/` + id).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push({ "fieldData": _f }));
                     data.productData.fields?.map((_f) => newField.push({ "fieldData": _f }));
-                    setFields(data.productData.fields)
-                    newField.map((_f) => {
-                        if (_f.fieldData?.fieldName === "currency") {
-                            setCurrencySymbol(
-                                getUniqueCurrencies().find(
-                                    (d) => d.currencyCode === data.productData["currency"]
-                                )?.symbolNative
-                            );
-                        }
-                    });
+
                     setProductFields(newField)
                     handleMainPoints(data.productData);
                     setHeadingLabel(data.productData.productName);
