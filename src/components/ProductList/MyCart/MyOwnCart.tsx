@@ -232,7 +232,7 @@ function MyOwnCart() {
               )}
             </div>
 
-            <div className={styles.price_card}>
+            {Object.keys(mappedCartItems).length !== 0 && <div className={styles.price_card}>
               <div className={styles.price_card_price_summary}>
                 <h3 className={styles.price_card_price_summary_heading}>PRICE DETAILS</h3>
                 <hr />
@@ -256,10 +256,6 @@ function MyOwnCart() {
                   <h3 className={styles.price_card_price}>Rs. {tempTotalPrice}.00</h3>
                 </div>
               </div>
-              {/* <div className={styles.price_card_secure_text}>
-              <SecureIcon />
-              <h3>Safe and Secure Payments.100% Authentic products.</h3>
-            </div> */}
               <div className={styles.price_card_checkout_button}>
                 <Button variant="contained" color="secondary" onClick={onCheckout} className={styles.price_card_checkout_button_layout}>
                   {checkoutLabel}
@@ -269,7 +265,7 @@ function MyOwnCart() {
                   <p>Safe and Secure Payments.100% Authentic products.</p>
                 </div>
               </div>
-            </div>
+            </div>}
           </div>
         </div>
         <div className={styles.sponsored}>
