@@ -132,11 +132,6 @@ const Steps = (props) => {
     approvedQuote,
     handleVersionUpdate,
     allowedToEdit,
-    DOAlimit,
-    totalCost,
-    handleSendReminder = null,
-    reminderLoading = false,
-    hideReminderButton = false,
     DOAData = null,
     quoteData
   } = props;

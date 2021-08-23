@@ -1,10 +1,8 @@
 import { Button, makeStyles } from "@material-ui/core";
 import DetailsPage from "../../../components/Shared/DetailsPage";
 import axiosInstance from '../../../axios/axiosInstance';
-import { useHistory } from "react-router-dom";
 import { useMemo, useState, useContext, useEffect } from "react";
-import { formatAmountWithCurrency, processFieldName, quoteBuilder, stepsToIgnoreManualCompleteForOpportunity } from "../../../constants/helpers";
-import routes from "../../../components/Helpers/Routes";
+import { formatAmountWithCurrency, processFieldName, stepsToIgnoreManualCompleteForOpportunity } from "../../../constants/helpers";
 import { BiLayerPlus } from "react-icons/bi";
 import { HiPencil } from "react-icons/hi";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -22,10 +20,8 @@ const useStyles = makeStyles(() => ({
 
 export default function QuoteDetailPage({ quoteData, quotePermissions, selectedEntity, ifQuoteApprovedAapproved, allowedToEdit, handleOpenUpdateDialog,handleOpenCloneDialog, handleSetSteps }) {
     const classes = useStyles();
-    const history = useHistory();
     const [loadingFields, setLoadingFields] = useState(false);
     const [quoteFields, setQuoteFields] = useState([]);
-    const { qbApi } = quoteBuilder;
     const toastConfig = useContext(CustomToastContext);
 
 

@@ -144,7 +144,6 @@ export default function QuoteProcess(props) {
 
     const [quoteCurrency] = useState(quoteData?.currency)
     const [nextStep, setNextStep] = useState(true);
-    const [options, setOptions] = useState([]);
     const [redCard, setRedCard] = useState(false);
     const [totalProfit, setTotalProfit] = useState({
         shortFormatAmount: "",
@@ -189,15 +188,13 @@ export default function QuoteProcess(props) {
     const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
     const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
     const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
-    const [approvedButtonText, setApprovedButtonText] = useState("Accept");
-    const [productsData, setProductsData] = useState([]);
+    const [approvedButtonText] = useState("Accept");
     const [loading, setLoading] = useState(false);
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
     const [generatingPdfFile, setGeneratingFile] = useState(false);
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
     const [sendEmail, setSendEmail] = useState(false);
-    const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
     const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
     const [messageDialog, setMessageDialog] = useState({
@@ -322,8 +319,6 @@ export default function QuoteProcess(props) {
         }
     }, [DOAsetup])
 
-
-
     useEffect(() => {
         if (DOAsetup) {
             axiosInstance()
@@ -393,7 +388,6 @@ export default function QuoteProcess(props) {
         }
     };
 
-
     const defaultTotalValue = useMemo(() => {
         let result = "0";
         if (quoteData && quoteData?.currency) {
@@ -428,10 +422,6 @@ export default function QuoteProcess(props) {
         let totalSellingPrice = 0;
         let totalMargin = 0;
         let totalProfit = 0;
-        let CostCurrency = "";
-        let SPCurrency = "";
-        let MarginCurrency = "";
-        let ProfitCurrency = "";
 
         BuilderData = BuilderData.map((data) => ({
             ...data,
@@ -484,7 +474,6 @@ export default function QuoteProcess(props) {
         // }
         let colName = [];
         let dynamicTable = [];
-        setProductsData(BuilderData);
 
         const filterKeys = ["priceTemplate", "productTemplate", "productCategory", "productImage"]
         BuilderData.forEach((quoteRows: { [x: string]: any }) => {
@@ -527,8 +516,6 @@ export default function QuoteProcess(props) {
                     dynamicTable.push(labelsWithVal)
                 }
 
-
-
                 if (ignoredKeys.indexOf(key) === -1) {
                     let indexkey = key;
                     let currency = "";
@@ -558,25 +545,21 @@ export default function QuoteProcess(props) {
 
                     if (currency === quoteData?.currency && key === "totalCost") {
                         totalCost = totalCost + quoteRows[indexkey];
-                        CostCurrency = currency;
                     } else if (
                         currency === quoteData?.currency &&
                         key === "totalSalesPrice"
                     ) {
                         totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-                        SPCurrency = currency;
                     } else if (
                         currency === quoteData?.currency &&
                         key === "totalProfit"
                     ) {
                         totalProfit = totalProfit + quoteRows[indexkey];
-                        ProfitCurrency = currency;
                     } else if (
                         currency === quoteData?.currency &&
                         key === "totalMargin"
                     ) {
                         totalMargin = totalMargin + quoteRows[indexkey];
-                        MarginCurrency = currency;
                     }
                     // }
                 }
@@ -629,7 +612,7 @@ export default function QuoteProcess(props) {
                 .post(`quote-builder/updateprocess/${quoteData._id}?version=${currentVersion}`, {
                     processStatus: "New",
                 })
-                .then(({ data }) => {
+                .then(() => {
                     fetchQuoteData(currentVersion);
                 })
                 .catch((error) => {
@@ -657,10 +640,8 @@ export default function QuoteProcess(props) {
 
     const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
         if (BuilderData.length) {
-            setOptions([]);
             setRedCard(false);
-            let optionstoSet = [];
-            const { inventory, totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
+            const { totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
             setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
             setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
             setTotalSale(
@@ -705,27 +686,6 @@ export default function QuoteProcess(props) {
                 setDOAreq(false);
                 setCustomerreq(false);
             }
-
-            // const ColName = inventory[0].map((col) =>
-            //     col.fieldName === "Productname" ? "Product Name" : col.fieldName
-            // );
-
-
-            // setColName(ColName);
-            // const allData: any = [];
-            // inventory.forEach((col) => {
-            //     let obj: { [key: string]: string | number } = {};
-
-            //     col.forEach((_col) => {
-            //         obj[
-            //             _col.fieldName === "Productname" ? "Product Name" : _col.fieldName
-            //         ] = _col.fieldValue || "";
-            //     });
-
-            //     allData.push(obj);
-            // });
-            setOptions(optionstoSet);
-
         }
     };
 
@@ -1184,7 +1144,7 @@ export default function QuoteProcess(props) {
         setAnchorEl(null);
     };
 
-    const handleChangeVersionInQuote = (event) =>{
+    const handleChangeVersionInQuote = (event) => {
         handleChangeVersion(event);
         setAnchorEl(null);
     }
@@ -1290,14 +1250,14 @@ export default function QuoteProcess(props) {
                             </Button>
                         ) : null}
                         <div>
-                            <Button 
-                            className="customSelect mx-1"
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            aria-controls="simple-menu" 
-                            aria-haspopup="true" 
-                            onClick={handleClick}>
+                            <Button
+                                className="customSelect mx-1"
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                aria-controls="simple-menu"
+                                aria-haspopup="true"
+                                onClick={handleClick}>
                                 {`Version : ${currentVersion}`}
                             </Button>
                             <Menu
@@ -1369,20 +1329,10 @@ export default function QuoteProcess(props) {
                         id={quoteData._id}
                         version={currentVersion}
                         Refresh={fetchQuoteData}
-                        quoteData={quoteData}
                         nextStep={nextStep}
                         versionStatus={versionStatus}
-                        versionProcessStatus={quoteData.versions[currentVersion]?.processStatus}
                         loading={loading}
                         approvedQuote={ifQuoteApproved}
-                        DOAlimit={DOAmaxLimit}
-                        totalCost={totalPrice}
-                        handleSendReminder={handleSendReminder}
-                        reminderLoading={reminderLoading}
-                        hideReminderButton={isHideReminder}
-                        openInvoiceDialog={() => setOpenInvoiceDialog(true)}
-                        allowedToEdit={allowedToEdit}
-                        DOAData={DOAData}
                         handleVersionUpdate={() => {
                             handleVersionUpdate(
                                 visibleColumns,
@@ -1390,6 +1340,9 @@ export default function QuoteProcess(props) {
                                 state?.selectedRecords
                             );
                         }}
+                        allowedToEdit={allowedToEdit}
+                        DOAData={DOAData}
+                        quoteData={quoteData}
                     />
                 </div>
             </Paper>
@@ -1643,6 +1596,7 @@ export default function QuoteProcess(props) {
                         <div className="text-align-center">
                             <Typography variant="h4">Under Construction </Typography>
                             <img
+                                alt="image"
                                 src={`${PerformanceTuningImg}`}
                                 style={{ height: "300px" }}
                             />
