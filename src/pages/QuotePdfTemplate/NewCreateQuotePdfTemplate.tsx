@@ -27,7 +27,6 @@ const PdfTemplateSchema = Yup.object().shape({
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
-        padding: theme.spacing(4)
     },
     paper: {
         width: "100%",
@@ -148,7 +147,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                 />
             </Grid>
         </Grid>
-        <CustomContainer styles={{ top: '10px' }}>
+        <div className="main-container">
             <Paper className={classes.paper}>
                 {initialValues ? (
                     <Formik
@@ -274,7 +273,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                     </Box>
                 </Grid>
             </Paper>
-        </CustomContainer>
+        </div>
     </div >
 }
 
