@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
-import Layout from "../../components/Layout";
 import Button from "@material-ui/core/Button";
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";

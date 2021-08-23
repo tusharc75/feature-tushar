@@ -12,13 +12,6 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
 
   const history = useHistory()
 
-  const calculateNetPrice = (price: number, discount: number) => {
-    let netPrice = price;
-    netPrice = (price * discount) / 100;
-    return netPrice;
-
-  }
-
   return (
     <div className={styles.product_card}>
       {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
@@ -41,14 +34,14 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
           else {
             history.push(`product/details/${product._id}`)
           }
-        }}>{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
+        }}>{`${product?.productName}, ${product?.productCategory ? product.productCategory.optionLabel : ""} `}</h4>
         <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <div>
             {(product.mrp && parseInt(product.mrp) !== 0) &&
               <>
-                <span className={styles.amount}>{formatAmountWithCurrency(product.currency, calculateNetPrice(parseInt(product.mrp), parseInt(product.discount))).fullFormatAmount}</span>
-                {(parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>}
+                <span className={styles.amount}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>
+                {(product.discount && parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>}
               </>
             }
           </div>

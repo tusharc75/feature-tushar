@@ -31,7 +31,7 @@ import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
 import { green, red } from '@material-ui/core/colors';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { getFormulaValue, handleAutoCalculation } from '../../constants/formulaUtility';
+import { handleAutoCalculation } from '../../constants/formulaUtility';
 import NumberFormat from 'react-number-format';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -44,12 +44,10 @@ import {
   documentUploadSupportExtensions,
   formatAmountWithCurrency
 } from '../../constants/helpers';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
-import { useLocation, useHistory } from 'react-router-dom'
 
 const filter = createFilterOptions();
 
@@ -58,24 +56,6 @@ interface NumberFormatCustomProps {
   onChange: (event: { target: { name: string; value: string } }) => void;
   name: string;
 }
-
-const withValueLimit = (inputObj, limitVal) => {
-  const { value } = inputObj;
-  if (value <= limitVal) return inputObj;
-};
-
-const formatDecimal = (value, decimalPlaces) => {
-  if (value === '') {
-    return 0;
-  }
-  // && isNaN(value)
-  // else if (parseFloat(value) < 0) {
-  //   return 0;
-  // }
-  else {
-    return parseFloat(value.toFixed(decimalPlaces));
-  }
-};
 
 const CustomFormat = (props: NumberFormatCustomProps | any) => {
   const { inputRef, onChange, selectedCurrencyCode, ...other } = props;
@@ -206,9 +186,6 @@ const FormTypes = (props) => {
   const [displayType, setDisplayType] = React.useState(null);
 
   const inputNumberRef = useRef(null);
-
-  const { id } = useHistory()
-  const { pathnames } = useLocation()
 
   useEffect(() => {
     setOptionsList(options)

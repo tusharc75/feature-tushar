@@ -453,7 +453,27 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                               </Grid>
                                             ) : null}
                                           </Grid>
-                                        </Grid> : field.fieldName === "currency" ? (
+                                        </Grid> : field.fieldName === "projectCategory" ? (
+                                          <FormTypes
+                                            {...field}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={null}
+                                          />
+                                        ) : field.fieldName === "currency" ? (
                                           <FormTypes
                                             {...field}
                                             disabled={Boolean(projectSalesId) && field.disableOnEdit}
@@ -486,8 +506,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : field.fieldName.trim() === "amount" ? (
                                           <FormTypes
-                                           disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                           isNew={Boolean(projectSalesId)}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
                                             fieldId={field._id}
                                             lookup={field.lookup}
                                             // {...rest}

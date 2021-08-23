@@ -62,8 +62,8 @@ const QuotePdfTemplate: FC = () => {
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
     if (columnState) {
-        columns.map((item) => {
-            columnState.map((d) => {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
                 if (d.colId === item.field) {
                     item.show = !d.hide;
                 }

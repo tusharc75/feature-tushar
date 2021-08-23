@@ -17,7 +17,8 @@ export default function OrgChartContainer({ data, onClick }) {
     google.charts.load('current', { packages: ["orgchart"] });
 
     const [positions, setPositions] = useState([]);
-    const [showModal, setShowModal] = useState(false);
+    // const [showModal, setShowModal] = useState(false);
+
     // const [node, setNode] = useState({
     //     id: '',
     //     title: '',
@@ -43,18 +44,18 @@ export default function OrgChartContainer({ data, onClick }) {
         setPositions([...data]);
     };
 
-    const update = (id, parentId) => {
-        const updatedPositions = [...positions];
-        const index = updatedPositions.findIndex((position) => position.id === id);
-        const position = updatedPositions[index];
-        updatedPositions.splice(index, 1, {
-            id: position.id,
-            title: position.title,
-            name: position.name,
-            parentId,
-        });
-        setPositions([...updatedPositions]);
-    };
+    // const update = (id, parentId) => {
+    //     const updatedPositions = [...positions];
+    //     const index = updatedPositions.findIndex((position) => position.id === id);
+    //     const position = updatedPositions[index];
+    //     updatedPositions.splice(index, 1, {
+    //         id: position.id,
+    //         title: position.title,
+    //         name: position.name,
+    //         parentId,
+    //     });
+    //     setPositions([...updatedPositions]);
+    // };
 
     // const addNode = () => {
     //     let updatedNode;
@@ -77,9 +78,9 @@ export default function OrgChartContainer({ data, onClick }) {
 
 
 
-    const toggleModal = () => {
-        setShowModal(!showModal);
-    };
+    // const toggleModal = () => {
+    //     setShowModal(!showModal);
+    // };
 
     // const handleSubmit = (event) => {
     //     event.preventDefault();

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, Suspense, Fragment } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toolbar, Box, makeStyles, withWidth } from "@material-ui/core";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";

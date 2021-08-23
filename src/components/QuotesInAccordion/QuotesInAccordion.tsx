@@ -6,7 +6,6 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
@@ -22,7 +21,6 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
 import routes from '../Helpers/Routes';
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-
 
 const Accordion = withStyles({
     root: {
