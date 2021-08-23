@@ -17,14 +17,11 @@ import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
 
 function MyOwnCart() {
-  const [products, setProducts] = useState([]);
-  const [clonedProducts, setClonedProducts] = useState([]);
   const { dispatch }: any = useData();
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchCart();
-    fetchProducts();
   }, []);
 
   const {
@@ -32,31 +29,18 @@ function MyOwnCart() {
   }: any = useData();
   const history = useHistory();
   const [totalCount, setTotalCount] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
-  const [addedCartItems, setAddedCartItems] = useState([]);
-  const [productLoading, setProductLoading] = useState(false);
-
-  const fetchProducts = () => {
-    setProductLoading(true);
-    axiosInstance()
-      .get(`${product.api}?limit=0`)
-      .then(({ data: { data } }) => {
-        setProductLoading(false);
-        setProducts(data);
-        setClonedProducts(data);
-      })
-      .catch((error) => {
-        setProductLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
+  const [cart, setCart] = useState([]);
+  const [cartProducts, setCartProducts] = useState([]);
+  const [cartProductsLoading, setCartProductsLoading] = useState(false);
 
   const FracImage = 'https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png';
 
   const onAddToCartItem = (item) => {
     let tempQuantity = 1;
-    addedCartItems.some((o) => {
+    cartProducts.some((o) => {
       if (o.productId === item._id) {
         tempQuantity = tempQuantity + 1;
         return true;
@@ -77,20 +61,20 @@ function MyOwnCart() {
       });
   };
 
+
   const deleteCartItem = (cartId) => {
     if (cartId) {
       axiosInstance()
         .delete(`/user/cart/${cartId}`)
         .then(() => {
           fetchCart();
-          setClonedProducts([...products]);
         });
     }
   };
 
   const onDeleteCartItem = (item) => {
     let cartId;
-    addedCartItems.some((o) => {
+    cart.some((o) => {
       if (o.productId === item._id) {
         cartId = o.id;
         return true;
@@ -100,22 +84,31 @@ function MyOwnCart() {
   };
 
   const fetchCart = () => {
+    let numOr0 = n => isNaN(n) ? 0 : n
+    let tempTotalPrice = 0
+    setCartProductsLoading(true)
     axiosInstance()
       .get(`/user/cart`)
       .then(({ data: { data } }) => {
         if (data) {
           dispatch({ type: SET_CART_COUNT, payload: data.length });
-          setAddedCartItems(data);
+          data.map((d) => {
+            tempTotalPrice = (d.product?.mrp ? parseInt(d.product?.mrp) : 0) + tempTotalPrice
+          })
+          setCart(data)
+          setCartProducts(data.map(d => d.product))
+          setTotalPrice(tempTotalPrice)
           setTotalCount(data.length)
         }
         if (data && data.length >= 1) {
           setCheckoutLabel('Create Quote');
         }
+        setCartProductsLoading(false)
       });
   };
 
   const onCheckout = () => {
-    if (checkoutLabel === 'Create Quote' && addedCartItems.length >= 1) {
+    if (checkoutLabel === 'Create Quote') {
       setshowCreateQuoteDialog(true);
     }
   };
@@ -125,23 +118,15 @@ function MyOwnCart() {
   };
 
   const handleCreateQuote = (values) => {
-    let selectedProductIds = addedCartItems.map((o) => o.productId);
+    // let selectedProductIds = addedCartItems.map((o) => o.productId);
 
-    let selectedProducts = products.filter((obj) => selectedProductIds.indexOf(obj._id) >= 0);
+    // let selectedProducts = products.filter((obj) => selectedProductIds.indexOf(obj._id) >= 0);
     axiosInstance()
-      .post(`quote-builder/create/from-cart`, { ...values, products: selectedProducts })
+      .post(`quote-builder/create/from-cart`, { ...values, products: cartProducts })
       .then(({ data: { data } }) => {
         history.push(`${routes.quoteBuilder.path}/detail/${data?._id}`);
       });
   };
-  const mappedCartItems = {};
-  let tempTotalPrice = 0
-  addedCartItems.map((o) => {
-    if (!mappedCartItems[o?.productId]) {
-      mappedCartItems[o?.productId] = o?.quantity;
-      tempTotalPrice = tempTotalPrice + o?.mrp ? Number(o.mrp) : 0
-    }
-  });
 
   return (
     <Fragment>
@@ -152,15 +137,15 @@ function MyOwnCart() {
             <div className={styles.box_layout}>
               <h2>MY CART</h2>
               <hr />
-              {productLoading ? (
+              {cartProductsLoading ? (
                 <Grid container spacing={3}>
                   <Grid item xs={12} className={styles.loadingContainer}>
                     <Typography> ...Loading</Typography>
                   </Grid>
                 </Grid>
-              ) : Object.keys(mappedCartItems).length ? (
-                clonedProducts.map((item, index) => {
-                  return mappedCartItems[item?._id] ? (
+              ) : cartProducts.length ? (
+                cartProducts.map((item, index) => {
+                  return (
                     <div key={item.id} className={styles.checkout_items}>
                       <div className={styles.card}>
                         <div className={styles.products_image_layout}>
@@ -169,7 +154,7 @@ function MyOwnCart() {
                         <div className={styles.card_body}>
                           <div className={styles.card_price}>
                             {/* Price:{'  '} */}
-                            {item?.currency ? currencyCodeToSymbol(item?.currency) : '$'}
+                            {item?.currency ? currencyCodeToSymbol(item?.currency) : ''}
                             {item?.mrp || 0}
                           </div>
                           <div className={styles.card_seller}>
@@ -195,7 +180,7 @@ function MyOwnCart() {
                         <hr />
                       </div>
                     </div>
-                  ) : null;
+                  );
                 })
               ) : (
                 <Grid container spacing={3}>
@@ -206,7 +191,7 @@ function MyOwnCart() {
               )}
             </div>
 
-            {Object.keys(mappedCartItems).length !== 0 && <div className={styles.price_card}>
+            {cartProducts.length !== 0 && <div className={styles.price_card}>
               <div className={styles.price_card_price_summary}>
                 <h3 className={styles.price_card_price_summary_heading}>PRICE DETAILS</h3>
                 <hr />
@@ -215,7 +200,7 @@ function MyOwnCart() {
                     {' '}
                     Sub-Total <span> ({totalCount} items) </span>{' '}
                   </p>
-                  <h3 className={styles.price_card_price}>Rs. {tempTotalPrice}.00</h3>
+                  <h3 className={styles.price_card_price}> {totalPrice}</h3>
                 </div>
                 <div className={styles.price_card_summary_pickup}>
                   <p>Pickup</p>
@@ -227,7 +212,7 @@ function MyOwnCart() {
                 <hr />
                 <div className={styles.price_card_total}>
                   <h3>Total Amount</h3>
-                  <h3 className={styles.price_card_price}>Rs. {tempTotalPrice}.00</h3>
+                  <h3 className={styles.price_card_price}> {totalPrice}</h3>
                 </div>
               </div>
               <div className={styles.price_card_checkout_button}>
@@ -247,7 +232,7 @@ function MyOwnCart() {
             <div className={styles.sponsored_items_container}>
               <h2>Sponsored Products Related To This Item </h2>
               <div className={`gap-3 ${styles.sponsored_items_list}`}>
-                {productLoading
+                {cartProductsLoading
                   ? [...Array(7).keys()].map((o, index) => {
                     return (
                       <>
@@ -262,9 +247,9 @@ function MyOwnCart() {
                       </>
                     );
                   })
-                  : products.map((product, index: number) => (
+                  : cartProducts.map((product, index: number) => (
                     <>
-                      <Product key={index} product={product} onAddItem={onAddToCartItem} />
+                      {/* <Product key={index} product={product} onAddItem={onAddToCartItem} /> */}
                     </>
                   ))}
               </div>
