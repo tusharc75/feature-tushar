@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Menu, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom'
-import { useHistory } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
-import AssignDataDialog from '../../pages/ProjectSales/AssignDataDialog';
 import { MoreVert } from '@material-ui/icons';
-import { id } from 'date-fns/locale';
-import { customerContact } from '../../constants/helpers';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
 
 const Accordion = withStyles({

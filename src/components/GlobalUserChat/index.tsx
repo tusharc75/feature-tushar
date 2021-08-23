@@ -1,5 +1,5 @@
 import React, { useState, useContext, useCallback, useEffect } from 'react';
-import { Badge, Box, Fab } from '@material-ui/core';
+import { Badge, Fab } from '@material-ui/core';
 import { Chat, Clear } from '@material-ui/icons';
 
 import ChatsPopover from './ChatsPopover';
