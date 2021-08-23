@@ -38,7 +38,7 @@ const TopDashboard = (props) => {
         const dataUrl = canvas.toDataURL('image/png');
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
-        slide.addImage({ data: dataUrl, sizing: { type: 'contain', w: 4, h: 3 } });
+        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
         pptx.writeFile();
         break;
       }
@@ -68,20 +68,9 @@ const TopDashboard = (props) => {
         const ws = XLSX.utils.json_to_sheet(wData);
         const wb = {
           Sheets: {
-            data: ws,
-            chart: {
-              name: 'image.png',
-              data: dataUrl,
-              opts: { base64: true },
-              position: {
-                type: 'twoCellAnchor',
-                attrs: { editAs: 'oneCell' },
-                from: { col: 2, row: 2 },
-                to: { col: 6, row: 5 }
-              }
-            }
+            data: ws
           },
-          SheetNames: ['data', 'chart']
+          SheetNames: ['data']
         };
         const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
