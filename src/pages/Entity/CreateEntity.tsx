@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Dialog,
   Button,
@@ -13,6 +13,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
@@ -33,6 +34,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
   });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const history = useHistory();
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     getInitialData();
@@ -63,11 +65,17 @@ const CreateEntity = ({ open, close, fetchData }) => {
         const newId = data.data._id;
         setSubmitting(false);
         fetchData();
+        toastConfig.setToastConfig({
+          type:"success",
+          open: true,
+          message: data.message
+        })
         history.push(`/entity/detail/${newId}`);
         close();
       })
       .catch((err) => {
         setSubmitting(false);
+        toastConfig.setToastConfig(err)
       });
   };
 
