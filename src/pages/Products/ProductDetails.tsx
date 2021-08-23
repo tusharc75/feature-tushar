@@ -189,10 +189,8 @@ export default function ProductDetails() {
                   </span>
                   <div className={styles.price}>
                     <span className={styles.vendor}>
-                      <h5>Sold by: <span>Cactus Wellhead</span></h5>
+                      <h5>Sold by: <span>{user?.user?.brandName}</span></h5>
                     </span>
-
-
                   </div>
                   <div className={styles.set_width}> <hr /> </div>
 
@@ -212,28 +210,28 @@ export default function ProductDetails() {
                   <p>{productDetails?.description}</p>
                 </article>
                 <div className={styles.controls}>
-                  <div className={styles.controls_over}>
+                  {/* <div className={styles.controls_over}>
                     <h5><li>MFG</li></h5>
                     <a className="option">(UK 8)</a>
-                  </div>
-                  <div className={styles.controls_over}>
-                    <h5><li>Product Number</li></h5>
-                    <a className="option">(1)</a>
-                  </div>
-                  <div className={styles.controls_over}>
-                    <h5><li>Measuring Unit</li></h5>
-                    <a className="option">(1)</a>
-                  </div>
-                  <div className={styles.controls_over}>
-                    <h5><li>Measuring Unit</li></h5>
-                    <a className="option">(1)</a>
-                  </div>
+                  </div> */}
+                  {productDetails.productNumber && <div className={styles.controls_over}>
+                    <h5><li>Product Number </li></h5>
+                    <a className="option">{` ${productDetails.productNumber}`}</a>
+                  </div>}
+                  {productDetails.unit && <div className={styles.controls_over}>
+                    <h5><li>Measuring Unit </li></h5>
+                    <a className="option">{` ${productDetails.unit}`}</a>
+                  </div>}
+
                 </div>
 
                 {/*<div className={styles.set_width_2}> <hr/> </div>*/}
                 <div className={styles.price_and_discount}>
                   <span className={styles.current}>
-                    <h2>$699.00</h2>
+                    <h2>{
+                      formatAmountWithCurrency(
+                        productDetails.currency, productDetails.mrp).fullFormatAmount
+                    }</h2>
                     {
                       formatAmountWithCurrency(
                         productDetails.currency,
@@ -330,7 +328,8 @@ export default function ProductDetails() {
             <span>Loading...</span>
           )}
           <div className="a_divider_inner"></div>
-          <FrequentlyBought />
+
+          <FrequentlyBought id={productDetails?._id} />
           <div className="a_divider_inner"></div>
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>

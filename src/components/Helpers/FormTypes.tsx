@@ -1719,6 +1719,7 @@ const FormTypes = (props) => {
         <KeyboardDatePicker
           {...rest}
           clearable
+          autoOk
           required={required}
           variant="inline"
           inputVariant="outlined"
@@ -1741,6 +1742,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDateTimePicker
           {...rest}
+          autoOk
           clearable
           required={required}
           variant="inline"

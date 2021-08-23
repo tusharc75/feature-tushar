@@ -997,7 +997,7 @@ export default function QuoteProcess(props) {
                             setLoading(false)
                         })
                         .catch((err) => {
-                            setSendEmail(true)
+                            toastConfig.setToastConfig(err);
                             setLoading(false)
                             setGeneratingFile(false);
                         });
@@ -1029,13 +1029,13 @@ export default function QuoteProcess(props) {
 
                                 })
                                 .catch((err) => {
-                                    setSendEmail(true)
+                                    toastConfig.setToastConfig(err);
                                     setLoading(false)
                                     setGeneratingFile(false);
                                 });
                         })
                         .catch((err) => {
-                            setSendEmail(true)
+                            toastConfig.setToastConfig(err);
                             setLoading(false)
                             setGeneratingFile(false);
                         });
