@@ -80,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 export default function QuotesInAccordion({
-    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null, }) {
+    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null }) {
     const history = useHistory();
     const {
         state: { selectedEntity, user }, dispatch
@@ -345,9 +345,7 @@ export default function QuotesInAccordion({
                 isRenderedFromOpportunity={isRenderedFromOpportunity}
                 opportunityName={opportunityName}
                 isRenderedFromCustomerAccount={isRenderedFromCustomerAccount}
-
-
-
+                doaCollaboratorResources={user?.user?.doa?.map(obj => obj.user)}
             />
         }
         {
