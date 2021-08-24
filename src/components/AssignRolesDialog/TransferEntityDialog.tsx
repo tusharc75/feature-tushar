@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import {
     Button,
     Checkbox,
@@ -12,7 +12,6 @@ import {
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";

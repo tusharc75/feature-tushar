@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
     Button,
     Checkbox,
@@ -20,12 +20,10 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { startCase } from "lodash";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
-import { roleTypes } from "../../constants/helpers";
 import SearchBox from "../Helpers/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
@@ -107,12 +105,12 @@ const AssignRegionalRolesUserDialog = ({
         let resultEntity = [];
 
         resultUser = userConst.filter((data) => {
-            return data.concatedName?.toLowerCase().search(value.toLowerCase()) != -1 || data.email?.toLowerCase().search(value.toLowerCase()) != -1;
+            return data.concatedName?.toLowerCase().search(value.toLowerCase()) !== -1 || data.email?.toLowerCase().search(value.toLowerCase()) !== -1;
 
         });
         setUser(resultUser)
         resultEntity = entityConst.filter((data) => {
-            return data.address?.toLowerCase().search(value.toLowerCase()) != -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) != -1
+            return data.address?.toLowerCase().search(value.toLowerCase()) !== -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) !== -1
         });
         setEntity(resultEntity)
     };

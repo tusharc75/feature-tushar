@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  Dialog,
   FormControl,
   FormControlLabel,
   Grid,
@@ -92,7 +91,7 @@ const AssignRolesDialog = ({
     setSearch(value);
     let result = [];
     result = rolesConst.filter((data) => {
-      return data.name.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
+      return data.name.toLowerCase().search(value.toLowerCase()) !== -1 || data.description.toLowerCase().search(value.toLowerCase()) !== -1;
     });
     setRoles(result)
   };

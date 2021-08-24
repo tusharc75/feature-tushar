@@ -1,15 +1,13 @@
-import React, { useCallback, useEffect, useContext, useState, Fragment } from 'react';
-import { useDrop } from 'react-dnd';
+import { useEffect, useContext, useState, Fragment } from 'react';
 import Divider from '@material-ui/core/Divider';
-import Button from '@material-ui/core/Button';
 import { AddField } from '../AddField';
 import axiosInstance from '../../../axios/axiosInstance'
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { Box, Typography, Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import { DragBox } from "./DragBox";
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     acionBtn: {
         display: "flex",
         alignItems: "center",
@@ -23,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
         background: "#e6f1f5"
     },
 }));
-
 
 export const CustomField = ({ }) => {
 

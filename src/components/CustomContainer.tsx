@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Paper, Container, CssBaseline } from "@material-ui/core";
+import { Container, CssBaseline } from "@material-ui/core";
 
 const CustomContainer = (props) => {
   const { children, styles, maxWidth, minHeight, padding } = props;

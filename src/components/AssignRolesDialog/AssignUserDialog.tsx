@@ -86,7 +86,7 @@ const AssignUserDialog = ({
     setSearch(value);
     let result = [];
     result = usersConst.filter((data) => {
-      return data.concatedName.toLowerCase().search(value.toLowerCase()) != -1 || data.email.toLowerCase().search(value.toLowerCase()) != -1;
+      return data.concatedName.toLowerCase().search(value.toLowerCase()) !== -1 || data.email.toLowerCase().search(value.toLowerCase()) !== -1;
     });
     setUsers(result)
   };

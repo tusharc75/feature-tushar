@@ -152,7 +152,6 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
         }),
     });
 
-    const opacity = isDragging ? 0 : 1;
     drag(drop(ref));
 
     const [{ }, drop_field] = useDrop({

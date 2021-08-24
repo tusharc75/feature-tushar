@@ -1,27 +1,16 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import Checkbox from "@material-ui/core/Checkbox";
 import Box from "@material-ui/core/Box";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
-import ListItemText from "@material-ui/core/ListItemText";
 import { checkFormula } from "../../../constants/formulaUtility";
 import Chip from "@material-ui/core/Chip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import Grid from "@material-ui/core/Grid";
-import { startCase } from "lodash";
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
-  },
-};
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);

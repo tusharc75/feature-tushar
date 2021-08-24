@@ -1,4 +1,5 @@
-import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
+import { csvIcon, docIcon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index";
+
 export const fileIcons = [
     {
         extensions: [".txt", ".rtf"],

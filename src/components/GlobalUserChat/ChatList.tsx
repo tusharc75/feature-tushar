@@ -1,11 +1,7 @@
-import { Fragment, useEffect } from 'react'
+import { Fragment } from 'react'
 import {
   ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
-  Typography
-} from '@material-ui/core'
+  ListItemText} from '@material-ui/core'
 import moment from 'moment'
 
 import axiosInstance from '../../axios/axiosInstance'

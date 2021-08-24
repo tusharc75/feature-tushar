@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useRef } from 'react';
+import { useState, Fragment, useRef } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
@@ -15,7 +15,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { camelCase } from "./../../../constants/helpers";
 import { Vlookup } from "./vlookup";
 import { Formula } from "./formula";
@@ -34,20 +34,11 @@ const FieldSchema = Yup.object().shape({
     .required("please enter field label"),
 });
 
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
-  },
-};
-
 export const AddField = (props) => {
 
   const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
 
-  const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
+  const [initialValues,] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
     tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "Option 1", optionValue: "Option 1" }], formula: "return ", isvlookupReverse: false,
     units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false, displayCurrency: refrence !== "formAdd" ? ["CUR"] : ["USD"]
