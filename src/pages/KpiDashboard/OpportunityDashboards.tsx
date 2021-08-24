@@ -2,7 +2,13 @@ import Chart from 'react-chartjs-2';
 import { Grid, Box, Paper, Typography, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
 
 const OpportunityDashboards = (props) => {
-  const { openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts } = props;
+  const { openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts, createdLeads, status } = props;
+
+  const statusText = {
+    open: 'Open',
+    won: 'Won',
+    lost: 'Lost'
+  };
   return (
     <>
       <Grid container spacing={2}>
@@ -22,7 +28,7 @@ const OpportunityDashboards = (props) => {
 
               <Box flex={0.5}>
                 <Typography variant="h6" color="secondary">
-                  Open Quotes
+                  {statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
                   <Typography variant="h5" color="primary">
@@ -37,7 +43,7 @@ const OpportunityDashboards = (props) => {
           </Paper>
           <Paper elevation={2}>
             <Box p={2} textAlign="center">
-              <Typography variant="h6">Open Opportunities by Customer Account</Typography>
+              <Typography variant="h6">{statusText[status]} Opportunities by Customer Account</Typography>
               <Chart
                 type="bar"
                 options={{
@@ -68,7 +74,7 @@ const OpportunityDashboards = (props) => {
         <Grid item sm={4}>
           <Paper elevation={2}>
             <Box p={2} textAlign="center">
-              <Typography variant="h6">Open Opportunities by Sales Rep</Typography>
+              <Typography variant="h6">{statusText[status]} Opportunities by Sales Rep</Typography>
               <Chart type="pie" data={oppSalesRep} />
             </Box>
           </Paper>
@@ -84,7 +90,7 @@ const OpportunityDashboards = (props) => {
             <List>
               {topProducts.length ? (
                 topProducts.map((product) => (
-                  <ListItem divider>
+                  <ListItem divider key={product}>
                     <ListItemText primary={product.productCategory} />
                     <ListItemSecondaryAction>
                       <Typography variant="h6">{product.count}</Typography>
@@ -107,6 +113,15 @@ const OpportunityDashboards = (props) => {
               <Typography variant="h6">Opportunity Trends</Typography>
 
               <Chart type="line" data={oppTrends} />
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item sm={6}>
+          <Paper>
+            <Box p={2}>
+              <Typography variant="h6">Created Leads</Typography>
+
+              <Chart type="bar" data={createdLeads} />
             </Box>
           </Paper>
         </Grid>
