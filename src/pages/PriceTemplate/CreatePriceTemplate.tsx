@@ -45,9 +45,10 @@ const PriceTemplate = () => {
   const [productTemplate, setProductTemplate] = useState([]);
   const [templateField, setTemplateField] = useState([]);
   const [showHistory, setShowHistory] = useState(false)
+  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
 
   const {
-    state: { permissions },
+    state: { user, permissions },
   }: any = useData();
   const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
     isCreate: false,
@@ -72,11 +73,12 @@ const PriceTemplate = () => {
         toastConfig.setToastConfig(error);
       });
     fetchOnePriceTemplate();
+    fetchUser();
   }, [id]);
 
   const fetchOnePriceTemplate = () => {
     if (id === "0") {
-      setInitialValues({ name: "", productTemplate: "" });
+      setInitialValues({ name: "", productTemplate: "",entity: [], owner: "", collaborator: [] });
       axiosInstance()
         .get(`/price-template/default-field`)
         .then(({ data: { data } }) => {
@@ -119,11 +121,22 @@ const PriceTemplate = () => {
     }
   };
 
+
+  const fetchUser = () => {
+    axiosInstance().get(`/user`).then(({ data: { data } }) => {
+      setOwnerCollaboratorData(data);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
   const handleSave = (values) => {
     let data: any = {};
     data.name = values.name;
     data.productTemplate = values.productTemplate;
-
+    data.entity = values.entity.map(e => e._id);
+    data.owner = values.owner._id;
+    data.collaborator = values.collaborator.map(d => d._id);
     const resultproductTemplate = productTemplate.filter(
       (_f) => _f._id === values.productTemplate
     );
@@ -378,6 +391,76 @@ const PriceTemplate = () => {
                           Close
                         </Button>
                       </Box>
+                    </Grid>
+                    <Grid container spacing={1}>
+                      <Grid item xs={12} sm={3}>
+                        { <Autocomplete
+                          multiple
+                          options={user?.entity}
+                          getOptionLabel={(option: any) => (option ? option?.entityName : "")}
+                          value={values["entity"]}
+                          onChange={(e, val) => {
+                            setFieldValue("entity", val)
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              name="entity"
+                              label="Entity"
+                              variant="outlined"
+                              error={touched["entity"] && Boolean(errors["entity"])}
+                              helperText={touched["entity"] && errors["entity"]}
+                              fullWidth
+                            />
+                          )}
+                        />}
+                      </Grid>
+                      <Grid item xs={12} sm={3}>
+                        { <Autocomplete
+                          getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                          value={values["owner"]}
+                          options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d._id)))}
+                          onChange={(e, val) => {
+                            setFieldValue("owner", val);
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              name="owner"
+                              label="Owner"
+                              variant="outlined"
+                              error={touched["owner"] && Boolean(errors["owner"])}
+                              helperText={touched["owner"] && errors["owner"]}
+                              fullWidth
+                            />
+                          )}
+                        />}
+                      </Grid>
+                      <Grid item xs={12} sm={3}>
+                        { <Autocomplete
+                          multiple
+                          options={ownerCollaboratorData.filter(d => d._id !== values["owner"]?._id)}
+                          getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                          value={values["collaborator"]}
+                          onChange={(e, val) => {
+                            setFieldValue("collaborator", val)
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              name="collaborator"
+                              label="Collaborator"
+                              variant="outlined"
+                              error={touched["collaborator"] && Boolean(errors["collaborator"])}
+                              helperText={touched["collaborator"] && errors["collaborator"]}
+                              fullWidth
+                            />
+                          )}
+                        />}
+                      </Grid>
                     </Grid>
                   </Grid>
                 </Box>

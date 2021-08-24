@@ -18,6 +18,8 @@ import TinyMce from "./../../components/TinyMCE/index"
 import CircularProgress from "@material-ui/core/CircularProgress"
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
+import { Autocomplete } from "@material-ui/lab";
+import { useData } from '../../StateProvider/Provider';
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
@@ -55,6 +57,10 @@ export default function NewCreateQuotePdfTemplate(props) {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [isClone] = useState(history.location.state?.isClone ? true : false);
+    const {
+        state: { user },
+    }: any = useData();
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
 
     useEffect(() => {
         if (id && id !== '0') {
@@ -70,7 +76,10 @@ export default function NewCreateQuotePdfTemplate(props) {
                         header: data?.header,
                         footer: data?.footer,
                         aboveTable: data?.aboveTable,
-                        belowTable: data?.belowTable
+                        belowTable: data?.belowTable,
+                        entity: data?.entity,
+                        owner: data?.owner,
+                        collaborator: data?.collaborator,
                     });
                     setDetails({
                         header: data?.header,
@@ -91,10 +100,22 @@ export default function NewCreateQuotePdfTemplate(props) {
                 header: "",
                 footer: "",
                 aboveTable: "",
-                belowTable: ""
+                belowTable: "",
+                entity: [],
+                owner: "",
+                collaborator: [],
             })
         }
+        fetchUser()
     }, [id]);
+
+    const fetchUser = () => {
+        axiosInstance().get(`/user`).then(({ data: { data } }) => {
+            setOwnerCollaboratorData(data);
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    };
 
     const handleSubmit = (values) => {
         setIsUpdating(true);
@@ -176,6 +197,76 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             onClick={submitForm} variant="contained">
                                             Save{isUpdating && <CircularProgress size={24} />}
                                         </Button>
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={3}>
+                                        {<Autocomplete
+                                            multiple
+                                            options={user?.entity}
+                                            getOptionLabel={(option: any) => (option ? option?.entityName : "")}
+                                            value={values["entity"]}
+                                            onChange={(e, val) => {
+                                                setFieldValue("entity", val)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="entity"
+                                                    label="Entity"
+                                                    variant="outlined"
+                                                    error={touched["entity"] && Boolean(errors["entity"])}
+                                                    helperText={touched["entity"] && errors["entity"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {<Autocomplete
+                                            getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                            value={values["owner"]}
+                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d._id)))}
+                                            onChange={(e, val) => {
+                                                setFieldValue("owner", val);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="owner"
+                                                    label="Owner"
+                                                    variant="outlined"
+                                                    error={touched["owner"] && Boolean(errors["owner"])}
+                                                    helperText={touched["owner"] && errors["owner"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {<Autocomplete
+                                            multiple
+                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"]?._id)}
+                                            getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                            value={values["collaborator"]}
+                                            onChange={(e, val) => {
+                                                setFieldValue("collaborator", val)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="collaborator"
+                                                    label="Collaborator"
+                                                    variant="outlined"
+                                                    error={touched["collaborator"] && Boolean(errors["collaborator"])}
+                                                    helperText={touched["collaborator"] && errors["collaborator"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
                                     </Grid>
                                 </Grid>
                                 <Grid item xs={12} style={{ textAlign: 'left' }}>

@@ -8,7 +8,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { camelCase } from "../../constants/helpers";
+import { camelCase, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -24,6 +24,7 @@ import { useData } from "../../StateProvider/Provider";
 import HistoryDialog from "../../components/Activity/History"
 import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
+import { user } from "../../routes/User";
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -47,9 +48,9 @@ const ProductTemplate = () => {
     const [productCategory, setProductCategory] = useState(null);
     const [showHistory, setShowHistory] = useState(false)
     //const [productUnit, setProductUnit] = useState(null);
-
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const {
-        state: { permissions },
+        state: { user, permissions },
     }: any = useData();
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
         isCreate: false,
@@ -70,7 +71,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", isStandard: false });
+            setInitialValues({ name: "", productCategory: "", entity: [], owner: "", collaborator: [], isStandard: false });
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -98,6 +99,7 @@ const ProductTemplate = () => {
             });
         }
         fetchProductCategory()
+        fetchUser()
         // axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
         //     let field = data.map((_f) => _f.fieldData)
         //     if (field.filter((data) => data.fieldName === "unit").length) {
@@ -117,6 +119,15 @@ const ProductTemplate = () => {
         });
     };
 
+    const fetchUser = () => {
+        axiosInstance().get(`/user`).then(({ data: { data } }) => {
+            setOwnerCollaboratorData(data);
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    };
+
+
     const handleSave = (values) => {
         let data: any = {}
         data.name = values.name;
@@ -124,10 +135,16 @@ const ProductTemplate = () => {
         if (data.isStandard) {
             data.productCategory = null;
             data.unit = null;
+            data.entity = null;
+            data.owner = null;
+            data.collaborator = null;
         }
         else {
             data.productCategory = values.productCategory;
             data.unit = values.unit;
+            data.entity = values.entity.map(e => e._id);
+            data.owner = values.owner._id;
+            data.collaborator = values.collaborator.map(d => d._id);
         }
         let fields: any = []
         let order = 0;
@@ -301,31 +318,6 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        {/* {!values["isStandard"] && <Autocomplete
-                                            options={productUnit}
-                                            getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-                                            getOptionSelected={(option: any, val) => option.optionLabel === val}
-                                            value={productUnit.filter((data) => data.optionLabel === values["unit"]).length
-                                                ? productUnit.filter((data) => data.optionLabel === values["unit"])[0]
-                                                : ""
-                                            }
-                                            onChange={(e, val) => setFieldValue("unit", val && val.optionLabel ? val.optionLabel : "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="unit"
-                                                    label="Unit"
-                                                    variant="outlined"
-                                                    error={touched["unit"] && Boolean(errors["unit"])}
-                                                    helperText={touched["unit"] && errors["unit"]}
-                                                    required={true}
-                                                    fullWidth
-                                                />
-                                            )}
-                                        />} */}
-                                    </Grid>
                                     <Grid item xs={12} sm={2} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
@@ -340,6 +332,77 @@ const ProductTemplate = () => {
                                         </Box>
                                     </Grid>
                                 </Grid>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={3}>
+                                        {!values["isStandard"] && <Autocomplete
+                                            multiple
+                                            options={user?.entity}
+                                            getOptionLabel={(option: any) => (option ? option?.entityName : "")}
+                                            value={values["entity"]}
+                                            onChange={(e, val) => {
+                                                setFieldValue("entity", val)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="entity"
+                                                    label="Entity"
+                                                    variant="outlined"
+                                                    error={touched["entity"] && Boolean(errors["entity"])}
+                                                    helperText={touched["entity"] && errors["entity"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {!values["isStandard"] && <Autocomplete
+                                            getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                            value={values["owner"]}
+                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d._id)))}
+                                            onChange={(e, val) => {
+                                                setFieldValue("owner", val);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="owner"
+                                                    label="Owner"
+                                                    variant="outlined"
+                                                    error={touched["owner"] && Boolean(errors["owner"])}
+                                                    helperText={touched["owner"] && errors["owner"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {!values["isStandard"] && <Autocomplete
+                                            multiple
+                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"]?._id)}
+                                            getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                            value={values["collaborator"]}
+                                            onChange={(e, val) => {
+                                                setFieldValue("collaborator", val)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="collaborator"
+                                                    label="Collaborator"
+                                                    variant="outlined"
+                                                    error={touched["collaborator"] && Boolean(errors["collaborator"])}
+                                                    helperText={touched["collaborator"] && errors["collaborator"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                </Grid>
+
                             </Box>
                             <Box >
                                 <FormBuilder
