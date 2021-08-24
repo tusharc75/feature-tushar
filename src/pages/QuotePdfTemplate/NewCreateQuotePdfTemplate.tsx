@@ -36,7 +36,10 @@ const useStyles = makeStyles((theme) => ({
     },
     saveButtonContainer: {
         textAlign: 'end',
-        marginBottom: '6px'
+        marginTop: '5px'
+    },
+    tinyMCEContainer: {
+        width: "725px"
     }
 }));
 
@@ -156,7 +159,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
                             <Form>
                                 <Grid container>
-                                    <Grid item xs={6}>
+                                    <Grid item xs={4}>
                                         <TextField
                                             variant="outlined"
                                             type="text"
@@ -171,14 +174,14 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={6} className={classes.saveButtonContainer}>
+                                    <Grid item xs={3} className={classes.saveButtonContainer}>
                                         <Button disabled={isUpdating} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
                                             Save{isUpdating && <CircularProgress size={24} />}
                                         </Button>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} style={{ textAlign: 'left' }}>
+                                <Grid item xs={6} style={{ textAlign: 'left' }}>
                                     <FormControlLabel
                                         value={values['showPageNumberInFooter']}
                                         control={
@@ -196,7 +199,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                         )}
                     </Formik>) : null}
                 <Grid item xs={12}>
-                    <Box>
+                    <Box className={classes.tinyMCEContainer}>
                         <Typography variant="h5" component="h5">Header</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -205,7 +208,8 @@ export default function NewCreateQuotePdfTemplate(props) {
                                     header: value
                                 }))
                             }}
-                            height={400}
+                            width={725}
+                            height={300}
                             initialValue={initialValues?.header}
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
@@ -216,7 +220,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Box>
+                    <Box className={classes.tinyMCEContainer}>
                         <Typography variant="h5" component="h5">Below Table</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -225,7 +229,8 @@ export default function NewCreateQuotePdfTemplate(props) {
                                     belowTable: value
                                 }))
                             }}
-                            height={400}
+                            width={725}
+                            height={300}
                             initialValue={initialValues?.belowTable}
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
@@ -235,7 +240,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    <Box>
+                    <Box className={classes.tinyMCEContainer}>
                         <Typography variant="h5" component="h5">Above Table</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -244,6 +249,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                     aboveTable: value
                                 }))
                             }}
+                            width={725}
                             height={400}
                             initialValue={initialValues?.aboveTable}
                             imageOrFileUploadCompletePercentage={(
@@ -253,8 +259,8 @@ export default function NewCreateQuotePdfTemplate(props) {
                         />
                     </Box>
                 </Grid >
-                <Grid item xs={12}>
-                    <Box>
+                <Grid item xs={12} style={{ justifyContent: 'center' }}>
+                    <Box className={classes.tinyMCEContainer}>
                         <Typography variant="h5" component="h5">Footer</Typography>
                         <TinyMce
                             onChange={(value) => {
@@ -263,6 +269,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                     footer: value
                                 }))
                             }}
+                            width={725}
                             height={400}
                             initialValue={initialValues?.footer}
                             imageOrFileUploadCompletePercentage={(
