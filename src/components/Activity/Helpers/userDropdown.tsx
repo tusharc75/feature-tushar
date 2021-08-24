@@ -1,11 +1,9 @@
-import { useState, useEffect, Fragment, FormEvent } from "react";
+import { useState, useEffect, Fragment } from "react";
 import PropTypes from "prop-types";
 import { TextField, Chip } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { flatMap, map } from "lodash";
-
 import axiosInstance from "../../../axios/axiosInstance";
-import { useData } from "../../../StateProvider/Provider";
 
 export const UserDropdown = ({
   email,
@@ -48,7 +46,7 @@ export const UserDropdown = ({
           setUsers(userData);
         }
       })
-      .catch((err) => { });
+      .catch(() => { });
   };
 
   const setParticipants = (values, reason) => {

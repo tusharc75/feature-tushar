@@ -19,7 +19,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     const [columns,] = useState([
         { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "nameRenderer" },
-        { field: "processStatus", headerName: "Conclusion", show: true, cellRenderer: "nameRenderer" },
+        { field: "processStatus", headerName: "Current Step", show: true, cellRenderer: "nameRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
         { field: "totalcost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
         { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, cellRenderer: "commonRenderer" },
