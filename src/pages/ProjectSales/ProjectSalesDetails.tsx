@@ -304,6 +304,7 @@ const ProjectSalesDetails = () => {
           close={closeUpdateDIalog}
           fetchData={() => {
             getSalesData();
+            getProjectFields()
           }}
           projectSalesId={projectSalesData._id}
         />
