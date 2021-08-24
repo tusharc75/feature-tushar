@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, simplifyValues, yupSchema } from '../constants/helpers';
+import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from '../constants/helpers';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
 import CommonSkeleton from './Helpers/CommonSkeleton';
@@ -9,9 +9,11 @@ import { Form, Formik } from 'formik';
 import FormTypes from './Helpers/FormTypes';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
 import CustomButton from './Helpers/CustomButton';
+
 const arr = [...Array(9).keys()];
+
 const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) => {
-  const [entityData, setEntityData] = useState({
+  const [entityData,] = useState({
     fields: fieldData.map((fields) => fields.fieldData),
     initialValues: getObjKeys(
       '',
@@ -22,6 +24,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
   entityData.fields.map((obj) => {
     return (obj.required = true);
   });
+
   const formsData = setFieldsInAscendingOrder(entityData.fields);
 
   const onSubmit = (values) => {
@@ -48,7 +51,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
         )}
         {entityData.fields.length > 0 && (
           <Formik initialValues={entityData.initialValues} validationSchema={yupSchema(entityData.fields)} validateOnMount onSubmit={onSubmit}>
-            {({ submitForm, values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+            {({ submitForm, values, errors, touched, setFieldValue }) => (
               <>
                 <CustomDialogContent>
                   <Form noValidate>

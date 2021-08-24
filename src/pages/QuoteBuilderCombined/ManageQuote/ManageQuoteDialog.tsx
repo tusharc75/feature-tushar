@@ -733,7 +733,7 @@ export default function ManageQuoteDialog({
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                         options={field.option}
                                         setFieldValue={setFieldValue}
                                         required={field.required}
@@ -781,7 +781,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
                                             // setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -821,10 +821,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
-                                                  disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
+                                                  disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color={ accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                  <AddIcon color={isClone ? "primary" : accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -874,7 +874,7 @@ export default function ManageQuoteDialog({
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
                                             setFieldValue={setFieldValue}
-                                            disabled={contactId ? true : false || (!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -903,10 +903,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
-                                                  disabled={contactId ? true : false || (!isNew && field.disableOnEdit)}
+                                                  disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color={(contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                  <AddIcon color={isClone ? "primary" : (contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -956,7 +956,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={opportunityDataSource}
-                                            disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -996,10 +996,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
-                                                  disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
+                                                  disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color={isRenderedFromOpportunity || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                  <AddIcon color={isClone ? "primary" : isRenderedFromOpportunity || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1027,7 +1027,7 @@ export default function ManageQuoteDialog({
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
-                                            disabled={(!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit): false}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1135,7 +1135,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1159,7 +1159,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1178,7 +1178,7 @@ export default function ManageQuoteDialog({
                                             e.target.checked
                                           );
                                           if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
+                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
                                             setFieldValue("collaborator", [
                                               ...values["collaborator"]].concat(doaUserDataTemp)
                                             );
@@ -1190,7 +1190,7 @@ export default function ManageQuoteDialog({
                                         {...field}
                                         // {...rest}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1223,7 +1223,7 @@ export default function ManageQuoteDialog({
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
-                                          disabled={(!isNew && field.disableOnEdit)}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1243,7 +1243,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={disableCurrency || (!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (disableCurrency || (!isNew && field.disableOnEdit)) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1276,7 +1276,7 @@ export default function ManageQuoteDialog({
                                         {...field}
                                         // {...rest}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
@@ -1311,7 +1311,7 @@ export default function ManageQuoteDialog({
                                         {...field}
                                         // {...rest}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1365,7 +1365,7 @@ export default function ManageQuoteDialog({
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
-                                            disabled={(!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1407,10 +1407,10 @@ export default function ManageQuoteDialog({
                                               >
                                                 <IconButton
                                                   onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                  disabled={(!isNew && field.disableOnEdit)}
+                                                  disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                  <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1449,7 +1449,7 @@ export default function ManageQuoteDialog({
                                             <FormTypes
                                               {...field}
                                               isNew={isNew}
-                                              disabled={(!isNew && field.disableOnEdit)}
+                                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1490,10 +1490,10 @@ export default function ManageQuoteDialog({
                                                     onClick={() => {
                                                       setShowAddMarketSegmentDialog(true);
                                                     }}
-                                                    disabled={(!isNew && field.disableOnEdit)}
+                                                    disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                     size="small"
                                                   >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                    <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -1515,7 +1515,7 @@ export default function ManageQuoteDialog({
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
-                                          disabled={(!isNew && field.disableOnEdit)}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1552,7 +1552,7 @@ export default function ManageQuoteDialog({
                             <FormTypes
                               {...field}
                               isNew={isNew}
-                              disabled={(!isNew && field.disableOnEdit)}
+                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                               values={values}
                               errors={errors}
                               touched={touched}

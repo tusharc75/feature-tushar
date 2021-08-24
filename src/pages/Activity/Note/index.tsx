@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Layout from '../../../components/Layout';
 import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { GetReferenceName, GetNotes } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
-import moment from 'moment';
 import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
@@ -25,7 +23,6 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { displayDate } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
-import { truncate } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 
@@ -41,14 +38,12 @@ const Note = () => {
   const [isNew, setIsNew] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState([]);
-  const [notes, setNotes] = useState([]);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+  const [, setShowDeleteWarningConfirmBox] = useState(false);
   const [noteData, setNoteData] = useState(null);
   const [noteId, setNoteId] = useState(undefined);
-  const [open, setOpen] = useState(false);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -66,7 +61,7 @@ const Note = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });

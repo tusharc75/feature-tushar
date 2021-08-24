@@ -129,7 +129,7 @@ const QuoteBuilders = () => {
         ),
       },
       {
-        field: "processStatus", headerName: "Conclusion", flex: 1,
+        field: "processStatus", headerName: "Current Step", flex: 1,
         renderCell: (params: any) => (
           <Typography
             title={params.value}
