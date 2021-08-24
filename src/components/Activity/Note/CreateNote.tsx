@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -9,16 +9,13 @@ import MomentUtils from '@date-io/moment';
 import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { CreateNewNote, UpdateNote, GetNoteDetail } from "../../../axios/activity";
-import RichTextEditor from 'react-rte';
 import axiosInstance from '../../../axios/axiosInstance';
-import { makeStyles } from '@material-ui/core/styles';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
 import PropTypes from 'prop-types'
 import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import FormTypes from "../../Helpers/FormTypes";
 import { IconButton, Paper } from "@material-ui/core";
 import { csvIcon, docIcon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -33,12 +30,6 @@ const NoteSchema = Yup.object().shape({
         .required("please enter note title"),
 });
 
-const useStyles = makeStyles((theme) => ({
-    textEditor: {
-        fontFamily: "inherit",
-        minHeight: 250
-    }
-}));
 const fileIcons = [
     {
         extensions: [".txt", ".rtf"],
@@ -72,7 +63,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     const [fileImageAttachments, setFileImageAttachments] = useState([])
     const [imageAttachments, setImageAttachments] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
-    const [isUploading, setUploading] = useState(false);
+    const [, setUploading] = useState(false);
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
@@ -104,7 +95,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     }
                     setInitialValues(data)
                 })
-                .catch((err) => {
+                .catch(() => {
                 });
         }
         else {
@@ -120,19 +111,19 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
             [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
         if (noteId) {
             UpdateNote(noteId, values)
-                .then(({ data }) => {
+                .then(() => {
                     setInitialValues(null)
                     handleClose()
                 })
-                .catch((err) => {
+                .catch(() => {
                 });
         }
         else {
             CreateNewNote(values)
-                .then(({ data }) => {
+                .then(() => {
                     handleClose()
                 })
-                .catch((err) => {
+                .catch(() => {
                 });
         }
     };
@@ -244,7 +235,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         </Grid >
     )
 
-    const classes = useStyles();
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
             <>
