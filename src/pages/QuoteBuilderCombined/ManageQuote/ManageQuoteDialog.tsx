@@ -824,7 +824,7 @@ export default function ManageQuoteDialog({
                                                   disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
                                                   size="small"
                                                 >
-                                                  <AddIcon color={ accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                  <AddIcon color={accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1178,7 +1178,7 @@ export default function ManageQuoteDialog({
                                             e.target.checked
                                           );
                                           if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
+                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
                                             setFieldValue("collaborator", [
                                               ...values["collaborator"]].concat(doaUserDataTemp)
                                             );

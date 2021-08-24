@@ -1573,7 +1573,7 @@ export default function QuoteProcess(props) {
                                     text="Loading..."
                                 />
                             )}
-                            {ProcessStatus === "Quote Builder" && (
+                            {/* {ProcessStatus === "Quote Builder" && (
                                 <AdditionalData
                                     fetchTNC={fetchTNC}
                                     state={state}
@@ -1581,7 +1581,7 @@ export default function QuoteProcess(props) {
                                     allowedToEdit={allowedToEdit}
                                     handleVersionUpdateFromAdditionalData={handleVersionUpdateFromAdditionalData}
                                 />
-                            )}
+                            )} */}
                         </Grid>
                     </Grid>
                 ) : null}
