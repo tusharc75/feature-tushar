@@ -50,7 +50,6 @@ export default function ManageAccount(props) {
   ] = useState([]);
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
-  const [tempcollaboratorDataSource, setTempCollaboratorDataSource] = useState([]);
   const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState("")
 

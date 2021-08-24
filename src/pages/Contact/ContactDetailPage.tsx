@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from '@material-ui/core';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Dialog } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
-import Layout from '../../components/Layout';
 import { Skeleton } from '@material-ui/lab';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import { Link } from 'react-router-dom';
@@ -37,7 +32,6 @@ import OpportunityInAccordian from '../../components/OpportunityInAccordian/Oppo
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import ProcessFlow from '../../components/ProcessFlow';
-import LeadInAccordion from '../../components/LeadsInAccordion/LeadsInAccordion';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
@@ -58,7 +52,7 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -68,7 +62,6 @@ const ContactDetailsPage = (props) => {
   const [showAtLast, setShowAtLast] = useState(false);
   const [showActivity, setActivityShow] = useState(true);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [contactPermissions, setContactPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -87,12 +80,6 @@ const ContactDetailsPage = (props) => {
   let { id } = useParams();
 
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
-
-  // useEffect(() => {
-  //     if (id) {
-  //         fetchContactData()
-  //     }
-  // }, [id]);
 
   useEffect(() => {
     const hasContactPermission = permissions[contactResource];
@@ -117,7 +104,7 @@ const ContactDetailsPage = (props) => {
       if (processSteps && processSteps.isRead && contactData) {
         const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === contactData[processFieldName]);
         if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
-        if (currentStepToShow == steps.length - 1) {
+        if (currentStepToShow === steps.length - 1) {
           setShowAtLast(true);
         } else {
           setShowAtLast(false);
@@ -307,7 +294,7 @@ const ContactDetailsPage = (props) => {
           setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
         }
         data.map((d) => {
-          if (d.fieldData.sectionName == processSteps?.fieldData.additionalInfoSection && sectionFields.length == 0) {
+          if (d.fieldData.sectionName === processSteps?.fieldData.additionalInfoSection && sectionFields.length === 0) {
             setSectionFields((prevItems) => {
               return [...prevItems, d];
             });
@@ -349,10 +336,10 @@ const ContactDetailsPage = (props) => {
     let allowToEdit = false;
 
     if (userId) {
-      allowToEdit = contactDetails.owner?.optionValue && contactDetails.owner.optionValue == userId;
+      allowToEdit = contactDetails.owner?.optionValue && contactDetails.owner.optionValue === userId;
 
       if (!allowToEdit && contactDetails.collaborator && contactDetails.collaborator.length > 0) {
-        allowToEdit = contactDetails.collaborator.findIndex((d) => d.optionValue == userId) > -1;
+        allowToEdit = contactDetails.collaborator.findIndex((d) => d.optionValue === userId) > -1;
       }
 
       if (allowToEdit) setAllowedToEdit(allowToEdit);
@@ -374,13 +361,12 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleSave = (data) => {
-    setIsProcessing(true);
     setShowAtLast(true);
     setOpenAdditionalDialog(false);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     let processFieldName = '';
     const contactFieldData = contactFields.map((f) => {
-      if (f.fieldData.type == 'process') {
+      if (f.fieldData.type === 'process') {
         processFieldName = f.fieldData.fieldName;
       }
       return f.fieldData;
@@ -401,25 +387,21 @@ const ContactDetailsPage = (props) => {
       .put(`${contactApi}`, updatedData)
       .then(() => {
         fetchContactData();
-        // setActiveStep(activeStep + 1)
-        setIsProcessing(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsProcessing(false);
       });
   };
 
   const handleMarkAsCompleted = (data) => {
     setShowAtLast(false);
-    setIsProcessing(true);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-    if (tempActiveStep == steps.length - 1 && showAdditionalField) {
+    if (tempActiveStep === steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
       let processFieldName = '';
       const contactFieldData = contactFields.map((f) => {
-        if (f.fieldData.type == 'process') {
+        if (f.fieldData.type === 'process') {
           processFieldName = f.fieldData.fieldName;
         }
         return f.fieldData;
@@ -435,12 +417,9 @@ const ContactDetailsPage = (props) => {
         .put(`${contactApi}`, updatedData)
         .then(() => {
           fetchContactData();
-          // setActiveStep(activeStep + 1)
-          setIsProcessing(false);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsProcessing(false);
         });
     }
   };
@@ -629,7 +608,7 @@ const ContactDetailsPage = (props) => {
                   isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
                 />
               )}
-              {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
+              {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
                 <ProjectInAccordion
                   recordsPerLine={3}
                   projectSales={projectSales}

@@ -1,6 +1,5 @@
 import { useState, useEffect, Fragment } from "react";
 import { Box, Grid, makeStyles, Paper } from "@material-ui/core";
-import Layout from "../../components/Layout";
 import CustomTabs from "../../components/Helpers/CustomTabs";
 import Board from "../../components/Activity/Report/Board";
 import Roadmap from "../../components/Activity/Report/Roadmap";
