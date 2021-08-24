@@ -201,7 +201,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                             </Form>
                         )}
                     </Formik>) : null}
-                <Grid item xs={12} className="mt-4 mb-2">
+                <Grid item xs={12} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Header</Typography>
                         <TinyMce
@@ -224,7 +224,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                 </Grid>
 
 
-                <Grid item xs={12} className="mt-4 mb-2">
+                <Grid item xs={12} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Above Table</Typography>
                         <TinyMce
@@ -245,7 +245,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                         />
                     </Box>
                 </Grid >
-                <Grid item xs={12} className="mt-4 mb-2">
+                <Grid item xs={12} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Below Table</Typography>
                         <TinyMce
