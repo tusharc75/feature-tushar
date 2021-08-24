@@ -40,6 +40,17 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+const mappedVariablesNames = {
+    entity: "Entity",
+    customerAccountName: "Customer Account Name",
+    quoteDate: "Quote Date",
+    quoteName: "Quote Name",
+    version: "Version",
+    quoteId: "Quote Id",
+    currency: "Currency",
+    expiryDate: "Expiry Date",
+    incoTerms: "Inco Terms"
+}
 export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
@@ -110,13 +121,13 @@ export default function TinyMCE(props) {
             .then(({ data }) => {
 
                 setImgUploading(false);
-                if (onUploadFile) {
-                    onUploadFile(data.fileUrl)
+                if (details && details.isImage) {
+                    setUploadError(false)
+                    setImageUrl(data.fileUrl)
                 }
                 else {
-                    if (details && details.isImage) {
-                        setUploadError(false)
-                        setImageUrl(data.fileUrl)
+                    if (onUploadFile) {
+                        onUploadFile(data.fileUrl)
                     }
                     else {
                         const editorContent = editorRef.current.getContent()
@@ -376,21 +387,18 @@ export default function TinyMCE(props) {
 
                                 </Fragment>
                         }
-                        {
-                            onUploadFile ? null :
-                                <span >
-                                    <Box display="flex" alignItems="center" >
-                                        <Button
-                                            startIcon={<HiOutlinePhotograph />}
-                                            size="small"
-                                            variant="outlined"
-                                            onClick={() => setIsUploadImage(true)}
-                                        >
-                                            Upload Image
-                                        </Button>
-                                    </Box>
-                                </span>
-                        }
+                        <span >
+                            <Box display="flex" alignItems="center" >
+                                <Button
+                                    startIcon={<HiOutlinePhotograph />}
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => setIsUploadImage(true)}
+                                >
+                                    Upload Image
+                                </Button>
+                            </Box>
+                        </span>
 
                         <span>
                             {
@@ -422,7 +430,7 @@ export default function TinyMCE(props) {
                                                     'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map(o => {
                                                         return <MenuItem
                                                             onClick={() => handleVaribleSelect(o)}
-                                                            value={o}>{o}</MenuItem>
+                                                            value={o}>{mappedVariablesNames[o]}</MenuItem>
                                                     })
                                             }
                                         </Menu>
@@ -447,7 +455,7 @@ export default function TinyMCE(props) {
                 init={{
                     height: height,
                     width: width,
-                    // menubar: false,
+                    menubar: false,
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
 
