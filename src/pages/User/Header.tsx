@@ -113,68 +113,79 @@ const Header = (props) => {
                     Delete
                   </MenuItem>
                 )}
-                {userPermissions.isUpdate && (
-                  <>
 
-                    <MenuItem
-                      disabled={approvalProcessActionDisabled}
-                      onClick={() => {
-                        openApprovalProcessDialog();
-                        closeActions();
-                      }}
-                    >
-                      Set Approval Process
-                    </MenuItem>
+                {
+                  userPermissions.isUpdate && <MenuItem
+                    disabled={approvalProcessActionDisabled}
+                    onClick={() => {
+                      openApprovalProcessDialog();
+                      closeActions();
+                    }}
+                  >
+                    Set Approval Process
+                  </MenuItem>
+                }
 
-                    <MenuItem
-                      disabled={rolesActionDisabled}
-                      onClick={() => {
-                        openGlobalRolesDialog();
-                        closeActions();
-                      }}
-                    >
-                      Assign Company Wide Roles
-                    </MenuItem>
-                    <MenuItem
-                      disabled={rolesActionDisabled}
-                      onClick={() => {
-                        openRegionalRolesDialog();
-                        closeActions();
-                      }}
-                    >
-                      Assign Region Wide Functional Roles
-                    </MenuItem>
-                    <MenuItem
-                      disabled={assignDoaDisabled}
-                      onClick={() => {
-                        openDOADialog();
-                        closeActions();
-                      }}
-                    >
-                      Assign DOA's
-                    </MenuItem>
-                    {entityRoleRedirectDetails.id && (
-                      <MenuItem
-                        disabled={rolesActionDisabled}
-                        onClick={() => {
-                          unAssignUsersFromEntity();
-                          closeActions();
-                        }}
-                      >
-                        Un-assign Entity
-                      </MenuItem>
-                    )}
-                    <MenuItem
-                        disabled={approvalProcessActionDisabled || rolesActionDisabled || assignDoaDisabled}
-                        onClick={() => {
-                          openUserSetupDialog();
-                          closeActions();
-                        }}
-                      >
-                        User Setup
-                      </MenuItem>
-                  </>
-                )}
+                {
+                  userPermissions.isUpdate && <MenuItem
+                    disabled={rolesActionDisabled}
+                    onClick={() => {
+                      openGlobalRolesDialog();
+                      closeActions();
+                    }}
+                  >
+                    Assign Company Wide Roles
+                  </MenuItem>
+                }
+
+                {
+                  userPermissions.isUpdate && <MenuItem
+                    disabled={rolesActionDisabled}
+                    onClick={() => {
+                      openRegionalRolesDialog();
+                      closeActions();
+                    }}
+                  >
+                    Assign Region Wide Functional Roles
+                  </MenuItem>
+                }
+
+                {
+                  userPermissions.isUpdate && <MenuItem
+                    disabled={assignDoaDisabled}
+                    onClick={() => {
+                      openDOADialog();
+                      closeActions();
+                    }}
+                  >
+                    Assign DOA's
+                  </MenuItem>
+                }
+
+                {
+                  userPermissions.isUpdate && entityRoleRedirectDetails.id && <MenuItem
+                    disabled={rolesActionDisabled}
+                    onClick={() => {
+                      unAssignUsersFromEntity();
+                      closeActions();
+                    }}
+                  >
+                    Un-assign Entity
+                  </MenuItem>
+                }
+
+                {
+                  userPermissions.isUpdate && <MenuItem
+                    disabled={approvalProcessActionDisabled || rolesActionDisabled || assignDoaDisabled}
+                    onClick={() => {
+                      openUserSetupDialog();
+                      closeActions();
+                    }}
+                  >
+                    User Setup
+                  </MenuItem>
+                }
+
               </Menu>
             </>
           ) : null}
