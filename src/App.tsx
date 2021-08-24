@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, lazy, useState, Fragment, Suspense } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import ReactGA from "react-ga";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
@@ -72,9 +72,7 @@ import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail/index";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 import Dashboard from "./pages/Dashboard";
-import KpiDashboard from "./pages/KpiDashboard";
 import KpiDashboards from "./pages/KpiDashboard/Dashboard";
-import EditDashboard from "./pages/KpiDashboard/EditDashboards";
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
@@ -87,7 +85,6 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
-import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
 import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
@@ -109,7 +106,7 @@ function App() {
   }: any = useData();
 
   const history = useHistory();
-  history.listen((location, action) => {
+  history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
     if (isSlowInternetConnection == "true") {
       toast.setToastConfig({
@@ -140,15 +137,6 @@ function App() {
   window.addEventListener('offline', function (e) {
     setIsOffline(true);
   }, false);
-
-
-  const getVersion = () => {
-    setTimeout(() => {
-      axiosInstance()
-        .get("/version")
-        .then(({ data }) => { });
-    }, 30000);
-  };
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -221,7 +209,6 @@ function App() {
       }
     } catch (e) { }
 
-    // getVersion();
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
