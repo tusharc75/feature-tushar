@@ -71,6 +71,7 @@ export default function TinyMCE(props) {
     const { setToastConfig } = useContext(CustomToastContext);
 
     const editorRef = useRef(null);
+
     const handleUploadFile = (ev) => {
         if (ev.target.files && ev.target.files.length) {
             let files = ev.target.files;
@@ -130,9 +131,7 @@ export default function TinyMCE(props) {
                         onUploadFile(data.fileUrl)
                     }
                     else {
-                        const editorContent = editorRef.current.getContent()
-                        editorRef.current.setContent(`${editorContent}${data}`)
-                        onChange(`${editorContent}${data}`)
+                        editorRef.current.execCommand('mceInsertContent', false, data);
                     }
                 }
                 //data.fileUrl data.fileName
@@ -197,9 +196,8 @@ export default function TinyMCE(props) {
             imgTag = `${imgTag} alt='${imageDetails.alt}'`
         }
         imgTag = `${imgTag} />`
-        const editorContent = editorRef.current.getContent()
-        editorRef.current.setContent(`${editorContent}${imgTag}`)
-        onChange(`${editorContent}${imgTag}`)
+
+        editorRef.current.execCommand('mceInsertContent', false, imgTag);
         setIsUploadImage(false)
         setImageUrl("")
         setImageDetails({ width: "", height: "", alt: "" })
@@ -211,10 +209,8 @@ export default function TinyMCE(props) {
     }
 
     const handleVaribleSelect = (e) => {
-        const editorContent = editorRef.current.getContent()
         let newTag = `<p>{{${e}}}</p>`
-        editorRef.current.setContent(`${editorContent}${newTag}`)
-        onChange(`${editorContent}${newTag}`)
+        editorRef.current.execCommand('mceInsertContent', false, newTag);
     }
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -455,10 +451,9 @@ export default function TinyMCE(props) {
                 init={{
                     height: height,
                     width: width,
-                    menubar: false,
+                    // menubar: false,
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-
                     plugins: [
                         'advlist autolink lists link image charmap print preview anchor',
                         'searchreplace visualblocks code fullscreen',
