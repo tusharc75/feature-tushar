@@ -12,6 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
+import { checkFormulaLoop } from "../../constants/formulaUtility";
 
 const CreateFormBuilder = () => {
 
@@ -67,6 +68,16 @@ const CreateFormBuilder = () => {
                 data.push(_field_data)
             })
         })
+
+        const result = checkFormulaLoop(data);
+        if (result.error) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: "error",
+                message: result.message,
+            });
+            return;
+        }
 
         let sendData: any = {}
         sendData.resource = resource;
