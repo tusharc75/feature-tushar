@@ -55,6 +55,10 @@ const Dashboard = () => {
     labels: [],
     datasets: []
   });
+  const [createdLeads, setCreatedLeads] = useState({
+    labels: [],
+    datasets: []
+  });
   const [status, setStatus] = useState('open');
 
   const [salesFilter, setSalesFilter] = useState({
@@ -120,13 +124,6 @@ const Dashboard = () => {
           if (!entityIds.includes(d.entityId)) {
             entityIds.push(d.entityId);
           }
-
-          // allEntities.push({
-          //   type: 'line',
-          //   label: d.entity,
-          //   borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
-          //   borderWidth: 2
-          // });
         }
 
         entityIds.forEach((id) => {
@@ -217,6 +214,14 @@ const Dashboard = () => {
               borderWidth: 2,
               fill: true,
               data: saleData
+            },
+            {
+              type: 'line',
+              label: 'Budget',
+              borderColor: 'rgb(254, 162, 35)',
+              borderWidth: 2,
+              fill: false,
+              data: budget
             }
           ]
         });
@@ -370,7 +375,7 @@ const Dashboard = () => {
 
   const fetchOpenQuote = useCallback(() => {
     let params = {
-      status,
+      status: status === 'open' || status === 'lost' ? 'open' : 'won',
       entity: salesFilter.entity ? salesFilter.entity['id'] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
@@ -389,6 +394,7 @@ const Dashboard = () => {
         }
       }
     }
+
     axiosInstance()
       .get(`/dashboard/open-quote${url}`)
       .then(({ data: { data } }) => {
@@ -542,6 +548,66 @@ const Dashboard = () => {
     fetchOppTrends();
   }, [fetchOppTrends]);
 
+  const fetctCreatedLeads = useCallback(() => {
+    let params = {
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+    axiosInstance()
+      .get(`/dashboard/created/leads${url}`)
+      .then(({ data: { data } }) => {
+        data = data.sort((a, b) => {
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+
+          return aDate - bDate;
+        });
+
+        const dataset = [];
+        const labels = [];
+
+        for (let d of data) {
+          dataset.push(d.count);
+          labels.push(d.date);
+        }
+
+        setCreatedLeads({
+          labels: labels.map((d) => moment(d).format('MMM/YY')),
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Lead Count',
+              borderColor: 'rgb(20, 162, 35)',
+              backgroundColor: 'rgb(20, 162, 35, 0.4)',
+              borderWidth: 2,
+              fill: true,
+              data: dataset
+            }
+          ]
+        });
+      })
+      .catch((err) => {});
+  }, [salesFilter.entity, salesFilter.between]);
+
+  useEffect(() => {
+    fetctCreatedLeads();
+  }, [fetctCreatedLeads]);
+
   useEffect(() => {
     fetchTopProducts();
     fetchEntities();
@@ -642,6 +708,8 @@ const Dashboard = () => {
                   oppAccount={oppAccount}
                   openQuoteData={openQuoteData}
                   oppSalesRep={oppSalesRep}
+                  createdLeads={createdLeads}
+                  status={status}
                 />
 
                 <Grid container spacing={4}>

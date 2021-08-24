@@ -88,9 +88,12 @@ const Details = (props: DetailProps) => {
     const vals = getObjKeysWithValues(data, fieldData);
     setValues(vals);
 
-    return () => setValues(null);
+    return () => {
+      setValues(null);
+      setFormsData([])
+    }
     // eslint-disable-next-line
-  }, []);
+  }, [fields, data]);
 
   /**
    * DOWNLOAD FILE

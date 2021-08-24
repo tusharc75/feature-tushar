@@ -217,7 +217,7 @@ export default function AccountAccordionDetail({
                                                         <CardContent className="detailCard detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={12}>
-                                                                    <Link className="link" to={type === "customer" ? `${routes.customerAccountDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
+                                                                    <Link className="link" to={type === "customer" ? `${routes.customerAccountDetail.path}/${obj._id}` : `${routes.supplierAccountDetail.path}/${obj._id}`}>
                                                                         <Typography className="detailName">{obj?.accountName} </Typography>
                                                                     </Link>
                                                                 </Grid>
