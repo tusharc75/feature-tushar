@@ -228,7 +228,7 @@ const Email = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map((field) => {
+      Object.keys(filters).forEach((field) => {
         if (filters[field].filter.toLowerCase() === 'me') {
           filters[field].filter = user?.user?.email;
         }

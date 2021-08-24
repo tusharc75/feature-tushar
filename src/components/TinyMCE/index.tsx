@@ -55,7 +55,7 @@ export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
         onUploadImage = null, usePublicUrlforFileUpload = false,
-        doNotShowUploadFile = false, showVariableDropdown = false
+        doNotShowUploadFile = false, showVariableDropdown = false, id
     } = props
 
     const classes = useStyles();
@@ -361,15 +361,15 @@ export default function TinyMCE(props) {
                                 <Fragment>
                                     <Box display="flex" alignItems="center" style={{ marginRight: '5px' }}>
                                         <input
-                                            id="file"
-                                            name="file"
+                                            id={`${id}file`}
+                                            name={`${id}file`}
                                             onChange={handleUploadFile}
                                             style={{ display: 'none' }}
                                             onClick={(e: any) => (e.target.value = null)}
                                             type="file"
                                             accept=".docx,.doc"
                                         />
-                                        <label htmlFor="file">
+                                        <label htmlFor={`${id}file`}>
                                             <Button
                                                 size="small"
                                                 variant="outlined"
@@ -437,6 +437,7 @@ export default function TinyMCE(props) {
                     : null}
 
             <Editor
+                id={id ?? "editor"}
                 onInit={(evt, editor) => {
                     setIsInitiated(true)
                     editorRef.current = editor
