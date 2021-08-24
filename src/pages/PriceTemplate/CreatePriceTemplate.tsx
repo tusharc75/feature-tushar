@@ -43,6 +43,7 @@ const PriceTemplate = () => {
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
   const [productTemplate, setProductTemplate] = useState([]);
+  const [productField, setProductField] = useState([]);
   const [templateField, setTemplateField] = useState([]);
   const [showHistory, setShowHistory] = useState(false)
 
@@ -63,6 +64,14 @@ const PriceTemplate = () => {
   }, [permissions]);
 
   useEffect(() => {
+
+    axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+      const _productField: any = []
+      data.forEach((_f) => {
+        _productField.push(_f.fieldData)
+      })
+      setProductField([...extractFields(_productField)]);
+    })
     axiosInstance()
       .get(`/product-template`)
       .then(({ data }) => {
@@ -71,6 +80,8 @@ const PriceTemplate = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+
+
     fetchOnePriceTemplate();
   }, [id]);
 
@@ -149,7 +160,7 @@ const PriceTemplate = () => {
       });
     });
     data.fields = fields;
-    const result = checkFormulaLoop(data.fields);
+    const result = checkFormulaLoop([...productField, ...templateField, ...data.fields]);
     if (result.error) {
       toastConfig.setToastConfig({
         open: true,

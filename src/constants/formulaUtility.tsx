@@ -308,7 +308,7 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
                             return false;
                     return true;
                 });
-  
+
                 if (result.length) {
                     if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
                         if (_data.type !== 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
@@ -562,16 +562,26 @@ export const checkFormulaLoop = (fields) => {
     try {
         var error_field = ""
 
-        var is_multiple = false
+        var is_same = false
+        var same_type = ""
+
         fields.forEach((_f) => {
-            if ((fields.filter((_d) => _d.fieldName === _f.fieldName).length) > 1) {
+            if ((fields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase()).length) > 1) {
+                error_field = _f.fieldLabel;
+                same_type = "Label";
+                is_same = true
+                return
+            }
+            if ((fields.filter((_d) => _d.fieldName.toLowerCase() === _f.fieldName.toLowerCase()).length) > 1) {
                 error_field = _f.fieldName;
-                is_multiple = true
+                same_type = "Name";
+                is_same = true
                 return
             }
         })
-        if (is_multiple) {
-            return { error: true, message: "Field Name " + error_field + "  is same" }
+        
+        if (is_same) {
+            return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
         }
 
         var is_loop = false
@@ -607,7 +617,7 @@ export const checkFormulaLoop = (fields) => {
         return { error: false, message: "sucess" }
     }
     catch (e) {
-        return { error: true, message: "error in formula" }
+        return { error: true, message: e.message }
     }
 
 }
