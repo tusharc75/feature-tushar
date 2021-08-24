@@ -124,13 +124,6 @@ const Dashboard = () => {
           if (!entityIds.includes(d.entityId)) {
             entityIds.push(d.entityId);
           }
-
-          // allEntities.push({
-          //   type: 'line',
-          //   label: d.entity,
-          //   borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
-          //   borderWidth: 2
-          // });
         }
 
         entityIds.forEach((id) => {
@@ -221,6 +214,14 @@ const Dashboard = () => {
               borderWidth: 2,
               fill: true,
               data: saleData
+            },
+            {
+              type: 'line',
+              label: 'Budget',
+              borderColor: 'rgb(254, 162, 35)',
+              borderWidth: 2,
+              fill: false,
+              data: budget
             }
           ]
         });
