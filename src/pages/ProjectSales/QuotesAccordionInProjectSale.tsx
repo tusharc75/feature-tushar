@@ -454,6 +454,7 @@ export default function QuotesAccordionInProjectSale({
           marketSegmentId={marketSegmentId}
           subMarketSegmentId={subMarketSegmentId}
           isRenderedFromProjectSales={true}
+          doaCollaboratorResources={user?.user?.doa?.map(obj => obj.user)}
         />
       )}
     </>
