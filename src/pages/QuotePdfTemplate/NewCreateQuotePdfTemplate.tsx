@@ -36,7 +36,13 @@ const useStyles = makeStyles((theme) => ({
     },
     saveButtonContainer: {
         textAlign: 'end',
-        marginBottom: '6px'
+        marginTop: '5px'
+    },
+    tinyMCEContainer: {
+        width: "725px",
+    },
+    headingLabel: {
+        marginBottom: '7px'
     }
 }));
 
@@ -131,6 +137,7 @@ export default function NewCreateQuotePdfTemplate(props) {
         }
     }
 
+
     return <div className={classes.root}>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -156,7 +163,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
                             <Form>
                                 <Grid container>
-                                    <Grid item xs={6}>
+                                    <Grid item xs={4}>
                                         <TextField
                                             variant="outlined"
                                             type="text"
@@ -171,14 +178,14 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={6} className={classes.saveButtonContainer}>
+                                    <Grid item xs={3} className={classes.saveButtonContainer}>
                                         <Button disabled={isUpdating} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
                                             Save{isUpdating && <CircularProgress size={24} />}
                                         </Button>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} style={{ textAlign: 'left' }}>
+                                <Grid item xs={6} style={{ textAlign: 'left' }}>
                                     <FormControlLabel
                                         value={values['showPageNumberInFooter']}
                                         control={
@@ -195,17 +202,19 @@ export default function NewCreateQuotePdfTemplate(props) {
                             </Form>
                         )}
                     </Formik>) : null}
-                <Grid item xs={12}>
-                    <Box>
-                        <Typography variant="h5" component="h5">Header</Typography>
+                <Grid item xs={12} className="mt-4">
+                    <Box className={classes.tinyMCEContainer}>
+                        <Typography className={classes.headingLabel} variant="h5" component="h5">Header</Typography>
                         <TinyMce
+                            id="header"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
                                     ...prevState,
                                     header: value
                                 }))
                             }}
-                            height={400}
+                            width={725}
+                            height={300}
                             initialValue={initialValues?.header}
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
@@ -215,35 +224,19 @@ export default function NewCreateQuotePdfTemplate(props) {
                     </Box>
                 </Grid>
 
-                <Grid item xs={12}>
-                    <Box>
-                        <Typography variant="h5" component="h5">Below Table</Typography>
+
+                <Grid item xs={12} className="mt-4">
+                    <Box className={classes.tinyMCEContainer}>
+                        <Typography className={classes.headingLabel} variant="h5" component="h5">Above Table</Typography>
                         <TinyMce
-                            onChange={(value) => {
-                                setDetails((prevState) => ({
-                                    ...prevState,
-                                    belowTable: value
-                                }))
-                            }}
-                            height={400}
-                            initialValue={initialValues?.belowTable}
-                            imageOrFileUploadCompletePercentage={(
-                                completePercentage
-                            ) => null}
-                            showVariableDropdown={true}
-                        />
-                    </Box>
-                </Grid>
-                <Grid item xs={12}>
-                    <Box>
-                        <Typography variant="h5" component="h5">Above Table</Typography>
-                        <TinyMce
+                            id="aboveTable"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
                                     ...prevState,
                                     aboveTable: value
                                 }))
                             }}
+                            width={725}
                             height={400}
                             initialValue={initialValues?.aboveTable}
                             imageOrFileUploadCompletePercentage={(
@@ -253,16 +246,40 @@ export default function NewCreateQuotePdfTemplate(props) {
                         />
                     </Box>
                 </Grid >
-                <Grid item xs={12}>
-                    <Box>
-                        <Typography variant="h5" component="h5">Footer</Typography>
+                <Grid item xs={12} className="mt-4">
+                    <Box className={classes.tinyMCEContainer}>
+                        <Typography className={classes.headingLabel} variant="h5" component="h5">Below Table</Typography>
                         <TinyMce
+                            id="belowTable"
+                            onChange={(value) => {
+                                setDetails((prevState) => ({
+                                    ...prevState,
+                                    belowTable: value
+                                }))
+                            }}
+                            width={725}
+                            height={300}
+                            initialValue={initialValues?.belowTable}
+                            imageOrFileUploadCompletePercentage={(
+                                completePercentage
+                            ) => null}
+                            showVariableDropdown={true}
+                        />
+                    </Box>
+                </Grid>
+
+                <Grid item xs={12} className="mt-4">
+                    <Box className={classes.tinyMCEContainer}>
+                        <Typography className={classes.headingLabel} variant="h5" component="h5">Footer</Typography>
+                        <TinyMce
+                            id="footer"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
                                     ...prevState,
                                     footer: value
                                 }))
                             }}
+                            width={725}
                             height={400}
                             initialValue={initialValues?.footer}
                             imageOrFileUploadCompletePercentage={(
