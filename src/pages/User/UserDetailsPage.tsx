@@ -383,7 +383,7 @@ const UserDetailsPage = () => {
           setUnionRoleData(null);
           getRoleUnion();
           toastConfig.setToastConfig({
-            message: "Successfully unassigned role",
+            message: "Role unassigned successfully",
             type: "success",
             open: true,
           });
@@ -1044,9 +1044,9 @@ const UserDetailsPage = () => {
           // onOk={handleDeleteUser}
           message={
             deleteUserRec
-              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
+              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
                 : ""
           }
           onClose={() => {
