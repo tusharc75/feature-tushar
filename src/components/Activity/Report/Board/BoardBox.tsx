@@ -11,7 +11,6 @@ import {
 } from "@material-ui/core";
 import { MoreHoriz, CalendarToday } from "@material-ui/icons";
 import { useDrag, useDrop } from "react-dnd";
-import { useHistory } from "react-router-dom";
 import { ListRelatedTo } from "../../Helpers/ListRelatedTo";
 import {
   DeleteEvent,

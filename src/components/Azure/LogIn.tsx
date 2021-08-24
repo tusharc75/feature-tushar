@@ -10,8 +10,8 @@ import {
 } from "@azure/msal-react";
 import { SiMicrosoftoffice } from "react-icons/si";
 
-const LogIn = (props) => {
-  const { instance, accounts, inProgress } = useMsal();
+const LogIn = () => {
+  const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const azureLogin = async() => {
     try{

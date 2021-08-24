@@ -1,4 +1,4 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment, useCallback } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import { Tooltip, IconButton, Grid, Dialog } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
@@ -293,7 +293,13 @@ const User: FC = () => {
     // eslint-disable-next-line
   }, [search]);
 
-  const fetchUsers = useCallback(() => {
+  useEffect(() => {
+    if (renderCount > 0) {
+      fetchUsers();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
+
+  const fetchUsers = () => {
     const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
 
@@ -355,14 +361,7 @@ const User: FC = () => {
         toastConfig.setToastConfig(error);
       });
     // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchUsers();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, entityRoleRedirectDetails, fetchUsers, renderCount]);
-
+  };
 
   const showConfirmBox = (row) => {
     if (row) {

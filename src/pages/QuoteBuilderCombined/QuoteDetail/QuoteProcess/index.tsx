@@ -957,7 +957,11 @@ export default function QuoteProcess(props) {
                             setLoading(false)
                         })
                         .catch((err) => {
-                            toastConfig.setToastConfig(err);
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: "error",
+                                message: "PDF generating error",
+                            });
                             setLoading(false)
                             setGeneratingFile(false);
                         });
@@ -989,13 +993,21 @@ export default function QuoteProcess(props) {
 
                                 })
                                 .catch((err) => {
-                                    toastConfig.setToastConfig(err);
+                                    toastConfig.setToastConfig({
+                                        open: true,
+                                        type: "error",
+                                        message: "PDF generating error",
+                                    });
                                     setLoading(false)
                                     setGeneratingFile(false);
                                 });
                         })
                         .catch((err) => {
-                            toastConfig.setToastConfig(err);
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: "error",
+                                message: "PDF generating error",
+                            });
                             setLoading(false)
                             setGeneratingFile(false);
                         });

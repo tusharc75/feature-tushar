@@ -5,7 +5,6 @@ import {
     CircularProgress,
     Dialog,
     FormControl,
-    FormControlLabel,
     Grid,
     List,
     ListItem,
@@ -86,7 +85,7 @@ const AssignProductDialog = ({
         setSearch(value);
         let result = [];
         result = productsConst.filter((data) => {
-            return data.concatedName.toLowerCase().search(value.toLowerCase()) != -1 || data.email.toLowerCase().search(value.toLowerCase()) != -1;
+            return data.concatedName.toLowerCase().search(value.toLowerCase()) !== -1 || data.email.toLowerCase().search(value.toLowerCase()) !== -1;
         });
         setProducts(result)
     };

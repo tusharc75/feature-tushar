@@ -83,8 +83,8 @@ function OpportunityDetailsPage() {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
-  const [showAtLast, setShowAtLast] = useState(false);
-  const [additionalFieldName, setAdditionalFieldName] = useState('');
+  const [, setShowAtLast] = useState(false);
+  const [, setAdditionalFieldName] = useState('');
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)

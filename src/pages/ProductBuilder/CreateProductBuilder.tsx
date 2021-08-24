@@ -30,7 +30,6 @@ const CreateProductBuilder = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
-      user: { user },
       permissions: { productBuilder: permissions },
     },
   }: any = useData();
