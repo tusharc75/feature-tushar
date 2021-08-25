@@ -129,37 +129,33 @@ export default function ManageContact(props) {
   };
 
   const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId, selectedEntity) => {
-    setCollaboratorDataSource(
-      getCollaboratorDropdownDataSource(
+    if (selectedEntity?.length > 0) {
+
+      let newTempArray = []
+
+      const ownerCollaboratorData = getCollaboratorDropdownDataSource(
         selectedOwnerId,
         ownerCollaboratorCommonDataSource
-      )
-    );
+      );
 
-    if(selectedEntity && collaboratorDataSource){
-     
-      let newTempArray = []
-     
-      selectedEntity.map(d=>{
-        getCollaboratorDropdownDataSource(
-          selectedOwnerId,
-          ownerCollaboratorCommonDataSource
-        ).map(item=>{
-          if(item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId){
+      selectedEntity.map(d => {
+        ownerCollaboratorData.map(item => {
+          if (item.entities?.find(s => s.entity === d && item.optionValue !== selectedOwnerId)) {
             newTempArray.push(item)
           }
         })
         setCollaboratorDataSource(newTempArray)
-        // setCollaboratorDataSource(
-        //   getCollaboratorDropdownDataSource(
-        //   selectedOwnerId,
-        //   ownerCollaboratorCommonDataSource
-        // ).filter(item => item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId)) 
-        
-        
       })
     }
-  };
+    else {
+      setCollaboratorDataSource(
+        getCollaboratorDropdownDataSource(
+          selectedOwnerId,
+          ownerCollaboratorCommonDataSource
+        )
+      );
+    }
+  }
   //  Owner, Collaborator Code - End
 
   const onReportsToDropdownOpen = (selectedAccount) => {
@@ -338,7 +334,7 @@ export default function ManageContact(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
-                                            values.owner, values.entity ? values.entity : "" 
+                                            values.owner, values.entity ? values.entity : []
                                           )
                                         }
                                       />

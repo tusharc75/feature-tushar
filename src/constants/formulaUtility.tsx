@@ -41,7 +41,7 @@ export const checkFormula = (formula, inputFields) => {
         })
         fs['f1'] = new Function(...argument, formula);
         let result = fs['f1'].apply(null, values);
-        console.log(result)
+        
         if (result === undefined) {
             isValid = false
         }
@@ -84,9 +84,6 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
     }
     catch (e) {
     }
-    //console.log(formula)
-    // console.log(value)
-
     return value
 }
 
@@ -300,8 +297,7 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
     if (fields && fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).length) {
         fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).forEach((_data: any) => {
             if (_data.vlookupInputFields.includes(name)) {
-                console.log(_data.option)
-                console.log(_data.vlookupInputFields)
+
                 let result = _data.option && _data.option.filter(function (val: any) {
                     for (var i = 0; i < _data.vlookupInputFields.length; i++)
                         if ((_data.vlookupInputFields[i] === name ? value.toString() : values[_data.vlookupInputFields[i]].toString()) !== val[_data.vlookupInputFields[i]].toString())
@@ -579,7 +575,7 @@ export const checkFormulaLoop = (fields) => {
                 return
             }
         })
-        
+
         if (is_same) {
             return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
         }
@@ -621,6 +617,48 @@ export const checkFormulaLoop = (fields) => {
     }
 
 }
+
+export const checkUniqueValidation = (checkinFields, checkfromFields) => {
+    try {
+        var error_field = ""
+
+        var is_same = false
+        var same_type = ""
+
+        checkinFields.forEach((_f) => {
+            if ((checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase()).length) > 0) {
+                error_field = _f.fieldLabel;
+                if (checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName) {
+                    error_field = error_field +
+                        " (Template - " + checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName + ")";
+                }
+                same_type = "Label";
+                is_same = true
+                return
+            }
+            if ((checkfromFields.filter((_d) => _d.fieldName.toLowerCase() === _f.fieldName.toLowerCase()).length) > 0) {
+                error_field = _f.fieldName;
+                if (checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName) {
+                    error_field = error_field +
+                        " (Template - " + checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName + ")";
+                }
+                same_type = "Name";
+                is_same = true
+                return
+            }
+        })
+
+        if (is_same) {
+            return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
+        }
+        return { error: false, message: "sucess" }
+    }
+    catch (e) {
+        return { error: true, message: e.message }
+    }
+
+}
+
 
 export const checkFieldDependency = (fieldId, sectionId, section) => {
     try {

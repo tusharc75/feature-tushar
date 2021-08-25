@@ -409,8 +409,8 @@ export default function ManageQuoteDialog({
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
           initialData["quoteName"] = opportunityName;
-          initialData["currency"] = currency;
-          initialData["estimatedAmount"] = estimatedAmount;
+          initialData["currency"] = currency || "";
+          initialData["estimatedAmount"] = estimatedAmount || "";
         }
 
         if (isClone) {
