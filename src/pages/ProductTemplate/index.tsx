@@ -40,7 +40,7 @@ const ProductTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { permissions, selectedEntity },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
@@ -116,7 +116,7 @@ const ProductTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {productTemplatePermissions.isDelete ?
+        {productTemplatePermissions.isDelete && user?.user?._id === params.data?.owner ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
