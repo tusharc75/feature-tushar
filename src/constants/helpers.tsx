@@ -797,6 +797,10 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
+export const review = {
+  reviewsApi: "/product/review",
+}
+
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, "currencyCode");
 };

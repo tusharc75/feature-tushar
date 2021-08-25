@@ -74,7 +74,7 @@ const AddExistingProduct = (props) => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: field,
                     term: filters[field].filter

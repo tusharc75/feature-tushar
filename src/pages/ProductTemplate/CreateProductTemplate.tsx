@@ -19,7 +19,7 @@ import TextField from '@material-ui/core/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { checkFormulaLoop } from "../../constants/formulaUtility";
+import { extractFields, checkFormulaLoop } from "../../constants/formulaUtility";
 import { useData } from "../../StateProvider/Provider";
 import HistoryDialog from "../../components/Activity/History"
 import { productTemplate } from "../../constants/helpers"
@@ -47,6 +47,7 @@ const ProductTemplate = () => {
     const [productCategory, setProductCategory] = useState(null);
     const [showHistory, setShowHistory] = useState(false)
     //const [productUnit, setProductUnit] = useState(null);
+    const [productField, setProductField] = useState([]);
 
     const {
         state: { permissions },
@@ -60,6 +61,13 @@ const ProductTemplate = () => {
 
     useEffect(() => {
         fetchOneProductTemplate();
+        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+            const _productField: any = []
+            data.forEach((_f) => {
+                _productField.push(_f.fieldData)
+            })
+            setProductField([...extractFields(_productField)]);
+        })
     }, [id, isClone]);
 
     useEffect(() => {
@@ -144,7 +152,7 @@ const ProductTemplate = () => {
             })
         })
         data.fields = fields;
-        const result = checkFormulaLoop(data.fields)
+        const result = checkFormulaLoop([...productField, ...data.fields])
         if (result.error) {
             toastConfig.setToastConfig({ open: true, type: "error", message: result.message });
             return

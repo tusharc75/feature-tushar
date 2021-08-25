@@ -53,7 +53,7 @@ export default function AssignedEntities({
       .put(`/user/assign-entity`, dataObj)
       .then(() => {
         toastConfig.setToastConfig({
-          message: ` Role removed successfully`,
+          message: `${showConfirmBox ? "Entity unassigned successfully." : "Role removed successfully"}`,
           type: "success",
           open: true,
         });
@@ -88,7 +88,7 @@ export default function AssignedEntities({
       .put(`/user/assign-entity`, dataObj)
       .then(() => {
         toastConfig.setToastConfig({
-          message: ` Role removed successfully`,
+          message: `${showConfirmBox ? "Entity unassigned successfully." : "Role removed successfully"}`,
           type: "success",
           open: true,
         });
@@ -99,7 +99,7 @@ export default function AssignedEntities({
       });
   };
 
-  const handleCloseDialog = (rec) => {
+  const handleCloseDialog = () => {
     setShowAssignEntityDialog(false)
   };
 
@@ -144,7 +144,7 @@ export default function AssignedEntities({
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to un-assign  ${currentEntity.entity.entityName}`}
+          message={`Are you sure you want to un-assign  ${currentEntity.entity.entityName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

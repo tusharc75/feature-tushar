@@ -409,8 +409,8 @@ export default function ManageQuoteDialog({
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
           initialData["quoteName"] = opportunityName;
-          initialData["currency"] = currency;
-          initialData["estimatedAmount"] = estimatedAmount;
+          initialData["currency"] = currency || "";
+          initialData["estimatedAmount"] = estimatedAmount || "";
         }
 
         if (isClone) {
@@ -660,7 +660,7 @@ export default function ManageQuoteDialog({
         toastConfig.setToastConfig({
           open: true,
           type: "success",
-          message: "File downloaded Successfuly",
+          message: "File downloaded Successfully",
         });
 
         const file = new Blob([data], { type: "application/pdf" });
@@ -1178,7 +1178,7 @@ export default function ManageQuoteDialog({
                                             e.target.checked
                                           );
                                           if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
+                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
                                             setFieldValue("collaborator", [
                                               ...values["collaborator"]].concat(doaUserDataTemp)
                                             );
