@@ -113,7 +113,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                 aboveTable: "",
                 belowTable: "",
                 entity: [],
-                owner: "",
+                owner: user.user._id,
                 collaborator: [],
             })
         }
@@ -223,8 +223,8 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
-                                            value={user?.entity.filter((data) => values["entity"].some(d => d === data._id)).length
-                                                ? user?.entity.filter((data) => values["entity"].some(d => d === data._id))
+                                            value={user?.entity.filter((data) => values["entity"]?.some(d => d === data._id)).length
+                                                ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
                                                 setFieldValue("entity", val && val?.map(d => d._id))
@@ -272,8 +272,8 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             multiple
                                             options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                                            value={ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id)).length
-                                                ? ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id))
+                                            value={ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id)).length
+                                                ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
                                                 setFieldValue("collaborator", val && val?.map(d => d._id))

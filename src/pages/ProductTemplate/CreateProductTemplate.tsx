@@ -81,7 +81,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", entity: [], owner: "", collaborator: [], isStandard: false });
+            setInitialValues({ name: "", productCategory: "", entity: [], owner: user.user._id, collaborator: [], isStandard: false });
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -354,8 +354,8 @@ const ProductTemplate = () => {
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
-                                            value={user?.entity.filter((data) => values["entity"].some(d => d === data._id)).length
-                                                ? user?.entity.filter((data) => values["entity"].some(d => d === data._id))
+                                            value={user?.entity.filter((data) => values["entity"]?.some(d => d === data._id)).length
+                                                ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
                                                 setFieldValue("entity", val && val?.map(d => d._id))
@@ -403,8 +403,8 @@ const ProductTemplate = () => {
                                             multiple
                                             options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                                            value={ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id)).length
-                                                ? ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id))
+                                            value={ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id)).length
+                                                ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
                                                 setFieldValue("collaborator", val && val?.map(d => d._id))
