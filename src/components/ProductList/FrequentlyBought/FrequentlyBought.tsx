@@ -9,8 +9,6 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import CircularProgress from "@material-ui/core/CircularProgress"
 
 function FrequentlyBought({ id }) {
-  console.log('id', id)
-
   const history = useHistory();
   const [count, setCount] = useState(0);
   const [checkedItems, setCheckedItems] = useState([])

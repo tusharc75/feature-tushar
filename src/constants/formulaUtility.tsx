@@ -41,7 +41,7 @@ export const checkFormula = (formula, inputFields) => {
         })
         fs['f1'] = new Function(...argument, formula);
         let result = fs['f1'].apply(null, values);
-        console.log(result)
+        
         if (result === undefined) {
             isValid = false
         }
@@ -84,9 +84,6 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
     }
     catch (e) {
     }
-    //console.log(formula)
-    // console.log(value)
-
     return value
 }
 
@@ -300,8 +297,7 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
     if (fields && fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).length) {
         fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).forEach((_data: any) => {
             if (_data.vlookupInputFields.includes(name)) {
-                console.log(_data.option)
-                console.log(_data.vlookupInputFields)
+
                 let result = _data.option && _data.option.filter(function (val: any) {
                     for (var i = 0; i < _data.vlookupInputFields.length; i++)
                         if ((_data.vlookupInputFields[i] === name ? value.toString() : values[_data.vlookupInputFields[i]].toString()) !== val[_data.vlookupInputFields[i]].toString())
