@@ -660,7 +660,7 @@ export default function ManageQuoteDialog({
         toastConfig.setToastConfig({
           open: true,
           type: "success",
-          message: "File downloaded Successfuly",
+          message: "File downloaded Successfully",
         });
 
         const file = new Blob([data], { type: "application/pdf" });

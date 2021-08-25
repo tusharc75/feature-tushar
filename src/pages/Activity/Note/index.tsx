@@ -180,7 +180,7 @@ const Note = () => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Note Deleted Succesfully'
+            message: 'Note Deleted Successfully'
           });
           setIsConformDialogVisible(false);
           setOkButtonLoading(false);
