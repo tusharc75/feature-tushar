@@ -58,7 +58,14 @@ const OpportunityDashboards = (props) => {
                   responsive: true,
                   plugins: {
                     legend: {
-                      position: 'right'
+                      display: false
+                    },
+                    tooltips: {
+                      callbacks: {
+                         label: function(tooltipItem) {
+                                return tooltipItem.yLabel;
+                         }
+                      }
                     },
                     title: {
                       display: false,
