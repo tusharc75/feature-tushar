@@ -12,6 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
+import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
 
 const CreateFormBuilder = () => {
 
@@ -52,7 +53,7 @@ const CreateFormBuilder = () => {
         });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         let data = []
         let order = 0;
         section.forEach(_section => {
@@ -67,6 +68,33 @@ const CreateFormBuilder = () => {
                 data.push(_field_data)
             })
         })
+
+
+        if ((resource.toString()).toLowerCase() === "product") {
+            var otherField = []
+            await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
+                otherField = data;
+            }).catch((error) => {
+            });
+            const result = checkUniqueValidation(data, otherField);
+            if (result.error) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: result.message,
+                });
+                return false;
+            }
+        }
+        const result = checkFormulaLoop(data);
+        if (result.error) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: "error",
+                message: result.message,
+            });
+            return false;
+        }
 
         let sendData: any = {}
         sendData.resource = resource;

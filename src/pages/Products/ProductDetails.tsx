@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, product } from "../../constants/helpers";
+import { formatAmountWithCurrency, product, review } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import styles from "./product-detail-page.module.scss";
@@ -20,6 +20,8 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
 
 export default function ProductDetails() {
+
+  const [reviews, setReviews] = useState([])
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
@@ -34,7 +36,21 @@ export default function ProductDetails() {
   useEffect(() => {
     fetchCart()
     fetchProducts()
+    fetchReviews()
   }, []);
+
+  const fetchReviews = () => {
+    axiosInstance()
+      .get(`${review.reviewsApi}/${id}`)
+      .then(({ data: { data } }) => {
+        if (data.review) {
+          setReviews(data.review)
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const fetchProducts = () => {
     axiosInstance()
@@ -64,7 +80,6 @@ export default function ProductDetails() {
 
   const onCheckout = () => {
     if (checkoutLabel === "Create Quote" && addedCartItems.length >= 1) {
-      console.log('Yes checkout ')
       setshowCreateQuoteDialog(true)
     }
   }
@@ -333,7 +348,7 @@ export default function ProductDetails() {
           <div className="a_divider_inner"></div>
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>
-          <RatingAndReviewChart />
+          <RatingAndReviewChart id={id} reviews={reviews} />
         </div>
 
       </Box>

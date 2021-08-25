@@ -361,7 +361,7 @@ export default function Attachment() {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Deleted Succesfully'
+            message: 'Deleted Successfully'
           });
           setIsConfirmDialogVisible(false);
           setDeleteLoading(false);

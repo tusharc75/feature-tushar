@@ -22,6 +22,16 @@ export const CreatedByRenderer = params => params.value ? (
     <NoDataCell />
 );
 
+export const DateRenderer = params => params.value ? (
+    <h5 className="createBy" title={`${params.value} • ${moment(
+        params.value.slice(0, 10)
+    ).format(dateFormat)}`}>
+        {moment(params.value.slice(0, 10)).format(dateFormat)}
+    </h5>
+) : (
+    <NoDataCell />
+);
+
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(
         params.data.updatedByDate.slice(0, 10)

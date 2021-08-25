@@ -10,10 +10,11 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, displayDate } from '../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
+    DateRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
@@ -28,7 +29,7 @@ const EquipmentRentalMaster = () => {
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+    
     const {
         state: { permissions },
     }: any = useData();
@@ -41,8 +42,8 @@ const EquipmentRentalMaster = () => {
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "rentalStartDate", headerName: "Rental Start Date", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "rentalBackDate", headerName: "Rental Back Date", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "rentalStartDate", headerName: "Rental Start Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
+        { field: "rentalBackDate", headerName: "Rental Back Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
@@ -61,9 +62,9 @@ const EquipmentRentalMaster = () => {
                 ...u,
                 id: u._id,
                 productName: u.product?.optionLabel,
-                rentalStartDate:u.createdBy?.date,
-                rentalBackDate:u.createdBy?.date,
-                warehouse:"warehouse",
+                rentalStartDate: u.createdBy?.date ? displayDate(u.createdBy?.date) : "",
+                rentalBackDate: u.createdBy?.date ? displayDate(u.createdBy?.date) : "",
+                warehouse: "warehouse",
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
@@ -87,7 +88,7 @@ const EquipmentRentalMaster = () => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
@@ -144,6 +145,7 @@ const EquipmentRentalMaster = () => {
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         commonRenderer: CommonRenderer,
+        dateRenderer: DateRenderer
     };
 
     const replaceFieldName = (field) => {
