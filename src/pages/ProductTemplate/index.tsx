@@ -40,7 +40,7 @@ const ProductTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { permissions },
+        state: { user, permissions },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
@@ -67,13 +67,13 @@ const ProductTemplate: FC = () => {
     ];
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
 
@@ -116,7 +116,7 @@ const ProductTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {productTemplatePermissions.isDelete ?
+        {productTemplatePermissions.isDelete && user?.user?._id === params.data?.owner ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -322,7 +322,7 @@ const ProductTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="productTemplatePage"/>
+                    loading={loading} renderedFrom="productTemplatePage" />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

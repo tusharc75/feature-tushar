@@ -21,7 +21,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import {
     CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+    UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -66,13 +67,13 @@ const PriceTemplate: FC = () => {
     ];
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
 
@@ -115,7 +116,7 @@ const PriceTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {priceTemplatePermissions.isDelete && params.data?.createdById === user?.user?._id ?
+        {priceTemplatePermissions.isDelete && user?.user?._id === params.data?.owner ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -324,7 +325,7 @@ const PriceTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="priceTemplatePage"/>
+                    loading={loading} renderedFrom="priceTemplatePage" />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

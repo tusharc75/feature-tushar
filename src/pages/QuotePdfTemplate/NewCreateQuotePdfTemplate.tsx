@@ -23,6 +23,7 @@ import { useData } from '../../StateProvider/Provider';
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    owner: Yup.string().required('Owner is required'),
     showPageNumberInFooter: Yup.boolean()
 });
 
@@ -67,6 +68,7 @@ export default function NewCreateQuotePdfTemplate(props) {
         state: { user },
     }: any = useData();
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [disableSaveButton, setDisableSaveButton] = useState(false)
 
     useEffect(() => {
         if (id && id !== '0') {
@@ -83,9 +85,9 @@ export default function NewCreateQuotePdfTemplate(props) {
                         footer: data?.footer,
                         aboveTable: data?.aboveTable,
                         belowTable: data?.belowTable,
-                        entity: data?.entity,
+                        entity: data?.entity ? data?.entity : [],
                         owner: data?.owner,
-                        collaborator: data?.collaborator,
+                        collaborator: data?.collaborator ? data?.collaborator : [],
                     });
                     setDetails({
                         header: data?.header,
@@ -93,6 +95,9 @@ export default function NewCreateQuotePdfTemplate(props) {
                         aboveTable: data?.aboveTable,
                         belowTable: data?.belowTable
                     })
+                    if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+                        setDisableSaveButton(true)
+                    }
 
                 } catch (e) {
                     toastConfig.setToastConfig(e);
@@ -129,7 +134,10 @@ export default function NewCreateQuotePdfTemplate(props) {
             axiosInstance()
                 .post('/quote-pdf-template', {
                     ...details, name: values.name,
-                    pageNumberInFooter: values.showPageNumberInFooter
+                    pageNumberInFooter: values.showPageNumberInFooter,
+                    entity: values?.entity,
+                    owner: values?.owner,
+                    collaborator: values?.collaborator,
                 })
                 .then(({ data: { data } }) => {
                     history.push({ pathname: routes.quotePdfTemplate.path });
@@ -145,7 +153,10 @@ export default function NewCreateQuotePdfTemplate(props) {
                 .put('/quote-pdf-template', {
                     _id: id,
                     ...details, name: values.name,
-                    pageNumberInFooter: values.showPageNumberInFooter
+                    pageNumberInFooter: values.showPageNumberInFooter,
+                    entity: values?.entity,
+                    owner: values?.owner,
+                    collaborator: values?.collaborator,
                 })
                 .then(({ data: { data } }) => {
                     setIsUpdating(false);
@@ -200,7 +211,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                         />
                                     </Grid>
                                     <Grid item xs={3} className={classes.saveButtonContainer}>
-                                        <Button disabled={isUpdating} size="small" color="primary"
+                                        <Button disabled={isUpdating || disableSaveButton} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
                                             Save{isUpdating && <CircularProgress size={24} />}
                                         </Button>
@@ -212,9 +223,11 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
-                                            value={values["entity"]}
+                                            value={user?.entity.filter((data) => values["entity"].some(d => d === data._id)).length
+                                                ? user?.entity.filter((data) => values["entity"].some(d => d === data._id))
+                                                : []}
                                             onChange={(e, val) => {
-                                                setFieldValue("entity", val)
+                                                setFieldValue("entity", val && val?.map(d => d._id))
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -233,10 +246,12 @@ export default function NewCreateQuotePdfTemplate(props) {
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                                            value={values["owner"]}
-                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d._id)))}
+                                            value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
+                                                ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
+                                                : ""}
+                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
                                             onChange={(e, val) => {
-                                                setFieldValue("owner", val);
+                                                setFieldValue("owner", val && val._id ? val._id : "");
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -255,11 +270,13 @@ export default function NewCreateQuotePdfTemplate(props) {
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
                                             multiple
-                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"]?._id)}
+                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                                            value={values["collaborator"]}
+                                            value={ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id)).length
+                                                ? ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id))
+                                                : []}
                                             onChange={(e, val) => {
-                                                setFieldValue("collaborator", val)
+                                                setFieldValue("collaborator", val && val?.map(d => d._id))
                                             }}
                                             renderInput={(params) => (
                                                 <TextField

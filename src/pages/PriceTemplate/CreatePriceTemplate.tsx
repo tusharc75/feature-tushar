@@ -31,6 +31,7 @@ const PriceTemplateSchema = Yup.object().shape({
     .max(50, "Too Long")
     .required("name is required"),
   productTemplate: Yup.string().required("product template is required"),
+  owner: Yup.string().required('Owner is required'),
 });
 
 const PriceTemplate = () => {
@@ -47,6 +48,7 @@ const PriceTemplate = () => {
   const [templateField, setTemplateField] = useState([]);
   const [showHistory, setShowHistory] = useState(false)
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+  const [disableSaveButton, setDisableSaveButton] = useState(false)
 
   const {
     state: { user, permissions },
@@ -89,7 +91,7 @@ const PriceTemplate = () => {
 
   const fetchOnePriceTemplate = () => {
     if (id === "0") {
-      setInitialValues({ name: "", productTemplate: "",entity: [], owner: "", collaborator: [] });
+      setInitialValues({ name: "", productTemplate: "", entity: [], owner: "", collaborator: [] });
       axiosInstance()
         .get(`/price-template/default-field`)
         .then(({ data: { data } }) => {
@@ -124,6 +126,9 @@ const PriceTemplate = () => {
             setInitialValues(data);
             handleProductTemplateField(data.productTemplate);
             setSection(data.section);
+            if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+              setDisableSaveButton(true)
+            }
           }
         })
         .catch((error) => {
@@ -145,9 +150,9 @@ const PriceTemplate = () => {
     let data: any = {};
     data.name = values.name;
     data.productTemplate = values.productTemplate;
-    data.entity = values?.entity?.map(e => e._id);
-    data.owner = values?.owner?._id;
-    data.collaborator = values?.collaborator?.map(d => d._id);
+    data.entity = values?.entity;
+    data.owner = values?.owner;
+    data.collaborator = values?.collaborator;
     const resultproductTemplate = productTemplate.filter(
       (_f) => _f._id === values.productTemplate
     );
@@ -378,7 +383,7 @@ const PriceTemplate = () => {
                         {(priceTemplatePermissions.isCreate ||
                           priceTemplatePermissions.isUpdate) && (
                             <Button
-                              disabled={isUpdating}
+                              disabled={isUpdating || disableSaveButton}
                               size="small"
                               color="primary"
                               onClick={submitForm}
@@ -405,13 +410,15 @@ const PriceTemplate = () => {
                     </Grid>
                     <Grid container spacing={1}>
                       <Grid item xs={12} sm={3}>
-                        { <Autocomplete
+                        {<Autocomplete
                           multiple
                           options={user?.entity}
                           getOptionLabel={(option: any) => (option ? option?.entityName : "")}
-                          value={values["entity"]}
+                          value={user?.entity.filter((data) => values["entity"].some(d => d === data._id)).length
+                            ? user?.entity.filter((data) => values["entity"].some(d => d === data._id))
+                            : []}
                           onChange={(e, val) => {
-                            setFieldValue("entity", val)
+                            setFieldValue("entity", val && val?.map(d => d._id))
                           }}
                           renderInput={(params) => (
                             <TextField
@@ -428,12 +435,14 @@ const PriceTemplate = () => {
                         />}
                       </Grid>
                       <Grid item xs={12} sm={3}>
-                        { <Autocomplete
+                        {<Autocomplete
                           getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                          value={values["owner"]}
-                          options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d._id)))}
+                          value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
+                            ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
+                            : ""}
+                          options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
                           onChange={(e, val) => {
-                            setFieldValue("owner", val);
+                            setFieldValue("owner", val && val._id ? val._id : "");
                           }}
                           renderInput={(params) => (
                             <TextField
@@ -450,13 +459,15 @@ const PriceTemplate = () => {
                         />}
                       </Grid>
                       <Grid item xs={12} sm={3}>
-                        { <Autocomplete
+                        {<Autocomplete
                           multiple
-                          options={ownerCollaboratorData.filter(d => d._id !== values["owner"]?._id)}
+                          options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                           getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                          value={values["collaborator"]}
+                          value={ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id)).length
+                            ? ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id))
+                            : []}
                           onChange={(e, val) => {
-                            setFieldValue("collaborator", val)
+                            setFieldValue("collaborator", val && val?.map(d => d._id))
                           }}
                           renderInput={(params) => (
                             <TextField

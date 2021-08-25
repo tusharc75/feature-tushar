@@ -104,8 +104,7 @@ const ProductTemplate = () => {
                 }
                 setInitialValues(data);
                 setSection(data.section);
-                let xx = user.user._id !== data?.owner?._id && !data?.collaborator.some(d => d._id === user.user._id)
-                if (user.user._id !== data?.owner?._id && !data?.collaborator.some(d => d._id === user.user._id)) {
+                if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
                     setDisableSaveButton(true)
                 }
             }).catch((error) => {
@@ -156,9 +155,9 @@ const ProductTemplate = () => {
         else {
             data.productCategory = values.productCategory;
             data.unit = values.unit;
-            data.entity = values?.entity?.map(e => e._id);
-            data.owner = values?.owner?._id;
-            data.collaborator = values?.collaborator?.map(d => d._id);
+            data.entity = values?.entity;
+            data.owner = values?.owner;
+            data.collaborator = values?.collaborator;
         }
         let fields: any = []
         let order = 0;
@@ -208,6 +207,9 @@ const ProductTemplate = () => {
         if (!values.isStandard) {
             if (!values.productCategory || values.productCategory === "") {
                 errors["productCategory"] = "Product category is required";
+            }
+            if (!values.owner || values.owner === "") {
+                errors["owner"] = "Owner is required";
             }
             // if (!values.unit || values.unit === "") {
             //     errors["unit"] = "Unit is required";
@@ -352,9 +354,11 @@ const ProductTemplate = () => {
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
-                                            value={values["entity"]}
+                                            value={user?.entity.filter((data) => values["entity"].some(d => d === data._id)).length
+                                                ? user?.entity.filter((data) => values["entity"].some(d => d === data._id))
+                                                : []}
                                             onChange={(e, val) => {
-                                                setFieldValue("entity", val)
+                                                setFieldValue("entity", val && val?.map(d => d._id))
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -373,10 +377,12 @@ const ProductTemplate = () => {
                                     <Grid item xs={12} sm={3}>
                                         {!values["isStandard"] && <Autocomplete
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                                            value={values["owner"]}
-                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d._id)))}
+                                            value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
+                                                ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
+                                                : ""}
+                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
                                             onChange={(e, val) => {
-                                                setFieldValue("owner", val);
+                                                setFieldValue("owner", val && val._id ? val._id : "");
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -395,11 +401,13 @@ const ProductTemplate = () => {
                                     <Grid item xs={12} sm={3}>
                                         {!values["isStandard"] && <Autocomplete
                                             multiple
-                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"]?._id)}
+                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
-                                            value={values["collaborator"]}
+                                            value={ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id)).length
+                                                ? ownerCollaboratorData.filter((data) => values["collaborator"].some(d => d === data._id))
+                                                : []}
                                             onChange={(e, val) => {
-                                                setFieldValue("collaborator", val)
+                                                setFieldValue("collaborator", val && val?.map(d => d._id))
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
