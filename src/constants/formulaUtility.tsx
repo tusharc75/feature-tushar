@@ -579,7 +579,7 @@ export const checkFormulaLoop = (fields) => {
                 return
             }
         })
-        
+
         if (is_same) {
             return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
         }
@@ -621,6 +621,48 @@ export const checkFormulaLoop = (fields) => {
     }
 
 }
+
+export const checkUniqueValidation = (checkinFields, checkfromFields) => {
+    try {
+        var error_field = ""
+
+        var is_same = false
+        var same_type = ""
+
+        checkinFields.forEach((_f) => {
+            if ((checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase()).length) > 0) {
+                error_field = _f.fieldLabel;
+                if (checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName) {
+                    error_field = error_field +
+                        " (Template - " + checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName + ")";
+                }
+                same_type = "Label";
+                is_same = true
+                return
+            }
+            if ((checkfromFields.filter((_d) => _d.fieldName.toLowerCase() === _f.fieldName.toLowerCase()).length) > 0) {
+                error_field = _f.fieldName;
+                if (checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName) {
+                    error_field = error_field +
+                        " (Template - " + checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName + ")";
+                }
+                same_type = "Name";
+                is_same = true
+                return
+            }
+        })
+
+        if (is_same) {
+            return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
+        }
+        return { error: false, message: "sucess" }
+    }
+    catch (e) {
+        return { error: true, message: e.message }
+    }
+
+}
+
 
 export const checkFieldDependency = (fieldId, sectionId, section) => {
     try {
