@@ -81,7 +81,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", entity: [], owner: "", collaborator: [], isStandard: false });
+            setInitialValues({ name: "", productCategory: "", entity: [], owner: user.user._id, collaborator: [], isStandard: false });
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));

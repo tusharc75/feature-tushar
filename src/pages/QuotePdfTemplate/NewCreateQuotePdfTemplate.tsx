@@ -113,7 +113,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                 aboveTable: "",
                 belowTable: "",
                 entity: [],
-                owner: "",
+                owner: user.user._id,
                 collaborator: [],
             })
         }
