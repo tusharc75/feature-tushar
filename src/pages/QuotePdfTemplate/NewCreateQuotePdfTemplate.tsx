@@ -220,6 +220,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
+                            isCheckHeight={true}
                         />
                     </Box>
                 </Grid>
@@ -258,7 +259,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                 }))
                             }}
                             width={725}
-                            height={300}
+                            height={400}
                             initialValue={initialValues?.belowTable}
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
@@ -280,12 +281,13 @@ export default function NewCreateQuotePdfTemplate(props) {
                                 }))
                             }}
                             width={725}
-                            height={400}
+                            height={300}
                             initialValue={initialValues?.footer}
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
+                            isCheckHeight={true}
                         />
                     </Box>
                 </Grid>

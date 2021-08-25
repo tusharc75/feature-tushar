@@ -55,10 +55,11 @@ export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
         onUploadImage = null, usePublicUrlforFileUpload = false,
-        doNotShowUploadFile = false, showVariableDropdown = false, id
+        doNotShowUploadFile = false, showVariableDropdown = false, id, isCheckHeight = false
     } = props
 
     const classes = useStyles();
+    const [prevData, setPrevData] = useState("")
     const [imageDetails, setImageDetails] = useState({ width: "", height: "", alt: "" })
     const [imageUrl, setImageUrl] = useState("")
     const [uploadError, setUploadError] = useState(false)
@@ -131,7 +132,12 @@ export default function TinyMCE(props) {
                         onUploadFile(data.fileUrl)
                     }
                     else {
-                        editorRef.current.execCommand('mceInsertContent', false, data);
+                        if (isCheckHeight) {
+                            if (isValidHeight()) {
+                                editorRef.current.execCommand('mceInsertContent', false, data);
+                            }
+                        }
+                        else editorRef.current.execCommand('mceInsertContent', false, data);
                     }
                 }
                 //data.fileUrl data.fileName
@@ -179,6 +185,25 @@ export default function TinyMCE(props) {
             }).catch(err => setIsImageLoading(false))
     };
 
+    const isValidHeight = () => {
+        const contentDiv = document.getElementById("contentDiv")
+        let content = editorRef.current.getContent()
+        contentDiv.innerHTML = content;
+        let contentHeight = contentDiv.offsetHeight
+        let validHeight = height ? (height / 2.5) : 106
+
+        if (contentHeight < validHeight) {
+            setPrevData(content)
+            contentDiv.innerHTML = ""
+            return true
+        }
+        else {
+            editorRef.current.setContent(prevData)
+            contentDiv.innerHTML = ""
+            return false
+        }
+    }
+
     const handleSubmit = () => {
 
         if (!imageUrl) {
@@ -192,12 +217,22 @@ export default function TinyMCE(props) {
         if (imageDetails && imageDetails.height) {
             imgTag = `${imgTag} height='${imageDetails.height}'`
         }
+        else if (isCheckHeight) {
+            imgTag = `${imgTag} height='${70}'`
+        }
+
         if (imageDetails && imageDetails.alt) {
             imgTag = `${imgTag} alt='${imageDetails.alt}'`
         }
         imgTag = `${imgTag} />`
 
-        editorRef.current.execCommand('mceInsertContent', false, imgTag);
+        if (isCheckHeight) {
+            if (isValidHeight()) {
+                editorRef.current.execCommand('mceInsertContent', false, imgTag);
+            }
+        }
+        else editorRef.current.execCommand('mceInsertContent', false, imgTag);
+
         setIsUploadImage(false)
         setImageUrl("")
         setImageDetails({ width: "", height: "", alt: "" })
@@ -210,7 +245,12 @@ export default function TinyMCE(props) {
 
     const handleVaribleSelect = (e) => {
         let newTag = `<p>{{${e}}}</p>`
-        editorRef.current.execCommand('mceInsertContent', false, newTag);
+        if (isCheckHeight) {
+            if (isValidHeight()) {
+                editorRef.current.execCommand('mceInsertContent', false, newTag);
+            }
+        }
+        else editorRef.current.execCommand('mceInsertContent', false, newTag);
     }
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -395,7 +435,6 @@ export default function TinyMCE(props) {
                                 </Button>
                             </Box>
                         </span>
-
                         <span>
                             {
                                 showVariableDropdown ?
@@ -445,10 +484,21 @@ export default function TinyMCE(props) {
                 initialValue={initialValue || ""}
                 onChange={(content) => {
                     if (editorRef.current.isDirty()) {
-                        onChange(editorRef.current.getContent())
+                        if (isCheckHeight) {
+                            if (isValidHeight()) {
+                                onChange(editorRef.current.getContent())
+                            }
+                            else {
+                                setToastConfig({
+                                    open: true,
+                                    type: 'error',
+                                    message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
+                                });
+                            }
+                        }
+                        else onChange(editorRef.current.getContent())
                     }
                 }}
-
                 init={{
                     height: height,
                     width: width,
@@ -473,6 +523,7 @@ export default function TinyMCE(props) {
                     // }
                 }}
             />
+            <div style={{ visibility: "hidden" }} id="contentDiv"></div>
         </>
 
     </>
