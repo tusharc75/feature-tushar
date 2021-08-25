@@ -420,7 +420,7 @@ const Header = ({ toggleDrawer }) => {
   window.addEventListener('storage', (event) => {
     if (event.storageArea == localStorage) {
       let token = localStorage.getItem('token');
-      if (token === undefined) {
+      if (token == undefined) {
         window.location.reload();
       }
     }
