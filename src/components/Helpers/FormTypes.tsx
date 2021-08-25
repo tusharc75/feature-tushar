@@ -389,8 +389,6 @@ const FormTypes = (props) => {
       option: [optionData]
     }
 
-    console.log(data)
-
     if (productTemplateId && priceTemplateId) {
       data["productTemplate"] = productTemplateId
       data["priceTemplate"] = productTemplateId
