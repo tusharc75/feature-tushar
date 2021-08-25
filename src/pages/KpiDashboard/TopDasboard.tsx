@@ -51,7 +51,7 @@ const TopDashboard = (props) => {
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
         doc.setFontSize(20);
-        doc.text('Total Booked Value In USD', 60, 15);
+        doc.text(`Total Booked Value In ${currency}`, 60, 15);
         doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
         doc.save('sales-chart.pdf');
         break;
