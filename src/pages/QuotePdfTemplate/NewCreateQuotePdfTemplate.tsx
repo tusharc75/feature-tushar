@@ -17,9 +17,9 @@ import Typography from "@material-ui/core/Typography"
 import TinyMce from "./../../components/TinyMCE/index"
 import CircularProgress from "@material-ui/core/CircularProgress"
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import CustomContainer from '../../components/CustomContainer';
 import { Autocomplete } from "@material-ui/lab";
 import { useData } from '../../StateProvider/Provider';
+import { quoteBuilder } from "../../constants/helpers";
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
@@ -38,8 +38,9 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.text.secondary
     },
     saveButtonContainer: {
-        textAlign: 'end',
-        marginTop: '5px'
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "end"
     },
     tinyMCEContainer: {
         width: "725px",
@@ -49,8 +50,9 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function NewCreateQuotePdfTemplate(props) {
+export default function NewCreateQuotePdfTemplate() {
 
+    const { qbApi } = quoteBuilder;
     const { id } = useParams();
     const history = useHistory();
     const [details, setDetails] = useState({
@@ -61,6 +63,7 @@ export default function NewCreateQuotePdfTemplate(props) {
     })
     const [initialValues, setInitialValues] = useState(null)
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isUpdatingAndPreview, setIsUpdatingAndPreview] = useState(false);
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [isClone] = useState(history.location.state?.isClone ? true : false);
@@ -128,8 +131,44 @@ export default function NewCreateQuotePdfTemplate(props) {
         });
     };
 
-    const handleSubmit = (values) => {
-        setIsUpdating(true);
+    const previewPdfTemplate = (templateId) => {
+
+        toastConfig.setToastConfig({
+            hideDuration: null,
+            open: true,
+            type: "info",
+            message: `Downloading preview file, Please wait...`,
+        });
+
+        axiosInstance()
+            .get(`${qbApi}/getdummy/${templateId}`, {
+                responseType: "blob",
+            })
+            .then(({ data }) => {
+
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: "File downloaded Successfully",
+                });
+
+                const file = new Blob([data], { type: "application/pdf" });
+                const fileURL = URL.createObjectURL(file);
+                const pdfWindow = window.open();
+                pdfWindow.location.href = fileURL;
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
+    const handleSubmit = (values, isPreview) => {
+        if (isPreview === true) {
+            setIsUpdatingAndPreview(true);
+        } else {
+            setIsUpdating(true);
+        }
+
         if (id === '0' || isClone === true) {
             axiosInstance()
                 .post('/quote-pdf-template', {
@@ -140,11 +179,18 @@ export default function NewCreateQuotePdfTemplate(props) {
                     collaborator: values?.collaborator,
                 })
                 .then(({ data: { data } }) => {
-                    history.push({ pathname: routes.quotePdfTemplate.path });
-                    setIsUpdating(false);
+                    if (isPreview === true) {
+                        previewPdfTemplate(data._id)
+                        setIsUpdatingAndPreview(false);
+                        history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+                    } else {
+                        history.push({ pathname: routes.quotePdfTemplate.path });
+                        setIsUpdating(false);
+                    }
                 })
                 .catch((error) => {
                     setIsUpdating(false);
+                    setIsUpdatingAndPreview(false);
                     toastConfig.setToastConfig(error);
                 });
         }
@@ -159,16 +205,22 @@ export default function NewCreateQuotePdfTemplate(props) {
                     collaborator: values?.collaborator,
                 })
                 .then(({ data: { data } }) => {
-                    setIsUpdating(false);
-                    history.push({ pathname: routes.quotePdfTemplate.path });
+                    if (isPreview === true) {
+                        previewPdfTemplate(data._id);
+                        setIsUpdatingAndPreview(false);
+                        history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+                    } else {
+                        history.push({ pathname: routes.quotePdfTemplate.path });
+                        setIsUpdating(false);
+                    }
                 })
                 .catch((error) => {
                     setIsUpdating(false);
+                    setIsUpdatingAndPreview(false);
                     toastConfig.setToastConfig(error);
                 });
         }
     }
-
 
     return <div className={classes.root}>
         <Grid container className="headerbox">
@@ -210,11 +262,17 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={3} className={classes.saveButtonContainer}>
+                                    <Grid item xs={3} className={`${classes.saveButtonContainer} gap-2`}>
                                         <Button disabled={isUpdating || disableSaveButton} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
-                                            Save{isUpdating && <CircularProgress size={24} />}
+                                            {isUpdating && <CircularProgress size={24} />} {" "} Save
                                         </Button>
+
+                                        <Button disabled={isUpdatingAndPreview || disableSaveButton} size="small" color="primary"
+                                            onClick={() => { handleSubmit(values, true) }} variant="contained">
+                                            {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
+                                        </Button>
+
                                     </Grid>
                                 </Grid>
                                 <Grid container spacing={1}>
@@ -256,6 +314,7 @@ export default function NewCreateQuotePdfTemplate(props) {
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
+                                                    required={true}
                                                     margin="dense"
                                                     name="owner"
                                                     label="Owner"
