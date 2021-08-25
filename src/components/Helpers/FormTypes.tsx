@@ -19,7 +19,6 @@ import {
   Typography,
   useTheme,
   Dialog,
-  DialogContentText
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
