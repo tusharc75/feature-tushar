@@ -39,7 +39,7 @@ const PriceTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
@@ -100,7 +100,7 @@ const PriceTemplate: FC = () => {
         if (renderCount > 0) {
             fetchpriceTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, sorting, selectedEntity]);
 
 
     const NameRenderer = params => <Link className="link"
@@ -198,6 +198,9 @@ const PriceTemplate: FC = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
