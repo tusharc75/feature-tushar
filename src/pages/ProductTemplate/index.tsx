@@ -40,7 +40,7 @@ const ProductTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
@@ -100,7 +100,7 @@ const ProductTemplate: FC = () => {
         if (renderCount > 0) {
             fetchProductTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, sorting, selectedEntity]);
 
 
     const NameRenderer = params => <Link className="link"
@@ -200,6 +200,9 @@ const ProductTemplate: FC = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 

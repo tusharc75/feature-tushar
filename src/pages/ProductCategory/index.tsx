@@ -119,7 +119,7 @@ const ProductCategory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
-        state: { permissions, user },
+        state: { permissions, user, selectedEntity },
     }: any = useData();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
@@ -168,7 +168,7 @@ const ProductCategory = () => {
 
     useEffect(() => {
         fetchProductCategory()
-    }, [page, limit, filters, sorting, search])
+    }, [page, limit, filters, sorting, search, selectedEntity])
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
@@ -222,6 +222,9 @@ const ProductCategory = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
