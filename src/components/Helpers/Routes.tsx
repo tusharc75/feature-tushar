@@ -162,15 +162,15 @@ const routes = {
     path: "/product-template",
   },
   productInventory: {
-    title: storedRoutes ? storedRoutes.productInventory?.title : RESOURCE_LABEL.productInventory,
+    title: storedRoutes ? storedRoutes?.productInventory?.title : RESOURCE_LABEL.productInventory,
     path: "/product-inventory",
   },
   productInventoryDetail: {
-    title: storedRoutes ? storedRoutes.productInventory?.title : RESOURCE_LABEL.productInventory,
+    title: storedRoutes ? storedRoutes?.productInventory?.title : RESOURCE_LABEL.productInventory,
     path: "/product-inventory/detail",
   },
   equipmentRentalMaster: {
-    title: storedRoutes ? storedRoutes.equipmentRentalMaster?.title : RESOURCE_LABEL.equipmentRentalMaster,
+    title: storedRoutes ? storedRoutes?.equipmentRentalMaster?.title : RESOURCE_LABEL.equipmentRentalMaster,
     path: "/equiptment-rental-master",
   },
   quoteBuilder: {
@@ -230,7 +230,7 @@ const routes = {
     path: "/product-list",
   },
   address: {
-    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    title: storedRoutes ? storedRoutes?.address?.title : RESOURCE_LABEL.address,
     path: "/address",
   },
 };

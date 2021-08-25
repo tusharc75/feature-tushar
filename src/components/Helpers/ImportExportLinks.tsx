@@ -83,7 +83,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
             toastConfig.setToastConfig({
               open: true,
               type: "success",
-              message: "All Records Added Successfuly",
+              message: "All Records Added Successfully",
             });
             afterImportCompleted();
           } else {
