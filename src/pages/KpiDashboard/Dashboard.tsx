@@ -17,6 +17,7 @@ import OpportunitiesDashboard from './OpportunitiesDashboard';
 
 const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
+  const [currency, setCurrency] = useState("");
   const [salesRevenue, setSalesRevenue] = useState({
     revenue: 0,
     spend: 0,
@@ -124,6 +125,8 @@ const Dashboard = () => {
           if (!entityIds.includes(d.entityId)) {
             entityIds.push(d.entityId);
           }
+
+          
         }
 
         entityIds.forEach((id) => {
@@ -186,10 +189,21 @@ const Dashboard = () => {
         const labels = [];
         const budget = [];
 
+        data = data.sort((a, b) => {
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+
+          return aDate - bDate;
+        });
+
+
         for (let d of data) {
           saleData.push(d.totalSell);
           labels.push(moment(d.date).format('MMM/YY'));
           budget.push(d.budget);
+          if (d.currency) {
+            setCurrency(d.currency)
+          }
         }
 
         const revenue = data.length > 1 ? data.map((d) => d.totalSell).reduce((acc, val) => acc + val) : data[0].totalSell;
@@ -277,7 +291,7 @@ const Dashboard = () => {
           labels,
           datasets: [
             {
-              label: '# of Votes',
+              label: '',
               data: datasets,
               backgroundColor: [
                 'rgba(255, 99, 132, 0.8)',
@@ -343,7 +357,7 @@ const Dashboard = () => {
           labels,
           datasets: [
             {
-              label: 'Customer Account',
+              label: '',
               data: datasets,
               backgroundColor: [
                 'rgba(255, 99, 132, 0.8)',
@@ -698,9 +712,9 @@ const Dashboard = () => {
                 setStatus={setStatus}
               />
               <Box py={2}>
-                <TopDashboard regionSales={regionSales} salesRevenue={salesRevenue} salesData={salesData} />
+                <TopDashboard currency={currency} moment={moment} regionSales={regionSales} salesRevenue={salesRevenue} salesData={salesData} />
 
-                <Top2Dashboard allEntitySalesData={allEntitySalesData} />
+                <Top2Dashboard currency={currency} allEntitySalesData={allEntitySalesData} />
 
                 <OpportunityDashboards
                   oppTrends={oppTrends}

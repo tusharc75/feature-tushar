@@ -21,10 +21,13 @@ import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
-import moment from 'moment';
+
+
+import { formatAmountWithCurrency } from '../../constants/helpers';
+
 
 const TopDashboard = (props) => {
-  const { salesRevenue, salesData, regionSales } = props;
+  const { salesRevenue, salesData, regionSales, moment, currency } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event) => {
@@ -48,15 +51,15 @@ const TopDashboard = (props) => {
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
         doc.setFontSize(20);
-        doc.text('Total Booked Value In USD', 60, 15);
+        doc.text(`Total Booked Value In ${currency}`, 60, 15);
         doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
         doc.save('sales-chart.pdf');
         break;
       }
 
       case 'excel': {
-        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        // const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
         const wData = salesData.allData.map((d) => ({
@@ -78,6 +81,17 @@ const TopDashboard = (props) => {
         break;
       }
 
+      case "json": {
+        const wData = salesData.allData.map((d) => ({
+          Month: moment(d.date).format('MMM/YY'),
+          ['Total Sell']: d.totalSell.toLocaleString(),
+          ['Total Cost']: d.totalCost.toLocaleString(),
+          Budget: d.budget
+        }));
+        let blob = new Blob([JSON.stringify(wData)], {type: "text/plain;charset=utf-8"});
+        FileSaver.saveAs(blob, "sales.json");
+        break;
+        }
       default:
         break;
     }
@@ -97,7 +111,7 @@ const TopDashboard = (props) => {
                     Total Booked Value
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    ${salesRevenue.revenue?.toLocaleString()}
+                    {formatAmountWithCurrency(currency, salesRevenue.revenue).fullFormatAmount}
                   </Typography>
                 </Box>
               </Paper>
@@ -109,7 +123,7 @@ const TopDashboard = (props) => {
                     Total Cost
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    ${salesRevenue.spend?.toLocaleString()}
+                  {formatAmountWithCurrency(currency, salesRevenue.spend).fullFormatAmount}
                   </Typography>
                 </Box>
               </Paper>
@@ -138,9 +152,10 @@ const TopDashboard = (props) => {
               <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
               <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
               <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
             </Menu>
             <Box textAlign="center">
-              <Typography variant="h5">Total booked value in USD</Typography>
+              <Typography variant="h5">Total booked value in {currency}</Typography>
             </Box>
             <Chart
               id="perEntityChart"
@@ -180,7 +195,7 @@ const TopDashboard = (props) => {
                     <TableRow key={data.region}>
                       {Object.keys(data).map((label, i) => (
                         <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                          {data[label]}
+                          {i < 1 ? data[label] : formatAmountWithCurrency(currency, data[label]).fullFormatAmount}
                         </TableCell>
                       ))}
                     </TableRow>
