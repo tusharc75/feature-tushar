@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from 'react'
+import { useState, Fragment } from 'react'
 import { Avatar, TextField, Box, Button } from '@material-ui/core'
 import { Autocomplete } from '@material-ui/lab'
 
@@ -9,10 +9,17 @@ const NewChat = (props) => {
     const { setNewChat, setSelectedChat, users, userId } = props;
     
     const [newUsers, setNewUsers] = useState([])
+    const [groupName, setGroupName] = useState('')
     
 
     const createRoom = () => {
-        axiosInstance().post("/chatter/user-to-user", {users: newUsers.map(d => d.id)})
+        const chatData = { users: newUsers.map(d => d.id) }
+        
+        if (newUsers.length > 1) {
+            chatData['group'] = groupName
+        }
+
+        axiosInstance().post("/chatter/user-to-user", chatData)
             .then(({ data: { data } }) => {
                 setNewChat(false)
                 const chatData = {
@@ -28,8 +35,10 @@ const NewChat = (props) => {
 
     return (
         <div className="new-chatbox">
+            <div>
             <Autocomplete
                 id="User-select"
+                limitTags={2}
                 fullWidth
                 options={users}
                 autoHighlight
@@ -56,11 +65,25 @@ const NewChat = (props) => {
                     }}
                     />
                 )}
-            />
+                />
+                <Box my={1} />
+                <TextField
+                    disabled={newUsers.length < 2}
+                    size="small"
+                    fullWidth
+                    label="Group Name"
+                    variant="outlined"
+                    onChange={(e) => setGroupName(e.target.value.trim())}
+                    error={newUsers.length>1 && groupName && groupName.length < 4}
+                    helperText={newUsers.length>1 && groupName && "Name must be at least 4 characters"}
+                />
+            </div>
+            
+
 
             <div className="new-chat-btn">
                 <Button
-                    disabled={!newUsers.length}
+                    disabled={!newUsers.length || (newUsers.length > 1 && !groupName)}
                     fullWidth
                     color='primary'
                     variant="outlined"
