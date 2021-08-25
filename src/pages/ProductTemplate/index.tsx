@@ -40,7 +40,7 @@ const ProductTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
@@ -67,13 +67,13 @@ const ProductTemplate: FC = () => {
     ];
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
 
@@ -100,7 +100,7 @@ const ProductTemplate: FC = () => {
         if (renderCount > 0) {
             fetchProductTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, sorting, selectedEntity]);
 
 
     const NameRenderer = params => <Link className="link"
@@ -200,6 +200,9 @@ const ProductTemplate: FC = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -322,7 +325,7 @@ const ProductTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="productTemplatePage"/>
+                    loading={loading} renderedFrom="productTemplatePage" />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

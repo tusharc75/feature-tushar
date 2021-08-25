@@ -41,7 +41,7 @@ const QuotePdfTemplate: FC = () => {
     const { qbApi } = quoteBuilder;
 
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity},
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
 
@@ -88,7 +88,7 @@ const QuotePdfTemplate: FC = () => {
         if (renderCount > 0) {
             fetchQuotePdfTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, sorting, selectedEntity]);
 
     const previewPdfTemplate = (templateId) => {
 
@@ -225,6 +225,10 @@ const QuotePdfTemplate: FC = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
