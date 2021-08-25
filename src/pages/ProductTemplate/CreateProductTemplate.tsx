@@ -50,6 +50,7 @@ const ProductTemplate = () => {
     //const [productUnit, setProductUnit] = useState(null);
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [productField, setProductField] = useState([]);
+    const [disableSaveButton, setDisableSaveButton] = useState(false)
 
     const {
         state: { user, permissions },
@@ -103,6 +104,10 @@ const ProductTemplate = () => {
                 }
                 setInitialValues(data);
                 setSection(data.section);
+                let xx = user.user._id !== data?.owner?._id && !data?.collaborator.some(d => d._id === user.user._id)
+                if (user.user._id !== data?.owner?._id && !data?.collaborator.some(d => d._id === user.user._id)) {
+                    setDisableSaveButton(true)
+                }
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -151,9 +156,9 @@ const ProductTemplate = () => {
         else {
             data.productCategory = values.productCategory;
             data.unit = values.unit;
-            data.entity = values.entity.map(e => e._id);
-            data.owner = values.owner._id;
-            data.collaborator = values.collaborator.map(d => d._id);
+            data.entity = values?.entity?.map(e => e._id);
+            data.owner = values?.owner?._id;
+            data.collaborator = values?.collaborator?.map(d => d._id);
         }
         let fields: any = []
         let order = 0;
@@ -331,7 +336,7 @@ const ProductTemplate = () => {
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
-                                                <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
+                                                <Button disabled={isUpdating || disableSaveButton} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                     Save{isUpdating && <CircularProgress size={24} />}
                                                 </Button>
                                             }

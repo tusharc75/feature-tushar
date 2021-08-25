@@ -145,9 +145,9 @@ const PriceTemplate = () => {
     let data: any = {};
     data.name = values.name;
     data.productTemplate = values.productTemplate;
-    data.entity = values.entity.map(e => e._id);
-    data.owner = values.owner._id;
-    data.collaborator = values.collaborator.map(d => d._id);
+    data.entity = values?.entity?.map(e => e._id);
+    data.owner = values?.owner?._id;
+    data.collaborator = values?.collaborator?.map(d => d._id);
     const resultproductTemplate = productTemplate.filter(
       (_f) => _f._id === values.productTemplate
     );
