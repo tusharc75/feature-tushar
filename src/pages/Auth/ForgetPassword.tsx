@@ -1,24 +1,22 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Box,
     Button,
-    Container,
     CssBaseline,
     Grid,
     LinearProgress,
     Paper,
     Link as MuiLink,
-    Typography,
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import { TextField } from 'formik-material-ui';
 import * as Yup from 'yup';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
-import demoImg from '../../assets/clip-hardworking-man.png';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { SVG } from "../../assets";
+
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -122,7 +120,7 @@ const ForgetPassword = () => {
                     <Grid container className={classes.grid}>
                         <Grid item sm={6} md={5} className="loginSidebar">
                             <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
-                                <img className="imgLogin" src={SVG("imgComputer")}></img>
+                                <img alt="image" className="imgLogin" src={SVG("imgComputer")}></img>
                             </Box>
                         </Grid>
                         <Grid item sm={6} md={7} xs={12} className={classes.formSide}>

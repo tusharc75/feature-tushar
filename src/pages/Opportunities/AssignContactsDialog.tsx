@@ -35,10 +35,10 @@ export default function AssignContactsDialog({
     notToBeRemovedContacts
 }) {
     const toastConfig = useContext(CustomToastContext);
-    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [loadingUsers] = useState(false);
     const [isAssigning, setAssigning] = useState(false);
-    const [currentContactsConst, setCurrentContactsConst] = useState(contacts.customerContacts);
-    const [selectedContacts, setSelectedContacts] = useState([]);
+    const [currentContactsConst] = useState(contacts.customerContacts);
+    const [, setSelectedContacts] = useState([]);
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
     const [search, setSearch] = useState("");
     const handleContactSelection = (e, id) => {

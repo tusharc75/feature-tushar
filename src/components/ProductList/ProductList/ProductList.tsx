@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Product from '../ProductCard/ProductCard';
-// import { mockData } from '../../assets/mockData';
 import styles from './product-list.module.scss'
-import { Grid, Box, Paper } from "@material-ui/core";
+import { Grid, Paper } from "@material-ui/core";
 import CategorySidebar from "../CategorySidebar/CategorySidebar"
 import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import axiosInstance from "../../../axios/axiosInstance";
@@ -15,8 +14,8 @@ import { useData } from "../../../StateProvider/Provider";
 const ProductList = ({ products, fetchData, count }) => {
 
     const [addedCartItems, setAddedCartItems] = useState([])
-    const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
     const { dispatch }: any = useData();
+
     useEffect(() => {
         fetchCart()
     }, [])
@@ -29,11 +28,9 @@ const ProductList = ({ products, fetchData, count }) => {
                     dispatch({ type: SET_CART_COUNT, payload: data.length });
                     setAddedCartItems(data)
                 }
-                if (data && data.length >= 4) {
-                    setCheckoutLabel("Create Quote")
-                }
             })
     }
+
     const onAddToCartItem = (item) => {
         let tempQuantity = 1
         addedCartItems.some(o => {
@@ -53,6 +50,7 @@ const ProductList = ({ products, fetchData, count }) => {
                 fetchCart()
             })
     }
+
     return (<>
         <Grid container className="headerbox">
             <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
@@ -95,27 +93,6 @@ const ProductList = ({ products, fetchData, count }) => {
             </div>
         </div>
     </>
-        // <Layout>
-        //     <Grid container className="headerbox">
-        //         <CustomBreadCrumbs routes={[{ title: "Hi" }]} />
-        //     </Grid>
-        //     <Box className="detail-container">
-        //         <div className={styles.wrapper}>
-
-        //             <CategorySidebar />
-
-        //             <div className={`${styles.product_list_container}`}>
-        //                 {
-        //                     products.map((product, index: number) => (
-        //                         <Product key={index} product={product}
-        //                             onAddItem={onAddToCartItem}
-        //                         />
-        //                     ))
-        //                 }
-        //             </div>
-        //         </div>
-        //     </Box>
-        // </Layout>
     );
 }
 

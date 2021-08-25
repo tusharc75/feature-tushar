@@ -133,7 +133,7 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equipt Rental Master"
+  equipmentRentalMaster: "Equiptment Rental Master"
 };
 
 export const RESOURCE_LABEL = {
@@ -175,7 +175,7 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equipt Rental Master"
+  equipmentRentalMaster: "Equiptment Rental Master"
 };
 
 export const lead = {

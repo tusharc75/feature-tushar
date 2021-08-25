@@ -40,11 +40,22 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+const mappedVariablesNames = {
+    entity: "Entity",
+    customerAccountName: "Customer Account Name",
+    quoteDate: "Quote Date",
+    quoteName: "Quote Name",
+    version: "Version",
+    quoteId: "Quote Id",
+    currency: "Currency",
+    expiryDate: "Expiry Date",
+    incoTerms: "Inco Terms"
+}
 export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
         onUploadImage = null, usePublicUrlforFileUpload = false,
-        doNotShowUploadFile = false, showVariableDropdown = false
+        doNotShowUploadFile = false, showVariableDropdown = false, id
     } = props
 
     const classes = useStyles();
@@ -60,6 +71,7 @@ export default function TinyMCE(props) {
     const { setToastConfig } = useContext(CustomToastContext);
 
     const editorRef = useRef(null);
+
     const handleUploadFile = (ev) => {
         if (ev.target.files && ev.target.files.length) {
             let files = ev.target.files;
@@ -110,18 +122,16 @@ export default function TinyMCE(props) {
             .then(({ data }) => {
 
                 setImgUploading(false);
-                if (onUploadFile) {
-                    onUploadFile(data.fileUrl)
+                if (details && details.isImage) {
+                    setUploadError(false)
+                    setImageUrl(data.fileUrl)
                 }
                 else {
-                    if (details && details.isImage) {
-                        setUploadError(false)
-                        setImageUrl(data.fileUrl)
+                    if (onUploadFile) {
+                        onUploadFile(data.fileUrl)
                     }
                     else {
-                        const editorContent = editorRef.current.getContent()
-                        editorRef.current.setContent(`${editorContent}${data}`)
-                        onChange(`${editorContent}${data}`)
+                        editorRef.current.execCommand('mceInsertContent', false, data);
                     }
                 }
                 //data.fileUrl data.fileName
@@ -186,9 +196,8 @@ export default function TinyMCE(props) {
             imgTag = `${imgTag} alt='${imageDetails.alt}'`
         }
         imgTag = `${imgTag} />`
-        const editorContent = editorRef.current.getContent()
-        editorRef.current.setContent(`${editorContent}${imgTag}`)
-        onChange(`${editorContent}${imgTag}`)
+
+        editorRef.current.execCommand('mceInsertContent', false, imgTag);
         setIsUploadImage(false)
         setImageUrl("")
         setImageDetails({ width: "", height: "", alt: "" })
@@ -200,10 +209,8 @@ export default function TinyMCE(props) {
     }
 
     const handleVaribleSelect = (e) => {
-        const editorContent = editorRef.current.getContent()
         let newTag = `<p>{{${e}}}</p>`
-        editorRef.current.setContent(`${editorContent}${newTag}`)
-        onChange(`${editorContent}${newTag}`)
+        editorRef.current.execCommand('mceInsertContent', false, newTag);
     }
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -354,15 +361,15 @@ export default function TinyMCE(props) {
                                 <Fragment>
                                     <Box display="flex" alignItems="center" style={{ marginRight: '5px' }}>
                                         <input
-                                            id="file"
-                                            name="file"
+                                            id={`${id}file`}
+                                            name={`${id}file`}
                                             onChange={handleUploadFile}
                                             style={{ display: 'none' }}
                                             onClick={(e: any) => (e.target.value = null)}
                                             type="file"
                                             accept=".docx,.doc"
                                         />
-                                        <label htmlFor="file">
+                                        <label htmlFor={`${id}file`}>
                                             <Button
                                                 size="small"
                                                 variant="outlined"
@@ -376,21 +383,18 @@ export default function TinyMCE(props) {
 
                                 </Fragment>
                         }
-                        {
-                            onUploadFile ? null :
-                                <span >
-                                    <Box display="flex" alignItems="center" >
-                                        <Button
-                                            startIcon={<HiOutlinePhotograph />}
-                                            size="small"
-                                            variant="outlined"
-                                            onClick={() => setIsUploadImage(true)}
-                                        >
-                                            Upload Image
-                                        </Button>
-                                    </Box>
-                                </span>
-                        }
+                        <span >
+                            <Box display="flex" alignItems="center" >
+                                <Button
+                                    startIcon={<HiOutlinePhotograph />}
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => setIsUploadImage(true)}
+                                >
+                                    Upload Image
+                                </Button>
+                            </Box>
+                        </span>
 
                         <span>
                             {
@@ -422,7 +426,7 @@ export default function TinyMCE(props) {
                                                     'version', 'quoteId', "currency", "expiryDate", "incoTerms"].map(o => {
                                                         return <MenuItem
                                                             onClick={() => handleVaribleSelect(o)}
-                                                            value={o}>{o}</MenuItem>
+                                                            value={o}>{mappedVariablesNames[o]}</MenuItem>
                                                     })
                                             }
                                         </Menu>
@@ -433,6 +437,7 @@ export default function TinyMCE(props) {
                     : null}
 
             <Editor
+                id={id ?? "editor"}
                 onInit={(evt, editor) => {
                     setIsInitiated(true)
                     editorRef.current = editor
@@ -450,7 +455,6 @@ export default function TinyMCE(props) {
                     // menubar: false,
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-
                     plugins: [
                         'advlist autolink lists link image charmap print preview anchor',
                         'searchreplace visualblocks code fullscreen',

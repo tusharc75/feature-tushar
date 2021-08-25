@@ -73,7 +73,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig({
             open: true,
             type: "success",
-            message: "Deleted Succesfully",
+            message: "Deleted Successfully",
           });
           fetchAttachment();
           handleActivityRefresh();

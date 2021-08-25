@@ -162,7 +162,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Header = ({ toggleDrawer }) => {
-  const { instance, accounts, inProgress } = useMsal();
+  const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
 
   const {
@@ -420,7 +420,7 @@ const Header = ({ toggleDrawer }) => {
   window.addEventListener('storage', (event) => {
     if (event.storageArea == localStorage) {
       let token = localStorage.getItem('token');
-      if (token == undefined) {
+      if (token === undefined) {
         window.location.reload();
       }
     }
@@ -515,7 +515,7 @@ const Header = ({ toggleDrawer }) => {
 
   const NotificationContent = ({ data }) => {
     return (
-      <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
+      <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
         <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
           <Typography
             onClick={() => {
@@ -555,10 +555,10 @@ const Header = ({ toggleDrawer }) => {
                 style={{
                   borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
                 }}
-                className={`${d.read == true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
+                className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}
                 onClick={() => {
-                  if (d.read == false) {
+                  if (d.read === false) {
                     axiosInstance()
                       .put('/user/notification/read', {
                         toggle: true,
@@ -607,7 +607,7 @@ const Header = ({ toggleDrawer }) => {
 
   const ChatNotificationContent = ({ data }) => {
     return (
-      <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
+      <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
         <div className={`${classes.markAll} d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
           <Typography
             onClick={() => {
@@ -648,10 +648,10 @@ const Header = ({ toggleDrawer }) => {
                 style={{
                   borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
                 }}
-                className={`${d.read == true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
+                className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}
                 onClick={() => {
-                  if (d.read == false) {
+                  if (d.read === false) {
                     axiosInstance()
                       .put('/user/user-notification/read', {
                         toggle: true,
@@ -762,7 +762,7 @@ const Header = ({ toggleDrawer }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl == null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
         <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
           <ChatIcon />
         </Badge>
@@ -785,7 +785,7 @@ const Header = ({ toggleDrawer }) => {
         >
           {loadingChatNotifications ? (
             <Typography className="m-3">Loading Chat Notifications...</Typography>
-          ) : chatNotificationList.length == 0 ? (
+          ) : chatNotificationList.length === 0 ? (
             <Typography className="m-3">No Chat Notifications found</Typography>
           ) : (
             <ChatNotificationContent data={chatNotificationList} />
@@ -793,7 +793,7 @@ const Header = ({ toggleDrawer }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl == null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
         <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
           <Notifications />
         </Badge>
@@ -816,7 +816,7 @@ const Header = ({ toggleDrawer }) => {
         >
           {loadingNotifications ? (
             <Typography className="m-3">Loading Notifications...</Typography>
-          ) : notificationList.length == 0 ? (
+          ) : notificationList.length === 0 ? (
             <Typography className="m-3">No Notifications found</Typography>
           ) : (
             <NotificationContent data={notificationList} />
@@ -1004,7 +1004,7 @@ const Header = ({ toggleDrawer }) => {
               >
                 {loadingNotifications ? (
                   <Typography className="m-3">Loading Notifications...</Typography>
-                ) : notificationList.length == 0 ? (
+                ) : notificationList.length === 0 ? (
                   <Typography className="m-3">No Notifications found</Typography>
                 ) : (
                   <NotificationContent data={notificationList} />
@@ -1043,7 +1043,7 @@ const Header = ({ toggleDrawer }) => {
               >
                 {loadingChatNotifications ? (
                   <Typography className="m-3">Loading Chat Notifications...</Typography>
-                ) : chatNotificationList.length == 0 ? (
+                ) : chatNotificationList.length === 0 ? (
                   <Typography className="m-3">No Chat Notifications found</Typography>
                 ) : (
                   <ChatNotificationContent data={chatNotificationList} />

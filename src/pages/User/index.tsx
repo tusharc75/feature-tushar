@@ -84,8 +84,8 @@ const User: FC = () => {
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
         if (d.colId === item.field) {
           item.show = !d.hide;
         }
@@ -628,7 +628,7 @@ const User: FC = () => {
               openUserSetupDialog={() => {
                 setOpenUserSetupDialog(true);
               }}
-              assignDoaDisabled = {selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
+              assignDoaDisabled={selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
             />
           </div>
 

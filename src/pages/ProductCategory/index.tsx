@@ -1,12 +1,8 @@
-import React, { useState, useEffect, Fragment, useContext, useReducer } from "react";
+import { useState, useEffect, Fragment, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from 'react-icons/gi';
@@ -15,8 +11,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import CreateProductCategory from "./CreateProductCategory";
 import routes from "../../components/Helpers/Routes";
-import { ExpandMore } from "@material-ui/icons";
-import { Box, Menu, MenuItem } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import {
     gridLoadingTimeout,
@@ -24,15 +19,11 @@ import {
     isObjectEmpty
 } from "../../constants/helpers";
 import {
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+    CommonRenderer} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
-
 
 function reducer(state, action) {
     switch (action.type) {
@@ -142,7 +133,6 @@ const ProductCategory = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
-    const [anchorEl, setAnchorEl] = useState(null);
 
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -310,20 +300,10 @@ const ProductCategory = () => {
             fetchProductCategory();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            // setSelectedCategory([])
-            setAnchorEl(null)
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
     }
-
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });

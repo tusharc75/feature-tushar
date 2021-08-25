@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import Table from '@material-ui/core/Table';
@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { BsEnvelopeOpen, BsPhone, BsDisplay } from 'react-icons/bs'
+import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs'
 import styles from "../profilePage.module.scss"
 import DetailsPageHeader from '../../../components/DetailsPageHeader';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';

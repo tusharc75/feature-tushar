@@ -157,7 +157,7 @@ function FrequentlyBought({ id }) {
                       <>
                         <div>
                           {' '}
-                          <img src={o?.productImage} alt={o?.productName} className={styles.frequently_bought_together_products}></img>
+                          <img src={o?.productImage} alt={o?.productName} className={styles.frequently_bought_together_products} />
                         </div>
                         {
                           i < checkedItems.length - 1 ?
@@ -207,7 +207,7 @@ function FrequentlyBought({ id }) {
             <Checkbox color="primary" size="small" inputProps={{ 'aria-label': 'secondary checkbox' }} checked disabled />
           </div>
           <div className={styles.card__img}>
-            <img src={FracImage} className={styles.card__img} />
+            <img alt="image" src={FracImage} className={styles.card__img} />
           </div>
           <div className={styles.card__body}>
             <p className={styles.card__desc}>Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature Class U, Material Class DD</p>
@@ -226,7 +226,7 @@ function FrequentlyBought({ id }) {
                 onChange={(e) => handleChange(e, index)}
               />
             </div>
-            <img src={FracImage} className={styles.card__img} />
+            <img alt="image" src={FracImage} className={styles.card__img} />
             <div className={styles.card__body}>
               <p className={styles.card__desc}>{item.itemDesc}</p>
               <h2 className={styles.card__price}>Rs. {item.itemPrice} /day</h2>

@@ -200,7 +200,7 @@ const PriceTemplate: FC = () => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
