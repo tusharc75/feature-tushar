@@ -73,7 +73,6 @@ const CreateFormBuilder = () => {
         if ((resource.toString()).toLowerCase() === "product") {
             var otherField = []
             await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
-                console.log(data)
                 otherField = data;
             }).catch((error) => {
             });

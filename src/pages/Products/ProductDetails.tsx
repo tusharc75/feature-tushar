@@ -80,7 +80,6 @@ export default function ProductDetails() {
 
   const onCheckout = () => {
     if (checkoutLabel === "Create Quote" && addedCartItems.length >= 1) {
-      console.log('Yes checkout ')
       setshowCreateQuoteDialog(true)
     }
   }

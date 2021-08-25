@@ -29,7 +29,7 @@ const EquipmentRentalMaster = () => {
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-    console.log(routes)
+    
     const {
         state: { permissions },
     }: any = useData();

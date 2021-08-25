@@ -669,7 +669,6 @@ export default function AccountDetailPage(props) {
         });
     }
 
-    // console.log(steps.length - 1);
     // if (activeStep === steps.length - 2 && showAdditionalField) {
     //   setOpenAdditionalDialog(true);
     // }

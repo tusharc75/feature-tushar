@@ -102,7 +102,6 @@ const CreateQuotePdfTemplate = () => {
         field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
-    console.log(_data);
     setSection(_data);
   }, []);
 
