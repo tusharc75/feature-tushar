@@ -7,7 +7,6 @@ import {
     Menu,
     MenuItem,
     Tooltip,
-    Chip
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
@@ -31,6 +30,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 let quotePdfTemplateTimeout;
 
@@ -41,7 +41,7 @@ const QuotePdfTemplate: FC = () => {
     const { qbApi } = quoteBuilder;
 
     const {
-        state: { permissions, selectedEntity},
+        state: { permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
 
@@ -126,15 +126,14 @@ const QuotePdfTemplate: FC = () => {
             to={`${routes.quotePdfTemplateDetail.path}/${params.data._id}`} title={params.value}>
             {params.value}
         </Link>
-        &emsp;<Chip size="small" label="Preview"
-            color="primary"
-            onClick={() => {
-                previewPdfTemplate(params.data._id);
-            }}
-        />
     </>;
 
     const ActionsRenderer = params => <>
+        <Tooltip title="Preview">
+            <IconButton size="small" aria-label="Clone" className="mr-2" onClick={() => previewPdfTemplate(params.data._id)}>
+                <VisibilityIcon color="primary" />
+            </IconButton>
+        </Tooltip>
         {permissions.quotePdfTemplate.isCreate &&
             <Tooltip title="Clone">
                 <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
@@ -228,7 +227,7 @@ const QuotePdfTemplate: FC = () => {
 
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-          }
+        }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -355,7 +354,7 @@ const QuotePdfTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={200}
                     loading={loading} renderedFrom="quotePdfPage" />
 
                 {showDeleteConfirmBox &&

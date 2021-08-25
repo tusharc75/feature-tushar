@@ -41,7 +41,7 @@ export const checkFormula = (formula, inputFields) => {
         })
         fs['f1'] = new Function(...argument, formula);
         let result = fs['f1'].apply(null, values);
-        
+
         if (result === undefined) {
             isValid = false
         }
@@ -558,26 +558,19 @@ export const checkFormulaLoop = (fields) => {
     try {
         var error_field = ""
 
-        var is_same = false
-        var same_type = ""
-
+        var duplicateList = [];
         fields.forEach((_f) => {
             if ((fields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase()).length) > 1) {
-                error_field = _f.fieldLabel;
-                same_type = "Label";
-                is_same = true
-                return
+                duplicateList.push(_f.fieldLabel)
             }
             if ((fields.filter((_d) => _d.fieldName.toLowerCase() === _f.fieldName.toLowerCase()).length) > 1) {
-                error_field = _f.fieldName;
-                same_type = "Name";
-                is_same = true
-                return
+                duplicateList.push(_f.fieldLabel)
             }
         })
-
-        if (is_same) {
-            return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
+        if (duplicateList.length) {
+            duplicateList = uniq(duplicateList)
+            var message = "Duplicate Field " + duplicateList.join(",");
+            return { error: true, message: message }
         }
 
         var is_loop = false
@@ -627,29 +620,27 @@ export const checkUniqueValidation = (checkinFields, checkfromFields) => {
 
         checkinFields.forEach((_f) => {
             if ((checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase()).length) > 0) {
-                error_field = _f.fieldLabel;
+                error_field = error_field
                 if (checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName) {
                     error_field = error_field +
                         " (Template - " + checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName + ")";
                 }
                 same_type = "Label";
                 is_same = true
-                return
             }
             if ((checkfromFields.filter((_d) => _d.fieldName.toLowerCase() === _f.fieldName.toLowerCase()).length) > 0) {
-                error_field = _f.fieldName;
+                error_field = error_field
                 if (checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName) {
                     error_field = error_field +
                         " (Template - " + checkfromFields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase())[0].templateName + ")";
                 }
                 same_type = "Name";
                 is_same = true
-                return
             }
         })
 
         if (is_same) {
-            return { error: true, message: "Field " + same_type + " " + error_field + "  is same" }
+            return { error: true, message: "Field " + same_type + " " + error_field + "  duplicate" }
         }
         return { error: false, message: "sucess" }
     }
