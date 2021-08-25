@@ -57,12 +57,12 @@ const Product = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity },
     }: any = useData();
 
     useEffect(() => {
         fetchProduct()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, selectedEntity]);
 
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
@@ -197,7 +197,10 @@ const Product = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
+        
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
