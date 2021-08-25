@@ -456,14 +456,13 @@ export default function TinyMCE(props) {
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
                     plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
+                        'advlist autolink lists link charmap print preview anchor',
                         'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount pagebreak'
+                        'insertdatetime media table paste code wordcount'
                     ],
                     toolbar: 'undo redo | formatselect  | ' +
                         'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                        'removeformat | help | myCustomToolbarButton | pagebreak',
+                        'alignright alignjustify | bullist numlist outdent indent ',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
 
                     // setup: (editor) => {
