@@ -218,7 +218,7 @@ export default function TinyMCE(props) {
             imgTag = `${imgTag} height='${imageDetails.height}'`
         }
         else if (isCheckHeight) {
-            imgTag = `${imgTag} height='${70}'`
+            imgTag = `${imgTag} height='${60}'`
         }
 
         if (imageDetails && imageDetails.alt) {
@@ -503,6 +503,9 @@ export default function TinyMCE(props) {
                     height: height,
                     width: width,
                     // menubar: false,
+                    table_default_attributes: {
+                        border: '0'
+                    },
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
                     plugins: [
