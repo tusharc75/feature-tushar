@@ -43,10 +43,10 @@ const PriceTemplate: FC = () => {
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
+        isCreate: permissions?.priceTemplate?.isCreate,
+        isUpdate: permissions?.priceTemplate?.isUpdate,
+        isRead: permissions?.priceTemplate?.isRead,
+        isDelete: permissions?.priceTemplate?.isDelete,
     });
 
     const [anchorEl, setAnchorEl] = useState(null);
