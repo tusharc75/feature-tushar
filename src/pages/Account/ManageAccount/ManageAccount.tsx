@@ -103,13 +103,35 @@ export default function ManageAccount(props) {
     };
   }, [accountData.fields]);
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerDataSource(
-      getOwnerDropdownDataSource(
+  const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
+    if (selectedEntity?.length > 0) {
+
+      let newTempArray = []
+
+      const ownerCollaboratorData = getOwnerDropdownDataSource(
         selectedCollaborator,
         ownerCollaboratorCommonDataSource
-      )
-    );
+      );
+
+      selectedEntity.forEach(d => {
+        ownerCollaboratorData.forEach(item => {
+          if (item.entities?.find(s => s.entity === d && item.optionValue !== selectedCollaborator)) {
+            if (!newTempArray.find(s => s.optionValue === item.optionValue)) {
+              newTempArray.push(item)
+            }
+          }
+        })
+      })
+      setOwnerDataSource(newTempArray)
+    }
+    else {
+      setOwnerDataSource(
+        getOwnerDropdownDataSource(
+          selectedCollaborator,
+          ownerCollaboratorCommonDataSource
+        )
+      );
+    }
   };
 
   const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId, selectedEntity) => {
@@ -122,14 +144,17 @@ export default function ManageAccount(props) {
         ownerCollaboratorCommonDataSource
       );
 
-      selectedEntity.map(d => {
-        ownerCollaboratorData.map(item => {
+      selectedEntity.forEach(d => {
+        ownerCollaboratorData.forEach(item => {
           if (item.entities?.find(s => s.entity === d && item.optionValue !== selectedOwnerId)) {
-            newTempArray.push(item)
+            if (!newTempArray.find(s => s.optionValue === item.optionValue)) {
+              newTempArray.push(item)
+            }
           }
         })
-        setCollaboratorDataSource(newTempArray)
       })
+
+      setCollaboratorDataSource(newTempArray)
     }
     else {
       setCollaboratorDataSource(
@@ -179,7 +204,6 @@ export default function ManageAccount(props) {
             >
               {({
                 submitForm,
-
                 values,
                 errors,
                 touched,
@@ -261,7 +285,7 @@ export default function ManageAccount(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onOwnerDropdownOpen(
-                                            values.collaborator
+                                            values.collaborator, values.entity ? values.entity : []
                                           )
                                         }
                                       />
@@ -299,186 +323,180 @@ export default function ManageAccount(props) {
                                           )
                                         }
                                       />
-                                    )
-                                      // : field.fieldName === "entity" ? (
-                                      //   <FormTypes
-                                      //     multiple
-                                      //     values={values}
-                                      //     errors={errors}
-                                      //     touched={touched}
-                                      //     label={field.fieldLabel}
-                                      //     name={field.fieldName}
-                                      //     type={field.type}
+                                    ) : field.fieldName === "entity" ? (
+                                      <FormTypes
+                                        multiple
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
 
-                                      //     setFieldValue={setFieldValue}
-                                      //     options={field.option}
-                                      //     fullWidth
-                                      //     isTooltip={field?.isTooltip || false}
-                                      //     tooltipMessage={field?.tooltipMessage}
-                                      //     size="small"
-                                      //     // onChange={(e, value) => {
-                                      //     //   setFieldValue(
-                                      //     //     field.fieldName,
-                                      //     //     value && value.optionValue
-                                      //     //       ? value.optionValue
-                                      //     //       : ""
-                                      //     //   );
-                                      //     //   setFieldValue(
-                                      //     //     "collaborator",
-                                      //     //     []
-                                      //     //   );
+                                        options={field.option}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onChange={(e, value) => {
 
-                                      //     // }}
-                                      //   />
-                                      // )
-                                      : field.fieldName ===
-                                        "isShippingAddressSameAsBillingAddress" ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onChange={(e) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                          );
+
+                                          setFieldValue("owner", "");
+                                          setFieldValue("collaborator", []);
+                                        }}
+                                      />
+                                    ) : field.fieldName ===
+                                      "isShippingAddressSameAsBillingAddress" ? (
+                                      <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onChange={(e) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            e.target.checked
+                                          );
+                                          if (
+                                            e.target.checked &&
+                                            values.billingAddress
+                                          ) {
                                             setFieldValue(
-                                              field.fieldName,
-                                              e.target.checked
-                                            );
-                                            if (
-                                              e.target.checked &&
+                                              "shippingAddress",
                                               values.billingAddress
-                                            ) {
-                                              setFieldValue(
-                                                "shippingAddress",
-                                                values.billingAddress
-                                              );
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName === "billingAddress" ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onChange={(event, newValue) => {
-                                            setFieldValue(
-                                              field.fieldName,
-                                              newValue?.description ?? ""
                                             );
-                                            if (
-                                              values.isShippingAddressSameAsBillingAddress ===
-                                              true
-                                            ) {
-                                              setFieldValue(
-                                                "shippingAddress",
-                                                newValue?.description ?? ""
-                                              );
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName ===
-                                        "shippingAddress" ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          disabled={
+                                          }
+                                        }}
+                                      />
+                                    ) : field.fieldName === "billingAddress" ? (
+                                      <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onChange={(event, newValue) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            newValue?.description ?? ""
+                                          );
+                                          if (
                                             values.isShippingAddressSameAsBillingAddress ===
-                                            true || (!isNew && field.disableOnEdit)
-                                          }
-                                          onChange={(event, newValue) => {
+                                            true
+                                          ) {
                                             setFieldValue(
-                                              field.fieldName,
+                                              "shippingAddress",
                                               newValue?.description ?? ""
                                             );
-                                          }}
-                                        />
-                                      ) : field.fieldName === "parentAccount" ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={parentAccountDataSource}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                        />
-                                      ) : (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ["imageUpload", "fileUpload"].some(
-                                              (s) => s === field.type
-                                            )
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(
-                                                  completePercentage
-                                                );
-                                              }
-                                              : null
                                           }
-                                        />
-                                      )}
+                                        }}
+                                      />
+                                    ) : field.fieldName ===
+                                      "shippingAddress" ? (
+                                      <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        disabled={
+                                          values.isShippingAddressSameAsBillingAddress ===
+                                          true || (!isNew && field.disableOnEdit)
+                                        }
+                                        onChange={(event, newValue) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            newValue?.description ?? ""
+                                          );
+                                        }}
+                                      />
+                                    ) : field.fieldName === "parentAccount" ? (
+                                      <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={parentAccountDataSource}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                      />
+                                    ) : (
+                                      <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        // {...rest}
+                                        disabled={!isNew && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={
+                                          ["imageUpload", "fileUpload"].some(
+                                            (s) => s === field.type
+                                          )
+                                            ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(
+                                                completePercentage
+                                              );
+                                            }
+                                            : null
+                                        }
+                                      />
+                                    )}
                                   </Grid>
                                 ))}
                               </Grid>
