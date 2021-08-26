@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, useReducer } from "react";
 import Box from "@material-ui/core/Box";
 import CreateProduct from "../Product/CreateProduct";
 import AddExistingProduct from "./AddExistingProduct";
-import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
@@ -336,7 +335,7 @@ const ProductBuilder = (props) => {
     data._id = productBuilderId;
     axiosInstance()
       .post(`/productbuilder/addproduct`, data)
-      .then(({ data: { data } }) => {
+      .then(() => {
         fetchProduct(productBuilderId);
       })
       .catch((error) => {
@@ -355,7 +354,7 @@ const ProductBuilder = (props) => {
       data._id = productBuilderId;
       axiosInstance()
         .put(`/productbuilder/updateProduct`, data)
-        .then(({ data: { data } }) => {
+        .then(() => {
           setProductData(null);
           setIsBulkEdit(false);
           setproductDataList([]);
@@ -379,7 +378,7 @@ const ProductBuilder = (props) => {
     data._ids = ids;
     axiosInstance()
       .post(`/productbuilder/deleteproduct`, data)
-      .then(({ data: { data } }) => {
+      .then(() => {
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
@@ -478,7 +477,7 @@ const ProductBuilder = (props) => {
     }
     axiosInstance()
       .post(`/productbuilder/addField`, data)
-      .then(({ data: { data } }) => {
+      .then(() => {
         fetchProduct(productBuilderId);
         setIsAddField(false);
       })
@@ -573,7 +572,7 @@ const ProductBuilder = (props) => {
         data._id = productBuilderId;
         axiosInstance()
           .put(`/productbuilder/updateproduct-inline`, data)
-          .then(({ data: { data } }) => {
+          .then(() => {
             fetchProduct(productBuilderId);
           })
           .catch((error) => {
