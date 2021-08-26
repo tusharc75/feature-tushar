@@ -59,3 +59,7 @@ export const CustomLoadingCellRenderer = (params) => <div
     <AiOutlineLoading />
     <h4>{params.loadingMessage}</h4>
 </div>
+
+export const CustomPinnedRowRenderer = (params) => (
+    <span>{params.value}</span>
+)
