@@ -24,6 +24,9 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import { termsAndConditionDocumentUploadMaxSize } from "../../constants/helpers";
 import TinyMce from "./../../components/TinyMCE"
+import { Autocomplete } from "@material-ui/lab";
+import TextField from "@material-ui/core/TextField";
+import { useData } from "../../StateProvider/Provider";
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {
@@ -59,6 +62,9 @@ const TermsAndCondition = ({
   editRecord,
   displayTitle
 }) => {
+  const {
+    state: { user },
+  }: any = useData();
 
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
@@ -67,18 +73,25 @@ const TermsAndCondition = ({
     TACName: "",
     file: "",
     description: "",
+    entity: [],
+    owner: user.user._id,
+    collaborator: []
   });
+
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
   const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string().required(`please add ${displayTitle.toLowerCase()} name`),
+    owner: Yup.string().required(`Owner is required`),
   });
-
+  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+  const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [additionalDataPosition, setAdditionalDataPosition] = useState(editRecord ? editRecord.topPosition?.toString() : "true");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdditionalDataPosition((event.target as HTMLInputElement).value);
   };
+  const [disableSaveButton, setDisableSaveButton] = useState(false)
 
   useEffect(() => {
     if (editRecord && editRecord?._id) {
@@ -86,15 +99,38 @@ const TermsAndCondition = ({
         description: editRecord.description,
         TACName: editRecord.TACName,
         file: editRecord?.file ?? "",
+        entity: editRecord?.entity ? editRecord?.entity : [],
+        owner: editRecord?.owner ? editRecord?.owner : user.user._id,
+        collaborator: editRecord?.collaborator ? editRecord?.collaborator : []
       });
+      if (editRecord?.owner && editRecord?.owner !== undefined && user.user._id !== editRecord?.owner && !editRecord?.collaborator?.some(d => d === user.user._id)) {
+        setDisableSaveButton(true)
+      }
     }
   }, [editRecord]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [open]);
+
+
+  const fetchUser = () => {
+    axiosInstance().get(`/user`).then(({ data: { data } }) => {
+      setOwnerCollaboratorData(data);
+      setOwnerCollaboratorDataConst(data);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
 
   const handleSubmit = (values) => {
     let request = {
       description: values.description,
       TACName: values.TACName,
       file: values?.file ?? "",
+      entity: values?.entity,
+      owner: values?.owner,
+      collaborator: values?.collaborator
     };
 
     if (displayTitle === "Additional Data") {
@@ -197,6 +233,98 @@ const TermsAndCondition = ({
                               )
                             }
                           />
+                          <Grid container spacing={1}>
+                            <Grid item xs={12} sm={3}>
+                              {<Autocomplete
+                                multiple
+                                options={user?.entity}
+                                getOptionLabel={(option: any) => (option ? option?.entityName : "")}
+                                value={user?.entity.filter((data) => values["entity"]?.some(d => d === data._id)).length
+                                  ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
+                                  : []}
+                                onChange={(e, val) => {
+                                  setFieldValue("entity", val && val?.map(d => d._id))
+                                  val && val.length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="entity"
+                                    label="Entity"
+                                    variant="outlined"
+                                    error={touched["entity"] && Boolean(errors["entity"])}
+                                    helperText={touched["entity"] && errors["entity"]}
+                                    fullWidth
+                                  />
+                                )}
+                              />}
+                            </Grid>
+                            <Grid item xs={12} sm={3}>
+                              {<Autocomplete
+                                getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
+                                  ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
+                                  : ""}
+                                options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
+                                onChange={(e, val) => {
+                                  setFieldValue("owner", val && val._id ? val._id : "");
+                                }}
+                                onOpen={() =>
+                                  values["entity"] && values["entity"].length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="owner"
+                                    label="Owner"
+                                    variant="outlined"
+                                    error={touched["owner"] && Boolean(errors["owner"])}
+                                    helperText={touched["owner"] && errors["owner"]}
+                                    required={true}
+                                    fullWidth
+                                  />
+                                )}
+                              />}
+                            </Grid>
+                            <Grid item xs={12} sm={3}>
+                              {<Autocomplete
+                                multiple
+                                options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
+                                getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                value={ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id)).length
+                                  ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
+                                  : []}
+                                onChange={(e, val) => {
+                                  setFieldValue("collaborator", val && val?.map(d => d._id))
+                                }}
+                                onOpen={() =>
+                                  values["entity"] && values["entity"].length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="collaborator"
+                                    label="Collaborator"
+                                    variant="outlined"
+                                    error={touched["collaborator"] && Boolean(errors["collaborator"])}
+                                    helperText={touched["collaborator"] && errors["collaborator"]}
+                                    fullWidth
+                                  />
+                                )}
+                              />}
+                            </Grid>
+                          </Grid>
+
                           {(displayTitle === "Additional Data") &&
                             <Box mt={2} >
                               <FormControl component="fieldset">
@@ -241,7 +369,7 @@ const TermsAndCondition = ({
                   color="primary"
                   loading={loading}
                   type="submit"
-                  disabled={uploadingImageOrFileProgress > 0}
+                  disabled={uploadingImageOrFileProgress > 0 || disableSaveButton}
                   onClick={submitForm}
                 >
                   Save

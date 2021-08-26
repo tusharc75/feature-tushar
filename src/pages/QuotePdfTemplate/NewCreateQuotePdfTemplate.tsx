@@ -71,6 +71,7 @@ export default function NewCreateQuotePdfTemplate() {
         state: { user },
     }: any = useData();
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [disableSaveButton, setDisableSaveButton] = useState(false)
 
     useEffect(() => {
@@ -89,7 +90,7 @@ export default function NewCreateQuotePdfTemplate() {
                         aboveTable: data?.aboveTable,
                         belowTable: data?.belowTable,
                         entity: data?.entity ? data?.entity : [],
-                        owner: data?.owner,
+                        owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
                         collaborator: data?.collaborator ? data?.collaborator : [],
                     });
                     setDetails({
@@ -98,7 +99,7 @@ export default function NewCreateQuotePdfTemplate() {
                         aboveTable: data?.aboveTable,
                         belowTable: data?.belowTable
                     })
-                    if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+                    if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
                         setDisableSaveButton(true)
                     }
 
@@ -126,6 +127,7 @@ export default function NewCreateQuotePdfTemplate() {
     const fetchUser = () => {
         axiosInstance().get(`/user`).then(({ data: { data } }) => {
             setOwnerCollaboratorData(data);
+            setOwnerCollaboratorDataConst(data);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -286,6 +288,9 @@ export default function NewCreateQuotePdfTemplate() {
                                                 : []}
                                             onChange={(e, val) => {
                                                 setFieldValue("entity", val && val?.map(d => d._id))
+                                                val && val.length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -311,6 +316,11 @@ export default function NewCreateQuotePdfTemplate() {
                                             onChange={(e, val) => {
                                                 setFieldValue("owner", val && val._id ? val._id : "");
                                             }}
+                                            onOpen={() =>
+                                                values["entity"] && values["entity"].length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
@@ -337,6 +347,11 @@ export default function NewCreateQuotePdfTemplate() {
                                             onChange={(e, val) => {
                                                 setFieldValue("collaborator", val && val?.map(d => d._id))
                                             }}
+                                            onOpen={() =>
+                                                values["entity"] && values["entity"].length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}

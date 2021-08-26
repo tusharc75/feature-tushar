@@ -48,6 +48,7 @@ const PriceTemplate = () => {
   const [templateField, setTemplateField] = useState([]);
   const [showHistory, setShowHistory] = useState(false)
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+  const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [disableSaveButton, setDisableSaveButton] = useState(false)
 
   const {
@@ -115,7 +116,9 @@ const PriceTemplate = () => {
       axiosInstance()
         .get(`/price-template/` + id)
         .then(({ data: { data } }) => {
-
+          if (data.owner || data.owner === undefined) {
+            data.owner = user.user._id
+          }
           if (isClone) {
             const { _id, name, createdBy, updatedBy, isSystem, ...rest } = data;
             setInitialValues(rest);
@@ -126,7 +129,7 @@ const PriceTemplate = () => {
             setInitialValues(data);
             handleProductTemplateField(data.productTemplate);
             setSection(data.section);
-            if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+            if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
               setDisableSaveButton(true)
             }
           }
@@ -141,6 +144,7 @@ const PriceTemplate = () => {
   const fetchUser = () => {
     axiosInstance().get(`/user`).then(({ data: { data } }) => {
       setOwnerCollaboratorData(data);
+      setOwnerCollaboratorDataConst(data);
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
@@ -419,6 +423,9 @@ const PriceTemplate = () => {
                             : []}
                           onChange={(e, val) => {
                             setFieldValue("entity", val && val?.map(d => d._id))
+                            val && val.length !== 0 ?
+                              setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                              : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }}
                           renderInput={(params) => (
                             <TextField
@@ -444,6 +451,11 @@ const PriceTemplate = () => {
                           onChange={(e, val) => {
                             setFieldValue("owner", val && val._id ? val._id : "");
                           }}
+                          onOpen={() =>
+                            values["entity"] && values["entity"].length !== 0 ?
+                              setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                              : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                          }
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -453,6 +465,7 @@ const PriceTemplate = () => {
                               variant="outlined"
                               error={touched["owner"] && Boolean(errors["owner"])}
                               helperText={touched["owner"] && errors["owner"]}
+                              required={true}
                               fullWidth
                             />
                           )}
@@ -469,6 +482,11 @@ const PriceTemplate = () => {
                           onChange={(e, val) => {
                             setFieldValue("collaborator", val && val?.map(d => d._id))
                           }}
+                          onOpen={() =>
+                            values["entity"] && values["entity"].length !== 0 ?
+                              setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                              : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                          }
                           renderInput={(params) => (
                             <TextField
                               {...params}
