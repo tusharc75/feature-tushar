@@ -60,7 +60,7 @@ export default function TinyMCE(props) {
 
     const classes = useStyles();
     const [prevData, setPrevData] = useState("")
-    const [imageDetails, setImageDetails] = useState({ width: "", height: "", alt: "" })
+    const [imageDetails, setImageDetails] = useState({ width: 0, height: 0, alt: "" })
     const [imageUrl, setImageUrl] = useState("")
     const [uploadError, setUploadError] = useState(false)
     const [isUploadImage, setIsUploadImage] = useState(false)
@@ -72,6 +72,12 @@ export default function TinyMCE(props) {
     const { setToastConfig } = useContext(CustomToastContext);
 
     const editorRef = useRef(null);
+
+    useEffect(() => {
+        if (id && ["header", "footer"].indexOf(id) >= 0) {
+            setImageDetails({ width: 0, height: 60, alt: "" })
+        }
+    }, [])
 
     const handleUploadFile = (ev) => {
         if (ev.target.files && ev.target.files.length) {
@@ -93,6 +99,7 @@ export default function TinyMCE(props) {
         }
     };
     const getFileUrl = (file, api, details) => {
+
         setImageUploadProgress(0);
         let formData = new FormData();
         formData.append('file', file);
@@ -218,7 +225,7 @@ export default function TinyMCE(props) {
             imgTag = `${imgTag} height='${imageDetails.height}'`
         }
         else if (isCheckHeight) {
-            imgTag = `${imgTag} height='${70}'`
+            imgTag = `${imgTag} height='${60}'`
         }
 
         if (imageDetails && imageDetails.alt) {
@@ -235,7 +242,8 @@ export default function TinyMCE(props) {
 
         setIsUploadImage(false)
         setImageUrl("")
-        setImageDetails({ width: "", height: "", alt: "" })
+        let tempHeight = (id && ["header", "footer"].indexOf(id) >= 0) ? 60 : 0
+        setImageDetails({ width: 0, height: tempHeight, alt: "" })
     }
 
     const handleChange = e => {
@@ -366,6 +374,7 @@ export default function TinyMCE(props) {
                                         <TextField id="height" name="height"
                                             type="number"
                                             size="small" label="Height"
+                                            defaultValue={imageDetails.height}
                                             variant="outlined" onChange={handleChange} />
                                     </Grid>
                                     <Grid item xs={12}>
@@ -379,7 +388,12 @@ export default function TinyMCE(props) {
                         </CustomDialogContent>
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
-                                onClick={() => { setIsUploadImage(false) }}>
+                                onClick={() => {
+                                    let tempHeight = (id && ["header", "footer"].indexOf(id) >= 0) ? 60 : 0
+                                    setImageDetails({ width: 0, height: tempHeight, alt: "" })
+                                    setImageUrl("")
+                                    setIsUploadImage(false)
+                                }}>
                                 Cancel
                             </Button>
                             <Button
@@ -503,6 +517,9 @@ export default function TinyMCE(props) {
                     height: height,
                     width: width,
                     // menubar: false,
+                    table_default_attributes: {
+                        border: '0'
+                    },
                     block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
                     font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
                     plugins: [
