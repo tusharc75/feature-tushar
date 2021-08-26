@@ -17,7 +17,7 @@ import OpportunitiesDashboard from './OpportunitiesDashboard';
 
 const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
-  const [currency, setCurrency] = useState("");
+  const [currency, setCurrency] = useState('');
   const [salesRevenue, setSalesRevenue] = useState({
     revenue: 0,
     spend: 0,
@@ -125,8 +125,6 @@ const Dashboard = () => {
           if (!entityIds.includes(d.entityId)) {
             entityIds.push(d.entityId);
           }
-
-          
         }
 
         entityIds.forEach((id) => {
@@ -196,13 +194,12 @@ const Dashboard = () => {
           return aDate - bDate;
         });
 
-
         for (let d of data) {
           saleData.push(d.totalSell);
           labels.push(moment(d.date).format('MMM/YY'));
           budget.push(d.budget);
           if (d.currency) {
-            setCurrency(d.currency)
+            setCurrency(d.currency);
           }
         }
 
@@ -712,7 +709,14 @@ const Dashboard = () => {
                 setStatus={setStatus}
               />
               <Box py={2}>
-                <TopDashboard currency={currency} moment={moment} regionSales={regionSales} salesRevenue={salesRevenue} salesData={salesData} />
+                <TopDashboard
+                  salesFilter={salesFilter}
+                  currency={currency}
+                  moment={moment}
+                  regionSales={regionSales}
+                  salesRevenue={salesRevenue}
+                  salesData={salesData}
+                />
 
                 <Top2Dashboard currency={currency} allEntitySalesData={allEntitySalesData} />
 
