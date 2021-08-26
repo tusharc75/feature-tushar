@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useRef } from 'react';
+import { useState, Fragment, useRef } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
@@ -15,7 +15,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { camelCase } from "./../../../constants/helpers";
 import { Vlookup } from "./vlookup";
 import { Formula } from "./formula";
@@ -34,20 +34,11 @@ const FieldSchema = Yup.object().shape({
     .required("please enter field label"),
 });
 
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
-  },
-};
-
 export const AddField = (props) => {
 
   const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
 
-  const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
+  const [initialValues,] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
     tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "Option 1", optionValue: "Option 1" }], formula: "return ", isvlookupReverse: false,
     units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false, displayCurrency: refrence !== "formAdd" ? ["CUR"] : ["USD"]
@@ -131,15 +122,15 @@ export const AddField = (props) => {
       values.option.forEach((ele) => {
         ele.optionValue = ele.optionLabel
       })
-      data.inputFields = values.inputFields
       data.option = values.option
+      data.vlookupInputFields = values.vlookupInputFields
       data.isvlookupReverse = values.isvlookupReverse
     }
     if (values.type === "converter" || values.isConverter) {
+      data.unitoption = values.unitoption
       data.units = values.units
       data.displayUnits = values.displayUnits
       data.formulaUnits = values.formulaUnits
-      data.option = values.option
     }
     if (values.type === "currencyAmount") {
       data.displayCurrency = values.displayCurrency
@@ -166,11 +157,6 @@ export const AddField = (props) => {
 
   function validate(values) {
     const errors = {};
-    if (refrence === "builder") {
-      if (!values.sectionName || values.sectionName === "") {
-        errors["sectionName"] = "Please select section name";
-      }
-    }
     if (values.type === 'formula' || values.isFormula === true) {
       if (!values.inputFields || values.inputFields.length === 0) {
         errors["inputFields"] = "Please select input parameters";
@@ -202,6 +188,21 @@ export const AddField = (props) => {
       }
       if (!values.formulainputFields || values.formulainputFields.length === 0) {
         errors["formulainputFields"] = "Please select input parameters";
+      }
+      if (values.formulaFields && values.formulaFields.length) {
+        let inputValues = {};
+        values.formulainputFields && values.formulainputFields.forEach((_input) => {
+          inputValues[_input] = 1;
+        });
+        Object.keys(values.formulaoption).forEach((_formula) => {
+          if (!checkFormula(values.formulaoption[_formula] ? values.formulaoption[_formula] : "", inputValues))
+            errors["formulaoption_" + _formula] = "Please enter valid formula";
+        });
+      }
+    }
+    if (values.type === 'vlookupDropdown' || values.isVlookup) {
+      if (!values.vlookupInputFields || values.vlookupInputFields.length === 0) {
+        errors["vlookupInputFields"] = "Please select input parameters";
       }
     }
     return errors;

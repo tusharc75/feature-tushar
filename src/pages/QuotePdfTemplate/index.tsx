@@ -1,19 +1,16 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
     Box,
     Button,
     Grid,
     IconButton,
-    Link as MuiLink,
     Menu,
     MenuItem,
     Tooltip,
-    Chip
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { quotePdfTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
+import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import styles from "../Leads/Header.module.scss";
@@ -33,6 +30,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 let quotePdfTemplateTimeout;
 
@@ -43,7 +41,7 @@ const QuotePdfTemplate: FC = () => {
     const { qbApi } = quoteBuilder;
 
     const {
-        state: { user, permissions },
+        state: { permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
 
@@ -64,16 +62,15 @@ const QuotePdfTemplate: FC = () => {
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
     if (columnState) {
-        columns.map((item) => {
-            columnState.map((d) => {
-                if (d.colId == item.field) {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
+                if (d.colId === item.field) {
                     item.show = !d.hide;
                 }
             });
         });
     }
     //  Grid Variables - End
-
 
     const { quotePdfTemplateApi } = quotePdfTemplate;
 
@@ -91,7 +88,7 @@ const QuotePdfTemplate: FC = () => {
         if (renderCount > 0) {
             fetchQuotePdfTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, sorting, selectedEntity]);
 
     const previewPdfTemplate = (templateId) => {
 
@@ -111,7 +108,7 @@ const QuotePdfTemplate: FC = () => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
-                    message: "File downloaded Successfuly",
+                    message: "File downloaded Successfully",
                 });
 
                 const file = new Blob([data], { type: "application/pdf" });
@@ -129,15 +126,14 @@ const QuotePdfTemplate: FC = () => {
             to={`${routes.quotePdfTemplateDetail.path}/${params.data._id}`} title={params.value}>
             {params.value}
         </Link>
-        &emsp;<Chip size="small" label="Preview"
-            color="primary"
-            onClick={() => {
-                previewPdfTemplate(params.data._id);
-            }}
-        />
     </>;
 
     const ActionsRenderer = params => <>
+        <Tooltip title="Preview">
+            <IconButton size="small" aria-label="Clone" className="mr-2" onClick={() => previewPdfTemplate(params.data._id)}>
+                <VisibilityIcon color="primary" />
+            </IconButton>
+        </Tooltip>
         {permissions.quotePdfTemplate.isCreate &&
             <Tooltip title="Clone">
                 <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
@@ -229,10 +225,14 @@ const QuotePdfTemplate: FC = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
@@ -299,7 +299,7 @@ const QuotePdfTemplate: FC = () => {
 
 
     return (
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.quotePdfTemplate]} />
@@ -354,7 +354,7 @@ const QuotePdfTemplate: FC = () => {
                 </div>
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={200}
                     loading={loading} renderedFrom="quotePdfPage" />
 
                 {showDeleteConfirmBox &&
@@ -366,7 +366,7 @@ const QuotePdfTemplate: FC = () => {
                     />
                 }
             </CustomContainer >
-        </Layout >
+        </Fragment >
     );
 
 };

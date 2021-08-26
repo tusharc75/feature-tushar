@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import {
   Box,
   Button,
@@ -12,9 +12,7 @@ import {
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -298,7 +296,7 @@ const RoleDetailsPage = () => {
 
       )}
 
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -570,7 +568,7 @@ const RoleDetailsPage = () => {
             </Paper>
           </Grid>
         </Grid>
-      </Layout>
+      </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

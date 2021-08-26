@@ -1,14 +1,13 @@
-import React, { Suspense, useContext, useEffect, useMemo, useState, useReducer } from 'react'
+import React, { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid, Button, Typography, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
+import { Paper, Box, Tabs, Tab, Grid, Button, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../../components/DetailsPageHeader";
 import DeleteButton from "../../../components/Helpers/DeleteButton";
-import Layout from "../../../components/Layout";
 import {
   reducer,
   intialState,
@@ -20,7 +19,6 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import routes from "../../../components/Helpers/Routes";
 import axiosInstance from "../../../axios/axiosInstance";
 import InfoIcon from "@material-ui/icons/Info";
-import Loader from "../../../components/Loader";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ManageQuoteDialog from "../ManageQuote/ManageQuoteDialog";
 import { HiPencil } from 'react-icons/hi';
@@ -71,8 +69,6 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: 435,
   },
 }));
-
-
 
 export default function QuoteDetail() {
   const classes = useStyles();
@@ -471,7 +467,7 @@ export default function QuoteDetail() {
 
   return (
     <>
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -779,7 +775,7 @@ export default function QuoteDetail() {
         )
 
         }
-      </Layout>
+      </Fragment>
     </>
   );
 }

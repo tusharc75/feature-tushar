@@ -1,9 +1,19 @@
+.detailContainerOne {
+  height: calc(100vh - 100px);
+  width: 100%;
+  position: relative;
+  top: 36px;
+  padding: 0 10px 10px 10px;
+  overflow: auto;
+  z-index: 11;
+  margin-top: 5px !important;
+}
 .product_list_container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-gap: 20px;
   align-items: stretch;
-  padding: 15px;
+  padding: 0 15px 15px 15px;
   flex: 1;
 }
 .wrapper {

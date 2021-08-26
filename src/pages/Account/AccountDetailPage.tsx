@@ -10,17 +10,11 @@ import {
   CardContent,
   List,
 } from "@material-ui/core";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { isMobile, isTablet } from "react-device-detect";
 
-import PropTypes from "prop-types";
-import { Dialog } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
 import { Skeleton } from "@material-ui/lab";
-import Layout from "../../components/Layout";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -132,7 +126,6 @@ export default function AccountDetailPage(props) {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false)
   const [additionalFieldName, setAdditionalFieldName] = useState("")
-  const [processLast, setProcessLast] = useState(false);
   const [showActivity, setActivityShow] = useState(true);
   const [
     showAccountHierarchyInFullScreenDialog,
@@ -676,7 +669,6 @@ export default function AccountDetailPage(props) {
         });
     }
 
-    // console.log(steps.length - 1);
     // if (activeStep === steps.length - 2 && showAdditionalField) {
     //   setOpenAdditionalDialog(true);
     // }
@@ -686,7 +678,6 @@ export default function AccountDetailPage(props) {
 
   return (
     <>
-      <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -1217,7 +1208,6 @@ export default function AccountDetailPage(props) {
             />
           )}
         </div>
-      </Layout>
     </>
   );
 }

@@ -1,9 +1,9 @@
-import { useEffect, useReducer, useState, useContext, Fragment } from "react";
+import { useState, useContext, Fragment } from "react";
 import { Box, Button, makeStyles } from "@material-ui/core";
 import CustomAgGrid from "../../../../components/AgGridComponents/CustomAgGrid";
 import AddIcon from "@material-ui/icons/Add";
 import axiosInstance from "../../../../axios/axiosInstance";
-import { gridLoadingTimeout, termsAndCondition } from "../../../../constants/helpers";
+import { termsAndCondition } from "../../../../constants/helpers";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageTermsAndCondition from "../../../TermsAndConditions/ManageTermsAndCondition";
 
@@ -15,20 +15,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
 export default function AdditionalData({
   state,
   dispatch,
   allowedToEdit,
   handleVersionUpdateFromAdditionalData,
-fetchTNC}) {
+  fetchTNC }) {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
 
   const [editRecordTNC, setEditRecordTNC] = useState(null);
   const [showManageAdditionalDataDialog, setShowManageAdditionalDataDialog] = useState(false);
 
-  const [gridApi, setGridApi] = useState(null);
+  const [, setGridApi] = useState(null);
   const {
     dataRows,
     rowCount,
@@ -36,24 +35,18 @@ fetchTNC}) {
     page,
     limit,
     pageSizes,
-    search,
-    filters,
-    sorting,
     selectedRecords,
   } = state;
-  const [columns, setColumns] = useState([
-      {
-        field: "name",
-        rowDrag: allowedToEdit,
-        headerName: "Name",
-        cellRenderer: "nameRenderer",
-        show: true,
-      },
-    ]);
 
-  // useEffect(() => {
-  //   fetchTNC()
-  // }, []);
+  const [columns] = useState([
+    {
+      field: "name",
+      rowDrag: allowedToEdit,
+      headerName: "Name",
+      cellRenderer: "nameRenderer",
+      show: true,
+    },
+  ]);
 
   const handleCloseCreateDialog = () => {
     setShowManageAdditionalDataDialog(false);
@@ -83,44 +76,6 @@ fetchTNC}) {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
   };
-
-  // const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
-  //   dispatch({ type: "loading", loading: true });
-
-  //   if (gridApi) {
-  //     // gridApi.setRowData([]);
-  //   }
-
-  //   axiosInstance()
-  //     .get(`${termsAndCondition.api}?limit=0`)
-  //     .then(({ data: { data, count } }) => {
-  //       let rows = data.map((tnc) => {
-  //         return {
-  //           ...tnc,
-  //           id: tnc._id,
-  //           name: tnc.TACName,
-  //         };
-  //       });
-  //       dispatch({
-  //         type: "initialize",
-  //         data: rows,
-  //         count: count,
-  //       });
-
-  //       // if (updateVersionStatus) {
-  //       //   handleVersionUpdateFromAdditionalData(selectedRecords);
-  //       // }
-
-  //       setTimeout(() => {
-  //         dispatch({ type: "loading", loading: false });
-  //       }, gridLoadingTimeout);
-  //     })
-  //     .catch((err) => {
-  //       toastConfig.setToastConfig(err);
-  //       dispatch({ type: "loading", loading: false });
-  //     });
-  // };
-
 
   return (
     <Fragment>
@@ -192,7 +147,5 @@ fetchTNC}) {
         />
       )}
     </Fragment>
-
   )
-
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { TablePagination } from '@material-ui/core';
+// import { TablePagination } from '@material-ui/core';
+import TablePagination from '@material-ui/core/TablePagination';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
@@ -366,7 +367,7 @@ export default function CustomAgGrid({
                 }
               }}
               rowsPerPage={limit}
-              onChangeRowsPerPage={(event) => {
+              onRowsPerPageChange={(event) => {
                 dispatch({ type: 'pageSizeChange', limit: event.target.value });
 
                 if (clientSideGridApi) {

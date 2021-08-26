@@ -132,11 +132,6 @@ const Steps = (props) => {
     approvedQuote,
     handleVersionUpdate,
     allowedToEdit,
-    DOAlimit,
-    totalCost,
-    handleSendReminder = null,
-    reminderLoading = false,
-    hideReminderButton = false,
     DOAData = null,
     quoteData
   } = props;
@@ -248,9 +243,7 @@ const Steps = (props) => {
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
         processStatus: steps[activeStep + 1],
       })
-      .then(({ data }) => {
-        const nextStep = activeStep + 1;
-
+      .then(() => {
         activeStep = activeStep + 1;
         Refresh(version);
       })
@@ -278,9 +271,7 @@ const Steps = (props) => {
           `quote-builder/updateStatusfromCustomer/${id}?version=${version}`,
           dataObj
         )
-        .then(({ data }) => {
-          const nextStep = activeStep + 1;
-
+        .then(() => {
           activeStep = activeStep + 1;
           Refresh(version);
         })
@@ -295,9 +286,7 @@ const Steps = (props) => {
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
         processStatus: steps[activeStep - 1],
       })
-      .then(({ data }) => {
-        const nextStep = activeStep - 1;
-
+      .then(() => {
         activeStep = activeStep - 1;
         Refresh(version);
       })

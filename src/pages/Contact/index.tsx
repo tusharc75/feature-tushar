@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
-import Layout from '../../components/Layout';
+import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom';
@@ -17,7 +16,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { sidebarResource, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -31,6 +30,7 @@ import {
 } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import contactClass from './contact.module.scss'
 
 const ContactTypes = [
   {
@@ -49,11 +49,10 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions}
   }: any = useData();
   const {
-    contact: { contactApi, contactResource, contactPermission, contactRoute, contactResourceLabel },
-    contactBreadcrumb,
+    contact: { contactApi, contactResource, contactPermission, contactRoute },
     account
   } = props;
   const [selectedType, setSelectedType] = useState(1);
@@ -74,10 +73,10 @@ export default function Contact(props) {
     accountName: history.location?.state?.accountName
   });
   const [contactPermissions, setContactPermissions] = useState<any>({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions[contactResource]?.isCreate,
+    isUpdate: permissions[contactResource]?.isUpdate,
+    isRead: permissions[contactResource]?.isRead,
+    isDelete: permissions[contactResource]?.isDelete,
   });
 
   const [filter, setFilter] = useState('All Contacts');
@@ -271,7 +270,6 @@ export default function Contact(props) {
   };
 
   const getContacts = () => {
-    if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
 
@@ -317,7 +315,7 @@ export default function Contact(props) {
           toastConfig.setToastConfig(err);
           dispatch({ type: 'loading', loading: false });
         });
-    }
+    
   };
 
   const handleSingleDeleteContacts = async () => {
@@ -390,7 +388,7 @@ export default function Contact(props) {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
@@ -408,35 +406,43 @@ export default function Contact(props) {
       </Grid>
 
       <CustomContainer>
-        <div className="header-panel">
-          <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item className="d-flex align-items-center gap-1">
-              <MdContacts className="headerLogo" />
-              <span className="listingHeader">{routes[contactResource].title}</span>
-              {ContactTypes && (
-                <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
-                  {ContactTypes.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-              )}
-              {accountDetails.accountId && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Account: ${accountDetails.accountName}`}
-                  onDelete={() => {
-                    setAccountDetails({ accountId: null, accountName: null });
-                    // getContacts();
-                  }}
-                />
-              )}
+        <div className={`${contactClass['contact_header_inner_container']}`}>
+          <Grid container className="header-panel" justify="space-between" alignContent="center">
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+              <Grid container>
+                <Grid item md={4} sm={4} xs={12} className="d-flex align-items-center gap-1" >
+                  <MdContacts className="headerLogo" />
+                  <span className="listingHeader">{routes[contactResource].title}</span>
+                </Grid>
+                <Grid item md={4} sm={4} xs={12}>
+                  {ContactTypes && (
+                    <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
+                      {ContactTypes.map((k, index) => {
+                        return (
+                          <ToggleButton value={k.key} key={index}>
+                            {k.key}
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+                </Grid>
+                <Grid item md={4} sm={4} xs={12}>
+                  {accountDetails.accountId && (
+                    <Chip
+                      className="ml-3"
+                      color="primary"
+                      label={`Account: ${accountDetails.accountName}`}
+                      onDelete={() => {
+                        setAccountDetails({ accountId: null, accountName: null });
+                        // getContacts();
+                      }}
+                    />
+                  )}
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid className={styles.filter_side} item>
+            <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
                 {contactPermissions.isCreate && (
@@ -563,6 +569,6 @@ export default function Contact(props) {
           ) : null}
         </Box>
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 }

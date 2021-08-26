@@ -1,11 +1,6 @@
-import React, { useState, useEffect } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
-import Button from "@material-ui/core/Button";
-import { useParams, useHistory } from "react-router-dom";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
-import AddIcon from "@material-ui/icons/Add";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -16,7 +11,7 @@ import { DragBox } from "./DragBox";
 import { DropMaster } from "./DropMaster";
 import { CustomField } from "./CustomField/index";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1,
     margin: 10,

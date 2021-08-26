@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Box,
@@ -13,8 +13,6 @@ import {
   Avatar,
 } from "@material-ui/core";
 import "./style.scss";
-
-import Layout from "../../components/Layout";
 import Container from "../../components/CustomContainer";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import NavLinks from "../../components/NavLinks";
@@ -82,7 +80,7 @@ const NewLead = () => {
     { title: "Delete", bg: theme.palette.primary.main, color: "#fff" }, //  darkBg
   ];
   return (
-    <Layout>
+    <Fragment>
       {/* Links Section */}
       <NavLinks ButtonProps={buttonProps} />
 
@@ -541,7 +539,7 @@ const NewLead = () => {
       >
         &copy; 2020, equipt.com, Inc, or its affiliates
       </Typography>
-    </Layout>
+    </Fragment>
   );
 };
 

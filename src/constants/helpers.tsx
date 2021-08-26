@@ -89,6 +89,7 @@ export const formFieldNames = {
 }
 
 export const sidebarResource = {
+  address: "Address",
   brand: "Brand",
   role: "Role",
   product: "Product",
@@ -131,9 +132,12 @@ export const sidebarResource = {
   DOARequest: 'DOA Request',
   event: 'Event',
   dashboard: 'Dashboard',
+  productInventory: 'Product Inventory',
+  equipmentRentalMaster: "Equiptment Rental Master"
 };
 
 export const RESOURCE_LABEL = {
+  address: "Addresses",
   account: 'Supplier Accounts',
   customerAccount: 'Customer Accounts',
   user: 'Users',
@@ -169,7 +173,9 @@ export const RESOURCE_LABEL = {
   dashboard: 'Dashboards',
   budget: 'Budgets',
   marketSegment: 'Market Segments',
-  quotePdfTemplate: 'Quote PDF Templates'
+  quotePdfTemplate: 'Quote PDF Templates',
+  productInventory: 'Product Inventory',
+  equipmentRentalMaster: "Equiptment Rental Master"
 };
 
 export const lead = {
@@ -260,6 +266,12 @@ export const product = {
   api: "/product",
   route: "/product",
   permission: "product",
+};
+
+export const productInventory = {
+  api: "/product-inventory",
+  route: "/product-inventory",
+  permission: "productInventory",
 };
 
 export const budget = {
@@ -501,6 +513,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`).nullable()
         : yup.string().nullable();
+    } else if (input.type === "freeStyleMultiSelect") {
+      schema[input.fieldName] = input.required
+        ? yup.array().required(`${input.fieldLabel} is required`)
+        : yup.array();
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)
@@ -719,7 +735,6 @@ export const getPermissions = (
         }
       });
     }
-
     localStorage.setItem("routes", JSON.stringify(routesAndTitle));
     return permissions;
   }
@@ -782,6 +797,10 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
+export const review = {
+  reviewsApi: "/product/review",
+}
+
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, "currencyCode");
 };
@@ -817,19 +836,15 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         .format(amount)
         .replace(/^(\D+)/, "$1 "),
       fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
-        style: "currency",
+        //  style: "currency",
         currencyDisplay: "code",
       }).format(amount),
     };
   }
 
   let currencyData = filterCountries[0];
-  let combinedAllLanguages = filterCountries[0].languages;
 
   if (filterCountries.length > 1) {
-    combinedAllLanguages = [
-      ...new Set(filterCountries.map((m) => m.languages).flat()),
-    ];
 
     switch (currencyCode) {
       case "AUD":

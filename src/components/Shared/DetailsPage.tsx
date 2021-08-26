@@ -12,12 +12,13 @@ import {
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
-import { kebabCase, orderBy } from "lodash";
+import { kebabCase } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
-import { getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
+import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "../../StateProvider/Provider";
 import { Skeleton } from "@material-ui/lab";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
@@ -68,7 +69,9 @@ const unlinkFields = [sidebarResource.marketSegment,sidebarResource.budget,sideb
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
-
+  const {
+    state: { permissions }
+  }: any = useData();
   const { data, fields } = props;
   const [isDownloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -85,9 +88,12 @@ const Details = (props: DetailProps) => {
     const vals = getObjKeysWithValues(data, fieldData);
     setValues(vals);
 
-    return () => setValues(null);
+    return () => {
+      setValues(null);
+      setFormsData([])
+    }
     // eslint-disable-next-line
-  }, []);
+  }, [fields, data]);
 
   /**
    * DOWNLOAD FILE
@@ -206,44 +212,11 @@ const Details = (props: DetailProps) => {
     type === "imageUpload" || type === "fileUpload" ? 12 : size;
 
   /**
-   *  POPOVER
-   */
-  const handlePopoverClose = () => {
-    cancelTokenSource.cancel();
-    setLookupResource(null);
-    setPopoverData(null);
-  };
-
-  /**
-   * GET DATA FOR CURRENT HOVERED RESOURCE
-   * @param e
-   * @param field
-   * @param value
-   */
-  const getPopoverData = (e: React.MouseEvent, field: any, value: string) => {
-    setLookupResource(kebabCase(field));
-    setLoadingPopoverData(true);
-    axiosInstance()
-      .get(`/${kebabCase(field)}/${value}`, {
-        cancelToken: cancelTokenSource.token,
-      })
-      .then(({ data }) => {
-        setPopoverData(data.data);
-        setLoadingPopoverData(false);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-        setLoadingPopoverData(false);
-      });
-  };
-
-  /**
    * Render Link  or Typography component
    */
   const renderData = (val: any, fieldData: any) => {
     const value = normalizeValues(val, fieldData);
-
-    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && !unlinkFields.includes(fieldData.lookupResource)) {
+    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && permissions[camelCase(fieldData.lookupResource)]?.isRead && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
           <Typography className={classes.fieldText} variant="body2">
@@ -336,115 +309,6 @@ const Details = (props: DetailProps) => {
         </Typography>
       );
     }
-  };
-
-  /**
-   * RENDER DATA FOR POPOVER
-   * @returns Node
-   */
-  const renderPopoverData = () => {
-    const img =
-      lookupResource === "user"
-        ? popoverData?.avatar
-        : lookupResource === "contact-account" ||
-          lookupResource === "supplier-account"
-        ? popoverData?.accountLogo
-        : lookupResource === "contact-contact"
-        ? popoverData?.contactLogo
-        : "";
-    const name =
-      lookupResource === "user"
-        ? `${popoverData?.firstName} ${popoverData?.lastName}`
-        : lookupResource === "customer-account" ||
-          lookupResource === "supplier-account"
-        ? popoverData?.accountName
-        : lookupResource === "customer-contact" ||
-          lookupResource === "supplier-contact"
-        ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
-        : lookupResource === "role"
-        ? popoverData?.name
-        : "";
-
-    const subInfo =
-      lookupResource === "user"
-        ? popoverData?.email
-        : lookupResource === "customer-account" ||
-          lookupResource === "supplier-account"
-        ? popoverData?.description
-        : lookupResource === "customer-contact" ||
-          lookupResource === "supplier-contact"
-        ? popoverData?.email
-        : lookupResource === "role"
-        ? popoverData?.description
-        : "";
-
-    const subInfo1 =
-      lookupResource === "user"
-        ? popoverData?.mobileNo
-        : lookupResource === "customer-account" ||
-          lookupResource === "supplier-account"
-        ? popoverData?.owner?.optionLabel
-        : lookupResource === "customer-contact" ||
-          lookupResource === "supplier-contact"
-        ? popoverData?.phone
-        : "";
-
-    const isRole = lookupResource === "role";
-    return (
-      <Box width="250px">
-        {loadingPopoverData || !popoverData ? (
-          <Box display="flex" justifyContent="start">
-            <Skeleton variant="circle" width="50px" height="50px" />
-            <Box
-              marginLeft={2}
-              display="flex"
-              flexDirection="column"
-              justifyContent="start"
-            >
-              <Skeleton variant="text" width="150px" />
-              <Skeleton variant="text" width="120px" />
-            </Box>
-          </Box>
-        ) : (
-          <Box display="flex" alignItems="start">
-            {!isRole && (
-              <Avatar style={{ width: 50, height: 50 }} src={img}>
-                {name && name.charAt(0)}
-              </Avatar>
-            )}
-            <Box
-              marginLeft={2}
-              display="flex"
-              flexDirection="column"
-              justifyContent="start"
-            >
-              <Typography className={classes.popoverText}>
-                <MuiLink
-                  component={Link}
-                  to={`/${lookupResource}/detail/${popoverData?._id}`}
-                >
-                  <span className={`text-truncate ${classes.dataValue}`}>{name}</span>
-                </MuiLink>
-              </Typography>
-              <Typography
-                color="textSecondary"
-                variant="body2"
-                className={classes.popoverText}
-              >
-                {subInfo}
-              </Typography>
-              {/* <Typography
-                color="textSecondary"
-                variant="body2"
-                className={classes.popoverText}
-              >
-                {subInfo1}
-              </Typography> */}
-            </Box>
-          </Box>
-        )}
-      </Box>
-    );
   };
 
   return (

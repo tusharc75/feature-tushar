@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { useData } from '../../StateProvider/Provider';
@@ -16,7 +16,8 @@ import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
-const useStyles = makeStyles((theme) => ({
+
+const useStyles = makeStyles(() => ({
   container: {
     height: '90vh',
     width: '90vw',
@@ -46,12 +47,12 @@ const Login = () => {
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
   const classes = useStyles();
-  const theme = useTheme();
   const [isSubmitting, setSubmitting] = useState(false);
-  const { instance, accounts, inProgress } = useMsal();
+  const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+
   useEffect(() => {
     if (!isEmpty(account)) {
       (async () => {
@@ -174,6 +175,7 @@ const Login = () => {
                     <Box display="flex" flexDirection="column" alignItems="center">
                       <Box mb={3}>
                         <TextField
+                          data-testid="email"
                           style={{ width: 260 }}
                           variant="outlined"
                           type="email"
@@ -188,6 +190,7 @@ const Login = () => {
                       </Box>
                       <Box>
                         <TextField
+                          data-testid="password"
                           style={{ width: 260 }}
                           variant="outlined"
                           type="password"

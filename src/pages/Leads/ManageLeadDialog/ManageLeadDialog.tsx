@@ -360,8 +360,8 @@ export default function ManageLeadDialog({
                                     >
                                       {field.fieldName === "owner" ? (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
+                                          isNew={isNew}
+                                          {...field}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -406,7 +406,7 @@ export default function ManageLeadDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          disabled={disableOwnerSelection}
+                                          disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                           onOpen={() => {
                                             onOwnerDropdownOpen(
                                               values["collaborator"]
@@ -415,8 +415,9 @@ export default function ManageLeadDialog({
                                         />
                                       ) : field.fieldName === "collaborator" ? (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
+                                          isNew={isNew}
+                                            {...field}
+                                          disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -454,8 +455,9 @@ export default function ManageLeadDialog({
                                             }
                                           >
                                             <FormTypes
-                                              fieldId={field._id}
-                                              lookup={field.lookup}
+                                              isNew={isNew}
+                                                  {...field}
+                                              disabled={(!isNew && field.disableOnEdit)}
                                               fields={leadData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -499,9 +501,10 @@ export default function ManageLeadDialog({
                                                 >
                                                   <IconButton
                                                     onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                    disabled={(!isNew && field.disableOnEdit)}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={(!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -538,8 +541,9 @@ export default function ManageLeadDialog({
                                               }
                                             >
                                               <FormTypes
-                                                fieldId={field._id}
-                                                lookup={field.lookup}
+                                                isNew={isNew}
+                                                {...field}
+                                                disabled={(!isNew && field.disableOnEdit)}
                                                 fields={leadData.fields}
                                                 fieldData={field}
                                                 errors={errors}
@@ -580,9 +584,10 @@ export default function ManageLeadDialog({
                                                       onClick={() => {
                                                         setShowAddMarketSegmentDialog(true);
                                                       }}
+                                                      disabled={(!isNew && field.disableOnEdit)}
                                                       size="small"
                                                     >
-                                                      <AddIcon color="primary" />
+                                                      <AddIcon color={(!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>
@@ -602,13 +607,13 @@ export default function ManageLeadDialog({
                                           </Grid>
                                         </Grid> : (
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
-                                            // {...rest}
+                                            isNew={isNew}
+                                            {...field}
+                                            disabled={(!isNew && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
-                                            label={field.fieldLabel}
+                                            label={field.fieldLabel} 
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}

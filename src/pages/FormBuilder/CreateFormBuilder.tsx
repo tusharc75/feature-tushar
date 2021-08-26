@@ -1,7 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
-import { makeStyles } from '@material-ui/core/styles';
 import { Box, Typography, Button, CircularProgress } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
@@ -14,10 +12,11 @@ import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
+import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
 
-const CreateFormBuilder = (props) => {
+const CreateFormBuilder = () => {
 
-    const { state: { user, permissions } }: any = useData();
+    const { state: { permissions } }: any = useData();
     const [formBuilderPermissions, setFormBuilderPermissions] = useState({
         isCreate: false,
         isUpdate: false,
@@ -54,7 +53,7 @@ const CreateFormBuilder = (props) => {
         });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         let data = []
         let order = 0;
         section.forEach(_section => {
@@ -70,6 +69,33 @@ const CreateFormBuilder = (props) => {
             })
         })
 
+
+        if ((resource.toString()).toLowerCase() === "product") {
+            var otherField = []
+            await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
+                otherField = data;
+            }).catch((error) => {
+            });
+            const result = checkUniqueValidation(data, otherField);
+            if (result.error) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: result.message,
+                });
+                return false;
+            }
+        }
+        const result = checkFormulaLoop(data);
+        if (result.error) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: "error",
+                message: result.message,
+            });
+            return false;
+        }
+
         let sendData: any = {}
         sendData.resource = resource;
         sendData.field = data;
@@ -84,9 +110,9 @@ const CreateFormBuilder = (props) => {
         });
     };
 
-    return (<Layout>
+    return (<Fragment>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[routes.formBuilder, { title: routes.quoteBuilder.title }]} />
+            <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]} />
         </Grid>
         <CustomContainer>
             {section ?
@@ -132,7 +158,7 @@ const CreateFormBuilder = (props) => {
                 <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
         </CustomContainer>
-    </Layout >
+    </Fragment >
     );
 }
 

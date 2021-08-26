@@ -8,7 +8,7 @@ import {
 import MomentUtils from "@date-io/moment";
 import moment from "moment";
 
-import SelectSearch from "react-select-search";
+// import SelectSearch from "react-select-search";
 import BoxWithBorder from "../BoxWithBorder";
 import { SVG } from "../../assets";
 
@@ -133,14 +133,14 @@ const OpportunityInformation = () => {
                   lg={5}
                   // className={classes.selectInput}
                 >
-                  <SelectSearch
+                  {/* <SelectSearch
                     onChange={handleCurrencyChange}
                     search
                     options={currencyOptions}
                     value={currency}
                     // name="language"
                     placeholder="Select Currency"
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
               </Grid>
@@ -165,11 +165,11 @@ const OpportunityInformation = () => {
                   lg={5}
                   // className={classes.selectInput}
                 >
-                  <SelectSearch
+                  {/* <SelectSearch
                     search
                     options={salesPersonOptions}
                     placeholder="Select Purchase Timeframe"
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
               </Grid>
@@ -229,11 +229,11 @@ const OpportunityInformation = () => {
                   <Typography className={classes.inputLable}>Type</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <SelectSearch
+                  {/* <SelectSearch
                     search
                     options={bussinessTypeOptions}
                     placeholder="Select Type"
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
               </Grid>
@@ -251,11 +251,11 @@ const OpportunityInformation = () => {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <SelectSearch
+                  {/* <SelectSearch
                     search
                     options={salesPersonOptions}
                     placeholder="Select Person"
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}>
                   <Link className={classes.inputLable}>

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, Fragment } from 'react'
 import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import Layout from "../../components/Layout";
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar'
 import { profileMenuItems } from '../../constants/helpers'
@@ -101,7 +100,7 @@ export default function ProfilePage(props) {
             });
     };
 
-    return <Layout>
+    return <Fragment>
         <Grid container className="headerbox">
             <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
@@ -143,5 +142,5 @@ export default function ProfilePage(props) {
                 </Grid>
             </Grid>
         </CustomContainer>
-    </Layout >
+    </Fragment >
 }

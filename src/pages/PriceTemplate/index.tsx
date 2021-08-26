@@ -1,18 +1,16 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
     Box,
     Button,
     Grid,
     IconButton,
-    Link as MuiLink,
     Menu,
     MenuItem,
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { priceTemplate, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { priceTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import styles from "../Leads/Header.module.scss";
@@ -23,12 +21,9 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import {
     CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay
+    UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { GiAbstract055 } from 'react-icons/gi';
@@ -44,7 +39,7 @@ const PriceTemplate: FC = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
@@ -72,13 +67,13 @@ const PriceTemplate: FC = () => {
     ];
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
 
@@ -105,7 +100,7 @@ const PriceTemplate: FC = () => {
         if (renderCount > 0) {
             fetchpriceTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, sorting, selectedEntity]);
 
 
     const NameRenderer = params => <Link className="link"
@@ -121,7 +116,7 @@ const PriceTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {priceTemplatePermissions.isDelete && params.data?.createdById === user?.user?._id ?
+        {priceTemplatePermissions.isDelete && user?.user?._id === params.data?.owner ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -137,7 +132,6 @@ const PriceTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-
     </>
 
     const frameworkComponents = {
@@ -147,7 +141,6 @@ const PriceTemplate: FC = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
     };
-
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -205,10 +198,13 @@ const PriceTemplate: FC = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
@@ -276,7 +272,7 @@ const PriceTemplate: FC = () => {
 
 
     return (
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.priceTemplate]} />
@@ -332,7 +328,7 @@ const PriceTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="priceTemplatePage"/>
+                    loading={loading} renderedFrom="priceTemplatePage" />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
@@ -343,7 +339,7 @@ const PriceTemplate: FC = () => {
                     />
                 }
             </CustomContainer >
-        </Layout >
+        </Fragment >
     );
 
 };

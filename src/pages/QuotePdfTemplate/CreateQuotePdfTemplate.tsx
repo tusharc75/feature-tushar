@@ -1,14 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { TextField, Grid, Box, Button, CircularProgress, FormControlLabel, Checkbox } from '@material-ui/core';
-
 import { useParams, useHistory } from 'react-router-dom';
-
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-
 import { FormBuilder } from '../../components/FormBuilder';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import Layout from '../../components/Layout';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { camelCase, map, uniq } from 'lodash';
 import axiosInstance from '../../axios/axiosInstance';
@@ -20,8 +16,6 @@ const PdfTemplateSchema = Yup.object().shape({
   showPageNumberInFooter: Yup.boolean()
 });
 
-
-
 const CreateQuotePdfTemplate = () => {
   const history = useHistory();
   const { id } = useParams();
@@ -29,75 +23,74 @@ const CreateQuotePdfTemplate = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
   const [seedData] = useState([
-  {
-    _id: '60e57ae7801802b66486e326',
-    fieldLabel: 'Header Column 1',
-    type: 'singleLine',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 4,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'headerColumn1',
-    sectionName: 'Header'
-  },
-  {
-    _id: '60e57ae7801802b66486e327',
-    fieldLabel: 'Header Column 2',
-    type: 'imageUpload',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 5,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'headerColumn2',
-    sectionName: 'Header'
-  },
-  {
-    _id: '60e57ae7801802b66486e328',
-    fieldLabel: 'Footer Column 1',
-    type: 'multiLine',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 6,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'footerColumn1',
-    sectionName: 'Footer'
-  },
-  {
-    _id: '60e57ae7801802b66486e329',
-    fieldLabel: 'Footer Column 2',
-    type: 'singleLine',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 7,
-    hiddenField: false,
-    isDefaultValue: true,
-    defaultValue: '',
-    fieldName: 'footerColumn2',
-    sectionName: 'Footer'
-  }
-  ])
+    {
+      _id: '60e57ae7801802b66486e326',
+      fieldLabel: 'Header Column 1',
+      type: 'singleLine',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 4,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'headerColumn1',
+      sectionName: 'Header'
+    },
+    {
+      _id: '60e57ae7801802b66486e327',
+      fieldLabel: 'Header Column 2',
+      type: 'imageUpload',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 5,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'headerColumn2',
+      sectionName: 'Header'
+    },
+    {
+      _id: '60e57ae7801802b66486e328',
+      fieldLabel: 'Footer Column 1',
+      type: 'multiLine',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 6,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'footerColumn1',
+      sectionName: 'Footer'
+    },
+    {
+      _id: '60e57ae7801802b66486e329',
+      fieldLabel: 'Footer Column 2',
+      type: 'singleLine',
+      option: [],
+      required: false,
+      isTooltip: false,
+      tooltipMessage: '',
+      editAble: true,
+      order: 7,
+      hiddenField: false,
+      isDefaultValue: true,
+      defaultValue: '',
+      fieldName: 'footerColumn2',
+      sectionName: 'Footer'
+    }
+  ]);
   const [section, setSection] = useState([]);
   const [deleteField, setDeleteField] = useState([]);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
-
 
   useEffect(() => {
     const _data = [];
@@ -109,11 +102,11 @@ const CreateQuotePdfTemplate = () => {
         field: seedData.filter((el: any) => el.sectionName === element)
       });
     });
-    console.log(_data)
     setSection(_data);
   }, []);
+
   useEffect(() => {
-    if (id && id != 0) {
+    if (id && id !== '0') {
       (async () => {
         try {
           const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
@@ -125,8 +118,7 @@ const CreateQuotePdfTemplate = () => {
             const { _id, name, createdBy, updatedBy, ...rest } = data;
             setInitialValues(rest);
             setSection(data.section);
-          }
-          else {
+          } else {
             setInitialValues(data);
             setSection(data.section);
           }
@@ -193,12 +185,10 @@ const CreateQuotePdfTemplate = () => {
   };
 
   const handleExportFields = () => {
-    var dataStr =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(section));
-    var dlAnchorElem = document.getElementById("downloadAnchorElem");
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "template_field.json");
+    var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
+    var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', 'template_field.json');
     dlAnchorElem.click();
   };
 
@@ -214,10 +204,8 @@ const CreateQuotePdfTemplate = () => {
     reader.readAsBinaryString(f);
   };
 
-
-
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs
@@ -227,17 +215,13 @@ const CreateQuotePdfTemplate = () => {
                 path: routes.quotePdfTemplate.path
               },
               {
-                title: (id === '0' || isClone === true) ? 'New' : initialValues && initialValues.name
+                title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
               }
             ]}
           />
         </Grid>
         <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
-          <label
-            htmlFor="importField"
-            style={{ color: "white" }}
-            className="cursor-pointer mr-3"
-          >
+          <label htmlFor="importField" style={{ color: 'white' }} className="cursor-pointer mr-3">
             Import Fields
             <input
               onClick={(e: any) => (e.target.value = null)}
@@ -245,21 +229,17 @@ const CreateQuotePdfTemplate = () => {
               name="importField"
               onChange={handleImportFields}
               style={{
-                opacity: "0",
-                position: "absolute",
-                zIndex: -1,
+                opacity: '0',
+                position: 'absolute',
+                zIndex: -1
               }}
               type="file"
             />
           </label>
-          <label
-            style={{ color: "white" }}
-            className="cursor-pointer"
-            onClick={handleExportFields}
-          >
+          <label style={{ color: 'white' }} className="cursor-pointer" onClick={handleExportFields}>
             Export Fields
           </label>
-          <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+          <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
         </Grid>
       </Grid>
       <div className="main-container">
@@ -341,7 +321,7 @@ const CreateQuotePdfTemplate = () => {
           </Box>
         )}
       </div>
-    </Layout>
+    </Fragment>
   );
 };
 

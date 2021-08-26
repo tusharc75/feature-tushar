@@ -13,12 +13,13 @@ import {
 import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
 import queryString from 'query-string';
-import { useHistory, Redirect, Link } from 'react-router-dom';
+import { Redirect, Link } from 'react-router-dom';
 import demoImg from '../../assets/clip-hardworking-man.png';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
 import { useData } from '../../StateProvider/Provider';
+
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(5),
@@ -64,7 +65,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ResetPassword = () => {
   const toastConfig = useContext(CustomToastContext)
-  const history = useHistory();
   const classes = useStyles();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState(false);

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
@@ -26,17 +26,13 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { CircularProgress, IconButton } from "@material-ui/core";
 import {
-  UnauthenticatedTemplate,
   useAccount,
   useMsal,
 } from "@azure/msal-react";
-import { AzureLogin } from "../../Azure/Azure";
 import getAzureAcessToken from "../../Azure/getAzureAccessToken";
 import { validations } from "../../../constants/helpers";
-import { BsFillImageFill } from "react-icons/bs";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { GoArrowDown } from "react-icons/go";
-import FormTypes from "../../../components/Helpers/FormTypes";
 import emailStyles from "../../../pages/Activity/Email/email.module.scss";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -46,17 +42,17 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import ImageAttachments from "./ImageAttachments";
 import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers";
 import { fileIcons } from "./FileIcons";
-import { toolbarConfig } from "./TextEditorToolbar";
 import { useData } from "../../../StateProvider/Provider";
+import TinyMce from "../../../components/TinyMCE"
 
-const emailSchemaHelper = Yup.array()
-  .transform(function (value, originalValue) {
-    if (this.isType(value) && value !== null) {
-      return value;
-    }
-    return originalValue ? originalValue.split(/[\s,]+/) : [];
-  })
-  .of(Yup.string().email(({ value }) => `${value} is not a valid email`));
+// const emailSchemaHelper = Yup.array()
+//   .transform(function (value, originalValue) {
+//     if (this.isType(value) && value !== null) {
+//       return value;
+//     }
+//     return originalValue ? originalValue.split(/[\s,]+/) : [];
+//   })
+//   .of(Yup.string().email(({ value }) => `${value} is not a valid email`));
 
 const EmailSchema = Yup.object().shape({
   name: Yup.string().required("please enter subject"),
@@ -73,7 +69,7 @@ const EmailSchema = Yup.object().shape({
   // cc: emailSchemaHelper,   //  Commented by punit
 });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   textEditor: {
     fontFamily: "inherit",
     border: "none",
@@ -106,10 +102,10 @@ export const CreateEmail = ({
   }: any = useData();
   const isESign = user?.user?.brandQuoteDigitalSignature;
   const toastConfig = useContext(CustomToastContext);
-  const { instance, accounts, inProgress } = useMsal();
+  const { instance, accounts } = useMsal();
   const azureAccount = useAccount(accounts[0] || {});
   const [initialValues, setInitialValues] = useState(null);
-  const [isUploading, setUploading] = useState(false);
+  const [, setUploading] = useState(false);
   const [fileImageAttachments, setFileImageAttachments] = useState([]);
   const [imageAttachments, setImageAttachments] = useState([]);
   const [otherAttachments, setOtherAttachments] = useState([]);
@@ -189,9 +185,9 @@ export const CreateEmail = ({
         to: values.to,
         cc: values.cc,
         subject: values.name,
-        attachment: values["file"]
+        attachment: (otherAttachments.length || fileImageAttachments.length)
           ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments]
-          : [...imageAttachments],
+          : [...imageAttachments]
       };
       if (azureAccount && azureAccount?.username) {
         payload["graphToken"] = await getAzureAcessToken(instance);
@@ -200,7 +196,7 @@ export const CreateEmail = ({
 
       if (emailId) {
         UpdateEmail(emailId, values)
-          .then(({ data }) => {
+          .then(() => {
             handleClose();
           })
           .catch((err) => {
@@ -243,7 +239,7 @@ export const CreateEmail = ({
     };
     axiosInstance()
       .post(`/quote-builder/sendQuoteEmail`, body)
-      .then(({ data: { data } }) => {
+      .then(() => {
         setSending(false);
         if (fetchData) fetchData();
       })
@@ -260,17 +256,17 @@ export const CreateEmail = ({
     }
   };
 
-  const handleToCcChange = (value) => {
-    let val = [];
-    value.map((currentEmail) => {
-      let email =
-        typeof currentEmail === "object" ? currentEmail?.email : currentEmail;
-      if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-        val.push(email);
-      }
-    });
-    return val;
-  };
+  // const handleToCcChange = (value) => {
+  //   let val = [];
+  //   value.map((currentEmail) => {
+  //     let email =
+  //       typeof currentEmail === "object" ? currentEmail?.email : currentEmail;
+  //     if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+  //       val.push(email);
+  //     }
+  //   });
+  //   return val;
+  // };
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
@@ -475,7 +471,7 @@ export const CreateEmail = ({
                               </Box>
                             )}
                             <Divider />
-                            <Box mt={2}>
+                            <Box mt={2} paddingLeft={3}>
                               <div
                                 dangerouslySetInnerHTML={{
                                   __html:
@@ -672,105 +668,21 @@ export const CreateEmail = ({
                                   setFieldValue("cc", val);
                                 }}
                               />
-                              {isQuoteBuilder ? null : (
-                                <Box mt={2}>
-                                  <FormTypes
-                                    label="File"
-                                    name="file"
-                                    isTooltip={true}
-                                    required={false}
-                                    type="fileUpload"
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    size="small"
-                                    isMultipleUpload={true}
-                                    setFieldValue={(name, file) => {
-                                      setFieldValue("file", file);
-                                      onUploadFile(file);
-                                    }}
-                                    usePublicUrlforFileUpload={true}
-                                    doNotShowUploadedFile={true}
-                                    imageOrFileUploadCompletePercentage={(
-                                      completePercentage
-                                    ) => {
-                                      setUploadingImageOrFileProgress(
-                                        completePercentage
-                                      );
-                                    }}
-                                  />
-                                </Box>
-                              )}
-                              {renderFileThumbnails}
-                              {isQuoteBuilder
-                                ? renderQuotesFileThumbnails
-                                : null}
-                              <ImageAttachments
-                                imageAttachments={fileImageAttachments}
-                                onImageClick={(attachment) => {
-                                  setImageSource(attachment);
-                                  setOpen(true);
-                                }}
-                                isCreateOnly={true}
-                                onDelete={handleDeleteFileImageAttachment}
-                                emailId={emailId}
-                              />
-                              <Box
-                                style={{
-                                  border: "1px solid #999",
-                                  minHeight: "220px",
-                                }}
-                              >
-                                <RichTextEditor
-                                  style={{ border: "none" }}
-                                  className={classes.textEditor}
-                                  value={values["content"]}
-                                  onChange={(value) =>
-                                    setFieldValue("content", value)
-                                  }
-                                  customControls={
-                                    isQuoteBuilder
-                                      ? null
-                                      : [
-                                        <button
-                                          type="button"
-                                          className={
-                                            emailStyles.emailRichTextEditorCustomControls
-                                          }
-                                        >
-                                          <label htmlFor="avatar">
-                                            <IconButton
-                                              title="Add picture"
-                                              size="small"
-                                              aria-label="upload picture"
-                                              component="span"
-                                            >
-                                              <BsFillImageFill
-                                                size={18}
-                                                color="black"
-                                              />
-                                              <input
-                                                disabled={isUploading}
-                                                id="avatar"
-                                                name="avatar"
-                                                onChange={handleUploadImage}
-                                                accept="image/x-png,image/gif,image/jpeg"
-                                                style={{
-                                                  opacity: "0",
-                                                  position: "absolute",
-                                                  zIndex: -1,
-                                                }}
-                                                onClick={(e: any) =>
-                                                  (e.target.value = null)
-                                                }
-                                                type="file"
-                                              />
-                                            </IconButton>
-                                          </label>
-                                        </button>,
-                                      ]
-                                  }
-                                  toolbarConfig={toolbarConfig}
+
+                              <Box>
+                                {renderFileThumbnails}
+                                {isQuoteBuilder
+                                  ? renderQuotesFileThumbnails
+                                  : null}
+                                <ImageAttachments
+                                  imageAttachments={fileImageAttachments}
+                                  onImageClick={(attachment) => {
+                                    setImageSource(attachment);
+                                    setOpen(true);
+                                  }}
+                                  isCreateOnly={true}
+                                  onDelete={handleDeleteFileImageAttachment}
+                                  emailId={emailId}
                                 />
                                 <ImageAttachments
                                   imageAttachments={imageAttachments}
@@ -781,6 +693,23 @@ export const CreateEmail = ({
                                   isCreateOnly={true}
                                   onDelete={handleDeleteImageAttachment}
                                   emailId={emailId}
+                                />
+                                <TinyMce
+                                  onChange={(value) => {
+                                    setFieldValue("content", value)
+                                  }}
+                                  initialValue={initialValues?.content}
+                                  imageOrFileUploadCompletePercentage={(
+                                    completePercentage
+                                  ) => {
+                                    setUploadingImageOrFileProgress(
+                                      completePercentage
+                                    );
+                                  }}
+                                  doNotShowUploadFile={isQuoteBuilder ? true : false}
+                                  onUploadFile={onUploadFile}
+                                  onUploadImage={handleUploadImage}
+                                  usePublicUrlforFileUpload={true}
                                 />
                               </Box>
                             </Grid>

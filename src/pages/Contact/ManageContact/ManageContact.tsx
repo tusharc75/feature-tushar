@@ -129,37 +129,33 @@ export default function ManageContact(props) {
   };
 
   const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId, selectedEntity) => {
-    setCollaboratorDataSource(
-      getCollaboratorDropdownDataSource(
+    if (selectedEntity?.length > 0) {
+
+      let newTempArray = []
+
+      const ownerCollaboratorData = getCollaboratorDropdownDataSource(
         selectedOwnerId,
         ownerCollaboratorCommonDataSource
-      )
-    );
+      );
 
-    if(selectedEntity && collaboratorDataSource){
-     
-      let newTempArray = []
-     
-      selectedEntity.map(d=>{
-        getCollaboratorDropdownDataSource(
-          selectedOwnerId,
-          ownerCollaboratorCommonDataSource
-        ).map(item=>{
-          if(item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId){
+      selectedEntity.map(d => {
+        ownerCollaboratorData.map(item => {
+          if (item.entities?.find(s => s.entity === d && item.optionValue !== selectedOwnerId)) {
             newTempArray.push(item)
           }
         })
         setCollaboratorDataSource(newTempArray)
-        // setCollaboratorDataSource(
-        //   getCollaboratorDropdownDataSource(
-        //   selectedOwnerId,
-        //   ownerCollaboratorCommonDataSource
-        // ).filter(item => item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId)) 
-        
-        
       })
     }
-  };
+    else {
+      setCollaboratorDataSource(
+        getCollaboratorDropdownDataSource(
+          selectedOwnerId,
+          ownerCollaboratorCommonDataSource
+        )
+      );
+    }
+  }
   //  Owner, Collaborator Code - End
 
   const onReportsToDropdownOpen = (selectedAccount) => {
@@ -243,8 +239,8 @@ export default function ManageContact(props) {
                                   >
                                     {field.fieldName === "owner" ? (
                                       <FormTypes
-                                        field={field._id}
-                                        lookup={field.lookup}
+                                        isNew={isNew}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -300,7 +296,7 @@ export default function ManageContact(props) {
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={disableOwnerSelection}
+                                        disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
                                           !fromProject &&
                                           onOwnerDropdownOpen(
@@ -310,9 +306,10 @@ export default function ManageContact(props) {
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
-                                        field={field._id}
-                                        lookup={field.lookup}
+                                        isNew={isNew}
+                                        {...field}
                                         multiple
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -337,7 +334,7 @@ export default function ManageContact(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
-                                            values.owner, values.entity ? values.entity : "" 
+                                            values.owner, values.entity ? values.entity : []
                                           )
                                         }
                                       />
@@ -366,8 +363,8 @@ export default function ManageContact(props) {
                                           }
                                         >
                                           <FormTypes
-                                            field={field._id}
-                                            lookup={field.lookup}
+                                            isNew={isNew}
+                                            {...field}
                                             values={
                                               accountId
                                                 ? initializeAccountDropdown(
@@ -376,7 +373,7 @@ export default function ManageContact(props) {
                                                 )
                                                 : values
                                             }
-                                            disabled={fromProject}
+                                            disabled={fromProject || (!isNew && field.disableOnEdit)}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -414,9 +411,9 @@ export default function ManageContact(props) {
                                                 <IconButton
                                                   onClick={onCreateAccount}
                                                   size="small"
-                                                  disabled={fromProject}
+                                                  disabled={fromProject || (!isNew && field.disableOnEdit)}
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit)) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -435,8 +432,9 @@ export default function ManageContact(props) {
                                       </Grid>
                                     ) : field.fieldName === "reportsTo" ? (
                                       <FormTypes
-                                        field={field._id}
-                                        lookup={field.lookup}
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -458,8 +456,9 @@ export default function ManageContact(props) {
                                       />
                                     ) : (
                                       <FormTypes
-                                        field={field._id}
-                                        lookup={field.lookup}
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}

@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Fragment } from "react";
 import { Box, Chip, Grid, Paper, Typography } from "@material-ui/core";
 import moment from "moment";
-
 import axiosInstance from "../../axios/axiosInstance";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import Layout from "../../components/Layout";
 import { ListRelatedTo } from "../../components/Activity/Helpers/ListRelatedTo";
 import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 import { MdDateRange } from 'react-icons/md';
@@ -59,10 +57,11 @@ const Reminder = () => {
   }, []);
 
   useEffect(() => {
+    if (!selectedActivity)
     fetchTasks();
     fetchEvents();
     fetchCases();
-  }, []);
+  }, [selectedActivity]);
 
   const dynamicChip = (data: string, type: string = null) => (
     <Chip
@@ -115,7 +114,7 @@ const Reminder = () => {
           fetchBoard={() => {}}
         />
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[{ title: routes.reminder.title }]} />
         </Grid>
@@ -285,7 +284,7 @@ const Reminder = () => {
             </Box>
           </Paper>
         </div>
-      </Layout>
+      </Fragment>
     </>
   );
 };

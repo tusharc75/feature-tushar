@@ -3,6 +3,7 @@ import { camelCase } from "lodash";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import { useData } from "../StateProvider/Provider";
 import Unauthorized from "../pages/Unauthorized";
+import Layout from "./Layout";
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -52,7 +53,10 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "doa-request",
         "product-list",
         "product/details",
-        "quote-pdf-template"
+        "quote-pdf-template",
+        "quote-pdf-template",
+        "product-inventory",
+        "equiptment-rental-master"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -76,7 +80,11 @@ const ProtectedRoute = ({ children, ...rest }) => {
               <p>Checking Credentials...</p>
             </div>
           ) : access ? (
-            children
+            <Layout>
+              {/* <Suspense fallback={<div>Loading...</div>}> */}
+                {children}
+              {/* </Suspense> */}
+            </Layout>
           ) : (
             <Unauthorized />
           )
@@ -84,11 +92,10 @@ const ProtectedRoute = ({ children, ...rest }) => {
           <Redirect
             to={{
               pathname: "/login",
-              search: `${
-                location && location.pathname
-                  ? `?redirect=${location.pathname}${location.search}`
-                  : null
-              }`,
+              search: `${location && location.pathname
+                ? `?redirect=${location.pathname}${location.search}`
+                : null
+                }`,
               state: { from: location },
             }}
           />

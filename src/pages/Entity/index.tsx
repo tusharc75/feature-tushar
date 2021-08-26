@@ -1,15 +1,13 @@
-import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import {
   Dialog,
   Grid,
   IconButton,
-  Link as MuiLink,
   Tooltip,
 } from "@material-ui/core";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { entity, gridLoadingTimeout, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
@@ -31,7 +29,6 @@ let entityTimeout;
 
 const Entity: FC = () => {
 
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -39,21 +36,12 @@ const Entity: FC = () => {
   }: any = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
-  const [entityPermissions, setEntityPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
-
-
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
-  const [singleSelectEntity, setSingleSelectEntity] = useState(null);
+
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -68,7 +56,7 @@ const Entity: FC = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -76,14 +64,7 @@ const Entity: FC = () => {
   }
   //  Grid Variables - End
 
-
   const { entityResource, entityApi } = entity;
-
-  useEffect(() => {
-    if (permissions && permissions[entityResource]) {
-      setEntityPermissions(permissions[entityResource]);
-    }
-  }, [permissions]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -117,9 +98,7 @@ const Entity: FC = () => {
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${entityId}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
-        setSingleSelectEntity(entityId)
         setUsersDialogLoding(false)
-
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -134,7 +113,7 @@ const Entity: FC = () => {
 
   const ActionsRenderer = params => <>
 
-    {entityPermissions.isUpdate ?
+    {permissions[entityResource]?.isUpdate ?
 
       <Tooltip title="Assign users">
         <IconButton
@@ -187,7 +166,7 @@ const Entity: FC = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -268,7 +247,7 @@ const Entity: FC = () => {
 
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.entity]} />
@@ -279,7 +258,7 @@ const Entity: FC = () => {
           sm={1}
           xs={2}>
           <ImportExportLinks
-            permissions={entityPermissions}
+            permissions={permissions[entityResource]}
             module="entity(s)"
             api={entityApi}
             afterImportCompleted={() => {
@@ -294,7 +273,7 @@ const Entity: FC = () => {
           <EntityHeader
             onSearch={handleSearch}
             searchVal={search}
-            entityPermissions={entityPermissions}
+            entityPermissions={permissions[entityResource]}
             onCreate={handleCreate}
             openUserDialog={handleOpenDialog}
             userActionDiabled={selectedRecords.length === 0} //single select entity can assign user
@@ -335,7 +314,7 @@ const Entity: FC = () => {
           </Dialog>
         )}
       </CustomContainer >
-    </Layout >
+    </Fragment >
   );
 
 };

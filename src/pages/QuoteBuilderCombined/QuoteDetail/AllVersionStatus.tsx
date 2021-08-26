@@ -1,8 +1,6 @@
-import { IconButton, Tooltip, Typography } from '@material-ui/core';
-import { DataGrid } from '@material-ui/data-grid'
-import React, { useContext, useReducer, useState } from 'react'
+import { IconButton, Tooltip } from '@material-ui/core';
+import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomDataGridNoDataFound from '../../../components/Helpers/CustomDataGridNoDataFound'
 import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
 import { Link } from "react-router-dom";
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -14,79 +12,14 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
-    const [loadingVersions, setLoadingVersions] = useState(true);
     const [gridApi, setGridApi] = useState(null);
-    const [columnApi, setColumnApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
-    const [versionStatusData, setVersionStatusData] = useState({
-        columns: [
-            {
-                field: "versionNumber",
-                headerName: "Version #",
-                flex: 0.5,
-                renderCell: (params: any) => (
-                    <Link
-                        title={params.value}
-                        className="text-truncate link"
-                        onClick={() => {
-                            fetchQuoteData(params.value);
-                            handleChangeVersionFromAllVersion(params.value);
-                        }}
-                    >
-                        {params.value}
-                    </Link>
-                ),
-            },
-            {
-                field: "status",
-                headerName: "Status",
-                flex: 1,
-                renderCell: (params: any) => (
-                    <Link
-                        title={params.value}
-                        className="text-truncate link"
-                        onClick={() => {
-                            handleChangeVersionFromAllVersion(params.row.versionNumber);
-                            fetchQuoteData(params.row.versionNumber);
-                        }}
-                    >
-                        {params.value}
-                    </Link>
-                ),
-            },
-            {
-                field: "comment",
-                headerName: "Comment",
-                flex: 1,
-                renderCell: (params: any) => (
-                    <Typography title={params.value} className="text-truncate">{params.value}</Typography>
-                ),
-            },
-            {
-                field: "processStatus", headerName: "Conclusion", flex: 1,
-                renderCell: (params: any) => (
-                    <Typography
-                        title={params.value}
-                    >
-                        {params.value}
-                    </Typography>
-                ),
-            },
-            { field: "totalcost", headerName: "Total Cost", flex: 0.5 },
-            {
-                field: "totalSalesPrice",
-                headerName: "Total Sales Price",
-                flex: 0.5,
-            },
-        ],
-        data: [],
-    });
     const [columns,] = useState([
         { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "nameRenderer" },
-        { field: "processStatus", headerName: "Conclusion", show: true, cellRenderer: "nameRenderer" },
+        { field: "processStatus", headerName: "Current Step", show: true, cellRenderer: "nameRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
         { field: "totalcost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
         { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, cellRenderer: "commonRenderer" },
@@ -138,7 +71,6 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     }, [quoteId]);
 
     const getVersionStatus = () => {
-        setLoadingVersions(true);
         dispatch({ type: "loading", loading: true });
 
         if (gridApi) {
@@ -163,21 +95,13 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                     };
                 });
 
-                setVersionStatusData((prevState) => {
-                    return {
-                        ...prevState,
-                        data: newData,
-                    };
-                });
                 dispatch({ type: "initialize", data: newData, count: newData.length });
                 setTimeout(() => {
                     dispatch({ type: "loading", loading: false });
                 }, gridLoadingTimeout);
-                setLoadingVersions(false);
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
-                setLoadingVersions(false);
                 dispatch({ type: "loading", loading: false });
 
             });

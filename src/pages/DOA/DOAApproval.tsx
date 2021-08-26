@@ -1,9 +1,7 @@
-import { useEffect, useState, useContext, useReducer } from "react";
+import { useEffect, useState, useContext, useReducer, Fragment } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
-import Layout from "../../components/Layout";
-
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography } from "@material-ui/core";
@@ -137,9 +135,7 @@ const DOAApproval = () => {
     limit,
     pageSizes,
   } = state;
-  const [sellingPrice, setSellingPrice] = useState(0);
   const [QData, setQData] = useState(null);
-  const [loadingData, setLoadingData] = useState(true);
   const [needDOA, setneedDOA] = useState(false);
   const [PDFName, setPDFName] = useState("");
   const [buttontext, setButton] = useState("Accept");
@@ -184,8 +180,6 @@ const DOAApproval = () => {
       gridApi.setRowData([]);
     }
 
-    setLoadingData(true);
-
     axiosInstance()
       .get("/quote-builder/getQuotefromDOAId/" + id)
       .then(({ data }) => {
@@ -214,7 +208,6 @@ const DOAApproval = () => {
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
-        setSellingPrice(data.TotalSellingPrice);
         fetchDOA(data.Quotedby);
         setPDFName(data.PDF);
 
@@ -222,12 +215,10 @@ const DOAApproval = () => {
         if (data.Quote_Status !== "Sent for DOA") {
           setQStatus(false);
         }
-        setLoadingData(false);
       })
       .catch((err) => {
         dispatch({ type: "loading", loading: false });
         setToastConfig(err);
-        setLoadingData(false);
       });
   };
 
@@ -286,7 +277,7 @@ const DOAApproval = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <div className="headerbox">
         <CustomBreadCrumbs
           routes={[
@@ -540,7 +531,7 @@ const DOAApproval = () => {
           accepted={quoteStatusChangeData}
         />
       )}
-    </Layout>
+    </Fragment>
   );
 };
 

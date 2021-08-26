@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
-import Layout from "../../components/Layout";
 import axiosInstance from "../../axios/axiosInstance";
 import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -69,10 +68,10 @@ const QuoteBuilders = () => {
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [quotePermissions, setQuotePermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
+    isCreate: permissions?.quoteBuilder?.isCreate,
+    isUpdate: permissions?.quoteBuilder?.isUpdate,
+    isRead: permissions?.quoteBuilder?.isRead,
+    isDelete: permissions?.quoteBuilder?.isDelete,
   });
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
@@ -130,7 +129,7 @@ const QuoteBuilders = () => {
         ),
       },
       {
-        field: "processStatus", headerName: "Conclusion", flex: 1,
+        field: "processStatus", headerName: "Current Step", flex: 1,
         renderCell: (params: any) => (
           <Typography
             title={params.value}
@@ -353,9 +352,9 @@ const QuoteBuilders = () => {
   }
 
   const QuoteNameRenderer = (params) => (
-    <span>
+    <>
       <Link
-        className="link"
+        className="text-truncate link"
         title={params.value}
         to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}
       >
@@ -370,7 +369,7 @@ const QuoteBuilders = () => {
             getVersionStatus(params.data._id, params.data.currency)
           }}>({params.data.versionCount})</span>
       </Tooltip>
-    </span>
+    </>
   );
 
   const CustomerAccountNameRenderer = (params) => (
@@ -528,7 +527,7 @@ const QuoteBuilders = () => {
               ...restProperties
             } = u;
 
-            let count = Object.keys(u.versions).length;
+            let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
             let versionArray = []
             Object.keys(u.versions).forEach(key => {
@@ -553,7 +552,7 @@ const QuoteBuilders = () => {
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
               status: tempStatus,
-              versionCount: count,
+              versionCount: versionCount,
               versionData: versionArray,
               currency: u.currency,
               relatedOpportunity: u.opportunity?.optionLabel,
@@ -650,7 +649,7 @@ const QuoteBuilders = () => {
 
   return (
     <>
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.quoteBuilder]} />
@@ -761,7 +760,7 @@ const QuoteBuilders = () => {
             />
           ) : null}
         </CustomContainer>
-      </Layout>
+      </Fragment>
 
       {showCreateQuoteDialog && (
         <ManageQuoteDialog

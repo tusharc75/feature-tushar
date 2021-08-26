@@ -1,8 +1,7 @@
-import { useState, FC, useReducer, useEffect, useContext } from "react";
+import { useState, FC, useReducer, useEffect, useContext, Fragment } from "react";
 import { Grid } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import ProjectHeader from "./Header";
@@ -176,7 +175,7 @@ const ProjectSales: FC = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -423,7 +422,7 @@ const ProjectSales: FC = () => {
           fetchData={fetchProjects}
         />
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.projectSales]} />
@@ -491,7 +490,7 @@ const ProjectSales: FC = () => {
             onOk={handleDeleteProjects}
           />
         ) : null}
-      </Layout>
+      </Fragment>
     </>
   );
 };

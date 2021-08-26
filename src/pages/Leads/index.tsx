@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Grid, Tooltip, IconButton } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import Layout from '../../components/Layout';
 import LeadsHeader from './LeadsHeader';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
@@ -49,6 +48,7 @@ const Leads = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
@@ -56,10 +56,10 @@ const Leads = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
   const [leadsPermissions, setLeadsPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions[leadResource]?.isCreate,
+    isUpdate: permissions[leadResource]?.isUpdate,
+    isRead: permissions[leadResource]?.isRead,
+    isDelete: permissions[leadResource]?.isDelete,
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -69,7 +69,6 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const { leadResource, leadApi } = lead;
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
@@ -89,7 +88,7 @@ const Leads = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -439,7 +438,7 @@ const Leads = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.lead]} />
@@ -567,7 +566,7 @@ const Leads = () => {
           />
         )}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

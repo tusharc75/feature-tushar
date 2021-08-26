@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Layout from '../../../components/Layout';
 import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { GetReferenceName, GetEmails } from '../../../axios/activity';
-import moment from 'moment';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
 import CustomContainer from '../../../components/CustomContainer';
@@ -23,7 +21,7 @@ import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { gridPageSizes, isObjectEmpty, RESOURCE_LABEL } from '../../../constants/helpers';
+import { isObjectEmpty } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
@@ -66,7 +64,7 @@ const Email = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
-  const [columns, setColumns] = useState([
+  const [columns,] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
     {
       field: 'subject',
@@ -92,9 +90,9 @@ const Email = () => {
   ]);
 
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -111,7 +109,7 @@ const Email = () => {
         .then(({ data }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [referenceId]);
 
@@ -192,7 +190,7 @@ const Email = () => {
         setEmailId(params.data.id);
       }}
     >
-      {typeof params.data.to == 'string' ? (
+      {typeof params.data.to === 'string' ? (
         <span> {params.data.to}</span>
       ) : (
         <span>{params.data?.isCreatedByMe ? getToEmailList(params.data.to) : params.data?.mailbox ?? ''}</span>
@@ -230,7 +228,7 @@ const Email = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map((field) => {
+      Object.keys(filters).forEach((field) => {
         if (filters[field].filter.toLowerCase() === 'me') {
           filters[field].filter = user?.user?.email;
         }
@@ -299,7 +297,7 @@ const Email = () => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Email deleted succesfully'
+            message: 'Email deleted successfully'
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
@@ -329,7 +327,7 @@ const Email = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item xs={12}>
           <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
@@ -455,7 +453,7 @@ const Email = () => {
           </Dialog>
         ) : null}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

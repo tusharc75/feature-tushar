@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useContext, useReducer } from "react";
+import React, { useEffect, useState, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import { Link } from "react-router-dom";
-import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,7 +17,7 @@ const FormBuilder = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
@@ -59,7 +58,7 @@ const FormBuilder = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[routes.formBuilder]} />
@@ -80,7 +79,7 @@ const FormBuilder = () => {
           isClientSideGrid={true} loading={loading} />
 
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

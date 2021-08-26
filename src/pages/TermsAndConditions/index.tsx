@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
-import Layout from "../../components/Layout";
+import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -20,7 +19,7 @@ import CustomContainer from "../../components/CustomContainer";
 import styles from "../Leads/Header.module.scss";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { termsAndCondition, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
@@ -71,9 +70,9 @@ export default function TermsAndCondition(props) {
                     setDeleteRec(params.data);
                     setShowDeleteConfirmBox(true)
                 }}
-                    disabled={actionsPermissions.isDelete ? false : true}
+                    disabled={permissions?.termsAndConditions?.isDelete ? false : true}
                 >
-                    <DeleteIcon color={actionsPermissions.isDelete ? "error" : "disabled"}
+                    <DeleteIcon color={permissions?.termsAndConditions?.isDelete ? "error" : "disabled"}
                     />
                 </IconButton>
             </Tooltip >
@@ -184,7 +183,7 @@ export default function TermsAndCondition(props) {
 
     return (
 
-        <Layout>
+        <Fragment>
             <Grid container className="headerbox">
                 <Grid item xs={12}>
                     <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
@@ -287,7 +286,7 @@ export default function TermsAndCondition(props) {
                     />
                 ) : null}
             </CustomContainer>
-        </Layout>
+        </Fragment>
 
 
     )

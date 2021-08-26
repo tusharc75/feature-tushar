@@ -123,13 +123,20 @@
         width: 100% !important;
     }
 }
-
-/* Medium devices (landscape tablets, 768px and up) */
-@media only screen and (max-width: 959px) {
-    .main-container {
+@media only screen and (max-width: 770px) {
+    .detail-container{
         top: 0;
         margin: 0;
     }
+
+    .main-container{
+        top: 0;
+        margin: 0;
+    }
+    
+}
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (max-width: 959px) {
     .headerbox {
         width: 100% !important;
     }
@@ -154,7 +161,8 @@
     .activityHide {
         display: none;
     }
-    .detail-container {
-        height: auto;
-    }
+}
+
+.scroll-y-hidden{
+    overflow-y: hidden;
 }

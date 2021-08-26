@@ -1,28 +1,52 @@
 .sidebar_nav {
-  width: 25rem;
-  margin-top: 1rem;
-  max-height: 45rem;
-
-  overflow-y: scroll;
+  padding: 10px;
+  height: calc(100vh - 109px);
+  overflow: auto;
 }
 
 .single_category {
-  margin: 0.8rem;
+  margin: 4px;
+  display: flex;
+  align-items: center;
+  height: 2rem;
 
   &_name {
     color: var(--colorContact);
     margin: 0.2rem;
     font-weight: 600;
+    //padding: 0 0.5rem;
   }
 
   &_icon {
     color: var(--colorContact);
   }
-}
 
+}
+.padding_in_ratings{
+  margin-top: 20px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e9e6e6;
+  text-align: left;
+  padding: 3px 10px 0 7px;
+  font-size: 20px;
+  font-weight: bolder;
+  color: #041918;
+}
+.single_category_checkBox{
+  width: 15px !important;
+  height: 15px !important;
+}
+.font_size{
+  font-size: 15px;
+  color: #818a8d;
+}
 .rating {
+  padding: 4px 5px;
   display: flex;
   justify-content: space-between;
+}
+.rating_size{
+  font-size: 1.3rem !important;
 }
 @media screen and (max-width: 700px) {
   .sidebar_nav {

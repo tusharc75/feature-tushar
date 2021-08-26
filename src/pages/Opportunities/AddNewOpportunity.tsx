@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Tabs, Tab, Paper, useTheme } from "@material-ui/core";
 
@@ -7,7 +7,7 @@ import NewOpportunityStepper from "../../components/NewOpportunityStepper";
 import OpportunityNavLinks from "../../components/NavLinks";
 import Container from "../../components/CustomContainer";
 import TabPanel from "../../components/TabPanel";
-import { OpportunityInformation, Contacts } from "../../components/Tabs";
+// import { OpportunityInformation, Contacts } from "../../components/Tabs";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,7 +43,7 @@ const AddNewOpportunity = () => {
   ];
 
   return (
-    <Layout>
+    <Fragment>
       <div className={classes.root}>
         <OpportunityNavLinks
           OpportunityDashboard={true}
@@ -80,29 +80,29 @@ const AddNewOpportunity = () => {
           </Paper>
 
           <TabPanel value={value} index={0}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <Contacts />
+            {/* <Contacts /> */}
           </TabPanel>
           <TabPanel value={value} index={2}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={4}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={5}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
           <TabPanel value={value} index={6}>
-            <OpportunityInformation />
+            {/* <OpportunityInformation /> */}
           </TabPanel>
         </Container>
       </div>
-    </Layout>
+    </Fragment>
   );
 };
 

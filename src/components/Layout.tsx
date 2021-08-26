@@ -55,11 +55,11 @@ const Layout = ({ children, width }) => {
           onClick={handleToggleState}
         >
           <div className={classes.layout}>
-           {children}
+            {children}
           </div>
         </motion.div>
       </Box>
-      <GlobalUserChat/>
+      <GlobalUserChat />
     </div>
   );
 };

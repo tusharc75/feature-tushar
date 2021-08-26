@@ -373,6 +373,11 @@ body::-webkit-scrollbar-thumb {
   animation: dot-animation 2s infinite;
 }
 
+.loading-dots:after {
+  content: "";
+  animation: dot-animation 2s infinite;
+}
+
 @keyframes dot-animation {
   0% {
     content: ".";
@@ -386,7 +391,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .ag-grid-listing-grid {
-  height: calc(100vh - 280px);
+  height: calc(100vh - 260px);
   margin: 0 6px 0;
 }
 
@@ -505,7 +510,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .detail-container {
-  height: calc(100vh - 100px);
+  height: calc(100vh - 98px);
   position: relative;
   top: 36px;
   padding: 0 10px 10px 10px;
@@ -924,6 +929,11 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: 1fr 26px;
 }
+.grid-product-category {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  column-gap: 10px;
+}
 
 .grid-mobile {
   display: grid;
@@ -956,7 +966,7 @@ body::-webkit-scrollbar-thumb {
   font-size: 28px;
   border-left: 2px solid #e6dddd;
 
-  & .icon{
+  & .icon {
     left: -10px;
     position: absolute;
     top: 54px;

@@ -1,4 +1,4 @@
-import { useState, FC, useEffect, useContext, useReducer } from "react";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
 import { Tooltip, IconButton, Grid, Dialog } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
@@ -9,7 +9,6 @@ import {
   UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
@@ -85,9 +84,9 @@ const User: FC = () => {
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -582,7 +581,7 @@ const User: FC = () => {
           />
         </Dialog>
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.user]} />
@@ -629,7 +628,7 @@ const User: FC = () => {
               openUserSetupDialog={() => {
                 setOpenUserSetupDialog(true);
               }}
-              assignDoaDisabled = {selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
+              assignDoaDisabled={selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
             />
           </div>
 
@@ -674,7 +673,7 @@ const User: FC = () => {
                 : handleDeleteUser}
           />
         ) : null}
-      </Layout>
+      </Fragment>
     </>
   );
 };

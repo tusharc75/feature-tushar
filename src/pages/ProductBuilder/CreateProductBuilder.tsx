@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
-import Layout from "../../components/Layout";
 import Button from "@material-ui/core/Button";
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -31,7 +30,6 @@ const CreateProductBuilder = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
-      user: { user },
       permissions: { productBuilder: permissions },
     },
   }: any = useData();
@@ -40,6 +38,7 @@ const CreateProductBuilder = () => {
 
   const [isUpdating] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
+  const [currency, setCurrency] = useState("")
 
   useEffect(() => {
     fetchOneProductBuilder();
@@ -50,6 +49,7 @@ const CreateProductBuilder = () => {
       .get(`/productBuilder/` + id)
       .then(({ data: { data } }) => {
         setInitialValues(data);
+        setCurrency(data?.currency)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -70,7 +70,7 @@ const CreateProductBuilder = () => {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs
@@ -209,6 +209,7 @@ const CreateProductBuilder = () => {
                     <Box mt={1}>
                       {isUpdating ? null : (
                         <ProductBuilder
+                          currency={currency}
                           permissions={permissions}
                           createdBy={values?.createdBy?.user}
                           productBuilderId={id}
@@ -230,6 +231,7 @@ const CreateProductBuilder = () => {
                     <Box mt={1}>
                       {isUpdating ? null : (
                         <ProductBuilder
+                          currency={currency}
                           permissions={permissions}
                           createdBy={values?.createdBy?.user}
                           productBuilderId={id}
@@ -284,6 +286,7 @@ const CreateProductBuilder = () => {
                     <Box mt={1}>
                       {isUpdating ? null : (
                         <ProductBuilder
+                          currency={currency}
                           permissions={permissions}
                           createdBy={values?.createdBy?.user}
                           productBuilderId={id}
@@ -307,7 +310,7 @@ const CreateProductBuilder = () => {
           </Box>
         )}
       </CustomContainer>
-    </Layout>
+    </Fragment>
   );
 };
 

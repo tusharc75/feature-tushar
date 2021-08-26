@@ -13,17 +13,19 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
-import { IconButton, CircularProgress, Typography, Paper, Tooltip } from '@material-ui/core'
+import { IconButton, Typography, Paper, Tooltip } from '@material-ui/core'
 import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon } from "../../../assets/file_icons";
 import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import ImagePreview from "../Email/ImagePreview";
 import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
+
 const AttachmentSchema = Yup.object().shape({
     name: Yup.string().required("please add attachment name"),
     fileUrl: Yup.string().required("please upload attachment"),
 });
+
 const fileIcons = [
     {
         extensions: [".txt", ".rtf"],
@@ -59,16 +61,15 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
 
     const [initialValues, setInitialValues] = useState(null);
     const [loading, setLoading] = useState(false)
-    const [downloadProgress, setDownloadProgress] = useState(0);
-    const [isDownloading, setIsDownloading] = useState(false);
+    const [, setDownloadProgress] = useState(0);
+    const [, setIsDownloading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-    const [attachments, setAttachments] = useState([]);
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
-    const [imageAttachments, setImageAttachments] = useState([])
+    const [imageAttachments,] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
-    const [fileImageAttachments, setFileImageAttachments] = useState([])
+    const [fileImageAttachments,] = useState([]) 
     const [canEdit, setCanEdit] = useState(true);
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
     const [attachmentToDelete, setAttachemnetToDelete] = useState("");

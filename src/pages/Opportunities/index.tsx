@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, useReducer } from 'react';
 import { Grid, Chip } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayDate } from '../../services/util';
 import OpportunitiesHeader from './OpportunitiesHeader';
@@ -42,16 +41,17 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [opportunityPermissions, setOpportunityPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
+    isCreate: permissions[opportunityResource]?.isCreate,
+    isUpdate: permissions[opportunityResource]?.isUpdate,
+    isRead: permissions[opportunityResource]?.isRead,
+    isDelete: permissions[opportunityResource]?.isDelete
   });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
@@ -66,7 +66,6 @@ const Opportunities = () => {
     resource: history.location?.state?.resource
   });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { opportunityResource, opportunityApi } = opportunity;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -86,7 +85,7 @@ const Opportunities = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -403,98 +402,95 @@ const Opportunities = () => {
 
   return (
     <>
-      <Layout>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.opportunity]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={opportunityPermissions}
-                    module="opportunities"
-                    api={opportunityApi}
-                    afterImportCompleted={() => {
-                      fetchOpportunities();
-                    }}
-                  />
-                </Grid>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[routes.opportunity]} />
+        </Grid>
+        <Grid item md={8} sm={1} xs={2}>
+          <Grid container direction="row">
+            <Grid item xs={12} sm={12}>
+              <Grid container justify="flex-end">
+                <ImportExportLinks
+                  permissions={opportunityPermissions}
+                  module="opportunities"
+                  api={opportunityApi}
+                  afterImportCompleted={() => {
+                    fetchOpportunities();
+                  }}
+                />
               </Grid>
             </Grid>
           </Grid>
         </Grid>
+      </Grid>
 
-        {/* Tables Begins Here */}
-        <CustomContainer>
-          <div className="header-panel">
-            <OpportunitiesHeader
-              selectedRecords={selectedRecords}
-              onTypeChange={handleOpportunityTypeChange}
-              options={OpportunityTypes}
-              onSearch={handleSearch}
-              search={search}
-              opportunityPermissions={opportunityPermissions}
-              onCreate={clickCreateNew}
-              showConfirmBox={showConfirmBox}
-              canDelete={selectedRecords.length === 0}
-              icon={<GiHiveMind className="headerLogo" />}
-              heading={routes.opportunity.title}
-              showTransferEntityDialog={handleTransferEntityDialog}
-            >
-              {accountDetails.accountId && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${
-                    accountDetails.accountName
+      {/* Tables Begins Here */}
+      <CustomContainer>
+        <div className="header-panel">
+          <OpportunitiesHeader
+            selectedRecords={selectedRecords}
+            onTypeChange={handleOpportunityTypeChange}
+            options={OpportunityTypes}
+            onSearch={handleSearch}
+            search={search}
+            opportunityPermissions={opportunityPermissions}
+            onCreate={clickCreateNew}
+            showConfirmBox={showConfirmBox}
+            canDelete={selectedRecords.length === 0}
+            icon={<GiHiveMind className="headerLogo" />}
+            heading={routes.opportunity.title}
+            showTransferEntityDialog={handleTransferEntityDialog}
+          >
+            {accountDetails.accountId && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
                   }`}
-                  onDelete={() => {
-                    setAccountDetails({ accountId: null, accountName: null, resource: null });
-                  }}
-                />
-              )}
-            </OpportunitiesHeader>
-          </div>
+                onDelete={() => {
+                  setAccountDetails({ accountId: null, accountName: null, resource: null });
+                }}
+              />
+            )}
+          </OpportunitiesHeader>
+        </div>
 
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-            renderedFrom={opportunityResource}
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          actionWidth={100}
+          loading={loading}
+          renderedFrom={opportunityResource}
+        />
+
+        {showDeleteWarningConfirmBox ? (
+          <MessageDialog
+            open={showDeleteWarningConfirmBox}
+            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+            onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
-
-          {showDeleteWarningConfirmBox ? (
-            <MessageDialog
-              open={showDeleteWarningConfirmBox}
-              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-              onClose={() => setShowDeleteWarningConfirmBox(false)}
-            />
-          ) : null}
-          {isConfirmDialogVisible ? (
-            <ConfirmationDialog
-              open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${
-                deleteRecord.opportunityName || ''
+        ) : null}
+        {isConfirmDialogVisible ? (
+          <ConfirmationDialog
+            open={isConfirmDialogVisible}
+            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${deleteRecord.opportunityName || ''
               }?`}
-              onClose={() => {
-                if (deleteRecord) setDeleteRecord({});
-                setIsConformDialogVisible(false);
-              }}
-              okBtnLoading={deleteLoading}
-              onOk={handleDeleteOpportunity}
-            />
-          ) : null}
-          {/* {
+            onClose={() => {
+              if (deleteRecord) setDeleteRecord({});
+              setIsConformDialogVisible(false);
+            }}
+            okBtnLoading={deleteLoading}
+            onOk={handleDeleteOpportunity}
+          />
+        ) : null}
+        {/* {
             showCreateOpportunityDialog && <ManageOpportunityMain
               open={showCreateOpportunityDialog}
               onClose={() => setShowCreateOpportunityDialog(false)}
@@ -504,22 +500,21 @@ const Opportunities = () => {
               }}
             />
           } */}
-          {singleOpportunityDelete.show ? (
-            <ConfirmationDialog
-              open={singleOpportunityDelete.show}
-              message={`Are you sure you want to delete contact: ${singleOpportunityDelete.opportunityName}?`}
-              onClose={() =>
-                setSingleOpportunityDelete({
-                  id: null,
-                  show: false,
-                  opportunityName: ''
-                })
-              }
-              onOk={handleSingleDeleteOpportunity}
-            />
-          ) : null}
-        </CustomContainer>
-      </Layout>
+        {singleOpportunityDelete.show ? (
+          <ConfirmationDialog
+            open={singleOpportunityDelete.show}
+            message={`Are you sure you want to delete contact: ${singleOpportunityDelete.opportunityName}?`}
+            onClose={() =>
+              setSingleOpportunityDelete({
+                id: null,
+                show: false,
+                opportunityName: ''
+              })
+            }
+            onOk={handleSingleDeleteOpportunity}
+          />
+        ) : null}
+      </CustomContainer>
 
       {showCreateOpportunityDialog && (
         <ManageOpportunityDialog

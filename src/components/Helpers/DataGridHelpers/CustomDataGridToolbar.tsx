@@ -1,7 +1,6 @@
 import React from 'react'
 import {
     GridToolbarContainer,
-    GridToolbarExport,
     GridToolbarColumnsButton,
     GridToolbarDensitySelector,
     GridToolbarFilterButton
@@ -14,7 +13,6 @@ export default function CustomDataGridToolbar() {
                 <GridToolbarColumnsButton />
                 <GridToolbarFilterButton />
                 <GridToolbarDensitySelector />
-                {/* <GridToolbarExport /> */}
             </GridToolbarContainer>
         </React.Fragment>
     )

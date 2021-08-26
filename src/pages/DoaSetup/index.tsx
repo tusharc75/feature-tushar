@@ -1,20 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Box,
   Grid,
-  Divider,
-  IconButton,
-  Tooltip,
   Checkbox,
   Button,
-  TextField,
-  InputAdornment,
   Dialog,
 } from "@material-ui/core";
 import { Link } from 'react-router-dom'
 import { DataGrid } from "@material-ui/data-grid";
-import Layout from "../../components/Layout";
 import Container from "../../components/CustomContainer";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import NewStepper from "../../components/Helpers/NewStepper";
@@ -24,8 +18,6 @@ import DoaHeader from "./DoaHeader";
 import { GiHiveMind } from "react-icons/gi";
 import routes from './../../components/Helpers/Routes';
 import { useData } from "../../StateProvider/Provider";
-import DeleteIcon from '@material-ui/icons/Delete';
-import { FcPlus } from "react-icons/fc";
 import { useCallback } from "react";
 import { getSearchQuery } from "../../services/util";
 import axiosInstance from "../../axios/axiosInstance";
@@ -134,18 +126,14 @@ export default function Doa() {
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [doaPermissions, setDoaPermissions] = useState({ isCreate: true, isUpdate: true, isRead: true, isDelete: true });
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
-  const [deleteRec, setDeleteRec] = useState<any>({})
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [, setIsConformDialogVisible] = useState(false)
+  const [, setDeleteRec] = useState<any>({})
+  const [, setShowDeleteWarningConfirmBox] = useState(false)
   const [loading, setLoading] = useState(false);
-  const [rowCount, setRowCount] = useState(0);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
-  const [singleUserDelete, setSingleUserDelete] = useState({ id: null, show: false, Name: "" })
   const toastConfig = useContext(CustomToastContext);
-  const [users, setUsers] = useState<any[]>([]);
   const [doa, setDoa] = useState<any[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
-
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -172,10 +160,8 @@ export default function Doa() {
     setLoading(true);
     axiosInstance()
       .get(api)
-      .then(({ data: { data, count } }) => {
-        setUsers(data);
+      .then(({ data: { data } }) => {
         getRows(data);
-        setRowCount(count);
         setCheckAllUsers(false);
         setLoading(false);
       })
@@ -193,7 +179,7 @@ export default function Doa() {
     setDoa([])
     axiosInstance()
       .get(`/doa/${id}`)
-      .then(({ data: { data, count } }) => {
+      .then(({ data: { data } }) => {
         setDoa(data?.doa.map(item => {
           return {
             id: item.user?._id,
@@ -446,7 +432,7 @@ export default function Doa() {
 
 
   return (
-    <Layout>
+    <Fragment>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[routes.doa]} />
       </Grid>
@@ -560,6 +546,6 @@ export default function Doa() {
           </BoxWithBorder>
         </Container>
       </Box>
-    </Layout>
+    </Fragment>
   )
 };

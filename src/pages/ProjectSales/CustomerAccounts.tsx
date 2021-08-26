@@ -18,18 +18,14 @@ import {
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { Delete, ExpandMore, MoreVert } from "@material-ui/icons";
-
 import axiosInstance from "../../axios/axiosInstance";
 import CustomerContacts from "./CustomerContacts";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import OpportunityAccordianProjectSales from "./OpportunityAccordingProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import ManageContactDialog from "../Contact/ManageContact";
 import { customerAccount, customerContact } from "../../constants/helpers";
 import ManageAccountDialog from "../Account/ManageAccount";
-import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import ConfirmationDialogRaw from "../../components/Helpers/ConfirmationDialog";
 import QuotesAccordionInProjectSale from "./QuotesAccordionInProjectSale";
 

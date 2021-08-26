@@ -83,16 +83,12 @@ export default function ManageQuoteDialog({
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-  const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate?.owner?.optionValue
-  );
 
   const [entityData, setEntityData] = useState({
     fields: [],
     initialValues: {},
   });
 
-  const [quoteFields, setQuoteFields] = useState([]);
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
@@ -332,7 +328,6 @@ export default function ManageQuoteDialog({
     axiosInstance()
       .get(`/field?resource=Quotes&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        setQuoteFields(data.map((f) => f.fieldData));
 
         if (!quoteApproved) {
           data = data.filter(
@@ -414,8 +409,8 @@ export default function ManageQuoteDialog({
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
           initialData["quoteName"] = opportunityName;
-          initialData["currency"] = currency;
-          initialData["estimatedAmount"] = estimatedAmount;
+          initialData["currency"] = currency || "";
+          initialData["estimatedAmount"] = estimatedAmount || "";
         }
 
         if (isClone) {
@@ -665,7 +660,7 @@ export default function ManageQuoteDialog({
         toastConfig.setToastConfig({
           open: true,
           type: "success",
-          message: "File downloaded Successfuly",
+          message: "File downloaded Successfully",
         });
 
         const file = new Blob([data], { type: "application/pdf" });
@@ -730,15 +725,15 @@ export default function ManageQuoteDialog({
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName === "quoteName" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
+                                        isNew={isNew}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        disabled={isRenderedFromOpportunity}
+                                        disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                         options={field.option}
                                         setFieldValue={setFieldValue}
                                         required={field.required}
@@ -777,8 +772,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
+                                            isNew={isNew}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -786,7 +781,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={accountFieldDisable}
+                                            disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
                                             // setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -826,9 +821,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -867,8 +863,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
+                                            isNew={isNew}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -878,7 +874,7 @@ export default function ManageQuoteDialog({
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
                                             setFieldValue={setFieldValue}
-                                            disabled={contactId ? true : false}
+                                            disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -907,9 +903,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : (contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -950,8 +947,8 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
+                                            isNew={isNew}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -959,7 +956,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={opportunityDataSource}
-                                            disabled={isRenderedFromOpportunity}
+                                            disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -999,9 +996,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : isRenderedFromOpportunity || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1027,7 +1025,9 @@ export default function ManageQuoteDialog({
                                           md={10}
                                         >
                                           <FormTypes
-                                            lookup={field.lookup}
+                                            {...field}
+                                            isNew={isNew}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit): false}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1060,7 +1060,7 @@ export default function ManageQuoteDialog({
                                               }}
                                               size="small"
                                             >
-                                              <GetAppIcon color={values.pDFTemplate ? "primary" : "disabled" } />
+                                              <GetAppIcon color={values.pDFTemplate ? "primary" : "disabled"} />
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
@@ -1078,8 +1078,7 @@ export default function ManageQuoteDialog({
                                       </Grid>
                                     ) : field.fieldName === "owner" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1124,7 +1123,8 @@ export default function ManageQuoteDialog({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={disableOwnerDropDown}
+                                        isNew={isNew}
+                                        disabled={disableOwnerDropDown || (!isNew && field.disableOnEdit)}
                                         onOpen={() => {
                                           onOwnerDropdownOpen(
                                             values["collaborator"]
@@ -1133,8 +1133,9 @@ export default function ManageQuoteDialog({
                                       />
                                     ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1154,11 +1155,42 @@ export default function ManageQuoteDialog({
                                           );
                                         }}
                                       />
+                                    ) : field.fieldName === "privateAccess" ? (
+                                      <FormTypes
+                                        {...field}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onChange={(e) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            e.target.checked
+                                          );
+                                          if (e.target.checked) {
+                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
+                                            setFieldValue("collaborator", [
+                                              ...values["collaborator"]].concat(doaUserDataTemp)
+                                            );
+                                          }
+                                        }}
+                                      />
                                     ) : field.fieldName === "probability" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1189,9 +1221,9 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "lostReason" ? (
                                       values["stage"] === "Closed Lost" ? (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
-                                          // {...rest}
+                                          {...field}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1209,9 +1241,9 @@ export default function ManageQuoteDialog({
                                       ) : null
                                     ) : field.fieldName === "currency" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
-                                        disabled={disableCurrency}
+                                        {...field}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (disableCurrency || (!isNew && field.disableOnEdit)) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1241,9 +1273,10 @@ export default function ManageQuoteDialog({
                                     ) : field.fieldName === "estimatedAmount" ||
                                       field.fieldName === "invoiceAmount" ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
@@ -1275,9 +1308,10 @@ export default function ManageQuoteDialog({
                                       "invoicedDate",
                                     ].indexOf(field?.fieldName) >= 0 ? (
                                       <FormTypes
-                                        fieldId={field._id}
-                                        lookup={field.lookup}
+                                        {...field}
                                         // {...rest}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1329,8 +1363,9 @@ export default function ManageQuoteDialog({
                                           }
                                         >
                                           <FormTypes
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
+                                            {...field}
+                                            isNew={isNew}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1372,9 +1407,10 @@ export default function ManageQuoteDialog({
                                               >
                                                 <IconButton
                                                   onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                  disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1411,8 +1447,9 @@ export default function ManageQuoteDialog({
                                             }
                                           >
                                             <FormTypes
-                                              fieldId={field._id}
-                                              lookup={field.lookup}
+                                              {...field}
+                                              isNew={isNew}
+                                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1453,9 +1490,10 @@ export default function ManageQuoteDialog({
                                                     onClick={() => {
                                                       setShowAddMarketSegmentDialog(true);
                                                     }}
+                                                    disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -1475,9 +1513,9 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                       </Grid> : (
                                         <FormTypes
-                                          fieldId={field._id}
-                                          lookup={field.lookup}
-                                          // {...rest}
+                                          {...field}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1512,9 +1550,9 @@ export default function ManageQuoteDialog({
                         ) : (
                           form.sectionFields.map((field) => (
                             <FormTypes
-                              fieldId={field._id}
-                              lookup={field.lookup}
-                              // {...rest}
+                              {...field}
+                              isNew={isNew}
+                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                               values={values}
                               errors={errors}
                               touched={touched}

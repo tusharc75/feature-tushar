@@ -1,9 +1,8 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Grid, Paper } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import Layout from '../../components/Layout';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -17,14 +16,9 @@ import { getObjKeysWithValues, lead, processFieldName } from '../../constants/he
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
-import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import AccordionOfOpportunity from './AccordionOfOpportunity';
 import ProcessFlow from '../../components/ProcessFlow';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Dialog } from '@material-ui/core';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright,IoIosArrowDropleft } from 'react-icons/io';
 
@@ -69,7 +63,6 @@ const LeadDetailsPage = () => {
 
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
@@ -262,7 +255,6 @@ const LeadDetailsPage = () => {
   };
 
   const handleSave = (data) => {
-    setIsProcessing(true);
     setShowAtLast(true);
     setOpenAdditionalDialog(false);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
@@ -290,18 +282,14 @@ const LeadDetailsPage = () => {
       .put(`/lead?entity=${selectedEntity}`, updatedData)
       .then(() => {
         fetchLeadData();
-        // setActiveStep(activeStep + 1)
-        setIsProcessing(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsProcessing(false);
       });
   };
 
   const handleMarkAsCompleted = (data) => {
     setShowAtLast(false);
-    setIsProcessing(true);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
@@ -324,14 +312,12 @@ const LeadDetailsPage = () => {
         .put(`/lead?entity=${selectedEntity}`, updatedData)
         .then(() => {
           // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
-          setIsProcessing(false);
           // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
           // }
           fetchLeadData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsProcessing(false);
         });
     }
   };
@@ -359,7 +345,7 @@ const LeadDetailsPage = () => {
           onOk={handleDeleteLead}
         />
       ) : null}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -541,7 +527,7 @@ const LeadDetailsPage = () => {
             fieldData={sectionFields}
           />
         )}
-      </Layout>
+      </Fragment>
     </>
   );
 };

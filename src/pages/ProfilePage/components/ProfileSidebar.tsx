@@ -1,15 +1,9 @@
-import React from 'react'
 import { Grid, Typography, Icon } from '@material-ui/core'
-import { BiCheckShield } from 'react-icons/bi';
 import { profileMenuItems } from '../../../constants/helpers'
 import ManageProfile from './ManageProfile'
 import styles from "../profilePage.module.scss"
 import { CgProfile } from 'react-icons/cg';
 import { IoMdNotificationsOutline } from 'react-icons/io';
-import { FiUsers } from 'react-icons/fi';
-import { IoSettingsOutline } from 'react-icons/io5';
-
-
 
 export default function Sidebar({ onItemClick, activeLink, userData, onFetchUserData, otherDetails, ...rest }) {
     const userMenu = [

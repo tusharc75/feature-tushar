@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import {
   Grid,
   Box,
@@ -28,7 +28,6 @@ import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory, Link } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
-import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -55,7 +54,8 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import { FcFlowChart } from 'react-icons/fc';
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import AssignedEntities from "./AssignedEntities";
-
+import { isMobile, isTablet } from "react-device-detect";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -113,6 +113,7 @@ const UserDetailsPage = () => {
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([])
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
+  const [showActivity, setActivityShow] = useState(true);
 
   useEffect(() => {
     if (id) {
@@ -139,7 +140,9 @@ const UserDetailsPage = () => {
     },
   ].filter((d) => d.show);
 
-
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
   const fetchUserData = async () => {
     setLoading(true);
 
@@ -380,7 +383,7 @@ const UserDetailsPage = () => {
           setUnionRoleData(null);
           getRoleUnion();
           toastConfig.setToastConfig({
-            message: "Successfully unassigned role",
+            message: "Role unassigned successfully",
             type: "success",
             open: true,
           });
@@ -498,12 +501,12 @@ const UserDetailsPage = () => {
           />
         </Dialog>
       )}
-      <Layout>
+      <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
             <Paper>
               {!userData ? (
                 <div>
@@ -966,65 +969,73 @@ const UserDetailsPage = () => {
                 />
               </div>
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="fixedRightPanel">
-              <Box className="detailHeader">
-                <h2 className="listingHeader single">Approval Process</h2>
-              </Box>
-              <Box padding={2}>
-                <FormControl component="fieldset" fullWidth>
-                  <FormGroup>
-                    {loading ? (
-                      [1, 2, 3, 4].map((i) => (
-                        <Box
-                          padding={1}
-                          marginBottom={2}
-                          display="flex"
-                          key={i}
-                        >
-                          <Skeleton
-                            style={{ borderRadius: 16 }}
-                            width="30px"
-                            height="30px"
-                          />
-                          <Box marginX={1} />
-                          <Skeleton
-                            variant="text"
-                            width="80%"
-                            height="30px"
-                          />
-                        </Box>
+          </div>
+          <div className="position-relative">
+            {showActivity ?
+              <Paper className="fixedRightPanel">
+                {!isMobile && !isTablet && <span color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </span>}
+                <Box className="detailHeader">
+                  <h2 className="listingHeader single">Approval Process</h2>
+                </Box>
+                <Box padding={2}>
+                  <FormControl component="fieldset" fullWidth>
+                    <FormGroup>
+                      {loading ? (
+                        [1, 2, 3, 4].map((i) => (
+                          <Box
+                            padding={1}
+                            marginBottom={2}
+                            display="flex"
+                            key={i}
+                          >
+                            <Skeleton
+                              style={{ borderRadius: 16 }}
+                              width="30px"
+                              height="30px"
+                            />
+                            <Box marginX={1} />
+                            <Skeleton
+                              variant="text"
+                              width="80%"
+                              height="30px"
+                            />
+                          </Box>
 
-                      ))
-                    ) : userPermissions ? (
-                      Object.keys(userPermissions).map((key) => (
-                        <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
-                          <FormControlLabel
-                            key={key}
-                            control={
-                              <Switch
-                                checked={userPermissions[key]}
-                                name={key}
-                                disabled={!hasPermissionToUpdateApprovalProcess}
-                                onChange={handleChangePermissions}
-                              />
-                            }
-                            label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
-                          />
-                        </Tooltip>
-                      ))
-                    ) : (
-                      <Typography>There are no permissions</Typography>
-                    )}
-                  </FormGroup>
-                </FormControl>
-              </Box>
-              <QuickLinks quickLinks={quickLinks} />
-            </Paper>
-          </Grid>
-        </Grid>
-      </Layout>
+                        ))
+                      ) : userPermissions ? (
+                        Object.keys(userPermissions).map((key) => (
+                          <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
+                            <FormControlLabel
+                              key={key}
+                              control={
+                                <Switch
+                                  checked={userPermissions[key]}
+                                  name={key}
+                                  disabled={!hasPermissionToUpdateApprovalProcess}
+                                  onChange={handleChangePermissions}
+                                />
+                              }
+                              label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
+                            />
+                          </Tooltip>
+                        ))
+                      ) : (
+                        <Typography>There are no permissions</Typography>
+                      )}
+                    </FormGroup>
+                  </FormControl>
+                </Box>
+                <QuickLinks quickLinks={quickLinks} />
+              </Paper>
+              :
+              !isMobile && !isTablet && <span className="activityShow" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </span>}
+          </div>
+        </div>
+      </Fragment>
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -1033,9 +1044,9 @@ const UserDetailsPage = () => {
           // onOk={handleDeleteUser}
           message={
             deleteUserRec
-              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
+              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
                 : ""
           }
           onClose={() => {

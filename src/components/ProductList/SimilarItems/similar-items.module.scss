@@ -1,23 +1,39 @@
 .similar_items_outer {
     width: 100%;
     justify-self: center;
-    padding: 0 25px;
+    height: auto;
+    
 }
 
 .similar_items_inner {
     display: grid;
     margin: 1em 0;
-    grid-template-columns: 0.50fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+    grid-template-rows: repeat(1, 1fr);
+    grid-auto-rows: 0; 
+    overflow-y: hidden;
+}
+.similar_items_middle{
+    width: 87%;
+    margin: 0 auto;
+    
+}
+.set_img_size{
+    height: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .item_details {
     display: grid;
-    grid-template-rows: 1fr 30px 30px 30px;
+    padding: 0 8px;
+    font-size: 13px;
+    text-align: start;
+    font-weight: 600 !important;
+    color: var(--primary);
 }
 
 .similar_items_child {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
 }
 
 .similar_item {
@@ -40,9 +56,9 @@
 }
 
 .price{
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
-    color: var(--red);
+    color: var(--productRed) ;
 }
 
 .no_image{
@@ -51,7 +67,19 @@
 }
 
 .item_alt{
-    background:#f2f4f6;
+    font-size: 12px;
+    
+    h3{
+        display: inline-flex;
+        font-size: 0.8rem;
+    }
+    p{
+        padding-left: 5px;
+        display: inline-flex;
+        font-size: 0.6rem;
+        color: var(--grey);
+        
+    }
 }
 
 @media (max-width: 1024px) {
@@ -68,13 +96,14 @@
     }
 
     .similar_items_inner {
-        margin: 1em 0;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-
+        margin: 1em 0;
+        grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+        grid-template-rows: repeat(2,auto);
+    
         div:nth-child(1) {
-            display: none;
         }
+        
 
         div {
             margin-top: 10px;
@@ -82,7 +111,6 @@
     }
 
     .similar_items_child {
-        border: 1px solid lightgray;
     }
 }
 
@@ -95,10 +123,14 @@
     .similar_items_inner {
         margin: 1em 0;
         display: grid;
-        grid-template-columns: 1fr;
+        justify-content: center;
+        grid-template-columns: repeat(auto-fill,minmax(150px,250px));
+        grid-template-rows: max-content;
+        grid-auto-rows: max-content;
+        overflow-y: visible;
 
         div:nth-child(1) {
-            display: none;
+            
         }
 
         div {

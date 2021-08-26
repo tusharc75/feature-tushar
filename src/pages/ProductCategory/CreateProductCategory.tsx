@@ -19,7 +19,7 @@ import { Box } from '@material-ui/core';
 const CreateProductCategory = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productCategoryId, onClose, onSuccess } = props;
+    const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
@@ -30,6 +30,8 @@ const CreateProductCategory = (props) => {
 
             if (productCategoryId) {
                 axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
+                    let tempOptionArray = fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option
+                    fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option = tempOptionArray.filter(data => data.optionValue !== productCategoryId)
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -95,10 +97,11 @@ const CreateProductCategory = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={productCategoryId ? !isUpdateDisabled ? "Update " + routes.productCategory.title : values["name"] : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <InputField
+                                    disabled={isUpdateDisabled}
                                     errors={errors}
                                     values={values}
                                     setFieldValue={setFieldValue}
@@ -110,14 +113,17 @@ const CreateProductCategory = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
-                            <CustomButton
-                                loading={loading}
-                                variant="contained"
-                                color="primary"
-                                type="submit"
-                                onClick={submitForm}
-                            > Save</CustomButton>
+                            <Button size="small" color="primary" onClick={onClose}>{isUpdateDisabled ? "Close" : "Cancel"}</Button>
+                            {!isUpdateDisabled &&
+                                <CustomButton
+                                    loading={loading}
+                                    variant="contained"
+                                    color="primary"
+                                    type="submit"
+                                    onClick={submitForm}
+                                > Save
+                                </CustomButton>
+                            }
                         </CustomDialogFooter>
                     </Fragment>
                 )}

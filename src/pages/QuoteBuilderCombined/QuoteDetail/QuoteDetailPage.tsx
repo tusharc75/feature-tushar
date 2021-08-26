@@ -1,15 +1,13 @@
 import { Button, makeStyles } from "@material-ui/core";
 import DetailsPage from "../../../components/Shared/DetailsPage";
 import axiosInstance from '../../../axios/axiosInstance';
-import { useHistory } from "react-router-dom";
 import { useMemo, useState, useContext, useEffect } from "react";
-import { formatAmountWithCurrency, processFieldName, quoteBuilder, stepsToIgnoreManualCompleteForOpportunity } from "../../../constants/helpers";
-import routes from "../../../components/Helpers/Routes";
+import { formatAmountWithCurrency, processFieldName, stepsToIgnoreManualCompleteForOpportunity } from "../../../constants/helpers";
 import { BiLayerPlus } from "react-icons/bi";
 import { HiPencil } from "react-icons/hi";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     detailBox: {
         border: "1px solid #163340",
     },
@@ -22,10 +20,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function QuoteDetailPage({ quoteData, quotePermissions, selectedEntity, ifQuoteApprovedAapproved, allowedToEdit, handleOpenUpdateDialog,handleOpenCloneDialog, handleSetSteps }) {
     const classes = useStyles();
-    const history = useHistory();
     const [loadingFields, setLoadingFields] = useState(false);
     const [quoteFields, setQuoteFields] = useState([]);
-    const { qbResource, qbApi } = quoteBuilder;
     const toastConfig = useContext(CustomToastContext);
 
 
@@ -85,17 +81,6 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
                     setLoadingFields(false);
                 });
         }
-    };
-
-    const handleClone = () => {
-        axiosInstance()
-            .post(`${qbApi}/clone/${quoteData._id}`)
-            .then(({ data }) => {
-                history.push(`${routes.quoteBuilder.path}/detail/${data.data._id}`);
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
     };
 
     return (
