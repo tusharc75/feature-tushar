@@ -86,7 +86,7 @@ const TermsAndCondition = ({
     owner: Yup.string().required(`Owner is required`),
   });
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-
+  const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [additionalDataPosition, setAdditionalDataPosition] = useState(editRecord ? editRecord.topPosition?.toString() : "true");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdditionalDataPosition((event.target as HTMLInputElement).value);
@@ -103,7 +103,7 @@ const TermsAndCondition = ({
         owner: editRecord?.owner ? editRecord?.owner : user.user._id,
         collaborator: editRecord?.collaborator ? editRecord?.collaborator : []
       });
-      if (user.user._id !== editRecord?.owner && !editRecord?.collaborator?.some(d => d === user.user._id)) {
+      if (editRecord?.owner && editRecord?.owner !== undefined && user.user._id !== editRecord?.owner && !editRecord?.collaborator?.some(d => d === user.user._id)) {
         setDisableSaveButton(true)
       }
     }
@@ -117,6 +117,7 @@ const TermsAndCondition = ({
   const fetchUser = () => {
     axiosInstance().get(`/user`).then(({ data: { data } }) => {
       setOwnerCollaboratorData(data);
+      setOwnerCollaboratorDataConst(data);
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
@@ -243,6 +244,10 @@ const TermsAndCondition = ({
                                   : []}
                                 onChange={(e, val) => {
                                   setFieldValue("entity", val && val?.map(d => d._id))
+                                  val && val.length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+
                                 }}
                                 renderInput={(params) => (
                                   <TextField
@@ -268,6 +273,11 @@ const TermsAndCondition = ({
                                 onChange={(e, val) => {
                                   setFieldValue("owner", val && val._id ? val._id : "");
                                 }}
+                                onOpen={() =>
+                                  values["entity"] && values["entity"].length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
@@ -294,6 +304,11 @@ const TermsAndCondition = ({
                                 onChange={(e, val) => {
                                   setFieldValue("collaborator", val && val?.map(d => d._id))
                                 }}
+                                onOpen={() =>
+                                  values["entity"] && values["entity"].length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
