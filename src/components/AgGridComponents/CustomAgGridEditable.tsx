@@ -9,7 +9,7 @@ import {
   gridPageSizes,
 } from "../../constants/helpers";
 import CustomGridHeaderOptions from "./CustomGridHeaderOptions";
-import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CustomLoadingOverlay, CustomPinnedRowRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import { orderBy } from "lodash";
 import NumericEditor from "./NumericEditor";
@@ -286,6 +286,7 @@ export default function CustomAgGridEditable({
                 customLoadingOverlay: CustomLoadingOverlay,
                 customFloatingFilter: CustomFloatingFilter,
                 numericCellEditor: NumericEditor,
+                customPinnedRowRenderer: CustomPinnedRowRenderer,
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
@@ -380,9 +381,15 @@ export default function CustomAgGridEditable({
                   checkboxSelection={true}
                   resizable={false}
                   sortable={false}
-                  pinnedRowCellRendererFramework={() => (
-                    <p>Total</p>
-                  )}
+                  cellRendererSelector={(params) => {
+                    if (params.node.rowPinned) {
+                      return {
+                        component: 'customPinnedRowRenderer',
+                      };
+                    } else {
+                      return undefined;
+                    }
+                  }}
                 ></AgGridColumn>
               )}
 
@@ -399,9 +406,16 @@ export default function CustomAgGridEditable({
                   sortable={false}
                   filter={false}
                   cellRenderer="actionsRenderer"
-                  pinnedRowCellRendererFramework={() => (
-                    <></>
-                  )}
+                  // pinnedRowCellRenderer="commonRenderer"
+                  cellRendererSelector={(params) => {
+                    if (params.node.rowPinned) {
+                      return {
+                        component: 'customPinnedRowRenderer',
+                      };
+                    } else {
+                      return undefined;
+                    }
+                  }}
                 ></AgGridColumn>
               )}
             </AgGridReact>
