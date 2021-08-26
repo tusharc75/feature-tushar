@@ -144,8 +144,9 @@ const AddOptionDialog = ({addFieldOption, options, setOptions, setOpen }) => {
 
   const onSave = () => {
     const order = options.length
-    addFieldOption(values.map((val, i) => ({order: order + i, default: false, optionLabel: val, optionValue: val})))
-    const newOptions = values.map((val, i) => ({order: order + i, default: false, optionLabel: val, optionValue: val}))
+    const filteredArr = values.filter(val => options.filter(op => op.optionValue === val).length===0)
+    const newOptions = filteredArr.map((val, i) => ({order: order + i, default: false, optionLabel: val, optionValue: val}))
+    addFieldOption(filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val })))
     setOptions([...options, ...newOptions])
     setOpen(false)
 
@@ -849,7 +850,7 @@ const FormTypes = (props) => {
     </InfoLabel>
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={1} alignItems="center">
         <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
           <Autocomplete
             {...rest}
@@ -957,7 +958,7 @@ const FormTypes = (props) => {
           />
         </Grid>
         {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-          <Grid xs={2}>
+          <Grid item xs={2}>
             <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
               <AddCircleIcon />
             </IconButton>
@@ -1384,7 +1385,7 @@ const FormTypes = (props) => {
     </InfoLabel>
   ) : type === 'multiSelect' ? (
     <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={1} alignItems="center">
         <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
           <Autocomplete
             {...rest}
