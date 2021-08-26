@@ -86,14 +86,22 @@ const Product = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
-                ...u,
+            data.data = data.data?.map((u) => {
+                const {createdBy, entity, ...restProperties} = u;
+                const [firstEntity,...restEntity] = entity;
+                let res={
+                ...restProperties,
                 id: u._id,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
                 updatedByDate: u.updatedBy?.date,
-            }));
+                entity:firstEntity?.optionLabel,
+                entityId:firstEntity?.optionValue,
+                restEntity: restEntity,
+                }
+                return res;
+            });
             let column = []
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {
@@ -166,6 +174,9 @@ const Product = () => {
                             }
                             if (ele.fieldName === "productTemplate") {
                                 col.cellRenderer = "productTemplateRenderer"
+                            }
+                            if (ele.fieldName === "entity") {
+                                col.cellRenderer = "entityRenderer"
                             }
                             col.order = ele.order;
                             col.leval = ele.leval;
@@ -248,6 +259,21 @@ const Product = () => {
         </Link>
     )
 
+    const EntityNameRenderer = (params) =>
+    params.value ? (
+      <>
+        <h5 className="createBy d-flex">
+          <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+            {params.value}
+          </Link>
+          {params.data.restEntity.length > 0 && (
+            <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
+          )}
+        </h5>
+      </>
+    ) : (
+      <NoDataCell />
+    );
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
@@ -317,6 +343,7 @@ const Product = () => {
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
+        entityRenderer: EntityNameRenderer,
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
         productTemplateRenderer: ProductTemplateRenderer,

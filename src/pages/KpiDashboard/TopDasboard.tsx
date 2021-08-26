@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Grid,
   Box,
@@ -14,7 +14,7 @@ import {
   Menu,
   MenuItem
 } from '@material-ui/core';
-import { ImportExport } from '@material-ui/icons';
+import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import Chart from 'react-chartjs-2';
 import PptxGenJs from 'pptxgenjs';
@@ -22,13 +22,23 @@ import jsPDF from 'jspdf';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 
-
 import { formatAmountWithCurrency } from '../../constants/helpers';
-
 
 const TopDashboard = (props) => {
   const { salesRevenue, salesData, regionSales, moment, currency } = props;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [tableView, setTableView] = useState(false);
+  const [tableDataRaw, setTableDataRaw] = useState([]);
+
+  useEffect(() => {
+    const tableD = salesData.allData.map((d) => ({
+      Month: moment(d.date).format('MMM/YY'),
+      ['Total Sell']: d.totalSell.toLocaleString(),
+      ['Total Cost']: d.totalCost.toLocaleString(),
+      Budget: d.budget
+    }));
+    setTableDataRaw(tableD);
+  }, [salesData]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -81,17 +91,11 @@ const TopDashboard = (props) => {
         break;
       }
 
-      case "json": {
-        const wData = salesData.allData.map((d) => ({
-          Month: moment(d.date).format('MMM/YY'),
-          ['Total Sell']: d.totalSell.toLocaleString(),
-          ['Total Cost']: d.totalCost.toLocaleString(),
-          Budget: d.budget
-        }));
-        let blob = new Blob([JSON.stringify(wData)], {type: "text/plain;charset=utf-8"});
-        FileSaver.saveAs(blob, "sales.json");
+      case 'json': {
+        let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
+        FileSaver.saveAs(blob, 'sales.json');
         break;
-        }
+      }
       default:
         break;
     }
@@ -111,7 +115,7 @@ const TopDashboard = (props) => {
                     Total Booked Value
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    {formatAmountWithCurrency(currency, salesRevenue.revenue).fullFormatAmount}
+                    {salesRevenue.revenue ? formatAmountWithCurrency(currency, salesRevenue.revenue).fullFormatAmount : 0}
                   </Typography>
                 </Box>
               </Paper>
@@ -123,7 +127,7 @@ const TopDashboard = (props) => {
                     Total Cost
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                  {formatAmountWithCurrency(currency, salesRevenue.spend).fullFormatAmount}
+                    {salesRevenue.spend ? formatAmountWithCurrency(currency, salesRevenue.spend).fullFormatAmount : 0}
                   </Typography>
                 </Box>
               </Paper>
@@ -145,39 +149,76 @@ const TopDashboard = (props) => {
 
         <Paper elevation={2}>
           <Box p={2}>
-            <Button onClick={handleClick} startIcon={<ImportExport />}>
-              Export to
-            </Button>
-            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-            </Menu>
-            <Box textAlign="center">
+            <Box display="flex" justifyContent="space-between">
+              <Button onClick={handleClick} startIcon={<ImportExport />}>
+                Export to
+              </Button>
+              <Button
+                onClick={() => {
+                  setTableView(!tableView);
+                }}
+                startIcon={!tableView ? <TableChart /> : <Timeline />}
+              >
+                {!tableView ? 'Table' : 'Chart'} View
+              </Button>
+              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+                <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+                <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+                <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+                <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+              </Menu>
+            </Box>
+            <Box textAlign="center" mb={2}>
               <Typography variant="h5">Total booked value in {currency}</Typography>
             </Box>
-            <Chart
-              id="perEntityChart"
-              options={{
-                tooltip: {
-                  mode: 'index',
-                  intersect: false
-                },
-                hover: {
-                  mode: 'index',
-                  intersect: false
-                }
-              }}
-              type="bar"
-              data={salesData}
-            />
+            {!tableView ? (
+              <Chart
+                id="perEntityChart"
+                options={{
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false
+                  },
+                  hover: {
+                    mode: 'index',
+                    intersect: false
+                  }
+                }}
+                type="bar"
+                data={salesData}
+              />
+            ) : (
+              <TableContainer style={{ height: '400px' }} component={Paper}>
+                <Table stickyHeader aria-label="caption table">
+                  <TableHead>
+                    <TableRow>
+                      {Object.keys(tableDataRaw[0]).map((label, i) => (
+                        <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                          {startCase(label)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {tableDataRaw.map((data, index) => (
+                      <TableRow key={index}>
+                        {Object.keys(data).map((label, i) => (
+                          <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                            {data[label].toLocaleString()}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </Box>
         </Paper>
       </Grid>
       <Grid item sm={4}>
         <Box>
-          <TableContainer style={{ height: '500px' }} component={Paper}>
+          <TableContainer style={{ height: '625px' }} component={Paper}>
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow>
