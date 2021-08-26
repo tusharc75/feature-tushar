@@ -115,7 +115,9 @@ const PriceTemplate = () => {
       axiosInstance()
         .get(`/price-template/` + id)
         .then(({ data: { data } }) => {
-
+          if (data.owner || data.owner === undefined) {
+            data.owner = user.user._id
+          }
           if (isClone) {
             const { _id, name, createdBy, updatedBy, isSystem, ...rest } = data;
             setInitialValues(rest);
@@ -126,7 +128,7 @@ const PriceTemplate = () => {
             setInitialValues(data);
             handleProductTemplateField(data.productTemplate);
             setSection(data.section);
-            if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+            if (user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
               setDisableSaveButton(true)
             }
           }
@@ -453,6 +455,7 @@ const PriceTemplate = () => {
                               variant="outlined"
                               error={touched["owner"] && Boolean(errors["owner"])}
                               helperText={touched["owner"] && errors["owner"]}
+                              required={true}
                               fullWidth
                             />
                           )}

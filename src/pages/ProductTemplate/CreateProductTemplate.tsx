@@ -102,6 +102,9 @@ const ProductTemplate = () => {
                 if (isClone) {
                     data.name = ""
                 }
+                if (data.owner || data.owner === undefined) {
+                    data.owner = user.user._id
+                }
                 setInitialValues(data);
                 setSection(data.section);
                 if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
@@ -393,6 +396,7 @@ const ProductTemplate = () => {
                                                     variant="outlined"
                                                     error={touched["owner"] && Boolean(errors["owner"])}
                                                     helperText={touched["owner"] && errors["owner"]}
+                                                    required={true}
                                                     fullWidth
                                                 />
                                             )}

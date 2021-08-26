@@ -89,7 +89,7 @@ export default function NewCreateQuotePdfTemplate() {
                         aboveTable: data?.aboveTable,
                         belowTable: data?.belowTable,
                         entity: data?.entity ? data?.entity : [],
-                        owner: data?.owner,
+                        owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
                         collaborator: data?.collaborator ? data?.collaborator : [],
                     });
                     setDetails({
@@ -98,7 +98,7 @@ export default function NewCreateQuotePdfTemplate() {
                         aboveTable: data?.aboveTable,
                         belowTable: data?.belowTable
                     })
-                    if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+                    if (user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
                         setDisableSaveButton(true)
                     }
 
