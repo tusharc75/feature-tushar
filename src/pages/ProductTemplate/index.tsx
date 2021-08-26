@@ -44,10 +44,10 @@ const ProductTemplate: FC = () => {
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
-        isCreate: permissions.productTemplate?.isCreate,
-        isUpdate: permissions.productTemplate?.isUpdate,
-        isRead: permissions.productTemplate?.isRead,
-        isDelete: permissions.productTemplate?.isDelete,
+        isCreate: permissions?.productTemplate?.isCreate,
+        isUpdate: permissions?.productTemplate?.isUpdate,
+        isRead: permissions?.productTemplate?.isRead,
+        isDelete: permissions?.productTemplate?.isDelete,
     });
 
     const [anchorEl, setAnchorEl] = useState(null);
