@@ -445,7 +445,9 @@ const Dashboard = () => {
     axiosInstance()
       .get(`dashboard/products${url}`)
       .then(({ data: { data } }) => {
-        setTopProducts(data);
+        data = data.map(d => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : "Unknown" })).sort((a,b) => b.totalSell - a.totalSell)
+        
+        setTopProducts(data)
       })
       .catch((err) => {});
   }, [salesFilter.entity, salesFilter.between]);
@@ -721,6 +723,7 @@ const Dashboard = () => {
                 <Top2Dashboard currency={currency} allEntitySalesData={allEntitySalesData} />
 
                 <OpportunityDashboards
+                  currency={currency}
                   oppTrends={oppTrends}
                   topProducts={topProducts}
                   oppAccount={oppAccount}

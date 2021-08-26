@@ -1,8 +1,12 @@
 import Chart from 'react-chartjs-2';
 import { Grid, Box, Paper, Typography, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import { formatAmountWithCurrency } from '../../constants/helpers';
+import { useState } from 'react';
 
 const OpportunityDashboards = (props) => {
-  const { openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts, createdLeads, status } = props;
+  const { currency, openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts, createdLeads, status } = props;
+  const [toggleButtonValue, setToggleButtonValue] = useState("totalSell")
 
   const statusText = {
     open: 'Open',
@@ -92,15 +96,20 @@ const OpportunityDashboards = (props) => {
               <Typography variant="h6" color="textSecondary">
                 Top Selling Product Category
               </Typography>
+              <Box mt={1} />
+              <ToggleButtonGroup value={toggleButtonValue} exclusive onChange={(e, val) => setToggleButtonValue(val)} size="small">
+                <ToggleButton value="totalSell">Total Sell</ToggleButton>
+                <ToggleButton value="totalCost">Total Cost</ToggleButton>
+              </ToggleButtonGroup>
             </Box>
 
-            <List>
+            <List style={{overflow: "auto", maxHeight: 450}}>
               {topProducts.length ? (
                 topProducts.map((product) => (
                   <ListItem divider key={product}>
                     <ListItemText primary={product.productCategory} />
                     <ListItemSecondaryAction>
-                      <Typography variant="h6">{product.count}</Typography>
+                      <Typography>{product[toggleButtonValue] ? formatAmountWithCurrency(currency, product[toggleButtonValue]).fullFormatAmount : 0}</Typography>
                     </ListItemSecondaryAction>
                   </ListItem>
                 ))

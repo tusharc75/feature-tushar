@@ -204,7 +204,7 @@ const TopDashboard = (props) => {
                       <TableRow key={index}>
                         {Object.keys(data).map((label, i) => (
                           <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                            {i < 1 ? data[label] : formatAmountWithCurrency(currency, data[label]).fullFormatAmount}
+                            {data[label].toLocaleString()}
                           </TableCell>
                         ))}
                       </TableRow>
