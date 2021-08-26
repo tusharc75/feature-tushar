@@ -91,7 +91,7 @@ export default (history = null, passedHeaders = null) => {
                 if (error.response.status === 401) {
                     clearTokenAndRedirectToHome();
                     return new Promise((resolve, reject) => {
-                        reject({ open: true, type: "error", message: error.response.data.message });
+                        reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
                     });
 
                 }
