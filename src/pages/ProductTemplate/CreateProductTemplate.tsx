@@ -356,7 +356,7 @@ const ProductTemplate = () => {
                                 </Grid>
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}>
-                                        {!values["isStandard"] && <Autocomplete
+                                        {<Autocomplete
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
@@ -384,7 +384,7 @@ const ProductTemplate = () => {
                                         />}
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
-                                        {!values["isStandard"] && <Autocomplete
+                                        {<Autocomplete
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                                             value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                                                 ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -414,7 +414,7 @@ const ProductTemplate = () => {
                                         />}
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
-                                        {!values["isStandard"] && <Autocomplete
+                                        {<Autocomplete
                                             multiple
                                             options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}

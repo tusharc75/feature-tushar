@@ -234,10 +234,19 @@ export default function ManageOpportunityDialog({
           setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
+        let initialData = getObjKeys("", newFields);
+
+        if (isNew) {
+          const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
+          if (selectedEntityDetails) {
+            initialData["currency"] = selectedEntityDetails.currency || "";
+          }
+        }
+
         setEntityData({
           fields: newFields,
           initialValues: isNew
-            ? getObjKeys("", newFields)
+            ? initialData
             : getObjKeysWithValues(dataToUpdate, newFields),
         });
       });

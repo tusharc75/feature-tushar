@@ -25,7 +25,7 @@ const ProductDetailsPage = () => {
     const { id } = useParams();
     const history = useHistory();
     const {
-        state: { permissions }
+        state: { user, permissions }
     }: any = useData();
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
@@ -80,6 +80,9 @@ const ProductDetailsPage = () => {
                     handleMainPoints(data.productData);
                     setHeadingLabel(data.productData.productName);
                     setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
+                    if (data.productData.entity && data.productData.entity !== undefined) {
+                        data.productData.entity = user.entity.filter(d => data.productData.entity.some(e => d._id === e)).map(d => { return { "optionValue": d._id, "optionLabel": d.entityName } })
+                    }
                     setProductData(data.productData);
                     setLoading(false);
                 }).catch((error) => {
