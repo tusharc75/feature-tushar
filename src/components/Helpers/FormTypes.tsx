@@ -79,11 +79,14 @@ const CustomFormat = (props: NumberFormatCustomProps | any) => {
   }
 };
 
-const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) =>
+const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, warningMessage, warningTooltip }) =>
   isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
         {children}
+       {warningTooltip && <Box ml={1}>
+          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+        </Box>}
       </Grid>
       <Grid item xs={1} sm={1} md={1}>
         <Tooltip title={info}>
@@ -92,11 +95,19 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) 
       </Grid>
     </Grid>
   ) : doNotShowInfoTooltip ? (
-    <>{children}</>
+      <>
+        {children}
+        {warningTooltip && <Box ml={1}>
+          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+        </Box>}
+      </>
   ) : (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={12} sm={12} md={12}>
-        {children}
+            {children}
+            {warningTooltip && <Box ml={1}>
+          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+        </Box>}
       </Grid>
       {/* <Grid item xs={1} sm={1} md={1}>
         <InfoIcon style={{ opacity: 0 }} color="disabled" />
@@ -202,6 +213,8 @@ const FormTypes = (props) => {
     type,
     label,
     _id: fieldId,
+    isWarningTooltip,
+    warningTooltipMessage,
     name,
     errors,
     values,
@@ -596,7 +609,7 @@ const FormTypes = (props) => {
   };
 
   return type === 'singleLine' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -611,7 +624,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'name' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -631,7 +644,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'multiLine' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -648,7 +661,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'number' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -674,7 +687,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'percent' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         type="number"
@@ -701,7 +714,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'formula' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -730,7 +743,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'email' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -745,7 +758,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'password' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -760,7 +773,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'mobileNumber' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPhoneInput
         {...rest}
         defaultCountry={'us'}
@@ -777,7 +790,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'freeStyleMultiSelect' ? (
-    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Autocomplete
         {...rest}
         multiple
@@ -815,7 +828,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'dropDown' && fieldData && fieldData.isDependentDropdown ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
         options={option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn])}
@@ -849,7 +862,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Grid container spacing={1} alignItems="center">
         <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
           <Autocomplete
@@ -969,7 +982,7 @@ const FormTypes = (props) => {
       </Grid>
     </InfoLabel>
   ) : type === 'vlookupDropdown' && fieldData && !fieldData.isvlookupReverse ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -990,7 +1003,7 @@ const FormTypes = (props) => {
       <Grid key={_unit} item xs={12} sm={6} md={6}>
         <Box display="flex">
           <Box flexGrow={1}>
-            <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+            <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
               <TextField
                 {...rest}
                 variant="outlined"
@@ -1063,7 +1076,7 @@ const FormTypes = (props) => {
           <Grid key={_unit} item xs={12} sm={6} md={6}>
             <Box display="flex">
               <Box flexGrow={1}>
-                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
                   <TextField
                     {...rest}
                     variant="outlined"
@@ -1198,7 +1211,7 @@ const FormTypes = (props) => {
         <Grid key={_currency} item xs={12} sm={6} md={6}>
           <Box display="flex">
             <Box flexGrow={1}>
-              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
                 <TextField
                   {...rest}
                   variant="outlined"
@@ -1305,7 +1318,7 @@ const FormTypes = (props) => {
       )
     )
   ) : type === 'decimal' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -1331,7 +1344,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'currency' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Autocomplete
         {...rest}
         fullWidth
@@ -1384,7 +1397,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'multiSelect' ? (
-    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Grid container spacing={1} alignItems="center">
         <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
           <Autocomplete
@@ -1513,7 +1526,7 @@ const FormTypes = (props) => {
       </Grid>
     </InfoLabel>
   ) : type === 'switch' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <FormControlLabel
         control={
           values[name] ? (
@@ -1526,7 +1539,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'checkBox' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <FormControlLabel
         control={
           <Checkbox
@@ -1541,7 +1554,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'radio' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <FormControl component="fieldset" required={required}>
         <FormLabel component="legend">{label}</FormLabel>
         <RadioGroup aria-label="gender" name={name} value={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}>
@@ -1552,7 +1565,7 @@ const FormTypes = (props) => {
       </FormControl>
     </InfoLabel>
   ) : type === 'location' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Autocomplete
         {...rest}
         getOptionLabel={(option: any) => (typeof option === 'string' ? option : option.description)}
@@ -1766,7 +1779,7 @@ const FormTypes = (props) => {
       </Box>
     </Fragment>
   ) : type === 'url' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -1781,7 +1794,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'date' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
           {...rest}
@@ -1805,7 +1818,7 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'dateTime' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDateTimePicker
           {...rest}
@@ -1831,7 +1844,7 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'year' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <DatePicker
           {...rest}
