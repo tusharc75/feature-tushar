@@ -333,6 +333,7 @@ const CreateProduct = (props) => {
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
+                                      style={{background: field.isUneditable ? "#1e768221": ""}}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -370,6 +371,7 @@ const CreateProduct = (props) => {
                                         <Box flexGrow={1}>
                                             <FormTypes
                                             {...field}
+                                            style={{background: field.isUneditable ? "#1e768221": ""}}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
