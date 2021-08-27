@@ -759,6 +759,7 @@ export const downloadExcel = (fileDetails, fileName) => {
   //Check the Browser type and download the File.
   const isIE = false || !!document["documentMode"];
   if (isIE) {
+    //@ts-ignore
     window.navigator.msSaveBlob(blob, fileName);
   } else {
     var url = window.URL || window.webkitURL;
