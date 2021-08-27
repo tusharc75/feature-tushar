@@ -1,6 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
-import { Box, Paper, Typography, Button, Menu, MenuItem } from '@material-ui/core';
+import {
+  Box, Paper, Typography, Button, Menu, MenuItem,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody} from '@material-ui/core';
 import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
@@ -13,6 +20,18 @@ const Top2Dashboard = (props) => {
   const [tableView, setTableView] = useState(false);
   const [tableDataRaw, setTableDataRaw] = useState([]);
 
+  useEffect(() => {
+    const tableD = allEntitySalesData.allData.map((d) => ({
+      ["Period"]: d.period,
+      ["Entity Name"]: d.entityName,
+      ["Budget"]: d.budget.toLocaleString(),
+      ['Total Sell']: d.totalSell.toLocaleString(),
+      ['Total Cost']: d.totalCost.toLocaleString(),
+    }));
+    setTableDataRaw(tableD);
+  }, [allEntitySalesData]);
+
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -20,28 +39,28 @@ const Top2Dashboard = (props) => {
   const handleClose = (exportType) => () => {
     switch (exportType) {
       case 'ppt': {
-        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        const canvas = document.getElementById('allEntityChart') as HTMLCanvasElement;
         const dataUrl = canvas.toDataURL('image/png');
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
         slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile();
+        pptx.writeFile({ fileName: "All Entity Sales Chart.pptx"});
         break;
       }
 
       case 'pdf': {
-        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        const canvas = document.getElementById('allEntityChart') as HTMLCanvasElement;
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
         doc.setFontSize(20);
         doc.text(`Total Booked Value In ${currency}`, 60, 15);
         doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
-        doc.save('sales-chart.pdf');
+        doc.save('All Entity Sales Chart.pdf');
         break;
       }
 
       case 'excel': {
-        // const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        // const canvas = document.getElementById('allEntityChart') as HTMLCanvasElement;
         // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
@@ -54,13 +73,13 @@ const Top2Dashboard = (props) => {
         };
         const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs(data, 'sales-data' + fileExtension);
+        FileSaver.saveAs(data, 'All Entity Sales Chart' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
-        FileSaver.saveAs(blob, 'sales.json');
+        FileSaver.saveAs(blob, 'All Entity Sales Chart.json');
         break;
       }
       default:
@@ -97,7 +116,31 @@ const Top2Dashboard = (props) => {
           <Typography variant="h5">Total booked value in {currency}</Typography>
         </Box>
 
-        <Chart type="bar" data={allEntitySalesData} />
+        {!tableView ? <Chart id="allEntityChart" type="bar" data={allEntitySalesData} />
+          : <TableContainer style={{ height: '400px' }}>
+                <Table stickyHeader aria-label="caption table">
+                  <TableHead>
+                    <TableRow>
+                      {Object.keys(tableDataRaw[0]).map((label, i) => (
+                        <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                          {label}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {tableDataRaw.map((data, index) => (
+                      <TableRow key={index}>
+                        {Object.keys(data).map((label, i) => (
+                          <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                            {data[label].toLocaleString()}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>}
       </Box>
     </Paper>
   );

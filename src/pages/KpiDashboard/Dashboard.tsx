@@ -134,11 +134,14 @@ const Dashboard = () => {
           let obj = {};
           const entitySale = data.filter((d) => d.entityId === id);
 
+          console.log(entitySale)
+
           obj = {
             entityName: entitySale[0].entity,
             totalCost: entitySale.map(d => d.totalCost).reduce((acc, total) => acc + total),
             totalSell: entitySale.map(d => d.totalSell).reduce((acc, total) => acc + total),
-            
+            budget: entitySale.map(d => d.budget||0).reduce((acc, total) => acc + total),
+            period: `${moment(entitySale[0].date).format("MMM/YY")} - ${moment(entitySale[entitySale.length - 1].date).format("MMM/YY")}`,
           }
           chartObj = {
             type: 'line',
@@ -731,7 +734,11 @@ const Dashboard = () => {
                   salesData={salesData}
                 />
 
-                <Top2Dashboard currency={currency} allEntitySalesData={allEntitySalesData} />
+                <Top2Dashboard
+                  moment={moment}
+                  currency={currency}
+                  allEntitySalesData={allEntitySalesData}
+                />
 
                 <OpportunityDashboards
                   currency={currency}
