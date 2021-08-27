@@ -117,7 +117,7 @@ const CreateProduct = (props) => {
                     } else {
                         let currentContactRemovedDataSource =
                             productCategoryDropdownData.option.filter(
-                                (d) => d.optionValue !== newProductCategoryId
+                                (d) => d?.optionValue !== newProductCategoryId
                             );
                         setProductCategoryDataSource(currentContactRemovedDataSource);
                     }
@@ -291,7 +291,7 @@ const CreateProduct = (props) => {
     const initializeProductCategoryDropdown = (values, productCategorySource) => {
         if (values && values.hasOwnProperty("productCategory")) {
             const getNewAddedProductCategory = productCategorySource.find(
-                (d) => d.optionValue === newProductCategoryId
+                (d) => d?.optionValue === newProductCategoryId
             );
             if (getNewAddedProductCategory) {
                 values["productCategory"] = getNewAddedProductCategory.optionValue;

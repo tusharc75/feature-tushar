@@ -122,8 +122,8 @@ export default function Account(props) {
   ];
 
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
         if (d.colId == item.field) {
           item.show = !d.hide;
         }
@@ -390,7 +390,7 @@ export default function Account(props) {
             ownerId: u.owner?.optionValue,
             canDelete: u.owner?.optionValue === user?.user._id,
 
-            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d.optionValue == user?.user?._id),
+            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
             lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
