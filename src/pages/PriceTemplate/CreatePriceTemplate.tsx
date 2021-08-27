@@ -311,6 +311,7 @@ const PriceTemplate = () => {
           >
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form>
+                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                 <Box p={1} ml={1} bgcolor="white">
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>

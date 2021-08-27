@@ -328,6 +328,7 @@ const CreateProduct = (props) => {
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
+                                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <h2 className="form-label-style">{section.name}
@@ -404,7 +405,7 @@ const CreateProduct = (props) => {
                                                                                         disabled={(Boolean(productId) && field.disableOnEdit)}
                                                                                         size="small"
                                                                                     >
-                                                                                        <AddIcon color={(Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"}/>
+                                                                                        <AddIcon color={(Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                     </IconButton>
                                                                                 </Tooltip>
                                                                             </Grid>
@@ -567,7 +568,7 @@ const CreateProduct = (props) => {
                                                                                     <FormTypes
                                                                                         isNew={Boolean(productId)}
                                                                                         disabled={(Boolean(productId) && field.disableOnEdit)}
-                                                                                       {...field}
+                                                                                        {...field}
                                                                                         productTemplateId={values?.productTemplate}
                                                                                         priceTemplateId={values?.priceTemplate}
                                                                                         fields={initialData.fields}

@@ -714,6 +714,8 @@ export default function ManageQuoteDialog({
               <>
                 <CustomDialogContent>
                   <Form>
+                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+
                     {formsData &&
                       formsData.map((form, index1) => {
                         return form.name ? (
@@ -1027,7 +1029,7 @@ export default function ManageQuoteDialog({
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
-                                            disabled={!isClone ? (!isNew && field.disableOnEdit): false}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
