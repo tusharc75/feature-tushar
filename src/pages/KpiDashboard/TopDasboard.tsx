@@ -72,13 +72,7 @@ const TopDashboard = (props) => {
         // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const wData = salesData.allData.map((d) => ({
-          Month: moment(d.date).format('MMM/YY'),
-          ['Total Sell']: d.totalSell.toLocaleString(),
-          ['Total Cost']: d.totalCost.toLocaleString(),
-          Budget: d.budget
-        }));
-        const ws = XLSX.utils.json_to_sheet(wData);
+        const ws = XLSX.utils.json_to_sheet(tableDataRaw);
         const wb = {
           Sheets: {
             data: ws
@@ -188,7 +182,7 @@ const TopDashboard = (props) => {
                 data={salesData}
               />
             ) : (
-              <TableContainer style={{ height: '400px' }} component={Paper}>
+              <TableContainer style={{ height: '400px' }}>
                 <Table stickyHeader aria-label="caption table">
                   <TableHead>
                     <TableRow>

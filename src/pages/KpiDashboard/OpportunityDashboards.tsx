@@ -105,8 +105,8 @@ const OpportunityDashboards = (props) => {
 
             <List style={{overflow: "auto", maxHeight: 450}}>
               {topProducts.length ? (
-                topProducts.map((product) => (
-                  <ListItem divider key={product}>
+                topProducts.map((product, i) => (
+                  <ListItem divider key={i}>
                     <ListItemText primary={product.productCategory} />
                     <ListItemSecondaryAction>
                       <Typography>{product[toggleButtonValue] ? formatAmountWithCurrency(currency, product[toggleButtonValue]).fullFormatAmount : 0}</Typography>
