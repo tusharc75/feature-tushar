@@ -37,7 +37,8 @@ const Dashboard = () => {
   const [subMarketSegments, setSubMarketSegments] = useState([]);
   const [allEntitySalesData, setAllEntitySalesData] = useState({
     labels: [],
-    datasets: []
+    datasets: [],
+    allData: [],
   });
   const [salesData, setSalesData] = useState({
     labels: [],
@@ -104,6 +105,7 @@ const Dashboard = () => {
         const saleData = [];
         const labels = [];
         const budget = [];
+        const allEntitiesChart = [];
         const allEntities = [];
         const entityIds = [];
 
@@ -128,10 +130,20 @@ const Dashboard = () => {
         }
 
         entityIds.forEach((id) => {
+          let chartObj = {};
           let obj = {};
           const entitySale = data.filter((d) => d.entityId === id);
 
+          console.log(entitySale)
+
           obj = {
+            entityName: entitySale[0].entity,
+            totalCost: entitySale.map(d => d.totalCost).reduce((acc, total) => acc + total),
+            totalSell: entitySale.map(d => d.totalSell).reduce((acc, total) => acc + total),
+            budget: entitySale.map(d => d.budget||0).reduce((acc, total) => acc + total),
+            period: `${moment(entitySale[0].date).format("MMM/YY")} - ${moment(entitySale[entitySale.length - 1].date).format("MMM/YY")}`,
+          }
+          chartObj = {
             type: 'line',
             label: entitySale[0].entity,
             borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
@@ -139,12 +151,14 @@ const Dashboard = () => {
             data: entitySale.map((e) => e.totalSell)
           };
 
-          allEntities.push(obj);
+          allEntities.push(obj)
+          allEntitiesChart.push(chartObj);
         });
 
         setAllEntitySalesData({
           labels: labels.map((d) => moment(d).format('MMM/YY')),
-          datasets: allEntities
+          datasets: allEntitiesChart,
+          allData: allEntities
         });
       })
       .catch((err) => {});
@@ -720,7 +734,11 @@ const Dashboard = () => {
                   salesData={salesData}
                 />
 
-                <Top2Dashboard currency={currency} allEntitySalesData={allEntitySalesData} />
+                <Top2Dashboard
+                  moment={moment}
+                  currency={currency}
+                  allEntitySalesData={allEntitySalesData}
+                />
 
                 <OpportunityDashboards
                   currency={currency}
