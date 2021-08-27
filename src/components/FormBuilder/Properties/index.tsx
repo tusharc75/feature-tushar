@@ -92,6 +92,16 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.disableOnEdit = false;
       }
 
+      if (!values.isWarningTooltip && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+        values.isWarningTooltip = false;
+        values.warningTooltipMessage = "";
+
+      }
+
+      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+        values.disableOnEdit = false;
+      }
+
       if (!values.hiddenField && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
         values.hiddenField = false;
       }
@@ -197,6 +207,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isDefaultValue = values.isDefaultValue;
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
+
+            if (values.hasOwnProperty('isWarningTooltip')) {
+              ele.isWarningTooltip = values.isWarningTooltip
+              ele.warningTooltipMessage = values.warningTooltipMessage
+            }
 
             if (values.hasOwnProperty('addAdditionalOption')) {
               ele.addAdditionalOption = values.addAdditionalOption;
@@ -624,6 +639,32 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         error={touched['tooltipMessage'] && Boolean(errors['tooltipMessage'])}
                         helperText={touched['tooltipMessage'] && errors['tooltipMessage']}
                         onChange={(e) => setFieldValue('tooltipMessage', e.target.value.trimStart())}
+                      />
+                    )}
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isWarningTooltip"
+                          checked={values['isWarningTooltip']}
+                          onChange={(e) => setFieldValue('isWarningTooltip', e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label="Show Warning Tooltip"
+                    />
+                    {values['isWarningTooltip'] && (
+                      <TextField
+                        variant="outlined"
+                        type="text"
+                        label="Warning Tooltip Message"
+                        required={true}
+                        name="warningTooltipMessage"
+                        fullWidth
+                        margin="dense"
+                        value={values['warningTooltipMessage']}
+                        error={touched['warningTooltipMessage'] && Boolean(errors['warningTooltipMessage'])}
+                        helperText={touched['warningTooltipMessage'] && errors['warningTooltipMessage']}
+                        onChange={(e) => setFieldValue('warningTooltipMessage', e.target.value.trimStart())}
                       />
                     )}
 
