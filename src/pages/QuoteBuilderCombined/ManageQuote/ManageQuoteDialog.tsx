@@ -1027,7 +1027,7 @@ export default function ManageQuoteDialog({
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
-                                            disabled={!isClone ? (!isNew && field.disableOnEdit): false}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1178,7 +1178,7 @@ export default function ManageQuoteDialog({
                                             e.target.checked
                                           );
                                           if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
+                                            let doaUserDataTemp = doaCollaboratorResources?.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d.optionValue)
                                             setFieldValue("collaborator", [
                                               ...values["collaborator"]].concat(doaUserDataTemp)
                                             );
