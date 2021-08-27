@@ -211,8 +211,7 @@ export default function NewCreateQuotePdfTemplate() {
                         previewPdfTemplate(data._id);
                         setIsUpdatingAndPreview(false);
                         if (history.location?.state?.quoteId) {
-                            history.goBack()
-                            history.replace(`${history.location?.pathname}`, {
+                            history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
                                 versionNumber: `${history.location?.state?.version}`, tabValue: 2
                             })
                         }
@@ -222,8 +221,7 @@ export default function NewCreateQuotePdfTemplate() {
 
                     } else {
                         if (history.location?.state?.quoteId) {
-                            history.goBack()
-                            history.replace(`${history.location?.pathname}`, {
+                            history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
                                 versionNumber: `${history.location?.state?.version}`, tabValue: 2
                             })
                         }
@@ -265,7 +263,6 @@ export default function NewCreateQuotePdfTemplate() {
                         validationSchema={PdfTemplateSchema} onSubmit={handleSubmit}>
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
                             <Form>
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                 <Grid container>
                                     <Grid item xs={4}>
                                         <TextField
