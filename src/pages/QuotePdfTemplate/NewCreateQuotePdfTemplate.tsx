@@ -248,6 +248,7 @@ export default function NewCreateQuotePdfTemplate() {
                         validationSchema={PdfTemplateSchema} onSubmit={handleSubmit}>
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
                             <Form>
+                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                 <Grid container>
                                     <Grid item xs={4}>
                                         <TextField

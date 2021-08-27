@@ -65,6 +65,7 @@ const CreateNewDialog = (props) => {
                     <CustomDialogHeader title={"Create New"} onClose={handleClose}></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
+                            <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                             <Box p={1}>
                                 <TextField
                                     variant="outlined"

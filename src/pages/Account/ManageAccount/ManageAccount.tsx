@@ -213,7 +213,7 @@ export default function ManageAccount(props) {
 
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-
+                    <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
