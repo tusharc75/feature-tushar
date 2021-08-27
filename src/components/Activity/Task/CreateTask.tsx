@@ -133,6 +133,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                   <Box padding={1}>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                       <Box mb={2}>
@@ -304,8 +305,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                         </Grid>
                         <Grid item xs={12} md={5} sm={6}>
                           {id && (
-                             <Fragment>
-                                <Box mt={1}>
+                            <Fragment>
+                              <Box mt={1}>
                                 <Button
                                   variant="contained"
                                   size="small"
@@ -325,7 +326,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                   setId={setId}
                                 />
                               </Box>
-                              </Fragment>
+                            </Fragment>
                           )}
                         </Grid>
                       </Grid>
@@ -335,12 +336,12 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                         />
                       </Box>
                       {id &&
-                      <Box mt={2}>
-                        <Divider />
-                        <Box mt={1}>
-                          <Comment referenceId={id} /> 
-                        </Box>
-                      </Box>}
+                        <Box mt={2}>
+                          <Divider />
+                          <Box mt={1}>
+                            <Comment referenceId={id} />
+                          </Box>
+                        </Box>}
                     </MuiPickersUtilsProvider>
                   </Box>
                 </Form>

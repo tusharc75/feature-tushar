@@ -109,7 +109,7 @@ export default function ManageContact(props) {
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
-              (d) => d.optionValue !== contactId
+              (d) => d?.optionValue !== contactId
             );
           setReportsToMainDataSource(currentContactRemovedDataSource);
         }
@@ -197,7 +197,7 @@ export default function ManageContact(props) {
   const initializeAccountDropdown = (values, accountSource) => {
     if (values && values.hasOwnProperty("accountName")) {
       const getNewAddedAccount = accountSource.find(
-        (d) => d.optionValue === accountId
+        (d) => d?.optionValue === accountId
       );
       if (getNewAddedAccount) {
         values["accountName"] = getNewAddedAccount.optionValue;
@@ -249,6 +249,7 @@ export default function ManageContact(props) {
                 <>
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
+                    <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
@@ -291,7 +292,7 @@ export default function ManageContact(props) {
                                             const checkOwnerAddedInCollaborator =
                                               values["collaborator"].find(
                                                 (d) =>
-                                                  d.optionValue ===
+                                                  d?.optionValue ===
                                                   user?.user?._id
                                               );
                                             if (
@@ -310,7 +311,7 @@ export default function ManageContact(props) {
                                                 ...values["collaborator"],
                                                 newCollaboratorDataSource.find(
                                                   (d) =>
-                                                    d.optionValue ===
+                                                    d?.optionValue ===
                                                     user?.user?._id
                                                 ).optionValue,
                                               ]);

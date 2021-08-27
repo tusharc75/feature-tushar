@@ -49,6 +49,7 @@ const ProductTemplate = () => {
     const [showHistory, setShowHistory] = useState(false)
     //const [productUnit, setProductUnit] = useState(null);
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [productField, setProductField] = useState([]);
     const [disableSaveButton, setDisableSaveButton] = useState(false)
 
@@ -102,9 +103,12 @@ const ProductTemplate = () => {
                 if (isClone) {
                     data.name = ""
                 }
+                if (data.owner || data.owner === undefined) {
+                    data.owner = user.user._id
+                }
                 setInitialValues(data);
                 setSection(data.section);
-                if (user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+                if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
                     setDisableSaveButton(true)
                 }
             }).catch((error) => {
@@ -134,7 +138,8 @@ const ProductTemplate = () => {
 
     const fetchUser = () => {
         axiosInstance().get(`/user`).then(({ data: { data } }) => {
-            setOwnerCollaboratorData(data);
+            setOwnerCollaboratorDataConst(data);
+            setOwnerCollaboratorData(data)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -270,6 +275,7 @@ const ProductTemplate = () => {
                 <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
+                            <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                             <Box p={1} bgcolor="white">
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}  >
@@ -359,6 +365,9 @@ const ProductTemplate = () => {
                                                 : []}
                                             onChange={(e, val) => {
                                                 setFieldValue("entity", val && val?.map(d => d._id))
+                                                val && val.length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
@@ -384,6 +393,11 @@ const ProductTemplate = () => {
                                             onChange={(e, val) => {
                                                 setFieldValue("owner", val && val._id ? val._id : "");
                                             }}
+                                            onOpen={() =>
+                                                values["entity"] && values["entity"].length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
@@ -393,6 +407,7 @@ const ProductTemplate = () => {
                                                     variant="outlined"
                                                     error={touched["owner"] && Boolean(errors["owner"])}
                                                     helperText={touched["owner"] && errors["owner"]}
+                                                    required={true}
                                                     fullWidth
                                                 />
                                             )}
@@ -409,6 +424,11 @@ const ProductTemplate = () => {
                                             onChange={(e, val) => {
                                                 setFieldValue("collaborator", val && val?.map(d => d._id))
                                             }}
+                                            onOpen={() =>
+                                                values["entity"] && values["entity"].length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
