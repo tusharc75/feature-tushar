@@ -413,7 +413,11 @@ export default function ManageQuoteDialog({
           initialData["estimatedAmount"] = estimatedAmount || "";
         } else {
           if (isNew) {
-            initialData["currency"] = selectedEntity?.currency || "";
+            const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
+
+            if (selectedEntityDetails) {
+              initialData["currency"] = selectedEntityDetails.currency || "";
+            }
           }
         }
 
