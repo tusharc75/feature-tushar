@@ -96,7 +96,7 @@ export default function ManageUserDialog({
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
-              (d) => d.optionValue !== userId
+              (d) => d?.optionValue !== userId
             );
           setReportsToDataSource(currentContactRemovedDataSource);
         }
@@ -167,8 +167,8 @@ export default function ManageUserDialog({
           isNew
             ? "Create New User"
             : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
-                .filter((f) => f)
-                .join(" ")}`
+              .filter((f) => f)
+              .join(" ")}`
         }
         onClose={close}
       />
@@ -214,6 +214,8 @@ export default function ManageUserDialog({
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+
                   {formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
@@ -264,10 +266,10 @@ export default function ManageUserDialog({
                                         (s) => s === field.type
                                       )
                                         ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(
-                                              completePercentage
-                                            );
-                                          }
+                                          setUploadingImageOrFileProgress(
+                                            completePercentage
+                                          );
+                                        }
                                         : null
                                     }
                                   />
@@ -307,7 +309,8 @@ export default function ManageUserDialog({
                         inline: 'start',
                       });
                     }
-                    submitForm()}}
+                    submitForm()
+                  }}
                   disabled={
                     isSubmitting || loading || uploadingImageOrFileProgress > 0
                   }

@@ -100,6 +100,8 @@ const CreateProductCategory = (props) => {
                         <CustomDialogHeader title={productCategoryId ? !isUpdateDisabled ? "Update " + routes.productCategory.title : values["name"] : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
+                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+
                                 <InputField
                                     disabled={isUpdateDisabled}
                                     errors={errors}

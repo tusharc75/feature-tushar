@@ -123,7 +123,7 @@ const SelectionDialog = (props) => {
     const initializeProductCategoryDropdown = (values, productCategorySource) => {
         if (values && values.hasOwnProperty("productCategory")) {
             const getNewAddedProductCategory = productCategorySource.find(
-                (d) => d.optionValue === newProductCategoryId
+                (d) => d?.optionValue === newProductCategoryId
             );
             if (getNewAddedProductCategory) {
                 values["productCategory"] = getNewAddedProductCategory.optionValue;
