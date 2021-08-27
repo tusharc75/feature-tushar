@@ -250,7 +250,7 @@ const Leads = () => {
 
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
-              isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d.optionValue === user?.user?._id),
+              isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
 
               convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
               relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,

@@ -75,7 +75,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     const handleExportExcel = () => {
         var export_json = [...values["option"]];
         export_json.forEach((_d) => {
-            delete _d.optionValue
+            delete _d?.optionValue
         })
         var ws = XLSX.utils.json_to_sheet(export_json);
         var wb = XLSX.utils.book_new();
