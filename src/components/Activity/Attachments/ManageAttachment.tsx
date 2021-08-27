@@ -69,7 +69,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [open, setOpen] = useState(false)
     const [imageAttachments,] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
-    const [fileImageAttachments,] = useState([]) 
+    const [fileImageAttachments,] = useState([])
     const [canEdit, setCanEdit] = useState(true);
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
     const [attachmentToDelete, setAttachemnetToDelete] = useState("");
@@ -311,6 +311,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
+                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>

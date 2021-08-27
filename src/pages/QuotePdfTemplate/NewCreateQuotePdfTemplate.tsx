@@ -210,9 +210,24 @@ export default function NewCreateQuotePdfTemplate() {
                     if (isPreview === true) {
                         previewPdfTemplate(data._id);
                         setIsUpdatingAndPreview(false);
-                        history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+                        if (history.location?.state?.quoteId) {
+                            history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
+                                versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                            })
+                        }
+                        else {
+                            history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+                        }
+
                     } else {
-                        history.push({ pathname: routes.quotePdfTemplate.path });
+                        if (history.location?.state?.quoteId) {
+                            history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
+                                versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                            })
+                        }
+                        else {
+                            history.push({ pathname: routes.quotePdfTemplate.path });
+                        }
                         setIsUpdating(false);
                     }
                 })

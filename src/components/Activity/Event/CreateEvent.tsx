@@ -77,7 +77,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
         .then(({ data }) => {
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: "",
@@ -275,6 +275,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box padding={1}>
                       <TextField
@@ -408,9 +409,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                                 setFieldValue("startTime", date);
                                 if (new Date(date._d).getHours() < 23) {
                                   setFieldValue("endTime", new Date(
-                                      new Date(date._d).getTime() + 30 * 60000
-                                      )
-                                  );                                  
+                                    new Date(date._d).getTime() + 30 * 60000
+                                  )
+                                  );
                                 }
                               }}
                               error={
@@ -482,7 +483,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               placeholder="08:00 AM"
                               mask="__:__ _M"
                               value={values.endTime}
-                              onChange={(date:any) => {
+                              onChange={(date: any) => {
                                 const nDate = new Date(values.startTime).toISOString().split("T")[0];
                                 const nTime = new Date(date._d).toISOString().split("T")[1];
 
@@ -554,8 +555,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                       )}
 
                       {eventId &&
-                      initialValues?.relatedTo &&
-                      initialValues.relatedTo.length ? (
+                        initialValues?.relatedTo &&
+                        initialValues.relatedTo.length ? (
                         <Fragment>
                           <Box mt={2}>
                             <RelatedToDispay
@@ -598,7 +599,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                         .then(({ data }) => {
                           handleClose();
                         })
-                        .catch((err) => {})
+                        .catch((err) => { })
                     }
                   >
                     Delete

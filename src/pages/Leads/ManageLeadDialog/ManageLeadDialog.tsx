@@ -342,6 +342,7 @@ export default function ManageLeadDialog({
               <>
                 <CustomDialogContent>
                   <Form>
+                  <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
                     {formsData &&
                       formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => {
                         return (

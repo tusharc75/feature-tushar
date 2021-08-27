@@ -2,7 +2,8 @@ import { Button, CircularProgress, Grid, Paper, makeStyles, FormControl, Checkbo
 import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
-import { AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
+import { useHistory } from "react-router-dom";
+import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
 import { BiLayerPlus, BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
 import { GiVintageRobot } from "react-icons/gi";
@@ -141,6 +142,7 @@ export default function QuoteProcess(props) {
     const {
         state: { user, permissions },
     }: any = useData();
+    const history = useHistory();
 
     const [quoteCurrency] = useState(quoteData?.currency)
     const [nextStep, setNextStep] = useState(true);
@@ -1515,7 +1517,21 @@ export default function QuoteProcess(props) {
                                 >
                                     Download
                                 </Button>
-
+                                <Button
+                                    onClick={() => {
+                                        quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
+                                            quoteId: quoteData._id,
+                                            version: currentVersion,
+                                          })
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    className="mr-1"
+                                    startIcon={<AiFillEdit />}
+                                    color="primary"
+                                >
+                                    Edit
+                                </Button>
                                 <Tooltip title="AI Suggestion">
                                     <IconButton
                                         onClick={() => {
