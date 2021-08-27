@@ -96,7 +96,7 @@ export default function ManageUserDialog({
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
-              (d) => d.optionValue !== userId
+              (d) => d?.optionValue !== userId
             );
           setReportsToDataSource(currentContactRemovedDataSource);
         }

@@ -135,7 +135,7 @@ export default function NewOpportunityProjectSales({
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
       const getNewAddedMarketSegment = marketSegmentSource.find(
-        (d) => d.optionValue === newMarketSegmentId
+        (d) => d?.optionValue === newMarketSegmentId
       );
       if (getNewAddedMarketSegment) {
         values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
@@ -148,7 +148,7 @@ export default function NewOpportunityProjectSales({
   const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
       const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-        (d) => d.optionValue === newSubMarketSegmentId
+        (d) => d?.optionValue === newSubMarketSegmentId
       );
       if (getNewAddedSubMarketSegment) {
         values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
@@ -713,7 +713,7 @@ export default function NewOpportunityProjectSales({
               setNewSubMarketSegmentId(null);
             } else {
               //  If parent selected, consider that as a child
-              if (marketSegmentDataSource.some(d => d.optionValue === data.parentMarketSegment)) {
+              if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
                 setSubMarketSegmentDataSource([
                   ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
                   {
@@ -734,7 +734,7 @@ export default function NewOpportunityProjectSales({
                 })
 
                 if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                  const getMarketSegment = mainMarketSegmentDataSource.find(d => d.optionValue === data.parentMarketSegment);
+                  const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
 
                   initializeMarketSegmentDataSource.push({
                     optionValue: getMarketSegment.optionValue,

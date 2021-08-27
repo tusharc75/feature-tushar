@@ -89,7 +89,7 @@ export default function ManageAccount(props) {
         isNew
           ? parentAccountDropdownData.option
           : parentAccountDropdownData.option.filter(
-            (d) => d.optionValue !== accountId
+            (d) => d?.optionValue !== accountId
           )
       );
     }
@@ -250,7 +250,7 @@ export default function ManageAccount(props) {
                                             const checkOwnerAddedInCollaborator =
                                               values["collaborator"].find(
                                                 (d) =>
-                                                  d.optionValue ===
+                                                  d?.optionValue ===
                                                   user?.user?._id
                                               );
                                             if (
@@ -269,7 +269,7 @@ export default function ManageAccount(props) {
                                                 ...values["collaborator"],
                                                 newCollaboratorDataSource.find(
                                                   (d) =>
-                                                    d.optionValue ===
+                                                    d?.optionValue ===
                                                     user?.user?._id
                                                 ).optionValue,
                                               ]);

@@ -339,7 +339,7 @@ const ContactDetailsPage = (props) => {
       allowToEdit = contactDetails.owner?.optionValue && contactDetails.owner.optionValue === userId;
 
       if (!allowToEdit && contactDetails.collaborator && contactDetails.collaborator.length > 0) {
-        allowToEdit = contactDetails.collaborator.findIndex((d) => d.optionValue === userId) > -1;
+        allowToEdit = contactDetails.collaborator.findIndex((d) => d?.optionValue === userId) > -1;
       }
 
       if (allowToEdit) setAllowedToEdit(allowToEdit);
