@@ -234,10 +234,19 @@ export default function ManageOpportunityDialog({
           setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
         }
 
+        let initialData = getObjKeys("", newFields);
+
+        if (isNew) {
+          const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
+          if (selectedEntityDetails) {
+            initialData["currency"] = selectedEntityDetails.currency || "";
+          }
+        }
+
         setEntityData({
           fields: newFields,
           initialValues: isNew
-            ? getObjKeys("", newFields)
+            ? initialData
             : getObjKeysWithValues(dataToUpdate, newFields),
         });
       });
@@ -250,7 +259,7 @@ export default function ManageOpportunityDialog({
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
       const getNewAddedMarketSegment = marketSegmentSource.find(
-        (d) => d.optionValue === newMarketSegmentId
+        (d) => d?.optionValue === newMarketSegmentId
       );
       if (getNewAddedMarketSegment) {
         values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
@@ -263,7 +272,7 @@ export default function ManageOpportunityDialog({
   const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
       const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-        (d) => d.optionValue === newSubMarketSegmentId
+        (d) => d?.optionValue === newSubMarketSegmentId
       );
       if (getNewAddedSubMarketSegment) {
         values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
@@ -392,6 +401,7 @@ export default function ManageOpportunityDialog({
               <>
                 <CustomDialogContent>
                   <Form>
+                  <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
                     {formsData &&
                       formsData.filter((item) => item.name !== additionalFieldName).map((form, index1) => {
                         return form.name ? (
@@ -505,7 +515,7 @@ export default function ManageOpportunityDialog({
                                             const checkOwnerAddedInCollaborator =
                                               values["collaborator"].find(
                                                 (d) =>
-                                                  d.optionValue ===
+                                                  d?.optionValue ===
                                                   user?.user?._id
                                               );
                                             if (
@@ -515,7 +525,7 @@ export default function ManageOpportunityDialog({
                                                 ...values["collaborator"],
                                                 collaboratorData.find(
                                                   (d) =>
-                                                    d.optionValue ===
+                                                    d?.optionValue ===
                                                     user?.user?._id
                                                 ).optionValue,
                                               ]);
@@ -1021,7 +1031,7 @@ export default function ManageOpportunityDialog({
                 setNewSubMarketSegmentId(null);
               } else {
                 //  If parent selected, consider that as a child
-                if (marketSegmentDataSource.some(d => d.optionValue === data.parentMarketSegment)) {
+                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
                   setSubMarketSegmentDataSource([
                     ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
                     {
@@ -1042,7 +1052,7 @@ export default function ManageOpportunityDialog({
                   })
 
                   if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d.optionValue === data.parentMarketSegment);
+                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
 
                     initializeMarketSegmentDataSource.push({
                       optionValue: getMarketSegment.optionValue,
