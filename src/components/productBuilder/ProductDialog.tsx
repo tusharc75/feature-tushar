@@ -47,7 +47,7 @@ const CreateProduct = (props) => {
   const [masterFields, setMasterFields] = useState([]);
   const [productFields, setProductFields] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [initialData, setInitialData] = useState({ fields: [], values: { } });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
@@ -84,6 +84,11 @@ const CreateProduct = (props) => {
     values.productCategory = values.productCategory.optionValue;
     values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue;
     values.priceTemplate = values.priceTemplate && values.priceTemplate.optionValue && values.priceTemplate.optionValue;
+    const entity = []
+    values.entity && values.entity.forEach((ele) => {
+      entity.push(ele.optionValue);
+    })
+    values.entity = entity;
     delete values.fields;
 
     setInitialData({
@@ -164,9 +169,9 @@ const CreateProduct = (props) => {
     setFields(fields);
     let newField = initialData.fields;
     newField.push(field);
-    var extraCalculatedValue: any = {}
+    var extraCalculatedValue: any = { }
     if (field.type === "formula" || field.isFormula) {
-      var inputValues = {};
+      var inputValues = { };
       field.inputFields && field.inputFields.forEach((_f) => {
         inputValues[_f] = ref.current.values[_f] ? ref.current.values[_f] : 0
       })
@@ -333,7 +338,7 @@ const CreateProduct = (props) => {
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
-                                      style={{background: field.isUneditable ? "#1e768221": ""}}
+                                      style={{ background: field.isUneditable ? "#1e768221" : "" }}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -369,9 +374,9 @@ const CreateProduct = (props) => {
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
                                       <Box display="flex">
                                         <Box flexGrow={1}>
-                                            <FormTypes
+                                          <FormTypes
                                             {...field}
-                                            style={{background: field.isUneditable ? "#1e768221": ""}}
+                                            style={{ background: field.isUneditable ? "#1e768221" : "" }}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
@@ -406,8 +411,8 @@ const CreateProduct = (props) => {
                                             }
                                             size="small"
                                             disabled={stage === "product" ?
-                                              ["productCategory", "productTemplate"].includes(field.fieldName) ? true : false
-                                              : ["productCategory", "productTemplate", "priceTemplate"].includes(field.fieldName) ? true : false}
+                                              ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                              : ["productCategory", "productTemplate", "priceTemplate", "entity"].includes(field.fieldName) ? true : false}
                                             imageOrFileUploadCompletePercentage={
                                               ["imageUpload", "fileUpload"].some((s) => s === field.type)
                                                 ? (completePercentage) => {
