@@ -240,6 +240,14 @@ export default function ManageUserDialog({
                                     type={field.type}
                                     options={reportsToDataSource}
                                     setFieldValue={setFieldValue}
+                                    onChange={(e, val) => {
+                                      setFieldValue(
+                                        field.fieldName,
+                                        val && val.optionValue
+                                          ? val.optionValue
+                                          : ""
+                                      );
+                                    }}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
