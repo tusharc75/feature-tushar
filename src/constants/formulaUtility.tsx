@@ -102,7 +102,7 @@ const formatDecimal = (value, decimalPlaces) => {
 };
 
 export const handleAutoCalculation = (fieldData, fields, values, name, currency, unit, value) => {
-    let resultValues: any = {}
+    let resultValues: any = { }
     resultValues[name] = value;
     try {
         loop_count = 0;
@@ -153,7 +153,7 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
 const handleMulitFormula = (fieldData, fields, values, resultValues) => {
     fieldData.formulaFields.forEach((_field: any) => {
         if (resultValues[_field] === undefined) {
-            let formulainputFields: any = {};
+            let formulainputFields: any = { };
             fieldData.formulainputFields.forEach((_input: any) => {
                 formulainputFields[_input] = resultValues[_input] || resultValues[_input] === 0 ? resultValues[_input] : values[_input] ? values[_input] : 0;
             });
@@ -188,7 +188,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                 if (loop_count > 100) {
                     return resultValues
                 }
-                let inputFields = {};
+                let inputFields = { };
                 _data.inputFields.forEach((_input) => {
                     if (name === _input) {
                         inputFields[_input] = value;
@@ -308,12 +308,14 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
                 if (result.length) {
                     if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
                         if (_data.type !== 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
-                            resultValues[_data.fieldName + "_" + _data.displayUnits[0].toLowerCase()] = parseFloat(result[0].optionLabel);
-                            resultValues = handleConverter(_data, fields, values, _data.fieldName, _data.displayUnits[0], result[0].optionLabel, resultValues)
+                            const _unit = _data.vlookupOnConverter ? _data.vlookupOnConverter : _data.displayUnits[0];
+                            resultValues[_data.fieldName + "_" + _unit.toLowerCase()] = parseFloat(result[0].optionLabel);
+                            resultValues = handleConverter(_data, fields, values, _data.fieldName, _unit, result[0].optionLabel, resultValues)
                         }
                         else if (_data.type === 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
-                            resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase() + "_" + _data.displayUnits[0].toLowerCase()] = parseFloat(result[0].optionLabel);
-                            resultValues = handleCurrencyConverter(_data, fields, values, _data.fieldName, _data.displayCurrency[0], _data.displayUnits[0], result[0].optionLabel, resultValues)
+                            const _unit = _data.vlookupOnConverter ? _data.vlookupOnConverter : _data.displayUnits[0];
+                            resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase() + "_" + _unit.toLowerCase()] = parseFloat(result[0].optionLabel);
+                            resultValues = handleCurrencyConverter(_data, fields, values, _data.fieldName, _data.displayCurrency[0], _unit, result[0].optionLabel, resultValues)
                         }
                         else if (_data.type === 'currencyAmount') {
                             resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase()] = parseFloat(result[0].optionLabel);
@@ -446,10 +448,11 @@ export const extractFields = (fields) => {
 export const autoCalculate = (values: any, fieldList: any) => {
     const returnvalues: any = values;
     fieldList.forEach((ele: any) => {
-        if (ele.lookup || ((ele.type === 'vlookupDropdown' || ele.isVlookup) && !ele.isvlookupReverse) || ele.isUneditable) {
+        //((ele.type === 'vlookupDropdown' || ele.isVlookup) && ele.isvlookupReverse)
+        if (ele.lookup || ele.isUneditable) {
         }
         else {
-            let calValues: any = {};
+            let calValues: any = { };
             if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
                 if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                     ele.displayUnits && ele.displayUnits.forEach((_unit: any) => {
@@ -523,6 +526,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
     return returnvalues;
 };
 
+
 export const autoCalculateSpecificFields = (inputValues: any, values: any, fieldList: any) => {
     const returnvalues: any = { ...inputValues }
     for (var _fieldName in inputValues) {
@@ -578,19 +582,19 @@ export const checkFormulaLoop = (fields) => {
             if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
                 if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                     let fieldName = ele.fieldName + "_" + ele.displayUnits[0].toLowerCase();
-                    handleAutoCalculation(ele, fields, {}, fieldName, "", ele.displayUnits[0], 1)
+                    handleAutoCalculation(ele, fields, { }, fieldName, "", ele.displayUnits[0], 1)
                 }
                 else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                     let fieldName = ele.fieldName + "_" + ele.displayCurrency[0].toLowerCase() + "_" + ele.displayUnits[0].toLowerCase();
-                    handleAutoCalculation(ele, fields, {}, fieldName, ele.displayCurrency[0], ele.displayUnits[0], 1)
+                    handleAutoCalculation(ele, fields, { }, fieldName, ele.displayCurrency[0], ele.displayUnits[0], 1)
                 }
                 else if (ele.type === 'currencyAmount') {
                     let fieldName = ele.fieldName + "_" + ele.displayCurrency[0].toLowerCase();
-                    handleAutoCalculation(ele, fields, {}, fieldName, ele.displayCurrency[0], "", 1)
+                    handleAutoCalculation(ele, fields, { }, fieldName, ele.displayCurrency[0], "", 1)
                 }
             }
             else {
-                handleAutoCalculation(ele, fields, {}, ele.fieldName, "", "", 1)
+                handleAutoCalculation(ele, fields, { }, ele.fieldName, "", "", 1)
             }
             if (loop_count > 100) {
                 is_loop = true
@@ -653,7 +657,7 @@ export const checkUniqueValidation = (checkinFields, checkfromFields) => {
 
 export const checkFieldDependency = (fieldId, sectionId, section) => {
     try {
-        var fieldData: any = {}
+        var fieldData: any = { }
         section.forEach((row) => {
             if (row.sectionId.toString() === sectionId.toString()) {
                 if (row.field.filter(i => i._id.toString() === fieldId.toString()).length) {

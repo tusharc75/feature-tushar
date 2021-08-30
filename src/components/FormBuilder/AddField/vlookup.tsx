@@ -14,6 +14,8 @@ import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { FixedSizeList } from 'react-window';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
 export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [isUpdate, setUpdate] = useState(false);
@@ -58,7 +60,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
         dataParse.splice(0, 1);
         let option = [];
         dataParse.forEach((row) => {
-          let rowInsert = {};
+          let rowInsert = { };
           rowInsert['optionLabel'] = row[0] ? row[0].toString() : '';
           values['vlookupInputFields'] &&
             values['vlookupInputFields'].forEach((coloum, index) => {
@@ -139,7 +141,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
               values['vlookupInputFields'].map((_row) => (
                 <Box minWidth={200} maxWidth={200} pl={1}>
                   {(fields.filter((_f) => _f.fieldName === _row).length && fields.filter((_f) => _f.fieldName === _row)[0].type === 'dropDown') ||
-                  fields.filter((_f) => _f.fieldName === _row)[0].type === 'vlookupDropdown' ? (
+                    fields.filter((_f) => _f.fieldName === _row)[0].type === 'vlookupDropdown' ? (
                     <Select
                       id="demo-simple-select-outlined"
                       fullWidth
@@ -331,6 +333,23 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                     ))} */}
         </Box>
       </Box>
+      {values['isConverter'] || values['type'] === "converter" && (
+        <Grid item xs={12} sm={4} md={4}>
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel id="vlookupOnConverter">Vlookup applied on converter</InputLabel>
+            <Select
+              labelId="vlookupOnConverter"
+              id="vlookupOnConverter"
+              value={values['vlookupOnConverter']}
+              onChange={(e) => setFieldValue('vlookupOnConverter', e.target.value)}
+              label="Vlookup applied on converter"
+              name="vlookupOnConverter"
+            >
+              {values['formulaUnits'] && values['formulaUnits'].map((_unit) => <MenuItem value={_unit}>{_unit}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Grid>
+      )}
       {!values['isVlookup'] && (
         <FormControlLabel
           control={
