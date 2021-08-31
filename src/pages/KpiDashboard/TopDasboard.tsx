@@ -25,7 +25,7 @@ import * as XLSX from 'xlsx';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const TopDashboard = (props) => {
-  const { salesRevenue, salesData, regionSales, moment, currency } = props;
+  const { salesRevenue, salesData, regionSales, moment, currency, filterCurrency } = props;
   const [anchorElChart, setAnchorElChart] = useState(null);
   const [anchorElTable, setAnchorElTable] = useState(null);
   const [tableView, setTableView] = useState(false);
@@ -45,8 +45,6 @@ const TopDashboard = (props) => {
     setAnchorElChart(event.currentTarget);
   };
 
-  
-
   const handleCloseChart = (exportType) => () => {
     switch (exportType) {
       case 'ppt': {
@@ -55,7 +53,7 @@ const TopDashboard = (props) => {
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
         slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile({ fileName: "Entity Sales Chart.pptx"});
+        pptx.writeFile({ fileName: 'Entity Sales Chart.pptx' });
         break;
       }
 
@@ -108,19 +106,26 @@ const TopDashboard = (props) => {
     switch (exportType) {
       case 'ppt': {
         const pptx = new PptxGenJs();
-        let cell1 = regionSales.map(r => ({
-          text: `${r.region}\n`,
+        let cell1 = regionSales.map((r) => ({
+          text: `${r.region}\n`
           // options: {color: "#333"}
-        }))
-        let cell2 = regionSales.map(r => ({
-          text: `${r.totalBookedValue}\n`,
+        }));
+        let cell2 = regionSales.map((r) => ({
+          text: `${r.totalBookedValue}\n`
           // options: {color: "#333"}
-        }))
+        }));
         const slide = pptx.addSlide();
-        slide.addTable([[{ text: cell1 }, { text: cell2 }]],
-          { x: 0.5, y: 0.5, w: 6, h: 3, fontSize: 16, border: { pt: 1 }, fill: { color: "f1f1f1" } })
-        
-        pptx.writeFile({ fileName: "Regional Sales.pptx"});
+        slide.addTable([[{ text: cell1 }, { text: cell2 }]], {
+          x: 0.5,
+          y: 0.5,
+          w: 6,
+          h: 3,
+          fontSize: 16,
+          border: { pt: 1 },
+          fill: { color: 'f1f1f1' }
+        });
+
+        pptx.writeFile({ fileName: 'Regional Sales.pptx' });
         break;
       }
 
@@ -177,7 +182,7 @@ const TopDashboard = (props) => {
                     Total Booked Value
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.revenue ? formatAmountWithCurrency(currency, salesRevenue.revenue).fullFormatAmount : 0}
+                    {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
                   </Typography>
                 </Box>
               </Paper>
@@ -189,7 +194,7 @@ const TopDashboard = (props) => {
                     Total Cost
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.spend ? formatAmountWithCurrency(currency, salesRevenue.spend).fullFormatAmount : 0}
+                    {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
                   </Typography>
                 </Box>
               </Paper>
@@ -308,7 +313,7 @@ const TopDashboard = (props) => {
                     <TableRow key={data.region}>
                       {Object.keys(data).map((label, i) => (
                         <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                          {i < 1 ? data[label] : formatAmountWithCurrency(currency, data[label]).fullFormatAmount}
+                          {i < 1 ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                         </TableCell>
                       ))}
                     </TableRow>
