@@ -86,7 +86,7 @@ function ReviewsComponent({ review }) {
   );
 }
 
-const RatingAndReviewChart = ({ id, reviews }) => {
+const RatingAndReviewChart = ({ id, reviews, averageRating }) => {
   const [ratings, setRatings] = useState({
     1: 0,
     2: 0,
@@ -94,7 +94,6 @@ const RatingAndReviewChart = ({ id, reviews }) => {
     4: 0,
     5: 0
   })
-  const [averageRating, setAverageRating] = useState(0)
 
   useEffect(() => {
 
@@ -104,13 +103,7 @@ const RatingAndReviewChart = ({ id, reviews }) => {
         tempRating[o?.rating] = tempRating[o?.rating] ? tempRating[o?.rating] + 1 : 1
       }
     })
-    let averageRating = (tempRating[5] * 5) + (tempRating[4] * 4) + (tempRating[3] * 3) + (tempRating[2] * 2) + (tempRating[1])
-    if (averageRating > 0) {
-      averageRating = averageRating / (tempRating[5] + tempRating[4] + tempRating[3] + tempRating[2] + tempRating[1])
-      averageRating = parseFloat((Math.round(averageRating * 100) / 100).toFixed(1));
-      setAverageRating(averageRating)
-      setRatings({ ...tempRating })
-    }
+    setRatings({ ...tempRating })
   }, [reviews])
 
   return (
