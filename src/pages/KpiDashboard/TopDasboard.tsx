@@ -34,9 +34,9 @@ const TopDashboard = (props) => {
   useEffect(() => {
     const tableD = salesData.allData.map((d) => ({
       Month: moment(d.date).format('MMM/YY'),
-      ['Total Sell']: d.totalSell.toLocaleString(),
-      ['Total Cost']: d.totalCost.toLocaleString(),
-      Budget: d.budget.toLocaleString()
+      ['Total Sell']: d.totalSell ? d.totalSell.toLocaleString() : 0,
+      ['Total Cost']: d.totalSell ? d.totalCost.toLocaleString() : 0,
+      Budget: d.budget ? d.budget.toLocaleString() : 0
     }));
     setTableDataRaw(tableD);
   }, [salesData]);

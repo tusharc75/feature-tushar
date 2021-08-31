@@ -224,21 +224,25 @@ const Dashboard = () => {
 
         for (let d of data) {
           if (filterCurrency && filterCurrency !== currency) {
-            if (d.totalSell && d.totalCost) {
+            if (d.totalSell && d.totalCost && d.budget) {
               const totalSelldata = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalSell);
               const totalCostData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalCost);
+              const budgetData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget);
               saleData.push(totalSelldata.rates[filterCurrency]);
               costData.push(totalCostData.rates[filterCurrency]);
+              budget.push(budgetData.rates[filterCurrency]);
             } else {
               saleData.push(d.totalSell);
               costData.push(d.totalCost);
+              budget.push(d.budget);
             }
           } else {
             saleData.push(d.totalSell);
             costData.push(d.totalCost);
+            budget.push(d.budget);
           }
           labels.push(moment(d.date).format('MMM/YY'));
-          budget.push(d.budget);
+
           if (d.currency) {
             setCurrency(d.currency);
           }
@@ -252,9 +256,9 @@ const Dashboard = () => {
 
         const profit = revenue && spend ? Math.floor(((revenue - spend) / spend) * 100) : 0;
 
-        if (revenue && spend && filterCurrency !== currency) {
-          revenueRate = await getExchangeRates(moment().format('YYYY-MM-DD'), revenue);
-          spendRate = await getExchangeRates(moment().format('YYYY-MM-DD'), spend);
+        if (filterCurrency !== currency) {
+          revenueRate = revenue ? await getExchangeRates(moment().format('YYYY-MM-DD'), revenue) : 0;
+          spendRate = spend ? await getExchangeRates(moment().format('YYYY-MM-DD'), spend) : 0;
         }
 
         setSalesRevenue({
