@@ -1543,6 +1543,7 @@ const FormTypes = (props) => {
       <FormControlLabel
         control={
           <Checkbox
+            {...rest}
             required={required}
             name={name}
             checked={values[name]}
