@@ -311,15 +311,19 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
                             const _unit = _data.vlookupOnConverter ? _data.vlookupOnConverter : _data.displayUnits[0];
                             resultValues[_data.fieldName + "_" + _unit.toLowerCase()] = parseFloat(result[0].optionLabel);
                             resultValues = handleConverter(_data, fields, values, _data.fieldName, _unit, result[0].optionLabel, resultValues)
+                            resultValues = handleFormula(_data, fields, values, _data.fieldName + "_" + _unit.toLowerCase(), result[0].optionLabel, resultValues, true)
                         }
                         else if (_data.type === 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
                             const _unit = _data.vlookupOnConverter ? _data.vlookupOnConverter : _data.displayUnits[0];
                             resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase() + "_" + _unit.toLowerCase()] = parseFloat(result[0].optionLabel);
                             resultValues = handleCurrencyConverter(_data, fields, values, _data.fieldName, _data.displayCurrency[0], _unit, result[0].optionLabel, resultValues)
+                            resultValues = handleFormula(_data, fields, values, _data.fieldName + "_" + _data.displayCurrency[0].toLowerCase() + "_" + _unit.toLowerCase(),
+                                result[0].optionLabel, resultValues, true)
                         }
                         else if (_data.type === 'currencyAmount') {
                             resultValues[_data.fieldName + "_" + _data.displayCurrency[0].toLowerCase()] = parseFloat(result[0].optionLabel);
                             resultValues = handleCurrency(_data, fields, values, _data.fieldName, _data.displayCurrency[0], result[0].optionLabel, resultValues)
+                            resultValues = handleFormula(_data, fields, values, _data.fieldName + "_" + _data.displayCurrency[0].toLowerCase(), result[0].optionLabel, resultValues, true)
                         }
                     }
                     else {
