@@ -18,6 +18,7 @@ import OpportunitiesDashboard from './OpportunitiesDashboard';
 const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
   const [currency, setCurrency] = useState('');
+  const [filterCurrency, setFilterCurrency] = useState('');
   const [salesRevenue, setSalesRevenue] = useState({
     revenue: 0,
     spend: 0,
@@ -713,8 +714,8 @@ const Dashboard = () => {
           <Paper>
             <Container maxWidth="xl">
               <Filters
-                currency={currency}
-                setCurrency={setCurrency}
+                currency={filterCurrency}
+                setCurrency={setFilterCurrency}
                 moment={moment}
                 entities={entities}
                 salesReps={salesReps}
