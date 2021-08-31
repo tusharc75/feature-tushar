@@ -19,13 +19,9 @@ const useStyles = makeStyles((theme) => ({
   },
   demo: {
     backgroundColor: theme.palette.background.paper,
-    width: "100%",
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-  },
-  list: {
-    width: "100%",
   },
 }));
 
@@ -50,9 +46,9 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
             ? data.map((obj: any, i: string) => (
               <BoxWithBorder
                 key={i}
-                style={{ padding: "0px", margin: "8px" }}
+                style={{ padding: "0px"}}
               >
-                <ListItem className={classes.list}>
+                <ListItem>
                   <ListItemText
                     primary={
                       <Typography

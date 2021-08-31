@@ -591,28 +591,28 @@ export default function QuoteDetail() {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-                      {(quoteData && <AllVersionStatus
-                        quoteId={id}
-                        quoteData={quoteData}
-                        quotePermissions={permissions[qbResource]}
-                        fetchQuoteData={fetchQuoteData}
-                        handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
-                        handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-                      />)}
+                    {(quoteData && <AllVersionStatus
+                      quoteId={id}
+                      quoteData={quoteData}
+                      quotePermissions={permissions[qbResource]}
+                      fetchQuoteData={fetchQuoteData}
+                      handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
+                      handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
+                    />)}
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
                     <>
-                        {(quoteData && <QuoteDetailPage
-                          quoteData={quoteData}
-                          quotePermissions={permissions[qbResource]}
-                          selectedEntity={selectedEntity}
-                          ifQuoteApprovedAapproved={ifQuoteApproved.approved}
-                          allowedToEdit={allowedToEdit}
-                          handleOpenUpdateDialog={handleOpenUpdateDialog}
-                          handleOpenCloneDialog={handleOpenCloneDialog}
-                          handleSetSteps={handleSetSteps}
-                        />)}
+                      {(quoteData && <QuoteDetailPage
+                        quoteData={quoteData}
+                        quotePermissions={permissions[qbResource]}
+                        selectedEntity={selectedEntity}
+                        ifQuoteApprovedAapproved={ifQuoteApproved.approved}
+                        allowedToEdit={allowedToEdit}
+                        handleOpenUpdateDialog={handleOpenUpdateDialog}
+                        handleOpenCloneDialog={handleOpenCloneDialog}
+                        handleSetSteps={handleSetSteps}
+                      />)}
                       {permissions?.projectSales?.isRead && (
                         <ProjectInAccordion
                           recordsPerLine={3}
@@ -628,24 +628,24 @@ export default function QuoteDetail() {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={2}>
-                      {(quoteData && <QuoteProcess
-                        updatingVersion={updatingVersion}
-                        handleVersionUpdate={handleVersionUpdate}
-                        state={state}
-                        dispatch={dispatch}
-                        quoteData={quoteData}
-                        ProcessStatus={processStatus}
-                        ifQuoteApproved={ifQuoteApproved}
-                        allowedToEdit={allowedToEdit}
-                        handleOpenUpdateDialog={handleOpenUpdateDialog}
-                        handleChangeVersion={handleChangeVersion}
-                        currentVersion={currentVersion}
-                        productBuilderId={productBuilderId}
-                        versionStatus={versionStatus}
-                        fetchQuoteData={fetchQuoteData}
-                        columnView={columnView}
-                        fetchTNC={fetchTermsAndConditions}
-                      />)}
+                    {(quoteData && <QuoteProcess
+                      updatingVersion={updatingVersion}
+                      handleVersionUpdate={handleVersionUpdate}
+                      state={state}
+                      dispatch={dispatch}
+                      quoteData={quoteData}
+                      ProcessStatus={processStatus}
+                      ifQuoteApproved={ifQuoteApproved}
+                      allowedToEdit={allowedToEdit}
+                      handleOpenUpdateDialog={handleOpenUpdateDialog}
+                      handleChangeVersion={handleChangeVersion}
+                      currentVersion={currentVersion}
+                      productBuilderId={productBuilderId}
+                      versionStatus={versionStatus}
+                      fetchQuoteData={fetchQuoteData}
+                      columnView={columnView}
+                      fetchTNC={fetchTermsAndConditions}
+                    />)}
                   </TabPanel>
                 </>
               )}
@@ -738,6 +738,7 @@ export default function QuoteDetail() {
             disableCurrency={true}
             quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
             cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
+            doaCollaboratorResources={user.user?.doa?.map(obj => obj.user)}
           />
         )}
         {reopenReasonDialog && (
