@@ -18,6 +18,7 @@ import OpportunitiesDashboard from './OpportunitiesDashboard';
 const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
   const [currency, setCurrency] = useState('');
+  const [filterCurrency, setFilterCurrency] = useState('');
   const [salesRevenue, setSalesRevenue] = useState({
     revenue: 0,
     spend: 0,
@@ -38,7 +39,7 @@ const Dashboard = () => {
   const [allEntitySalesData, setAllEntitySalesData] = useState({
     labels: [],
     datasets: [],
-    allData: [],
+    allData: []
   });
   const [salesData, setSalesData] = useState({
     labels: [],
@@ -75,6 +76,20 @@ const Dashboard = () => {
       to: new Date()
     }
   });
+
+  const getExchangeRates = async (date, amount) => {
+    if (filterCurrency && filterCurrency !== currency) {
+      try {
+        const host = 'api.frankfurter.app';
+        const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
+        const data = await res.json();
+
+        return data;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
 
   const fetchAllEntitiesData = useCallback(() => {
     let params = {
@@ -134,15 +149,13 @@ const Dashboard = () => {
           let obj = {};
           const entitySale = data.filter((d) => d.entityId === id);
 
-          console.log(entitySale)
-
           obj = {
             entityName: entitySale[0].entity,
-            totalCost: entitySale.map(d => d.totalCost).reduce((acc, total) => acc + total),
-            totalSell: entitySale.map(d => d.totalSell).reduce((acc, total) => acc + total),
-            budget: entitySale.map(d => d.budget||0).reduce((acc, total) => acc + total),
-            period: `${moment(entitySale[0].date).format("MMM/YY")} - ${moment(entitySale[entitySale.length - 1].date).format("MMM/YY")}`,
-          }
+            totalCost: entitySale.map((d) => d.totalCost).reduce((acc, total) => acc + total),
+            totalSell: entitySale.map((d) => d.totalSell).reduce((acc, total) => acc + total),
+            budget: entitySale.map((d) => d.budget || 0).reduce((acc, total) => acc + total),
+            period: `${moment(entitySale[0].date).format('MMM/YY')} - ${moment(entitySale[entitySale.length - 1].date).format('MMM/YY')}`
+          };
           chartObj = {
             type: 'line',
             label: entitySale[0].entity,
@@ -151,7 +164,7 @@ const Dashboard = () => {
             data: entitySale.map((e) => e.totalSell)
           };
 
-          allEntities.push(obj)
+          allEntities.push(obj);
           allEntitiesChart.push(chartObj);
         });
 
@@ -196,8 +209,9 @@ const Dashboard = () => {
 
     axiosInstance()
       .get(`dashboard/sales${url}`)
-      .then(({ data: { data } }) => {
+      .then(async ({ data: { data } }) => {
         const saleData = [];
+        const costData = [];
         const labels = [];
         const budget = [];
 
@@ -209,7 +223,20 @@ const Dashboard = () => {
         });
 
         for (let d of data) {
-          saleData.push(d.totalSell);
+          if (filterCurrency && filterCurrency !== currency) {
+            if (d.totalSell && d.totalCost) {
+              const totalSelldata = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalSell);
+              const totalCostData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalCost);
+              saleData.push(totalSelldata.rates[filterCurrency]);
+              costData.push(totalCostData.rates[filterCurrency]);
+            } else {
+              saleData.push(d.totalSell);
+              costData.push(d.totalCost);
+            }
+          } else {
+            saleData.push(d.totalSell);
+            costData.push(d.totalCost);
+          }
           labels.push(moment(d.date).format('MMM/YY'));
           budget.push(d.budget);
           if (d.currency) {
@@ -217,14 +244,22 @@ const Dashboard = () => {
           }
         }
 
-        const revenue = data.length > 1 ? data.map((d) => d.totalSell).reduce((acc, val) => acc + val) : data[0].totalSell;
-        const spend = data.length > 1 ? data.map((d) => d.totalCost).reduce((acc, val) => acc + val) : data[0].totalCost;
+        console.log(saleData, costData);
+
+        let revenue = saleData.reduce((acc, val) => acc + val);
+        let spend = costData.reduce((acc, val) => acc + val);
+        let revenueRate, spendRate;
 
         const profit = revenue && spend ? Math.floor(((revenue - spend) / spend) * 100) : 0;
 
+        if (revenue && spend && filterCurrency !== currency) {
+          revenueRate = await getExchangeRates(moment().format('YYYY-MM-DD'), revenue);
+          spendRate = await getExchangeRates(moment().format('YYYY-MM-DD'), spend);
+        }
+
         setSalesRevenue({
-          revenue,
-          spend,
+          revenue: revenue && filterCurrency !== currency ? revenueRate.rates[filterCurrency] : revenue,
+          spend: spend && filterCurrency !== currency ? spendRate.rates[filterCurrency] : spend,
           profit
         });
 
@@ -260,7 +295,7 @@ const Dashboard = () => {
         allData: []
       });
     };
-  }, [salesFilter]);
+  }, [salesFilter, filterCurrency]);
 
   useEffect(() => {
     fetchSalesData();
@@ -458,13 +493,32 @@ const Dashboard = () => {
     }
     axiosInstance()
       .get(`dashboard/products${url}`)
-      .then(({ data: { data } }) => {
-        data = data.map(d => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : "Unknown" })).sort((a,b) => b.totalSell - a.totalSell)
-        
-        setTopProducts(data)
+      .then(async ({ data: { data } }) => {
+        data = data
+          .map((d) => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : 'Unknown' }))
+          .sort((a, b) => b.totalSell - a.totalSell);
+
+        let topProductsData = [];
+
+        for (const d of data) {
+          let totalSell = 0;
+          let totalCost = 0;
+          if (d.totalSell && d.totalCost && filterCurrency !== currency) {
+            const sellRateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell);
+            const costRateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalCost);
+            totalSell = sellRateData.rates[filterCurrency];
+            totalCost = costRateData.rates[filterCurrency];
+          } else {
+            totalSell = d.totalSell;
+            totalCost = d.totalCost;
+          }
+          topProductsData.push({ ...d, totalSell, totalCost });
+        }
+
+        setTopProducts(topProductsData);
       })
       .catch((err) => {});
-  }, [salesFilter.entity, salesFilter.between]);
+  }, [salesFilter.entity, salesFilter.between, filterCurrency]);
 
   useEffect(() => {
     fetchTopProducts();
@@ -473,12 +527,24 @@ const Dashboard = () => {
   const fetchRegionalSalesData = useCallback(() => {
     axiosInstance()
       .get('dashboard/regionalsales')
-      .then(({ data: { data } }) => {
+      .then(async ({ data: { data } }) => {
         data = data.sort((a, b) => b.totalSell - a.totalSell);
-        setRegionSales(data.map((d) => ({ region: d.region, totalBookedValue: d.totalSell })));
+        let regionSalesData = [];
+
+        for (const d of data) {
+          let totalBookedValue = 0;
+          if (d.totalSell && filterCurrency !== currency) {
+            const rateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell);
+            totalBookedValue = rateData.rates[filterCurrency];
+          } else {
+            totalBookedValue = d.totalSell;
+          }
+          regionSalesData.push({ region: d.region, totalBookedValue });
+        }
+        setRegionSales(regionSalesData);
       })
       .catch((err) => {});
-  }, []);
+  }, [filterCurrency]);
 
   useEffect(() => {
     fetchRegionalSalesData();
@@ -711,6 +777,8 @@ const Dashboard = () => {
           <Paper>
             <Container maxWidth="xl">
               <Filters
+                currency={filterCurrency}
+                setCurrency={setFilterCurrency}
                 moment={moment}
                 entities={entities}
                 salesReps={salesReps}
@@ -726,6 +794,7 @@ const Dashboard = () => {
               />
               <Box py={2}>
                 <TopDashboard
+                  filterCurrency={filterCurrency}
                   salesFilter={salesFilter}
                   currency={currency}
                   moment={moment}
@@ -734,13 +803,10 @@ const Dashboard = () => {
                   salesData={salesData}
                 />
 
-                <Top2Dashboard
-                  moment={moment}
-                  currency={currency}
-                  allEntitySalesData={allEntitySalesData}
-                />
+                <Top2Dashboard moment={moment} currency={currency} allEntitySalesData={allEntitySalesData} />
 
                 <OpportunityDashboards
+                  filterCurrency={filterCurrency}
                   currency={currency}
                   oppTrends={oppTrends}
                   topProducts={topProducts}
