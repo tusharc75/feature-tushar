@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
-import {
-  Box, Paper, Typography, Button, Menu, MenuItem,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody} from '@material-ui/core';
+import { Box, Paper, Typography, Button, Menu, MenuItem, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
@@ -15,22 +8,21 @@ import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 
 const Top2Dashboard = (props) => {
-  const {currency, allEntitySalesData, moment} = props
+  const { currency, allEntitySalesData, moment, filterCurrency } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [tableView, setTableView] = useState(false);
   const [tableDataRaw, setTableDataRaw] = useState([]);
 
   useEffect(() => {
     const tableD = allEntitySalesData.allData.map((d) => ({
-      ["Period"]: d.period,
-      ["Entity Name"]: d.entityName,
-      ["Budget"]: d.budget.toLocaleString(),
+      ['Period']: d.period,
+      ['Entity Name']: d.entityName,
+      ['Budget']: d.budget.toLocaleString(),
       ['Total Sell']: d.totalSell.toLocaleString(),
-      ['Total Cost']: d.totalCost.toLocaleString(),
+      ['Total Cost']: d.totalCost.toLocaleString()
     }));
     setTableDataRaw(tableD);
   }, [allEntitySalesData]);
-
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -44,7 +36,7 @@ const Top2Dashboard = (props) => {
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
         slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile({ fileName: "All Entity Sales Chart.pptx"});
+        pptx.writeFile({ fileName: 'All Entity Sales Chart.pptx' });
         break;
       }
 
@@ -89,58 +81,60 @@ const Top2Dashboard = (props) => {
     setAnchorEl(null);
   };
 
-
   return (
     <Paper elevation={2}>
       <Box my={2} p={2}>
-      <Box display="flex" justifyContent="space-between">
-              <Button onClick={handleClick} startIcon={<ImportExport />}>
-                Export to
-              </Button>
-              <Button
-                onClick={() => {
-                  setTableView(!tableView);
-                }}
-                startIcon={!tableView ? <TableChart /> : <Timeline />}
-              >
-                {!tableView ? 'Table' : 'Chart'} View
-              </Button>
-              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-                <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-                <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-                <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-              </Menu>
-            </Box>
+        <Box display="flex" justifyContent="space-between">
+          <Button onClick={handleClick} startIcon={<ImportExport />}>
+            Export to
+          </Button>
+          <Button
+            onClick={() => {
+              setTableView(!tableView);
+            }}
+            startIcon={!tableView ? <TableChart /> : <Timeline />}
+          >
+            {!tableView ? 'Table' : 'Chart'} View
+          </Button>
+          <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+          </Menu>
+        </Box>
         <Box textAlign="center">
-          <Typography variant="h5">Total booked value in {currency}</Typography>
+          <Typography variant="h5">Total booked value in {filterCurrency || currency}</Typography>
         </Box>
 
-        {!tableView ? <Chart id="allEntityChart" type="bar" data={allEntitySalesData} />
-          : <TableContainer style={{ height: '400px' }}>
-                <Table stickyHeader aria-label="caption table">
-                  <TableHead>
-                    <TableRow>
-                      {Object.keys(tableDataRaw[0]).map((label, i) => (
-                        <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                          {label}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {tableDataRaw.map((data, index) => (
-                      <TableRow key={index}>
-                        {Object.keys(data).map((label, i) => (
-                          <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                            {data[label].toLocaleString()}
-                          </TableCell>
-                        ))}
-                      </TableRow>
+        {!tableView ? (
+          <Chart id="allEntityChart" type="bar" data={allEntitySalesData} />
+        ) : (
+          <TableContainer style={{ height: '400px' }}>
+            <Table stickyHeader aria-label="caption table">
+              <TableHead>
+                <TableRow>
+                  {Object.keys(tableDataRaw[0]).map((label, i) => (
+                    <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                      {label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tableDataRaw.map((data, index) => (
+                  <TableRow key={index}>
+                    {Object.keys(data).map((label, i) => (
+                      <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                        {data[label].toLocaleString()}
+                      </TableCell>
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
     </Paper>
   );

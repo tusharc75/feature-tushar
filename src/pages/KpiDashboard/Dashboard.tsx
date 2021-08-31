@@ -807,7 +807,7 @@ const Dashboard = () => {
                   salesData={salesData}
                 />
 
-                <Top2Dashboard moment={moment} currency={currency} allEntitySalesData={allEntitySalesData} />
+                <Top2Dashboard filterCurrency={filterCurrency} moment={moment} currency={currency} allEntitySalesData={allEntitySalesData} />
 
                 <OpportunityDashboards
                   filterCurrency={filterCurrency}

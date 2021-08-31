@@ -236,7 +236,7 @@ const TopDashboard = (props) => {
               </Menu>
             </Box>
             <Box textAlign="center" mb={2}>
-              <Typography variant="h5">Total booked value in {currency}</Typography>
+              <Typography variant="h5">Total booked value in {filterCurrency || currency}</Typography>
             </Box>
             {!tableView ? (
               <Chart
