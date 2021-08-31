@@ -1,11 +1,13 @@
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useContext } from 'react';
 import { Avatar, TextField, Box, Button } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
 import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const NewChat = (props) => {
   const { setNewChat, setSelectedChat, users, userId } = props;
+  const { setToastConfig } = useContext(CustomToastContext);
 
   const [newUsers, setNewUsers] = useState([]);
   const [groupName, setGroupName] = useState('');
@@ -34,7 +36,9 @@ const NewChat = (props) => {
 
         setSelectedChat(chatData);
       })
-      .catch(() => {});
+      .catch((err) => {
+        setToastConfig(err);
+      });
   };
 
   return (
