@@ -39,6 +39,7 @@ const Entity: FC = () => {
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
+  const [selectedEntity, setSelectedEntity] = useState(null);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -121,6 +122,7 @@ const Entity: FC = () => {
           aria-label="Assign users"
           onClick={() => {
             fetchEntityUser(params.data._id)
+            setSelectedEntity(params.data._id)
             setUsersDialogOpen(true)
           }}
         >
@@ -303,11 +305,11 @@ const Entity: FC = () => {
               entitiesDialogOpen={usersDialogOpen}
               handleCloseDialog={handleCloseDialog}
               type="user"
-              ids={selectedRecords.map(rec => rec._id)}
+              ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
               assignedEntity={users}
               regionalRole={false}
               onSuccess={() => {
-                // fetchEntity();
+                setSelectedEntity(null)
                 handleCloseDialog();
               }}
             />
