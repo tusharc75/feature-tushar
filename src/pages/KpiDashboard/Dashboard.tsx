@@ -38,7 +38,7 @@ const Dashboard = () => {
   const [allEntitySalesData, setAllEntitySalesData] = useState({
     labels: [],
     datasets: [],
-    allData: [],
+    allData: []
   });
   const [salesData, setSalesData] = useState({
     labels: [],
@@ -134,15 +134,15 @@ const Dashboard = () => {
           let obj = {};
           const entitySale = data.filter((d) => d.entityId === id);
 
-          console.log(entitySale)
+          console.log(entitySale);
 
           obj = {
             entityName: entitySale[0].entity,
-            totalCost: entitySale.map(d => d.totalCost).reduce((acc, total) => acc + total),
-            totalSell: entitySale.map(d => d.totalSell).reduce((acc, total) => acc + total),
-            budget: entitySale.map(d => d.budget||0).reduce((acc, total) => acc + total),
-            period: `${moment(entitySale[0].date).format("MMM/YY")} - ${moment(entitySale[entitySale.length - 1].date).format("MMM/YY")}`,
-          }
+            totalCost: entitySale.map((d) => d.totalCost).reduce((acc, total) => acc + total),
+            totalSell: entitySale.map((d) => d.totalSell).reduce((acc, total) => acc + total),
+            budget: entitySale.map((d) => d.budget || 0).reduce((acc, total) => acc + total),
+            period: `${moment(entitySale[0].date).format('MMM/YY')} - ${moment(entitySale[entitySale.length - 1].date).format('MMM/YY')}`
+          };
           chartObj = {
             type: 'line',
             label: entitySale[0].entity,
@@ -151,7 +151,7 @@ const Dashboard = () => {
             data: entitySale.map((e) => e.totalSell)
           };
 
-          allEntities.push(obj)
+          allEntities.push(obj);
           allEntitiesChart.push(chartObj);
         });
 
@@ -459,9 +459,11 @@ const Dashboard = () => {
     axiosInstance()
       .get(`dashboard/products${url}`)
       .then(({ data: { data } }) => {
-        data = data.map(d => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : "Unknown" })).sort((a,b) => b.totalSell - a.totalSell)
-        
-        setTopProducts(data)
+        data = data
+          .map((d) => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : 'Unknown' }))
+          .sort((a, b) => b.totalSell - a.totalSell);
+
+        setTopProducts(data);
       })
       .catch((err) => {});
   }, [salesFilter.entity, salesFilter.between]);
@@ -711,6 +713,8 @@ const Dashboard = () => {
           <Paper>
             <Container maxWidth="xl">
               <Filters
+                currency={currency}
+                setCurrency={setCurrency}
                 moment={moment}
                 entities={entities}
                 salesReps={salesReps}
@@ -734,11 +738,7 @@ const Dashboard = () => {
                   salesData={salesData}
                 />
 
-                <Top2Dashboard
-                  moment={moment}
-                  currency={currency}
-                  allEntitySalesData={allEntitySalesData}
-                />
+                <Top2Dashboard moment={moment} currency={currency} allEntitySalesData={allEntitySalesData} />
 
                 <OpportunityDashboards
                   currency={currency}
