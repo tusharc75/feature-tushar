@@ -248,7 +248,7 @@ const QuoteApproval = () => {
                 </div>
                 ) : (
                     <div>
-                        <h1>Invalid URL, Please check the URL</h1>
+                        <h1>Link Expired.</h1>
                     </div>
                 )
             }
