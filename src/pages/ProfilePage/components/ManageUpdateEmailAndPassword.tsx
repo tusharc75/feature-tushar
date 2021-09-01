@@ -17,7 +17,7 @@ import { IconButton } from "@material-ui/core";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const updatePassWordSchema = Yup.object().shape({
     oldPassword: Yup.string()
@@ -110,6 +110,36 @@ export default function ManageUpdateEmailAndPassword({
             </IconButton>
         </InputAdornment>
     )
+
+    const validateForm = (values) => {
+
+        const errors: any = {};
+
+        if (!values.oldPassword) {
+            errors.oldPassword = 'Required field';
+        }
+        else if (!values.newPassword) {
+            errors.newPassword = 'Required field';
+        }
+        else if (!values.confirmPassword) {
+            errors.confirmPassword = 'Required field';
+        }
+        else if (
+            !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
+                values.newPassword,
+            )
+        ) {
+            errors.newPassword =
+                'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+        }
+        else if (values.newPassword !== values.confirmPassword) {
+            errors.confirmPassword = 'New Password and Confirm Password should be same';
+        }
+        else if (values.oldPassword == values.newPassword) {
+            errors.newPassword = 'Old Password and New Password should not be same';
+        }
+        return errors;
+    };
     return (
         <Dialog
             maxWidth="sm"
@@ -125,11 +155,12 @@ export default function ManageUpdateEmailAndPassword({
                 onClose={onClose}
             />
             <Formik
-                // onSubmit={handleSubmit}
-                onSubmit={() => { }}
+                onSubmit={handleSubmit}
+                // onSubmit={() => { }}
                 initialValues={isUpdateEmail ? { email: userData?.email ?? '' } :
                     { oldPassword: "", newPassword: "", confirmPassword: "" }}
                 validationSchema={isUpdateEmail ? updateEmailSchema : updatePassWordSchema}
+                validate={isUpdateEmail ? null : validateForm}
             >
                 {({
                     values,
@@ -241,33 +272,8 @@ export default function ManageUpdateEmailAndPassword({
                                 variant="contained"
                                 color="primary"
                                 disabled={loading ? true : ((isUpdateEmail && values.email === userData.email) || false)}
-                                onClick={(e) => {
-                                    if (Object.keys(errors).length) {
-                                        Object.keys(errors).forEach(key => {
-                                            setFieldTouched(key, true)
-                                        })
-                                        return
-                                    }
-                                    if (isUpdateEmail) {
-                                        handleSubmit(values)
-                                    }
-                                    else {
-                                        if (values.newPassword !== values.confirmPassword) {
-                                            setFieldError("confirmPassword", "new and confirm password should be same")
-                                            setFieldTouched("confirmPassword", true)
-                                            return
-                                        }
-                                        else if (values.newPassword === values.oldPassword) {
-                                            setFieldError("newPassword", "new and old password should be different")
-                                            setFieldTouched("newPassword", true)
-                                            return
-                                        }
-                                        else {
-                                            handleSubmit(values)
-                                        }
-                                    }
-
-                                }}
+                                type="submit"
+                                onClick={submitForm}
                             >
                                 Update
                             </CustomButton>

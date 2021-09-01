@@ -275,16 +275,12 @@ export default function ProductDetails() {
                     name="half-rating-read"
                     defaultValue={4.5}
                     precision={0.5}
-                    value={productDetails.rating}
+                    value={productDetails?.averageRating}
                     readOnly
                     size="small"
                   />
-                  <p>4.4</p>
+                  <p>{productDetails?.averageRating}</p>
                 </div>
-
-
-
-
                 <div className={'footer' && styles.button_layout} >
                   <Button
                     variant="contained"
@@ -348,7 +344,8 @@ export default function ProductDetails() {
           <div className="a_divider_inner"></div>
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>
-          <RatingAndReviewChart id={id} reviews={reviews} />
+          <RatingAndReviewChart id={id} reviews={reviews}
+            averageRating={Math.round(productDetails?.averageRating).toFixed(1) || 0} />
         </div>
 
       </Box>
