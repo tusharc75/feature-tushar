@@ -345,7 +345,7 @@ export default function ProductDetails() {
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>
           <RatingAndReviewChart id={id} reviews={reviews}
-            averageRating={productDetails?.averageRating} />
+            averageRating={Math.round(productDetails?.averageRating).toFixed(1) || 0} />
         </div>
 
       </Box>

@@ -130,10 +130,10 @@ const ProductCategory = () => {
     }: any = useData();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
+        isCreate: permissions.productCategory?.isCreate,
+        isUpdate: permissions.productCategory?.isUpdate,
+        isRead: permissions.productCategory?.isRead,
+        isDelete: permissions.productCategory?.isDelete
     });
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -188,9 +188,8 @@ const ProductCategory = () => {
 
     </span>
 
-    console.log("user?.user?._id", user?.user?._id)
     const ActionsRenderer = params => <Fragment>
-        {params?.data?.createdById == user?.user?._id ?
+        {productCategoryPermissions.isDelete && (params?.data?.createdById == user?.user?._id) ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -387,7 +386,10 @@ const ProductCategory = () => {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowDeleteConfirmBox(true)
+                                }}>Delete</MenuItem>
                             </Menu>
                         </Box>
                     </Grid>
@@ -413,7 +415,7 @@ const ProductCategory = () => {
 
             {open &&
                 <CreateProductCategory
-                    isUpdateDisabled={productCategoryId ? true : false}
+                    isUpdateDisabled={false}
                     productCategoryId={productCategoryId}
                     onClose={() => setOpen(false)}
                     onSuccess={() => {
@@ -423,7 +425,7 @@ const ProductCategory = () => {
                 />
             }
         </CustomContainer>
-    </Fragment>
+    </Fragment >
     );
 }
 

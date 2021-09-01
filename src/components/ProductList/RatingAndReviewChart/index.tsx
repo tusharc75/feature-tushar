@@ -115,9 +115,9 @@ const RatingAndReviewChart = ({ id, reviews, averageRating }) => {
             <Typography variant="h4" color="primary">
               {averageRating}<StarIcon fontSize="large" />
             </Typography>
-            <Typography variant="body2" color="primary">
+            {/* <Typography variant="body2" color="primary">
               {reviews ? reviews.length : 0} Ratings &amp;
-            </Typography>
+            </Typography> */}
             <Typography variant="body2" color="primary" >
               {reviews ? reviews.length : 0} Reviews
             </Typography>
