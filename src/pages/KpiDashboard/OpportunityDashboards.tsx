@@ -1,12 +1,196 @@
+import { useState, useCallback, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
-import { Grid, Box, Paper, Typography, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import { formatAmountWithCurrency } from '../../constants/helpers';
-import { useState } from 'react';
+import { Grid, Box, Paper, Typography, CircularProgress } from '@material-ui/core';
+
+import axiosInstance from '../../axios/axiosInstance';
+import OpportunityTable from './OpportunityDashboardTable';
 
 const OpportunityDashboards = (props) => {
-  const { currency, openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts, createdLeads, status, filterCurrency } = props;
-  const [toggleButtonValue, setToggleButtonValue] = useState('totalSell');
+  const { currency, status, filterCurrency, salesFilter, getExchangeRates, moment } = props;
+
+  const [openQuoteData, setOpenQuoteData] = useState({
+    all: 0,
+    open: 0,
+    percent: 0
+  });
+  const [oppSalesRep, setOppSalesRep] = useState({
+    labels: [],
+    datasets: []
+  });
+  const [oppAccount, setOppAccount] = useState({
+    labels: [],
+    datasets: []
+  });
+
+  const fetchOpportunitySalesRep = useCallback(() => {
+    let params = {
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      status,
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+    axiosInstance()
+      .get(`/dashboard/opportunities/sales-rep${url}`)
+      .then(({ data: { data } }) => {
+        const labels = [];
+        const datasets = [];
+
+        for (let d of data) {
+          labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          datasets.push(d.count);
+        }
+
+        setOppSalesRep({
+          labels,
+          datasets: [
+            {
+              label: '',
+              data: datasets,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }
+          ]
+        });
+      })
+      .catch((err) => {});
+  }, [salesFilter.entity, salesFilter.between, status]);
+
+  useEffect(() => {
+    fetchOpportunitySalesRep();
+  }, [fetchOpportunitySalesRep]);
+
+  const fetchOpportunityContact = useCallback(() => {
+    let params = {
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      status,
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+    axiosInstance()
+      .get(`/dashboard/opportunities/customer-account${url}`)
+      .then(({ data: { data } }) => {
+        const labels = [];
+        const datasets = [];
+
+        for (let d of data) {
+          labels.push(d.customerAccount);
+          datasets.push(d.count);
+        }
+
+        setOppAccount({
+          labels,
+          datasets: [
+            {
+              label: '',
+              data: datasets,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }
+          ]
+        });
+      })
+      .catch((err) => {});
+  }, [salesFilter.entity, salesFilter.between, status]);
+
+  useEffect(() => {
+    fetchOpportunityContact();
+  }, [fetchOpportunityContact]);
+
+  const fetchOpenQuote = useCallback(() => {
+    let params = {
+      status: status === 'open' || status === 'lost' ? 'open' : 'won',
+      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      between: JSON.stringify({
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+
+    axiosInstance()
+      .get(`/dashboard/open-quote${url}`)
+      .then(({ data: { data } }) => {
+        setOpenQuoteData({
+          all: data.count,
+          open: data.open,
+          percent: Math.floor((data.open / data.count) * 100)
+        });
+      })
+      .catch((err) => {});
+  }, [salesFilter.entity, salesFilter.between, status]);
+
+  useEffect(() => {
+    fetchOpenQuote();
+  }, [fetchOpenQuote]);
 
   const statusText = {
     open: 'Open',
@@ -91,59 +275,13 @@ const OpportunityDashboards = (props) => {
           </Paper>
         </Grid>
         <Grid item sm={4}>
-          <Paper>
-            <Box p={2}>
-              <Typography variant="h6" color="textSecondary">
-                Top Selling Product Category
-              </Typography>
-              <Box mt={1} />
-              <ToggleButtonGroup value={toggleButtonValue} exclusive onChange={(e, val) => setToggleButtonValue(val)} size="small">
-                <ToggleButton value="totalSell">Total Sell</ToggleButton>
-                <ToggleButton value="totalCost">Total Cost</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-
-            <List style={{ overflow: 'auto', maxHeight: 450 }}>
-              {topProducts.length ? (
-                topProducts.map((product, i) => (
-                  <ListItem divider key={i}>
-                    <ListItemText primary={product.productCategory} />
-                    <ListItemSecondaryAction>
-                      <Typography>
-                        {product[toggleButtonValue]
-                          ? formatAmountWithCurrency(filterCurrency || currency, product[toggleButtonValue]).fullFormatAmount
-                          : 0}
-                      </Typography>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))
-              ) : (
-                <ListItem>
-                  <ListItemText primary={'No Data'} />
-                </ListItem>
-              )}
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
-      <Grid container spacing={2}>
-        <Grid item sm={6}>
-          <Paper>
-            <Box p={2}>
-              <Typography variant="h6">Opportunity Trends</Typography>
-
-              <Chart type="line" data={oppTrends} />
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item sm={6}>
-          <Paper>
-            <Box p={2}>
-              <Typography variant="h6">Created Leads</Typography>
-
-              <Chart type="bar" data={createdLeads} />
-            </Box>
-          </Paper>
+          <OpportunityTable
+            moment={moment}
+            salesFilter={salesFilter}
+            filterCurrency={filterCurrency}
+            currency={currency}
+            getExchangeRates={getExchangeRates}
+          />
         </Grid>
       </Grid>
     </>
