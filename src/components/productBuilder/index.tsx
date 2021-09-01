@@ -224,7 +224,7 @@ const ProductBuilder = (props) => {
                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase();
                 let fieldLabel = ele.fieldLabel + " " + _unit;
                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = {};
+                  let col: any = { };
                   col.field = fieldName;
                   col.headerName = fieldLabel;
                   col.width = 180;
@@ -244,7 +244,7 @@ const ProductBuilder = (props) => {
                   let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
                   let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency;
                   if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                    let col: any = {};
+                    let col: any = { };
                     col.field = fieldName;
                     col.headerName = fieldLabel;
                     col.width = 180;
@@ -264,7 +264,7 @@ const ProductBuilder = (props) => {
                 let fieldName = ele.fieldName + "_" + _currency.toLowerCase();
                 let fieldLabel = ele.fieldLabel + " " + _currency;
                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = {};
+                  let col: any = { };
                   col.field = fieldName;
                   col.headerName = fieldLabel;
                   col.width = 180;
@@ -281,7 +281,7 @@ const ProductBuilder = (props) => {
             }
           } else {
             if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-              let col: any = {};
+              let col: any = { };
               col.field = ele.fieldName;
               col.headerName = ele.fieldLabel;
               col.width = 180;
@@ -305,6 +305,9 @@ const ProductBuilder = (props) => {
               }
               if (ele.fieldName === "priceTemplate") {
                 col.cellRenderer = "priceTemplateRenderer"
+              }
+              if (ele.fieldName === "entity") {
+                return
               }
               column.push(col);
             }
@@ -330,7 +333,7 @@ const ProductBuilder = (props) => {
   };
 
   const addProductInBuilder = (rows) => {
-    let data: any = {};
+    let data: any = { };
     data.product = rows;
     data._id = productBuilderId;
     axiosInstance()
@@ -349,7 +352,7 @@ const ProductBuilder = (props) => {
       setProductData(null);
       setIsClone(false);
     } else {
-      let data: any = {};
+      let data: any = { };
       data.product = rows;
       data._id = productBuilderId;
       axiosInstance()
@@ -373,7 +376,7 @@ const ProductBuilder = (props) => {
     } else {
       ids = selectedRecords.map((d) => d.id);
     }
-    let data: any = {};
+    let data: any = { };
     data.productBuilderId = productBuilderId;
     data._ids = ids;
     axiosInstance()
@@ -457,7 +460,7 @@ const ProductBuilder = (props) => {
   };
 
   const handleAddField = (field) => {
-    let data: any = {};
+    let data: any = { };
     data.productBuilderId = productBuilderId;
     data._ids = selectedRecords.map((d) => d.id);
     data.field = field;
@@ -566,7 +569,7 @@ const ProductBuilder = (props) => {
           unit,
           value
         );
-        let data: any = {};
+        let data: any = { };
         data.values = result;
         data.id = row.data.id;
         data._id = productBuilderId;

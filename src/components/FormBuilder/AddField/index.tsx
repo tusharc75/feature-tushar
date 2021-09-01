@@ -135,7 +135,9 @@ export const AddField = (props) => {
     if (values.type === "currencyAmount") {
       data.displayCurrency = values.displayCurrency
     }
-
+    if ((values.type === 'vlookupDropdown' || values.isVlookup) && (values.type === 'converter' || values.isConverter === true)) {
+      data.vlookupOnConverter = values.vlookupOnConverter;
+    }
     if (values.type === "currencyAmount" && refrence === "formAdd") {
       axiosInstance().get(`/converter?type=currency`).then((result: any) => {
         data.currency = result.data.data.currency;

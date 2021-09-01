@@ -5,8 +5,8 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import { useState } from 'react';
 
 const OpportunityDashboards = (props) => {
-  const { currency, openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts, createdLeads, status } = props;
-  const [toggleButtonValue, setToggleButtonValue] = useState("totalSell")
+  const { currency, openQuoteData, oppSalesRep, oppAccount, oppTrends, topProducts, createdLeads, status, filterCurrency } = props;
+  const [toggleButtonValue, setToggleButtonValue] = useState('totalSell');
 
   const statusText = {
     open: 'Open',
@@ -66,9 +66,9 @@ const OpportunityDashboards = (props) => {
                     },
                     tooltips: {
                       callbacks: {
-                         label: function(tooltipItem) {
-                                return tooltipItem.yLabel;
-                         }
+                        label: function (tooltipItem) {
+                          return tooltipItem.yLabel;
+                        }
                       }
                     },
                     title: {
@@ -103,13 +103,17 @@ const OpportunityDashboards = (props) => {
               </ToggleButtonGroup>
             </Box>
 
-            <List style={{overflow: "auto", maxHeight: 450}}>
+            <List style={{ overflow: 'auto', maxHeight: 450 }}>
               {topProducts.length ? (
-                topProducts.map((product) => (
-                  <ListItem divider key={product}>
+                topProducts.map((product, i) => (
+                  <ListItem divider key={i}>
                     <ListItemText primary={product.productCategory} />
                     <ListItemSecondaryAction>
-                      <Typography>{product[toggleButtonValue] ? formatAmountWithCurrency(currency, product[toggleButtonValue]).fullFormatAmount : 0}</Typography>
+                      <Typography>
+                        {product[toggleButtonValue]
+                          ? formatAmountWithCurrency(filterCurrency || currency, product[toggleButtonValue]).fullFormatAmount
+                          : 0}
+                      </Typography>
                     </ListItemSecondaryAction>
                   </ListItem>
                 ))

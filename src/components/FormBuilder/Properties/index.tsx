@@ -92,6 +92,16 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.disableOnEdit = false;
       }
 
+      if (!values.isWarningTooltip && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+        values.isWarningTooltip = false;
+        values.warningTooltipMessage = "";
+
+      }
+
+      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+        values.disableOnEdit = false;
+      }
+
       if (!values.hiddenField && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
         values.hiddenField = false;
       }
@@ -198,6 +208,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
 
+            if (values.hasOwnProperty('isWarningTooltip')) {
+              ele.isWarningTooltip = values.isWarningTooltip
+              ele.warningTooltipMessage = values.warningTooltipMessage
+            }
+
             if (values.hasOwnProperty('addAdditionalOption')) {
               ele.addAdditionalOption = values.addAdditionalOption;
             }
@@ -261,6 +276,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 ele.formulaOnConverter = values.formulaOnConverter;
               }
             }
+            if ((fieldData.type === 'vlookupDropdown' || fieldData.isVlookup) && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
+              ele.vlookupOnConverter = values.vlookupOnConverter;
+            }
             if (fieldData.type === 'currencyAmount') {
               delete ele.currency;
               ele.displayCurrency = values.displayCurrency;
@@ -282,12 +300,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   };
 
   function validate(values) {
-    const errors = {};
+    const errors = { };
     if (values.type === 'formula' || values.isFormula === true) {
       if (!values.inputFields || values.inputFields.length === 0) {
         errors['inputFields'] = 'Please select input parameters';
       }
-      let inputValues = {};
+      let inputValues = { };
       values.inputFields &&
         values.inputFields.forEach((_input) => {
           inputValues[_input] = 1;
@@ -317,7 +335,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         errors['formulainputFields'] = 'Please select input parameters';
       }
       if (values.formulaFields && values.formulaFields.length) {
-        let inputValues = {};
+        let inputValues = { };
         values.formulainputFields &&
           values.formulainputFields.forEach((_input) => {
             inputValues[_input] = 1;
@@ -405,36 +423,36 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                    <Grid spacing={3} container>
-                      {values['type'] === 'formula' && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <FormControl fullWidth margin="dense" variant="outlined">
-                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={values['returnType']}
-                              onChange={(e) => setFieldValue('returnType', e.target.value)}
-                              label="Return Type"
-                              name="returnType"
-                            >
-                              <MenuItem value="decimal">Decimal</MenuItem>
-                              <MenuItem value="string">String</MenuItem>
-                              <MenuItem value="boolean">Boolean</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      )}
-                      {(values['type'] === 'decimal' ||
-                        values['type'] === 'converter' ||
-                        values['type'] === 'currencyAmount' ||
-                        values['returnType'] === 'decimal') && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <DecimalPlaces values={values} setFieldValue={setFieldValue} />
-                        </Grid>
-                      )}
-                    </Grid>
-                  )}
+                      <Grid spacing={3} container>
+                        {values['type'] === 'formula' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values['returnType']}
+                                onChange={(e) => setFieldValue('returnType', e.target.value)}
+                                label="Return Type"
+                                name="returnType"
+                              >
+                                <MenuItem value="decimal">Decimal</MenuItem>
+                                <MenuItem value="string">String</MenuItem>
+                                <MenuItem value="boolean">Boolean</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                        {(values['type'] === 'decimal' ||
+                          values['type'] === 'converter' ||
+                          values['type'] === 'currencyAmount' ||
+                          values['returnType'] === 'decimal') && (
+                            <Grid item xs={12} sm={6} md={6}>
+                              <DecimalPlaces values={values} setFieldValue={setFieldValue} />
+                            </Grid>
+                          )}
+                      </Grid>
+                    )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -541,7 +559,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 setFieldValue('isMulitFormula', e.target.checked);
                                 setFieldValue('formulaFields', []);
                                 setFieldValue('formulainputFields', []);
-                                setFieldValue('formulaoption', {});
+                                setFieldValue('formulaoption', { });
                               }}
                               color="primary"
                             />
@@ -624,6 +642,32 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         error={touched['tooltipMessage'] && Boolean(errors['tooltipMessage'])}
                         helperText={touched['tooltipMessage'] && errors['tooltipMessage']}
                         onChange={(e) => setFieldValue('tooltipMessage', e.target.value.trimStart())}
+                      />
+                    )}
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isWarningTooltip"
+                          checked={values['isWarningTooltip']}
+                          onChange={(e) => setFieldValue('isWarningTooltip', e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label="Show Warning Tooltip"
+                    />
+                    {values['isWarningTooltip'] && (
+                      <TextField
+                        variant="outlined"
+                        type="text"
+                        label="Warning Tooltip Message"
+                        required={true}
+                        name="warningTooltipMessage"
+                        fullWidth
+                        margin="dense"
+                        value={values['warningTooltipMessage']}
+                        error={touched['warningTooltipMessage'] && Boolean(errors['warningTooltipMessage'])}
+                        helperText={touched['warningTooltipMessage'] && errors['warningTooltipMessage']}
+                        onChange={(e) => setFieldValue('warningTooltipMessage', e.target.value.trimStart())}
                       />
                     )}
 

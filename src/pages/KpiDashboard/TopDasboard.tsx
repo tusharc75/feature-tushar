@@ -25,26 +25,27 @@ import * as XLSX from 'xlsx';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const TopDashboard = (props) => {
-  const { salesRevenue, salesData, regionSales, moment, currency } = props;
-  const [anchorEl, setAnchorEl] = useState(null);
+  const { salesRevenue, salesData, regionSales, moment, currency, filterCurrency } = props;
+  const [anchorElChart, setAnchorElChart] = useState(null);
+  const [anchorElTable, setAnchorElTable] = useState(null);
   const [tableView, setTableView] = useState(false);
   const [tableDataRaw, setTableDataRaw] = useState([]);
 
   useEffect(() => {
     const tableD = salesData.allData.map((d) => ({
       Month: moment(d.date).format('MMM/YY'),
-      ['Total Sell']: d.totalSell.toLocaleString(),
-      ['Total Cost']: d.totalCost.toLocaleString(),
-      Budget: d.budget
+      ['Total Sell']: d.totalSell ? d.totalSell.toLocaleString() : 0,
+      ['Total Cost']: d.totalSell ? d.totalCost.toLocaleString() : 0,
+      Budget: d.budget ? d.budget.toLocaleString() : 0
     }));
     setTableDataRaw(tableD);
   }, [salesData]);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleClickChart = (event) => {
+    setAnchorElChart(event.currentTarget);
   };
 
-  const handleClose = (exportType) => () => {
+  const handleCloseChart = (exportType) => () => {
     switch (exportType) {
       case 'ppt': {
         const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
@@ -52,7 +53,7 @@ const TopDashboard = (props) => {
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
         slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile();
+        pptx.writeFile({ fileName: 'Entity Sales Chart.pptx' });
         break;
       }
 
@@ -63,7 +64,7 @@ const TopDashboard = (props) => {
         doc.setFontSize(20);
         doc.text(`Total Booked Value In ${currency}`, 60, 15);
         doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
-        doc.save('sales-chart.pdf');
+        doc.save('Entity Sales Chart.pdf');
         break;
       }
 
@@ -72,13 +73,7 @@ const TopDashboard = (props) => {
         // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const wData = salesData.allData.map((d) => ({
-          Month: moment(d.date).format('MMM/YY'),
-          ['Total Sell']: d.totalSell.toLocaleString(),
-          ['Total Cost']: d.totalCost.toLocaleString(),
-          Budget: d.budget
-        }));
-        const ws = XLSX.utils.json_to_sheet(wData);
+        const ws = XLSX.utils.json_to_sheet(tableDataRaw);
         const wb = {
           Sheets: {
             data: ws
@@ -87,20 +82,92 @@ const TopDashboard = (props) => {
         };
         const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs(data, 'sales-data' + fileExtension);
+        FileSaver.saveAs(data, 'Entity Sales Chart' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
-        FileSaver.saveAs(blob, 'sales.json');
+        FileSaver.saveAs(blob, 'Entity Sales Chart.json');
         break;
       }
       default:
         break;
     }
 
-    setAnchorEl(null);
+    setAnchorElChart(null);
+  };
+
+  const handleClickTable = (event) => {
+    setAnchorElTable(event.currentTarget);
+  };
+
+  const handleCloseTable = (exportType) => () => {
+    switch (exportType) {
+      case 'ppt': {
+        const pptx = new PptxGenJs();
+        let cell1 = regionSales.map((r) => ({
+          text: `${r.region}\n`
+          // options: {color: "#333"}
+        }));
+        let cell2 = regionSales.map((r) => ({
+          text: `${r.totalBookedValue}\n`
+          // options: {color: "#333"}
+        }));
+        const slide = pptx.addSlide();
+        slide.addTable([[{ text: cell1 }, { text: cell2 }]], {
+          x: 0.5,
+          y: 0.5,
+          w: 6,
+          h: 3,
+          fontSize: 16,
+          border: { pt: 1 },
+          fill: { color: 'f1f1f1' }
+        });
+
+        pptx.writeFile({ fileName: 'Regional Sales.pptx' });
+        break;
+      }
+
+      case 'pdf': {
+        const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const doc = new jsPDF('portrait');
+        doc.setFontSize(20);
+        doc.text(`Total Booked Value In ${currency}`, 60, 15);
+        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
+        doc.save('Entity Sales Chart.pdf');
+        break;
+      }
+
+      case 'excel': {
+        // const canvas = document.getElementById('perEntityChart') as HTMLCanvasElement;
+        // const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const fileExtension = '.xlsx';
+        const ws = XLSX.utils.json_to_sheet(tableDataRaw);
+        const wb = {
+          Sheets: {
+            data: ws
+          },
+          SheetNames: ['data']
+        };
+        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const data = new Blob([excelBuffer], { type: fileType });
+        FileSaver.saveAs(data, 'Entity Sales Chart' + fileExtension);
+        break;
+      }
+
+      case 'json': {
+        let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
+        FileSaver.saveAs(blob, 'Entity Sales Chart.json');
+        break;
+      }
+      default:
+        break;
+    }
+
+    setAnchorElTable(null);
   };
 
   return (
@@ -115,7 +182,7 @@ const TopDashboard = (props) => {
                     Total Booked Value
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.revenue ? formatAmountWithCurrency(currency, salesRevenue.revenue).fullFormatAmount : 0}
+                    {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
                   </Typography>
                 </Box>
               </Paper>
@@ -127,7 +194,7 @@ const TopDashboard = (props) => {
                     Total Cost
                   </Typography>
                   <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.spend ? formatAmountWithCurrency(currency, salesRevenue.spend).fullFormatAmount : 0}
+                    {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
                   </Typography>
                 </Box>
               </Paper>
@@ -150,7 +217,7 @@ const TopDashboard = (props) => {
         <Paper elevation={2}>
           <Box p={2}>
             <Box display="flex" justifyContent="space-between">
-              <Button onClick={handleClick} startIcon={<ImportExport />}>
+              <Button onClick={handleClickChart} startIcon={<ImportExport />}>
                 Export to
               </Button>
               <Button
@@ -161,15 +228,15 @@ const TopDashboard = (props) => {
               >
                 {!tableView ? 'Table' : 'Chart'} View
               </Button>
-              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-                <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-                <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-                <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+              <Menu id="export-chart-menu" anchorEl={anchorElChart} keepMounted open={Boolean(anchorElChart)} onClose={handleCloseChart('')}>
+                <MenuItem onClick={handleCloseChart('ppt')}>Powerpoint</MenuItem>
+                <MenuItem onClick={handleCloseChart('pdf')}>PDF</MenuItem>
+                <MenuItem onClick={handleCloseChart('excel')}>Excel</MenuItem>
+                <MenuItem onClick={handleCloseChart('json')}>Raw JSON</MenuItem>
               </Menu>
             </Box>
             <Box textAlign="center" mb={2}>
-              <Typography variant="h5">Total booked value in {currency}</Typography>
+              <Typography variant="h5">Total booked value in {filterCurrency || currency}</Typography>
             </Box>
             {!tableView ? (
               <Chart
@@ -188,7 +255,7 @@ const TopDashboard = (props) => {
                 data={salesData}
               />
             ) : (
-              <TableContainer style={{ height: '400px' }} component={Paper}>
+              <TableContainer style={{ height: '400px' }}>
                 <Table stickyHeader aria-label="caption table">
                   <TableHead>
                     <TableRow>
@@ -218,6 +285,16 @@ const TopDashboard = (props) => {
       </Grid>
       <Grid item sm={4}>
         <Box>
+          {/* <Button onClick={handleClickTable} startIcon={<ImportExport />}>
+            Export to
+          </Button>
+          <Menu id="export-table-menu" anchorEl={anchorElTable} keepMounted open={Boolean(anchorElTable)} onClose={handleCloseTable('')}>
+            <MenuItem onClick={handleCloseTable('ppt')}>Powerpoint</MenuItem>
+            <MenuItem onClick={handleCloseTable('pdf')}>PDF</MenuItem>
+            <MenuItem onClick={handleCloseTable('excel')}>Excel</MenuItem>
+            <MenuItem onClick={handleCloseTable('json')}>Raw JSON</MenuItem>
+          </Menu>
+            */}
           <TableContainer style={{ height: '625px' }} component={Paper}>
             <Table stickyHeader size="small">
               <TableHead>
@@ -236,7 +313,7 @@ const TopDashboard = (props) => {
                     <TableRow key={data.region}>
                       {Object.keys(data).map((label, i) => (
                         <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                          {i < 1 ? data[label] : formatAmountWithCurrency(currency, data[label]).fullFormatAmount}
+                          {i < 1 ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                         </TableCell>
                       ))}
                     </TableRow>

@@ -565,7 +565,7 @@ export const getOwnerDropdownDataSource = (
 
     mainDataSource.map((d) => {
       const isCollaboratorSelected = selectedCollaborator.find(
-        (collaboratorId) => collaboratorId === d.optionValue
+        (collaboratorId) => collaboratorId === d?.optionValue
       );
       if (!isCollaboratorSelected) {
         ownerDataSource.push(d);
@@ -581,7 +581,7 @@ export const getCollaboratorDropdownDataSource = (
   mainDataSource
 ) => {
   return selectedOwnerId
-    ? mainDataSource.filter((d) => d.optionValue !== selectedOwnerId)
+    ? mainDataSource.filter((d) => d?.optionValue !== selectedOwnerId)
     : mainDataSource;
 };
 
@@ -594,7 +594,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
     let options = field.fieldData.option;
 
     options.forEach((d) => {
-      d.default = d.optionValue === id;
+      d.default = d?.optionValue === id;
     });
 
     field.fieldData.option = options;
@@ -759,6 +759,7 @@ export const downloadExcel = (fileDetails, fileName) => {
   //Check the Browser type and download the File.
   const isIE = false || !!document["documentMode"];
   if (isIE) {
+    //@ts-ignore
     window.navigator.msSaveBlob(blob, fileName);
   } else {
     var url = window.URL || window.webkitURL;

@@ -25,7 +25,7 @@ const ProductDetailsPage = () => {
     const { id } = useParams();
     const history = useHistory();
     const {
-        state: { permissions }
+        state: { user, permissions }
     }: any = useData();
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
@@ -69,17 +69,35 @@ const ProductDetailsPage = () => {
                 })
 
                 const _fields = [];
+                const displayField = [];
                 _productField.map((_f) => _fields.push({ "fieldData": _f }));
 
                 const newField = _fields;
                 axiosInstance().get(`/product/` + id).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push({ "fieldData": _f }));
                     data.productData.fields?.map((_f) => newField.push({ "fieldData": _f }));
-
-                    setProductFields(newField)
+                    newField.map(f => {
+                        if (f.fieldData.type === "converter") {
+                            f.fieldData.displayUnits.map(d => {
+                                let tempField = JSON.parse(JSON.stringify(f))
+                                tempField.fieldData._id = `${tempField.fieldData._id}_` + d.toLowerCase()
+                                tempField.fieldData.type = `productSpecification`
+                                tempField.fieldData.fieldName = `${tempField.fieldData.fieldName}_` + d.toLowerCase()
+                                tempField.fieldData.fieldLabel = `${tempField.fieldData.fieldLabel} [${d}]`
+                                displayField.push(tempField)
+                            })
+                        }
+                        else {
+                            displayField.push(f)
+                        }
+                    })
+                    setProductFields(displayField)
                     handleMainPoints(data.productData);
                     setHeadingLabel(data.productData.productName);
                     setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
+                    if (data.productData.entity && data.productData.entity !== undefined) {
+                        data.productData.entity = user.entity.filter(d => data.productData.entity.some(e => d._id === e)).map(d => { return { "optionValue": d._id, "optionLabel": d.entityName } })
+                    }
                     setProductData(data.productData);
                     setLoading(false);
                 }).catch((error) => {
