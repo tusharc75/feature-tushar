@@ -47,7 +47,7 @@ const CreateProduct = (props) => {
   const [masterFields, setMasterFields] = useState([]);
   const [productFields, setProductFields] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [initialData, setInitialData] = useState({ fields: [], values: { } });
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
@@ -169,9 +169,9 @@ const CreateProduct = (props) => {
     setFields(fields);
     let newField = initialData.fields;
     newField.push(field);
-    var extraCalculatedValue: any = { }
+    var extraCalculatedValue: any = {}
     if (field.type === "formula" || field.isFormula) {
-      var inputValues = { };
+      var inputValues = {};
       field.inputFields && field.inputFields.forEach((_f) => {
         inputValues[_f] = ref.current.values[_f] ? ref.current.values[_f] : 0
       })
