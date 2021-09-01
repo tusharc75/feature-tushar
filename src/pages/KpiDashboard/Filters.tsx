@@ -4,11 +4,15 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
+import FormTypes from '../../components/Helpers/FormTypes';
 
 const useStyles = makeStyles({
   appBar: {
     padding: 0,
-    height: 70
+    height: "70px",
+    borderRadius: "3px 3px 0 0",
+    borderBottom: "1px solid #e1dde6",
+    boxShadow: "1px 3px 3px #ddd",
   }
 });
 
@@ -26,7 +30,9 @@ const Filters = (props) => {
     salesReps,
     customerAccounts,
     status,
-    setStatus
+    setStatus,
+    currency,
+    setCurrency
   } = props;
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
@@ -101,6 +107,21 @@ const Filters = (props) => {
       >
         <Box p={2}>
           <Box width="250px">
+            <Autocomplete
+              fullWidth
+              size="small"
+              disabled={salesFilter.allEntity}
+              options={entities}
+              autoHighlight
+              value={salesFilter.entity}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, entity: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
+            />
+            <Box mt={1} />
             <Autocomplete
               size="small"
               fullWidth
@@ -182,21 +203,6 @@ const Filters = (props) => {
                 Filters
               </Button>
               <Box mr={2} />
-              <Autocomplete
-                style={{ width: '150px' }}
-                size="small"
-                disabled={salesFilter.allEntity}
-                options={entities}
-                autoHighlight
-                value={salesFilter.entity}
-                getOptionLabel={(option) => option.name || ''}
-                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                onChange={(_, val) => {
-                  setSalesFilter({ ...salesFilter, entity: val });
-                }}
-                renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-              />
-              <Box mr={2} />
               <FormControl style={{ width: '150px' }} size="small" variant="outlined">
                 <InputLabel id="status">Status</InputLabel>
                 <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
@@ -205,6 +211,25 @@ const Filters = (props) => {
                   <MenuItem value={'open'}>Open</MenuItem>
                 </Select>
               </FormControl>
+              <Box mr={2} />
+              <FormTypes
+                fullWidth={false}
+                style={{ width: '250px' }}
+                values={{ currency }}
+                type="currency"
+                errors={{ currency: '' }}
+                touched={{ currency: false }}
+                name="currency"
+                label="Currency"
+                size="small"
+                onChange={(e, val) => {
+                  if (val && val.currencyCode) {
+                    setCurrency(val.currencyCode);
+                  } else {
+                    setCurrency('');
+                  }
+                }}
+              />
             </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -262,14 +287,14 @@ const Filters = (props) => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid container spacing={2}>
+        {/* <Grid container spacing={2}>
           <Grid item sm={6}></Grid>
           <Grid item sm={6}></Grid>
           <Grid item sm={6}></Grid>
           <Grid item sm={6}></Grid>
           {salesFilter.marketSegment && <Grid item sm={6}></Grid>}
           <Grid item sm={6}></Grid>
-        </Grid>
+        </Grid> */}
       </Box>
     </AppBar>
   );

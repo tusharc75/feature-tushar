@@ -474,6 +474,55 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             size="small"
                                             imageOrFileUploadCompletePercentage={null}
                                           />
+                                        ) : field.fieldName === "entity" ? (
+                                          <FormTypes
+                                            multiple
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+
+                                            options={field.option}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            onChange={(e, value) => {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                              );
+                                              setFieldValue("projectManager","");
+                                            }}
+                                          />
+                                        ) : field.fieldName === "projectManager" ? (
+                                          <FormTypes
+                                            {...field}
+                                            disabled={Boolean(projectSalesId)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={values["entity"] && values["entity"].length !== 0 ?
+                                              field.option.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d)))
+                                              : field.option}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            onChange={(e, value) => {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                value && value.optionValue
+                                                  ? value.optionValue
+                                                  : ""
+                                              );
+                                            }}
+                                          />
                                         ) : field.fieldName === "currency" ? (
                                           <FormTypes
                                             {...field}

@@ -3,7 +3,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import { Dialog, Grid, IconButton } from '@material-ui/core';
+import { Dialog, FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { ControlPoint } from '@material-ui/icons';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import RoleEngine from '../../components/Shared/RoleEngine';
@@ -13,6 +13,8 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { values } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
 
 export default function AssignedEntities({
   entities,
@@ -156,35 +158,55 @@ export default function AssignedEntities({
           padding: "5px",
         }}
       >
-        <Box width="100%">
-          <>
-            <Tabs
-              variant="scrollable"
-              scrollButtons="auto"
-              className="oms-tab"
-              value={currentTabIndex}
-              onChange={(index, newValue) => {
-                setCurrentTabIndex(newValue);
-                setCurrentEntity(entities[newValue])
-              }}
-              indicatorColor="primary"
-              textColor="primary"
-              aria-label="icon tabs example"
-            >
-              {entities.map((c, i) => (
-                <Tab
-                  key={i}
-                  tabIndex={i}
-                  label={c?.entity?.entityName}
-                  aria-controls={`a11y-tabpanel-${i}`}
-                  id={`a11y-tab-${i}`}
-                />
-              ))}
-            </Tabs>
-
+        <Box>
+          <>{
+            isMobile || isTablet ?
+              <FormControl fullWidth margin="dense" variant="outlined">
+                <InputLabel id="demo-simple-select-outlined-label">Select Entity</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={currentTabIndex}
+                  onChange={(index, values: any) => {
+                    const { props: { value } } = values;
+                    setCurrentTabIndex(value);
+                    setCurrentEntity(entities[value])
+                  }}
+                  label="Section Name"
+                  name="sectionName"
+                >
+                  {entities.map((c, i) => (
+                    <MenuItem key={i} value={i}>{c?.entity?.entityName}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              :
+              <Tabs
+                variant="scrollable"
+                scrollButtons="auto"
+                className="oms-tab"
+                value={currentTabIndex}
+                onChange={(index, newValue) => {
+                  setCurrentTabIndex(newValue);
+                  setCurrentEntity(entities[newValue])
+                }}
+                indicatorColor="primary"
+                textColor="primary"
+                aria-label="icon tabs example"
+              >
+                {entities.map((c, i) => (
+                  <Tab
+                    key={i}
+                    tabIndex={i}
+                    label={c?.entity?.entityName}
+                    aria-controls={`a11y-tabpanel-${i}`}
+                    id={`a11y-tab-${i}`}
+                  />
+                ))}
+              </Tabs>
+          }
             <Box style={{ padding: "0px", minHeight: "300px" }}>
               <Box display="flex" padding={1} bgcolor="grey.200">
-
                 <Grid container>
                   <Grid item xs={10}>
                     <Box display="flex">
@@ -220,7 +242,7 @@ export default function AssignedEntities({
                 </Grid>
               </Box>
 
-              <Grid container style={{ padding: "8px" }} spacing={1}>
+              <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={4}>
                   <BoxWithBorder
                     style={{
@@ -231,7 +253,6 @@ export default function AssignedEntities({
                     {
                       <Box
                         style={{
-                          width: "100%",
                           height: "100%",
                           overflowY: "auto",
                         }}
@@ -252,7 +273,7 @@ export default function AssignedEntities({
                   </BoxWithBorder>
                 </Grid>
                 <Grid item xs={12} sm={12} md={8} lg={8}>
-                  <BoxWithBorder
+                  {/* <BoxWithBorder
                     style={{
                       padding: "0px",
                       height: "352px",
@@ -263,7 +284,7 @@ export default function AssignedEntities({
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
                     />
-                  </BoxWithBorder>
+                  </BoxWithBorder> */}
                 </Grid>
               </Grid>
             </Box>

@@ -218,6 +218,14 @@ const UpdateDetailsDialog = (props) => {
                                         setCurrencySymbol(null);
                                       }
                                     }
+                                    : field.fieldData.type === "dropDown" ? (e,val) => {
+                                      setFieldValue(
+                                        field.fieldData.fieldName,
+                                        val && val.optionValue
+                                          ? val.optionValue
+                                          : ""
+                                      );
+                                    }
                                     : null
                                 }
                               />

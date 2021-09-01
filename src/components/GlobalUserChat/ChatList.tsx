@@ -1,63 +1,76 @@
-import { Fragment } from 'react'
-import {
-  ListItem,
-  ListItemText} from '@material-ui/core'
-import moment from 'moment'
+import { Fragment } from 'react';
+import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, withStyles, Tooltip, Typography } from '@material-ui/core';
+import { Group } from '@material-ui/icons';
+import moment from 'moment';
 
-import axiosInstance from '../../axios/axiosInstance'
+import axiosInstance from '../../axios/axiosInstance';
 
+const HtmlTooltip = withStyles((theme) => ({
+  tooltip: {
+    backgroundColor: '#f5f5f9',
+    color: 'rgba(0, 0, 0, 0.87)',
+    maxWidth: 220,
+    fontSize: theme.typography.pxToRem(12),
+    border: '1px solid #dadde9'
+  }
+}))(Tooltip);
 
 const ChatList = (props) => {
-  const { chat, setSelectedChat, userId } = props
+  const { chat, setSelectedChat, userId } = props;
 
   const onChatClick = () => {
-    setSelectedChat(chat)
+    setSelectedChat(chat);
 
     if (chat.unseen > 0) {
-      axiosInstance().put(`chatter/mark-read/${chat.id}`)
+      axiosInstance().put(`chatter/mark-read/${chat.id}`);
     }
-  }
+  };
 
   const formatTime = (time) => moment(time).fromNow(true);
 
   return (
     <Fragment>
-      <ListItem
-        button
-        divider
-        onClick={onChatClick}
-        alignItems="flex-start">
-        {/* <ListItemAvatar>
-          <Avatar alt="Remy Sharp" />
-          </ListItemAvatar> */}
+      <ListItem button divider onClick={onChatClick} alignItems="flex-start">
+        <ListItemAvatar>
+          <Avatar alt={chat?.chatTitle} />
+        </ListItemAvatar>
         <ListItemText
           primary={
-            <Fragment>
-              <p title={chat.chatTitle} className={`chat-listTitle text-truncate ${chat?.unseen > 0 ? "new-msg" : ""}`}>{chat.chatTitle}</p>
-            </Fragment>}
-              
+            <Box display="flex" alignItems="center">
+              <p title={chat.chatTitle} className={`chat-listTitle text-truncate ${chat?.unseen > 0 ? 'new-msg' : ''}`}>
+                {chat.chatTitle}
+              </p>
+              <Box ml={1} />
+              {chat?.users.length > 2 && (
+                <HtmlTooltip
+                  title={
+                    <Fragment>
+                      {chat?.users.map((u) => (
+                        <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>
+                      ))}
+                    </Fragment>
+                  }
+                >
+                  <Chip variant="outlined" color="secondary" label="Group" size="small" icon={<Group />} />
+                </HtmlTooltip>
+              )}
+            </Box>
+          }
           secondary={
-            <Fragment>
-              <div title={chat.message?.message} className="chat-listSubtext">
-                <div className="chat-listSubtitle">
-                  <p className={`who ${chat?.unseen > 0 ? "unseen" : ""}`}>
-                    {chat?.message?.userid === userId ? "You:" : ""}
-                  </p>
-                  <p className={`msg text-truncate ${chat?.unseen > 0 ? "unseen" : ""}`}>
-                    {chat.message?.message ? chat.message?.message : "\'New chat\'"}
-                  </p>
-                </div>
-                {chat.message?.message
-                  && <p className={`message-time ${chat?.unseen > 0 ? "new-msg" : ""}`}>
-                  {formatTime(chat.message.date)}
-                </p>}
-              </div>
-            </Fragment>
+            <span title={chat.message?.message} className="chat-listSubtext">
+              <span className="chat-listSubtitle">
+                <span className={`who ${chat?.unseen > 0 ? 'unseen' : ''}`}>{chat?.message?.userid === userId ? 'You:' : ''}</span>
+                <span className={`msg text-truncate ${chat?.unseen > 0 ? 'unseen' : ''}`}>
+                  {chat.message?.message ? chat.message?.message : "'New chat'"}
+                </span>
+              </span>
+              {chat.message?.message && <span className={`message-time ${chat?.unseen > 0 ? 'new-msg' : ''}`}>{formatTime(chat.message.date)}</span>}
+            </span>
           }
         />
       </ListItem>
     </Fragment>
-  )
-}
+  );
+};
 
-export default ChatList
+export default ChatList;

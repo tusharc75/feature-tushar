@@ -129,8 +129,7 @@ export default function QuoteProcess(props) {
         updatingVersion
     } = props
     const defaultSelectColumns = [
-        "Product Name",
-        "Description",
+        "Product Description",
         "Unit",
         "Qty",
         `Sales Price Per Unit ${quoteData?.currency}`,
@@ -1517,21 +1516,22 @@ export default function QuoteProcess(props) {
                                 >
                                     Download
                                 </Button>
-                                <Button
-                                    onClick={() => {
-                                        quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
-                                            quoteId: quoteData._id,
-                                            version: currentVersion,
-                                          })
-                                    }}
-                                    variant="outlined"
-                                    size="small"
-                                    className="mr-1"
-                                    startIcon={<AiFillEdit />}
-                                    color="primary"
-                                >
-                                    Edit
-                                </Button>
+                                {((permissions[qbResource]?.isUpdate && permissions?.quotePdfTmeplate?.isUpdate) || (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id))) &&
+                                    <Button
+                                        onClick={() => {
+                                            quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
+                                                quoteId: quoteData._id,
+                                                version: currentVersion,
+                                            })
+                                        }}
+                                        variant="outlined"
+                                        size="small"
+                                        className="mr-1"
+                                        startIcon={<AiFillEdit />}
+                                        color="primary"
+                                    >
+                                        Edit Template
+                                    </Button>}
                                 <Tooltip title="AI Suggestion">
                                     <IconButton
                                         onClick={() => {
