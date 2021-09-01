@@ -22,7 +22,8 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
-
+import { SVG } from "../../assets";
+import styles from './dashboard.module.scss';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
@@ -238,49 +239,70 @@ const TopDashboard = (props) => {
           <Grid container spacing={2} alignItems="stretch">
             <Grid item xs={4}>
               <Paper>
-                <Box p={2} flexDirection="column" display="flex" alignItems="center" textAlign="center">
-                  <Typography variant="h6" color="textSecondary">
-                    Total Booked Value
-                  </Typography>
-                  {!loadingChart ? (
-                    <Typography variant="h5" color="textPrimary">
-                      {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
-                    </Typography>
-                  ) : (
-                    <Skeleton variant="text" width={200} height={40} />
-                  )}
+                <Box p={2} textAlign="center">
+                  <Grid container>
+                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                      <img alt="image" className={styles.state_img} src={SVG("booked_value")}></img>
+                    </Grid>
+                    <Grid item xs={12} sm={10} className="pull-left">
+                      {!loadingChart ? (
+                        <Typography variant="h5" className={styles.price}>
+                          {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
+                        </Typography>
+                      ) : (
+                        <Skeleton variant="text" width={200} height={40} />
+                      )}
+                      <Typography variant="h6" className={styles.title}>
+                        Total Booked Value
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>
             <Grid item xs={4}>
               <Paper>
-                <Box p={2} flexDirection="column" display="flex" alignItems="center" textAlign="center">
-                  <Typography variant="h6" color="textSecondary">
-                    Total Cost
-                  </Typography>
-                  {!loadingChart ? (
-                    <Typography variant="h5" color="textPrimary">
-                      {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
-                    </Typography>
-                  ) : (
-                    <Skeleton variant="text" width={200} height={40} />
-                  )}
+                <Box p={2} textAlign="center">
+                  <Grid container>
+                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                      <img alt="image" className={styles.state_img} src={SVG("total_cost")}></img>
+                    </Grid>
+                    <Grid item xs={12} sm={10} className="pull-left">
+                      {!loadingChart ? (
+                        <Typography variant="h5" className={styles.price}>
+                          {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
+                        </Typography>
+                      ) : (
+                        <Skeleton variant="text" width={200} height={40} />
+                      )}
+                      <Typography variant="h6" className={styles.title}>
+                        Total Cost
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>
             <Grid item xs={4}>
               <Paper>
-                <Box p={2} textAlign="center" flexDirection="column" display="flex" alignItems="center">
-                  <Typography variant="h6" color="textSecondary">
-                    Profits
-                  </Typography>
-                  {!loadingChart ? (
-                    <Typography variant="h5" color="textPrimary">
-                      {salesRevenue.profit}%
-                    </Typography>
-                  ) : (
-                    <Skeleton variant="text" width={200} height={40} />
-                  )}
+                <Box p={2} textAlign="center">
+                  <Grid container>
+                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                      <img alt="image" className={styles.state_img} src={SVG("profit")}></img>
+                    </Grid>
+                    <Grid item xs={12} sm={10} className="pull-left">
+                      {!loadingChart ? (
+                        <Typography variant="h5" className={styles.price}>
+                          {salesRevenue.profit}%
+                        </Typography>
+                      ) : (
+                        <Skeleton variant="text" width={200} height={40} />
+                      )}
+                      <Typography variant="h6" className={styles.title}>
+                        Profits
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>
