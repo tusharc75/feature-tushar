@@ -107,14 +107,14 @@ const ChatsPopover = (props) => {
 
           <Box display="flex" alignItems="center">
             <Typography variant="h6" color="textPrimary" className="text-truncate">
-              {selectedChat ? selectedChat?.chatTitle : newChat ? 'New chat' : `Chats (${chatList.length})`}
+              {selectedChat ? selectedChat?.chatTitle : newChat ? 'New chat' : `Chats (${chatList?.length})`}
             </Typography>
-            {selectedChat && selectedChat.users.length > 2 && (
+            {selectedChat && selectedChat?.users?.length > 2 && (
               <Box ml={1} pt={1}>
                 <HtmlTooltip
                   title={
                     <>
-                      {selectedChat?.users.map((u) => (
+                      {selectedChat?.users?.map((u) => (
                         <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>
                       ))}
                     </>

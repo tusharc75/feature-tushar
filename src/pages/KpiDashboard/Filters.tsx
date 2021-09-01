@@ -287,14 +287,14 @@ const Filters = (props) => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid container spacing={2}>
+        {/* <Grid container spacing={2}>
           <Grid item sm={6}></Grid>
           <Grid item sm={6}></Grid>
           <Grid item sm={6}></Grid>
           <Grid item sm={6}></Grid>
           {salesFilter.marketSegment && <Grid item sm={6}></Grid>}
           <Grid item sm={6}></Grid>
-        </Grid>
+        </Grid> */}
       </Box>
     </AppBar>
   );

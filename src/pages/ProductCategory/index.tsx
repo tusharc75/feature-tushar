@@ -11,19 +11,26 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import CreateProductCategory from "./CreateProductCategory";
 import routes from "../../components/Helpers/Routes";
-import { Box } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
+import DeleteIcon from "@material-ui/icons/Delete";
 import {
     gridLoadingTimeout,
     gridPageSizes,
     isObjectEmpty
 } from "../../constants/helpers";
 import {
-    CommonRenderer} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+    CommonRenderer,
+    CreatedByRenderer,
+    UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
+import { Box, Menu, MenuItem } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -123,10 +130,10 @@ const ProductCategory = () => {
     }: any = useData();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
+        isCreate: permissions.productCategory?.isCreate,
+        isUpdate: permissions.productCategory?.isUpdate,
+        isRead: permissions.productCategory?.isRead,
+        isDelete: permissions.productCategory?.isDelete
     });
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -146,18 +153,19 @@ const ProductCategory = () => {
     const columns = [
         { field: "name", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "parentCategory", headerName: "Parent Category", show: true, disabled: true, cellRenderer: "parentCategoryRenderer" },
-        // { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        // { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
+    const [anchorEl, setAnchorEl] = useState(null);
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
     useEffect(() => {
@@ -180,31 +188,31 @@ const ProductCategory = () => {
 
     </span>
 
-    // const ActionsRenderer = params => <Fragment>
-    //     {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ?
-    //         <Tooltip title="Delete" >
-    //             <IconButton aria-label="Delete" onClick={() => {
-    //                 setDeleteRecord(params.data);
-    //                 setShowDeleteConfirmBox(true)
-    //             }}>
-    //                 <DeleteIcon
-    //                     fontSize="small" color="error" />
-    //             </IconButton>
-    //         </Tooltip> :
-    //         <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
-    //             <IconButton aria-label="Delete">
-    //                 <DeleteIcon fontSize="small" />
-    //             </IconButton>
-    //         </Tooltip>
-    //     }
-    // </Fragment >
+    const ActionsRenderer = params => <Fragment>
+        {productCategoryPermissions.isDelete && (params?.data?.createdById == user?.user?._id) ?
+            <Tooltip title="Delete" >
+                <IconButton aria-label="Delete" onClick={() => {
+                    setDeleteRecord(params.data);
+                    setShowDeleteConfirmBox(true)
+                }}>
+                    <DeleteIcon
+                        fontSize="small" color="error" />
+                </IconButton>
+            </Tooltip> :
+            <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
+                <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                </IconButton>
+            </Tooltip>
+        }
+    </Fragment >
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
         parentCategoryRenderer: CommonRenderer,
-        // createdByRenderer: CreatedByRenderer,
-        // updatedByRenderer: UpdatedByRenderer,
-        // actionsRenderer: ActionsRenderer
+        createdByRenderer: CreatedByRenderer,
+        updatedByRenderer: UpdatedByRenderer,
+        actionsRenderer: ActionsRenderer
     };
 
     const replaceFieldName = (field) => {
@@ -224,7 +232,7 @@ const ProductCategory = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-          }
+        }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -312,6 +320,14 @@ const ProductCategory = () => {
         dispatch({ type: "search", search: e.target.value });
     };
 
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -346,7 +362,7 @@ const ProductCategory = () => {
                             {productCategoryPermissions.isCreate &&
                                 <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {/* {productCategoryPermissions.isDelete &&
+                            {productCategoryPermissions.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
@@ -370,16 +386,23 @@ const ProductCategory = () => {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu> */}
+                                <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowDeleteConfirmBox(true)
+                                }}>Delete</MenuItem>
+                            </Menu>
                         </Box>
                     </Grid>
                 </Grid>
             </div>
 
-            <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page}  allowAction={false}
-                loading={loading} renderedFrom="productCategoryPage"/>
+            <CustomAgGrid columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
+                loading={loading} renderedFrom="productCategoryPage" />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
@@ -392,7 +415,7 @@ const ProductCategory = () => {
 
             {open &&
                 <CreateProductCategory
-                    isUpdateDisabled={productCategoryId ? true : false}
+                    isUpdateDisabled={false}
                     productCategoryId={productCategoryId}
                     onClose={() => setOpen(false)}
                     onSuccess={() => {
@@ -402,7 +425,7 @@ const ProductCategory = () => {
                 />
             }
         </CustomContainer>
-    </Fragment>
+    </Fragment >
     );
 }
 
