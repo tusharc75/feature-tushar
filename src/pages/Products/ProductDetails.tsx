@@ -279,7 +279,7 @@ export default function ProductDetails() {
                     readOnly
                     size="small"
                   />
-                  <p>{productDetails.rating}</p>
+                  <p>{productDetails?.averageRating}</p>
                 </div>
                 <div className={'footer' && styles.button_layout} >
                   <Button
