@@ -21,7 +21,8 @@ import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
-
+import { SVG } from "../../assets";
+import styles from './dashboard.module.scss';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const TopDashboard = (props) => {
@@ -178,36 +179,57 @@ const TopDashboard = (props) => {
             <Grid item xs={4}>
               <Paper>
                 <Box p={2} textAlign="center">
-                  <Typography variant="h6" color="textSecondary">
-                    Total Booked Value
-                  </Typography>
-                  <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
-                  </Typography>
+                  <Grid container>
+                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                      <img alt="image" className={styles.state_img} src={SVG("booked_value")}></img>
+                    </Grid>
+                    <Grid item xs={12} sm={10} className="pull-left">
+                      <Typography variant="h5" className={styles.price}>
+                        {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
+                      </Typography>
+                      <Typography variant="h6" className={styles.title}>
+                        Total Booked Value
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>
             <Grid item xs={4}>
               <Paper>
                 <Box p={2} textAlign="center">
-                  <Typography variant="h6" color="textSecondary">
-                    Total Cost
-                  </Typography>
-                  <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
-                  </Typography>
+                  <Grid container>
+                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                      <img alt="image" className={styles.state_img} src={SVG("total_cost")}></img>
+                    </Grid>
+                    <Grid item xs={12} sm={10} className="pull-left">
+                      <Typography variant="h5" className={styles.price}>
+                        {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
+                      </Typography>
+                      <Typography variant="h6" className={styles.title}>
+                        Total Cost
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>
             <Grid item xs={4}>
               <Paper>
                 <Box p={2} textAlign="center">
-                  <Typography variant="h6" color="textSecondary">
-                    Profits
-                  </Typography>
-                  <Typography variant="h5" color="textPrimary">
-                    {salesRevenue.profit}%
-                  </Typography>
+                  <Grid container>
+                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                      <img alt="image" className={styles.state_img} src={SVG("profit")}></img>
+                    </Grid>
+                    <Grid item xs={12} sm={10} className="pull-left">
+                      <Typography variant="h5" className={styles.price}>
+                        {salesRevenue.profit}%
+                      </Typography>
+                      <Typography variant="h6" className={styles.title}>
+                        Profits
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>

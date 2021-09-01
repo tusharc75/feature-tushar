@@ -9,7 +9,10 @@ import FormTypes from '../../components/Helpers/FormTypes';
 const useStyles = makeStyles({
   appBar: {
     padding: 0,
-    height: 70
+    height: "70px",
+    borderRadius: "3px 3px 0 0",
+    borderBottom: "1px solid #e1dde6",
+    boxShadow: "1px 3px 3px #ddd",
   }
 });
 

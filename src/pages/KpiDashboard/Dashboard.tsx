@@ -9,8 +9,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import { entity, marketSegment, customerAccount } from '../../constants/helpers';
 import OpportunityDashboards from './OpportunityDashboards';
 import Filters from './Filters';
+import styles from './dashboard.module.scss';
 
-import './dashboard.scss';
 import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
@@ -174,7 +174,7 @@ const Dashboard = () => {
           allData: allEntities
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.customerAccount, salesFilter.subMarketSegment, salesFilter.marketSegment, salesFilter.between]);
 
   useEffect(() => {
@@ -286,7 +286,7 @@ const Dashboard = () => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
 
     return () => {
       setSalesData({
@@ -360,7 +360,7 @@ const Dashboard = () => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
@@ -426,7 +426,7 @@ const Dashboard = () => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
@@ -464,7 +464,7 @@ const Dashboard = () => {
           percent: Math.floor((data.open / data.count) * 100)
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
@@ -517,7 +517,7 @@ const Dashboard = () => {
 
         setTopProducts(topProductsData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, filterCurrency]);
 
   useEffect(() => {
@@ -543,7 +543,7 @@ const Dashboard = () => {
         }
         setRegionSales(regionSalesData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [filterCurrency]);
 
   useEffect(() => {
@@ -634,7 +634,7 @@ const Dashboard = () => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between]);
 
   useEffect(() => {
@@ -694,7 +694,7 @@ const Dashboard = () => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between]);
 
   useEffect(() => {
@@ -716,7 +716,7 @@ const Dashboard = () => {
       .then(({ data: { data } }) => {
         setEntities(data.map((d) => ({ id: d._id, name: d.entityName })));
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchProductCategory = () => {
@@ -725,7 +725,7 @@ const Dashboard = () => {
       .then(({ data: { data } }) => {
         setProductCategory(data.map((d) => ({ id: d._id, name: d.name })));
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchMarketSegment = () => {
@@ -739,7 +739,7 @@ const Dashboard = () => {
         }));
         setMarketSegments(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchSalesReps = () => {
@@ -752,7 +752,7 @@ const Dashboard = () => {
         }));
         setSalesReps(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
   const fetchCustomerAccount = () => {
     axiosInstance()
@@ -764,7 +764,7 @@ const Dashboard = () => {
         }));
         setCustomerAccounts(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   return (
@@ -775,7 +775,7 @@ const Dashboard = () => {
         </Grid>
         <div className="detail-container">
           <Paper>
-            <Container maxWidth="xl">
+            <div>
               <Filters
                 currency={filterCurrency}
                 setCurrency={setFilterCurrency}
@@ -792,7 +792,7 @@ const Dashboard = () => {
                 status={status}
                 setStatus={setStatus}
               />
-              <Box py={2}>
+              <Box className={styles.dashboard_container}>
                 <TopDashboard
                   filterCurrency={filterCurrency}
                   salesFilter={salesFilter}
@@ -826,7 +826,7 @@ const Dashboard = () => {
                   <OpportunitiesDashboard />
                 </Box>
               </Box>
-            </Container>
+            </div>
             <Box p={2} display="flex" alignItems="center" flexDirection="column">
               <Box my={2} p={2} width="100%" maxWidth="800px" textAlign="center"></Box>
             </Box>
