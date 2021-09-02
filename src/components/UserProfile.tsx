@@ -63,7 +63,7 @@ export default function UserProfile(props) {
                     <ListItemIcon style={{ minWidth: "30px" }}>
                       <FiUser />
                     </ListItemIcon>
-                    <Typography className="logoutProfile"> Profile</Typography>
+                    <Typography> Profile</Typography>
                   </MenuItem>
                 </MenuList>
               </ClickAwayListener>
@@ -80,7 +80,7 @@ export default function UserProfile(props) {
                       <ListItemIcon style={{ minWidth: "30px" }}>
                         <FiSettings />
                       </ListItemIcon>
-                      <Typography className="logoutProfile">
+                      <Typography>
                         Brand Configuration
                       </Typography>
                     </MenuItem>
@@ -97,7 +97,7 @@ export default function UserProfile(props) {
                     <ListItemIcon style={{ minWidth: "30px" }}>
                       <FiLogOut />
                     </ListItemIcon>
-                    <Typography className="logoutProfile">Logout</Typography>
+                    <Typography>Logout</Typography>
                   </MenuItem>
                 </MenuList>
               </ClickAwayListener>

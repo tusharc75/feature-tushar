@@ -35,7 +35,9 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
             history.push(`product/details/${product._id}`)
           }
         }}>{`${product?.productName}, ${product?.productCategory ? product.productCategory.optionLabel : ""} `}</h4>
-        <div><Rating name="size-small" value={product.rating} readOnly size="small" /></div>
+        <div><Rating name="size-small"
+          precision={0.5}
+          value={Math.round(product?.averageRating)} readOnly size="small" /></div>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <div>
             {(product.mrp && parseInt(product.mrp) !== 0) &&

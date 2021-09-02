@@ -129,8 +129,7 @@ export default function QuoteProcess(props) {
         updatingVersion
     } = props
     const defaultSelectColumns = [
-        "Product Name",
-        "Description",
+        "Product Description",
         "Unit",
         "Qty",
         `Sales Price Per Unit ${quoteData?.currency}`,
@@ -242,7 +241,6 @@ export default function QuoteProcess(props) {
             .catch((error) => {
                 //   toastConfig.setToastConfig(error);
             });
-
     }, [currentVersion])
 
     useEffect(() => {
@@ -625,7 +623,7 @@ export default function QuoteProcess(props) {
     };
 
     const fetchDoaLimit = () => {
-        if (quoteData) {
+       if (quoteData) {
             axiosInstance()
                 .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
                 .then(({ data: { data } }) => {
@@ -1517,7 +1515,9 @@ export default function QuoteProcess(props) {
                                 >
                                     Download
                                 </Button>
-                                {permissions[qbResource]?.isUpdate && permissions?.quotePdfTmeplate?.isUpdate &&
+                                {(permissions[qbResource]?.isUpdate && permissions?.quotePdfTemplate.isUpdate && 
+                                (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id)) && 
+                                (user?.user?._id === quoteData?.pDFTemplate?.owner || quoteData?.pDFTemplate?.collaborator?.some(d => d === user?.user?._id))) &&
                                     <Button
                                         onClick={() => {
                                             quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
