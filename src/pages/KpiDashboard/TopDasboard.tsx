@@ -241,7 +241,7 @@ const TopDashboard = (props) => {
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={2} className="d-flex align-items-center">
+                    <Grid item xs={3} sm={2} className="d-flex align-items-center justify-content-center">
                       <img alt="image" className={styles.state_img} src={SVG("booked_value")}></img>
                     </Grid>
                     <Grid item xs={9} sm={10} className="pull-left">
@@ -264,7 +264,7 @@ const TopDashboard = (props) => {
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={2} className="d-flex align-items-center">
+                    <Grid item xs={3} sm={2} className="d-flex align-items-center justify-content-center">
                       <img alt="image" className={styles.state_img} src={SVG("total_cost")}></img>
                     </Grid>
                     <Grid item xs={9} sm={10} className="pull-left">
@@ -287,7 +287,7 @@ const TopDashboard = (props) => {
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={2} className="d-flex align-items-center">
+                    <Grid item xs={3} sm={2} className="d-flex align-items-center justify-content-center">
                       <img alt="image" className={styles.state_img} src={SVG("profit")}></img>
                     </Grid>
                     <Grid item xs={9} sm={10} className="pull-left">
