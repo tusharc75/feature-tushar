@@ -24,6 +24,7 @@ import ImageAttachments from "../Email/ImageAttachments";
 import ImagePreview from "../Email/ImagePreview";
 import { displayDate } from "../../../constants/helpers"
 import TinyMce from "../../../components/TinyMCE"
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const NoteSchema = Yup.object().shape({
     name: Yup.string()
@@ -67,6 +68,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         fetchNoteDetail();
@@ -238,7 +240,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
             <>
-                <CustomDialogHeader onClose={handleDialogClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+                <CustomDialogHeader 
+                    onClose={() => {
+                        setShowConfirmDialog(true)
+                    }}
+                    title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate >
                         <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
@@ -322,7 +328,10 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button size="small" type="button" color="primary" onClick={handleDialogClose}>Cancel</Button>
+                    <Button size="small" type="button" color="primary"
+                        onClick={() => {
+                            setShowConfirmDialog(true)
+                        }}>Cancel</Button>
                     <Button size="small" type="button" color="primary" variant="contained"
                         onClick={() => {
 
@@ -335,6 +344,25 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                         }}
                         disabled={uploadingImageOrFileProgress > 0}>Save</Button>
                 </CustomDialogFooter>
+                {
+                    showConfirmDialog ?
+                        <ConfirmCancelDialog
+                            open={showConfirmDialog}
+                            onSave={() => {
+                                setShowConfirmDialog(false)
+                                if (Object.keys(errors).length) {
+                                    Object.keys(errors).map(k => {
+                                        setFieldTouched(k, true)
+                                    })
+                                }
+                                else submitForm()
+                            }}
+                            onClose={() => {
+                                setShowConfirmDialog(false)
+                                handleClose()
+                            }}
+                        /> : null
+                }
                 {
                     open ?
                         <ImagePreview

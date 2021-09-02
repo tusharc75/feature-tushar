@@ -38,6 +38,8 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
 import { dateFormat } from "../../../constants/helpers"
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+
 
 const CaseSchema = Yup.object().shape({
   name: Yup.string().required("Please enter case name"),
@@ -57,6 +59,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
     fetchCaseDetail();
@@ -120,7 +123,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
     <>
       <CustomDialogHeader
         title={`${id ? "Edit" : "New"} Case`}
-        onClose={handleClose}
+        onClose={() => {
+          setShowConfirmDialog(true)
+        }}
       ></CustomDialogHeader>
       {initialValues ? (
         <Formik
@@ -346,7 +351,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                   disabled={isSubmitting}
                   color="primary"
                   size="small"
-                  onClick={handleClose}
+                  onClick={() => {
+                    setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -361,6 +368,20 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                   {isSubmitting ? <CircularProgress size={22} /> : "Save"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm()
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      handleClose()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>

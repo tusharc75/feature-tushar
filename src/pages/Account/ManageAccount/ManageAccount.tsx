@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
@@ -18,6 +18,7 @@ import Dialog from "@material-ui/core/Dialog";
 import { useData } from "../../../StateProvider/Provider";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import { isMobile, isTablet } from "react-device-detect";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const arr = [...Array(9).keys()];
 
@@ -44,6 +45,7 @@ export default function ManageAccount(props) {
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [
     ownerCollaboratorCommonDataSource,
     setOwnerCollaboratorCommonDataSource,
@@ -171,20 +173,52 @@ export default function ManageAccount(props) {
     handleSubmit(values, false);
   };
 
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
+  const isFieldNotTouched = (accountData, values) => {
+    return Object.values(
+      simplifyValues(
+        accountData.initialValues,
+        accountData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, accountData.fields)
+      ).toString()
+  }
+
   return (
     <>
       <Dialog
-        disableBackdropClick={true}
         fullWidth
         maxWidth="md"
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            setShowConfirmDialog(true)
+          }
+        }}
         open={open}
       >
         <CustomDialogHeader
-          onClose={onClose}
+          onClose={() => {
+            setShowConfirmDialog(true)
+          }}
           title={
             isNew
               ? "Add Account"
@@ -210,10 +244,9 @@ export default function ManageAccount(props) {
                 setFieldValue,
               }) => (
                 <>
-
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
+                      <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
@@ -507,10 +540,14 @@ export default function ManageAccount(props) {
                   </CustomDialogContent>
                   <CustomDialogFooter>
                     <Button
-                      onClick={onClose}
+                      onClick={() => {
+                        if (isFieldNotTouched(accountData, values)) onClose()
+                        else setShowConfirmDialog(true)
+                      }}
                       variant="outlined"
                       color="primary"
                       size="small"
+
                     >
                       Cancel
                     </Button>
@@ -521,39 +558,49 @@ export default function ManageAccount(props) {
                       disabled={
                         loading ||
                         uploadingImageOrFileProgress > 0 ||
-                        Object.values(
-                          simplifyValues(
-                            accountData.initialValues,
-                            accountData.fields
-                          )
-                        ).toString() ===
-                        Object.values(
-                          simplifyValues(values, accountData.fields)
-                        ).toString()
+                        isFieldNotTouched(accountData, values)
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {
                         e.preventDefault();
-                        const err = Object.keys(errors);
-                        if (err.length) {
-                          const input = document.querySelector(
-                            `input[name=${err[0]}]`,
-                          );
-
-                          input.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'start',
-                          });
-                        }
+                        handleScroll(errors)
                         submitForm();
                       }}
                     >
                       Save
                     </CustomButton>
                   </CustomDialogFooter>
+
+                  {
+                    showConfirmDialog ?
+                      <ConfirmCancelDialog
+                        open={showConfirmDialog}
+                        onSave={() => {
+                          setShowConfirmDialog(false)
+                          // e.preventDefault();
+                          const err = Object.keys(errors);
+                          if (err.length) {
+                            const input = document.querySelector(
+                              `input[name=${err[0]}]`,
+                            );
+
+                            input.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'center',
+                              inline: 'start',
+                            });
+                          }
+                          submitForm();
+                        }}
+                        onClose={() => {
+                          setShowConfirmDialog(false)
+                          onClose()
+                        }}
+                      /> : null
+                  }
                 </>
               )}
+
             </Formik>
           </>
         ) : (
