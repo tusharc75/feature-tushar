@@ -59,7 +59,7 @@ const Leads = () => {
     isCreate: permissions[leadResource]?.isCreate,
     isUpdate: permissions[leadResource]?.isUpdate,
     isRead: permissions[leadResource]?.isRead,
-    isDelete: permissions[leadResource]?.isDelete,
+    isDelete: permissions[leadResource]?.isDelete
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -184,9 +184,6 @@ const Leads = () => {
         return field;
     }
   };
-
-  
-  throw TypeError('New')
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
