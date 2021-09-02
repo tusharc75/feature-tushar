@@ -21,7 +21,6 @@ import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import * as Yup from "yup";
 import moment from "moment";
-
 import {
   GetTaskDetail,
   CreateNewTask,
@@ -38,6 +37,7 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
 import { dateFormat, dateFormatForInputControl } from "../../../constants/helpers"
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const TaskSchema = Yup.object().shape({
   name: Yup.string().required("Please enter task name"),
@@ -57,6 +57,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
     fetchTaskDetail();
@@ -120,7 +121,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
     <>
       <CustomDialogHeader
         title={`${id ? "Edit" : "New"} Task`}
-        onClose={handleClose}
+        onClose={() => {
+          setShowConfirmDialog(true)
+        }}
       ></CustomDialogHeader>
       {initialValues ? (
         <Formik
@@ -351,7 +354,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                   disabled={isSubmitting}
                   color="primary"
                   size="small"
-                  onClick={handleClose}
+                  onClick={() => {
+                    setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -366,6 +371,20 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                   {isSubmitting ? <CircularProgress size={22} /> : "Save"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm()
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      handleClose()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>

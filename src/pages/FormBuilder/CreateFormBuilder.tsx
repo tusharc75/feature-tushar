@@ -13,6 +13,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
 import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const CreateFormBuilder = () => {
 
@@ -34,12 +35,27 @@ const CreateFormBuilder = () => {
     const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         if (permissions && permissions.formBuilder) {
             setFormBuilderPermissions(permissions.formBuilder);
         }
     }, [permissions]);
+
+    const onBackButtonEvent = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, null, window.location.pathname);
+        setShowConfirmDialog(true)
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
 
     useEffect(() => {
         fetchBrandResourceData()
@@ -138,7 +154,8 @@ const CreateFormBuilder = () => {
                                     }
                                 </Box>
                                 <Box ml={1} >
-                                    <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
+                                    <Button color="primary" variant="contained" size="small"
+                                        onClick={() => setShowConfirmDialog(true)} > Close</Button>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -154,6 +171,20 @@ const CreateFormBuilder = () => {
                             module="form-builder"
                         />
                     </Box>
+                    {
+                        showConfirmDialog ?
+                            <ConfirmCancelDialog
+                                open={showConfirmDialog}
+                                onSave={() => {
+                                    setShowConfirmDialog(false)
+                                    handleSave();
+                                }}
+                                onClose={() => {
+                                    setShowConfirmDialog(false)
+                                    history.push({ pathname: "/form-builder" })
+                                }}
+                            /> : null
+                    }
                 </Fragment>
                 :
                 <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>

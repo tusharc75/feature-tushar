@@ -25,6 +25,8 @@ import FormTypes from "../../components/Helpers/FormTypes";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { simplifyValues } from "../../constants/helpers"
 
 interface InitialData {
   fields: any[];
@@ -60,6 +62,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -234,15 +237,32 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
     setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
   }
 
+  const isFieldNotTouched = (initialData, values) => {
+    return Object.values(
+      simplifyValues(
+        initialData.initialValues,
+        initialData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, initialData.fields)
+      ).toString()
+  }
   return (
     <Dialog
       open={open}
-      onClose={close}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title={`${projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} onClose={close} />
+      <CustomDialogHeader
+        onClose={() => setShowConfirmDialog(true)}
+        title={`${projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -257,7 +277,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled>
+            <Button variant="outlined" size="small" color="primary" disabled
+            >
               Cancel
             </Button>
             <Button variant="contained" size="small" color="primary" disabled>
@@ -494,7 +515,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 field.fieldName,
                                                 value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                               );
-                                              setFieldValue("projectManager","");
+                                              setFieldValue("projectManager", "");
                                             }}
                                           />
                                         ) : field.fieldName === "projectManager" ? (
@@ -642,7 +663,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                   color="primary"
                   size="small"
                   disabled={isSubmitting || loading}
-                  onClick={close}
+                  onClick={() => {
+                    if (isFieldNotTouched(initialData, values)) close()
+                    else setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -656,6 +680,20 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      close()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>

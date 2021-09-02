@@ -302,7 +302,11 @@ const Activity = (props) => {
           open={open}
           aria-labelledby="customized-dialog-title"
           maxWidth={"md"}
-          onClose={handleClose}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              handleClose()
+            }
+          }}
           fullWidth
         >
           {type === "Task" ? (
