@@ -303,7 +303,6 @@ const Activity = (props) => {
           aria-labelledby="customized-dialog-title"
           maxWidth={"md"}
           onClose={(e, reason) => {
-            console.log("🚀 ~ file: index.tsx ~ line 314 ~ Activity ~ reason", reason)
             if (reason !== 'backdropClick') {
               handleClose()
             }

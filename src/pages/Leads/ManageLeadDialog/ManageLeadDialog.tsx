@@ -334,7 +334,6 @@ export default function ManageLeadDialog({
           }
         }}
         open={open}
-        disableBackdropClick={true}
       >
         <CustomDialogHeader
           title={

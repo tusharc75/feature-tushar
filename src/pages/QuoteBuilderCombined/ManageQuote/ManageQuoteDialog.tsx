@@ -721,7 +721,6 @@ export default function ManageQuoteDialog({
           }
         }}
         open={open}
-        disableBackdropClick={true}
         fullWidth
         fullScreen={isMobile || isTablet}
       >

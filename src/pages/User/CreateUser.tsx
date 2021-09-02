@@ -95,22 +95,15 @@ const CreateUser = ({ open, close, fetchData }) => {
       open={open}
       maxWidth="md"
       fullWidth
-      disableBackdropClick={true}
       fullScreen={isMobile}
-      onBackdropClick={() => {
-        console.log('backdrop clicked')
-      }}
       onClose={(e, reason) => {
-        console.log("e", e)
-        console.log("🚀 ~ file: CreateUser.tsx ~ line 109 ~ CreateUser ~ reason", reason)
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true)
         }
       }}
     >
       <CustomDialogHeader title="CCCreate New User"
-        onClose={(e, reason) => {
-          console.log('e', e, 'reason', reason)
+        onClose={() => {
           setShowConfirmDialog(true)
         }} />
 
