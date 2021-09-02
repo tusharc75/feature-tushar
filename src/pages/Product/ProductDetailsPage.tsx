@@ -83,7 +83,7 @@ const ProductDetailsPage = () => {
                                 tempField.fieldData._id = `${tempField.fieldData._id}_` + d.toLowerCase()
                                 tempField.fieldData.type = `productSpecification`
                                 tempField.fieldData.fieldName = `${tempField.fieldData.fieldName}_` + d.toLowerCase()
-                                tempField.fieldData.fieldLabel = `${tempField.fieldData.fieldLabel} [${d}]`
+                                tempField.fieldData.fieldLabel = `${tempField.fieldData.fieldLabel} (${d})`
                                 displayField.push(tempField)
                             })
                         }
