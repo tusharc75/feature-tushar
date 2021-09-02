@@ -13,6 +13,9 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "3px 3px 0 0",
     borderBottom: "1px solid #e1dde6",
     boxShadow: "1px 3px 3px #ddd",
+    [theme.breakpoints.down("sm")]: {
+      height: "auto",
+    },
     [theme.breakpoints.down("xs")]: {
       height: "auto",
     }
@@ -20,6 +23,15 @@ const useStyles = makeStyles((theme) => ({
   currencyBox:{
     width: "250px",
     [theme.breakpoints.down("xs")]: {
+      width: "auto",
+    }
+  },
+  status:{
+    width: "100%",
+    [theme.breakpoints.down("xs")]: {
+      width: "auto",
+    },
+    [theme.breakpoints.down("sm")]: {
       width: "auto",
     }
   }
@@ -206,15 +218,15 @@ const Filters = (props) => {
       </Popover>
       <Box p={2}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={12} md={6}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={1}>
+              <Grid item xs={12} sm={4} md={2}>
                 <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
                   Filters
                 </Button>
               </Grid>
-              <Grid item xs={6} sm={2}>
-                <FormControl style={{ width: '150px' }} size="small" variant="outlined">
+              <Grid item xs={6} sm={4} md={3}>
+                <FormControl className={classes.status} size="small" variant="outlined">
                   <InputLabel id="status">Status</InputLabel>
                   <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                     <MenuItem value={'won'}>Won</MenuItem>
@@ -223,7 +235,7 @@ const Filters = (props) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6} sm={2}>
+              <Grid item xs={6} sm={4} md={3}>
                 <FormTypes
                   fullWidth={false}
                   className={classes.currencyBox}
@@ -245,7 +257,7 @@ const Filters = (props) => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={12} md={6}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small" variant="outlined">

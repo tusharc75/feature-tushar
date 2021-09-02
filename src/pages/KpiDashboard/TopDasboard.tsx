@@ -234,17 +234,17 @@ const TopDashboard = (props) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={8}>
+      <Grid item xs={12} sm={12} md={12} lg={8}>
         <Box mb={2}>
           <Grid container spacing={2} alignItems="stretch">
             <Grid item sm={4} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={2} className="d-flex align-items-center" justifyContent="center">
+                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("booked_value")}></img>
                     </Grid>
-                    <Grid item xs={9} sm={10} className="pull-left">
+                    <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
                           {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
@@ -264,10 +264,10 @@ const TopDashboard = (props) => {
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={2} className="d-flex align-items-center" justifyContent="center">
+                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("total_cost")}></img>
                     </Grid>
-                    <Grid item xs={9} sm={10} className="pull-left">
+                    <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
                           {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
@@ -287,10 +287,10 @@ const TopDashboard = (props) => {
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={2} className="d-flex align-items-center" justifyContent="center">
+                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("profit")}></img>
                     </Grid>
-                    <Grid item xs={9} sm={10} className="pull-left">
+                    <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
                           {salesRevenue.profit}%
@@ -309,7 +309,7 @@ const TopDashboard = (props) => {
           </Grid>
         </Box>
 
-        <Paper elevation={2}>
+        <Paper elevation={2}> 
           <Box p={2}>
             <Box display="flex" justifyContent="space-between">
               <Button onClick={handleClickChart} startIcon={<ImportExport />}>
@@ -384,7 +384,7 @@ const TopDashboard = (props) => {
           </Box>
         </Paper>
       </Grid>
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={12} md={12} lg={4}>
         <TopDashboardTable moment={moment} filterCurrency={filterCurrency} currency={currency} getExchangeRates={getExchangeRates} />
       </Grid>
     </Grid>
