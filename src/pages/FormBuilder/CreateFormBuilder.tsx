@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment, useContext } from "react";
 import Grid from '@material-ui/core/Grid';
 import { Box, Typography, Button, CircularProgress } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import queryString from "query-string";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -25,10 +25,11 @@ const CreateFormBuilder = () => {
     });
 
     const history = useHistory();
+    const {resource:res} = useParams();
     const parsed = queryString.parse(history.location.search);
     const toastConfig = useContext(CustomToastContext)
 
-    const { resource } = parsed;
+    let  resource = Object.keys(parsed).length > 0 ? parsed.resource :  res.split("=")[1];
     const [section, setSection] = useState(null);
     const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
