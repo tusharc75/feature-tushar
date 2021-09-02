@@ -200,7 +200,7 @@ const OpportunityDashboards = (props) => {
   return (
     <>
       <Grid container spacing={2}>
-        <Grid item sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper>
             <Box mb={2} p={2} display="flex" alignItems="center">
               <Box flex={0.5}>
@@ -266,7 +266,7 @@ const OpportunityDashboards = (props) => {
             </Box>
           </Paper>
         </Grid>
-        <Grid item sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper elevation={2}>
             <Box p={2} textAlign="center">
               <Typography variant="h6">{statusText[status]} Opportunities by Sales Rep</Typography>
@@ -274,7 +274,7 @@ const OpportunityDashboards = (props) => {
             </Box>
           </Paper>
         </Grid>
-        <Grid item sm={4}>
+        <Grid item xs={12} sm={4}>
           <OpportunityTable
             moment={moment}
             salesFilter={salesFilter}
