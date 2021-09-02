@@ -256,7 +256,7 @@ const TopDashboard = (props) => {
                         Total Booked Value
                       </Typography>
                     </Grid>
-                  </Grid>
+                  </Grid> 
                 </Box>
               </Paper>
             </Grid>
