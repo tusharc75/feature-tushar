@@ -110,6 +110,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.addAdditionalOption = false;
       }
 
+      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup) {
+        values.addManualOptionInExcel = false;
+      }
+
       if (
         !values.unique &&
         (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
@@ -460,7 +464,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           <Checkbox
                             name="lookup"
                             checked={values['lookup']}
-                            onChange={(e) => setFieldValue('lookup', e.target.checked)}
+                            onChange={(e) => {
+                              const val = e.target.checked
+                              setFieldValue('lookup', val);
+                              if (val) {
+                                setFieldValue('addAdditionalOption', false)
+                                setFieldValue('addManualOptionInExcel', false)
+                              }
+                            }}
                             color="primary"
                           />
                         }
@@ -832,6 +843,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       <FormControlLabel
                         control={
                           <Checkbox
+                            disabled={values?.lookup}
                             name="isAdditionalOption"
                             checked={values['addAdditionalOption']}
                             onChange={(e) => setFieldValue('addAdditionalOption', e.target.checked)}
@@ -839,6 +851,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         }
                         label="Add Additional Option"
+                      />
+                    ) : null}
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup ? (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            disabled={values?.lookup}
+                            name="isManualOption"
+                            checked={values['addManualOptionInExcel']}
+                            onChange={(e) => setFieldValue('addManualOptionInExcel', e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Add Manual Option In Excel"
                       />
                     ) : null}
                     {fieldData.type === 'process' && (
