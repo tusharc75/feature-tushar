@@ -1,7 +1,11 @@
+import { useState } from "react"
 import { Breadcrumbs, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import ConfirmCancelDialog from "../components/ConfirmCancelDialog"
 
 const CustomBreadCrumbs = ({ routes = [] }) => {
+
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   return (
     <div >
       <Breadcrumbs separator="›" aria-label="breadcrumb">
@@ -24,6 +28,19 @@ const CustomBreadCrumbs = ({ routes = [] }) => {
           );
         })}
       </Breadcrumbs>
+      {
+        showConfirmDialog ?
+          <ConfirmCancelDialog
+            open={showConfirmDialog}
+            onSave={() => {
+              setShowConfirmDialog(false)
+
+            }}
+            onClose={() => {
+              setShowConfirmDialog(false)
+            }}
+          /> : null
+      }
     </div>
   );
 };

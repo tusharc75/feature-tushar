@@ -240,7 +240,6 @@ export default function ManageContact(props) {
   return (
     <>
       <Dialog
-        disableBackdropClick={true}
         maxWidth="md"
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {

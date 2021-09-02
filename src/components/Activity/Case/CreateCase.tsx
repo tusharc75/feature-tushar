@@ -351,7 +351,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                   disabled={isSubmitting}
                   color="primary"
                   size="small"
-                  onClick={handleClose}
+                  onClick={() => {
+                    setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>

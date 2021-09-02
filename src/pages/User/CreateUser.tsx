@@ -15,9 +15,9 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
-import { getObjKeys, yupSchema } from "../../constants/helpers";
+import { getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
-
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 interface InitialData {
   fields: any[];
@@ -35,6 +35,7 @@ const CreateUser = ({ open, close, fetchData }) => {
     values: {},
   });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const location = useLocation();
   const history = useHistory();
 
@@ -92,12 +93,26 @@ const CreateUser = ({ open, close, fetchData }) => {
   return (
     <Dialog
       open={open}
-      onClose={close}
       maxWidth="md"
       fullWidth
+      disableBackdropClick={true}
       fullScreen={isMobile}
+      onBackdropClick={() => {
+        console.log('backdrop clicked')
+      }}
+      onClose={(e, reason) => {
+        console.log("e", e)
+        console.log("🚀 ~ file: CreateUser.tsx ~ line 109 ~ CreateUser ~ reason", reason)
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
     >
-      <CustomDialogHeader title="Create New User" onClose={close} />
+      <CustomDialogHeader title="CCCreate New User"
+        onClose={(e, reason) => {
+          console.log('e', e, 'reason', reason)
+          setShowConfirmDialog(true)
+        }} />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -148,7 +163,10 @@ const CreateUser = ({ open, close, fetchData }) => {
                   color="primary"
                   size="small"
                   disabled={isSubmitting || loading}
-                  onClick={close}
+                  onClick={() => {
+                    if (isFieldNotTouched(initialData, values)) close()
+                    else setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -162,6 +180,20 @@ const CreateUser = ({ open, close, fetchData }) => {
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      close()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>

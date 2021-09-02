@@ -216,7 +216,7 @@ export default function ManageAccount(props) {
         open={open}
       >
         <CustomDialogHeader
-          onClose={(e, reason) => {
+          onClose={() => {
             setShowConfirmDialog(true)
           }}
           title={

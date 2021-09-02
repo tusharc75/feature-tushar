@@ -18,7 +18,8 @@ import {
     budget,
     setFieldsInAscendingOrder,
     getUniqueCurrencies,
-    formFieldNames
+    formFieldNames,
+    isFieldNotTouched
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -35,6 +36,7 @@ import { CustomDialogTransition } from "../../constants/helpers";
 import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import { useData } from "../../StateProvider/Provider";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -72,6 +74,7 @@ export default function ManageBudgetDialog({
     const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
     const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
     const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         getBudgetFields();
@@ -235,6 +238,20 @@ export default function ManageBudgetDialog({
         }
         return values;
     };
+    const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
 
     return (
         <>
@@ -244,9 +261,12 @@ export default function ManageBudgetDialog({
                 fullScreen={isMobile || isTablet}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
-                onClose={onClose}
                 open={open}
-                disableBackdropClick={true}
+                onClose={(e, reason) => {
+                    if (reason !== 'backdropClick') {
+                        setShowConfirmDialog(true)
+                    }
+                }}
             >
                 <CustomDialogHeader
                     title={
@@ -254,7 +274,7 @@ export default function ManageBudgetDialog({
                             ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
                             : "Create Budget"
                     }
-                    onClose={onClose}
+                    onClose={() => setShowConfirmDialog(true)}
                 />
 
                 {entityData.fields.length === 0 && (
@@ -652,7 +672,10 @@ export default function ManageBudgetDialog({
                                         variant="outlined"
                                         color="primary"
                                         size="small"
-                                        onClick={onClose}
+                                        onClick={() => {
+                                            if (isFieldNotTouched(entityData, values)) onClose()
+                                            else setShowConfirmDialog(true)
+                                        }}
                                     >
                                         Cancel
                                     </Button>
@@ -675,24 +698,29 @@ export default function ManageBudgetDialog({
                                         }
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            const err = Object.keys(errors);
-                                            if (err.length) {
-                                                const input = document.querySelector(
-                                                    `input[name=${err[0]}]`,
-                                                );
-
-                                                input.scrollIntoView({
-                                                    behavior: 'smooth',
-                                                    block: 'center',
-                                                    inline: 'start',
-                                                });
-                                            }
+                                            handleScroll(errors)
                                             submitForm();
                                         }}
                                     >
                                         Save
                                     </CustomButton>
                                 </CustomDialogFooter>
+                                {
+                                    showConfirmDialog ?
+                                        <ConfirmCancelDialog
+                                            open={showConfirmDialog}
+                                            onSave={() => {
+                                                setShowConfirmDialog(false)
+                                                handleScroll(errors)
+                                                submitForm();
+                                            }}
+                                            onClose={() => {
+                                                setShowConfirmDialog(false)
+                                                onClose()
+                                            }}
+                                        /> : null
+                                }
+
                             </>
                         )}
                     </Formik>

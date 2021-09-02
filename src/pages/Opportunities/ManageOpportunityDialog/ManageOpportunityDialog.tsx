@@ -398,7 +398,6 @@ export default function ManageOpportunityDialog({
           }
         }}
         open={open}
-        disableBackdropClick={true}
       >
         <CustomDialogHeader
           title={
@@ -406,7 +405,9 @@ export default function ManageOpportunityDialog({
               ? "Create Opportunity"
               : `Editing ${dataToUpdate.opportunityName}`
           }
-          onClose={onClose}
+          onClose={(e, reason) => {
+            setShowConfirmDialog(true)
+          }}
         />
 
         {entityData.fields.length === 0 && (

@@ -240,7 +240,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
             <>
-                <CustomDialogHeader onClose={handleDialogClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+                <CustomDialogHeader 
+                    onClose={() => {
+                        setShowConfirmDialog(true)
+                    }}
+                    title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate >
                         <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
@@ -346,7 +350,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                             open={showConfirmDialog}
                             onSave={() => {
                                 setShowConfirmDialog(false)
-                                submitForm();
                                 if (Object.keys(errors).length) {
                                     Object.keys(errors).map(k => {
                                         setFieldTouched(k, true)

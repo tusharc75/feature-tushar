@@ -20,6 +20,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from "@material-ui/lab";
 import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder } from "../../constants/helpers";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
@@ -73,6 +74,21 @@ export default function NewCreateQuotePdfTemplate() {
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [disableSaveButton, setDisableSaveButton] = useState(false)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+
+    const onBackButtonEvent = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, null, window.location.pathname);
+        setShowConfirmDialog(true)
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
 
     useEffect(() => {
         if (id && id !== '0') {
@@ -291,6 +307,20 @@ export default function NewCreateQuotePdfTemplate() {
                                         </Button>
 
                                     </Grid>
+                                    {
+                                        showConfirmDialog ?
+                                            <ConfirmCancelDialog
+                                                open={showConfirmDialog}
+                                                onSave={() => {
+                                                    setShowConfirmDialog(false)
+                                                    submitForm();
+                                                }}
+                                                onClose={() => {
+                                                    setShowConfirmDialog(false)
+                                                    history.push({ pathname: routes.quotePdfTemplate.path });
+                                                }}
+                                            /> : null
+                                    }
                                 </Grid>
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}>
@@ -487,6 +517,7 @@ export default function NewCreateQuotePdfTemplate() {
                             isCheckHeight={true}
                         />
                     </Box>
+
                 </Grid>
             </Paper>
         </div>
