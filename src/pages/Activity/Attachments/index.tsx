@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Layout from '../../../components/Layout';
 import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
@@ -19,7 +18,7 @@ import { AddOutlined } from '@material-ui/icons';
 import { Button, Tooltip, IconButton, MenuItem, Menu } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, gridLoadingTimeout, RESOURCE_LABEL } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import CustomAgGrid from '../../../components/AgGridComponents/CustomAgGrid';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
@@ -117,10 +116,10 @@ const intialState = {
   sorting: [],
   selectedRecords: []
 };
-export default function Attachment(props) {
+export default function Attachment() {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { referenceType, referenceId, activityType, activityId } = parsed;
+  const { referenceType, referenceId } = parsed;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState([]);
@@ -160,9 +159,9 @@ export default function Attachment(props) {
     }
   ]);
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -362,7 +361,7 @@ export default function Attachment(props) {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Deleted Succesfully'
+            message: 'Deleted Successfully'
           });
           setIsConfirmDialogVisible(false);
           setDeleteLoading(false);

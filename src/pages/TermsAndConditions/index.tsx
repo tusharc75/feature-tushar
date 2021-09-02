@@ -28,10 +28,9 @@ import routes from '../../components/Helpers/Routes';
 
 let termsTimeout
 export default function TermsAndCondition(props) {
-
     const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);
-    const { state: { permissions } }: any = useData();
+    const { state: { permissions, selectedEntity } }: any = useData();
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -51,7 +50,7 @@ export default function TermsAndCondition(props) {
 
     useEffect(() => {
         fetchTermsAndConditions()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, selectedEntity]);
 
     const TermsConditionNameRenderer = params => (
         <span className={`${actionsPermissions.isUpdate ? "link" : ""} cursor-pointer`}
@@ -70,9 +69,9 @@ export default function TermsAndCondition(props) {
                     setDeleteRec(params.data);
                     setShowDeleteConfirmBox(true)
                 }}
-                    disabled={actionsPermissions.isDelete ? false : true}
+                    disabled={permissions?.termsAndConditions?.isDelete ? false : true}
                 >
-                    <DeleteIcon color={actionsPermissions.isDelete ? "error" : "disabled"}
+                    <DeleteIcon color={permissions?.termsAndConditions?.isDelete ? "error" : "disabled"}
                     />
                 </IconButton>
             </Tooltip >
@@ -157,7 +156,9 @@ export default function TermsAndCondition(props) {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 

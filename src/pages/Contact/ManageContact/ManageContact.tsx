@@ -20,6 +20,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import { makeStyles } from "@material-ui/core/styles";
 import { isMobile, isTablet } from "react-device-detect";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const arr = [...Array(9).keys()];
 
@@ -56,6 +57,7 @@ export default function ManageContact(props) {
     !isNew && user.user._id !== contactData.initialValues.owner;
 
   //  Owner, Collaborator Code - Start
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formsData, setFormsData] = useState([]);
   const [
     ownerCollaboratorCommonDataSource,
@@ -109,7 +111,7 @@ export default function ManageContact(props) {
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
-              (d) => d.optionValue !== contactId
+              (d) => d?.optionValue !== contactId
             );
           setReportsToMainDataSource(currentContactRemovedDataSource);
         }
@@ -119,47 +121,69 @@ export default function ManageContact(props) {
     }
   }, [contactData.fields]);
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerDataSource(
-      getOwnerDropdownDataSource(
+
+  const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
+    if (selectedEntity?.length > 0) {
+
+      let newTempArray = []
+
+      const ownerCollaboratorData = getOwnerDropdownDataSource(
         selectedCollaborator,
         ownerCollaboratorCommonDataSource
-      )
-    );
+      );
+
+      selectedEntity.forEach(d => {
+        ownerCollaboratorData.forEach(item => {
+          if (item.entities?.find(s => s.entity === d && item.optionValue !== selectedCollaborator)) {
+            if (!newTempArray.find(s => s.optionValue === item.optionValue)) {
+              newTempArray.push(item)
+            }
+          }
+        })
+      })
+      setOwnerDataSource(newTempArray)
+    }
+    else {
+      setOwnerDataSource(
+        getOwnerDropdownDataSource(
+          selectedCollaborator,
+          ownerCollaboratorCommonDataSource
+        )
+      );
+    }
   };
 
   const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId, selectedEntity) => {
-    setCollaboratorDataSource(
-      getCollaboratorDropdownDataSource(
+    if (selectedEntity?.length > 0) {
+
+      let newTempArray = []
+
+      const ownerCollaboratorData = getCollaboratorDropdownDataSource(
         selectedOwnerId,
         ownerCollaboratorCommonDataSource
-      )
-    );
+      );
 
-    if(selectedEntity && collaboratorDataSource){
-     
-      let newTempArray = []
-     
-      selectedEntity.map(d=>{
+      selectedEntity.forEach(d => {
+        ownerCollaboratorData.forEach(item => {
+          if (item.entities?.find(s => s.entity === d && item.optionValue !== selectedOwnerId)) {
+            if (!newTempArray.find(s => s.optionValue === item.optionValue)) {
+              newTempArray.push(item)
+            }
+          }
+        })
+      })
+
+      setCollaboratorDataSource(newTempArray)
+    }
+    else {
+      setCollaboratorDataSource(
         getCollaboratorDropdownDataSource(
           selectedOwnerId,
           ownerCollaboratorCommonDataSource
-        ).map(item=>{
-          if(item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId){
-            newTempArray.push(item)
-          }
-        })
-        setCollaboratorDataSource(newTempArray)
-        // setCollaboratorDataSource(
-        //   getCollaboratorDropdownDataSource(
-        //   selectedOwnerId,
-        //   ownerCollaboratorCommonDataSource
-        // ).filter(item => item.entities[0]?.entity == d && item.optionValue!= selectedOwnerId)) 
-        
-        
-      })
+        )
+      );
     }
-  };
+  }
   //  Owner, Collaborator Code - End
 
   const onReportsToDropdownOpen = (selectedAccount) => {
@@ -175,7 +199,7 @@ export default function ManageContact(props) {
   const initializeAccountDropdown = (values, accountSource) => {
     if (values && values.hasOwnProperty("accountName")) {
       const getNewAddedAccount = accountSource.find(
-        (d) => d.optionValue === accountId
+        (d) => d?.optionValue === accountId
       );
       if (getNewAddedAccount) {
         values["accountName"] = getNewAddedAccount.optionValue;
@@ -186,20 +210,50 @@ export default function ManageContact(props) {
     return values;
   };
 
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
+  const isFieldNotTouched = (contactData, values) => {
+    return Object.values(
+      simplifyValues(
+        contactData.initialValues,
+        contactData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, contactData.fields)
+      ).toString()
+  }
+
   return (
     <>
       <Dialog
-        disableBackdropClick={true}
         maxWidth="md"
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            setShowConfirmDialog(true)
+          }
+        }}
         open={open}
         fullWidth
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
-          onClose={onClose}
+          onClose={() => setShowConfirmDialog(true)}
           title={
             isNew
               ? "Add Contact"
@@ -227,6 +281,7 @@ export default function ManageContact(props) {
                 <>
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
+                      <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
@@ -269,7 +324,7 @@ export default function ManageContact(props) {
                                             const checkOwnerAddedInCollaborator =
                                               values["collaborator"].find(
                                                 (d) =>
-                                                  d.optionValue ===
+                                                  d?.optionValue ===
                                                   user?.user?._id
                                               );
                                             if (
@@ -288,7 +343,7 @@ export default function ManageContact(props) {
                                                 ...values["collaborator"],
                                                 newCollaboratorDataSource.find(
                                                   (d) =>
-                                                    d.optionValue ===
+                                                    d?.optionValue ===
                                                     user?.user?._id
                                                 ).optionValue,
                                               ]);
@@ -304,7 +359,7 @@ export default function ManageContact(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onOwnerDropdownOpen(
-                                            values.collaborator
+                                            values.collaborator, values.entity ? values.entity : []
                                           )
                                         }
                                       />
@@ -338,7 +393,7 @@ export default function ManageContact(props) {
                                         onOpen={() =>
                                           !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
-                                            values.owner, values.entity ? values.entity : "" 
+                                            values.owner, values.entity ? values.entity : []
                                           )
                                         }
                                       />
@@ -417,7 +472,7 @@ export default function ManageContact(props) {
                                                   size="small"
                                                   disabled={fromProject || (!isNew && field.disableOnEdit)}
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit)) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -457,6 +512,32 @@ export default function ManageContact(props) {
                                             values.accountName
                                           )
                                         }
+                                      />
+                                    ) : field.fieldName === "entity" ? (
+                                      <FormTypes
+                                        multiple
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+
+                                        options={field.option}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onChange={(e, value) => {
+
+                                          setFieldValue(
+                                            field.fieldName,
+                                            value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                          );
+
+                                          setFieldValue("owner", "");
+                                          setFieldValue("collaborator", []);
+                                        }}
                                       />
                                     ) : (
                                       <FormTypes
@@ -499,7 +580,10 @@ export default function ManageContact(props) {
                   </CustomDialogContent>
                   <CustomDialogFooter>
                     <Button
-                      onClick={onClose}
+                      onClick={() => {
+                        if (isFieldNotTouched(contactData, values)) onClose()
+                        else setShowConfirmDialog(true)
+                      }}
                       variant="outlined"
                       color="primary"
                       size="small"
@@ -514,36 +598,32 @@ export default function ManageContact(props) {
                       disabled={
                         loading ||
                         uploadingImageOrFileProgress > 0 ||
-                        Object.values(
-                          simplifyValues(
-                            contactData.initialValues,
-                            contactData.fields
-                          )
-                        ).toString() ===
-                        Object.values(
-                          simplifyValues(values, contactData.fields)
-                        ).toString()
+                        isFieldNotTouched(contactData, values)
                       }
                       onClick={(e) => {
                         e.preventDefault();
-                        const err = Object.keys(errors);
-                        if (err.length) {
-                          const input = document.querySelector(
-                            `input[name=${err[0]}]`,
-                          );
-
-                          input.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'start',
-                          });
-                        }
+                        handleScroll(errors)
                         submitForm();
                       }}
                     >
                       Save
                     </Button>
                   </CustomDialogFooter>
+                  {
+                    showConfirmDialog ?
+                      <ConfirmCancelDialog
+                        open={showConfirmDialog}
+                        onSave={() => {
+                          setShowConfirmDialog(false)
+                          handleScroll(errors)
+                          submitForm();
+                        }}
+                        onClose={() => {
+                          setShowConfirmDialog(false)
+                          onClose()
+                        }}
+                      /> : null
+                  }
                 </>
               )}
             </Formik>

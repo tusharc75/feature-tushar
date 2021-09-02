@@ -1,154 +1,66 @@
-import { Fragment, useState, useCallback, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  TableHead,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Container
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import { useState, useCallback, useEffect } from 'react';
+import { Box, Grid, Paper, Container } from '@material-ui/core';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { startCase } from 'lodash';
-import Chart from 'react-chartjs-2';
 import moment from 'moment';
-
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
-import { entity, marketSegment } from '../../constants/helpers';
-import OpportunitiesDashboard from './OpportunitiesDashboard';
-import ConvertedLeads from './ConvertedLeads';
+import { entity, marketSegment, customerAccount } from '../../constants/helpers';
+import OpportunityDashboards from './OpportunityDashboards';
+import Filters from './Filters';
+import styles from './dashboard.module.scss';
 
+import TopDashboard from './TopDasboard';
+import Top2Dashboard from './Top2Dashboard';
+import OpportunitiesDashboard from './OpportunitiesDashboard';
+import OpportunityTrends from './OpportunityTrends';
 
 const Dashboard = () => {
-  const [regionSales, setRegionSales] = useState([]);
+  const [currency, setCurrency] = useState('');
+  const [filterCurrency, setFilterCurrency] = useState('');
+
   const [entities, setEntities] = useState([]);
+  const [salesReps, setSalesReps] = useState([]);
+  const [customerAccounts, setCustomerAccounts] = useState([]);
   const [productCategory, setProductCategory] = useState([]);
   const [marketSegments, setMarketSegments] = useState([]);
   const [subMarketSegments, setSubMarketSegments] = useState([]);
-  const [salesData, setSalesData] = useState({
-    labels: [],
-    datasets: []
-  });
+  const [status, setStatus] = useState('open');
+
   const [salesFilter, setSalesFilter] = useState({
-    allEntity: true,
-    byMonth: false,
     entity: {},
     marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
     subMarketSegment: {},
     productCategory: {},
     between: {
-      from: new Date(moment().subtract(3, 'months').calendar()),
+      from: new Date(moment().subtract(1, 'year').calendar()),
       to: new Date()
     }
   });
 
-  const fetchSalesData = useCallback(() => {
-    let params = {
-      allEntity: salesFilter.allEntity ? 1 : 0,
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
-      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
-      productCategory: salesFilter.productCategory ? salesFilter.productCategory['id'] : '',
-      byMonth: salesFilter.byMonth ? 1 : 0,
-      between: JSON.stringify({
-        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
-        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
-      })
-    };
+  const getExchangeRates = async (date, amount) => {
+    if (filterCurrency && filterCurrency !== currency) {
+      try {
+        const host = 'api.frankfurter.app';
+        const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
+        const data = await res.json();
 
-    let url = '?';
-    for (const k of Object.keys(params)) {
-
-      if (params[k]) {
-        if (k === "between" && salesFilter.between.from && salesFilter.between.to) {
-          url = `${url}${k}=${params[k]}&`;
-        }
-        if (k !== "between") {
-          url = `${url}${k}=${params[k]}&`;
-        }
-  
+        return data;
+      } catch (error) {
+        console.log(error);
       }
-
-
     }
-
-    axiosInstance()
-      .get(`dashboard/sales${url}`)
-      .then(({ data: { data } }) => {
-        const saleData = []
-        const labels = [];
-        const budget = []
-
-        for (let d of data) {
-          saleData.push(d.totalSell);
-          labels.push(moment(d.date).format('MMM/YY'));
-          budget.push(d.budget)
-        }
-
-        setSalesData({
-          labels,
-          datasets: [
-             {
-              type: 'line',
-              label: 'Budget',
-              borderColor: 'rgb(54, 162, 235)',
-              borderWidth: 2,
-              fill: false,
-              data: budget
-            },
-            {
-              type: 'line',
-              label: 'Total booked value',
-              borderColor: 'rgb(54, 162, 235, 0.1)',
-              backgroundColor: 'rgb(255, 99, 132, 0.8)',
-              borderWidth: 2,
-              fill: true,
-              data: saleData
-            },
-           
-          ]
-        });
-      })
-      .catch((err) => {});
-
-    return () => {
-      setSalesData({
-        labels: [],
-        datasets: []
-        })
-      }
-  }, [salesFilter]);
-
-  const fetchRegionalSalesData = useCallback(() => {
-    axiosInstance()
-      .get('dashboard/regionalsales')
-      .then(({ data: { data } }) => {
-        data = data.sort((a, b) => b.totalSell - a.totalSell);
-        setRegionSales(data.map((d) => ({ region: d.region, totalBookedValue: d.totalSell })));
-      })
-      .catch((err) => {});
-  }, []);
+  };
 
   useEffect(() => {
-    fetchSalesData();
-  }, [fetchSalesData]);
-
-  useEffect(() => {
-    fetchRegionalSalesData();
     fetchEntities();
     fetchMarketSegment();
     fetchProductCategory();
+    fetchSalesReps();
+    fetchCustomerAccount();
   }, []);
 
   const fetchEntities = () => {
@@ -157,7 +69,7 @@ const Dashboard = () => {
       .then(({ data: { data } }) => {
         setEntities(data.map((d) => ({ id: d._id, name: d.entityName })));
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchProductCategory = () => {
@@ -166,7 +78,7 @@ const Dashboard = () => {
       .then(({ data: { data } }) => {
         setProductCategory(data.map((d) => ({ id: d._id, name: d.name })));
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchMarketSegment = () => {
@@ -180,7 +92,32 @@ const Dashboard = () => {
         }));
         setMarketSegments(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
+  };
+
+  const fetchSalesReps = () => {
+    axiosInstance()
+      .get(`/user?limit=0`)
+      .then(({ data: { data } }) => {
+        data = data.map((d) => ({
+          id: d._id,
+          name: d.concatedName
+        }));
+        setSalesReps(data);
+      })
+      .catch((err) => { });
+  };
+  const fetchCustomerAccount = () => {
+    axiosInstance()
+      .get(`${customerAccount.accountApi}?limit=0`)
+      .then(({ data: { data } }) => {
+        data = data.map((d) => ({
+          id: d._id,
+          name: d.accountName
+        }));
+        setCustomerAccounts(data);
+      })
+      .catch((err) => { });
   };
 
   return (
@@ -191,186 +128,53 @@ const Dashboard = () => {
         </Grid>
         <div className="detail-container">
           <Paper>
-            <Container maxWidth="lg">
-              <Box py={2}>
-                <Grid container spacing={2}>
-                  <Grid item sm={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={salesFilter.allEntity}
-                          onChange={(e) => setSalesFilter({ ...salesFilter, allEntity: e.target.checked })}
-                          color="primary"
-                        />
-                      }
-                      label="All Entity"
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={salesFilter.byMonth}
-                          onChange={(e) => setSalesFilter({ ...salesFilter, byMonth: e.target.checked })}
-                          color="primary"
-                        />
-                      }
-                      label="By Month"
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <Autocomplete
-                      size="small"
-                      disabled={salesFilter.allEntity}
-                      fullWidth
-                      options={entities}
-                      autoHighlight
-                      value={salesFilter.entity}
-                      getOptionLabel={(option) => option.name || ''}
-                      getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                      onChange={(_, val) => {
-                        setSalesFilter({ ...salesFilter, entity: val });
-                      }}
-                      renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <Autocomplete
-                      size="small"
-                      fullWidth
-                      options={marketSegments}
-                      autoHighlight
-                      value={salesFilter.marketSegment}
-                      getOptionLabel={(option) => option.name || ''}
-                      getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                      onChange={(_, val) => {
-                        setSalesFilter({ ...salesFilter, marketSegment: val });
-                        if (val) {
-                          setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
-                        } else {
-                          setSubMarketSegments([]);
-                        }
-                      }}
-                      renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
-                    />
-                  </Grid>
-                  {salesFilter.marketSegment && (
-                    <Grid item sm={6}>
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={subMarketSegments}
-                        autoHighlight
-                        value={salesFilter.subMarketSegment}
-                        getOptionLabel={(option) => option.name || ''}
-                        getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                        onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
-                        renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
-                      />
-                    </Grid>
-                  )}
-                  <Grid item sm={6}>
-                    <Autocomplete
-                      size="small"
-                      fullWidth
-                      options={productCategory}
-                      autoHighlight
-                      value={salesFilter.productCategory}
-                      getOptionLabel={(option) => option.name || ''}
-                      getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                      onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
-                      renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
-                    />
-                  </Grid>
-                </Grid>
+            <div>
+              <Filters
+                currency={filterCurrency}
+                setCurrency={setFilterCurrency}
+                moment={moment}
+                entities={entities}
+                salesReps={salesReps}
+                customerAccounts={customerAccounts}
+                marketSegments={marketSegments}
+                subMarketSegments={subMarketSegments}
+                productCategory={productCategory}
+                setSubMarketSegment={setSubMarketSegments}
+                salesFilter={salesFilter}
+                setSalesFilter={setSalesFilter}
+                status={status}
+                setStatus={setStatus}
+              />
+              <Box className={styles.dashboard_container}>
+                <TopDashboard
+                  filterCurrency={filterCurrency}
+                  salesFilter={salesFilter}
+                  currency={currency}
+                  setCurrency={setCurrency}
+                  moment={moment}
+                  getExchangeRates={getExchangeRates}
+                />
 
-                <Grid container spacing={2} className="mt-2">
-                  <Grid item xs={6}>
-                    <DatePicker
-                      inputVariant="outlined"
-                      fullWidth
-                      size="small"
-                      disableFuture
-                      openTo="year"
-                      format="MM/dd/yyyy"
-                      maxDate={salesFilter.between.from}
-                      label="From"
-                      views={['year', 'month', 'date']}
-                      value={salesFilter.between.from}
-                      onChange={(date) => {
-                        setSalesFilter({ ...salesFilter, between: { from: date, to: salesFilter.between.to } });
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <DatePicker
-                      inputVariant="outlined"
-                      fullWidth
-                      size="small"
-                      minDate={salesFilter.between.from}
-                      disableFuture
-                      openTo="year"
-                      format="MM/dd/yyyy"
-                      label="To"
-                      views={['year', 'month', 'date']}
-                      value={salesFilter.between.to}
-                      onChange={(date) => {
-                        setSalesFilter({ ...salesFilter, between: { to: date, from: salesFilter.between.from } });
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item sm={8}>
-                    <Box textAlign="center">
-                      <Typography variant="h5">Total booked value in USD</Typography>
-                    </Box>
+                <Top2Dashboard salesFilter={salesFilter} filterCurrency={filterCurrency} moment={moment} currency={currency} />
 
-                    <Chart type="bar" data={salesData} />
-                  </Grid>
-                  <Grid item sm={4}>
-                    <Box mt={2}>
-                      <TableContainer style={{ maxHeight: 450 }} component={Paper}>
-                        <Table stickyHeader size="small">
-                          <TableHead>
-                            <TableRow>
-                              {regionSales.length > 0 &&
-                                Object.keys(regionSales[0]).map((label, i) => (
-                                  <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                    {startCase(label)}
-                                  </TableCell>
-                                ))}
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {regionSales.length > 0 &&
-                              regionSales.map((data) => (
-                                <TableRow key={data.region}>
-                                  {Object.keys(data).map((label, i) => (
-                                    <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                      {data[label]}
-                                    </TableCell>
-                                  ))}
-                                </TableRow>
-                              ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Box>
-                  </Grid>
-                </Grid>
+                <OpportunityDashboards
+                  moment={moment}
+                  getExchangeRates={getExchangeRates}
+                  filterCurrency={filterCurrency}
+                  currency={currency}
+                  salesFilter={salesFilter}
+                  status={status}
+                />
+
+                <OpportunityTrends moment={moment} salesFilter={salesFilter} />
 
                 <Box my={2}>
                   <OpportunitiesDashboard />
                 </Box>
               </Box>
-            </Container>
+            </div>
             <Box p={2} display="flex" alignItems="center" flexDirection="column">
               <Box my={2} p={2} width="100%" maxWidth="800px" textAlign="center"></Box>
-
-              <Box my={2}>
-                <ConvertedLeads Chart={Chart} />
-              </Box>
             </Box>
           </Paper>
         </div>

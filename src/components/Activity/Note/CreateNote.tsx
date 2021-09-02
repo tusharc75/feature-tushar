@@ -1,46 +1,36 @@
-import React, { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
-import { GetNote, CreateNewNote, UpdateNote, GetNoteDetail } from "../../../axios/activity";
-import RichTextEditor from 'react-rte';
+import { CreateNewNote, UpdateNote, GetNoteDetail } from "../../../axios/activity";
 import axiosInstance from '../../../axios/axiosInstance';
-import { BsFillImageFill } from 'react-icons/bs'
-import { makeStyles } from '@material-ui/core/styles';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
 import PropTypes from 'prop-types'
 import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import FormTypes from "../../Helpers/FormTypes";
-import { fileURLToPath } from "url";
 import { IconButton, Paper } from "@material-ui/core";
-import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
+import { csvIcon, docIcon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import ImageAttachments from "../Email/ImageAttachments";
 import ImagePreview from "../Email/ImagePreview";
 import { displayDate } from "../../../constants/helpers"
+import TinyMce from "../../../components/TinyMCE"
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const NoteSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter note title"),
 });
 
-
-const useStyles = makeStyles((theme) => ({
-    textEditor: {
-        fontFamily: "inherit",
-        minHeight: 250
-    }
-}));
 const fileIcons = [
     {
         extensions: [".txt", ".rtf"],
@@ -74,10 +64,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     const [fileImageAttachments, setFileImageAttachments] = useState([])
     const [imageAttachments, setImageAttachments] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
-    const [isUploading, setUploading] = useState(false);
+    const [, setUploading] = useState(false);
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         fetchNoteDetail();
@@ -91,7 +82,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         if (noteId) {
             await GetNoteDetail(noteId)
                 .then(({ data }) => {
-                    data.description = RichTextEditor.createValueFromString(data.description, 'html')
                     if (data.fileUrl && data.fileUrl.length) {
                         let otherAttachments = []
                         let filteredAttachments = data.fileUrl.filter(url => {
@@ -107,11 +97,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     }
                     setInitialValues(data)
                 })
-                .catch((err) => {
+                .catch(() => {
                 });
         }
         else {
-            setInitialValues({ name: "", description: RichTextEditor.createEmptyValue(), fileUrl: '' })
+            setInitialValues({ name: "", description: "", fileUrl: '' })
         }
     };
 
@@ -119,22 +109,23 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         const description = values.description.toString('html');
         values.relatedTo = relatedTo;
         values.description = description;
-        values.fileUrl = values["fileUrl"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
+        values.fileUrl = (otherAttachments.length || fileImageAttachments.length) ?
+            [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
         if (noteId) {
             UpdateNote(noteId, values)
-                .then(({ data }) => {
+                .then(() => {
                     setInitialValues(null)
                     handleClose()
                 })
-                .catch((err) => {
+                .catch(() => {
                 });
         }
         else {
             CreateNewNote(values)
-                .then(({ data }) => {
+                .then(() => {
                     handleClose()
                 })
-                .catch((err) => {
+                .catch(() => {
                 });
         }
     };
@@ -246,13 +237,17 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         </Grid >
     )
 
-    const classes = useStyles();
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
             <>
-                <CustomDialogHeader onClose={handleDialogClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+                <CustomDialogHeader 
+                    onClose={() => {
+                        setShowConfirmDialog(true)
+                    }}
+                    title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate >
+                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                         <MuiPickersUtilsProvider utils={MomentUtils}>
                             <Box padding={1}>
                                 <Grid container spacing={3}>
@@ -270,29 +265,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             helperText={touched["name"] && errors["name"]}
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
-                                        <Box margin={0.5} />
-                                        <Grid item xs={10} >
-                                            <FormTypes
-                                                label="File"
-                                                name="fileUrl"
-                                                required={false}
-                                                type="fileUpload"
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                size="small"
-                                                setFieldValue={(fname, file) => {
-                                                    setFieldValue("fileUrl", file)
-                                                    onUploadFile(file)
-                                                }}
-                                                usePublicUrlforFileUpload={true}
-                                                doNotShowUploadedFile={true}
-                                                imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                }}
-                                                showErrorMessage={false}
-                                            />
-                                        </Grid>
                                         {renderFileThumbnails}
                                         <ImageAttachments
                                             imageAttachments={fileImageAttachments}
@@ -315,41 +287,23 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             isRenderedFrom={true}
                                         />
                                         <Box >
-                                            <RichTextEditor
-                                                className={classes.textEditor}
-                                                value={values["description"]}
-                                                onChange={(value) => setFieldValue("description", value)}
-                                                customControls={[
-                                                    <button type="button"
-                                                        className={emailStyles.emailRichTextEditorCustomControls}
-                                                    >
-                                                        <label htmlFor="avatar">
-                                                            <IconButton
-                                                                title="Add picture"
-                                                                size="small"
-                                                                aria-label="upload picture"
-                                                                component="span">
-                                                                <BsFillImageFill size={18} color="black" />
-                                                                <input
-                                                                    disabled={isUploading}
-                                                                    id="avatar"
-                                                                    name="avatar"
-                                                                    onChange={handleUploadImage}
-                                                                    accept="image/x-png,image/gif,image/jpeg"
-                                                                    style={{
-                                                                        opacity: "0",
-                                                                        position: "absolute",
-                                                                        zIndex: -1
-                                                                    }}
-                                                                    onClick={(e: any) => (e.target.value = null)}
-                                                                    type="file"
-                                                                />
-                                                            </IconButton>
-                                                        </label>
-                                                    </button>
-                                                ]}
+                                            <TinyMce
+                                                onChange={(value) => {
+                                                    setFieldValue("description", value)
+                                                }}
+                                                initialValue={initialValues?.description}
+                                                imageOrFileUploadCompletePercentage={(
+                                                    completePercentage
+                                                ) => {
+                                                    setUploadingImageOrFileProgress(
+                                                        completePercentage
+                                                    );
+                                                }}
+                                                // doNotShowUploadFile={true : false}
+                                                onUploadFile={onUploadFile}
+                                                onUploadImage={handleUploadImage}
+                                                usePublicUrlforFileUpload={true}
                                             />
-
                                         </Box>
 
                                         {noteId && <Fragment>
@@ -374,7 +328,10 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button size="small" type="button" color="primary" onClick={handleDialogClose}>Cancel</Button>
+                    <Button size="small" type="button" color="primary"
+                        onClick={() => {
+                            setShowConfirmDialog(true)
+                        }}>Cancel</Button>
                     <Button size="small" type="button" color="primary" variant="contained"
                         onClick={() => {
 
@@ -387,6 +344,25 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                         }}
                         disabled={uploadingImageOrFileProgress > 0}>Save</Button>
                 </CustomDialogFooter>
+                {
+                    showConfirmDialog ?
+                        <ConfirmCancelDialog
+                            open={showConfirmDialog}
+                            onSave={() => {
+                                setShowConfirmDialog(false)
+                                if (Object.keys(errors).length) {
+                                    Object.keys(errors).map(k => {
+                                        setFieldTouched(k, true)
+                                    })
+                                }
+                                else submitForm()
+                            }}
+                            onClose={() => {
+                                setShowConfirmDialog(false)
+                                handleClose()
+                            }}
+                        /> : null
+                }
                 {
                     open ?
                         <ImagePreview

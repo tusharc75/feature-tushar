@@ -20,9 +20,11 @@ import {
   yupSchema,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
+  isFieldNotTouched
 } from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 interface InitialData {
   fields: any[];
@@ -51,6 +53,7 @@ export default function ManageUserDialog({
   const history = useHistory();
   const [formsData, setFormsData] = useState([]);
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
@@ -96,7 +99,7 @@ export default function ManageUserDialog({
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
-              (d) => d.optionValue !== userId
+              (d) => d?.optionValue !== userId
             );
           setReportsToDataSource(currentContactRemovedDataSource);
         }
@@ -153,24 +156,42 @@ export default function ManageUserDialog({
         });
     }
   };
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
 
   return (
     <Dialog
       open={open}
-      onClose={close}
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
     >
       <CustomDialogHeader
         title={
           isNew
             ? "Create New User"
             : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
-                .filter((f) => f)
-                .join(" ")}`
+              .filter((f) => f)
+              .join(" ")}`
         }
-        onClose={close}
+        onClose={() => setShowConfirmDialog(true)}
       />
 
       {loading || !initialData.fields.length ? (
@@ -214,6 +235,8 @@ export default function ManageUserDialog({
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+
                   {formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
@@ -238,6 +261,14 @@ export default function ManageUserDialog({
                                     type={field.type}
                                     options={reportsToDataSource}
                                     setFieldValue={setFieldValue}
+                                    onChange={(e, val) => {
+                                      setFieldValue(
+                                        field.fieldName,
+                                        val && val.optionValue
+                                          ? val.optionValue
+                                          : ""
+                                      );
+                                    }}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
@@ -264,10 +295,10 @@ export default function ManageUserDialog({
                                         (s) => s === field.type
                                       )
                                         ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(
-                                              completePercentage
-                                            );
-                                          }
+                                          setUploadingImageOrFileProgress(
+                                            completePercentage
+                                          );
+                                        }
                                         : null
                                     }
                                   />
@@ -286,7 +317,10 @@ export default function ManageUserDialog({
                   color="primary"
                   size="small"
                   disabled={isSubmitting || loading}
-                  onClick={close}
+                  onClick={() => {
+                    if (isFieldNotTouched(initialData, values)) close()
+                    else setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -295,19 +329,9 @@ export default function ManageUserDialog({
                   color="primary"
                   size="small"
                   onClick={() => {
-                    const err = Object.keys(errors);
-                    if (err.length) {
-                      const input = document.querySelector(
-                        `input[name=${err[0]}]`,
-                      );
-
-                      input.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'start',
-                      });
-                    }
-                    submitForm()}}
+                    handleScroll(errors)
+                    submitForm()
+                  }}
                   disabled={
                     isSubmitting || loading || uploadingImageOrFileProgress > 0
                   }
@@ -315,6 +339,21 @@ export default function ManageUserDialog({
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      handleScroll(errors)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      close()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>

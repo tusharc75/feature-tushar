@@ -1,12 +1,8 @@
-import React, { useState, useEffect, Fragment, useContext, useReducer } from "react";
+import { useState, useEffect, Fragment, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from 'react-icons/gi';
@@ -15,15 +11,17 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import CreateProductCategory from "./CreateProductCategory";
 import routes from "../../components/Helpers/Routes";
-import { ExpandMore } from "@material-ui/icons";
-import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
+import DeleteIcon from "@material-ui/icons/Delete";
 import {
     gridLoadingTimeout,
     gridPageSizes,
     isObjectEmpty
 } from "../../constants/helpers";
 import {
+    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -31,7 +29,8 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
-
+import { Box, Menu, MenuItem } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -127,21 +126,20 @@ const ProductCategory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
-        state: { permissions, user },
+        state: { permissions, user, selectedEntity },
     }: any = useData();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
-        isCreate: false,
-        isUpdate: false,
-        isRead: false,
-        isDelete: false,
+        isCreate: permissions.productCategory?.isCreate,
+        isUpdate: permissions.productCategory?.isUpdate,
+        isRead: permissions.productCategory?.isRead,
+        isDelete: permissions.productCategory?.isDelete
     });
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState(false);
     const [productCategoryId, setProductCategoryId] = useState(null);
-    const [anchorEl, setAnchorEl] = useState(null);
 
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -154,18 +152,20 @@ const ProductCategory = () => {
     const columnState = JSON.parse(localStorage.getItem("productCategoryPage"));
     const columns = [
         { field: "name", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "parentCategory", headerName: "Parent Category", show: true, disabled: true, cellRenderer: "parentCategoryRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
+    const [anchorEl, setAnchorEl] = useState(null);
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
     useEffect(() => {
@@ -176,7 +176,7 @@ const ProductCategory = () => {
 
     useEffect(() => {
         fetchProductCategory()
-    }, [page, limit, filters, sorting, search])
+    }, [page, limit, filters, sorting, search, selectedEntity])
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
@@ -189,7 +189,7 @@ const ProductCategory = () => {
     </span>
 
     const ActionsRenderer = params => <Fragment>
-        {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ?
+        {productCategoryPermissions.isDelete && (params?.data?.createdById == user?.user?._id) ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -209,6 +209,7 @@ const ProductCategory = () => {
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
+        parentCategoryRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
@@ -229,6 +230,9 @@ const ProductCategory = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -265,12 +269,13 @@ const ProductCategory = () => {
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, ...restProperties } = u;
+                const { createdBy, updatedBy, parentCategory, ...restProperties } = u;
 
                 let res = {
                     ...restProperties,
                     id: u._id,
 
+                    parentCategory: u.parentCategory?.optionLabel,
                     createdBy: u.createdBy?.user?.concatedName,
                     createdById: u.createdBy?.user?._id,
                     createdByDate: u.createdBy?.date,
@@ -306,12 +311,14 @@ const ProductCategory = () => {
             fetchProductCategory();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            // setSelectedCategory([])
-            setAnchorEl(null)
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
     }
+
+    const handleSearch = (e) => {
+        dispatch({ type: "search", search: e.target.value });
+    };
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -319,10 +326,6 @@ const ProductCategory = () => {
 
     const closeActions = () => {
         setAnchorEl(null);
-    };
-
-    const handleSearch = (e) => {
-        dispatch({ type: "search", search: e.target.value });
     };
 
     return (<Fragment>
@@ -383,16 +386,23 @@ const ProductCategory = () => {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowDeleteConfirmBox(true)
+                                }}>Delete</MenuItem>
                             </Menu>
                         </Box>
                     </Grid>
                 </Grid>
             </div>
 
-            <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
-                loading={loading} renderedFrom="productCategoryPage"/>
+            <CustomAgGrid columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
+                loading={loading} renderedFrom="productCategoryPage" />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
@@ -405,6 +415,7 @@ const ProductCategory = () => {
 
             {open &&
                 <CreateProductCategory
+                    isUpdateDisabled={false}
                     productCategoryId={productCategoryId}
                     onClose={() => setOpen(false)}
                     onSuccess={() => {
@@ -414,7 +425,7 @@ const ProductCategory = () => {
                 />
             }
         </CustomContainer>
-    </Fragment>
+    </Fragment >
     );
 }
 

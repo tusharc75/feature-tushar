@@ -84,6 +84,11 @@ const CreateProduct = (props) => {
     values.productCategory = values.productCategory.optionValue;
     values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue;
     values.priceTemplate = values.priceTemplate && values.priceTemplate.optionValue && values.priceTemplate.optionValue;
+    const entity = []
+    values.entity && values.entity.forEach((ele) => {
+      entity.push(ele.optionValue);
+    })
+    values.entity = entity;
     delete values.fields;
 
     setInitialData({
@@ -333,6 +338,7 @@ const CreateProduct = (props) => {
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
+                                      style={{ background: field.isUneditable ? "#1e768221" : "" }}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -368,8 +374,9 @@ const CreateProduct = (props) => {
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
                                       <Box display="flex">
                                         <Box flexGrow={1}>
-                                            <FormTypes
+                                          <FormTypes
                                             {...field}
+                                            style={{ background: field.isUneditable ? "#1e768221" : "" }}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
@@ -404,8 +411,8 @@ const CreateProduct = (props) => {
                                             }
                                             size="small"
                                             disabled={stage === "product" ?
-                                              ["productCategory", "productTemplate"].includes(field.fieldName) ? true : false
-                                              : ["productCategory", "productTemplate", "priceTemplate"].includes(field.fieldName) ? true : false}
+                                              ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                              : ["productCategory", "productTemplate", "priceTemplate", "entity"].includes(field.fieldName) ? true : false}
                                             imageOrFileUploadCompletePercentage={
                                               ["imageUpload", "fileUpload"].some((s) => s === field.type)
                                                 ? (completePercentage) => {

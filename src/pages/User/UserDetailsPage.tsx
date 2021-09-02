@@ -383,7 +383,7 @@ const UserDetailsPage = () => {
           setUnionRoleData(null);
           getRoleUnion();
           toastConfig.setToastConfig({
-            message: "Successfully unassigned role",
+            message: "Role unassigned successfully",
             type: "success",
             open: true,
           });
@@ -732,7 +732,6 @@ const UserDetailsPage = () => {
                       ) : (
                         <Box
                           style={{
-                            width: "100%",
                             height: "100%",
                             overflowY: "auto",
                           }}
@@ -973,9 +972,9 @@ const UserDetailsPage = () => {
           <div className="position-relative">
             {showActivity ?
               <Paper className="fixedRightPanel">
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span color="primary" className="activityHide" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
-                </a>}
+                </span>}
                 <Box className="detailHeader">
                   <h2 className="listingHeader single">Approval Process</h2>
                 </Box>
@@ -1030,9 +1029,9 @@ const UserDetailsPage = () => {
                 <QuickLinks quickLinks={quickLinks} />
               </Paper>
               :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              !isMobile && !isTablet && <span className="activityShow" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
-              </a>}
+              </span>}
           </div>
         </div>
       </Fragment>
@@ -1044,9 +1043,9 @@ const UserDetailsPage = () => {
           // onOk={handleDeleteUser}
           message={
             deleteUserRec
-              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
+              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
                 : ""
           }
           onClose={() => {

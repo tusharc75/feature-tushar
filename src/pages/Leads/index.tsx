@@ -3,7 +3,6 @@ import { Grid, Tooltip, IconButton } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import Layout from '../../components/Layout';
 import LeadsHeader from './LeadsHeader';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
@@ -89,7 +88,7 @@ const Leads = () => {
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
-        if (d.colId == item.field) {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -251,7 +250,7 @@ const Leads = () => {
 
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
-              isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d.optionValue === user?.user?._id),
+              isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
 
               convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
               relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,

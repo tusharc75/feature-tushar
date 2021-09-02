@@ -4,7 +4,6 @@ import {
   Button,
   Dialog,
   Grid,
-  Menu,
   MenuItem,
   Popper,
   Grow,
@@ -16,10 +15,8 @@ import { lowerCase, startCase } from "lodash";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { isMobile, isTablet } from "react-device-detect";
-
 import MyCalendar from "./MyCalendar";
 import { GetBoard } from "../../../axios/activity";
-import Layout from "../../../components/Layout";
 import CustomContainer from "../../../components/CustomContainer";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
@@ -44,7 +41,7 @@ const BigCalendar = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId, type: actType } = parsed;
-  const [type, setType] = useState(
+  const [type,] = useState(
     actType ? startCase(actType.toLocaleString()) : ""
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -72,7 +69,7 @@ const BigCalendar = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, []);
 
@@ -102,7 +99,7 @@ const BigCalendar = () => {
 
         setActivities(newData);
       })
-      .catch((err) => {});
+      .catch(() => { });
   }, [type, filter]);
 
   useEffect(() => {
@@ -170,8 +167,8 @@ const BigCalendar = () => {
                           item === "Event"
                             ? "#E65100"
                             : item === "Task"
-                            ? "#3949AB"
-                            : "#BF360C"
+                              ? "#3949AB"
+                              : "#BF360C"
                         }
                         borderRadius={50}
                       />

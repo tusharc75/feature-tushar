@@ -43,6 +43,7 @@ import ManageContactDialog from "../../Contact/ManageContact";
 import { isMobile, isTablet } from "react-device-detect";
 import routes from "../../../components/Helpers/Routes";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -89,6 +90,7 @@ export default function ManageQuoteDialog({
     initialValues: {},
   });
 
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
@@ -285,7 +287,7 @@ export default function ManageQuoteDialog({
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
       const getNewAddedMarketSegment = marketSegmentSource.find(
-        (d) => d.optionValue === newMarketSegmentId
+        (d) => d?.optionValue === newMarketSegmentId
       );
       if (getNewAddedMarketSegment) {
         values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
@@ -298,7 +300,7 @@ export default function ManageQuoteDialog({
   const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
       const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-        (d) => d.optionValue === newSubMarketSegmentId
+        (d) => d?.optionValue === newSubMarketSegmentId
       );
       if (getNewAddedSubMarketSegment) {
         values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
@@ -409,8 +411,16 @@ export default function ManageQuoteDialog({
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
           initialData["quoteName"] = opportunityName;
-          initialData["currency"] = currency;
-          initialData["estimatedAmount"] = estimatedAmount;
+          initialData["currency"] = currency || "";
+          initialData["estimatedAmount"] = estimatedAmount || "";
+        } else {
+          if (isNew) {
+            const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
+
+            if (selectedEntityDetails) {
+              initialData["currency"] = selectedEntityDetails.currency || "";
+            }
+          }
         }
 
         if (isClone) {
@@ -660,7 +670,7 @@ export default function ManageQuoteDialog({
         toastConfig.setToastConfig({
           open: true,
           type: "success",
-          message: "File downloaded Successfuly",
+          message: "File downloaded Successfully",
         });
 
         const file = new Blob([data], { type: "application/pdf" });
@@ -673,20 +683,52 @@ export default function ManageQuoteDialog({
       });
   }
 
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
+  const isFieldNotTouched = (entityData, values) => {
+    return Object.values(
+      simplifyValues(
+        entityData.initialValues,
+        entityData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, entityData.fields)
+      ).toString()
+  }
+
   return (
     <>
       <Dialog
         maxWidth="md"
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            setShowConfirmDialog(true)
+          }
+        }}
         open={open}
-        disableBackdropClick={true}
         fullWidth
         fullScreen={isMobile || isTablet}
       >
         <CustomDialogHeader
           title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
-          onClose={onClose}
+          onClose={(e, reason) => {
+            setShowConfirmDialog(true)
+          }}
         />
 
         {entityData.fields.length === 0 && (
@@ -714,6 +756,8 @@ export default function ManageQuoteDialog({
               <>
                 <CustomDialogContent>
                   <Form>
+                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+
                     {formsData &&
                       formsData.map((form, index1) => {
                         return form.name ? (
@@ -733,7 +777,7 @@ export default function ManageQuoteDialog({
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                         options={field.option}
                                         setFieldValue={setFieldValue}
                                         required={field.required}
@@ -781,7 +825,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={accountFieldDisable || (!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
                                             // setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -821,9 +865,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : accountFieldDisable || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -873,7 +918,7 @@ export default function ManageQuoteDialog({
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
                                             setFieldValue={setFieldValue}
-                                            disabled={contactId ? true : false || (!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -902,9 +947,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : (contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -954,7 +1000,7 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={opportunityDataSource}
-                                            disabled={isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
@@ -994,9 +1040,10 @@ export default function ManageQuoteDialog({
                                                       true
                                                     );
                                                   }}
+                                                  disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : isRenderedFromOpportunity || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1024,7 +1071,7 @@ export default function ManageQuoteDialog({
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
-                                            disabled={(!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -1098,7 +1145,7 @@ export default function ManageQuoteDialog({
                                             const checkOwnerAddedInCollaborator =
                                               values["collaborator"].find(
                                                 (d) =>
-                                                  d.optionValue ===
+                                                  d?.optionValue ===
                                                   user?.user?._id
                                               );
                                             if (
@@ -1108,7 +1155,7 @@ export default function ManageQuoteDialog({
                                                 ...values["collaborator"],
                                                 collaboratorData.find(
                                                   (d) =>
-                                                    d.optionValue ===
+                                                    d?.optionValue ===
                                                     user?.user?._id
                                                 ).optionValue,
                                               ]);
@@ -1132,7 +1179,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1156,7 +1203,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1175,10 +1222,10 @@ export default function ManageQuoteDialog({
                                             e.target.checked
                                           );
                                           if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue === userData?.optionValue)).map(d=>d.optionValue)
-                                              setFieldValue("collaborator", [
-                                                ...values["collaborator"]].concat(doaUserDataTemp)
-                                              );
+                                            let doaUserDataTemp = doaCollaboratorResources?.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d?.optionValue)
+                                            setFieldValue("collaborator", [
+                                              ...values["collaborator"]].concat(doaUserDataTemp)
+                                            );
                                           }
                                         }}
                                       />
@@ -1187,7 +1234,7 @@ export default function ManageQuoteDialog({
                                         {...field}
                                         // {...rest}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1220,7 +1267,7 @@ export default function ManageQuoteDialog({
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
-                                          disabled={(!isNew && field.disableOnEdit)}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1240,7 +1287,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={disableCurrency || (!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (disableCurrency || (!isNew && field.disableOnEdit)) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1273,7 +1320,7 @@ export default function ManageQuoteDialog({
                                         {...field}
                                         // {...rest}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         selectedCurrencyCode={values["currency"]}
                                         startAdornment={
                                           currencySymbol ? (
@@ -1308,7 +1355,7 @@ export default function ManageQuoteDialog({
                                         {...field}
                                         // {...rest}
                                         isNew={isNew}
-                                        disabled={(!isNew && field.disableOnEdit)}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1362,7 +1409,7 @@ export default function ManageQuoteDialog({
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
-                                            disabled={(!isNew && field.disableOnEdit)}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                             fields={entityData.fields}
                                             fieldData={field}
                                             errors={errors}
@@ -1404,9 +1451,10 @@ export default function ManageQuoteDialog({
                                               >
                                                 <IconButton
                                                   onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                  disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon color="primary" />
+                                                  <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -1445,7 +1493,7 @@ export default function ManageQuoteDialog({
                                             <FormTypes
                                               {...field}
                                               isNew={isNew}
-                                              disabled={(!isNew && field.disableOnEdit)}
+                                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                               fields={entityData.fields}
                                               fieldData={field}
                                               errors={errors}
@@ -1486,9 +1534,10 @@ export default function ManageQuoteDialog({
                                                     onClick={() => {
                                                       setShowAddMarketSegmentDialog(true);
                                                     }}
+                                                    disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -1510,7 +1559,7 @@ export default function ManageQuoteDialog({
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
-                                            disabled={(!isNew && field.disableOnEdit)}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -1547,7 +1596,7 @@ export default function ManageQuoteDialog({
                             <FormTypes
                               {...field}
                               isNew={isNew}
-                              disabled={(!isNew && field.disableOnEdit)}
+                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                               values={values}
                               errors={errors}
                               touched={touched}
@@ -1648,7 +1697,10 @@ export default function ManageQuoteDialog({
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={onClose}
+                    onClick={() => {
+                      if (isFieldNotTouched(entityData, values)) onClose()
+                      else setShowConfirmDialog(true)
+                    }}
                   >
                     Cancel
                   </Button>
@@ -1661,39 +1713,32 @@ export default function ManageQuoteDialog({
                     disabled={
                       loading ||
                       uploadingImageOrFileProgress > 0 ||
-                      Object.values(
-                        simplifyValues(
-                          entityData.initialValues,
-                          entityData.fields
-                        )
-                      ).toString() ===
-                      Object.values(
-                        simplifyValues(values, entityData.fields)
-                      ).toString()
+                      isFieldNotTouched(entityData, values)
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      const err = Object.keys({ ...errors, ...customError });
-                      if (err.length) {
-                        const input = document.querySelector(
-                          `input[name=${err[0]}]`,
-                        );
-
-                        input.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                          inline: 'start',
-                        });
-                      }
-                      // if (Object.keys(customError).length > 0) {
-                      //   return;
-                      // } else 
+                      handleScroll({ ...errors, ...customError })
                       submitForm();
                     }}
                   >
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
+                {
+                  showConfirmDialog ?
+                    <ConfirmCancelDialog
+                      open={showConfirmDialog}
+                      onSave={() => {
+                        setShowConfirmDialog(false)
+                        handleScroll({ ...errors, ...customError })
+                        submitForm();
+                      }}
+                      onClose={() => {
+                        setShowConfirmDialog(false)
+                        onClose()
+                      }}
+                    /> : null
+                }
               </>
             )}
           </Formik>
@@ -1740,7 +1785,7 @@ export default function ManageQuoteDialog({
                 setNewSubMarketSegmentId(null);
               } else {
                 //  If parent selected, consider that as a child
-                if (marketSegmentDataSource.some(d => d.optionValue === data.parentMarketSegment)) {
+                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
                   setSubMarketSegmentDataSource([
                     ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
                     {
@@ -1761,7 +1806,7 @@ export default function ManageQuoteDialog({
                   })
 
                   if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d.optionValue === data.parentMarketSegment);
+                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
 
                     initializeMarketSegmentDataSource.push({
                       optionValue: getMarketSegment.optionValue,

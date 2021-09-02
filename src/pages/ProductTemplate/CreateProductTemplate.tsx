@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams, useHistory } from "react-router-dom";
@@ -9,7 +8,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { camelCase } from "../../constants/helpers";
+import { camelCase, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -20,11 +19,13 @@ import TextField from '@material-ui/core/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { checkFormulaLoop } from "../../constants/formulaUtility";
+import { extractFields, checkFormulaLoop } from "../../constants/formulaUtility";
 import { useData } from "../../StateProvider/Provider";
 import HistoryDialog from "../../components/Activity/History"
 import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
+import { user } from "../../routes/User";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -48,9 +49,14 @@ const ProductTemplate = () => {
     const [productCategory, setProductCategory] = useState(null);
     const [showHistory, setShowHistory] = useState(false)
     //const [productUnit, setProductUnit] = useState(null);
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
+    const [productField, setProductField] = useState([]);
+    const [disableSaveButton, setDisableSaveButton] = useState(false)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     const {
-        state: { permissions },
+        state: { user, permissions },
     }: any = useData();
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
         isCreate: false,
@@ -59,8 +65,29 @@ const ProductTemplate = () => {
         isDelete: false,
     });
 
+    const onBackButtonEvent = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, null, window.location.pathname);
+        setShowConfirmDialog(true)
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
+
     useEffect(() => {
         fetchOneProductTemplate();
+        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+            const _productField: any = []
+            data.forEach((_f) => {
+                _productField.push(_f.fieldData)
+            })
+            setProductField([...extractFields(_productField)]);
+        })
     }, [id, isClone]);
 
     useEffect(() => {
@@ -71,7 +98,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", isStandard: false });
+            setInitialValues({ name: "", productCategory: "", entity: [], owner: user.user._id, collaborator: [], isStandard: false });
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -92,13 +119,20 @@ const ProductTemplate = () => {
                 if (isClone) {
                     data.name = ""
                 }
+                if (data.owner || data.owner === undefined) {
+                    data.owner = user.user._id
+                }
                 setInitialValues(data);
                 setSection(data.section);
+                if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
+                    setDisableSaveButton(true)
+                }
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
         }
         fetchProductCategory()
+        fetchUser()
         // axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
         //     let field = data.map((_f) => _f.fieldData)
         //     if (field.filter((data) => data.fieldName === "unit").length) {
@@ -118,6 +152,16 @@ const ProductTemplate = () => {
         });
     };
 
+    const fetchUser = () => {
+        axiosInstance().get(`/user`).then(({ data: { data } }) => {
+            setOwnerCollaboratorDataConst(data);
+            setOwnerCollaboratorData(data)
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    };
+
+
     const handleSave = (values) => {
         let data: any = {}
         data.name = values.name;
@@ -125,10 +169,16 @@ const ProductTemplate = () => {
         if (data.isStandard) {
             data.productCategory = null;
             data.unit = null;
+            data.entity = null;
+            data.owner = null;
+            data.collaborator = null;
         }
         else {
             data.productCategory = values.productCategory;
             data.unit = values.unit;
+            data.entity = values?.entity;
+            data.owner = values?.owner;
+            data.collaborator = values?.collaborator;
         }
         let fields: any = []
         let order = 0;
@@ -145,7 +195,7 @@ const ProductTemplate = () => {
             })
         })
         data.fields = fields;
-        const result = checkFormulaLoop(data.fields)
+        const result = checkFormulaLoop([...productField, ...data.fields])
         if (result.error) {
             toastConfig.setToastConfig({ open: true, type: "error", message: result.message });
             return
@@ -178,6 +228,9 @@ const ProductTemplate = () => {
         if (!values.isStandard) {
             if (!values.productCategory || values.productCategory === "") {
                 errors["productCategory"] = "Product category is required";
+            }
+            if (!values.owner || values.owner === "") {
+                errors["owner"] = "Owner is required";
             }
             // if (!values.unit || values.unit === "") {
             //     errors["unit"] = "Unit is required";
@@ -238,6 +291,7 @@ const ProductTemplate = () => {
                 <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
+                            <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                             <Box p={1} bgcolor="white">
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}  >
@@ -302,45 +356,115 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        {/* {!values["isStandard"] && <Autocomplete
-                                            options={productUnit}
-                                            getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-                                            getOptionSelected={(option: any, val) => option.optionLabel === val}
-                                            value={productUnit.filter((data) => data.optionLabel === values["unit"]).length
-                                                ? productUnit.filter((data) => data.optionLabel === values["unit"])[0]
-                                                : ""
-                                            }
-                                            onChange={(e, val) => setFieldValue("unit", val && val.optionLabel ? val.optionLabel : "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="unit"
-                                                    label="Unit"
-                                                    variant="outlined"
-                                                    error={touched["unit"] && Boolean(errors["unit"])}
-                                                    helperText={touched["unit"] && errors["unit"]}
-                                                    required={true}
-                                                    fullWidth
-                                                />
-                                            )}
-                                        />} */}
-                                    </Grid>
                                     <Grid item xs={12} sm={2} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
-                                                <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
+                                                <Button disabled={isUpdating || disableSaveButton} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                     Save{isUpdating && <CircularProgress size={24} />}
                                                 </Button>
                                             }
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/product-Template" })} >Close</Button>
+                                            <Button color="primary" variant="contained" size="small"
+                                                onClick={() =>
+                                                    setShowConfirmDialog(true)
+                                                }
+                                            >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={3}>
+                                        {<Autocomplete
+                                            multiple
+                                            options={user?.entity}
+                                            getOptionLabel={(option: any) => (option ? option?.entityName : "")}
+                                            value={user?.entity.filter((data) => values["entity"]?.some(d => d === data._id)).length
+                                                ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
+                                                : []}
+                                            onChange={(e, val) => {
+                                                setFieldValue("entity", val && val?.map(d => d._id))
+                                                val && val.length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="entity"
+                                                    label="Entity"
+                                                    variant="outlined"
+                                                    error={touched["entity"] && Boolean(errors["entity"])}
+                                                    helperText={touched["entity"] && errors["entity"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {<Autocomplete
+                                            getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                            value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
+                                                ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
+                                                : ""}
+                                            options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
+                                            onChange={(e, val) => {
+                                                setFieldValue("owner", val && val._id ? val._id : "");
+                                            }}
+                                            onOpen={() =>
+                                                values["entity"] && values["entity"].length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="owner"
+                                                    label="Owner"
+                                                    variant="outlined"
+                                                    error={touched["owner"] && Boolean(errors["owner"])}
+                                                    helperText={touched["owner"] && errors["owner"]}
+                                                    required={true}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {<Autocomplete
+                                            multiple
+                                            options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
+                                            getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                            value={ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id)).length
+                                                ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
+                                                : []}
+                                            onChange={(e, val) => {
+                                                setFieldValue("collaborator", val && val?.map(d => d._id))
+                                            }}
+                                            onOpen={() =>
+                                                values["entity"] && values["entity"].length !== 0 ?
+                                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                            }
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="collaborator"
+                                                    label="Collaborator"
+                                                    variant="outlined"
+                                                    error={touched["collaborator"] && Boolean(errors["collaborator"])}
+                                                    helperText={touched["collaborator"] && errors["collaborator"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                </Grid>
+
                             </Box>
                             <Box >
                                 <FormBuilder
@@ -353,6 +477,20 @@ const ProductTemplate = () => {
                                     module="product-template"
                                 />
                             </Box>
+                            {
+                                showConfirmDialog ?
+                                    <ConfirmCancelDialog
+                                        open={showConfirmDialog}
+                                        onSave={() => {
+                                            setShowConfirmDialog(false)
+                                            submitForm();
+                                        }}
+                                        onClose={() => {
+                                            setShowConfirmDialog(false)
+                                            history.push({ pathname: "/product-Template" })
+                                        }}
+                                    /> : null
+                            }
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

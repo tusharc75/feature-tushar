@@ -25,6 +25,8 @@ import FormTypes from "../../components/Helpers/FormTypes";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { simplifyValues } from "../../constants/helpers"
 
 interface InitialData {
   fields: any[];
@@ -60,6 +62,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -207,7 +210,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
       const getNewAddedMarketSegment = marketSegmentSource.find(
-        (d) => d.optionValue === newMarketSegmentId
+        (d) => d?.optionValue === newMarketSegmentId
       );
       if (getNewAddedMarketSegment) {
         values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
@@ -220,7 +223,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
       const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-        (d) => d.optionValue === newSubMarketSegmentId
+        (d) => d?.optionValue === newSubMarketSegmentId
       );
       if (getNewAddedSubMarketSegment) {
         values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
@@ -234,15 +237,32 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
     setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
   }
 
+  const isFieldNotTouched = (initialData, values) => {
+    return Object.values(
+      simplifyValues(
+        initialData.initialValues,
+        initialData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, initialData.fields)
+      ).toString()
+  }
   return (
     <Dialog
       open={open}
-      onClose={close}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title={`${projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} onClose={close} />
+      <CustomDialogHeader
+        onClose={() => setShowConfirmDialog(true)}
+        title={`${projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -257,7 +277,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled>
+            <Button variant="outlined" size="small" color="primary" disabled
+            >
               Cancel
             </Button>
             <Button variant="contained" size="small" color="primary" disabled>
@@ -275,6 +296,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
             <>
               <CustomDialogContent>
                 <Form noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                   {formsData &&
                     formsData.map((form, index1) => {
                       return form.name ? (
@@ -305,7 +327,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           >
                                             <FormTypes
                                               {...field}
-                                              disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                              disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                               isNew={Boolean(projectSalesId)}
                                               fields={initialData.fields}
                                               fieldData={field}
@@ -348,9 +370,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 >
                                                   <IconButton
                                                     onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                    disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                                     size="small"
                                                   >
-                                                    <AddIcon color="primary" />
+                                                    <AddIcon color={(Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
@@ -389,7 +412,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             >
                                               <FormTypes
                                                 {...field}
-                                                disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                                disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                                 isNew={Boolean(projectSalesId)}
                                                 fields={initialData.fields}
                                                 fieldData={field}
@@ -431,9 +454,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                       onClick={() => {
                                                         setShowAddMarketSegmentDialog(true);
                                                       }}
+                                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                                       size="small"
                                                     >
-                                                      <AddIcon color="primary" />
+                                                      <AddIcon color={(Boolean(projectSalesId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>
@@ -451,10 +475,79 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                               </Grid>
                                             ) : null}
                                           </Grid>
-                                        </Grid> : field.fieldName === "currency" ? (
+                                        </Grid> : field.fieldName === "projectCategory" ? (
                                           <FormTypes
                                             {...field}
-                                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={null}
+                                          />
+                                        ) : field.fieldName === "entity" ? (
+                                          <FormTypes
+                                            multiple
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+
+                                            options={field.option}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            onChange={(e, value) => {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                              );
+                                              setFieldValue("projectManager", "");
+                                            }}
+                                          />
+                                        ) : field.fieldName === "projectManager" ? (
+                                          <FormTypes
+                                            {...field}
+                                            disabled={Boolean(projectSalesId)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={values["entity"] && values["entity"].length !== 0 ?
+                                              field.option.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d)))
+                                              : field.option}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            onChange={(e, value) => {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                value && value.optionValue
+                                                  ? value.optionValue
+                                                  : ""
+                                              );
+                                            }}
+                                          />
+                                        ) : field.fieldName === "currency" ? (
+                                          <FormTypes
+                                            {...field}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                             isNew={Boolean(projectSalesId)}
                                             values={values}
                                             errors={errors}
@@ -484,8 +577,8 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : field.fieldName.trim() === "amount" ? (
                                           <FormTypes
-                                           disabled={!Boolean(projectSalesId) && field.disableOnEdit}
-                                           isNew={Boolean(projectSalesId)}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
                                             fieldId={field._id}
                                             lookup={field.lookup}
                                             // {...rest}
@@ -542,7 +635,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                         form.sectionFields.map((field) => (
                           <FormTypes
                             {...field}
-                            disabled={!Boolean(projectSalesId) && field.disableOnEdit}
+                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
                             isNew={Boolean(projectSalesId)}
                             values={values}
                             errors={errors}
@@ -570,7 +663,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                   color="primary"
                   size="small"
                   disabled={isSubmitting || loading}
-                  onClick={close}
+                  onClick={() => {
+                    if (isFieldNotTouched(initialData, values)) close()
+                    else setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -584,6 +680,20 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      close()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>
@@ -630,7 +740,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                 setNewSubMarketSegmentId(null);
               } else {
                 //  If parent selected, consider that as a child
-                if (marketSegmentDataSource.some(d => d.optionValue === data.parentMarketSegment)) {
+                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
                   setSubMarketSegmentDataSource([
                     ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
                     {
@@ -651,7 +761,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                   })
 
                   if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d.optionValue === data.parentMarketSegment);
+                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
 
                     initializeMarketSegmentDataSource.push({
                       optionValue: getMarketSegment.optionValue,

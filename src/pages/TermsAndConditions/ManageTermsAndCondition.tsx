@@ -13,28 +13,21 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
-import FormTypes from "../../components/Helpers/FormTypes";
 import CustomButton from "../../components/Helpers/CustomButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
-import htmlToDraft from "html-to-draftjs";
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-
-import {
-  EditorState,
-  ContentState,
-  convertToRaw,
-  convertFromRaw,
-} from "draft-js";
-import { RichTextEditor } from "../../components/RichEditor/RichEditor";
 import { termsAndConditionDocumentUploadMaxSize } from "../../constants/helpers";
-
-
+import TinyMce from "./../../components/TinyMCE"
+import { Autocomplete } from "@material-ui/lab";
+import TextField from "@material-ui/core/TextField";
+import { useData } from "../../StateProvider/Provider";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {
@@ -47,6 +40,19 @@ const useStyles = makeStyles((theme) => ({
   fileUpload: {
     width: "50%",
   },
+  root: {
+    flexGrow: 1,
+  },
+  errorText: {
+    color: theme.palette.error.main,
+  },
+  buttonContainer: {
+    display: 'flex',
+    padding: '4px',
+    paddingLeft: '5px',
+    border: '1px solid lightgray',
+    borderBottom: '0'
+  }
 }));
 
 const TermsAndCondition = ({
@@ -57,43 +63,75 @@ const TermsAndCondition = ({
   editRecord,
   displayTitle
 }) => {
-  const [initialValues, setInitialValues] = useState({
-    TACName: "",
-    file: "",
-    editorState: EditorState.createEmpty(),
-  });
+  const {
+    state: { user },
+  }: any = useData();
+
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
+  const [initialValues, setInitialValues] = useState({
+    TACName: "",
+    file: "",
+    description: "",
+    entity: [],
+    owner: user.user._id,
+    collaborator: []
+  });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
   const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string().required(`please add ${displayTitle.toLowerCase()} name`),
+    owner: Yup.string().required(`Owner is required`),
   });
-
+  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+  const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [additionalDataPosition, setAdditionalDataPosition] = useState(editRecord ? editRecord.topPosition?.toString() : "true");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdditionalDataPosition((event.target as HTMLInputElement).value);
   };
+  const [disableSaveButton, setDisableSaveButton] = useState(false)
 
   useEffect(() => {
     if (editRecord && editRecord?._id) {
-      let state = convertFromRaw(JSON.parse(editRecord.description));
       setInitialValues({
-        editorState: EditorState.createWithContent(state),
+        description: editRecord.description,
         TACName: editRecord.TACName,
         file: editRecord?.file ?? "",
+        entity: editRecord?.entity ? editRecord?.entity : [],
+        owner: editRecord?.owner ? editRecord?.owner : user.user._id,
+        collaborator: editRecord?.collaborator ? editRecord?.collaborator : []
       });
+      if (editRecord?.owner && editRecord?.owner !== undefined && user.user._id !== editRecord?.owner && !editRecord?.collaborator?.some(d => d === user.user._id)) {
+        setDisableSaveButton(true)
+      }
     }
   }, [editRecord]);
 
+  useEffect(() => {
+    fetchUser();
+  }, [open]);
+
+
+  const fetchUser = () => {
+    axiosInstance().get(`/user`).then(({ data: { data } }) => {
+      setOwnerCollaboratorData(data);
+      setOwnerCollaboratorDataConst(data);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
   const handleSubmit = (values) => {
-    const description = convertToRaw(values.editorState.getCurrentContent());
     let request = {
-      description: JSON.stringify(description),
+      description: values.description,
       TACName: values.TACName,
       file: values?.file ?? "",
+      entity: values?.entity,
+      owner: values?.owner,
+      collaborator: values?.collaborator
     };
 
     if (displayTitle === "Additional Data") {
@@ -112,6 +150,7 @@ const TermsAndCondition = ({
             message: data.message,
           });
           setLoading(false);
+
           handleClose();
         })
         .catch((error) => {
@@ -138,19 +177,6 @@ const TermsAndCondition = ({
     }
   };
 
-  const appendData = (htmlData, setFieldValue) => {
-    if (htmlData) {
-      const blocksFromHtml = htmlToDraft(htmlData);
-      const { contentBlocks, entityMap } = blocksFromHtml;
-      const contentState = ContentState.createFromBlockArray(
-        contentBlocks,
-        entityMap
-      );
-      const editorState = EditorState.createWithContent(contentState);
-      setFieldValue("editorState", editorState);
-    }
-  };
-
   return (
     <Dialog
       disableBackdropClick={true}
@@ -159,7 +185,11 @@ const TermsAndCondition = ({
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       maxWidth="md"
-      onClose={handleClose}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
       fullWidth
       className={classes.termAndConditionDialog}
     >
@@ -168,6 +198,7 @@ const TermsAndCondition = ({
           ? `Edit ${editRecord?.TACName ?? ""}`
           : `Create ${displayTitle}`
           }`}
+        onClose={() => setShowConfirmDialog(true)}
       ></CustomDialogHeader>
       {initialValues && (
         <Formik
@@ -187,6 +218,7 @@ const TermsAndCondition = ({
             <>
               <CustomDialogContent>
                 <Form noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box padding={1}>
                       <Grid container spacing={3}>
@@ -208,6 +240,98 @@ const TermsAndCondition = ({
                               )
                             }
                           />
+                          <Grid container spacing={1}>
+                            <Grid item xs={12} sm={3}>
+                              {<Autocomplete
+                                multiple
+                                options={user?.entity}
+                                getOptionLabel={(option: any) => (option ? option?.entityName : "")}
+                                value={user?.entity.filter((data) => values["entity"]?.some(d => d === data._id)).length
+                                  ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
+                                  : []}
+                                onChange={(e, val) => {
+                                  setFieldValue("entity", val && val?.map(d => d._id))
+                                  val && val.length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="entity"
+                                    label="Entity"
+                                    variant="outlined"
+                                    error={touched["entity"] && Boolean(errors["entity"])}
+                                    helperText={touched["entity"] && errors["entity"]}
+                                    fullWidth
+                                  />
+                                )}
+                              />}
+                            </Grid>
+                            <Grid item xs={12} sm={3}>
+                              {<Autocomplete
+                                getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
+                                  ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
+                                  : ""}
+                                options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
+                                onChange={(e, val) => {
+                                  setFieldValue("owner", val && val._id ? val._id : "");
+                                }}
+                                onOpen={() =>
+                                  values["entity"] && values["entity"].length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="owner"
+                                    label="Owner"
+                                    variant="outlined"
+                                    error={touched["owner"] && Boolean(errors["owner"])}
+                                    helperText={touched["owner"] && errors["owner"]}
+                                    required={true}
+                                    fullWidth
+                                  />
+                                )}
+                              />}
+                            </Grid>
+                            <Grid item xs={12} sm={3}>
+                              {<Autocomplete
+                                multiple
+                                options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
+                                getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
+                                value={ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id)).length
+                                  ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
+                                  : []}
+                                onChange={(e, val) => {
+                                  setFieldValue("collaborator", val && val?.map(d => d._id))
+                                }}
+                                onOpen={() =>
+                                  values["entity"] && values["entity"].length !== 0 ?
+                                    setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="collaborator"
+                                    label="Collaborator"
+                                    variant="outlined"
+                                    error={touched["collaborator"] && Boolean(errors["collaborator"])}
+                                    helperText={touched["collaborator"] && errors["collaborator"]}
+                                    fullWidth
+                                  />
+                                )}
+                              />}
+                            </Grid>
+                          </Grid>
+
                           {(displayTitle === "Additional Data") &&
                             <Box mt={2} >
                               <FormControl component="fieldset">
@@ -219,26 +343,12 @@ const TermsAndCondition = ({
                               </FormControl>
                             </Box>
                           }
-                          <Box mt={2} className={classes.fileUpload}>
-                            <FormTypes
-                              label="File"
-                              name="file"
-                              isTooltip={true}
-                              required={false}
-                              type="fileUpload"
-                              accept=".docx"
-                              uploadFileUrl="/doc-parser"
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              size="small"
-                              setFieldValue={(name, file) =>
-                                setFieldValue("file", file)
-                              }
-                              onAppendData={(data) =>
-                                appendData(data, setFieldValue)
-                              }
-                              doNotShowUploadedFile={true}
+                          <Box mt={2}>
+                            <TinyMce
+                              onChange={(value) => {
+                                setFieldValue("description", value)
+                              }}
+                              initialValue={initialValues?.description}
                               fileUploadMaxSize={
                                 termsAndConditionDocumentUploadMaxSize
                               } //size in bytes
@@ -251,14 +361,6 @@ const TermsAndCondition = ({
                               }}
                             />
                           </Box>
-                          <Box mt={2}>
-                            <RichTextEditor
-                              editorState={values.editorState}
-                              onChange={setFieldValue}
-                              onBlur={handleBlur}
-                              placeholder={displayTitle}
-                            />
-                          </Box>
                         </Grid>
                       </Grid>
                     </Box>
@@ -266,27 +368,35 @@ const TermsAndCondition = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={handleClose}>
+                <Button size="small" color="primary"
+                  onClick={() => setShowConfirmDialog(true)}>
                   Cancel
                 </Button>
                 <CustomButton
                   variant="contained"
                   color="primary"
                   loading={loading}
-                  disabled={uploadingImageOrFileProgress > 0}
-                  onClick={() => {
-                    if (Object.keys(errors).length) {
-                      Object.keys(errors).forEach((key) => {
-                        setFieldTouched(key, true);
-                      });
-                      return;
-                    }
-                    handleSubmit(values);
-                  }}
+                  type="submit"
+                  disabled={uploadingImageOrFileProgress > 0 || disableSaveButton}
+                  onClick={submitForm}
                 >
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      handleClose()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>
@@ -295,4 +405,4 @@ const TermsAndCondition = ({
   );
 };
 
-export default TermsAndCondition;
+export default TermsAndCondition

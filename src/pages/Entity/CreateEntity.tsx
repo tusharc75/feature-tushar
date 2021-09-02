@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Dialog,
   Button,
@@ -13,9 +13,11 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema } from "../../constants/helpers";
+import { getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 interface InitialData {
   fields: any[];
@@ -32,7 +34,9 @@ const CreateEntity = ({ open, close, fetchData }) => {
     values: {},
   });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const history = useHistory();
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     getInitialData();
@@ -63,23 +67,34 @@ const CreateEntity = ({ open, close, fetchData }) => {
         const newId = data.data._id;
         setSubmitting(false);
         fetchData();
+        toastConfig.setToastConfig({
+          type: "success",
+          open: true,
+          message: data.message
+        })
         history.push(`/entity/detail/${newId}`);
         close();
       })
       .catch((err) => {
         setSubmitting(false);
+        toastConfig.setToastConfig(err)
       });
   };
 
   return (
     <Dialog
       open={open}
-      onClose={close}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title="Create New Entities" onClose={close} />
+      <CustomDialogHeader title="Create New Entities"
+        onClose={() => setShowConfirmDialog(true)} />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -112,6 +127,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
             <>
               <CustomDialogContent>
                 <Form noValidate>
+                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                   <InputField
                     errors={errors}
                     values={values}
@@ -130,7 +146,11 @@ const CreateEntity = ({ open, close, fetchData }) => {
                   color="primary"
                   size="small"
                   disabled={isSubmitting || loading}
-                  onClick={close}
+
+                  onClick={() => {
+                    if (isFieldNotTouched(initialData, values)) close()
+                    else setShowConfirmDialog(true)
+                  }}
                 >
                   Cancel
                 </Button>
@@ -144,6 +164,20 @@ const CreateEntity = ({ open, close, fetchData }) => {
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      close()
+                    }}
+                  /> : null
+              }
             </>
 
           )}

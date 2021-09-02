@@ -89,6 +89,7 @@ export const formFieldNames = {
 }
 
 export const sidebarResource = {
+  address: "Address",
   brand: "Brand",
   role: "Role",
   product: "Product",
@@ -132,10 +133,11 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equipt Rental Master"
+  equipmentRentalMaster: "Equiptment Rental Master"
 };
 
 export const RESOURCE_LABEL = {
+  address: "Addresses",
   account: 'Supplier Accounts',
   customerAccount: 'Customer Accounts',
   user: 'Users',
@@ -173,7 +175,7 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equipt Rental Master"
+  equipmentRentalMaster: "Equiptment Rental Master"
 };
 
 export const lead = {
@@ -563,7 +565,7 @@ export const getOwnerDropdownDataSource = (
 
     mainDataSource.map((d) => {
       const isCollaboratorSelected = selectedCollaborator.find(
-        (collaboratorId) => collaboratorId === d.optionValue
+        (collaboratorId) => collaboratorId === d?.optionValue
       );
       if (!isCollaboratorSelected) {
         ownerDataSource.push(d);
@@ -579,7 +581,7 @@ export const getCollaboratorDropdownDataSource = (
   mainDataSource
 ) => {
   return selectedOwnerId
-    ? mainDataSource.filter((d) => d.optionValue !== selectedOwnerId)
+    ? mainDataSource.filter((d) => d?.optionValue !== selectedOwnerId)
     : mainDataSource;
 };
 
@@ -592,7 +594,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
     let options = field.fieldData.option;
 
     options.forEach((d) => {
-      d.default = d.optionValue === id;
+      d.default = d?.optionValue === id;
     });
 
     field.fieldData.option = options;
@@ -676,6 +678,18 @@ interface IPermission {
   };
 }
 
+export const isFieldNotTouched = (data, values) => {
+  return Object.values(
+    simplifyValues(
+      data.initialValues,
+      data.fields
+    )
+  ).toString() ===
+    Object.values(
+      simplifyValues(values, data.fields)
+    ).toString()
+}
+
 export const getPermissions = (
   user,
   selectedEntity = undefined
@@ -757,6 +771,7 @@ export const downloadExcel = (fileDetails, fileName) => {
   //Check the Browser type and download the File.
   const isIE = false || !!document["documentMode"];
   if (isIE) {
+    //@ts-ignore
     window.navigator.msSaveBlob(blob, fileName);
   } else {
     var url = window.URL || window.webkitURL;
@@ -795,6 +810,10 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
+export const review = {
+  reviewsApi: "/product/review",
+}
+
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, "currencyCode");
 };
@@ -830,19 +849,15 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         .format(amount)
         .replace(/^(\D+)/, "$1 "),
       fullFormatAmountWithCurrencyName: new Intl.NumberFormat(language, {
-        style: "currency",
+        //  style: "currency",
         currencyDisplay: "code",
       }).format(amount),
     };
   }
 
   let currencyData = filterCountries[0];
-  let combinedAllLanguages = filterCountries[0].languages;
 
   if (filterCountries.length > 1) {
-    combinedAllLanguages = [
-      ...new Set(filterCountries.map((m) => m.languages).flat()),
-    ];
 
     switch (currencyCode) {
       case "AUD":

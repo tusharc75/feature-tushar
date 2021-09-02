@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Box, Grid, Button, Dialog } from "@material-ui/core";
+import { Typography, Box, Button, Dialog } from "@material-ui/core";
 import { TreeView, TreeItem } from "@material-ui/lab";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import AddIcon from "@material-ui/icons/Add";
 import { isMobile, isTablet } from "react-device-detect";
-
 import ActivityModelHandler from "../../ActivityModelHandler";
 import { CreateTask } from "../../Task/CreateTask";
 import { CreateCase } from "../../Case/CreateCase";
@@ -41,7 +40,6 @@ export default function ActivityList(props) {
     type,
     fetchRoadmap,
     activity,
-    treeList,
     expanded,
     selected,
     handleToggle,

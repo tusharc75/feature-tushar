@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState, Fragment } from "react";
+import { useEffect, useState } from "react";
 import { camelCase } from "lodash";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import { useData } from "../StateProvider/Provider";
@@ -56,7 +56,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "quote-pdf-template",
         "quote-pdf-template",
         "product-inventory",
-        "equipt-rental-master"
+        "equiptment-rental-master"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

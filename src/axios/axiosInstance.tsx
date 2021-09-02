@@ -41,7 +41,8 @@ export default (history = null, passedHeaders = null) => {
 
     axiosInstance.interceptors.request.use((request) => {
         if (navigator) {
-            let bandwidth = navigator["connection"].downlink //in mb/s
+            //@ts-ignore
+            let bandwidth = navigator["connection"]?.downlink //in mb/s
             let maxSlowSpeed = 400 // in kb/s
             if (bandwidth * 1000 <= maxSlowSpeed) {
                 if (localStorage.getItem("slowInternetConnection") !== "true") {
@@ -91,7 +92,7 @@ export default (history = null, passedHeaders = null) => {
                 if (error.response.status === 401) {
                     clearTokenAndRedirectToHome();
                     return new Promise((resolve, reject) => {
-                        reject({ open: true, type: "error", message: error.response.data.message });
+                        reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
                     });
 
                 }

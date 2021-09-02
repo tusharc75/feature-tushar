@@ -17,7 +17,8 @@ import {
   TextField,
   Tooltip,
   Typography,
-  useTheme
+  useTheme,
+  Dialog,
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
@@ -31,7 +32,7 @@ import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
 import { green, red } from '@material-ui/core/colors';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { getFormulaValue, handleAutoCalculation } from '../../constants/formulaUtility';
+import { handleAutoCalculation } from '../../constants/formulaUtility';
 import NumberFormat from 'react-number-format';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -44,12 +45,13 @@ import {
   documentUploadSupportExtensions,
   formatAmountWithCurrency
 } from '../../constants/helpers';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
-import { useLocation, useHistory } from 'react-router-dom'
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 
 const filter = createFilterOptions();
 
@@ -58,24 +60,6 @@ interface NumberFormatCustomProps {
   onChange: (event: { target: { name: string; value: string } }) => void;
   name: string;
 }
-
-const withValueLimit = (inputObj, limitVal) => {
-  const { value } = inputObj;
-  if (value <= limitVal) return inputObj;
-};
-
-const formatDecimal = (value, decimalPlaces) => {
-  if (value === '') {
-    return 0;
-  }
-  // && isNaN(value)
-  // else if (parseFloat(value) < 0) {
-  //   return 0;
-  // }
-  else {
-    return parseFloat(value.toFixed(decimalPlaces));
-  }
-};
 
 const CustomFormat = (props: NumberFormatCustomProps | any) => {
   const { inputRef, onChange, selectedCurrencyCode, ...other } = props;
@@ -95,11 +79,14 @@ const CustomFormat = (props: NumberFormatCustomProps | any) => {
   }
 };
 
-const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) =>
+const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, warningMessage, warningTooltip }) =>
   isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
         {children}
+       {warningTooltip && <Box ml={1}>
+          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+        </Box>}
       </Grid>
       <Grid item xs={1} sm={1} md={1}>
         <Tooltip title={info}>
@@ -108,11 +95,19 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) 
       </Grid>
     </Grid>
   ) : doNotShowInfoTooltip ? (
-    <>{children}</>
+      <>
+        {children}
+        {warningTooltip && <Box ml={1}>
+          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+        </Box>}
+      </>
   ) : (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={12} sm={12} md={12}>
-        {children}
+            {children}
+            {warningTooltip && <Box ml={1}>
+          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+        </Box>}
       </Grid>
       {/* <Grid item xs={1} sm={1} md={1}>
         <InfoIcon style={{ opacity: 0 }} color="disabled" />
@@ -150,6 +145,64 @@ const GreenSwitch = withStyles({
   track: {}
 })(Switch);
 
+const AddOptionDialog = ({addFieldOption, options, setOptions, setOpen }) => {
+  const [values, setValues] = React.useState([]);
+
+  const handleChange = (val) => {
+    setValues(val)
+
+  }
+
+  const onSave = () => {
+    const order = options.length
+    const filteredArr = values.filter(val => options.filter(op => op.optionValue === val).length===0)
+    const newOptions = filteredArr.map((val, i) => ({order: order + i, default: false, optionLabel: val, optionValue: val}))
+    addFieldOption(filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val })))
+    setOptions([...options, ...newOptions])
+    setOpen(false)
+
+  }
+
+  return (
+    <div>
+      <Dialog fullWidth maxWidth="sm" open keepMounted onClose={() => setOpen(false)}>
+        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Options" />
+        <CustomDialogContent>
+          <Autocomplete
+           multiple
+           disableCloseOnSelect={true}
+            size="small"
+            fullWidth
+            freeSolo
+            value={values}
+            options={[]}
+            renderTags={(value: string[], getTagProps) =>
+              value.map((option: string, index: number) =>
+                <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+            }
+            onChange={(_, val) => handleChange(val)}
+            renderInput={(params) => <TextField {...params}
+              variant="outlined"
+              label="Options"
+              style={{ whiteSpace: 'nowrap' }}
+              margin="dense"
+              placeholder="New Option" />
+            }
+          />
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button color="primary" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button color="primary" onClick={onSave}>
+            Save
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>
+    </div>
+  );
+};
+
 const FormTypes = (props) => {
   const theme = useTheme();
   const {
@@ -160,6 +213,8 @@ const FormTypes = (props) => {
     type,
     label,
     _id: fieldId,
+    isWarningTooltip,
+    warningTooltipMessage,
     name,
     errors,
     values,
@@ -194,6 +249,7 @@ const FormTypes = (props) => {
   } = props;
   const [optionsList, setOptions] = React.useState([]);
   const [option, setOptionsList] = React.useState([]);
+  const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
@@ -207,12 +263,9 @@ const FormTypes = (props) => {
 
   const inputNumberRef = useRef(null);
 
-  const { id } = useHistory()
-  const { pathnames } = useLocation()
-
   useEffect(() => {
-    setOptionsList(options)
-  }, [options])
+    setOptionsList(options);
+  }, [options]);
 
   useEffect(() => {
     const ignoreScroll = (e) => {
@@ -402,30 +455,22 @@ const FormTypes = (props) => {
   };
 
   const addFieldOption = (optionData) => {
-
     const data = {
-      _id: productTemplateId || priceTemplateId
-        ? fieldData._id
-        : fieldData
-          ? fieldData._id
-          : fieldId,
-      option: [optionData]
-    }
-
-    console.log(data)
+      _id: productTemplateId || priceTemplateId ? fieldData._id : fieldData ? fieldData._id : fieldId,
+      option: Array.isArray(optionData) ? optionData : [optionData]
+    };
 
     if (productTemplateId && priceTemplateId) {
-      data["productTemplate"] = productTemplateId
-      data["priceTemplate"] = productTemplateId
+      data['productTemplate'] = productTemplateId;
+      data['priceTemplate'] = productTemplateId;
     } else if (!priceTemplateId && productTemplateId) {
-      data["productTemplate"] = productTemplateId
+      data['productTemplate'] = productTemplateId;
     } else if (priceTemplateId && !productTemplateId) {
-      data["priceTemplate"] = priceTemplateId
+      data['priceTemplate'] = priceTemplateId;
     }
 
-
-    axiosInstance().post("field/add-field-option", data)
-  }
+    axiosInstance().post('field/add-field-option', data);
+  };
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -564,7 +609,7 @@ const FormTypes = (props) => {
   };
 
   return type === 'singleLine' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -579,7 +624,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'name' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -599,7 +644,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'multiLine' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -616,7 +661,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'number' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -642,7 +687,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'percent' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         type="number"
@@ -663,13 +708,13 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, parseFloat(e.target.value));
-            }
+                handleChange(name, parseFloat(e.target.value));
+              }
         }
       />
     </InfoLabel>
   ) : type === 'formula' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -684,12 +729,12 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              if (fieldData.returnType === 'decimal') {
-                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              } else {
-                handleChange(name, e.target.value);
+                if (fieldData.returnType === 'decimal') {
+                  handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+                } else {
+                  handleChange(name, e.target.value);
+                }
               }
-            }
         }
         InputProps={{
           inputProps: { min: 0 },
@@ -698,7 +743,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'email' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -713,7 +758,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'password' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -728,7 +773,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'mobileNumber' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPhoneInput
         {...rest}
         defaultCountry={'us'}
@@ -744,23 +789,15 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : type === "freeStyleMultiSelect" ? (
-    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+  ) : type === 'freeStyleMultiSelect' ? (
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Autocomplete
         {...rest}
         multiple
         disableCloseOnSelect={true}
         freeSolo
         options={[]}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-            />
-          ))
-        }
+        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -775,17 +812,14 @@ const FormTypes = (props) => {
         )}
         value={values[name]}
         onBlur={(e: any) => {
-          if (e.target.value && e.target.value.trim() !== "") {
-            setFieldValue(name, [
-              ...values[name],
-              e.target.value,
-            ]);
+          if (e.target.value && e.target.value.trim() !== '') {
+            setFieldValue(name, [...values[name], e.target.value]);
           }
         }}
         onChange={(e, value: any) => {
           let valuesToInsert = [];
           for (var val of value) {
-            if (val && val.trim() !== "") {
+            if (val && val.trim() !== '') {
               valuesToInsert.push(val);
             }
           }
@@ -794,7 +828,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'dropDown' && fieldData && fieldData.isDependentDropdown ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
         options={option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn])}
@@ -811,8 +845,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) => {
-              handleChange(name, val && val.optionValue ? val.optionValue : '');
-            }
+                handleChange(name, val && val.optionValue ? val.optionValue : '');
+              }
         }
         renderInput={(params) => (
           <TextField
@@ -828,106 +862,127 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
-      <Autocomplete
-        {...rest}
-        options={option}
-        freeSolo={type === 'dropDown' && !lookup}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        getOptionSelected={(option: any, val) => option.optionValue === val}
-        value={
-          option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
-        }
-        onChange={
-          onChange
-            ? onChange
-            : (e, val) => {
-              if (setFieldValue) {
-                if (!lookup) {
-                  if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
+          <Autocomplete
+            {...rest}
+            options={option}
+            freeSolo={type === 'dropDown' && !lookup}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={
+              option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
+            }
+            onChange={
+              onChange
+                ? onChange
+                : (e, val) => {
+                    if (setFieldValue) {
+                      if (!lookup) {
+                        if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+                          const newOption = {
+                            order: option.length,
+                            default: false,
+                            optionLabel: val,
+                            optionValue: val
+                          };
 
-                    const newOption = {
-                      order: option.length,
-                      default: false,
-                      optionLabel: val,
-                      optionValue: val
-                    }
-
-                    if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                      addFieldOption(newOption)
-                      setOptionsList([...option, newOption]);
-                    }
-                    if (addAdditionalOption) {
-                      handleChange(name, val);
-                    }
-                  } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                    const newOption = {
-                      order: option.length,
-                      default: false,
-                      optionLabel: val.inputValue,
-                      optionValue: val.inputValue
-                    }
-                    if (!option?.find(o => o?.optionValue.includes(val.inputValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                      setOptionsList([...option, newOption]);
-                      addFieldOption(newOption)
-                    }
-                    if (addAdditionalOption) {
-                      handleChange(name, val.inputValue);
-                    }
-                  } else {
-                    if (val) {
-                      const newOption = {
-                        ...val,
-                        optionLabel: val.optionValue,
+                          if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                            addFieldOption(newOption);
+                            setOptionsList([...option, newOption]);
+                          }
+                          if (addAdditionalOption) {
+                            handleChange(name, val);
+                          }
+                        } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                          const newOption = {
+                            order: option.length,
+                            default: false,
+                            optionLabel: val.inputValue,
+                            optionValue: val.inputValue
+                          };
+                          if (
+                            !option?.find((o) => o?.optionValue.includes(val.inputValue)) &&
+                            (addAdditionalOption || fieldData?.addAdditionalOption)
+                          ) {
+                            setOptionsList([...option, newOption]);
+                            addFieldOption(newOption);
+                          }
+                          if (addAdditionalOption) {
+                            handleChange(name, val.inputValue);
+                          }
+                        } else {
+                          if (val) {
+                            const newOption = {
+                              ...val,
+                              optionLabel: val.optionValue
+                            };
+                            if (
+                              !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                              (addAdditionalOption || fieldData?.addAdditionalOption)
+                            ) {
+                              addFieldOption(newOption);
+                              setOptionsList([newOption, ...option]);
+                            }
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          }
+                        }
+                      } else {
+                        handleChange(name, val && val.optionValue ? val.optionValue : '');
                       }
-                      if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                        addFieldOption(newOption)
-                        setOptionsList([newOption, ...option]);
-                      }
-                      handleChange(name, val && val.optionValue ? val.optionValue : '');
-
                     }
                   }
-                } else {
-                  handleChange(name, val && val.optionValue ? val.optionValue : '');
-                }
-              }
             }
-        }
-        filterOptions={(options, params) => {
-          const filtered = filter(options, params);
+            filterOptions={(options, params) => {
+              const filtered = filter(options, params);
 
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))
-            && !lookup && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-            filtered.push({
-              order: option.length,
-              default: false,
-              optionLabel: `Add "${params.inputValue}"`,
-              optionValue: params.inputValue
-            })
-          }
+              if (
+                params.inputValue !== '' &&
+                !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
+                !lookup &&
+                (addAdditionalOption || fieldData?.addAdditionalOption)
+              ) {
+                filtered.push({
+                  order: option.length,
+                  default: false,
+                  optionLabel: `Add "${params.inputValue}"`,
+                  optionValue: params.inputValue
+                });
+              }
 
-          return filtered
-        }}
-        selectOnFocus
-        clearOnBlur
-        handleHomeEndKeys
-        forcePopupIcon={true}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            name={name}
-            label={getLabel(label)}
-            variant="outlined"
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
+              return filtered;
+            }}
+            selectOnFocus
+            clearOnBlur
+            handleHomeEndKeys
+            forcePopupIcon={true}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                name={name}
+                label={getLabel(label)}
+                variant="outlined"
+                error={touched[name] && Boolean(errors[name])}
+                helperText={touched[name] && errors[name]}
+                required={required}
+              />
+            )}
           />
+        </Grid>
+        {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
+          <Grid item xs={2}>
+            <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
+              <AddCircleIcon />
+            </IconButton>
+
+            {optionSaveDialog && <AddOptionDialog addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
+          </Grid>
         )}
-      />
+      </Grid>
     </InfoLabel>
   ) : type === 'vlookupDropdown' && fieldData && !fieldData.isvlookupReverse ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -948,7 +1003,7 @@ const FormTypes = (props) => {
       <Grid key={_unit} item xs={12} sm={6} md={6}>
         <Box display="flex">
           <Box flexGrow={1}>
-            <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+            <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
               <TextField
                 {...rest}
                 variant="outlined"
@@ -984,12 +1039,12 @@ const FormTypes = (props) => {
               {(fieldData.leval === 'product-custom' ||
                 fieldData.leval === 'product-builder-custom' ||
                 fieldData.leval === 'price-builder-custom') && (
-                  <Tooltip title="Remove">
-                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                      <HighlightOffIcon color="error" />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                <Tooltip title="Remove">
+                  <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                    <HighlightOffIcon color="error" />
+                  </IconButton>
+                </Tooltip>
+              )}
               {isExtraDispayType && (
                 <AddDisplayTypeDialog
                   handleAddDisplayType={handleAddDisplayType}
@@ -1021,7 +1076,7 @@ const FormTypes = (props) => {
           <Grid key={_unit} item xs={12} sm={6} md={6}>
             <Box display="flex">
               <Box flexGrow={1}>
-                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+                <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
                   <TextField
                     {...rest}
                     variant="outlined"
@@ -1029,9 +1084,11 @@ const FormTypes = (props) => {
                     label={label + ' ' + _currency + '/' + _unit}
                     name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
                     required={required}
-                    value={values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] ?
-                      values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString() :
-                      values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]}
+                    value={
+                      values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                        ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString()
+                        : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                    }
                     error={
                       touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
                       Boolean(errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()])
@@ -1045,19 +1102,19 @@ const FormTypes = (props) => {
                       onChange
                         ? onChange
                         : (e) => {
-                          if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                            handleCurrencyChangeWithConverterChange(
-                              name,
-                              _currency,
-                              _unit,
-                              e.target.value === ''
-                                ? 0
-                                : e.target.value.slice(-1) === '.'
+                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                              handleCurrencyChangeWithConverterChange(
+                                name,
+                                _currency,
+                                _unit,
+                                e.target.value === ''
+                                  ? 0
+                                  : e.target.value.slice(-1) === '.'
                                   ? e.target.value.replace(/,/g, '')
                                   : parseFloat(e.target.value.replace(/,/g, ''))
-                            );
+                              );
+                            }
                           }
-                        }
                     }
                     InputProps={{
                       startAdornment: (
@@ -1093,12 +1150,12 @@ const FormTypes = (props) => {
                   {(fieldData.leval === 'product-custom' ||
                     fieldData.leval === 'product-builder-custom' ||
                     fieldData.leval === 'price-builder-custom') && (
-                      <Tooltip title="Remove">
-                        <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                          <HighlightOffIcon color="error" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    <Tooltip title="Remove">
+                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                   {fieldData.displayUnits.length !== fieldData.units.length && (
                     <Tooltip title="Add Converter" className="formActionButton">
                       <IconButton
@@ -1154,7 +1211,7 @@ const FormTypes = (props) => {
         <Grid key={_currency} item xs={12} sm={6} md={6}>
           <Box display="flex">
             <Box flexGrow={1}>
-              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
+              <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
                 <TextField
                   {...rest}
                   variant="outlined"
@@ -1162,9 +1219,11 @@ const FormTypes = (props) => {
                   label={label + ' ' + _currency}
                   name={name + '_' + _currency.toLowerCase()}
                   required={required}
-                  value={values[name + '_' + _currency.toLowerCase()] ?
-                    values[name + '_' + _currency.toLowerCase()].toLocaleString()
-                    : values[name + '_' + _currency.toLowerCase()]}
+                  value={
+                    values[name + '_' + _currency.toLowerCase()]
+                      ? values[name + '_' + _currency.toLowerCase()].toLocaleString()
+                      : values[name + '_' + _currency.toLowerCase()]
+                  }
                   error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
                   helperText={touched[name + '_' + _currency.toLowerCase()] && errors[name + '_' + _currency.toLowerCase()]}
                   ref={inputNumberRef}
@@ -1172,29 +1231,29 @@ const FormTypes = (props) => {
                     onChange
                       ? onChange
                       : (e) => {
-                        if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                          if (fieldData.displayCurrency.length > 1) {
-                            handleCurrencyChange(
-                              name,
-                              _currency,
-                              e.target.value === ''
-                                ? 0
-                                : e.target.value.slice(-1) === '.'
+                          if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                            if (fieldData.displayCurrency.length > 1) {
+                              handleCurrencyChange(
+                                name,
+                                _currency,
+                                e.target.value === ''
+                                  ? 0
+                                  : e.target.value.slice(-1) === '.'
                                   ? e.target.value.replace(/,/g, '')
                                   : parseFloat(e.target.value.replace(/,/g, ''))
-                            );
-                          } else {
-                            handleChange(
-                              name + '_' + _currency.toLowerCase(),
-                              e.target.value === ''
-                                ? 0
-                                : e.target.value.slice(-1) === '.'
+                              );
+                            } else {
+                              handleChange(
+                                name + '_' + _currency.toLowerCase(),
+                                e.target.value === ''
+                                  ? 0
+                                  : e.target.value.slice(-1) === '.'
                                   ? e.target.value.replace(/,/g, '')
                                   : parseFloat(e.target.value.replace(/,/g, ''))
-                            );
+                              );
+                            }
                           }
                         }
-                      }
                   }
                   InputProps={{
                     startAdornment: (
@@ -1229,12 +1288,12 @@ const FormTypes = (props) => {
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
-                    <Tooltip title="Remove">
-                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                  <Tooltip title="Remove">
+                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 {isExtraDispayType && (
                   <AddDisplayTypeDialog
                     handleAddDisplayType={handleAddDisplayType}
@@ -1259,7 +1318,7 @@ const FormTypes = (props) => {
       )
     )
   ) : type === 'decimal' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -1275,8 +1334,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, parseFloat(e.target.value));
-            }
+                handleChange(name, parseFloat(e.target.value));
+              }
         }
         InputProps={{
           inputProps: { min: 0 },
@@ -1285,7 +1344,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'currency' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Autocomplete
         {...rest}
         fullWidth
@@ -1313,140 +1372,161 @@ const FormTypes = (props) => {
           const { currencyCode, currencyName, symbolNative } = option;
           return `${currencyCode} - ${currencyName} - (${symbolNative})`;
         }}
-      // renderOption={(option) => {
-      //   const { currencyCode, name, countryCode, symbolNative } = option;
-      //   return (
-      //     <Grid container alignItems="center">
-      //       <Grid item>
-      //         <Avatar
-      //           variant="rounded"
-      //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-      //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-      //         />
-      //       </Grid>
-      //       <Grid item xs>
-      //         <Typography>
-      //           {currencyCode} ({symbolNative})
-      //         </Typography>
-      //         <Typography variant="body2" color="textSecondary">
-      //           {name}
-      //         </Typography>
-      //       </Grid>
-      //     </Grid>
-      //   );
-      // }}
+        // renderOption={(option) => {
+        //   const { currencyCode, name, countryCode, symbolNative } = option;
+        //   return (
+        //     <Grid container alignItems="center">
+        //       <Grid item>
+        //         <Avatar
+        //           variant="rounded"
+        //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+        //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+        //         />
+        //       </Grid>
+        //       <Grid item xs>
+        //         <Typography>
+        //           {currencyCode} ({symbolNative})
+        //         </Typography>
+        //         <Typography variant="body2" color="textSecondary">
+        //           {name}
+        //         </Typography>
+        //       </Grid>
+        //     </Grid>
+        //   );
+        // }}
       />
     </InfoLabel>
   ) : type === 'multiSelect' ? (
-    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip}>
-      <Autocomplete
-        {...rest}
-        multiple
-        freeSolo={!lookup}
-        disableCloseOnSelect={true}
-        options={option}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
-        getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-        onChange={
-          onChange
-            ? onChange
-            : (e, value: any, reason) => {
-              if (setFieldValue) {
-                if (!lookup) {
-                  if (reason === 'clear') {
-                    setFieldValue(name, []);
-                  } else if (reason === 'remove-option' && values[name].length === 1) {
-                    setFieldValue(name, []);
-                  }
-                  value.forEach((val) => {
-                    if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                      const newOption = {
-                        order: option.length,
-                        default: false,
-                        optionLabel: val,
-                        optionValue: val
-                      }
-
-                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                        addFieldOption(newOption)
-                        setOptionsList([...option, newOption]);
-                      }
-                      if (addAdditionalOption) {
-                        setFieldValue(name, [...values[name], val]);
-                      }
-                    } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                      const newOption = {
-                        order: option.length,
-                        default: false,
-                        optionLabel: val.inputValue,
-                        optionValue: val.inputValue
-                      }
-
-                      if (!option?.find(o => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                        addFieldOption(newOption)
-                        setOptionsList([...option, newOption]);
-                      }
-                      if (addAdditionalOption) {
-                        setFieldValue(name, [...values[name], val.inputValue]);
-                      }
-                    } else {
-                      if (val) {
-                        const newOption = {
-                          ...val,
-                          optionLabel: val.optionValue,
+    <InfoLabel info={tooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
+          <Autocomplete
+            {...rest}
+            multiple
+            freeSolo={!lookup}
+            disableCloseOnSelect={true}
+            options={option}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
+            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+            onChange={
+              onChange
+                ? onChange
+                : (e, value: any, reason) => {
+                    if (setFieldValue) {
+                      if (!lookup) {
+                        if (reason === 'clear') {
+                          setFieldValue(name, []);
+                        } else if (reason === 'remove-option' && values[name].length === 1) {
+                          setFieldValue(name, []);
                         }
-                        if (!option?.find(o => o?.optionValue.includes(val.optionValue)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                          addFieldOption(newOption)
-                          setOptionsList([newOption, ...option]);
-                        }
+                        value.forEach((val) => {
+                          if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+                            const newOption = {
+                              order: option.length,
+                              default: false,
+                              optionLabel: val,
+                              optionValue: val
+                            };
 
-                        setFieldValue(name, value.filter(v => v.optionValue).map((val) => val.optionValue));
+                            if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                              addFieldOption(newOption);
+                              setOptionsList([...option, newOption]);
+                            }
+                            if (addAdditionalOption) {
+                              setFieldValue(name, [...values[name], val]);
+                            }
+                          } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                            const newOption = {
+                              order: option.length,
+                              default: false,
+                              optionLabel: val.inputValue,
+                              optionValue: val.inputValue
+                            };
+
+                            if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                              addFieldOption(newOption);
+                              setOptionsList([...option, newOption]);
+                            }
+                            if (addAdditionalOption) {
+                              setFieldValue(name, [...values[name], val.inputValue]);
+                            }
+                          } else {
+                            if (val) {
+                              const newOption = {
+                                ...val,
+                                optionLabel: val.optionValue
+                              };
+                              if (
+                                !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                                (addAdditionalOption || fieldData?.addAdditionalOption)
+                              ) {
+                                addFieldOption(newOption);
+                                setOptionsList([newOption, ...option]);
+                              }
+
+                              setFieldValue(
+                                name,
+                                value.filter((v) => v.optionValue).map((val) => val.optionValue)
+                              );
+                            }
+                          }
+                        });
+                      } else {
+                        setFieldValue(
+                          name,
+                          value.map((val) => val.optionValue)
+                        );
                       }
                     }
-                  });
-                } else {
-                  setFieldValue(
-                    name,
-                    value.map((val) => val.optionValue)
-                  );
-                }
+                  }
+            }
+            filterOptions={(options, params) => {
+              const filtered = filter(options, params);
+
+              if (
+                params.inputValue !== '' &&
+                !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
+                !lookup &&
+                (addAdditionalOption || fieldData?.addAdditionalOption)
+              ) {
+                filtered.push({
+                  order: option.length,
+                  default: false,
+                  optionLabel: `Add "${params.inputValue}"`,
+                  optionValue: params.inputValue
+                });
               }
 
-            }
-        }
-        filterOptions={(options, params) => {
-          const filtered = filter(options, params);
-
-          if (params.inputValue !== '' && !option.find(o => o?.optionValue.includes(params.inputValue))
-            && !lookup && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-            filtered.push({
-              order: option.length,
-              default: false,
-              optionLabel: `Add "${params.inputValue}"`,
-              optionValue: params.inputValue
-            })
-          }
-
-          return filtered
-        }}
-        forcePopupIcon={true}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            label={getLabel(label)}
-            name={name}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-            style={{ whiteSpace: 'nowrap' }}
+              return filtered;
+            }}
+            forcePopupIcon={true}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label={getLabel(label)}
+                name={name}
+                error={touched[name] && Boolean(errors[name])}
+                helperText={touched[name] && errors[name]}
+                required={required}
+                style={{ whiteSpace: 'nowrap' }}
+              />
+            )}
           />
+        </Grid>
+        {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
+          <Grid item xs={2}>
+            <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
+              <AddCircleIcon />
+            </IconButton>
+            {optionSaveDialog && <AddOptionDialog addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
+          </Grid>
         )}
-      />
+      </Grid>
     </InfoLabel>
   ) : type === 'switch' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <FormControlLabel
         control={
           values[name] ? (
@@ -1459,10 +1539,11 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'checkBox' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <FormControlLabel
         control={
           <Checkbox
+            {...rest}
             required={required}
             name={name}
             checked={values[name]}
@@ -1474,7 +1555,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'radio' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <FormControl component="fieldset" required={required}>
         <FormLabel component="legend">{label}</FormLabel>
         <RadioGroup aria-label="gender" name={name} value={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}>
@@ -1485,7 +1566,7 @@ const FormTypes = (props) => {
       </FormControl>
     </InfoLabel>
   ) : type === 'location' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <Autocomplete
         {...rest}
         getOptionLabel={(option: any) => (typeof option === 'string' ? option : option.description)}
@@ -1499,9 +1580,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1676,10 +1757,10 @@ const FormTypes = (props) => {
                 {isFileUploading
                   ? `Uploading... ${fileUploadProgress}%`
                   : values[name]
-                    ? values[name]
-                    : touched[name] && Boolean(errors[name])
-                      ? errors[name]
-                      : 'No file choosen'}
+                  ? values[name]
+                  : touched[name] && Boolean(errors[name])
+                  ? errors[name]
+                  : 'No file choosen'}
               </Typography>
             </Box>
             {values[name] ? (
@@ -1699,7 +1780,7 @@ const FormTypes = (props) => {
       </Box>
     </Fragment>
   ) : type === 'url' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
         variant="outlined"
@@ -1714,11 +1795,12 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === 'date' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
           {...rest}
           clearable
+          autoOk
           required={required}
           variant="inline"
           inputVariant="outlined"
@@ -1737,10 +1819,11 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'dateTime' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDateTimePicker
           {...rest}
+          autoOk
           clearable
           required={required}
           variant="inline"
@@ -1762,7 +1845,7 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'year' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <DatePicker
           {...rest}

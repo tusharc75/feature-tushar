@@ -13,17 +13,20 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
-import { IconButton, CircularProgress, Typography, Paper, Tooltip } from '@material-ui/core'
+import { IconButton, Typography, Paper, Tooltip } from '@material-ui/core'
 import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon } from "../../../assets/file_icons";
 import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import ImagePreview from "../Email/ImagePreview";
 import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+
 const AttachmentSchema = Yup.object().shape({
     name: Yup.string().required("please add attachment name"),
     fileUrl: Yup.string().required("please upload attachment"),
 });
+
 const fileIcons = [
     {
         extensions: [".txt", ".rtf"],
@@ -59,19 +62,19 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
 
     const [initialValues, setInitialValues] = useState(null);
     const [loading, setLoading] = useState(false)
-    const [downloadProgress, setDownloadProgress] = useState(0);
-    const [isDownloading, setIsDownloading] = useState(false);
+    const [, setDownloadProgress] = useState(0);
+    const [, setIsDownloading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-    const [attachments, setAttachments] = useState([]);
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
-    const [imageAttachments, setImageAttachments] = useState([])
+    const [imageAttachments,] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
-    const [fileImageAttachments, setFileImageAttachments] = useState([])
+    const [fileImageAttachments,] = useState([])
     const [canEdit, setCanEdit] = useState(true);
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
     const [attachmentToDelete, setAttachemnetToDelete] = useState("");
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         fetchAttachmentDetail();
@@ -306,10 +309,14 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <>
-                <CustomDialogHeader onClose={handleClose}
+                <CustomDialogHeader
+                    onClose={() => {
+                        setShowConfirmDialog(true)
+                    }}
                     title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
+                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
@@ -428,7 +435,10 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
+                    <Button color="primary" size="small"
+                        onClick={() => {
+                            setShowConfirmDialog(true)
+                        }}>Cancel</Button>
                     <CustomButton
                         type="button"
                         color="primary"
@@ -436,6 +446,20 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         loading={loading}
                         variant="contained" onClick={submitForm}>Save</CustomButton>
                 </CustomDialogFooter>
+                {
+                    showConfirmDialog ?
+                        <ConfirmCancelDialog
+                            open={showConfirmDialog}
+                            onSave={() => {
+                                setShowConfirmDialog(false)
+                                submitForm()
+                            }}
+                            onClose={() => {
+                                setShowConfirmDialog(false)
+                                handleClose()
+                            }}
+                        /> : null
+                }
                 {
                     open ?
                         <ImagePreview

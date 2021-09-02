@@ -83,8 +83,8 @@ function OpportunityDetailsPage() {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
-  const [showAtLast, setShowAtLast] = useState(false);
-  const [additionalFieldName, setAdditionalFieldName] = useState('');
+  const [, setShowAtLast] = useState(false);
+  const [, setAdditionalFieldName] = useState('');
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -237,7 +237,7 @@ function OpportunityDetailsPage() {
     let ids = [];
 
     if (opportunityData.supplierAccountName.length > 0 || useAccountList) {
-      ids = useAccountList ? accountList.map((d) => d.optionValue) : opportunityData.supplierAccountName.map((d) => d.optionValue);
+      ids = useAccountList ? accountList.map((d) => d?.optionValue) : opportunityData.supplierAccountName.map((d) => d?.optionValue);
 
       const filterById = JSON.stringify([{ field: 'accountName', term: ids.length > 1 ? { $in: ids } : ids[0] }]);
       setLoadingSupplierAccounts(true);

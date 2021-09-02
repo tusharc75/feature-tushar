@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, product } from "../../constants/helpers";
+import { formatAmountWithCurrency, product, review } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import styles from "./product-detail-page.module.scss";
@@ -17,8 +17,11 @@ import { useData } from "../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
 
 export default function ProductDetails() {
+
+  const [reviews, setReviews] = useState([])
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
@@ -26,14 +29,28 @@ export default function ProductDetails() {
   const [addedCartItems, setAddedCartItems] = useState([])
   const [products, setProducts] = useState([]);
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user } }: any = useData();
+  const { state: { user }, dispatch }: any = useData();
   const history = useHistory();
   let { id } = useParams();
 
   useEffect(() => {
     fetchCart()
     fetchProducts()
+    fetchReviews()
   }, []);
+
+  const fetchReviews = () => {
+    axiosInstance()
+      .get(`${review.reviewsApi}/${id}`)
+      .then(({ data: { data } }) => {
+        if (data.review) {
+          setReviews(data.review)
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const fetchProducts = () => {
     axiosInstance()
@@ -52,6 +69,7 @@ export default function ProductDetails() {
       .get(`/user/cart`).then(({ data: { data } }) => {
 
         if (data) {
+          dispatch({ type: SET_CART_COUNT, payload: data.length });
           setAddedCartItems(data)
         }
         if (data && data.length >= 1) {
@@ -62,7 +80,6 @@ export default function ProductDetails() {
 
   const onCheckout = () => {
     if (checkoutLabel === "Create Quote" && addedCartItems.length >= 1) {
-      console.log('Yes checkout ')
       setshowCreateQuoteDialog(true)
     }
   }
@@ -187,12 +204,10 @@ export default function ProductDetails() {
                   </span>
                   <div className={styles.price}>
                     <span className={styles.vendor}>
-                      <h5>Sold by: <span>Cactus Wellhead</span></h5>
+                      <h5>Sold by: <span>{user?.user?.brandName}</span></h5>
                     </span>
-
-
                   </div>
-                  <div className={styles.set_width}> <hr/> </div>
+                  <div className={styles.set_width}> <hr /> </div>
 
                   {/*<div className={styles.rate}>*/}
                   {/*  <Rating*/}
@@ -210,48 +225,48 @@ export default function ProductDetails() {
                   <p>{productDetails?.description}</p>
                 </article>
                 <div className={styles.controls}>
-                  <div className={styles.controls_over}>
+                  {/* <div className={styles.controls_over}>
                     <h5><li>MFG</li></h5>
                     <a className="option">(UK 8)</a>
-                  </div>
-                  <div className={styles.controls_over}>
-                    <h5><li>Product Number</li></h5>
-                    <a className="option">(1)</a>
-                  </div>
-                  <div className={styles.controls_over}>
-                    <h5><li>Measuring Unit</li></h5>
-                    <a className="option">(1)</a>
-                  </div>
-                  <div className={styles.controls_over}>
-                    <h5><li>Measuring Unit</li></h5>
-                    <a className="option">(1)</a>
-                  </div>
+                  </div> */}
+                  {productDetails.productNumber && <div className={styles.controls_over}>
+                    <h5><li>Product Number </li></h5>
+                    <a className="option">{` ${productDetails.productNumber}`}</a>
+                  </div>}
+                  {productDetails.unit && <div className={styles.controls_over}>
+                    <h5><li>Measuring Unit </li></h5>
+                    <a className="option">{` ${productDetails.unit}`}</a>
+                  </div>}
+
                 </div>
 
                 {/*<div className={styles.set_width_2}> <hr/> </div>*/}
                 <div className={styles.price_and_discount}>
                   <span className={styles.current}>
-                    <h2>$699.00</h2>
-                      {
-                        formatAmountWithCurrency(
-                          productDetails.currency,
-                          calculateNetPrice(
-                            parseInt(productDetails.mrp),
-                            productDetails.discount
-                          )
-                        ).fullFormatAmount
-                      }
-                    </span>
+                    <h2>{
+                      formatAmountWithCurrency(
+                        productDetails.currency, productDetails.mrp).fullFormatAmount
+                    }</h2>
+                    {
+                      formatAmountWithCurrency(
+                        productDetails.currency,
+                        calculateNetPrice(
+                          parseInt(productDetails.mrp),
+                          productDetails.discount
+                        )
+                      ).fullFormatAmount
+                    }
+                  </span>
 
                   <span className={styles.mrp_price}>
 
-                      {
-                        formatAmountWithCurrency(
-                          productDetails.currency,
-                          productDetails.mrp
-                        ).fullFormatAmount
-                      }
-                    </span>
+                    {
+                      formatAmountWithCurrency(
+                        productDetails.currency,
+                        productDetails.mrp
+                      ).fullFormatAmount
+                    }
+                  </span>
 
                 </div>
 
@@ -260,16 +275,12 @@ export default function ProductDetails() {
                     name="half-rating-read"
                     defaultValue={4.5}
                     precision={0.5}
-                    value={productDetails.rating}
+                    value={productDetails?.averageRating}
                     readOnly
                     size="small"
                   />
-                  <p>4.4</p>
+                  <p>{productDetails?.averageRating}</p>
                 </div>
-
-
-
-
                 <div className={'footer' && styles.button_layout} >
                   <Button
                     variant="contained"
@@ -328,11 +339,13 @@ export default function ProductDetails() {
             <span>Loading...</span>
           )}
           <div className="a_divider_inner"></div>
-          <FrequentlyBought />
+
+          <FrequentlyBought id={productDetails?._id} />
           <div className="a_divider_inner"></div>
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>
-          <RatingAndReviewChart />
+          <RatingAndReviewChart id={id} reviews={reviews}
+            averageRating={Math.round(productDetails?.averageRating).toFixed(1) || 0} />
         </div>
 
       </Box>

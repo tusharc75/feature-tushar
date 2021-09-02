@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, lazy, useState, Fragment, Suspense } from "react";
+import { useContext, useEffect, useState, lazy } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import ReactGA from "react-ga";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
@@ -34,7 +34,6 @@ import Leads from "./pages/Leads";
 import LeadDetailsPage from "./pages/Leads/LeadDetailsPage";
 import NewLead from "./pages/Leads/NewLead";
 import Opportunities from "./pages/Opportunities";
-import AddNewOpportunity from "./pages/Opportunities/AddNewOpportunity";
 import Doa from "./pages/DoaSetup";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account/index";
@@ -72,9 +71,7 @@ import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail/index";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 import Dashboard from "./pages/Dashboard";
-import KpiDashboard from "./pages/KpiDashboard";
 import KpiDashboards from "./pages/KpiDashboard/Dashboard";
-import EditDashboard from "./pages/KpiDashboard/EditDashboards";
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
@@ -87,11 +84,14 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/Products/ProductDetails";
 import MarketSegment from "./pages/MarketSegment";
 import Budget from "./pages/Budget";
-import CreateQuotePdfTemplate from "./pages/QuotePdfTemplate/CreateQuotePdfTemplate";
+import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
+import AddressResource from "./pages/AddressResource";
 import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
+import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInventoryDetailsPage";
+import ProductDetailsPage from "./pages/Product/ProductDetailsPage";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -105,7 +105,7 @@ function App() {
   }: any = useData();
 
   const history = useHistory();
-  history.listen((location, action) => {
+  history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
     if (isSlowInternetConnection == "true") {
       toast.setToastConfig({
@@ -121,6 +121,7 @@ function App() {
   ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
+    //@ts-ignore
     if (navigator.onLine) {
       if (isOffline) setIsOffline(false)
     }
@@ -136,15 +137,6 @@ function App() {
   window.addEventListener('offline', function (e) {
     setIsOffline(true);
   }, false);
-
-
-  const getVersion = () => {
-    setTimeout(() => {
-      axiosInstance()
-        .get("/version")
-        .then(({ data }) => { });
-    }, 30000);
-  };
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -217,7 +209,6 @@ function App() {
       }
     } catch (e) { }
 
-    // getVersion();
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
@@ -231,7 +222,7 @@ function App() {
 
     return !user ? (
       // <Suspense fallback={<div>Loading...</div>}>
-        <Comp />
+      <Comp />
       // </Suspense>
     ) : (
       <Redirect
@@ -300,9 +291,9 @@ function App() {
             <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
               <OpportunityDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path="/new-opp">
+            {/* <PrivateRoute exact path="/new-opp">
               <AddNewOpportunity />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path="/doa">
               <Doa />
             </PrivateRoute>
@@ -453,8 +444,14 @@ function App() {
             <PrivateRoute exact path={routes.product.path}>
               <Product />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.productDetail.path + "/:id"}>
+              <ProductDetailsPage />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.productInventory.path}>
               <ProductInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.productInventoryDetail.path + "/:id"}>
+              <ProductInventoryDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.equipmentRentalMaster.path}>
               <EquipmentRentalMaster />
@@ -472,7 +469,7 @@ function App() {
               <QuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
-              <CreateQuotePdfTemplate />
+              <CreateNewQuotePdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
@@ -502,6 +499,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.address.path}>
+              <AddressResource />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useCallback, useEffect } from 'react';
-import { Badge, Box, Fab } from '@material-ui/core';
+import { Badge, Fab } from '@material-ui/core';
 import { Chat, Clear } from '@material-ui/icons';
 
 import ChatsPopover from './ChatsPopover';
@@ -39,7 +39,7 @@ const GlobalUserChat = () => {
         data.forEach((d: any) => {
           const obj = {
             id: d.id,
-            chatTitle: d.users
+            chatTitle: d.group && d.group !== '' ? d.group : d.users
               .filter((d) => d._id !== user?.user?._id)
               .map((_d) => `${_d.firstName} ${_d.lastName}`)
               .join(', '),

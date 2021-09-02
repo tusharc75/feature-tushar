@@ -129,7 +129,7 @@ const QuoteBuilders = () => {
         ),
       },
       {
-        field: "processStatus", headerName: "Conclusion", flex: 1,
+        field: "processStatus", headerName: "Current Step", flex: 1,
         renderCell: (params: any) => (
           <Typography
             title={params.value}
@@ -352,9 +352,9 @@ const QuoteBuilders = () => {
   }
 
   const QuoteNameRenderer = (params) => (
-    <span>
+    <>
       <Link
-        className="link"
+        className="text-truncate link"
         title={params.value}
         to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}
       >
@@ -369,7 +369,7 @@ const QuoteBuilders = () => {
             getVersionStatus(params.data._id, params.data.currency)
           }}>({params.data.versionCount})</span>
       </Tooltip>
-    </span>
+    </>
   );
 
   const CustomerAccountNameRenderer = (params) => (

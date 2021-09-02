@@ -109,13 +109,17 @@ const routes = {
     title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
     path: "/product",
   },
+  productDetail: {
+    title: storedRoutes ? storedRoutes.product?.title : RESOURCE_LABEL.product,
+    path: "/product/detail",
+  },
   formBuilder: {
     title: storedRoutes ? storedRoutes.formBuilder?.title : RESOURCE_LABEL.formBuilder,
     path: "/form-builder",
   },
   formBuilderResource: {
     title: "Resource",
-    path: "/resource",
+    path: "/:resource",
   },
   termsAndConditions: {
     title: storedRoutes ? storedRoutes.termsAndConditions?.title : RESOURCE_LABEL.termsAndConditions,
@@ -158,12 +162,16 @@ const routes = {
     path: "/product-template",
   },
   productInventory: {
-    title: storedRoutes ? storedRoutes.productInventory?.title : RESOURCE_LABEL.productInventory,
+    title: (storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title) ? storedRoutes.productInventory.title : RESOURCE_LABEL.productInventory,
     path: "/product-inventory",
   },
+  productInventoryDetail: {
+    title: (storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title) ? storedRoutes.productInventory.title : RESOURCE_LABEL.productInventory,
+    path: "/product-inventory/detail",
+  },
   equipmentRentalMaster: {
-    title: storedRoutes ? storedRoutes.equipmentRentalMaster?.title : RESOURCE_LABEL.equipmentRentalMaster,
-    path: "/equipt-rental-master",
+    title: (storedRoutes && storedRoutes.equipmentRentalMaster && storedRoutes.equipmentRentalMaster) ? storedRoutes.equipmentRentalMaster.title : RESOURCE_LABEL.equipmentRentalMaster,
+    path: "/equiptment-rental-master",
   },
   quoteBuilder: {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
@@ -220,6 +228,10 @@ const routes = {
   productList: {
     title: "Products",
     path: "/product-list",
+  },
+  address: {
+    title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.address,
+    path: "/address",
   },
 };
 

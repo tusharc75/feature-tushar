@@ -74,7 +74,7 @@ const AddExistingProduct = (props) => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: field,
                     term: filters[field].filter
@@ -122,7 +122,7 @@ const AddExistingProduct = (props) => {
                                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
                                 let fieldLabel = ele.fieldLabel + " " + _unit
                                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
+                                    let col: any = { }
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
@@ -139,7 +139,7 @@ const AddExistingProduct = (props) => {
                                     let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
                                     let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
                                     if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                        let col: any = {}
+                                        let col: any = { }
                                         col.field = fieldName
                                         col.headerName = fieldLabel
                                         col.width = 180
@@ -156,7 +156,7 @@ const AddExistingProduct = (props) => {
                                 let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
                                 let fieldLabel = ele.fieldLabel + " " + _currency
                                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
+                                    let col: any = { }
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
@@ -170,7 +170,7 @@ const AddExistingProduct = (props) => {
                     }
                     else {
                         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = {};
+                            let col: any = { };
                             col.field = ele.fieldName;
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
@@ -180,6 +180,9 @@ const AddExistingProduct = (props) => {
                             }
                             if (ele.fieldName === "productTemplate") {
                                 col.cellRenderer = "productTemplateRenderer"
+                            }
+                            if (ele.fieldName === "entity") {
+                                return
                             }
                             col.order = ele.order;
                             col.leval = ele.leval;
@@ -223,6 +226,13 @@ const AddExistingProduct = (props) => {
             for (const [key, value] of Object.entries(_d)) {
                 if (typeof value === 'object' && value && value["optionValue"]) {
                     _d[key] = value["optionValue"]
+                }
+                if (Array.isArray(value) && value.length && value[0].optionValue) {
+                    const entity = []
+                    value && value.forEach((ele) => {
+                        entity.push(ele.optionValue)
+                    })
+                    _d[key] = entity
                 }
             }
         })

@@ -18,7 +18,8 @@ import {
     budget,
     setFieldsInAscendingOrder,
     getUniqueCurrencies,
-    formFieldNames
+    formFieldNames,
+    isFieldNotTouched
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -35,6 +36,7 @@ import { CustomDialogTransition } from "../../constants/helpers";
 import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import { useData } from "../../StateProvider/Provider";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -72,6 +74,7 @@ export default function ManageBudgetDialog({
     const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
     const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
     const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         getBudgetFields();
@@ -200,7 +203,7 @@ export default function ManageBudgetDialog({
     const initializeProductCategoryDropdown = (values, productCategorySource) => {
         if (values && values.hasOwnProperty("productCategory")) {
             const getNewAddedProductCategory = productCategorySource.find(
-                (d) => d.optionValue === newProductCategoryId
+                (d) => d?.optionValue === newProductCategoryId
             );
             if (getNewAddedProductCategory) {
                 values["productCategory"] = getNewAddedProductCategory.optionValue;
@@ -213,7 +216,7 @@ export default function ManageBudgetDialog({
     const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
         if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
             const getNewAddedMarketSegment = marketSegmentSource.find(
-                (d) => d.optionValue === newMarketSegmentId
+                (d) => d?.optionValue === newMarketSegmentId
             );
             if (getNewAddedMarketSegment) {
                 values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
@@ -226,7 +229,7 @@ export default function ManageBudgetDialog({
     const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
         if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
             const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-                (d) => d.optionValue === newSubMarketSegmentId
+                (d) => d?.optionValue === newSubMarketSegmentId
             );
             if (getNewAddedSubMarketSegment) {
                 values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
@@ -235,6 +238,20 @@ export default function ManageBudgetDialog({
         }
         return values;
     };
+    const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
 
     return (
         <>
@@ -244,9 +261,12 @@ export default function ManageBudgetDialog({
                 fullScreen={isMobile || isTablet}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
-                onClose={onClose}
                 open={open}
-                disableBackdropClick={true}
+                onClose={(e, reason) => {
+                    if (reason !== 'backdropClick') {
+                        setShowConfirmDialog(true)
+                    }
+                }}
             >
                 <CustomDialogHeader
                     title={
@@ -254,7 +274,7 @@ export default function ManageBudgetDialog({
                             ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
                             : "Create Budget"
                     }
-                    onClose={onClose}
+                    onClose={() => setShowConfirmDialog(true)}
                 />
 
                 {entityData.fields.length === 0 && (
@@ -282,6 +302,7 @@ export default function ManageBudgetDialog({
                             <>
                                 <CustomDialogContent>
                                     <Form>
+                                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                         {formsData &&
                                             formsData.map((form, index1) => {
                                                 return form.name ? (
@@ -369,6 +390,7 @@ export default function ManageBudgetDialog({
                                                                                         <FormTypes
                                                                                             fields={entityData.fields}
                                                                                             fieldData={field}
+                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                             errors={errors}
                                                                                             touched={touched}
                                                                                             label={field.fieldLabel}
@@ -407,9 +429,10 @@ export default function ManageBudgetDialog({
                                                                                                 >
                                                                                                     <IconButton
                                                                                                         onClick={() => { setShowAddProductCategoryDialog(true); }}
+                                                                                                        disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                         size="small"
                                                                                                     >
-                                                                                                        <AddIcon color="primary" />
+                                                                                                        <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                     </IconButton>
                                                                                                 </Tooltip>
                                                                                             </Grid>
@@ -448,6 +471,7 @@ export default function ManageBudgetDialog({
                                                                                             <FormTypes
                                                                                                 fields={entityData.fields}
                                                                                                 fieldData={field}
+                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                 errors={errors}
                                                                                                 touched={touched}
                                                                                                 label={field.fieldLabel}
@@ -489,9 +513,10 @@ export default function ManageBudgetDialog({
                                                                                                     >
                                                                                                         <IconButton
                                                                                                             onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                             size="small"
                                                                                                         >
-                                                                                                            <AddIcon color="primary" />
+                                                                                                            <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                         </IconButton>
                                                                                                     </Tooltip>
                                                                                                 </Grid>
@@ -530,6 +555,7 @@ export default function ManageBudgetDialog({
                                                                                                 <FormTypes
                                                                                                     fields={entityData.fields}
                                                                                                     fieldData={field}
+                                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                     errors={errors}
                                                                                                     touched={touched}
                                                                                                     label={field.fieldLabel}
@@ -568,9 +594,10 @@ export default function ManageBudgetDialog({
                                                                                                                 onClick={() => {
                                                                                                                     setShowAddMarketSegmentDialog(true);
                                                                                                                 }}
+                                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                                 size="small"
                                                                                                             >
-                                                                                                                <AddIcon color="primary" />
+                                                                                                                <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                             </IconButton>
                                                                                                         </Tooltip>
                                                                                                     </Grid>
@@ -645,7 +672,10 @@ export default function ManageBudgetDialog({
                                         variant="outlined"
                                         color="primary"
                                         size="small"
-                                        onClick={onClose}
+                                        onClick={() => {
+                                            if (isFieldNotTouched(entityData, values)) onClose()
+                                            else setShowConfirmDialog(true)
+                                        }}
                                     >
                                         Cancel
                                     </Button>
@@ -668,24 +698,29 @@ export default function ManageBudgetDialog({
                                         }
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            const err = Object.keys(errors);
-                                            if (err.length) {
-                                                const input = document.querySelector(
-                                                    `input[name=${err[0]}]`,
-                                                );
-
-                                                input.scrollIntoView({
-                                                    behavior: 'smooth',
-                                                    block: 'center',
-                                                    inline: 'start',
-                                                });
-                                            }
+                                            handleScroll(errors)
                                             submitForm();
                                         }}
                                     >
                                         Save
                                     </CustomButton>
                                 </CustomDialogFooter>
+                                {
+                                    showConfirmDialog ?
+                                        <ConfirmCancelDialog
+                                            open={showConfirmDialog}
+                                            onSave={() => {
+                                                setShowConfirmDialog(false)
+                                                handleScroll(errors)
+                                                submitForm();
+                                            }}
+                                            onClose={() => {
+                                                setShowConfirmDialog(false)
+                                                onClose()
+                                            }}
+                                        /> : null
+                                }
+
                             </>
                         )}
                     </Formik>
@@ -755,7 +790,7 @@ export default function ManageBudgetDialog({
                                 setNewSubMarketSegmentId(null);
                             } else {
                                 //  If parent selected, consider that as a child
-                                if (marketSegmentDataSource.some(d => d.optionValue === data.parentMarketSegment)) {
+                                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
                                     setSubMarketSegmentDataSource([
                                         ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
                                         {
@@ -776,7 +811,7 @@ export default function ManageBudgetDialog({
                                     })
 
                                     if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                                        const getMarketSegment = mainMarketSegmentDataSource.find(d => d.optionValue === data.parentMarketSegment);
+                                        const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
 
                                         initializeMarketSegmentDataSource.push({
                                             optionValue: getMarketSegment.optionValue,

@@ -1,8 +1,7 @@
 import { useState, useEffect, Fragment, useContext } from "react";
 import Grid from '@material-ui/core/Grid';
 import { Box, Typography, Button, CircularProgress } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
-import queryString from "query-string";
+import { useHistory, useParams } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { camelCase } from "../../constants/helpers";
@@ -12,6 +11,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
+import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const CreateFormBuilder = () => {
 
@@ -24,20 +25,33 @@ const CreateFormBuilder = () => {
     });
 
     const history = useHistory();
-    const parsed = queryString.parse(history.location.search);
+    const { resource } = useParams();
     const toastConfig = useContext(CustomToastContext)
-
-    const { resource } = parsed;
     const [section, setSection] = useState(null);
     const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         if (permissions && permissions.formBuilder) {
             setFormBuilderPermissions(permissions.formBuilder);
         }
     }, [permissions]);
+
+    const onBackButtonEvent = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, null, window.location.pathname);
+        setShowConfirmDialog(true)
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
 
     useEffect(() => {
         fetchBrandResourceData()
@@ -52,7 +66,7 @@ const CreateFormBuilder = () => {
         });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         let data = []
         let order = 0;
         section.forEach(_section => {
@@ -67,6 +81,33 @@ const CreateFormBuilder = () => {
                 data.push(_field_data)
             })
         })
+
+
+        if ((resource.toString()).toLowerCase() === "product") {
+            var otherField = []
+            await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
+                otherField = data;
+            }).catch((error) => {
+            });
+            const result = checkUniqueValidation(data, otherField);
+            if (result.error) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: result.message,
+                });
+                return false;
+            }
+        }
+        const result = checkFormulaLoop(data);
+        if (result.error) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: "error",
+                message: result.message,
+            });
+            return false;
+        }
 
         let sendData: any = {}
         sendData.resource = resource;
@@ -109,7 +150,8 @@ const CreateFormBuilder = () => {
                                     }
                                 </Box>
                                 <Box ml={1} >
-                                    <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
+                                    <Button color="primary" variant="contained" size="small"
+                                        onClick={() => setShowConfirmDialog(true)} > Close</Button>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -125,6 +167,20 @@ const CreateFormBuilder = () => {
                             module="form-builder"
                         />
                     </Box>
+                    {
+                        showConfirmDialog ?
+                            <ConfirmCancelDialog
+                                open={showConfirmDialog}
+                                onSave={() => {
+                                    setShowConfirmDialog(false)
+                                    handleSave();
+                                }}
+                                onClose={() => {
+                                    setShowConfirmDialog(false)
+                                    history.push({ pathname: "/form-builder" })
+                                }}
+                            /> : null
+                    }
                 </Fragment>
                 :
                 <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, Fragment, useContext } from "react";
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from "formik";
@@ -12,11 +13,11 @@ import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, marketSegment, setFieldsInAscendingOrder } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
-
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const ManageMarketSegmentDialog = (props) => {
 
@@ -25,6 +26,7 @@ const ManageMarketSegmentDialog = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formsData, setFormsData] = useState([]);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         if (initialData.fields.length > 0) {
@@ -89,6 +91,11 @@ const ManageMarketSegmentDialog = (props) => {
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                setShowConfirmDialog(true)
+            }
+        }}
         fullWidth
     >
         {initialData && initialData.fields.length ?
@@ -105,10 +112,13 @@ const ManageMarketSegmentDialog = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title} onClose={onClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title}
+                            onClose={() => setShowConfirmDialog(true)}
+                        ></CustomDialogHeader>
                         <CustomDialogContent>
 
                             <Form noValidate>
+                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
@@ -168,7 +178,12 @@ const ManageMarketSegmentDialog = (props) => {
 
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
+                            <Button size="small" color="primary"
+                                onClick={() => {
+                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    else setShowConfirmDialog(true)
+                                }}
+                            >Cancel</Button>
                             <CustomButton
                                 disabled={loading}
                                 loading={loading}
@@ -178,6 +193,20 @@ const ManageMarketSegmentDialog = (props) => {
                                 onClick={submitForm}
                             > Save</CustomButton>
                         </CustomDialogFooter>
+                        {
+                            showConfirmDialog ?
+                                <ConfirmCancelDialog
+                                    open={showConfirmDialog}
+                                    onSave={() => {
+                                        setShowConfirmDialog(false)
+                                        submitForm();
+                                    }}
+                                    onClose={() => {
+                                        setShowConfirmDialog(false)
+                                        onClose()
+                                    }}
+                                /> : null
+                        }
                     </Fragment>
                 )}
             </Formik>

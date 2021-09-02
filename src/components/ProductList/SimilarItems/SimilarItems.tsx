@@ -39,7 +39,7 @@ export default function SimilarItems({ similarItems }) {
                 <div className={styles.item_details}>
                   <div className="product_name_link p-2">
                     <strong>{product.productName}, </strong>
-                    <span>{product.productCategory.optionLabel}, </span>
+                    <span>{product?.productCategory?.optionLabel}, </span>
                     <span>{product.description}</span>
                   </div>
                   <span className="d-flex pl-2 align-items-center">

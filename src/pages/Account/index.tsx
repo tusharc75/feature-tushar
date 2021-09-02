@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
-import Layout from '../../components/Layout';
 import { useData } from '../../StateProvider/Provider';
-import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList, Box } from '@material-ui/core';
+import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
 import ReactGa from 'react-ga';
 import { Link } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
@@ -15,7 +14,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import CancelIcon from '@material-ui/icons/Cancel';
 import accountClass from './account.module.scss';
-import CustomHeader from '../../components/Helpers/CustomHeader';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FcApproval } from 'react-icons/fc';
@@ -26,7 +24,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -42,6 +40,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
+
 const AccTypes = [
   {
     key: 'All Accounts',
@@ -60,13 +59,13 @@ export default function Account(props) {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    account: { accountApi, accountResource, accountRoute, accountResourceLabel },
-    accountBreadcrumb
+    account: { accountApi, accountResource, accountRoute }
   } = props;
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
+
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [type, setType] = useState(options[0]);
@@ -121,9 +120,10 @@ export default function Account(props) {
     { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false },
     { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' }
   ];
+
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
         if (d.colId == item.field) {
           item.show = !d.hide;
         }
@@ -367,60 +367,60 @@ export default function Account(props) {
   };
 
   const fetchAccounts = async () => {
-      dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'loading', loading: true });
 
-      const queryString = getQueryString();
+    const queryString = getQueryString();
 
 
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
 
-      axiosInstance()
-        .get(`${accountApi}${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
+    axiosInstance()
+      .get(`${accountApi}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
 
-            let res = {
-              ...restProperties,
-              id: u._id,
+          let res = {
+            ...restProperties,
+            id: u._id,
 
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
-              canDelete: u.owner?.optionValue === user?.user._id,
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+            canDelete: u.owner?.optionValue === user?.user._id,
 
-              isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d.optionValue == user?.user?._id),
-              lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-              leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
-              approved: u.staticData?.approved,
+            approved: u.staticData?.approved,
 
-              parentAccount: parentAccount?.optionLabel,
-              parentAccountId: parentAccount?.optionValue,
+            parentAccount: parentAccount?.optionLabel,
+            parentAccountId: parentAccount?.optionValue,
 
-              entity: entity?.optionLabel,
-              masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-              masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+            entity: entity?.optionLabel,
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
 
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date
-            };
-            return res;
-          });
-
-          dispatch({ type: 'initialize', data: rows, count: count });
-
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          dispatch({ type: 'loading', loading: false });
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date
+          };
+          return res;
         });
+
+        dispatch({ type: 'initialize', data: rows, count: count });
+
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
+      });
   };
 
   const cloneAccount = async (accountId) => {

@@ -8,7 +8,6 @@ const InputField = (props) => {
   const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
@@ -93,6 +92,14 @@ const InputField = (props) => {
                                 setFieldValue(field.fieldName, "");
                                 setCurrencySymbol(null);
                               }
+                            }
+                            : field.type === "dropDown" ? (e, val) => {
+                              setFieldValue(
+                                field.fieldName,
+                                val && val.optionValue
+                                  ? val.optionValue
+                                  : ""
+                              );
                             }
                             : null
                         }

@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
+import { useRef, useState, useEffect, Fragment, useContext } from "react";
 import { Box, Grid, Button, Tooltip } from '@material-ui/core';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -63,7 +63,6 @@ const SelectionDialog = (props) => {
         });
     }, []);
 
-
     const handleChangeCategory = (value, label) => {
         if (value && value !== "") {
             axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
@@ -124,7 +123,7 @@ const SelectionDialog = (props) => {
     const initializeProductCategoryDropdown = (values, productCategorySource) => {
         if (values && values.hasOwnProperty("productCategory")) {
             const getNewAddedProductCategory = productCategorySource.find(
-                (d) => d.optionValue === newProductCategoryId
+                (d) => d?.optionValue === newProductCategoryId
             );
             if (getNewAddedProductCategory) {
                 values["productCategory"] = getNewAddedProductCategory.optionValue;

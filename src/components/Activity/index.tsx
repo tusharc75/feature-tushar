@@ -27,7 +27,6 @@ import { Note } from "./Note";
 import { CreateNote } from "./Note/CreateNote";
 import { Email } from "./Email";
 import { CreateEmail } from "./Email/CreateEmail";
-import { Chip } from "@material-ui/core";
 import Attachments from "./Attachments/index";
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -37,7 +36,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import HistoryDialog from "./History/index"
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   activityBox: {
     padding: "1px 1px 9px 1px",
     background: "#f6f6f6",
@@ -94,7 +93,7 @@ const Activity = (props) => {
   useEffect(() => {
     let data = [];
     if (emails && emails.length) {
-      emails.map((curEmail) => {
+      emails.forEach((curEmail) => {
         if (curEmail && emailUsersOptions.indexOf(curEmail) < 0)
           data.push(curEmail);
       });
@@ -303,7 +302,11 @@ const Activity = (props) => {
           open={open}
           aria-labelledby="customized-dialog-title"
           maxWidth={"md"}
-          onClose={handleClose}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              handleClose()
+            }
+          }}
           fullWidth
         >
           {type === "Task" ? (

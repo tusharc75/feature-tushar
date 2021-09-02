@@ -6,7 +6,6 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
@@ -22,7 +21,6 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
 import routes from '../Helpers/Routes';
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-
 
 const Accordion = withStyles({
     root: {
@@ -82,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 export default function QuotesInAccordion({
-    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null, }) {
+    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null }) {
     const history = useHistory();
     const {
         state: { selectedEntity, user }, dispatch
@@ -347,9 +345,7 @@ export default function QuotesInAccordion({
                 isRenderedFromOpportunity={isRenderedFromOpportunity}
                 opportunityName={opportunityName}
                 isRenderedFromCustomerAccount={isRenderedFromCustomerAccount}
-
-
-
+                doaCollaboratorResources={user?.user?.doa?.map(obj => obj.user)}
             />
         }
         {

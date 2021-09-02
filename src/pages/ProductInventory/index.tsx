@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
@@ -10,9 +9,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import CreateProduct from "../../components/Product/CreateProduct";
 import { GiAbstract055 } from 'react-icons/gi';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
 import { Box, Menu, MenuItem } from "@material-ui/core";
@@ -22,25 +19,19 @@ import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import {
-    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
-import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import CreateProductInventory from "./CreateProductInventory";
-
 
 const ProductInventory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const [open, setOpen] = useState(false);
     const [productInventoryId, setProductInventoryId] = useState(null);
-    const [isClone, setIsClone] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -58,8 +49,8 @@ const ProductInventory = () => {
 
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -100,7 +91,7 @@ const ProductInventory = () => {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
@@ -138,15 +129,11 @@ const ProductInventory = () => {
         });
     }
 
-    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <span className="link" onClick={() => {
-            setProductInventoryId(params.data.id);
-            setOpen(true);
-        }}>
-            <CustomRenderCell value={params.value} />
-        </span>
-
-    </span>
+    const NameRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+          {params.value}
+        </Link>
+      );
 
 
     const ActionsRenderer = params => (

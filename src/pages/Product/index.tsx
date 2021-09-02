@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
@@ -22,7 +21,6 @@ import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { product, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import {
     CommonRenderer,
     CreatedByRenderer,
@@ -59,12 +57,12 @@ const Product = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity },
     }: any = useData();
 
     useEffect(() => {
         fetchProduct()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, selectedEntity]);
 
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
@@ -88,14 +86,22 @@ const Product = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
-                ...u,
+            data.data = data.data?.map((u) => {
+                const {createdBy, entity, ...restProperties} = u;
+                const [firstEntity,...restEntity] = entity;
+                let res={
+                ...restProperties,
                 id: u._id,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
                 updatedByDate: u.updatedBy?.date,
-            }));
+                entity:firstEntity?.optionLabel,
+                entityId:firstEntity?.optionValue,
+                restEntity: restEntity,
+                }
+                return res;
+            });
             let column = []
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {
@@ -169,6 +175,9 @@ const Product = () => {
                             if (ele.fieldName === "productTemplate") {
                                 col.cellRenderer = "productTemplateRenderer"
                             }
+                            if (ele.fieldName === "entity") {
+                                col.cellRenderer = "entityRenderer"
+                            }
                             col.order = ele.order;
                             col.leval = ele.leval;
                             column.push(col);
@@ -199,11 +208,14 @@ const Product = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
+        
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
@@ -242,17 +254,26 @@ const Product = () => {
     }
 
     const ProductNameRenderer = params => (
-        productPermissions.isUpdate ?
-            <Link className="link"
-                onClick={() => {
-                    OpenProduct(params.data._id);
-                    setIsClone(false)
-                }}>
-                <CustomRenderCell value={params?.value} />
-            </Link>
-            : params?.value
+        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
+            {params.value}
+        </Link>
     )
 
+    const EntityNameRenderer = (params) =>
+    params.value ? (
+      <>
+        <h5 className="createBy d-flex">
+          <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+            {params.value}
+          </Link>
+          {params.data.restEntity.length > 0 && (
+            <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
+          )}
+        </h5>
+      </>
+    ) : (
+      <NoDataCell />
+    );
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
@@ -322,6 +343,7 @@ const Product = () => {
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
+        entityRenderer: EntityNameRenderer,
         commonRenderer: CommonRenderer,
         productCategoryRenderer: ProductCategoryRenderer,
         productTemplateRenderer: ProductTemplateRenderer,
