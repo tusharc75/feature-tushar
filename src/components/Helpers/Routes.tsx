@@ -119,7 +119,7 @@ const routes = {
   },
   formBuilderResource: {
     title: "Resource",
-    path: "/resource",
+    path: "/:resource",
   },
   termsAndConditions: {
     title: storedRoutes ? storedRoutes.termsAndConditions?.title : RESOURCE_LABEL.termsAndConditions,
