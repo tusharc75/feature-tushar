@@ -10,8 +10,19 @@ import * as XLSX from 'xlsx';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { formatAmountWithCurrency } from '../../constants/helpers';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  regionTable: {
+    height: "625px",
+    [theme.breakpoints.down("xs")]: {
+      height: "auto",
+    }
+  }
+}));
 
 const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates }) => {
+  const classes = useStyles();
   const [anchorElTable, setAnchorElTable] = useState(null);
   const [regionSales, setRegionSales] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -144,7 +155,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
         <MenuItem onClick={handleCloseTable('json')}>Raw JSON</MenuItem>
       </Menu>
       <Box>
-        <TableContainer style={{ height: '625px' }} component={Paper}>
+        <TableContainer className={classes.regionTable} component={Paper}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>

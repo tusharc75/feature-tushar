@@ -167,7 +167,7 @@ const OpportunityTrends = (props) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item sm={6}>
+      <Grid item xs={12} sm={6}>
         <Paper>
           <Box p={2}>
             <Typography variant="h6">Opportunity Trends</Typography>
@@ -176,7 +176,7 @@ const OpportunityTrends = (props) => {
           </Box>
         </Paper>
       </Grid>
-      <Grid item sm={6}>
+      <Grid item xs={12} sm={6}>
         <Paper>
           <Box p={2}>
             <Typography variant="h6">Created Leads</Typography>
