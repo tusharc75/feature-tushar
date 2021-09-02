@@ -211,14 +211,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isDefaultValue = values.isDefaultValue;
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
+            ele.addManualOptionInExcel = values.addManualOptionInExcel;
+            ele.addAdditionalOption = values.addAdditionalOption;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip
               ele.warningTooltipMessage = values.warningTooltipMessage
-            }
-
-            if (values.hasOwnProperty('addAdditionalOption')) {
-              ele.addAdditionalOption = values.addAdditionalOption;
             }
 
             if (ele.isDefaultValue) {
