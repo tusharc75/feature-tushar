@@ -185,6 +185,9 @@ const Leads = () => {
     }
   };
 
+  
+  throw TypeError('New')
+
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
 
