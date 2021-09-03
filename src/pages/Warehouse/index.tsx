@@ -413,7 +413,7 @@ const AddressResource = () => {
           page={page}
           actionWidth={100}
           loading={loading}
-          renderedFrom="productCategoryPage"
+          renderedFrom="warehousePage"
         />
 
         {showDeleteConfirmBox && (
