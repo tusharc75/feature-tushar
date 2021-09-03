@@ -13,7 +13,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import styles from '../Leads/Header.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomContainer from '../../components/CustomContainer';
-import CreateProductCategory from './ManageAddressResource';
+import ManageWarehouse from './ManageWarehouse';
 import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
@@ -121,11 +121,11 @@ const AddressResource = () => {
     state: { permissions, user }
   }: any = useData();
 
-  const [addressPermissions, setAddressPermissions] = useState({
-    isCreate: permissions?.address?.isCreate,
-    isUpdate: permissions?.address?.isUpdate,
-    isRead: permissions?.address?.isRead,
-    isDelete: permissions?.address?.isDelete,
+  const [warehousePermissions, setWarehousePermissions] = useState({
+    isCreate: permissions?.warehouse?.isCreate,
+    isUpdate: permissions?.warehouse?.isUpdate,
+    isRead: permissions?.warehouse?.isRead,
+    isDelete: permissions?.warehouse?.isDelete,
   });
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -169,8 +169,8 @@ const AddressResource = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    if (permissions && permissions.address) {
-      setAddressPermissions(permissions.address);
+    if (permissions && permissions.warehouse) {
+      setWarehousePermissions(permissions.warehouse);
     }
   }, [permissions]);
 
@@ -194,7 +194,7 @@ const AddressResource = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {addressPermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {warehousePermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -271,7 +271,7 @@ const AddressResource = () => {
     }
 
     axiosInstance()
-      .get(`/address${queryString}`)
+      .get(`/warehouse${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, ...restProperties } = u;
@@ -309,7 +309,7 @@ const AddressResource = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`/address/remove`, { ids: ids })
+      .put(`/warehouse/remove`, { ids: ids })
       .then(() => {
         fetchAddress();
         setShowDeleteConfirmBox(false);
@@ -343,8 +343,8 @@ const AddressResource = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={permissions.addressResource}
-            module="address"
-            api={'address'}
+            module="warehouse"
+            api={'warehouse'}
             afterImportCompleted={() => {
               fetchAddress();
             }}
@@ -360,7 +360,7 @@ const AddressResource = () => {
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
-                {addressPermissions.isCreate && (
+                {warehousePermissions.isCreate && (
                   <Button
                     className={styles.add_submit_btn}
                     onClick={() => {
@@ -375,7 +375,7 @@ const AddressResource = () => {
                     Add
                   </Button>
                 )}
-                {addressPermissions.isDelete && (
+                {warehousePermissions.isDelete && (
                   <Button
                     className={styles.action_submit_btn}
                     variant="outlined"
@@ -432,7 +432,7 @@ const AddressResource = () => {
         )}
 
         {open && (
-          <CreateProductCategory
+          <ManageWarehouse
             addressResourceId={addressResourceId}
             onClose={() => setOpen(false)}
             onSuccess={() => {
