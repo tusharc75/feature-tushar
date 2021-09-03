@@ -43,14 +43,18 @@ const Dashboard = () => {
 
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {
-      try {
-        const host = 'api.frankfurter.app';
-        const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
-        const data = await res.json();
-
-        return data;
-      } catch (error) {
-        console.log(error);
+      if (amount > 0) {  
+        try {
+          const host = 'api.frankfurter.app';
+          const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
+          const data = await res.json();
+          
+          return data;
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        return 0
       }
     }
   };
@@ -155,7 +159,13 @@ const Dashboard = () => {
                   getExchangeRates={getExchangeRates}
                 />
 
-                <Top2Dashboard salesFilter={salesFilter} filterCurrency={filterCurrency} moment={moment} currency={currency} />
+                <Top2Dashboard
+                  getExchangeRates={getExchangeRates}
+                  salesFilter={salesFilter}
+                  filterCurrency={filterCurrency}
+                  moment={moment}
+                  currency={currency}
+                />
 
                 <OpportunityDashboards
                   moment={moment}
