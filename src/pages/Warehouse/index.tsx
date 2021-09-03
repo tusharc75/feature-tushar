@@ -144,16 +144,10 @@ const AddressResource = () => {
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
   const columns = [
-    { field: 'fullName', headerName: 'Full Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'addressType', headerName: 'Address Type', show: true, disabled: true },
-    { field: 'area', headerName: 'Area', show: true, disabled: true },
-    { field: 'city', headerName: 'City', show: true, disabled: true },
-    { field: 'country', headerName: 'Country', show: true, disabled: true },
-    { field: 'state', headerName: 'State', show: true, disabled: true },
-    { field: 'flat', headerName: 'Flat', show: true, disabled: true },
-    { field: 'landmark', headerName: 'Landmark', show: true, disabled: true },
-    { field: 'pinCode', headerName: 'Pin Code', show: true, disabled: true },
-    { field: 'mobileNumber', headerName: 'Mobile Number', show: true, disabled: true },
+    { field: 'warehouseName', headerName: 'Warehouse Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'warehousID', headerName: 'Warehouse ID', show: true, disabled: true },
+    { field: 'storageType', headerName: 'Storage Type', show: true, disabled: true },
+    { field: 'address', headerName: 'Address', show: true, disabled: true },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
   ];

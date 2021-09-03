@@ -54,7 +54,7 @@ const ManageWarehouse = (props) => {
     const handleSubmit = (values) => {
         if (addressResourceId) {
             values._id = addressResourceId
-            axiosInstance().put(`/address`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {
@@ -63,7 +63,7 @@ const ManageWarehouse = (props) => {
             });
         }
         else {
-            axiosInstance().post(`/address`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
             }).catch((error) => {
