@@ -10,7 +10,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
 
 const Top2Dashboard = (props) => {
-  const { currency, salesFilter, moment, filterCurrency } = props;
+  const { currency, salesFilter, moment, filterCurrency, getExchangeRates } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [tableView, setTableView] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ const Top2Dashboard = (props) => {
     setLoading(true);
     axiosInstance()
       .get(`dashboard/sales${url}`)
-      .then(({ data: { data } }) => {
+      .then(async ({ data: { data } }) => {
         const saleData = [];
         const labels = [];
         const budget = [];
@@ -75,10 +75,20 @@ const Top2Dashboard = (props) => {
           }
         }
 
-        entityIds.forEach((id) => {
+        for (const id of entityIds) {
           let chartObj = {};
           let obj = {};
-          const entitySale = data.filter((d) => d.entityId === id);
+          let dataset = [];
+          const entitySale = await data.filter((d) => d.entityId === id);
+          
+          for (const sale of entitySale) {
+            if (filterCurrency && filterCurrency !== currency) {
+              const totalSelldata = await getExchangeRates(moment(sale.date).format('YYYY-MM-DD'), sale.totalSell);
+              dataset.push(totalSelldata ? totalSelldata.rates[filterCurrency] : sale.totalSell);
+            } else {
+              dataset.push(sale.totalSell);
+            }
+          }
 
           obj = {
             entityName: entitySale[0].entity,
@@ -92,12 +102,12 @@ const Top2Dashboard = (props) => {
             label: entitySale[0].entity,
             borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
             borderWidth: 2,
-            data: entitySale.map((e) => e.totalSell)
+            data: dataset
           };
 
           allEntities.push(obj);
           allEntitiesChart.push(chartObj);
-        });
+       }
 
         setAllEntitySalesData({
           labels: labels.map((d) => moment(d).format('MMM/YY')),
@@ -109,7 +119,7 @@ const Top2Dashboard = (props) => {
       .catch((err) => {
         setLoading(false);
       });
-  }, [salesFilter.customerAccount, salesFilter.subMarketSegment, salesFilter.marketSegment, salesFilter.between]);
+  }, [salesFilter.customerAccount, salesFilter.subMarketSegment, salesFilter.marketSegment, salesFilter.between, filterCurrency]);
 
   useEffect(() => {
     fetchAllEntitiesData();

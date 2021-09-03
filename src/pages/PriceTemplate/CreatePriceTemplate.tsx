@@ -52,6 +52,7 @@ const PriceTemplate = () => {
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [disableSaveButton, setDisableSaveButton] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
   const {
     state: { user, permissions },
@@ -213,7 +214,7 @@ const PriceTemplate = () => {
         .post("/price-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -226,7 +227,7 @@ const PriceTemplate = () => {
         .put("/price-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -286,6 +287,11 @@ const PriceTemplate = () => {
                 title: id === "0" ? "New" : initialValues && initialValues.name,
               },
             ]}
+            isConfirmBeforeClick={true}
+            onBreadCrumbClick={(path) => {
+              setIsBreakCrumbPath(path)
+              setShowConfirmDialog(true)
+            }}
           />
         </Grid>
         <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
@@ -541,7 +547,7 @@ const PriceTemplate = () => {
                       onClose={() => {
                         setShowConfirmDialog(false)
                         history.push({
-                          pathname: routes.priceTemplate.path,
+                          pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path,
                         })
                       }}
                     /> : null
