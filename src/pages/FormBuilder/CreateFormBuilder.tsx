@@ -26,16 +26,17 @@ const CreateFormBuilder = () => {
     });
 
     const history = useHistory();
-    const {resource:res} = useParams();
+    const { resource: res } = useParams();
     const parsed = queryString.parse(history.location.search);
     const toastConfig = useContext(CustomToastContext)
 
-    let  resource = Object.keys(parsed).length > 0 ? parsed.resource :  res.split("=")[1];
+    let resource = Object.keys(parsed).length > 0 ? parsed.resource : res.split("=")[1];
     const [section, setSection] = useState(null);
     const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     useEffect(() => {
         if (permissions && permissions.formBuilder) {
@@ -120,7 +121,7 @@ const CreateFormBuilder = () => {
         setIsUpdating(true)
         axiosInstance().put(`/sa-formbuilder/resourcedata`, sendData).then(({ data: { data } }) => {
             setIsUpdating(false)
-            history.push({ pathname: "/form-builder" });
+            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" });
         }).catch((error) => {
             setIsUpdating(false)
             toastConfig.setToastConfig(error);
@@ -129,7 +130,13 @@ const CreateFormBuilder = () => {
 
     return (<Fragment>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]} />
+            <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
+                isConfirmBeforeClick={true}
+                onBreadCrumbClick={(path) => {
+                    setIsBreakCrumbPath(path)
+                    setShowConfirmDialog(true)
+                }}
+            />
         </Grid>
         <CustomContainer>
             {section ?
@@ -181,7 +188,8 @@ const CreateFormBuilder = () => {
                                 }}
                                 onClose={() => {
                                     setShowConfirmDialog(false)
-                                    history.push({ pathname: "/form-builder" })
+                                    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" })
+                                    setIsBreakCrumbPath("")
                                 }}
                             /> : null
                     }

@@ -31,6 +31,7 @@ import { Autocomplete } from '@material-ui/lab';
 import FormTypes from '../../Helpers/FormTypes';
 import { startCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required('please enter field label')
@@ -66,6 +67,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     selectionStart: 0,
     selectionEnd: 0
   });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -304,12 +306,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   };
 
   function validate(values) {
-    const errors = { };
+    const errors = {};
     if (values.type === 'formula' || values.isFormula === true) {
       if (!values.inputFields || values.inputFields.length === 0) {
         errors['inputFields'] = 'Please select input parameters';
       }
-      let inputValues = { };
+      let inputValues = {};
       values.inputFields &&
         values.inputFields.forEach((_input) => {
           inputValues[_input] = 1;
@@ -339,7 +341,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         errors['formulainputFields'] = 'Please select input parameters';
       }
       if (values.formulaFields && values.formulaFields.length) {
-        let inputValues = { };
+        let inputValues = {};
         values.formulainputFields &&
           values.formulainputFields.forEach((_input) => {
             inputValues[_input] = 1;
@@ -372,11 +374,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       aria-labelledby="customized-dialog-title"
       open={true}
       fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
     >
       <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Fragment>
-            <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
+            <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
+              onClose={() => setShowConfirmDialog(true)}></CustomDialogHeader>
             <CustomDialogContent>
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
@@ -570,7 +578,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 setFieldValue('isMulitFormula', e.target.checked);
                                 setFieldValue('formulaFields', []);
                                 setFieldValue('formulainputFields', []);
-                                setFieldValue('formulaoption', { });
+                                setFieldValue('formulaoption', {});
                               }}
                               color="primary"
                             />
@@ -899,13 +907,32 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={handleClose} color="primary">
+              <Button size="small"
+                onClick={() => {
+                  setShowConfirmDialog(true)
+                }}
+                color="primary">
                 Cancel
               </Button>
-              <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+              <Button size="small" type="submit" color="primary" variant="contained"
+                onClick={submitForm}>
                 Save
               </Button>
             </CustomDialogFooter>
+            {
+              showConfirmDialog ?
+                <ConfirmCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false)
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false)
+                    handleClose()
+                  }}
+                /> : null
+            }
           </Fragment>
         )}
       </Formik>
