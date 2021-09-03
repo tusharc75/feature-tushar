@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -11,6 +11,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { Properties } from './Properties';
 import { checkFieldDependency } from '../../constants/formulaUtility';
 import FieldList from './FieldList';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const style = {
     backgroundColor: 'white',
@@ -28,6 +29,7 @@ const dropstyle = {
 export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data, addDeleteField, extraFields }) => {
 
     const ref = useRef(null);
+    const toastConfig = useContext(CustomToastContext)
 
     const [{ }, drop] = useDrop({
         accept: ["fieldmove", "field"],
@@ -143,13 +145,9 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
         let data = [...section]
         var result = checkFieldDependency(fieldId, sectionId, data)
         if (result.error) {
-            if (window.confirm(result.message)) {
-                handleClose()
-            }
-            else {
-                handleClose()
-                return
-            }
+            toastConfig.setToastConfig({ open: true, type: "error", message: result.message });
+            handleClose()
+            return
         }
         data.forEach((row) => {
             if (row.sectionId.toString() === sectionId.toString()) {

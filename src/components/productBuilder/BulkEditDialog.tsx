@@ -40,7 +40,7 @@ const BulkEditDialog = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { productDataList, handleClose, handleSaveProduct, stage, loading } = props;
     const [productFields, setProductFields] = useState([]);
-    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [initialData, setInitialData] = useState({ fields: [], values: { } });
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     const [isAddField, setIsAddField] = useState(false);
@@ -109,9 +109,18 @@ const BulkEditDialog = (props) => {
             products.push({ ...element, ...calValues })
         });
         products.forEach(element => {
-            element.productCategory = element.productCategory.optionValue
-            element.productTemplate = element.productTemplate && element.productTemplate.optionValue && element.productTemplate.optionValue
-            element.priceTemplate = element.priceTemplate && element.priceTemplate.optionValue && element.priceTemplate.optionValue
+            for (const [key, value] of Object.entries(element)) {
+                if (typeof value === 'object' && value && value["optionValue"]) {
+                    element[key] = value["optionValue"]
+                }
+                if (Array.isArray(value) && value.length && value[0].optionValue) {
+                    const entity = []
+                    value && value.forEach((ele) => {
+                        entity.push(ele.optionValue)
+                    })
+                    element[key] = entity
+                }
+            }
             element.fields = fields;
             element.fieldChanges = fieldChanges;
             delete element.srno
