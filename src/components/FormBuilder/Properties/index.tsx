@@ -17,7 +17,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import * as Yup from 'yup';
 import { Formik, Form } from 'formik';
-import { camelCase } from './../../../constants/helpers';
+import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
 import { Formula } from '../AddField/formula';
 import { Converter } from '../AddField/converter';
@@ -31,7 +31,7 @@ import { Autocomplete } from '@material-ui/lab';
 import FormTypes from '../../Helpers/FormTypes';
 import { startCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
-import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required('please enter field label')
@@ -55,6 +55,7 @@ const LookupResource = [
   { name: 'Price Template', value: 'Price Template' },
   { name: 'Product Template', value: 'Product Template' },
   { name: 'Quote Pdf Template', value: 'Quote Pdf Template' },
+  { name: 'Terms & Conditions', value: 'Terms & Conditions' },
   { name: 'Budget', value: 'Budget' },
   { name: 'Market Segment', value: 'Market Segment' }
 ];
@@ -67,7 +68,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     selectionStart: 0,
     selectionEnd: 0
   });
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -96,8 +97,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
       if (!values.isWarningTooltip && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
         values.isWarningTooltip = false;
-        values.warningTooltipMessage = "";
-
+        values.warningTooltipMessage = '';
       }
 
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
@@ -217,8 +217,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addAdditionalOption = values.addAdditionalOption;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
-              ele.isWarningTooltip = values.isWarningTooltip
-              ele.warningTooltipMessage = values.warningTooltipMessage
+              ele.isWarningTooltip = values.isWarningTooltip;
+              ele.warningTooltipMessage = values.warningTooltipMessage;
             }
 
             if (ele.isDefaultValue) {
@@ -374,15 +374,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       fullWidth
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          setShowConfirmDialog(true)
+          setShowConfirmDialog(true);
         }
       }}
     >
       <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Fragment>
-            <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
-              onClose={() => setShowConfirmDialog(true)}></CustomDialogHeader>
+            <CustomDialogHeader
+              title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
+              onClose={() => setShowConfirmDialog(true)}
+            ></CustomDialogHeader>
             <CustomDialogContent>
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
@@ -433,36 +435,36 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                      <Grid spacing={3} container>
-                        {values['type'] === 'formula' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormControl fullWidth margin="dense" variant="outlined">
-                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={values['returnType']}
-                                onChange={(e) => setFieldValue('returnType', e.target.value)}
-                                label="Return Type"
-                                name="returnType"
-                              >
-                                <MenuItem value="decimal">Decimal</MenuItem>
-                                <MenuItem value="string">String</MenuItem>
-                                <MenuItem value="boolean">Boolean</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        )}
-                        {(values['type'] === 'decimal' ||
-                          values['type'] === 'converter' ||
-                          values['type'] === 'currencyAmount' ||
-                          values['returnType'] === 'decimal') && (
-                            <Grid item xs={12} sm={6} md={6}>
-                              <DecimalPlaces values={values} setFieldValue={setFieldValue} />
-                            </Grid>
-                          )}
-                      </Grid>
-                    )}
+                    <Grid spacing={3} container>
+                      {values['type'] === 'formula' && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <FormControl fullWidth margin="dense" variant="outlined">
+                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                            <Select
+                              labelId="demo-simple-select-outlined-label"
+                              id="demo-simple-select-outlined"
+                              value={values['returnType']}
+                              onChange={(e) => setFieldValue('returnType', e.target.value)}
+                              label="Return Type"
+                              name="returnType"
+                            >
+                              <MenuItem value="decimal">Decimal</MenuItem>
+                              <MenuItem value="string">String</MenuItem>
+                              <MenuItem value="boolean">Boolean</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      )}
+                      {(values['type'] === 'decimal' ||
+                        values['type'] === 'converter' ||
+                        values['type'] === 'currencyAmount' ||
+                        values['returnType'] === 'decimal') && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <DecimalPlaces values={values} setFieldValue={setFieldValue} />
+                        </Grid>
+                      )}
+                    </Grid>
+                  )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -471,11 +473,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="lookup"
                             checked={values['lookup']}
                             onChange={(e) => {
-                              const val = e.target.checked
+                              const val = e.target.checked;
                               setFieldValue('lookup', val);
                               if (val) {
-                                setFieldValue('addAdditionalOption', false)
-                                setFieldValue('addManualOptionInExcel', false)
+                                setFieldValue('addAdditionalOption', false);
+                                setFieldValue('addManualOptionInExcel', false);
                               }
                             }}
                             color="primary"
@@ -905,32 +907,32 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small"
+              <Button
+                size="small"
                 onClick={() => {
-                  setShowConfirmDialog(true)
+                  setShowConfirmDialog(true);
                 }}
-                color="primary">
+                color="primary"
+              >
                 Cancel
               </Button>
-              <Button size="small" type="submit" color="primary" variant="contained"
-                onClick={submitForm}>
+              <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
                 Save
               </Button>
             </CustomDialogFooter>
-            {
-              showConfirmDialog ?
-                <ConfirmCancelDialog
-                  open={showConfirmDialog}
-                  onSave={() => {
-                    setShowConfirmDialog(false)
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmDialog(false)
-                    handleClose()
-                  }}
-                /> : null
-            }
+            {showConfirmDialog ? (
+              <ConfirmCancelDialog
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false);
+                  submitForm();
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false);
+                  handleClose();
+                }}
+              />
+            ) : null}
           </Fragment>
         )}
       </Formik>
