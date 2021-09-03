@@ -25,7 +25,6 @@ export default function ConfirmationCancelDialog(props) {
 
     return (
         <Dialog
-            disableBackdropClick
             disableEscapeKeyDown
             maxWidth="xs"
             aria-labelledby="confirmation-dialog-title"
@@ -35,6 +34,10 @@ export default function ConfirmationCancelDialog(props) {
             }}
             id="confirmation-dialog"
             keepMounted
+            onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                }
+            }}
         >
             <DialogTitle id="confirmation-dialog-title" className="text-white">Confirm</DialogTitle>
             <DialogContent dividers>
