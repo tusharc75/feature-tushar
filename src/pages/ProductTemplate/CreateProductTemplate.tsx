@@ -340,7 +340,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={2} container justify="flex-end">
+                                    <Grid item xs={12} sm={5} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&

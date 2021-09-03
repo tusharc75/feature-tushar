@@ -87,18 +87,23 @@ const Product = () => {
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u) => {
-                const {createdBy, entity, ...restProperties} = u;
-                const [firstEntity,...restEntity] = entity;
-                let res={
-                ...restProperties,
-                id: u._id,
-                createdBy: u.createdBy?.user?.concatedName,
-                createdByDate: u.createdBy?.date,
-                updatedBy: u.updatedBy?.user?.concatedName,
-                updatedByDate: u.updatedBy?.date,
-                entity:firstEntity?.optionLabel,
-                entityId:firstEntity?.optionValue,
-                restEntity: restEntity,
+                const { createdBy, entity, ...restProperties } = u;
+                const [firstEntity, ...restEntity] = entity;
+                let res = {
+                    ...restProperties,
+                    id: u._id,
+                    createdBy: u.createdBy?.user?.concatedName,
+                    createdByDate: u.createdBy?.date,
+                    updatedBy: u.updatedBy?.user?.concatedName,
+                    updatedByDate: u.updatedBy?.date,
+                    entity: firstEntity?.optionLabel,
+                    entityId: firstEntity?.optionValue,
+                    restEntity: restEntity,
+                }
+                for (let col in res) {
+                    if (res[col] && res[col].optionLabel) {
+                        res[col] = res[col].optionLabel;
+                    }
                 }
                 return res;
             });
@@ -113,7 +118,7 @@ const Product = () => {
                                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
                                 let fieldLabel = ele.fieldLabel + " " + _unit
                                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
+                                    let col: any = { }
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
@@ -130,7 +135,7 @@ const Product = () => {
                                     let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
                                     let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
                                     if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                        let col: any = {}
+                                        let col: any = { }
                                         col.field = fieldName
                                         col.headerName = fieldLabel
                                         col.width = 180
@@ -147,7 +152,7 @@ const Product = () => {
                                 let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
                                 let fieldLabel = ele.fieldLabel + " " + _currency
                                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
+                                    let col: any = { }
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
@@ -161,19 +166,13 @@ const Product = () => {
                     }
                     else {
                         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = {};
+                            let col: any = { };
                             col.field = ele.fieldName;
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
                             if (ele.fieldName === "productName") {
                                 col.cellRenderer = "productNameRenderer"
-                            }
-                            if (ele.fieldName === "productCategory") {
-                                col.cellRenderer = "productCategoryRenderer"
-                            }
-                            if (ele.fieldName === "productTemplate") {
-                                col.cellRenderer = "productTemplateRenderer"
                             }
                             if (ele.fieldName === "entity") {
                                 col.cellRenderer = "entityRenderer"
@@ -208,10 +207,10 @@ const Product = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-        
+
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-          }
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -260,20 +259,20 @@ const Product = () => {
     )
 
     const EntityNameRenderer = (params) =>
-    params.value ? (
-      <>
-        <h5 className="createBy d-flex">
-          <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-            {params.value}
-          </Link>
-          {params.data.restEntity.length > 0 && (
-            <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-          )}
-        </h5>
-      </>
-    ) : (
-      <NoDataCell />
-    );
+        params.value ? (
+            <>
+                <h5 className="createBy d-flex">
+                    <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+                        {params.value}
+                    </Link>
+                    {params.data.restEntity.length > 0 && (
+                        <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
+                    )}
+                </h5>
+            </>
+        ) : (
+            <NoDataCell />
+        );
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
@@ -299,21 +298,6 @@ const Product = () => {
             }
         </>
     )
-
-    const ProductCategoryRenderer = params => <>
-        {
-            params.data.productCategory || params.data.productCategory === 0 ?
-                typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
-                : <NoDataCell />
-        }
-    </>
-    const ProductTemplateRenderer = params => <>
-        {
-            params.data.productTemplate || params.data.productTemplate === 0 ?
-                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
-                : <NoDataCell />
-        }
-    </>
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
@@ -345,8 +329,6 @@ const Product = () => {
         actionsRenderer: ActionsRenderer,
         entityRenderer: EntityNameRenderer,
         commonRenderer: CommonRenderer,
-        productCategoryRenderer: ProductCategoryRenderer,
-        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const replaceFieldName = (field) => {

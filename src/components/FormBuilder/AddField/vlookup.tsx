@@ -16,21 +16,49 @@ import Select from '@material-ui/core/Select';
 import { FixedSizeList } from 'react-window';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import axiosInstance from '../../../axios/axiosInstance'
 
 export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors }) => {
+
+
   const [isUpdate, setUpdate] = useState(false);
+  const [lookupOptions, setlookupOptions] = useState({});
 
   useEffect(() => {
     if (!values['option'] || values['option'].length === 0) {
       setFieldValue('option', [{ optionLabel: 'Option 1', optionValue: 'Option 1' }]);
     }
+    GetLookupOption(values['vlookupInputFields'])
   }, []);
+
+  useEffect(() => {
+    setUpdate(!isUpdate);
+  }, [lookupOptions]);
 
   const onChangeValue = (index, fieldName, value) => {
     let data = [...values['option']];
     data[index][fieldName] = value;
     setFieldValue('option', data);
   };
+
+  const GetLookupOption = async (vlookupInputFields) => {
+    var lookupResource = [];
+    vlookupInputFields && vlookupInputFields.forEach(element => {
+      const _filter = fields.filter((_f) => _f.fieldName === element)
+      if (_filter.length) {
+        if (_filter[0].lookup) {
+          lookupResource.push(_filter[0].lookupResource)
+        }
+      }
+    });
+    if (lookupResource.length) {
+      axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + lookupResource.join(",")).then(({ data: { data } }) => {
+        setlookupOptions(data)
+      })
+        .catch((error) => {
+        });
+    }
+  }
 
   const AddRemoveValue = (type, index) => {
     let data = [...values['option']];
@@ -60,7 +88,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
         dataParse.splice(0, 1);
         let option = [];
         dataParse.forEach((row) => {
-          let rowInsert = { };
+          let rowInsert = {};
           rowInsert['optionLabel'] = row[0] ? row[0].toString() : '';
           values['vlookupInputFields'] &&
             values['vlookupInputFields'].forEach((coloum, index) => {
@@ -140,8 +168,9 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
             {values['vlookupInputFields'] &&
               values['vlookupInputFields'].map((_row) => (
                 <Box minWidth={200} maxWidth={200} pl={1}>
-                  {(fields.filter((_f) => _f.fieldName === _row).length && fields.filter((_f) => _f.fieldName === _row)[0].type === 'dropDown') ||
-                    fields.filter((_f) => _f.fieldName === _row)[0].type === 'vlookupDropdown' ? (
+                  {(fields.filter((_f) => _f.fieldName === _row).length &&
+                    (fields.filter((_f) => _f.fieldName === _row)[0].type === 'dropDown' && !fields.filter((_f) => _f.fieldName === _row)[0].lookup) ||
+                    fields.filter((_f) => _f.fieldName === _row)[0].type === 'vlookupDropdown') ? (
                     <Select
                       id="demo-simple-select-outlined"
                       fullWidth
@@ -151,27 +180,46 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
                     >
                       {fields.filter((_f) => _f.fieldName === _row)[0].option &&
-                        fields
-                          .filter((_f) => _f.fieldName === _row)[0]
-                          .option.map((_option) => {
+                        fields.filter((_f) => _f.fieldName === _row)[0].option.map((_option) => {
+                          return (
+                            <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                              {_option.optionLabel}
+                            </MenuItem>
+                          );
+                        })}
+                    </Select>
+                  )
+                    :
+                    fields.filter((_f) => _f.fieldName === _row).length &&
+                      (fields.filter((_f) => _f.fieldName === _row)[0].type === 'dropDown' && fields.filter((_f) => _f.fieldName === _row)[0].lookup) ?
+                      (<Select
+                        id="demo-simple-select-outlined"
+                        fullWidth
+                        variant="outlined"
+                        margin="dense"
+                        value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
+                        onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
+                      >
+                        {lookupOptions && lookupOptions[fields.filter((_f) => _f.fieldName === _row)[0].lookupResource]
+                          && lookupOptions[fields.filter((_f) => _f.fieldName === _row)[0].lookupResource].map((_option) => {
                             return (
-                              <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                              <MenuItem key={_option.optionValue} value={_option.optionValue}>
                                 {_option.optionLabel}
                               </MenuItem>
                             );
                           })}
-                    </Select>
-                  ) : (
-                    <TextField
-                      id="standard-basic"
-                      variant="outlined"
-                      margin="dense"
-                      fullWidth
-                      style={{ margin: 0 }}
-                      value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
-                      onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
-                    />
-                  )}
+                      </Select>)
+                      : (
+                        <TextField
+                          id="standard-basic"
+                          variant="outlined"
+                          margin="dense"
+                          fullWidth
+                          style={{ margin: 0 }}
+                          value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
+                          onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
+                        />
+                      )}
                 </Box>
               ))}
           </Box>
@@ -180,6 +228,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     ));
   }, [isUpdate]);
 
+  console.log(lookupOptions)
   return (
     <Box marginTop={2}>
       <Autocomplete
@@ -201,6 +250,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
         }
         onChange={(e, value) => {
           setFieldValue('vlookupInputFields', convertLabelToValue(value));
+          GetLookupOption([...values['vlookupInputFields'], ...convertLabelToValue(value)])
           setUpdate(!isUpdate);
         }}
         renderInput={(params) => (
