@@ -54,6 +54,7 @@ const ProductTemplate = () => {
     const [productField, setProductField] = useState([]);
     const [disableSaveButton, setDisableSaveButton] = useState(false)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     const {
         state: { user, permissions },
@@ -215,7 +216,8 @@ const ProductTemplate = () => {
             data.deleteField = deleteField;
             axiosInstance().put("/product-template", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: routes.productTemplate.path });
+                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path });
+                setIsBreakCrumbPath("")
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
@@ -262,7 +264,14 @@ const ProductTemplate = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
+                <CustomBreadCrumbs
+                    routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]}
+                    isConfirmBeforeClick={true}
+                    onBreadCrumbClick={(path) => {
+                        setIsBreakCrumbPath(path)
+                        setShowConfirmDialog(true)
+                    }}
+                />
             </Grid>
             <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
                 <label htmlFor="importField" style={{ color: "white" }} className="cursor-pointer mr-3">
@@ -487,7 +496,8 @@ const ProductTemplate = () => {
                                         }}
                                         onClose={() => {
                                             setShowConfirmDialog(false)
-                                            history.push({ pathname: "/product-Template" })
+                                            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/product-Template" })
+                                            setIsBreakCrumbPath("")
                                         }}
                                     /> : null
                             }
