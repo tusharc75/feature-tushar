@@ -131,6 +131,7 @@ const Steps = (props) => {
     loading,
     approvedQuote,
     handleVersionUpdate,
+    handleViewPdf,
     allowedToEdit,
     DOAData = null,
     quoteData
@@ -238,6 +239,7 @@ const Steps = (props) => {
   const handleNext = () => {
     if (currentStep === 2) {
       handleVersionUpdate();
+      handleViewPdf()
     }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
