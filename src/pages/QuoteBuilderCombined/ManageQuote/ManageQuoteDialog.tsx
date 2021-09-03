@@ -23,6 +23,7 @@ import {
   customerContact,
   getUniqueCurrencies,
   formFieldNames,
+  setFieldsInAscendingOrder,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -169,7 +170,7 @@ export default function ManageQuoteDialog({
       isRenderedFromCustomerAccount || isRenderedFromOpportunity || contactId
     );
 
-    sortArray();
+    // sortArray();
 
     const customerContactDropdownData = entityData.fields.find(
       (d) => d.fieldName === "customerContactName"
@@ -224,6 +225,8 @@ export default function ManageQuoteDialog({
         );
       }
     }
+
+    setFormsData(setFieldsInAscendingOrder(entityData.fields));
 
     return () => {
       setOwnerCollaboratorData([]);
