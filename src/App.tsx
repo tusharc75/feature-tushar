@@ -92,6 +92,7 @@ import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
 import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInventoryDetailsPage";
 import ProductDetailsPage from "./pages/Product/ProductDetailsPage";
+import RentalManagement from "./pages/RentalManagement";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -455,6 +456,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.equipmentRentalMaster.path}>
               <EquipmentRentalMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.rentalManagement.path}>
+              <RentalManagement />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />

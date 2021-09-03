@@ -1,0 +1,43 @@
+.nameLink {
+    color: #0645ad;
+    cursor: pointer;
+  }
+  .nameLink:hover {
+    text-decoration: underline;
+  }
+  .MuiStepper-horizontal {
+    border-radius: 2px;
+    border-left: none !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+  
+  .doaAction {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+  }
+  .currentStepColor {
+    & .MuiStepLabel-iconContainer {
+      color: #0e7723 !important;
+      opacity: 1;
+    }
+    & .MuiStepLabel-label {
+      color: #0e7723 !important;
+      font-weight: 600 !important;
+    }
+  }
+  
+  .MuiTab-textColorPrimary.Mui-selected {
+        border-radius: 0;
+        background: #163340;
+        color: white !important;
+        border-top-right-radius: 12px;
+        border-top-left-radius: 12px;
+  }
+  
+  .tab-font{
+    font-size: 14px;
+  }
+  
+  

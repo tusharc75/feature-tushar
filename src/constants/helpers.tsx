@@ -133,7 +133,8 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master"
+  equipmentRentalMaster: "Equiptment Rental Master",
+  rentalManagement: "Rental Management"
 };
 
 export const RESOURCE_LABEL = {
@@ -175,7 +176,9 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master"
+  equipmentRentalMaster: "Equiptment Rental Master",
+  rentalManagement: "Rental Management"
+
 };
 
 export const lead = {
@@ -208,6 +211,11 @@ export const priceTemplate = {
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
   qbApi: "/quote-builder",
+};
+
+export const rentalManagement = {
+  rentalManagementResource: "rentalManagement",
+  rentalManagementApi: "/rental-management",
 };
 
 export const projectSales = {
