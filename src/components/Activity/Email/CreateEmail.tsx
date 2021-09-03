@@ -44,6 +44,7 @@ import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers";
 import { fileIcons } from "./FileIcons";
 import { useData } from "../../../StateProvider/Provider";
 import TinyMce from "../../../components/TinyMCE"
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 // const emailSchemaHelper = Yup.array()
 //   .transform(function (value, originalValue) {
@@ -118,6 +119,7 @@ export const CreateEmail = ({
   const [toogle, setToogle] = useState({
     "E-Sign": isESign,
   });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
     fetchEmailDetail();
@@ -424,7 +426,7 @@ export const CreateEmail = ({
     <>
       <CustomDialogHeader
         title={`${emailId ? "View" : "New"} Email`}
-        onClose={handleClose}
+        onClose={() => { setShowConfirmDialog(true) }}
       ></CustomDialogHeader>
       {loading ? (
         <div className={classes.root}>
@@ -722,7 +724,10 @@ export const CreateEmail = ({
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
-                  <Button color="primary" size="small" onClick={handleClose}>
+                  <Button color="primary" size="small"
+                    onClick={() => {
+                      setShowConfirmDialog(true)
+                    }}>
                     Cancel
                   </Button>
                   {!emailId && (
@@ -756,6 +761,20 @@ export const CreateEmail = ({
                     </Button>
                   )}
                 </CustomDialogFooter>
+                {
+                  showConfirmDialog ?
+                    <ConfirmCancelDialog
+                      open={showConfirmDialog}
+                      onSave={() => {
+                        setShowConfirmDialog(false)
+                        submitForm();
+                      }}
+                      onClose={() => {
+                        setShowConfirmDialog(false)
+                        handleClose()
+                      }}
+                    /> : null
+                }
               </>
             )}
           </Formik>

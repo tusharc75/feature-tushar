@@ -19,6 +19,7 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 import { roleTypes } from "../../constants/helpers";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const CreateRole = ({
   open,
@@ -36,6 +37,7 @@ const CreateRole = ({
   const [values, setValues] = useState({ name: "", description: "" });
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
     getInitialData();
@@ -99,12 +101,17 @@ const CreateRole = ({
   return (
     <Dialog
       open={open}
-      onClose={close}
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
     >
-      <CustomDialogHeader title="Create New Role" onClose={close} />
+      <CustomDialogHeader title="Create New Role"
+        onClose={() => setShowConfirmDialog(true)} />
 
       {loading ? (
         <>
@@ -188,7 +195,10 @@ const CreateRole = ({
               color="primary"
               size="small"
               disabled={isSubmitting}
-              onClick={close}
+              onClick={() => {
+                if (Boolean(!values.name) && Boolean(!values.description)) close()
+                else setShowConfirmDialog(true)
+              }}
             >
               Cancel
             </Button>
@@ -206,6 +216,20 @@ const CreateRole = ({
               {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
             </Button>
           </CustomDialogFooter>
+          {
+            showConfirmDialog ?
+              <ConfirmCancelDialog
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false)
+                  handleSubmit()
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false)
+                  close()
+                }}
+              /> : null
+          }
         </>
       )}
     </Dialog>

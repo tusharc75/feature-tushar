@@ -25,6 +25,7 @@ import HistoryDialog from "../../components/Activity/History"
 import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import { user } from "../../routes/User";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -52,6 +53,8 @@ const ProductTemplate = () => {
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [productField, setProductField] = useState([]);
     const [disableSaveButton, setDisableSaveButton] = useState(false)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     const {
         state: { user, permissions },
@@ -62,6 +65,20 @@ const ProductTemplate = () => {
         isRead: false,
         isDelete: false,
     });
+
+    const onBackButtonEvent = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, null, window.location.pathname);
+        setShowConfirmDialog(true)
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
 
     useEffect(() => {
         fetchOneProductTemplate();
@@ -199,7 +216,8 @@ const ProductTemplate = () => {
             data.deleteField = deleteField;
             axiosInstance().put("/product-template", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: routes.productTemplate.path });
+                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path });
+                setIsBreakCrumbPath("")
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
@@ -246,7 +264,14 @@ const ProductTemplate = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
+                <CustomBreadCrumbs
+                    routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]}
+                    isConfirmBeforeClick={true}
+                    onBreadCrumbClick={(path) => {
+                        setIsBreakCrumbPath(path)
+                        setShowConfirmDialog(true)
+                    }}
+                />
             </Grid>
             <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
                 <label htmlFor="importField" style={{ color: "white" }} className="cursor-pointer mr-3">
@@ -350,7 +375,11 @@ const ProductTemplate = () => {
                                             }
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/product-Template" })} >Close</Button>
+                                            <Button color="primary" variant="contained" size="small"
+                                                onClick={() =>
+                                                    setShowConfirmDialog(true)
+                                                }
+                                            >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
@@ -457,6 +486,21 @@ const ProductTemplate = () => {
                                     module="product-template"
                                 />
                             </Box>
+                            {
+                                showConfirmDialog ?
+                                    <ConfirmCancelDialog
+                                        open={showConfirmDialog}
+                                        onSave={() => {
+                                            setShowConfirmDialog(false)
+                                            submitForm();
+                                        }}
+                                        onClose={() => {
+                                            setShowConfirmDialog(false)
+                                            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/product-Template" })
+                                            setIsBreakCrumbPath("")
+                                        }}
+                                    /> : null
+                            }
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

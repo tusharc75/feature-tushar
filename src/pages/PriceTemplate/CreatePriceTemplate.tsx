@@ -24,6 +24,7 @@ import { useData } from "../../StateProvider/Provider";
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import HistoryDialog from "../../components/Activity/History"
 import { priceTemplate } from "../../constants/helpers"
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const PriceTemplateSchema = Yup.object().shape({
   name: Yup.string()
@@ -50,6 +51,8 @@ const PriceTemplate = () => {
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [disableSaveButton, setDisableSaveButton] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
   const {
     state: { user, permissions },
@@ -60,6 +63,20 @@ const PriceTemplate = () => {
     isRead: false,
     isDelete: false,
   });
+
+  const onBackButtonEvent = (e) => {
+    e.preventDefault();
+    window.history.pushState(null, null, window.location.pathname);
+    setShowConfirmDialog(true)
+  }
+
+  useEffect(() => {
+    window.history.pushState(null, null, window.location.pathname);
+    window.addEventListener('popstate', onBackButtonEvent);
+    return () => {
+      window.removeEventListener('popstate', onBackButtonEvent);
+    };
+  }, []);
 
   useEffect(() => {
     if (permissions && permissions.priceTemplate) {
@@ -197,7 +214,7 @@ const PriceTemplate = () => {
         .post("/price-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -210,7 +227,7 @@ const PriceTemplate = () => {
         .put("/price-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -270,6 +287,11 @@ const PriceTemplate = () => {
                 title: id === "0" ? "New" : initialValues && initialValues.name,
               },
             ]}
+            isConfirmBeforeClick={true}
+            onBreadCrumbClick={(path) => {
+              setIsBreakCrumbPath(path)
+              setShowConfirmDialog(true)
+            }}
           />
         </Grid>
         <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
@@ -404,9 +426,7 @@ const PriceTemplate = () => {
                           size="small"
                           variant="contained"
                           onClick={() =>
-                            history.push({
-                              pathname: routes.priceTemplate.path,
-                            })
+                            setShowConfirmDialog(true)
                           }
                         >
                           Close
@@ -516,6 +536,22 @@ const PriceTemplate = () => {
                     module="price-template"
                   />
                 </Box>
+                {
+                  showConfirmDialog ?
+                    <ConfirmCancelDialog
+                      open={showConfirmDialog}
+                      onSave={() => {
+                        setShowConfirmDialog(false)
+                        submitForm();
+                      }}
+                      onClose={() => {
+                        setShowConfirmDialog(false)
+                        history.push({
+                          pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path,
+                        })
+                      }}
+                    /> : null
+                }
               </Form>
             )}
           </Formik>
@@ -533,7 +569,7 @@ const PriceTemplate = () => {
           /> : null
         }
       </div>
-    </Fragment>
+    </Fragment >
   );
 };
 

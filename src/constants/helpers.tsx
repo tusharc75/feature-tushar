@@ -678,6 +678,18 @@ interface IPermission {
   };
 }
 
+export const isFieldNotTouched = (data, values) => {
+  return Object.values(
+    simplifyValues(
+      data.initialValues,
+      data.fields
+    )
+  ).toString() ===
+    Object.values(
+      simplifyValues(values, data.fields)
+    ).toString()
+}
+
 export const getPermissions = (
   user,
   selectedEntity = undefined

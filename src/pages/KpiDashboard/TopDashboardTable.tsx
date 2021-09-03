@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 import axiosInstance from '../../axios/axiosInstance';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import { makeStyles } from '@material-ui/core/styles';
+import { Skeleton } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
   regionTable: {
@@ -179,7 +180,16 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
                   </TableRow>
                 ))
               ) : (
-                <Box p={2}>{loading ? <Typography>Loading Data...</Typography> : <Typography>No Data for regional sales</Typography>}</Box>
+                  <Box component="span" p={2} width="100%">
+                    {loading ?
+                      [...Array(10).keys()].map((_, i) => (
+                        <Box component="span" m={1} key={i} width="100%">
+                          <Skeleton variant='text' width="100%"  />
+
+                        </Box>
+                       ))
+                      : <Typography>No Data for regional sales</Typography>}
+                  </Box>
               )}
             </TableBody>
           </Table>

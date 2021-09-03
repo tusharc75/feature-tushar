@@ -27,6 +27,7 @@ import TinyMce from "./../../components/TinyMCE"
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import { useData } from "../../StateProvider/Provider";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {
@@ -77,7 +78,7 @@ const TermsAndCondition = ({
     owner: user.user._id,
     collaborator: []
   });
-
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
@@ -149,6 +150,7 @@ const TermsAndCondition = ({
             message: data.message,
           });
           setLoading(false);
+
           handleClose();
         })
         .catch((error) => {
@@ -183,7 +185,11 @@ const TermsAndCondition = ({
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       maxWidth="md"
-      onClose={handleClose}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
+      }}
       fullWidth
       className={classes.termAndConditionDialog}
     >
@@ -192,7 +198,7 @@ const TermsAndCondition = ({
           ? `Edit ${editRecord?.TACName ?? ""}`
           : `Create ${displayTitle}`
           }`}
-        onClose={handleClose}
+        onClose={() => setShowConfirmDialog(true)}
       ></CustomDialogHeader>
       {initialValues && (
         <Formik
@@ -362,7 +368,8 @@ const TermsAndCondition = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={handleClose}>
+                <Button size="small" color="primary"
+                  onClick={() => setShowConfirmDialog(true)}>
                   Cancel
                 </Button>
                 <CustomButton
@@ -376,6 +383,20 @@ const TermsAndCondition = ({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+              {
+                showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      handleClose()
+                    }}
+                  /> : null
+              }
             </>
           )}
         </Formik>
