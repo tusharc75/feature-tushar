@@ -1352,6 +1352,7 @@ export default function QuoteProcess(props) {
                                 state?.selectedRecords
                             );
                         }}
+                        handleViewPdf={handleViewPdf}
                         allowedToEdit={allowedToEdit}
                         DOAData={DOAData}
                         quoteData={quoteData}
