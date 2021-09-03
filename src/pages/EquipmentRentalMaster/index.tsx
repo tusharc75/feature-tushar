@@ -200,7 +200,7 @@ const EquipmentRentalMaster = () => {
                     page={page}
                     allowAction={false}
                     loading={loading}
-                    renderedFrom="productPage"
+                    renderedFrom="equipmentRentalMasterPage"
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
