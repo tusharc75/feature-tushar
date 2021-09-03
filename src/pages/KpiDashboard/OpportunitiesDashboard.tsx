@@ -43,7 +43,7 @@ const OpportunitiesDashboard = () => {
     let totalIncrease = current - prev;
     let percent = (totalIncrease / current) * 100;
 
-    return percent ? `${Math.floor(percent)}%` : '';
+    return percent && !percent.toString().includes('Infinity') ? `${Math.floor(percent)}%` : '';
   };
 
   return (

@@ -29,7 +29,7 @@ import { CustomDialogTransition } from "../../../constants/helpers";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
-
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const arr = [...Array(9).keys()];
 
@@ -58,6 +58,7 @@ export default function ManageLeadDialog({
     initialValues: {},
   });
 
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
@@ -295,6 +296,30 @@ export default function ManageLeadDialog({
       });
   };
 
+  const isFieldNotTouched = (leadData, values) => {
+    return Object.values(
+      simplifyValues(leadData.initialValues, leadData.fields)
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, leadData.fields)
+      ).toString()
+  }
+
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
   return (
     <>
       <Dialog
@@ -303,9 +328,12 @@ export default function ManageLeadDialog({
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            setShowConfirmDialog(true)
+          }
+        }}
         open={open}
-        disableBackdropClick={true}
       >
         <CustomDialogHeader
           title={
@@ -315,7 +343,9 @@ export default function ManageLeadDialog({
                 .filter((f) => f)
                 .join(" ")}`
           }
-          onClose={onClose}
+          onClose={(e, reason) => {
+            setShowConfirmDialog(true)
+          }}
         />
 
         {loadingData && (
@@ -342,7 +372,7 @@ export default function ManageLeadDialog({
               <>
                 <CustomDialogContent>
                   <Form>
-                  <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
+                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                     {formsData &&
                       formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => {
                         return (
@@ -417,7 +447,7 @@ export default function ManageLeadDialog({
                                       ) : field.fieldName === "collaborator" ? (
                                         <FormTypes
                                           isNew={isNew}
-                                            {...field}
+                                          {...field}
                                           disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
@@ -457,7 +487,7 @@ export default function ManageLeadDialog({
                                           >
                                             <FormTypes
                                               isNew={isNew}
-                                                  {...field}
+                                              {...field}
                                               disabled={(!isNew && field.disableOnEdit)}
                                               fields={leadData.fields}
                                               fieldData={field}
@@ -614,7 +644,7 @@ export default function ManageLeadDialog({
                                             values={values}
                                             errors={errors}
                                             touched={touched}
-                                            label={field.fieldLabel} 
+                                            label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
@@ -654,7 +684,10 @@ export default function ManageLeadDialog({
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={onClose}
+                    onClick={() => {
+                      if (isFieldNotTouched(leadData, values)) onClose()
+                      else setShowConfirmDialog(true)
+                    }}
                   >
                     Cancel
                   </Button>
@@ -666,28 +699,12 @@ export default function ManageLeadDialog({
                     disabled={
                       // loading || Object.keys(errors).length > 0 ? true : false
                       uploadingImageOrFileProgress > 0 ||
-                      Object.values(
-                        simplifyValues(leadData.initialValues, leadData.fields)
-                      ).toString() ===
-                      Object.values(
-                        simplifyValues(values, leadData.fields)
-                      ).toString() ||
+                      isFieldNotTouched(leadData, values) ||
                       loading
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      const err = Object.keys(errors);
-                      if (err.length) {
-                        const input = document.querySelector(
-                          `input[name=${err[0]}]`,
-                        );
-
-                        input.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                          inline: 'start',
-                        });
-                      }
+                      handleScroll(errors)
                       handleSubmit(
                         errors,
                         setFieldTouched,
@@ -700,6 +717,29 @@ export default function ManageLeadDialog({
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
+                {
+                  showConfirmDialog ?
+                    <ConfirmCancelDialog
+                      open={showConfirmDialog}
+                      onSave={() => {
+                        setShowConfirmDialog(false)
+                        handleScroll(errors)
+
+                        handleSubmit(
+                          errors,
+                          setFieldTouched,
+                          values,
+                          setValues,
+                          setErrors
+                        );
+                      }}
+                      onClose={() => {
+                        setShowConfirmDialog(false)
+                        onClose()
+                      }}
+                    /> : null
+                }
+
               </>
             )}
           </Formik>

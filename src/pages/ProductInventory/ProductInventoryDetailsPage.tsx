@@ -175,6 +175,7 @@ const ProductInventoryDetailsPage = () => {
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);
+            fetchProductInventoryData()
           }}
         />
       }

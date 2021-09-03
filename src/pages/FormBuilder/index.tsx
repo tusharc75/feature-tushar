@@ -26,7 +26,7 @@ const FormBuilder = () => {
   //  Grid Variables - End
 
   const ResourceRenderer = params => <Link className="link"
-    to={"/form-builder/resource?resource=" + params.data.resource}>
+    to={"/form-builder/" + params.data.resource}>
     {params.data.resource}
   </Link>
 

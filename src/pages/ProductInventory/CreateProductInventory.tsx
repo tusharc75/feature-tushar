@@ -10,11 +10,12 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, productInventory } from "./../../constants/helpers";
+import { CustomDialogTransition, productInventory, setFieldsInAscendingOrder } from "./../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import { Box } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
+import FormTypes from "../../components/Helpers/FormTypes";
 
 const CreateProductInventory = (props) => {
 
@@ -31,7 +32,7 @@ const CreateProductInventory = (props) => {
             if (productInventoryId) {
                 axiosInstance().get(`${productInventory.api}/` + productInventoryId).then(({ data: { data } }) => {
                     setInitialData({
-                        fields: fieldsDataForUpdate,
+                        fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
                     });
                 }).catch((error) => {
@@ -40,7 +41,7 @@ const CreateProductInventory = (props) => {
             }
             else {
                 setInitialData({
-                    fields: fieldsDataForCreate,
+                    fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                     values: getObjKeys("", fieldsDataForCreate),
                 });
             }
@@ -99,15 +100,61 @@ const CreateProductInventory = (props) => {
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
-                                <InputField
-                                    errors={errors}
-                                    values={values}
-                                    setFieldValue={setFieldValue}
-                                    touched={touched}
-                                    fieldsData={initialData.fields}
-                                    size="small"
-                                    fullWidth
-                                />
+                                {initialData.fields.length > 0 &&
+                                  initialData.fields.map((form, i) => (
+                                <div key={i}>
+                                    <h2 className="form-label-style">{form.name}</h2>
+                                    <Box marginY={2}>
+                                    <Grid spacing={3} container>
+                                        {form.sectionFields.map((field, index2) => (
+                                        <Grid key={index2} item xs={12} sm={6} md={6}>
+                                             {field.fieldName === "product" ? 
+                                             
+                                             <FormTypes
+                                             isNew={Boolean(productInventoryId)}
+                                             {...field}
+                                             disabled={!productInventoryId && field.disableOnEdit || !Boolean(values?.productCategory)}
+                                             values={values}
+                                             errors={errors}
+                                             touched={touched}
+                                             label={field.fieldLabel}
+                                             name={field.fieldName}
+                                             type={field.type}
+                                             options={values.productCategory ? field.option.filter(o => o.productCategory === values.productCategory) : []}
+                                             setFieldValue={setFieldValue}
+                                             required={field.required}
+                                             fullWidth
+                                             isTooltip={field?.isTooltip || false}
+                                             tooltipMessage={field?.tooltipMessage}
+                                             size="small"
+                                             imageOrFileUploadCompletePercentage={null}
+                                         />
+                                                    
+                                             : <FormTypes
+                                                isNew={Boolean(productInventoryId)}
+                                                {...field}
+                                                disabled={!productInventoryId && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={setFieldValue}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                imageOrFileUploadCompletePercentage={null}
+                                            />}
+                                        </Grid>
+                                        ))}
+                                    </Grid>
+                                    </Box>
+                                </div>
+                                ))}
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
