@@ -53,7 +53,7 @@ export default function TermsAndCondition(props) {
     }, [page, limit, filters, sorting, search, selectedEntity]);
 
     const TermsConditionNameRenderer = params => (
-        <span className={`${actionsPermissions.isUpdate ? "link" : ""} cursor-pointer`}
+        <span className="link cursor-pointer"
             onClick={() => {
                 setShowCreateDialog(true);
                 setEditRecord(cloneDeep(params.data))

@@ -375,10 +375,10 @@ const CustomerAccounts = (props) => {
       {showAccountCreateDialog && (
         <ManageAccountDialog
           open={showAccountCreateDialog}
-          onClose={({ id }) => {
+          onClose={(response) => {
             setShowAccountCreateDialog(false);
-            if (id) {
-              saveCustomerAccountToProject(id);
+            if (response && response["id"]) {
+              saveCustomerAccountToProject(response["id"]);
             }
             setDialogType(null);
             setAccId(null);
@@ -578,7 +578,7 @@ const CustomerAccounts = (props) => {
                                 ) : (
                                   <Box pb="6px">
                                     <Typography variant="subtitle1">
-                                      No Contacts
+                                      No Contacts To Show
                                     </Typography>
                                   </Box>
                                 )}
