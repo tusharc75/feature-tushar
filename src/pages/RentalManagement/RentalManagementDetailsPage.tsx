@@ -26,6 +26,7 @@ import IconButton from "@material-ui/core/IconButton/IconButton";
 import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
+import DeliveryTicket from "./DeliveryTicket";
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,15 +46,14 @@ const RentalManagementDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [users, setUsers] = useState<any[]>([]);
-  const [userList, setUserList] = useState<any[]>([]);
+  const [additionalCost, setAdditionalCost] = useState<any[]>([]);
+  const [productInventory, setProductInventory] = useState<any[]>([]);
 
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchProductInventory();
-      fetchUsers();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -125,9 +125,7 @@ const RentalManagementDetailsPage = () => {
     { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-  ];
+];
 
   const fetchProductInventory = () => {
     dispatch({ type: "loading", loading: true });
@@ -139,14 +137,12 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
       data.data = data.data?.map((u) => ({
         ...u,
-        id: u._id,
-        productName: u.product?.optionLabel,
-        createdBy: u.createdBy?.user?.concatedName,
-        createdByDate: u.createdBy?.date,
-        updatedBy: u.updatedBy?.user?.concatedName,
-        updatedByDate: u.updatedBy?.date,
+        id: u.inventory?._id,
+        productName: u.product?.productName,
+        assetNumber:u.inventory?.assetNumber,
+        serialNumber:u.inventory?.serialNumber,
       }));
-
+      setProductInventory(data.data)
       dispatch({ type: "initialize", data: data.data, count: data.count });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
@@ -167,28 +163,6 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error)
       });
   }
-
-  const fetchUsers = () => {
-    axiosInstance()
-      .get("/user")
-      .then(({ data: { data, count } }) => {
-        getRows(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }
-
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`,
-      }))
-      : [];
-
-    setUserList(rows);
-  };
 
   return (
     <>
@@ -284,7 +258,7 @@ const RentalManagementDetailsPage = () => {
             )}
             {(currentStep === 1) && (
               <Formik
-                initialValues={{ users: users }}
+                initialValues={{ additionalCost: additionalCost }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (
@@ -298,7 +272,7 @@ const RentalManagementDetailsPage = () => {
                           alignItems="center"
                         >
                           <Grid item md={12}>
-                            {values.users && values.users.length > 0 && (
+                            {values.additionalCost && values.additionalCost.length > 0 && (
 
                               <Box className={""}>
                                 <Grid
@@ -318,11 +292,11 @@ const RentalManagementDetailsPage = () => {
                             )}
                             <Box className="p-1">
                               <FieldArray
-                                name="users"
+                                name="additionalCost"
                                 render={arrayHelpers => (
                                   <div>
-                                    {values.users && values.users.length > 0 ? (
-                                      values.users.map((userVal, index) => (
+                                    {values.additionalCost && values.additionalCost.length > 0 ? (
+                                      values.additionalCost.map((userVal, index) => (
                                         <Grid
                                           container
                                           spacing={2}
@@ -339,11 +313,11 @@ const RentalManagementDetailsPage = () => {
                                               size="small"
                                               style={{ minWidth: 200 }}
                                               value={costTypeList.find(v => v === userVal)}
-                                              options={costTypeList.filter(element => !values.users.includes(element)) }
+                                              options={costTypeList.filter(element => !values.additionalCost.includes(element)) }
                                               getOptionLabel={(option: any) => option?  option : ""}
                                               onChange={(event, newValue) => {
                                                 arrayHelpers.replace(index, {
-                                                  ...values.users[index],
+                                                  ...values.additionalCost[index],
                                                   ["name"]: newValue,
                                                 });
                                               }}
@@ -377,7 +351,7 @@ const RentalManagementDetailsPage = () => {
                                                 value={userVal.amount}
                                                 onChange={(e) => {
                                                   arrayHelpers.replace(index, {
-                                                    ...values.users[index],
+                                                    ...values.additionalCost[index],
                                                     ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                   })
                                                 }}
@@ -434,7 +408,7 @@ const RentalManagementDetailsPage = () => {
 
             )}
             {(currentStep === 2) && (
-              
+              <DeliveryTicket warehouselist={["1","2","3"]} productInventory={productInventory}/>
             )}
           </Grid>
         </Grid>
