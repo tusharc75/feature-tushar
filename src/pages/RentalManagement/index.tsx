@@ -24,6 +24,7 @@ import { useHistory } from "react-router-dom";
 import {
   CommonRenderer,
   CreatedByRenderer,
+  DateRenderer,
   UpdatedByRenderer,
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
@@ -57,7 +58,7 @@ const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, permissions },
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -86,7 +87,7 @@ const RentalManagement = () => {
     isRead: permissions?.quoteBuilder?.isRead,
     isDelete: permissions?.quoteBuilder?.isDelete,
   });
-  const { rentalManagementResource,rentalManagementApi } = rentalManagement;
+  const { rentalManagementResource, rentalManagementApi } = rentalManagement;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -106,11 +107,31 @@ const RentalManagement = () => {
 
   const columns = [
     {
-      field: "rentalManagementName",
-      headerName: "RentalManagement Name",
+      field: "rentalJobName",
+      headerName: "Rental Job Name",
       show: true,
       disabled: true,
       cellRenderer: "rentalManagementNameRenderer",
+    },
+    {
+      field: "rentalJobID",
+      headerName: "Rental Job ID",
+      show: true,
+      cellRenderer: "commonRenderer",
+    },
+    {
+      field: "rentalStartDate",
+      headerName: "Rental Start Date",
+      show: true,
+      filter: false,
+      cellRenderer: "dateRenderer",
+    },
+    {
+      field: "rentalEndDate",
+      headerName: "Rental End Date",
+      show: true,
+      filter: false,
+      cellRenderer: "dateRenderer",
     },
     {
       field: "customerAccountName",
@@ -136,13 +157,6 @@ const RentalManagement = () => {
       headerName: "Updated By",
       show: true,
       cellRenderer: "updatedByRenderer",
-    },
-    {
-      field: "expiryDate",
-      headerName: "Expiry Date",
-      show: true,
-      filter: false,
-      cellRenderer: "commonRenderer",
     },
     {
       field: "owner",
@@ -176,7 +190,6 @@ const RentalManagement = () => {
     selectedType,
     filters,
     sorting,
-    selectedEntity,
     accountDetails,
   ]);
 
@@ -184,7 +197,7 @@ const RentalManagement = () => {
     dispatch({ type: "loading", loading: true });
 
     axiosInstance()
-      .put(`${rentalManagementApi}/remove?entity=${selectedEntity}`, {
+      .put(`${rentalManagementApi}/remove`, {
         ids: [singleRentalManagementDelete.id],
       })
       .then(({ data }) => {
@@ -266,6 +279,7 @@ const RentalManagement = () => {
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
+    dateRenderer:DateRenderer,
   };
 
   const replaceFieldName = (field) => {
@@ -303,11 +317,6 @@ const RentalManagement = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterRentalManagements=${selectedType}`;
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
-
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -354,7 +363,6 @@ const RentalManagement = () => {
   };
 
   const fetchRentalManagement = async () => {
-    if (selectedEntity) {
       dispatch({ type: "loading", loading: true });
       const queryString = getQueryString();
 
@@ -375,37 +383,17 @@ const RentalManagement = () => {
               ...restProperties
             } = u;
 
-            let versionCount = Object.keys(u.versions).length;
-            let tempStatus = "Building RentalManagement"
-            let versionArray = []
-            Object.keys(u.versions).forEach(key => {
-              versionArray.push(u.versions[key])
-            })
-
-            const updatedVersion = versionArray.find(v => v.status !== tempStatus)
-            if (updatedVersion) {
-              tempStatus = updatedVersion.status
-            }
-
             let res = {
               ...restProperties,
               id: u._id,
 
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
-
-              canDelete: u.owner?.optionValue === user?.user._id,
-              expiryDate: u.expiryDate ? displayDate(u.expiryDate) : "",
-
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
-              status: tempStatus,
-              versionCount: versionCount,
-              versionData: versionArray,
-              currency: u.currency,
+              customerContactName: u.customerAccountName?.optionLabel,
               relatedOpportunity: u.opportunity?.optionLabel,
               relatedOpportunityId: u.opportunity?.optionValue,
-
               createdBy: u.createdBy?.user?.concatedName,
               createdByDate: u.createdBy?.date,
               updatedBy: u.updatedBy?.user?.concatedName,
@@ -423,7 +411,7 @@ const RentalManagement = () => {
           dispatch({ type: "loading", loading: false });
           toastConfig.setToastConfig(error);
         });
-    }
+    
   };
 
   const handleSearch = (e) => {
@@ -432,12 +420,6 @@ const RentalManagement = () => {
 
   const handleRentalManagementTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-  };
-
-  const onSuccess = () => {
-    setshowCreateRentalManagementDialog(false);
-    setIsClone(false);
-    fetchRentalManagement();
   };
 
   const handleTransferEntityDialog = () => {
@@ -473,7 +455,7 @@ const RentalManagement = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${rentalManagementApi}/remove?entity=${selectedEntity}`, {
+        .put(`${rentalManagementApi}/remove`, {
           ids: recordsToDelete,
         })
         .then(({ data }) => {
@@ -613,22 +595,12 @@ const RentalManagement = () => {
       {showCreateRentalManagementDialog && (
         <CreateRentalManagementDialog
           open={showCreateRentalManagementDialog}
-          onSuccess={onSuccess}
-          onClose={() => {
+          productInventoryId={null}
+          onClose={() => setshowCreateRentalManagementDialog(false)}
+          onSuccess={() => {
             setshowCreateRentalManagementDialog(false);
-            setIsClone(false)
+            fetchRentalManagement();
           }}
-          isNew={isClone ? false : true}
-          dataToUpdate={isClone ? { ...selectedRecords[0], ...{ 'owner': { 'optionLabel': selectedRecords[0].owner, 'optionValue': selectedRecords[0].ownerId } } } : null}
-          isClone={isClone ? true : false}
-          resource={null}
-          isRedirectTodetailPage={isClone ? false : true}
-          contactId={null}
-          opportunityId={null}
-          disableOwnerDropDown={true}
-          contacts={null}
-          doaCollaboratorResources={user.user?.doa?.map(obj => obj.user)}
-          isRenderedFromOpportunity={false}
         />
       )}
     </>
