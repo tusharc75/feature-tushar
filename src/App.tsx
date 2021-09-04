@@ -87,7 +87,7 @@ import Budget from "./pages/Budget";
 import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
-import AddressResource from "./pages/AddressResource";
+import Warehouse from "./pages/Warehouse";
 import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
 import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInventoryDetailsPage";
@@ -501,7 +501,7 @@ function App() {
               <CurrencyConverter />
             </PrivateRoute>
             <PrivateRoute exact path={routes.address.path}>
-              <AddressResource />
+              <Warehouse />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />

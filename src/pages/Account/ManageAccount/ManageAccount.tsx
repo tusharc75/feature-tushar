@@ -72,15 +72,19 @@ export default function ManageAccount(props) {
       }
     }
 
-    let ownerCollaboratorDropdownData = accountData.fields.filter(
-      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-    );
-    if (ownerCollaboratorDropdownData.length > 0) {
-      setOwnerCollaboratorCommonDataSource(
-        ownerCollaboratorDropdownData[0].option
+    if (fromProject) {
+      setOwnerCollaboratorCommonDataSource(owners);
+      setOwnerDataSource(owners);
+      setCollaboratorDataSource(collaborators);
+    } else {
+      let ownerCollaboratorDropdownData = accountData.fields.filter(
+        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
       );
-      setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-      setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+      if (ownerCollaboratorDropdownData.length > 0) {
+        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].options);
+        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+      }
     }
 
     const parentAccountDropdownData = accountData.fields.find(
@@ -266,7 +270,8 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={
-                                          fromProject ? owners : ownerDataSource
+                                          // fromProject ? owners : ownerDataSource
+                                          ownerDataSource
                                         }
                                         onChange={(e, val) => {
                                           setFieldValue(
@@ -316,7 +321,7 @@ export default function ManageAccount(props) {
                                         size="small"
                                         disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
-                                          !fromProject &&
+                                          // !fromProject &&
                                           onOwnerDropdownOpen(
                                             values.collaborator, values.entity ? values.entity : []
                                           )
@@ -335,13 +340,14 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={
-                                          fromProject
-                                            ? collaborators.filter(
-                                              (c) =>
-                                                c.optionValue !==
-                                                values["owner"]
-                                            )
-                                            : collaboratorDataSource
+                                          // fromProject
+                                          //   ? collaborators.filter(
+                                          //     (c) =>
+                                          //       c.optionValue !==
+                                          //       values["owner"]
+                                          //   )
+                                          //   : collaboratorDataSource
+                                          collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
                                         required={field.required}
@@ -350,7 +356,7 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() =>
-                                          !fromProject &&
+                                          // !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
                                             values.owner, values.entity ? values.entity : []
                                           )

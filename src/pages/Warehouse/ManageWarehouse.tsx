@@ -9,13 +9,13 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "./../../constants/helpers";
+import { CustomDialogTransition } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const ManageAddressResource = (props) => {
+const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { addressResourceId, onClose, onSuccess } = props;
@@ -24,12 +24,12 @@ const ManageAddressResource = (props) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Address").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResourceId) {
-                axiosInstance().get(`/address/` + addressResourceId).then(({ data: { data } }) => {
+                axiosInstance().get(`/warehouse/` + addressResourceId).then(({ data: { data } }) => {
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -54,7 +54,7 @@ const ManageAddressResource = (props) => {
     const handleSubmit = (values) => {
         if (addressResourceId) {
             values._id = addressResourceId
-            axiosInstance().put(`/address`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {
@@ -63,7 +63,7 @@ const ManageAddressResource = (props) => {
             });
         }
         else {
-            axiosInstance().post(`/address`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
             }).catch((error) => {
@@ -157,4 +157,4 @@ const ManageAddressResource = (props) => {
     );
 }
 
-export default ManageAddressResource;
+export default ManageWarehouse;

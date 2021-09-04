@@ -86,20 +86,21 @@ export default function ManageContact(props) {
           });
         }
       }
-      const ownerCollaboratorDropdownData = contactData.fields.filter(
-        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-      );
 
-      if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(
-          ownerCollaboratorDropdownData[0].option
+      if (fromProject) {
+        setOwnerCollaboratorCommonDataSource(owners);
+        setOwnerDataSource(owners);
+        setCollaboratorDataSource(collaborators);
+      } else {
+        const ownerCollaboratorDropdownData = contactData.fields.filter(
+          (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
         );
-        setOwnerDataSource(
-          fromProject ? owners : ownerCollaboratorDropdownData[0].option
-        );
-        setCollaboratorDataSource(
-          fromProject ? owners : ownerCollaboratorDropdownData[0].option
-        );
+
+        if (ownerCollaboratorDropdownData.length > 0) {
+          setOwnerCollaboratorCommonDataSource( ownerCollaboratorDropdownData[0].option);
+          setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+          setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+        }
       }
 
       const reportsToDropdownData = contactData.fields.find(
@@ -306,9 +307,7 @@ export default function ManageContact(props) {
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        options={
-                                          fromProject ? owners : ownerDataSource
-                                        }
+                                        options={ownerDataSource}
                                         onChange={(e, val) => {
                                           setFieldValue(
                                             field.fieldName,
@@ -357,7 +356,7 @@ export default function ManageContact(props) {
                                         size="small"
                                         disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
-                                          !fromProject &&
+                                          // !fromProject &&
                                           onOwnerDropdownOpen(
                                             values.collaborator, values.entity ? values.entity : []
                                           )
@@ -375,15 +374,7 @@ export default function ManageContact(props) {
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        options={
-                                          fromProject
-                                            ? collaborators.filter(
-                                              (c) =>
-                                                c.optionValue !==
-                                                values["owner"]
-                                            )
-                                            : collaboratorDataSource
-                                        }
+                                        options={collaboratorDataSource}
                                         setFieldValue={setFieldValue}
                                         required={field.required}
                                         fullWidth
@@ -391,7 +382,7 @@ export default function ManageContact(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() =>
-                                          !fromProject &&
+                                          // !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
                                             values.owner, values.entity ? values.entity : []
                                           )
