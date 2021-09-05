@@ -76,7 +76,9 @@ export default function ManageQuoteDialog({
   isRenderedFromProjectSales = false,
   cloneQuoteWithVersionNumber = 0,
   isCreateQuoteFromCart = false,
-  onHandleSubmit = null
+  onHandleSubmit = null,
+  isFromProjectSales = false,
+  projectSalesTeam = []
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -136,13 +138,19 @@ export default function ManageQuoteDialog({
   }, [entityData]);
 
   useEffect(() => {
-    let ownerCollaboratorOptions = entityData.fields.filter(
-      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-    );
-    if (ownerCollaboratorOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
-      setOwnerData(ownerCollaboratorOptions[0].option);
-      setCollaboratorData(ownerCollaboratorOptions[0].option);
+    if (isFromProjectSales) {
+      setOwnerCollaboratorData(projectSalesTeam);
+      setOwnerData(projectSalesTeam);
+      setCollaboratorData(projectSalesTeam);
+    } else {
+      let ownerCollaboratorOptions = entityData.fields.filter(
+        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+      );
+      if (ownerCollaboratorOptions.length > 0) {
+        setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
+        setOwnerData(ownerCollaboratorOptions[0].option);
+        setCollaboratorData(ownerCollaboratorOptions[0].option);
+      }
     }
 
     let customerAccountOptions = entityData.fields.find(
