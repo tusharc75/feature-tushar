@@ -67,6 +67,9 @@ export default function ManageBudgetDialog({
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
 
+    const [salesRepDataSource, setSalesRepDataSource] = useState([])
+    const [usersDataSource, setUsersDataSource] = useState([]);
+
     const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
 
     const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
@@ -83,6 +86,26 @@ export default function ManageBudgetDialog({
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(entityData.fields));
     }, [entityData.fields]);
+
+    const onSalesRepDropdownOpen = (selectedEntity) => {
+        if (selectedEntity) {
+            let newTempArray = [];
+
+            [selectedEntity].forEach(d => {
+                usersDataSource.forEach(item => {
+                    if (item.entities?.find(s => s.entity === d)) {
+                        if (!newTempArray.find(s => s.optionValue === item.optionValue)) {
+                            newTempArray.push(item)
+                        }
+                    }
+                })
+            })
+            setSalesRepDataSource(newTempArray)
+        }
+        else {
+            setSalesRepDataSource(usersDataSource);
+        }
+    };
 
     const getBudgetFields = () => {
         axiosInstance()
@@ -107,6 +130,14 @@ export default function ManageBudgetDialog({
                         }
                     })
                     setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+                }
+
+                //  Check sales rep field
+                const salesRepDropdownData = filterData.map(m => m.fieldData).find(
+                    (d) => d.fieldName === "salesRep"
+                );
+                if (salesRepDropdownData) {
+                    setUsersDataSource(salesRepDropdownData.option);
                 }
 
                 if (budgetId) {
@@ -313,7 +344,28 @@ export default function ManageBudgetDialog({
                                                                 {form.sectionFields.map((field, index2) => (
                                                                     <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                         {
-                                                                            field.fieldName === "currency" ? (
+                                                                            field.fieldName === "entity" ? (
+                                                                                <FormTypes
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    onChange={(e, value) => {
+                                                                                        setFieldValue(
+                                                                                            field.fieldName,
+                                                                                            value ? value.optionValue : ""
+                                                                                        );
+                                                                                        setFieldValue("salesRep", "");
+                                                                                    }}
+                                                                                />
+                                                                            ) : field.fieldName === "currency" ? (
                                                                                 <FormTypes
                                                                                     // {...rest}
                                                                                     values={values}
@@ -534,107 +586,148 @@ export default function ManageBudgetDialog({
                                                                                             </Grid>
                                                                                         ) : null}
                                                                                     </Grid>
-                                                                                </Grid>
-                                                                                    : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                                                        <Grid container spacing={1}>
-                                                                                            <Grid
-                                                                                                item
-                                                                                                xs={
-                                                                                                    permissions.marketSegment.isCreate ? 10
-                                                                                                        : 11
-                                                                                                }
-                                                                                                sm={
-                                                                                                    permissions.marketSegment.isCreate ? 10
-                                                                                                        : 11
-                                                                                                }
-                                                                                                md={
-                                                                                                    permissions.marketSegment.isCreate ? 10
-                                                                                                        : 11
-                                                                                                }
-                                                                                            >
-                                                                                                <FormTypes
-                                                                                                    fields={entityData.fields}
-                                                                                                    fieldData={field}
-                                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
-                                                                                                    errors={errors}
-                                                                                                    touched={touched}
-                                                                                                    label={field.fieldLabel}
-                                                                                                    name={field.fieldName}
-                                                                                                    type={field.type}
-                                                                                                    setFieldValue={setFieldValue}
-                                                                                                    required={field.required}
-                                                                                                    fullWidth
-                                                                                                    isTooltip={field.isTooltip}
-                                                                                                    tooltipMessage={field.tooltipMessage}
-                                                                                                    onChange={(e, val) => {
-                                                                                                        setNewSubMarketSegmentId(null);
-                                                                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                                    }}
-                                                                                                    size="small"
-                                                                                                    values={
-                                                                                                        newSubMarketSegmentId
-                                                                                                            ? initializeSubMarketSegmentDropdown(
-                                                                                                                values,
-                                                                                                                subMarketSegmentDataSource
-                                                                                                            )
-                                                                                                            : values
-                                                                                                    }
-                                                                                                    options={subMarketSegmentDataSource}
-                                                                                                    doNotShowInfoTooltip={true}
-                                                                                                />
-                                                                                            </Grid>
-                                                                                            {
-                                                                                                permissions.marketSegment.isCreate && (
-                                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                                        <Tooltip
-                                                                                                            title="Add Sub Market Segment"
-                                                                                                            className="mt-1"
-                                                                                                        >
-                                                                                                            <IconButton
-                                                                                                                onClick={() => {
-                                                                                                                    setShowAddMarketSegmentDialog(true);
-                                                                                                                }}
-                                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
-                                                                                                                size="small"
-                                                                                                            >
-                                                                                                                <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                                                                            </IconButton>
-                                                                                                        </Tooltip>
-                                                                                                    </Grid>
-                                                                                                )
+                                                                                </Grid> : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                                    <Grid container spacing={1}>
+                                                                                        <Grid
+                                                                                            item
+                                                                                            xs={
+                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                    : 11
                                                                                             }
-                                                                                            {field?.tooltipMessage ? (
-                                                                                                <Grid item xs={1} sm={1} md={1}>
-                                                                                                    <Tooltip
-                                                                                                        title={
-                                                                                                            field?.tooltipMessage ?? ""
-                                                                                                        }
-                                                                                                    >
-                                                                                                        <InfoIcon color="disabled" />
-                                                                                                    </Tooltip>
-                                                                                                </Grid>
-                                                                                            ) : null}
-                                                                                        </Grid>
-                                                                                    </Grid>
-                                                                                        : (
+                                                                                            sm={
+                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                    : 11
+                                                                                            }
+                                                                                            md={
+                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                    : 11
+                                                                                            }
+                                                                                        >
                                                                                             <FormTypes
-                                                                                                // {...rest}
-                                                                                                values={values}
+                                                                                                fields={entityData.fields}
+                                                                                                fieldData={field}
+                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                                 errors={errors}
                                                                                                 touched={touched}
                                                                                                 label={field.fieldLabel}
                                                                                                 name={field.fieldName}
                                                                                                 type={field.type}
-                                                                                                options={field.option}
                                                                                                 setFieldValue={setFieldValue}
                                                                                                 required={field.required}
                                                                                                 fullWidth
-                                                                                                isTooltip={field?.isTooltip || false}
-                                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                                isTooltip={field.isTooltip}
+                                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                                onChange={(e, val) => {
+                                                                                                    setNewSubMarketSegmentId(null);
+                                                                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                }}
                                                                                                 size="small"
-                                                                                                imageOrFileUploadCompletePercentage={null}
+                                                                                                values={
+                                                                                                    newSubMarketSegmentId
+                                                                                                        ? initializeSubMarketSegmentDropdown(
+                                                                                                            values,
+                                                                                                            subMarketSegmentDataSource
+                                                                                                        )
+                                                                                                        : values
+                                                                                                }
+                                                                                                options={subMarketSegmentDataSource}
+                                                                                                doNotShowInfoTooltip={true}
                                                                                             />
-                                                                                        )}
+                                                                                        </Grid>
+                                                                                        {
+                                                                                            permissions.marketSegment.isCreate && (
+                                                                                                <Grid item xs={1} sm={1} md={1}>
+                                                                                                    <Tooltip
+                                                                                                        title="Add Sub Market Segment"
+                                                                                                        className="mt-1"
+                                                                                                    >
+                                                                                                        <IconButton
+                                                                                                            onClick={() => {
+                                                                                                                setShowAddMarketSegmentDialog(true);
+                                                                                                            }}
+                                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                                            size="small"
+                                                                                                        >
+                                                                                                            <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                                        </IconButton>
+                                                                                                    </Tooltip>
+                                                                                                </Grid>
+                                                                                            )
+                                                                                        }
+                                                                                        {field?.tooltipMessage ? (
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip
+                                                                                                    title={
+                                                                                                        field?.tooltipMessage ?? ""
+                                                                                                    }
+                                                                                                >
+                                                                                                    <InfoIcon color="disabled" />
+                                                                                                </Tooltip>
+                                                                                            </Grid>
+                                                                                        ) : null}
+                                                                                    </Grid>
+                                                                                </Grid> : field.fieldName === "salesRep" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                                    <Grid container spacing={1}>
+                                                                                        <Grid
+                                                                                            item
+                                                                                            xs={11}
+                                                                                            sm={11}
+                                                                                            md={11}
+                                                                                        >
+                                                                                            <FormTypes
+                                                                                                fields={entityData.fields}
+                                                                                                fieldData={field}
+                                                                                                errors={errors}
+                                                                                                touched={touched}
+                                                                                                label={field.fieldLabel}
+                                                                                                name={field.fieldName}
+                                                                                                type={field.type}
+                                                                                                // setFieldValue={setFieldValue}
+                                                                                                required={field.required}
+                                                                                                fullWidth
+                                                                                                isTooltip={field.isTooltip}
+                                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                                onChange={(e, val) => {
+                                                                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                }}
+                                                                                                size="small"
+                                                                                                values={values}
+                                                                                                options={salesRepDataSource}
+                                                                                                doNotShowInfoTooltip={true}
+                                                                                                onOpen={() => { onSalesRepDropdownOpen(values["entity"]) }}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                        {field?.tooltipMessage ? (
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip
+                                                                                                    title={
+                                                                                                        field?.tooltipMessage ?? ""
+                                                                                                    }
+                                                                                                >
+                                                                                                    <InfoIcon color="disabled" />
+                                                                                                </Tooltip>
+                                                                                            </Grid>
+                                                                                        ) : null}
+                                                                                    </Grid>
+                                                                                </Grid> : (
+                                                                                    <FormTypes
+                                                                                        // {...rest}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={field.option}
+                                                                                        setFieldValue={setFieldValue}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                        imageOrFileUploadCompletePercentage={null}
+                                                                                    />
+                                                                                )}
                                                                     </Grid>
                                                                 ))}
                                                             </Grid>
