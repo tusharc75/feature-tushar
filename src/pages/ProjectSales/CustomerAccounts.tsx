@@ -634,7 +634,8 @@ const CustomerAccounts = (props) => {
                                 estimatedAmount={estimatedAmount}
                                 marketSegmentId={marketSegmentId}
                                 subMarketSegmentId={subMarketSegmentId}
-
+                                isFromProjectSales={true}
+                                projectSalesTeam={collaborators}
                               />
                             )
                           }
