@@ -926,6 +926,10 @@ const FormTypes = (props) => {
                               setOptionsList([newOption, ...option]);
                             }
                             handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          } 
+                          //  This else was not there, so In budget create dialog if I was removing the selected dropdown value, the value did not get clear
+                          else {
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
                           }
                         }
                       } else {
