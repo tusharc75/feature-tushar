@@ -1,5 +1,6 @@
 import { Parser as FormulaParser } from 'hot-formula-parser';
 import { uniq } from "lodash";
+import { camelCase } from "../constants/helpers";
 
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
@@ -690,7 +691,7 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
             }
         }
         else {
-            fieldNames.push(fieldData.fieldName)
+            fieldNames.push(fieldData.fieldName ? fieldData.fieldName : camelCase(fieldData.fieldLabel.replace(/[^a-zA-Z0-9]/g, '')))
         }
         var used_Fields = []
         section.forEach((row) => {
@@ -705,12 +706,15 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
                     if (_field.formulainputFields && _field.formulainputFields.includes(_fieldName)) {
                         used_Fields.push(_field.fieldLabel)
                     }
+                    if (_field.dropdowDependentOn && _field.dropdowDependentOn.includes(_fieldName)) {
+                        used_Fields.push(_field.fieldLabel)
+                    }
                 })
             });
         });
         if (used_Fields.length) {
             used_Fields = uniq(used_Fields);
-            return { error: true, message: "This field used in " + used_Fields.join() + " fields. After delete formula afftect." }
+            return { error: true, message: "This field used in " + used_Fields.join() + " fields." }
         }
         else {
             return { error: false, message: "" }

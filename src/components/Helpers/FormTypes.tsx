@@ -85,7 +85,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
       <Grid item xs={11} sm={11} md={11}>
         {children}
        {warningTooltip && <Box ml={1}>
-          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+          <Typography variant="caption" color="secondary">{warningMessage}</Typography>
         </Box>}
       </Grid>
       <Grid item xs={1} sm={1} md={1}>
@@ -98,7 +98,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
       <>
         {children}
         {warningTooltip && <Box ml={1}>
-          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+          <Typography variant="caption" color="secondary">{warningMessage}</Typography>
         </Box>}
       </>
   ) : (
@@ -106,7 +106,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
       <Grid item xs={12} sm={12} md={12}>
             {children}
             {warningTooltip && <Box ml={1}>
-          <Typography variant="caption" color="textSecondary">{warningMessage}</Typography>
+          <Typography variant="caption" color="secondary">{warningMessage}</Typography>
         </Box>}
       </Grid>
       {/* <Grid item xs={1} sm={1} md={1}>
@@ -925,6 +925,10 @@ const FormTypes = (props) => {
                               addFieldOption(newOption);
                               setOptionsList([newOption, ...option]);
                             }
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          } 
+                          //  This else was not there, so In budget create dialog if I was removing the selected dropdown value, the value did not get clear
+                          else {
                             handleChange(name, val && val.optionValue ? val.optionValue : '');
                           }
                         }
