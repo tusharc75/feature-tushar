@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
 import ReactGa from 'react-ga';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -40,6 +40,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const AccTypes = [
   {
@@ -63,9 +64,9 @@ export default function Account(props) {
   } = props;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity }, dispatch: entityDispatch
   }: any = useData();
-
+  const history = useHistory();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [type, setType] = useState(options[0]);
@@ -166,14 +167,43 @@ export default function Account(props) {
     </span>
   );
 
+  const handleEntityChange = (entityId) => {
+    entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
+  }
+
+  const hasAccessToEntity = (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  }
+
   const LeadRenderer = (params) =>
     params.value ? (
-      <Link className="link" to={`${routes.leadDetail.path}/${params.data.leadId}`} title={params.value}>
-        {params.value}
-      </Link>
+      params?.data?.leadEntity === selectedEntity ?
+        <Link className="link" to={`${routes.leadDetail.path}/${params.data.leadId}`} title={params.value}>
+          {params.value}
+        </Link>
+        :
+        hasAccessToEntity(params?.data?.leadEntity) ?
+          <span
+            className="link"
+            onClick={() => {
+              handleEntityChange(params.data.leadEntity)
+              history.push(`${routes.leadDetail.path}/${params.data.leadId}`)
+            }}
+            title={params.value}
+          >
+            {params.value}
+          </span>
+          :
+          <span
+            title={params.value}
+          >
+            <CustomRenderCell value={params.value} />
+          </span>
     ) : (
       <NoDataCell />
     );
+    
 
   const ParentAccountRenderer = (params) =>
     params.value ? (
@@ -393,7 +423,7 @@ export default function Account(props) {
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
             lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-
+            leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
             approved: u.staticData?.approved,
 
             parentAccount: parentAccount?.optionLabel,
