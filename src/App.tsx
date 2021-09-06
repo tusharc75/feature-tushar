@@ -453,7 +453,7 @@ function App() {
             <PrivateRoute exact path={routes.productInventoryDetail.path + "/:id"}>
               <ProductInventoryDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.equipmentRentalMaster.path}>
+            <PrivateRoute exact path={routes.equiptmentRentalMaster.path}>
               <EquipmentRentalMaster />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>

@@ -169,8 +169,8 @@ const routes = {
     title: (storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title) ? storedRoutes.productInventory.title : RESOURCE_LABEL.productInventory,
     path: "/product-inventory/detail",
   },
-  equipmentRentalMaster: {
-    title: (storedRoutes && storedRoutes.equipmentRentalMaster && storedRoutes.equipmentRentalMaster) ? storedRoutes.equipmentRentalMaster.title : RESOURCE_LABEL.equipmentRentalMaster,
+  equiptmentRentalMaster: {
+    title: (storedRoutes && storedRoutes.equiptmentRentalMaster && storedRoutes.equiptmentRentalMaster) ? storedRoutes.equiptmentRentalMaster.title : RESOURCE_LABEL.equiptmentRentalMaster,
     path: "/equiptment-rental-master",
   },
   quoteBuilder: {
