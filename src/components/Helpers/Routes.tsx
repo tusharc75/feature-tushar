@@ -233,6 +233,14 @@ const routes = {
     title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",
   },
+  deliveryTicket: {
+    title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
+    path: "/loading-ticket",
+  },
+  deliveryTicketDetail: {
+    title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
+    path: "/loading-ticket/detail",
+  },
 };
 
 export default routes;

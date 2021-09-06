@@ -133,8 +133,7 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equiptmentRentalMaster: 'Equiptment Rental Master',
-  rentalManagement: 'Rental Management',
+  equipmentRentalMaster: "Equiptment Rental Master",
   deliveryTicket: 'Loading Ticket'
 };
 
@@ -179,7 +178,7 @@ export const RESOURCE_LABEL = {
   productInventory: 'Product Inventory',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   rentalManagement: 'Rental Management',
-  deliveryTicket: 'Loading Tickets'
+  deliveryTicket: "Delivery Ticket"
 };
 
 export const lead = {
@@ -212,6 +211,11 @@ export const priceTemplate = {
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
   qbApi: "/quote-builder",
+};
+
+export const deliveryTicket = {
+  deliveryTicketResource: "deliveryTicket",
+  deliveryTicketApi: "/delivery-ticket"
 };
 
 export const projectSales = {
@@ -747,6 +751,7 @@ export const getPermissions = (
         }
       });
     }
+
     localStorage.setItem("routes", JSON.stringify(routesAndTitle));
     return permissions;
   }
