@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { TextField, Grid, Box, Button, CircularProgress, FormControlLabel, Checkbox } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
+import { object, string, boolean } from "yup";
 import { FormBuilder } from '../../components/FormBuilder';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -11,9 +11,9 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 
-const PdfTemplateSchema = Yup.object().shape({
-  name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
-  showPageNumberInFooter: Yup.boolean()
+const PdfTemplateSchema = object().shape({
+  name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+  showPageNumberInFooter: boolean()
 });
 
 const CreateQuotePdfTemplate = () => {

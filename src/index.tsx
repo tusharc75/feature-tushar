@@ -6,7 +6,7 @@ import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { MsalProvider } from "@azure/msal-react";
 import AzureInstance from "./AzureInstance";
-import * as Sentry from "@sentry/react";
+import { init } from "@sentry/react";
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./styles/index.scss";
@@ -23,8 +23,8 @@ import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatN
 import { GlobalChatProvider } from "./StateProvider/GlobalChatContext";
 
 // @ts-ignore
-if(process.env.REACT_APP_ENV !== 'local'){
-  Sentry.init({
+if (process.env.REACT_APP_ENV !== 'local') {
+  init({
     environment: process.env.REACT_APP_ENV,
     release: process.env.REACT_APP_RELEASE,
     dsn: "https://42514b3242b14f7d8c5b8dbacd0c4237@o718098.ingest.sentry.io/5850347",
