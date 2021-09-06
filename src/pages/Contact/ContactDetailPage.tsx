@@ -34,6 +34,7 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,7 +45,7 @@ const ContactDetailsPage = (props) => {
   } = props;
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }, dispatch
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
@@ -449,6 +450,15 @@ const ContactDetailsPage = (props) => {
       });
   };
 
+  const handleEntityChange = (id) => {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+  }
+
+  const hasAccessToEntity = (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  }
+
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   return (
     <>
@@ -699,9 +709,23 @@ const ContactDetailsPage = (props) => {
                                 <ListItemText
                                   className="ml-2"
                                   primary={
-                                    <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
-                                      {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
-                                    </Link>
+                                    contactData?.staticData?.lead?.entity === selectedEntity ?
+                                      <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                        {contactData?.staticData?.lead?.concatedName}
+                                      </Link>
+                                      : hasAccessToEntity(contactData?.staticData?.lead?.entity) ?
+                                        <Link
+                                          className="link f_size p-l2"
+                                          onClick={() => {
+                                            handleEntityChange(contactData?.staticData?.lead?.entity)
+                                            history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`)
+                                          }}>
+                                          {contactData?.staticData?.lead?.concatedName}
+                                        </Link>
+                                        :
+                                        <span>
+                                          {contactData?.staticData?.lead?.concatedName}
+                                        </span>
                                   }
                                   secondary={
                                     <React.Fragment>

@@ -19,7 +19,7 @@ import {
   KeyboardTimePicker,
 } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import moment from "moment";
 import { camelCase, isEmpty, kebabCase } from "lodash";
 
@@ -42,12 +42,12 @@ import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
 import { dateFormat } from "../../../constants/helpers";
 
-const EventSchema = Yup.object().shape({
-  name: Yup.string().required("Please enter event name").min(3, "Too Short"),
-  startTime: Yup.string().required("Please enter start time").nullable(),
-  startDate: Yup.string().required("Please enter start date").nullable(),
-  endTime: Yup.string().required("Please enter end time").nullable(),
-  endDate: Yup.string().required("Please enter end date").nullable(),
+const EventSchema = object().shape({
+  name: string().required("Please enter event name").min(3, "Too Short"),
+  startTime: string().required("Please enter start time").nullable(),
+  startDate: string().required("Please enter start date").nullable(),
+  endTime: string().required("Please enter end time").nullable(),
+  endDate: string().required("Please enter end date").nullable(),
 });
 
 export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {

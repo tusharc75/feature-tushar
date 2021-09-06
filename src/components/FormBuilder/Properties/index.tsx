@@ -15,7 +15,7 @@ import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import * as Yup from 'yup';
+import { object, string } from "yup";
 import { Formik, Form } from 'formik';
 import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
@@ -33,8 +33,8 @@ import { startCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 
-const FieldSchema = Yup.object().shape({
-  fieldLabel: Yup.string().required('please enter field label')
+const FieldSchema = object().shape({
+  fieldLabel: string().required('please enter field label')
 });
 
 const LookupResource = [

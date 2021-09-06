@@ -17,7 +17,7 @@ import {
   ViewColumn,
   List,
 } from "@material-ui/icons";
-import * as yup from "yup";
+import { object, string, array, boolean } from "yup";
 import moment from "moment";
 import currencies from "./currency_with_country.json";
 import { TransitionProps } from "@material-ui/core/transitions";
@@ -133,12 +133,14 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master"
+  equiptmentRentalMaster: 'Equiptment Rental Master',
+  rentalManagement: 'Rental Management',
+  deliveryTicket: 'Loading Ticket'
 };
 
 export const RESOURCE_LABEL = {
-  warehouse: "Warehouse",
   account: 'Supplier Accounts',
+  warehouse: "Warehouses",
   customerAccount: 'Customer Accounts',
   user: 'Users',
   contact: 'Supplier Contacts',
@@ -175,7 +177,9 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master"
+  equiptmentRentalMaster: 'Equiptment Rental Master',
+  rentalManagement: 'Rental Management',
+  deliveryTicket: 'Loading Tickets'
 };
 
 export const lead = {
@@ -433,50 +437,46 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   fields.forEach((input) => {
     if (input.type === "singleLine") {
       schema[input.fieldName] = input.required
-        ? yup.string().required(`${input.fieldLabel} is required`)
-        : yup.string();
+        ? string().required(`${input.fieldLabel} is required`)
+        : string();
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
-        ? yup
-          .string()
+        ? string()
           .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
           .required(`${input.fieldLabel} is required`)
-        : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
+        : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
-        ? yup
-          .string()
+        ? string()
           .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             "Enter valid URL"
           )
           .required(`${input.fieldLabel} is required`)
-        : yup
-          .string()
+        : string()
           .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             "Enter valid URL"
           );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
-        ? yup
-          .string()
+        ? string()
           .min(10, "Mobile number is too short")
           .required(`${input.fieldLabel} is required`)
         : yup.string();
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
-        ? yup.array().required(`${input.fieldLabel} is required`)
-        : yup.array();
+        ? array().required(`${input.fieldLabel} is required`)
+        : array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
         input.required && validEmail
-          ? yup.string().email().required(`${input.fieldLabel} is required`)
-          : yup.string().email(`${input.fieldLabel} must be a valid email`);
+          ? string().email().required(`${input.fieldLabel} is required`)
+          : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
-        ? yup.boolean().required(`${input.fieldLabel} is required`)
-        : yup.boolean();
+        ? boolean().required(`${input.fieldLabel} is required`)
+        : boolean();
     } else if (
       input.type !== "currencyAmount" &&
       (input.type === "converter" || input.isConverter === true)
@@ -484,8 +484,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.displayUnits &&
         input.displayUnits.forEach((_unit) => {
           schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
-            ? yup.string().required(`${input.fieldLabel} is required`)
-            : yup.string();
+            ? string().required(`${input.fieldLabel} is required`)
+            : string();
         });
     } else if (input.type === "currencyAmount") {
       input.displayCurrency &&
@@ -499,32 +499,32 @@ export const yupSchema = (fields: any[], validEmail = true) => {
                 "_" +
                 _unit.toLowerCase()
               ] = input.required
-                  ? yup.string().required(`${input.fieldLabel} is required`)
-                  : yup.string();
+                  ? string().required(`${input.fieldLabel} is required`)
+                  : string();
             });
           } else {
             schema[input.fieldName + "_" + _currency.toLowerCase()] =
               input.required
-                ? yup.string().required(`${input.fieldLabel} is required`)
-                : yup.string();
+                ? string().required(`${input.fieldLabel} is required`)
+                : string();
           }
         });
     } else if (input.type === "date") {
       schema[input.fieldName] = input.required
-        ? yup.string().required(`${input.fieldLabel} is required`).nullable()
-        : yup.string().nullable();
+        ? string().required(`${input.fieldLabel} is required`).nullable()
+        : string().nullable();
     } else if (input.type === "freeStyleMultiSelect") {
       schema[input.fieldName] = input.required
-        ? yup.array().required(`${input.fieldLabel} is required`)
-        : yup.array();
+        ? array().required(`${input.fieldLabel} is required`)
+        : array();
     } else {
       schema[input.fieldName] = input.required
-        ? yup.string().required(`${input.fieldLabel} is required`)
-        : yup.string();
+        ? string().required(`${input.fieldLabel} is required`)
+        : string();
     }
   });
 
-  return yup.object().shape(schema);
+  return object().shape(schema);
 };
 
 export const camelCase = (str) => {

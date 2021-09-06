@@ -16,7 +16,7 @@ import axiosInstance from "../../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from "../../../../components/Helpers/CustomButton";
 import TextField from "@material-ui/core/TextField";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { useHistory } from "react-router-dom";
 import AxiosInstance from "../../../../axios/axiosInstance";
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -43,9 +43,9 @@ import { fileIcons } from "../../../../components/Activity/Email/FileIcons";
 import { toolbarConfig } from "../../../../components/Activity/Email/TextEditorToolbar";
 import ImagePreview from "../../../../components/Activity/Email/ImagePreview";
 
-const ProductBuilderSchema = Yup.object().shape({
-  subject: Yup.string().required("please enter email subject"),
-  contact: Yup.object().required("please select Contact"),
+const ProductBuilderSchema = object().shape({
+  subject: string().required("please enter email subject"),
+  contact: object().required("please select Contact"),
 });
 
 const useStyles = makeStyles((theme) => ({

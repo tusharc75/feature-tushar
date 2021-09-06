@@ -7,7 +7,7 @@ import { Formik, Form } from "formik";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import TextField from '@material-ui/core/TextField';
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { CreateNewNote, UpdateNote, GetNoteDetail } from "../../../axios/activity";
 import axiosInstance from '../../../axios/axiosInstance';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
@@ -26,8 +26,8 @@ import { displayDate } from "../../../constants/helpers"
 import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
-const NoteSchema = Yup.object().shape({
-    name: Yup.string()
+const NoteSchema = object().shape({
+    name: string()
         .required("please enter note title"),
 });
 
