@@ -59,7 +59,7 @@ const Leads = () => {
     isCreate: permissions[leadResource]?.isCreate,
     isUpdate: permissions[leadResource]?.isUpdate,
     isRead: permissions[leadResource]?.isRead,
-    isDelete: permissions[leadResource]?.isDelete,
+    isDelete: permissions[leadResource]?.isDelete
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);

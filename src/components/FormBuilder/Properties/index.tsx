@@ -49,6 +49,7 @@ const LookupResource = [
   { name: 'Lead', value: 'Lead' },
   { name: 'Opportunity', value: 'Opportunity' },
   { name: 'Product', value: 'Product' },
+  { name: 'Product Inventory', value: 'Product Inventory' },
   { name: 'Product Category', value: 'Product Category' },
   { name: 'Project Sales', value: 'Project Sales' },
   { name: 'Quotes', value: 'Quotes' },
@@ -56,9 +57,12 @@ const LookupResource = [
   { name: 'Product Template', value: 'Product Template' },
   { name: 'Quote Pdf Template', value: 'Quote Pdf Template' },
   { name: 'Terms & Conditions', value: 'Terms & Conditions' },
+  { name: 'Warehouse', value: 'Warehouse' },
   { name: 'Budget', value: 'Budget' },
-  { name: 'Market Segment', value: 'Market Segment' }
-];
+  { name: 'Market Segment', value: 'Market Segment' },
+  { name: 'Rental Management', value: 'Rental Management' },
+  { name: 'Loading Ticket', value: 'Loading Ticket' },
+].sort((a,b) =>  a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });

@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Breadcrumbs, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import ConfirmCancelDialog from "../components/ConfirmCancelDialog"
 
 const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadCrumbClick = null }) => {
 
@@ -31,7 +30,7 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
                     {route.title}
                   </Typography>
                   :
-                  < Link
+                  <Link
                     key={index}
                     to={route.path}
                     className="cursor-pointer" >

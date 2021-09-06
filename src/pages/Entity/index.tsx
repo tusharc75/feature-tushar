@@ -12,7 +12,7 @@ import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
 import { useData } from "../../StateProvider/Provider";
-import CreateEntity from "./CreateEntity";
+import ManageEntity from "./ManageEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import {
@@ -287,10 +287,11 @@ const Entity: FC = () => {
           loading={loading} renderedFrom="entityPage" />
 
         {isOpen && (
-          <CreateEntity
+          <ManageEntity
             open={isOpen}
             close={handleClose}
             fetchData={fetchEntity}
+            isNew={true}
           />
         )}
         {usersDialogOpen && !usersDialogLoding && (

@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
-import { Box, Button } from "@material-ui/core";
-import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import { Box, Avatar } from "@material-ui/core";
 import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
 import { formatAmountWithCurrency } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
+import { MdAddShoppingCart } from 'react-icons/md';
 
 const ProductCard = (props: { product: any, onAddItem: any }) => {
   const { product, onAddItem } = props;
@@ -14,16 +14,26 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
 
   return (
     <div className={styles.product_card}>
-      {(product.mrp && parseInt(product.mrp) !== 0) && (product.discount && parseInt(product.discount) !== 0) &&
-        <div className={styles.product_discount}>
-          -{product.discount}%
-        </div>
-      }
-      <Box display="flex" justifyContent="center" alignItems="center" onClick={() => { history.push(`product/details/${product._id}`) }}>
-        {product.productImage ?
-          <img src={product.productImage} alt={product.productName} />
-          : <BsImage className={styles.no_image} />
-        }
+      {product.mrp && parseInt(product.mrp) !== 0 && product.discount && parseInt(product.discount) !== 0 && (
+        <div className={styles.product_discount}>-{product.discount}%</div>
+      )}
+      <div className={styles.title}>
+        <h4
+          onClick={() => {
+            history.push(`product/details/${product._id}`);
+          }}
+        >{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
+        <Avatar className={styles.product_less}>-10%</Avatar>
+      </div>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        onClick={() => {
+          history.push(`product/details/${product._id}`);
+        }}
+      >
+        {product.productImage ? <img src={product.productImage} alt={product.productName} /> : <BsImage className={styles.no_image} />}
       </Box>
 
       <div className={styles.text}>
@@ -47,21 +57,26 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
               </>
             }
           </div>
-          <Button variant="outlined" color="secondary" size="small"
-            // onClick={() => onAddItem(product, { isAdd: true })}
-            onClick={() => onAddItem(product)}
-            startIcon={<AddShoppingCartIcon />}>
-            Add to cart
-          </Button>
+          <div className={styles.rating}>
+            <Rating name="size-small" value={product.rating} defaultValue={4} readOnly size="small" />
+            <span>
+              <h5>4.1 out of 5.0</h5>
+            </span>
+          </div>
         </Box>
+        <div >
+          <Avatar className={styles.cart_icon} onClick={() => onAddItem(product)}>
+            <MdAddShoppingCart size={18} />
+          </Avatar>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 ProductCard.propTypes = {
   product: PropTypes.object,
-  onAddItem: PropTypes.func,
+  onAddItem: PropTypes.func
 };
 
 export default ProductCard;

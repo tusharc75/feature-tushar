@@ -9,7 +9,6 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
@@ -22,6 +21,7 @@ import {
 } from "../../StateProvider/actionTypes";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import AssignedUsers from "./AssignedUsers";
+import ManageEntity from "./ManageEntity";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -222,7 +222,7 @@ const EntityDetailsPage = () => {
   };
 
   const fieldsToShowInDetailPage = entityFields.filter((field) => field.isRead);
-  const fieldsToShowInUpdateDialog = entityFields.filter((field) => field.isUpdate);
+
   return (
     <>
       {showAssignUserDialog && (
@@ -248,14 +248,15 @@ const EntityDetailsPage = () => {
         </Dialog>
       )}
       {openUpdateDialog && (
-        <UpdateDetailsDialog
-          title="Update"
-          openDialog={openUpdateDialog}
-          onClose={closeUpdateDIalog}
-          data={entityData}
-          fields={fieldsToShowInUpdateDialog}
-          isUpdating={isUpdating}
-          handleUpdate={handleUpdateEntity}
+        <ManageEntity
+          open={openUpdateDialog}
+          close={closeUpdateDIalog}
+          fetchData={() => {
+            fetchEntityData();
+            fetchUserData();
+          }}
+          values={entityData}
+          isNew={false}
         />
       )}
       <Fragment>

@@ -50,7 +50,9 @@ const PriceTemplate = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
-  const [disableSaveButton, setDisableSaveButton] = useState(false)
+
+  const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(null)
+
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
@@ -65,9 +67,11 @@ const PriceTemplate = () => {
   });
 
   const onBackButtonEvent = (e) => {
-    e.preventDefault();
-    window.history.pushState(null, null, window.location.pathname);
-    setShowConfirmDialog(true)
+    if (hasPermissionToUpdate) {
+      e.preventDefault();
+      window.history.pushState(null, null, window.location.pathname);
+      setShowConfirmDialog(true)
+    }
   }
 
   useEffect(() => {
@@ -133,7 +137,7 @@ const PriceTemplate = () => {
       axiosInstance()
         .get(`/price-template/` + id)
         .then(({ data: { data } }) => {
-          if (data.owner || data.owner === undefined) {
+          if (!data.owner) {
             data.owner = user.user._id
           }
           if (isClone) {
@@ -147,7 +151,9 @@ const PriceTemplate = () => {
             handleProductTemplateField(data.productTemplate);
             setSection(data.section);
             if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
-              setDisableSaveButton(true)
+              setHasPermissionToUpdate(false)
+            } else {
+              setHasPermissionToUpdate(true)
             }
           }
         })
@@ -287,10 +293,12 @@ const PriceTemplate = () => {
                 title: id === "0" ? "New" : initialValues && initialValues.name,
               },
             ]}
-            isConfirmBeforeClick={true}
+            isConfirmBeforeClick={hasPermissionToUpdate}
             onBreadCrumbClick={(path) => {
               setIsBreakCrumbPath(path)
-              setShowConfirmDialog(true)
+              if (hasPermissionToUpdate) {
+                setShowConfirmDialog(true)
+              }
             }}
           />
         </Grid>
@@ -338,6 +346,7 @@ const PriceTemplate = () => {
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
                       <TextField
+                        disabled={!hasPermissionToUpdate}
                         variant="outlined"
                         type="text"
                         label="Price Template Name"
@@ -355,6 +364,7 @@ const PriceTemplate = () => {
                     </Grid>
                     <Grid item xs={12} sm={3}>
                       <Autocomplete
+                        disabled={!hasPermissionToUpdate}
                         options={productTemplate}
                         getOptionLabel={(option: any) =>
                           option ? option.name : ""
@@ -410,7 +420,7 @@ const PriceTemplate = () => {
                         {(priceTemplatePermissions.isCreate ||
                           priceTemplatePermissions.isUpdate) && (
                             <Button
-                              disabled={isUpdating || disableSaveButton}
+                              disabled={isUpdating || !hasPermissionToUpdate}
                               size="small"
                               color="primary"
                               onClick={submitForm}
@@ -425,8 +435,13 @@ const PriceTemplate = () => {
                           color="primary"
                           size="small"
                           variant="contained"
-                          onClick={() =>
-                            setShowConfirmDialog(true)
+                          onClick={() => {
+                            if (hasPermissionToUpdate) {
+                              setShowConfirmDialog(true)
+                            } else {
+                              history.push(routes.priceTemplate.path)
+                            }
+                          }
                           }
                         >
                           Close
@@ -436,6 +451,7 @@ const PriceTemplate = () => {
                     <Grid container spacing={1}>
                       <Grid item xs={12} sm={3}>
                         {<Autocomplete
+                          disabled={!hasPermissionToUpdate}
                           multiple
                           options={user?.entity}
                           getOptionLabel={(option: any) => (option ? option?.entityName : "")}
@@ -464,6 +480,7 @@ const PriceTemplate = () => {
                       </Grid>
                       <Grid item xs={12} sm={3}>
                         {<Autocomplete
+                          disabled={!hasPermissionToUpdate}
                           getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                           value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                             ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -494,6 +511,7 @@ const PriceTemplate = () => {
                       </Grid>
                       <Grid item xs={12} sm={3}>
                         {<Autocomplete
+                          disabled={!hasPermissionToUpdate}
                           multiple
                           options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                           getOptionLabel={(option: any) => (option ? option?.concatedName : "")}

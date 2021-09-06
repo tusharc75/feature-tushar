@@ -13,6 +13,8 @@ import {
   simplifyValues,
   setFieldsInAscendingOrder,
   formFieldNames,
+  getCollaboratorDropdownDataSource,
+  getOwnerDropdownDataSource,
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -67,6 +69,12 @@ export default function NewOpportunityProjectSales({
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
 
+  const [
+    ownerCollaboratorCommonDataSource,
+    setOwnerCollaboratorCommonDataSource,
+  ] = useState([]);
+  const [ownerDataSource, setOwnerDataSource] = useState([]);
+  const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
 
   useEffect(() => {
     const processSteps = opportunityData.fields.find(
@@ -79,6 +87,22 @@ export default function NewOpportunityProjectSales({
         }
       });
     }
+
+    if (users && collaborators) {
+      setOwnerCollaboratorCommonDataSource(users);
+      setOwnerDataSource(users);
+      setCollaboratorDataSource(collaborators);
+    } else {
+      let ownerCollaboratorDropdownData = opportunityData.fields.filter(
+        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+      );
+      if (ownerCollaboratorDropdownData.length > 0) {
+        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].options);
+        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+      }
+    }
+
     setFormsData(setFieldsInAscendingOrder(opportunityData.fields));
   }, [opportunityData.fields]);
 
@@ -198,126 +222,153 @@ export default function NewOpportunityProjectSales({
       });
   };
 
+  const onOwnerDropdownOpen = (selectedCollaborator) => {
+    setOwnerDataSource(
+      getOwnerDropdownDataSource(
+        selectedCollaborator,
+        ownerCollaboratorCommonDataSource
+      )
+    );
+  };
+
+  const onCollaboratorMultiselectOpen = (selectedOwnerId) => {
+    setCollaboratorDataSource(
+      getCollaboratorDropdownDataSource(
+        selectedOwnerId,
+        ownerCollaboratorCommonDataSource
+      )
+    );
+  };
+
   return (
     <>
-    <Dialog
-      maxWidth="md"
-      fullWidth
-      fullScreen={isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      onClose={onClose}
-      open={open}
-      disableBackdropClick={true}
-    >
-      <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
+      <Dialog
+        maxWidth="md"
+        fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        onClose={onClose}
+        open={open}
+        disableBackdropClick={true}
+      >
+        <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
 
-      {opportunityData.fields.length === 0 && (
-        <CustomDialogContent>
-          <CommonSkeleton lenArray={arr} />
-        </CustomDialogContent>
-      )}
-      {opportunityData.fields.length > 0 && (
-        <Formik
-          initialValues={opportunityData.initialValues}
-          validationSchema={yupSchema(opportunityData.fields)}
-          validateOnMount
-          onSubmit={() => { }}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            setFieldValue,
-            setFieldTouched,
-            setErrors,
-          }) => (
-            <>
-              <CustomDialogContent>
-                <Form>
-                  {formsData &&
-                    formsData
-                      .filter((item) => item.name !== additionalFieldName)
-                      .map((form, i) => {
-                        return form.name ? (
-                          <div key={i}>
-                            <h2 className="form-label-style">{form.name}</h2>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid
-                                    key={field.fieldName}
-                                    item
-                                    xs={12}
-                                    sm={6}
-                                    md={6}
-                                  >
-                                    {field.fieldName === "owner" ? (
-                                      <FormTypes
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={users}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === "collaborator" ? (
-                                      <FormTypes
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={collaborators.filter(
-                                          (u) => values["owner"] !== u.optionValue
-                                        )}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === "probability" ? (
-                                      <FormTypes
-                                        // {...rest}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e) => {
-                                          if (
-                                            e.target.value &&
-                                            parseFloat(e.target.value) > 100
-                                          ) {
-                                            setFieldValue("probability", "100");
-                                          } else {
+        {opportunityData.fields.length === 0 && (
+          <CustomDialogContent>
+            <CommonSkeleton lenArray={arr} />
+          </CustomDialogContent>
+        )}
+        {opportunityData.fields.length > 0 && (
+          <Formik
+            initialValues={opportunityData.initialValues}
+            validationSchema={yupSchema(opportunityData.fields)}
+            validateOnMount
+            onSubmit={() => { }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              setFieldValue,
+              setFieldTouched,
+              setErrors,
+            }) => (
+              <>
+                <CustomDialogContent>
+                  <Form>
+                    {formsData &&
+                      formsData
+                        .filter((item) => item.name !== additionalFieldName)
+                        .map((form, i) => {
+                          return form.name ? (
+                            <div key={i}>
+                              <h2 className="form-label-style">{form.name}</h2>
+                              <Box marginY={2}>
+                                <Grid spacing={3} container>
+                                  {form.sectionFields.map((field) => (
+                                    <Grid
+                                      key={field.fieldName}
+                                      item
+                                      xs={12}
+                                      sm={6}
+                                      md={6}
+                                    >
+                                      {field.fieldName === "owner" ? (
+                                        <FormTypes
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={ownerDataSource}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e, val) => {
                                             setFieldValue(
-                                              "probability",
-                                              e.target.value
+                                              field.fieldName,
+                                              val && val.optionValue
+                                                ? val.optionValue
+                                                : ""
                                             );
+
+                                            if (
+                                              val &&
+                                              val.optionValue !== user?.user?._id
+                                            ) {
+                                              const checkOwnerAddedInCollaborator =
+                                                values["collaborator"].find(
+                                                  (d) =>
+                                                    d?.optionValue ===
+                                                    user?.user?._id
+                                                );
+                                              if (
+                                                !checkOwnerAddedInCollaborator
+                                              ) {
+                                                setFieldValue("collaborator", [
+                                                  ...values["collaborator"],
+                                                  collaboratorDataSource.find(
+                                                    (d) =>
+                                                      d?.optionValue ===
+                                                      user?.user?._id
+                                                  ).optionValue,
+                                                ]);
+                                              }
+                                            }
+                                          }}
+                                          onOpen={() => {
+                                            onOwnerDropdownOpen(
+                                              values["collaborator"]
+                                            );
+                                          }}
+                                        />
+                                      ) : field.fieldName === "collaborator" ? (
+                                        <FormTypes
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={collaboratorDataSource}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onOpen={() =>
+                                            onCollaboratorMultiselectOpen(
+                                              values["owner"]
+                                            )
                                           }
-                                        }}
-                                      />
-                                    ) : field.fieldName === "lostReason" ? (
-                                      values["stage"] === "Closed Lost" ? (
+                                        />
+                                      ) : field.fieldName === "probability" ? (
                                         <FormTypes
                                           // {...rest}
                                           values={values}
@@ -333,147 +384,96 @@ export default function NewOpportunityProjectSales({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
+                                          onChange={(e) => {
+                                            if (
+                                              e.target.value &&
+                                              parseFloat(e.target.value) > 100
+                                            ) {
+                                              setFieldValue("probability", "100");
+                                            } else {
+                                              setFieldValue(
+                                                "probability",
+                                                e.target.value
+                                              );
+                                            }
+                                          }}
                                         />
-                                      ) : null
-                                    ) : field.fieldName === "currency" ? (
-                                      <FormTypes
-                                        // {...rest}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e, val) => {
-                                          if (val && val.currencyCode) {
-                                            setFieldValue(
-                                              field.fieldName,
-                                              val.currencyCode
-                                            );
-                                            setCurrencySymbol(val.symbolNative);
-                                          } else {
-                                            setFieldValue(field.fieldName, "");
-                                            setCurrencySymbol(null);
-                                          }
-                                        }}
-                                      />
-                                    ) : field.fieldName === "amount" ? (
-                                      <FormTypes
-                                        // {...rest}
-                                        selectedCurrencyCode={values["currency"]}
-                                        startAdornment={
-                                          currencySymbol ? (
-                                            <InputAdornment position="start">
-                                              {currencySymbol}
-                                            </InputAdornment>
-                                          ) : (
-                                            ""
-                                          )
-                                        }
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={
-                                            permissions.marketSegment.isCreate ? 10
-                                              : 11
-                                          }
-                                          sm={
-                                            permissions.marketSegment.isCreate ? 10
-                                              : 11
-                                          }
-                                          md={
-                                            permissions.marketSegment.isCreate ? 10
-                                              : 11
-                                          }
-                                        >
+                                      ) : field.fieldName === "lostReason" ? (
+                                        values["stage"] === "Closed Lost" ? (
                                           <FormTypes
-                                            fields={opportunityData.fields}
-                                            fieldData={field}
+                                            // {...rest}
+                                            values={values}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
+                                            options={field.option}
                                             setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={field.isTooltip}
-                                            tooltipMessage={field.tooltipMessage}
-                                            onChange={(e, val) => {
-                                              setNewMarketSegmentId(null);
-                                              setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                              setNewSubMarketSegmentId(null);
-                                              setFieldValue(formFieldNames.subMarketSegment, "")
-                                              marketSegmentChange(val && val.optionValue ? val.optionValue : "");
-                                            }}
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            values={
-                                              newMarketSegmentId
-                                                ? initializeMarketSegmentDropdown(
-                                                  values,
-                                                  marketSegmentDataSource
-                                                )
-                                                : values
-                                            }
-                                            options={marketSegmentDataSource}
-                                            doNotShowInfoTooltip={true}
                                           />
-                                        </Grid>
-                                        {
-                                          // permissions.productCategory
-                                          //     .isCreate
-                                          permissions.marketSegment.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip
-                                                title="Add Market Segment"
-                                                className="mt-1"
-                                              >
-                                                <IconButton
-                                                  onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color="primary" />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )
-                                        }
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title={
-                                                field?.tooltipMessage ?? ""
-                                              }
-                                            >
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
-                                      : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                        ) : null
+                                      ) : field.fieldName === "currency" ? (
+                                        <FormTypes
+                                          // {...rest}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e, val) => {
+                                            if (val && val.currencyCode) {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                val.currencyCode
+                                              );
+                                              setCurrencySymbol(val.symbolNative);
+                                            } else {
+                                              setFieldValue(field.fieldName, "");
+                                              setCurrencySymbol(null);
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === "amount" ? (
+                                        <FormTypes
+                                          // {...rest}
+                                          selectedCurrencyCode={values["currency"]}
+                                          startAdornment={
+                                            currencySymbol ? (
+                                              <InputAdornment position="start">
+                                                {currencySymbol}
+                                              </InputAdornment>
+                                            ) : (
+                                              ""
+                                            )
+                                          }
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      ) : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                         <Grid container spacing={1}>
                                           <Grid
                                             item
@@ -504,33 +504,36 @@ export default function NewOpportunityProjectSales({
                                               isTooltip={field.isTooltip}
                                               tooltipMessage={field.tooltipMessage}
                                               onChange={(e, val) => {
-                                                setNewSubMarketSegmentId(null);
+                                                setNewMarketSegmentId(null);
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                setNewSubMarketSegmentId(null);
+                                                setFieldValue(formFieldNames.subMarketSegment, "")
+                                                marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"
                                               values={
-                                                newSubMarketSegmentId
-                                                  ? initializeSubMarketSegmentDropdown(
+                                                newMarketSegmentId
+                                                  ? initializeMarketSegmentDropdown(
                                                     values,
-                                                    subMarketSegmentDataSource
+                                                    marketSegmentDataSource
                                                   )
                                                   : values
                                               }
-                                              options={subMarketSegmentDataSource}
+                                              options={marketSegmentDataSource}
                                               doNotShowInfoTooltip={true}
                                             />
                                           </Grid>
                                           {
+                                            // permissions.productCategory
+                                            //     .isCreate
                                             permissions.marketSegment.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
-                                                  title="Add Sub Market Segment"
+                                                  title="Add Market Segment"
                                                   className="mt-1"
                                                 >
                                                   <IconButton
-                                                    onClick={() => {
-                                                      setShowAddMarketSegmentDialog(true);
-                                                    }}
+                                                    onClick={() => { setShowAddMarketSegmentDialog(true); }}
                                                     size="small"
                                                   >
                                                     <AddIcon color="primary" />
@@ -552,219 +555,298 @@ export default function NewOpportunityProjectSales({
                                           ) : null}
                                         </Grid>
                                       </Grid>
-                                        : (
-                                          <FormTypes
-                                            // {...rest}
-                                            disabled={
-                                              field.fieldName ===
-                                              "customerAccountName"
-                                            }
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={setFieldValue}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            imageOrFileUploadCompletePercentage={
-                                              ["imageUpload", "fileUpload"].some(
-                                                (s) => s === field.type
-                                              )
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(
-                                                    completePercentage
-                                                  );
+                                        : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                          <Grid container spacing={1}>
+                                            <Grid
+                                              item
+                                              xs={
+                                                permissions.marketSegment.isCreate ? 10
+                                                  : 11
+                                              }
+                                              sm={
+                                                permissions.marketSegment.isCreate ? 10
+                                                  : 11
+                                              }
+                                              md={
+                                                permissions.marketSegment.isCreate ? 10
+                                                  : 11
+                                              }
+                                            >
+                                              <FormTypes
+                                                fields={opportunityData.fields}
+                                                fieldData={field}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                setFieldValue={setFieldValue}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field.isTooltip}
+                                                tooltipMessage={field.tooltipMessage}
+                                                onChange={(e, val) => {
+                                                  setNewSubMarketSegmentId(null);
+                                                  setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                }}
+                                                size="small"
+                                                values={
+                                                  newSubMarketSegmentId
+                                                    ? initializeSubMarketSegmentDropdown(
+                                                      values,
+                                                      subMarketSegmentDataSource
+                                                    )
+                                                    : values
                                                 }
-                                                : null
+                                                options={subMarketSegmentDataSource}
+                                                doNotShowInfoTooltip={true}
+                                              />
+                                            </Grid>
+                                            {
+                                              permissions.marketSegment.isCreate && (
+                                                <Grid item xs={1} sm={1} md={1}>
+                                                  <Tooltip
+                                                    title="Add Sub Market Segment"
+                                                    className="mt-1"
+                                                  >
+                                                    <IconButton
+                                                      onClick={() => {
+                                                        setShowAddMarketSegmentDialog(true);
+                                                      }}
+                                                      size="small"
+                                                    >
+                                                      <AddIcon color="primary" />
+                                                    </IconButton>
+                                                  </Tooltip>
+                                                </Grid>
+                                              )
                                             }
-                                          />
-                                        )}
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        ) : (
-                          form.sectionFields.map((field) => (
-                            <FormTypes
-                              // {...rest}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={setFieldValue}
-                              required={field.required}
-                              fullWidth
-                              isTooltip={field?.isTooltip || false}
-                              tooltipMessage={field?.tooltipMessage}
-                              size="small"
-                              style={{ visibility: "hidden" }}
-                            />
-                          ))
-                        );
-                      })}
-                </Form>
-              </CustomDialogContent>
+                                            {field?.tooltipMessage ? (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title={
+                                                    field?.tooltipMessage ?? ""
+                                                  }
+                                                >
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid>
+                                            ) : null}
+                                          </Grid>
+                                        </Grid>
+                                          : (
+                                            <FormTypes
+                                              // {...rest}
+                                              disabled={
+                                                field.fieldName ===
+                                                "customerAccountName"
+                                              }
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={setFieldValue}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              imageOrFileUploadCompletePercentage={
+                                                ["imageUpload", "fileUpload"].some(
+                                                  (s) => s === field.type
+                                                )
+                                                  ? (completePercentage) => {
+                                                    setUploadingImageOrFileProgress(
+                                                      completePercentage
+                                                    );
+                                                  }
+                                                  : null
+                                              }
+                                            />
+                                          )}
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Box>
+                            </div>
+                          ) : (
+                            form.sectionFields.map((field) => (
+                              <FormTypes
+                                // {...rest}
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                                label={field.fieldLabel}
+                                name={field.fieldName}
+                                type={field.type}
+                                options={field.option}
+                                setFieldValue={setFieldValue}
+                                required={field.required}
+                                fullWidth
+                                isTooltip={field?.isTooltip || false}
+                                tooltipMessage={field?.tooltipMessage}
+                                size="small"
+                                style={{ visibility: "hidden" }}
+                              />
+                            ))
+                          );
+                        })}
+                  </Form>
+                </CustomDialogContent>
 
-              <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  onClick={onClose}
-                >
-                  Cancel
-                </Button>
+                <CustomDialogFooter>
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </Button>
 
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  disabled={
-                    uploadingImageOrFileProgress > 0 ||
-                    Object.values(
-                      simplifyValues(
-                        opportunityData.initialValues,
-                        opportunityData.fields
-                      )
-                    ).toString() ===
-                    Object.values(
-                      simplifyValues(values, opportunityData.fields)
-                    ).toString()
-                  }
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const err = Object.keys(errors);
-                    if (err.length) {
-                      const input = document.querySelector(
-                        `input[name=${err[0]}]`,
-                      );
-
-                      input.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'start',
-                      });
+                  <CustomButton
+                    loading={loading}
+                    variant="contained"
+                    color="primary"
+                    disabled={
+                      uploadingImageOrFileProgress > 0 ||
+                      Object.values(
+                        simplifyValues(
+                          opportunityData.initialValues,
+                          opportunityData.fields
+                        )
+                      ).toString() ===
+                      Object.values(
+                        simplifyValues(values, opportunityData.fields)
+                      ).toString()
                     }
-                    handleSubmit(
-                      errors,
-                      setFieldTouched,
-                      values,
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const err = Object.keys(errors);
+                      if (err.length) {
+                        const input = document.querySelector(
+                          `input[name=${err[0]}]`,
+                        );
 
-                      setErrors
-                    );
-                  }}
-                >
-                  Save
-                </CustomButton>
-              </CustomDialogFooter>
-            </>
-          )}
-        </Formik>
-      )}
-    </Dialog>
-    {
-      showAddMarketSegmentDialog && <ManageMarketSegmentDialog
-        marketSegmentId={null}
-        onClose={() => {
-          setShowAddMarketSegmentDialog(false);
-        }}
-        onSuccess={(data) => {
-          if (data?._id) {
-            setMainMarketSegmentDataSource((prevState) => {
-              return [
-                ...prevState,
-                {
-                  optionValue: data._id,
-                  optionLabel: data.name,
-                  order: mainMarketSegmentDataSource.length,
-                  default: false,
-                  parentMarketSegment: data.parentMarketSegment
-                }
-              ];
-            });
+                        input.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                          inline: 'start',
+                        });
+                      }
+                      handleSubmit(
+                        errors,
+                        setFieldTouched,
+                        values,
 
-            //  If no parent selected, consider that as parent and add it in Market Segment
-            if (data.parentMarketSegment === "") {
-              setMarketSegmentDataSource((prevState) => {
+                        setErrors
+                      );
+                    }}
+                  >
+                    Save
+                  </CustomButton>
+                </CustomDialogFooter>
+              </>
+            )}
+          </Formik>
+        )}
+      </Dialog>
+      {
+        showAddMarketSegmentDialog && <ManageMarketSegmentDialog
+          marketSegmentId={null}
+          onClose={() => {
+            setShowAddMarketSegmentDialog(false);
+          }}
+          onSuccess={(data) => {
+            if (data?._id) {
+              setMainMarketSegmentDataSource((prevState) => {
                 return [
                   ...prevState,
                   {
                     optionValue: data._id,
                     optionLabel: data.name,
-                    order: marketSegmentDataSource.length,
+                    order: mainMarketSegmentDataSource.length,
                     default: false,
                     parentMarketSegment: data.parentMarketSegment
                   }
                 ];
               });
-              setSubMarketSegmentDataSource([]);
-              setNewMarketSegmentId(data._id);
-              setNewSubMarketSegmentId(null);
-            } else {
-              //  If parent selected, consider that as a child
-              if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
-                setSubMarketSegmentDataSource([
-                  ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
-                  {
-                    optionValue: data._id,
-                    optionLabel: data.name,
-                    order: subMarketSegmentDataSource.length,
-                    default: false,
-                    parentMarketSegment: data.parentMarketSegment
-                  }]
-                );
+
+              //  If no parent selected, consider that as parent and add it in Market Segment
+              if (data.parentMarketSegment === "") {
+                setMarketSegmentDataSource((prevState) => {
+                  return [
+                    ...prevState,
+                    {
+                      optionValue: data._id,
+                      optionLabel: data.name,
+                      order: marketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: data.parentMarketSegment
+                    }
+                  ];
+                });
+                setSubMarketSegmentDataSource([]);
+                setNewMarketSegmentId(data._id);
+                setNewSubMarketSegmentId(null);
               } else {
+                //  If parent selected, consider that as a child
+                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
+                  setSubMarketSegmentDataSource([
+                    ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                    {
+                      optionValue: data._id,
+                      optionLabel: data.name,
+                      order: subMarketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: data.parentMarketSegment
+                    }]
+                  );
+                } else {
 
-                let initializeMarketSegmentDataSource = [];
-                mainMarketSegmentDataSource.forEach(option => {
-                  if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
-                    initializeMarketSegmentDataSource.push(option);
-                  }
-                })
-
-                if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                  const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
-
-                  initializeMarketSegmentDataSource.push({
-                    optionValue: getMarketSegment.optionValue,
-                    optionLabel: getMarketSegment.optionLabel,
-                    order: initializeMarketSegmentDataSource.length,
-                    default: false,
-                    parentMarketSegment: getMarketSegment.parentMarketSegment
+                  let initializeMarketSegmentDataSource = [];
+                  mainMarketSegmentDataSource.forEach(option => {
+                    if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
+                      initializeMarketSegmentDataSource.push(option);
+                    }
                   })
-                }
-                setMarketSegmentDataSource(initializeMarketSegmentDataSource);
 
-                setSubMarketSegmentDataSource([
-                  ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
-                  {
-                    optionValue: data._id,
-                    optionLabel: data.name,
-                    order: subMarketSegmentDataSource.length,
-                    default: false,
-                    parentMarketSegment: data.parentMarketSegment
-                  }]
-                );
+                  if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
+                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
+
+                    initializeMarketSegmentDataSource.push({
+                      optionValue: getMarketSegment.optionValue,
+                      optionLabel: getMarketSegment.optionLabel,
+                      order: initializeMarketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: getMarketSegment.parentMarketSegment
+                    })
+                  }
+                  setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+
+                  setSubMarketSegmentDataSource([
+                    ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                    {
+                      optionValue: data._id,
+                      optionLabel: data.name,
+                      order: subMarketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: data.parentMarketSegment
+                    }]
+                  );
+                }
+                setNewMarketSegmentId(data.parentMarketSegment);
+                setNewSubMarketSegmentId(data._id);
               }
-              setNewMarketSegmentId(data.parentMarketSegment);
-              setNewSubMarketSegmentId(data._id);
             }
-          }
-          setShowAddMarketSegmentDialog(false);
-        }}
-      />
-    }
+            setShowAddMarketSegmentDialog(false);
+          }}
+        />
+      }
     </>
   );
 }
