@@ -778,13 +778,20 @@ const FormTypes = (props) => {
         {...rest}
         defaultCountry={'us'}
         disableAreaCodes
-        countryCodeEditable={false}
+        countryCodeEditable
         variant="outlined"
         required={required}
         label={getLabel(label)}
         name={name}
         value={values[name]}
-        onChange={onChange ? onChange : (val) => setFieldValue(name, val)}
+        onChange={onChange ? onChange : (val) => {
+          if (val === '+') {
+            setFieldValue(name, "")
+          } else {
+            setFieldValue(name,  val)
+          }
+        
+        }}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
       />
