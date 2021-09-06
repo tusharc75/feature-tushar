@@ -32,6 +32,7 @@ const AssignDataDialog = (props) => {
     projectID,
     existingData,
     accountId = "",
+    entityIds = []
   } = props;
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
@@ -42,14 +43,29 @@ const AssignDataDialog = (props) => {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const url =
-      type === "customer-contact"
-        ? `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
-        : type === "opportunity"
-          ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
-          : type === "quote-builder"
-            ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
-            : `/${type}?limit=0`;
+
+    let url = `/${type}?limit=0`;
+
+    switch (type) {
+      case "customer-contact":
+        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
+        break;
+
+      case "opportunity":
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+        break;
+
+      case "quote-builder":
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+        break;
+
+      case "user":
+        if (entityIds.length > 0) {
+          url = `/${type}?filterById=[{"field":"entities.entity", "term": {"$in": [${entityIds.map(m => `"${m}"`)}] } }]`
+        }
+        break;
+    }
+
     setLoading(true);
     axiosInstance()
       .get(url)
