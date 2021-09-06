@@ -17,8 +17,7 @@ import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
 
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-
-const arr = [...Array(9).keys()];
+import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 
 const CreateRentalManagementDialog = (props) => {
 
@@ -174,13 +173,29 @@ const CreateRentalManagementDialog = (props) => {
                         setShowConfirmDialog(true)
                     }}
                 />
-
-                {loading && (
-                    <CustomDialogContent>
-                        <CommonSkeleton lenArray={arr} />
-                    </CustomDialogContent>
-                )}
-                {!loading && rentalData.fields.length > 0 && (
+                {loading || !rentalData.fields.length ? (
+                    <>
+                        <CustomDialogContent>
+                            <Skeleton width="100%" height="70px" />
+                            <Grid container spacing={2}>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+                                    <Grid key={i} item xs={12} sm={6} md={6}>
+                                        <Skeleton width="100%" height="60px" />
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </CustomDialogContent>
+                        <CustomDialogFooter>
+                            <Button variant="outlined" size="small" color="primary" disabled
+                            >
+                                Cancel
+                            </Button>
+                            <Button variant="contained" size="small" color="primary" disabled>
+                                Submit
+                            </Button>
+                        </CustomDialogFooter>
+                    </>
+                ) : (
                     <Formik
                         initialValues={rentalData.initialValues}
                         validationSchema={yupSchema(rentalData.fields)}

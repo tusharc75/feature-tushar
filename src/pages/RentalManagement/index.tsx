@@ -28,16 +28,11 @@ import {
   UpdatedByRenderer,
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import "./style.scss";
 import CustomAgGrid, {
   reducer,
   intialState,
 } from "../../components/AgGridComponents/CustomAgGrid";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
-import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import RentalManagementHeader from "./RentalManagementHeader";
 import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
 
