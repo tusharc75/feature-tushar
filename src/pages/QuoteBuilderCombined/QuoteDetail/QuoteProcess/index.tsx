@@ -1352,6 +1352,7 @@ export default function QuoteProcess(props) {
                                 state?.selectedRecords
                             );
                         }}
+                        handleViewPdf={handleViewPdf}
                         allowedToEdit={allowedToEdit}
                         DOAData={DOAData}
                         quoteData={quoteData}
@@ -1523,11 +1524,12 @@ export default function QuoteProcess(props) {
                                             quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
                                                 quoteId: quoteData._id,
                                                 version: currentVersion,
+                                                redirectTo: `/quotes/detail/${quoteData._id}`
                                             })
                                         }}
                                         variant="outlined"
                                         size="small"
-                                        className="mr-1"
+                                        className="mx-1"
                                         startIcon={<AiFillEdit />}
                                         color="primary"
                                     >

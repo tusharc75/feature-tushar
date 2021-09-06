@@ -92,7 +92,7 @@ const TermsAndCondition = ({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdditionalDataPosition((event.target as HTMLInputElement).value);
   };
-  const [disableSaveButton, setDisableSaveButton] = useState(false)
+  const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
 
   useEffect(() => {
     if (editRecord && editRecord?._id) {
@@ -105,7 +105,7 @@ const TermsAndCondition = ({
         collaborator: editRecord?.collaborator ? editRecord?.collaborator : []
       });
       if (editRecord?.owner && editRecord?.owner !== undefined && user.user._id !== editRecord?.owner && !editRecord?.collaborator?.some(d => d === user.user._id)) {
-        setDisableSaveButton(true)
+        setHasPermissionToUpdate(false)
       }
     }
   }, [editRecord]);
@@ -187,7 +187,11 @@ const TermsAndCondition = ({
       maxWidth="md"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          setShowConfirmDialog(true)
+          if (hasPermissionToUpdate) {
+            setShowConfirmDialog(true)
+          } else {
+            handleClose()
+          }
         }
       }}
       fullWidth
@@ -195,10 +199,16 @@ const TermsAndCondition = ({
     >
       <CustomDialogHeader
         title={`${editRecord?._id
-          ? `Edit ${editRecord?.TACName ?? ""}`
+          ? hasPermissionToUpdate ? `Edit ${editRecord?.TACName ?? ""}` : editRecord?.TACName
           : `Create ${displayTitle}`
           }`}
-        onClose={() => setShowConfirmDialog(true)}
+        onClose={() => {
+          if (hasPermissionToUpdate) {
+            setShowConfirmDialog(true)
+          } else {
+            handleClose()
+          }
+        }}
       ></CustomDialogHeader>
       {initialValues && (
         <Formik
@@ -218,12 +228,16 @@ const TermsAndCondition = ({
             <>
               <CustomDialogContent>
                 <Form noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  {
+                    hasPermissionToUpdate ?
+                      <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2> : ""
+                  }
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box padding={1}>
                       <Grid container spacing={3}>
                         <Grid item xs={12}>
                           <Field
+                            disabled={!hasPermissionToUpdate}
                             component={TextFieldFormik}
                             fullWidth
                             margin="dense"
@@ -244,6 +258,7 @@ const TermsAndCondition = ({
                             <Grid item xs={12} sm={3}>
                               {<Autocomplete
                                 multiple
+                                disabled={!hasPermissionToUpdate}
                                 options={user?.entity}
                                 getOptionLabel={(option: any) => (option ? option?.entityName : "")}
                                 value={user?.entity.filter((data) => values["entity"]?.some(d => d === data._id)).length
@@ -272,6 +287,7 @@ const TermsAndCondition = ({
                             </Grid>
                             <Grid item xs={12} sm={3}>
                               {<Autocomplete
+                                disabled={!hasPermissionToUpdate}
                                 getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                                 value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                                   ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -302,6 +318,7 @@ const TermsAndCondition = ({
                             </Grid>
                             <Grid item xs={12} sm={3}>
                               {<Autocomplete
+                                disabled={!hasPermissionToUpdate}
                                 multiple
                                 options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                 getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -345,6 +362,7 @@ const TermsAndCondition = ({
                           }
                           <Box mt={2}>
                             <TinyMce
+                              disabledEditor={!hasPermissionToUpdate}
                               onChange={(value) => {
                                 setFieldValue("description", value)
                               }}
@@ -369,7 +387,13 @@ const TermsAndCondition = ({
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button size="small" color="primary"
-                  onClick={() => setShowConfirmDialog(true)}>
+                  onClick={() => {
+                    if (hasPermissionToUpdate) {
+                      setShowConfirmDialog(true)
+                    } else {
+                      handleClose()
+                    }
+                  }}>
                   Cancel
                 </Button>
                 <CustomButton
@@ -377,7 +401,7 @@ const TermsAndCondition = ({
                   color="primary"
                   loading={loading}
                   type="submit"
-                  disabled={uploadingImageOrFileProgress > 0 || disableSaveButton}
+                  disabled={uploadingImageOrFileProgress > 0 || !hasPermissionToUpdate}
                   onClick={submitForm}
                 >
                   Save

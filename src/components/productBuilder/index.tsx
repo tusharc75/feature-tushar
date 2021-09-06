@@ -150,7 +150,7 @@ const ProductBuilder = (props) => {
         <Link
           className="link"
           onClick={() => {
-            setProductData(params.data);
+            openProductModel(params.data._id);
           }}
         >
           {params.data.srno}
@@ -161,36 +161,10 @@ const ProductBuilder = (props) => {
     </>
   );
 
-  const ProductCategoryRenderer = params => <>
-    {
-      params.data.productCategory || params.data.productCategory === 0 ?
-        typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
-        : <NoDataCell />
-    }
-  </>
-  const ProductTemplateRenderer = params => <>
-    {
-      params.data.productTemplate || params.data.productTemplate === 0 ?
-        typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
-        : <NoDataCell />
-    }
-  </>
-
-  const PriceTemplateRenderer = params => <>
-    {
-      params.data.priceTemplate || params.data.priceTemplate === 0 ?
-        typeof params.data.priceTemplate === 'object' ? params.data.priceTemplate["optionLabel"] : params.data.priceTemplate
-        : <NoDataCell />
-    }
-  </>
-
   const frameworkComponents = {
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
     productNameRenderer: ProductNameRenderer,
-    productCategoryRenderer: ProductCategoryRenderer,
-    productTemplateRenderer: ProductTemplateRenderer,
-    priceTemplateRenderer: PriceTemplateRenderer,
   };
 
   const fetchProduct = (id) => {
@@ -199,11 +173,20 @@ const ProductBuilder = (props) => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
-      data = data.data?.map((u, index) => ({
-        ...u,
-        id: u._id,
-        srno: index + 1,
-      }));
+      setProduct(data.data);
+      data = data.data?.map((u, index) => {
+        let res = {
+          ...u,
+          id: u._id,
+          srno: index + 1,
+        }
+        for (let col in res) {
+          if (res[col] && res[col].optionLabel) {
+            res[col] = res[col].optionLabel;
+          }
+        }
+        return res;
+      });
       setColumns(null);
       let column = [
         {
@@ -297,15 +280,6 @@ const ProductBuilder = (props) => {
                   col.cellRenderer = "commonRenderer";
                 }
               }
-              if (ele.fieldName === "productCategory") {
-                col.cellRenderer = "productCategoryRenderer"
-              }
-              if (ele.fieldName === "productTemplate") {
-                col.cellRenderer = "productTemplateRenderer"
-              }
-              if (ele.fieldName === "priceTemplate") {
-                col.cellRenderer = "priceTemplateRenderer"
-              }
               if (ele.fieldName === "entity") {
                 return
               }
@@ -319,7 +293,6 @@ const ProductBuilder = (props) => {
         return levalOrderBy.indexOf(item.leval);
       });
       setColumns(column);
-      setProduct(data);
       dispatch({ type: "initialize", data: [], count: 0 });
       dispatch({ type: "initialize", data: data, count: data.length });
       setTimeout(() => {
@@ -331,6 +304,13 @@ const ProductBuilder = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const openProductModel = (id) => {
+    const result = product.filter((_f) => _f._id === id);
+    if (result.length) {
+      setProductData(result[0]);
+    }
+  }
 
   const addProductInBuilder = (rows) => {
     let data: any = { };
@@ -501,7 +481,7 @@ const ProductBuilder = (props) => {
     if (selectedRecords.length === 0) {
       return true;
     } else if (
-      uniq(map(selectedRecords, "priceTemplate.optionValue")).length ===
+      uniq(map(selectedRecords, "priceTemplate")).length ===
       1 &&
       stage === "cost"
     ) {

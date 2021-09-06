@@ -81,14 +81,19 @@ const CreateProduct = (props) => {
     setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"));
 
     let values = { ...productData };
-    values.productCategory = values.productCategory.optionValue;
-    values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue;
-    values.priceTemplate = values.priceTemplate && values.priceTemplate.optionValue && values.priceTemplate.optionValue;
-    const entity = []
-    values.entity && values.entity.forEach((ele) => {
-      entity.push(ele.optionValue);
-    })
-    values.entity = entity;
+
+    for (const [key, value] of Object.entries(values)) {
+      if (typeof value === 'object' && value && value["optionValue"]) {
+        values[key] = value["optionValue"]
+      }
+      if (Array.isArray(value) && value.length && value[0].optionValue) {
+        const entity = []
+        value && value.forEach((ele) => {
+          entity.push(ele.optionValue)
+        })
+        values[key] = entity
+      }
+    }
     delete values.fields;
 
     setInitialData({
@@ -369,6 +374,9 @@ const CreateProduct = (props) => {
                                       removeDisplayType={removeDisplayType}
                                       setValues={setValues}
                                       handleRemoveField={handleRemoveField}
+                                      disabled={stage === "product" ?
+                                        ["product", "product-custom", "product-template"].includes(field.leval) ? true : false
+                                        : ["product", "product-custom", "product-template"].includes(field.leval) ? true : false}
                                     />
                                   ) : (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
@@ -411,8 +419,10 @@ const CreateProduct = (props) => {
                                             }
                                             size="small"
                                             disabled={stage === "product" ?
-                                              ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
-                                              : ["productCategory", "productTemplate", "priceTemplate", "entity"].includes(field.fieldName) ? true : false}
+                                              ["product", "product-custom", "product-template"].includes(field.leval)
+                                                && !["priceTemplate"].includes(field.fieldName)
+                                                ? true : false
+                                              : ["product", "product-custom", "product-template"].includes(field.leval) ? true : false}
                                             imageOrFileUploadCompletePercentage={
                                               ["imageUpload", "fileUpload"].some((s) => s === field.type)
                                                 ? (completePercentage) => {

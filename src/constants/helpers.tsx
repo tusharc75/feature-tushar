@@ -89,7 +89,7 @@ export const formFieldNames = {
 }
 
 export const sidebarResource = {
-  address: "Address",
+  warehouse: "Warehouse",
   brand: "Brand",
   role: "Role",
   product: "Product",
@@ -138,7 +138,7 @@ export const sidebarResource = {
 };
 
 export const RESOURCE_LABEL = {
-  address: "Addresses",
+  warehouse: "Warehouse",
   account: 'Supplier Accounts',
   customerAccount: 'Customer Accounts',
   user: 'Users',
