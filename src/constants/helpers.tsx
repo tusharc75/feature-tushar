@@ -473,7 +473,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         ? string()
           .min(10, "Mobile number is too short")
           .required(`${input.fieldLabel} is required`)
-        : string().min(10, "Mobile Number is too short");
+        : string();
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? array().required(`${input.fieldLabel} is required`)
