@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
@@ -18,6 +18,7 @@ import Dialog from "@material-ui/core/Dialog";
 import { useData } from "../../../StateProvider/Provider";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import { isMobile, isTablet } from "react-device-detect";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const arr = [...Array(9).keys()];
 
@@ -44,6 +45,7 @@ export default function ManageAccount(props) {
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [
     ownerCollaboratorCommonDataSource,
     setOwnerCollaboratorCommonDataSource,
@@ -70,15 +72,19 @@ export default function ManageAccount(props) {
       }
     }
 
-    let ownerCollaboratorDropdownData = accountData.fields.filter(
-      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-    );
-    if (ownerCollaboratorDropdownData.length > 0) {
-      setOwnerCollaboratorCommonDataSource(
-        ownerCollaboratorDropdownData[0].option
+    if (fromProject) {
+      setOwnerCollaboratorCommonDataSource(owners);
+      setOwnerDataSource(owners);
+      setCollaboratorDataSource(collaborators);
+    } else {
+      let ownerCollaboratorDropdownData = accountData.fields.filter(
+        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
       );
-      setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-      setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+      if (ownerCollaboratorDropdownData.length > 0) {
+        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].options);
+        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+      }
     }
 
     const parentAccountDropdownData = accountData.fields.find(
@@ -171,20 +177,52 @@ export default function ManageAccount(props) {
     handleSubmit(values, false);
   };
 
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
+  const isFieldNotTouched = (accountData, values) => {
+    return Object.values(
+      simplifyValues(
+        accountData.initialValues,
+        accountData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, accountData.fields)
+      ).toString()
+  }
+
   return (
     <>
       <Dialog
-        disableBackdropClick={true}
         fullWidth
         maxWidth="md"
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            setShowConfirmDialog(true)
+          }
+        }}
         open={open}
       >
         <CustomDialogHeader
-          onClose={onClose}
+          onClose={() => {
+            setShowConfirmDialog(true)
+          }}
           title={
             isNew
               ? "Add Account"
@@ -210,10 +248,9 @@ export default function ManageAccount(props) {
                 setFieldValue,
               }) => (
                 <>
-
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <h2 className="form-label-style" style={{borderBottom:"none"}}>* Required Fields</h2>
+                      <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
@@ -233,7 +270,8 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={
-                                          fromProject ? owners : ownerDataSource
+                                          // fromProject ? owners : ownerDataSource
+                                          ownerDataSource
                                         }
                                         onChange={(e, val) => {
                                           setFieldValue(
@@ -283,7 +321,7 @@ export default function ManageAccount(props) {
                                         size="small"
                                         disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
-                                          !fromProject &&
+                                          // !fromProject &&
                                           onOwnerDropdownOpen(
                                             values.collaborator, values.entity ? values.entity : []
                                           )
@@ -302,13 +340,14 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={
-                                          fromProject
-                                            ? collaborators.filter(
-                                              (c) =>
-                                                c.optionValue !==
-                                                values["owner"]
-                                            )
-                                            : collaboratorDataSource
+                                          // fromProject
+                                          //   ? collaborators.filter(
+                                          //     (c) =>
+                                          //       c.optionValue !==
+                                          //       values["owner"]
+                                          //   )
+                                          //   : collaboratorDataSource
+                                          collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
                                         required={field.required}
@@ -317,7 +356,7 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() =>
-                                          !fromProject &&
+                                          // !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
                                             values.owner, values.entity ? values.entity : []
                                           )
@@ -325,6 +364,9 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "entity" ? (
                                       <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -332,7 +374,6 @@ export default function ManageAccount(props) {
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-
                                         options={field.option}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -507,10 +548,14 @@ export default function ManageAccount(props) {
                   </CustomDialogContent>
                   <CustomDialogFooter>
                     <Button
-                      onClick={onClose}
+                      onClick={() => {
+                        if (isFieldNotTouched(accountData, values)) onClose()
+                        else setShowConfirmDialog(true)
+                      }}
                       variant="outlined"
                       color="primary"
                       size="small"
+
                     >
                       Cancel
                     </Button>
@@ -521,39 +566,49 @@ export default function ManageAccount(props) {
                       disabled={
                         loading ||
                         uploadingImageOrFileProgress > 0 ||
-                        Object.values(
-                          simplifyValues(
-                            accountData.initialValues,
-                            accountData.fields
-                          )
-                        ).toString() ===
-                        Object.values(
-                          simplifyValues(values, accountData.fields)
-                        ).toString()
+                        isFieldNotTouched(accountData, values)
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {
                         e.preventDefault();
-                        const err = Object.keys(errors);
-                        if (err.length) {
-                          const input = document.querySelector(
-                            `input[name=${err[0]}]`,
-                          );
-
-                          input.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'start',
-                          });
-                        }
+                        handleScroll(errors)
                         submitForm();
                       }}
                     >
                       Save
                     </CustomButton>
                   </CustomDialogFooter>
+
+                  {
+                    showConfirmDialog ?
+                      <ConfirmCancelDialog
+                        open={showConfirmDialog}
+                        onSave={() => {
+                          setShowConfirmDialog(false)
+                          // e.preventDefault();
+                          const err = Object.keys(errors);
+                          if (err.length) {
+                            const input = document.querySelector(
+                              `input[name=${err[0]}]`,
+                            );
+
+                            input.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'center',
+                              inline: 'start',
+                            });
+                          }
+                          submitForm();
+                        }}
+                        onClose={() => {
+                          setShowConfirmDialog(false)
+                          onClose()
+                        }}
+                      /> : null
+                  }
                 </>
               )}
+
             </Formik>
           </>
         ) : (

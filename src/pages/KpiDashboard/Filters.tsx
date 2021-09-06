@@ -6,15 +6,36 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
 import FormTypes from '../../components/Helpers/FormTypes';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   appBar: {
     padding: 0,
     height: "70px",
     borderRadius: "3px 3px 0 0",
     borderBottom: "1px solid #e1dde6",
     boxShadow: "1px 3px 3px #ddd",
+    [theme.breakpoints.down("sm")]: {
+      height: "auto",
+    },
+    [theme.breakpoints.down("xs")]: {
+      height: "auto",
+    }
+  },
+  currencyBox:{
+    width: "250px",
+    [theme.breakpoints.down("xs")]: {
+      width: "auto",
+    }
+  },
+  status:{
+    width: "100%",
+    [theme.breakpoints.down("xs")]: {
+      width: "auto",
+    },
+    [theme.breakpoints.down("sm")]: {
+      width: "auto",
+    }
   }
-});
+}));
 
 const Filters = (props) => {
   const classes = useStyles();
@@ -197,44 +218,48 @@ const Filters = (props) => {
       </Popover>
       <Box p={2}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Box display="flex">
-              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
-                Filters
-              </Button>
-              <Box mr={2} />
-              <FormControl style={{ width: '150px' }} size="small" variant="outlined">
-                <InputLabel id="status">Status</InputLabel>
-                <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <MenuItem value={'won'}>Won</MenuItem>
-                  <MenuItem value={'lost'}>Lost</MenuItem>
-                  <MenuItem value={'open'}>Open</MenuItem>
-                </Select>
-              </FormControl>
-              <Box mr={2} />
-              <FormTypes
-                fullWidth={false}
-                style={{ width: '250px' }}
-                values={{ currency }}
-                type="currency"
-                errors={{ currency: '' }}
-                touched={{ currency: false }}
-                name="currency"
-                label="Currency"
-                size="small"
-                onChange={(e, val) => {
-                  if (val && val.currencyCode) {
-                    setCurrency(val.currencyCode);
-                  } else {
-                    setCurrency('');
-                  }
-                }}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={12} md={6}>
             <Grid container spacing={2}>
-              <Grid item sm={4}>
+              <Grid item xs={12} sm={4} md={2}>
+                <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                  Filters
+                </Button>
+              </Grid>
+              <Grid item xs={6} sm={4} md={3}>
+                <FormControl className={classes.status} size="small" variant="outlined">
+                  <InputLabel id="status">Status</InputLabel>
+                  <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <MenuItem value={'won'}>Won</MenuItem>
+                    <MenuItem value={'lost'}>Lost</MenuItem>
+                    <MenuItem value={'open'}>Open</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={6} sm={4} md={3}>
+                <FormTypes
+                  fullWidth={false}
+                  className={classes.currencyBox}
+                  values={{ currency }}
+                  type="currency"
+                  errors={{ currency: '' }}
+                  touched={{ currency: false }}
+                  name="currency"
+                  label="Currency"
+                  size="small"
+                  onChange={(e, val) => {
+                    if (val && val.currencyCode) {
+                      setCurrency(val.currencyCode);
+                    } else {
+                      setCurrency('');
+                    }
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={12} sm={12} md={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small" variant="outlined">
                   <InputLabel id="duration">Select Duration</InputLabel>
                   <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
@@ -246,7 +271,7 @@ const Filters = (props) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item sm={4}>
+              <Grid item xs={6} sm={4}>
                 <KeyboardDatePicker
                   disabled={timeFrame !== 'custom'}
                   inputVariant="outlined"
@@ -265,7 +290,7 @@ const Filters = (props) => {
                   }}
                 />
               </Grid>
-              <Grid item sm={4}>
+              <Grid item xs={6} sm={4}>
                 <KeyboardDatePicker
                   disabled={timeFrame !== 'custom'}
                   inputVariant="outlined"

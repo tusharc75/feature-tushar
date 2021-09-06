@@ -112,6 +112,8 @@ export default function QuotesAccordionInProjectSale({
   estimatedAmount,
   marketSegmentId,
   subMarketSegmentId,
+  isFromProjectSales = false,
+  projectSalesTeam = []
 }) {
   const {
     state: { selectedEntity, user }, dispatch
@@ -389,7 +391,10 @@ export default function QuotesAccordionInProjectSale({
                       </Grid>
                     ))}
                   </Grid>
-                ) : null}
+                ) : <Typography variant="subtitle1">
+                  No Quotes To Show
+                </Typography>
+                }
               </>
             )}
           </>
@@ -455,6 +460,8 @@ export default function QuotesAccordionInProjectSale({
           subMarketSegmentId={subMarketSegmentId}
           isRenderedFromProjectSales={true}
           doaCollaboratorResources={user?.user?.doa?.map(obj => obj.user)}
+          isFromProjectSales={isFromProjectSales}
+          projectSalesTeam={projectSalesTeam}
         />
       )}
     </>

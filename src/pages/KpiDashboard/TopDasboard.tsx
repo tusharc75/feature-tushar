@@ -98,15 +98,13 @@ const TopDashboard = (props) => {
             const totalCostData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalCost);
             const budgetData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget);
 
-            saleData.push(d.totalSell ? totalSelldata.rates[filterCurrency] : d.totalSell);
-            costData.push(d.totalCost ? totalCostData.rates[filterCurrency] : d.totalCost);
-            budget.push(d.budget ? budgetData.rates[filterCurrency] : d.budget);
+            saleData.push(totalSelldata? totalSelldata.rates[filterCurrency] : d.totalSell);
+            costData.push(totalCostData ? totalCostData.rates[filterCurrency] : d.totalCost);
+            budget.push(budgetData ? budgetData.rates[filterCurrency] : d.budget);
           } else {
             saleData.push(d.totalSell);
             costData.push(d.totalCost);
             budget.push(d.budget);
-
-            console.log('NO Currency Selected');
           }
           labels.push(moment(d.date).format('MMM/YY'));
 
@@ -122,8 +120,8 @@ const TopDashboard = (props) => {
         const profit = revenue && spend ? Math.floor(((revenue - spend) / spend) * 100) : 0;
 
         if (filterCurrency !== currency) {
-          revenueRate = revenue ? await getExchangeRates(moment().format('YYYY-MM-DD'), revenue) : 0;
-          spendRate = spend ? await getExchangeRates(moment().format('YYYY-MM-DD'), spend) : 0;
+          revenueRate = await getExchangeRates(moment().format('YYYY-MM-DD'), revenue)
+          spendRate = await getExchangeRates(moment().format('YYYY-MM-DD'), spend)
         }
 
         setSalesRevenue({
@@ -234,17 +232,17 @@ const TopDashboard = (props) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item sm={8}>
+      <Grid item xs={12} sm={12} md={12} lg={8}>
         <Box mb={2}>
           <Grid container spacing={2} alignItems="stretch">
-            <Grid item xs={4}>
+            <Grid item sm={4} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("booked_value")}></img>
                     </Grid>
-                    <Grid item xs={12} sm={10} className="pull-left">
+                    <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
                           {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
@@ -256,18 +254,18 @@ const TopDashboard = (props) => {
                         Total Booked Value
                       </Typography>
                     </Grid>
-                  </Grid>
+                  </Grid> 
                 </Box>
               </Paper>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item sm={4} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("total_cost")}></img>
                     </Grid>
-                    <Grid item xs={12} sm={10} className="pull-left">
+                    <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
                           {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
@@ -283,14 +281,14 @@ const TopDashboard = (props) => {
                 </Box>
               </Paper>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item sm={4} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={12} sm={2} className="d-flex align-items-center">
+                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("profit")}></img>
                     </Grid>
-                    <Grid item xs={12} sm={10} className="pull-left">
+                    <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
                           {salesRevenue.profit}%
@@ -309,7 +307,7 @@ const TopDashboard = (props) => {
           </Grid>
         </Box>
 
-        <Paper elevation={2}>
+        <Paper elevation={2}> 
           <Box p={2}>
             <Box display="flex" justifyContent="space-between">
               <Button onClick={handleClickChart} startIcon={<ImportExport />}>
@@ -384,7 +382,7 @@ const TopDashboard = (props) => {
           </Box>
         </Paper>
       </Grid>
-      <Grid item sm={4}>
+      <Grid item xs={12} sm={12} md={12} lg={4}>
         <TopDashboardTable moment={moment} filterCurrency={filterCurrency} currency={currency} getExchangeRates={getExchangeRates} />
       </Grid>
     </Grid>

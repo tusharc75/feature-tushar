@@ -89,7 +89,7 @@ export const formFieldNames = {
 }
 
 export const sidebarResource = {
-  address: "Address",
+  warehouse: "Warehouse",
   brand: "Brand",
   role: "Role",
   product: "Product",
@@ -137,7 +137,7 @@ export const sidebarResource = {
 };
 
 export const RESOURCE_LABEL = {
-  address: "Addresses",
+  warehouse: "Warehouse",
   account: 'Supplier Accounts',
   customerAccount: 'Customer Accounts',
   user: 'Users',
@@ -676,6 +676,18 @@ interface IPermission {
     isDelete: boolean;
     approveAccount?: boolean;
   };
+}
+
+export const isFieldNotTouched = (data, values) => {
+  return Object.values(
+    simplifyValues(
+      data.initialValues,
+      data.fields
+    )
+  ).toString() ===
+    Object.values(
+      simplifyValues(values, data.fields)
+    ).toString()
 }
 
 export const getPermissions = (

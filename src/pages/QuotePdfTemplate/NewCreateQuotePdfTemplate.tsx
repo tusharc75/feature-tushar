@@ -20,6 +20,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from "@material-ui/lab";
 import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder } from "../../constants/helpers";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const PdfTemplateSchema = Yup.object().shape({
     name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
@@ -72,7 +73,25 @@ export default function NewCreateQuotePdfTemplate() {
     }: any = useData();
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
-    const [disableSaveButton, setDisableSaveButton] = useState(false)
+    const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
+
+    const onBackButtonEvent = (e) => {
+        if (hasPermissionToUpdate) {
+            e.preventDefault();
+            window.history.pushState(null, null, window.location.pathname);
+            setShowConfirmDialog(true)
+        }
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
 
     useEffect(() => {
         if (id && id !== '0') {
@@ -100,9 +119,8 @@ export default function NewCreateQuotePdfTemplate() {
                         belowTable: data?.belowTable
                     })
                     if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
-                        setDisableSaveButton(true)
+                        setHasPermissionToUpdate(false)
                     }
-
                 } catch (e) {
                     toastConfig.setToastConfig(e);
                 }
@@ -186,7 +204,7 @@ export default function NewCreateQuotePdfTemplate() {
                         setIsUpdatingAndPreview(false);
                         history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
                     } else {
-                        history.push({ pathname: routes.quotePdfTemplate.path });
+                        history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
                         setIsUpdating(false);
                     }
                 })
@@ -226,7 +244,7 @@ export default function NewCreateQuotePdfTemplate() {
                             })
                         }
                         else {
-                            history.push({ pathname: routes.quotePdfTemplate.path });
+                            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
                         }
                         setIsUpdating(false);
                     }
@@ -252,6 +270,14 @@ export default function NewCreateQuotePdfTemplate() {
                             title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
                         }
                     ]}
+                    isConfirmBeforeClick={hasPermissionToUpdate}
+                    onBreadCrumbClick={(path) => {
+                        setIsBreakCrumbPath(path)
+                        if (hasPermissionToUpdate) {
+                            setShowConfirmDialog(true)
+                        }
+                    }}
+
                 />
             </Grid>
         </Grid>
@@ -266,6 +292,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 <Grid container>
                                     <Grid item xs={4}>
                                         <TextField
+                                            disabled={!hasPermissionToUpdate}
                                             variant="outlined"
                                             type="text"
                                             label="Quote PDF Template Name"
@@ -280,21 +307,42 @@ export default function NewCreateQuotePdfTemplate() {
                                         />
                                     </Grid>
                                     <Grid item xs={3} className={`${classes.saveButtonContainer} gap-2`}>
-                                        <Button disabled={isUpdating || disableSaveButton} size="small" color="primary"
+                                        <Button disabled={isUpdating || !hasPermissionToUpdate} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
                                             {isUpdating && <CircularProgress size={24} />} {" "} Save
                                         </Button>
 
-                                        <Button disabled={isUpdatingAndPreview || disableSaveButton} size="small" color="primary"
+                                        <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
                                             onClick={() => { handleSubmit(values, true) }} variant="contained">
                                             {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
                                         </Button>
 
                                     </Grid>
+                                    {
+                                        showConfirmDialog ?
+                                            <ConfirmCancelDialog
+                                                open={showConfirmDialog}
+                                                onSave={() => {
+                                                    setShowConfirmDialog(false)
+                                                    submitForm();
+                                                }}
+                                                onClose={() => {
+                                                    //  This condition is to check either user is redirected from quote details screen or not
+                                                    if (history.location?.state?.redirectTo) {
+                                                        history.push(history.location?.state?.redirectTo);
+                                                    } else {
+                                                        setShowConfirmDialog(false)
+                                                        history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+                                                        setIsBreakCrumbPath("")
+                                                    }
+                                                }}
+                                            /> : null
+                                    }
                                 </Grid>
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
@@ -323,6 +371,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                                             value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                                                 ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -353,6 +402,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             multiple
                                             options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -384,6 +434,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 </Grid>
                                 <Grid item xs={12} style={{ textAlign: 'left' }}>
                                     <FormControlLabel
+                                        disabled={!hasPermissionToUpdate}
                                         value={values['showPageNumberInFooter']}
                                         control={
                                             <Checkbox
@@ -403,6 +454,7 @@ export default function NewCreateQuotePdfTemplate() {
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Header</Typography>
                         <TinyMce
+                            disabledEditor={!hasPermissionToUpdate}
                             id="header"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
@@ -427,6 +479,7 @@ export default function NewCreateQuotePdfTemplate() {
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Above Table</Typography>
                         <TinyMce
+                            disabledEditor={!hasPermissionToUpdate}
                             id="aboveTable"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
@@ -448,6 +501,7 @@ export default function NewCreateQuotePdfTemplate() {
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Below Table</Typography>
                         <TinyMce
+                            disabledEditor={!hasPermissionToUpdate}
                             id="belowTable"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
@@ -470,6 +524,7 @@ export default function NewCreateQuotePdfTemplate() {
                     <Box className={classes.tinyMCEContainer}>
                         <Typography className={classes.headingLabel} variant="h5" component="h5">Footer</Typography>
                         <TinyMce
+                            disabledEditor={!hasPermissionToUpdate}
                             id="footer"
                             onChange={(value) => {
                                 setDetails((prevState) => ({
@@ -487,6 +542,7 @@ export default function NewCreateQuotePdfTemplate() {
                             isCheckHeight={true}
                         />
                     </Box>
+
                 </Grid>
             </Paper>
         </div>

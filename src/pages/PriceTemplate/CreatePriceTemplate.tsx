@@ -24,6 +24,7 @@ import { useData } from "../../StateProvider/Provider";
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import HistoryDialog from "../../components/Activity/History"
 import { priceTemplate } from "../../constants/helpers"
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const PriceTemplateSchema = Yup.object().shape({
   name: Yup.string()
@@ -49,7 +50,11 @@ const PriceTemplate = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
-  const [disableSaveButton, setDisableSaveButton] = useState(false)
+
+  const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(null)
+
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
   const {
     state: { user, permissions },
@@ -60,6 +65,22 @@ const PriceTemplate = () => {
     isRead: false,
     isDelete: false,
   });
+
+  const onBackButtonEvent = (e) => {
+    if (hasPermissionToUpdate) {
+      e.preventDefault();
+      window.history.pushState(null, null, window.location.pathname);
+      setShowConfirmDialog(true)
+    }
+  }
+
+  useEffect(() => {
+    window.history.pushState(null, null, window.location.pathname);
+    window.addEventListener('popstate', onBackButtonEvent);
+    return () => {
+      window.removeEventListener('popstate', onBackButtonEvent);
+    };
+  }, []);
 
   useEffect(() => {
     if (permissions && permissions.priceTemplate) {
@@ -116,7 +137,7 @@ const PriceTemplate = () => {
       axiosInstance()
         .get(`/price-template/` + id)
         .then(({ data: { data } }) => {
-          if (data.owner || data.owner === undefined) {
+          if (!data.owner) {
             data.owner = user.user._id
           }
           if (isClone) {
@@ -130,7 +151,9 @@ const PriceTemplate = () => {
             handleProductTemplateField(data.productTemplate);
             setSection(data.section);
             if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
-              setDisableSaveButton(true)
+              setHasPermissionToUpdate(false)
+            } else {
+              setHasPermissionToUpdate(true)
             }
           }
         })
@@ -197,7 +220,7 @@ const PriceTemplate = () => {
         .post("/price-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -210,7 +233,7 @@ const PriceTemplate = () => {
         .put("/price-template", data)
         .then(({ data: { data } }) => {
           setIsUpdating(false);
-          history.push({ pathname: routes.priceTemplate.path });
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path });
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -270,6 +293,13 @@ const PriceTemplate = () => {
                 title: id === "0" ? "New" : initialValues && initialValues.name,
               },
             ]}
+            isConfirmBeforeClick={hasPermissionToUpdate}
+            onBreadCrumbClick={(path) => {
+              setIsBreakCrumbPath(path)
+              if (hasPermissionToUpdate) {
+                setShowConfirmDialog(true)
+              }
+            }}
           />
         </Grid>
         <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
@@ -316,6 +346,7 @@ const PriceTemplate = () => {
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
                       <TextField
+                        disabled={!hasPermissionToUpdate}
                         variant="outlined"
                         type="text"
                         label="Price Template Name"
@@ -333,6 +364,7 @@ const PriceTemplate = () => {
                     </Grid>
                     <Grid item xs={12} sm={3}>
                       <Autocomplete
+                        disabled={!hasPermissionToUpdate}
                         options={productTemplate}
                         getOptionLabel={(option: any) =>
                           option ? option.name : ""
@@ -388,7 +420,7 @@ const PriceTemplate = () => {
                         {(priceTemplatePermissions.isCreate ||
                           priceTemplatePermissions.isUpdate) && (
                             <Button
-                              disabled={isUpdating || disableSaveButton}
+                              disabled={isUpdating || !hasPermissionToUpdate}
                               size="small"
                               color="primary"
                               onClick={submitForm}
@@ -403,10 +435,13 @@ const PriceTemplate = () => {
                           color="primary"
                           size="small"
                           variant="contained"
-                          onClick={() =>
-                            history.push({
-                              pathname: routes.priceTemplate.path,
-                            })
+                          onClick={() => {
+                            if (hasPermissionToUpdate) {
+                              setShowConfirmDialog(true)
+                            } else {
+                              history.push(routes.priceTemplate.path)
+                            }
+                          }
                           }
                         >
                           Close
@@ -416,6 +451,7 @@ const PriceTemplate = () => {
                     <Grid container spacing={1}>
                       <Grid item xs={12} sm={3}>
                         {<Autocomplete
+                          disabled={!hasPermissionToUpdate}
                           multiple
                           options={user?.entity}
                           getOptionLabel={(option: any) => (option ? option?.entityName : "")}
@@ -444,6 +480,7 @@ const PriceTemplate = () => {
                       </Grid>
                       <Grid item xs={12} sm={3}>
                         {<Autocomplete
+                          disabled={!hasPermissionToUpdate}
                           getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                           value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                             ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -474,6 +511,7 @@ const PriceTemplate = () => {
                       </Grid>
                       <Grid item xs={12} sm={3}>
                         {<Autocomplete
+                          disabled={!hasPermissionToUpdate}
                           multiple
                           options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                           getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -516,6 +554,22 @@ const PriceTemplate = () => {
                     module="price-template"
                   />
                 </Box>
+                {
+                  showConfirmDialog ?
+                    <ConfirmCancelDialog
+                      open={showConfirmDialog}
+                      onSave={() => {
+                        setShowConfirmDialog(false)
+                        submitForm();
+                      }}
+                      onClose={() => {
+                        setShowConfirmDialog(false)
+                        history.push({
+                          pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path,
+                        })
+                      }}
+                    /> : null
+                }
               </Form>
             )}
           </Formik>
@@ -533,7 +587,7 @@ const PriceTemplate = () => {
           /> : null
         }
       </div>
-    </Fragment>
+    </Fragment >
   );
 };
 

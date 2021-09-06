@@ -30,7 +30,7 @@ let termsTimeout
 export default function TermsAndCondition(props) {
     const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);
-    const { state: { permissions, selectedEntity } }: any = useData();
+    const { state: { permissions, user, selectedEntity } }: any = useData();
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -53,7 +53,7 @@ export default function TermsAndCondition(props) {
     }, [page, limit, filters, sorting, search, selectedEntity]);
 
     const TermsConditionNameRenderer = params => (
-        <span className={`${actionsPermissions.isUpdate ? "link" : ""} cursor-pointer`}
+        <span className="link cursor-pointer"
             onClick={() => {
                 setShowCreateDialog(true);
                 setEditRecord(cloneDeep(params.data))
@@ -64,17 +64,22 @@ export default function TermsAndCondition(props) {
 
     const ActionsRenderer = params => (
         <>
-            <Tooltip title="Delete">
-                <IconButton size="small" aria-label="Delete" onClick={() => {
-                    setDeleteRec(params.data);
-                    setShowDeleteConfirmBox(true)
-                }}
-                    disabled={permissions?.termsAndConditions?.isDelete ? false : true}
-                >
-                    <DeleteIcon color={permissions?.termsAndConditions?.isDelete ? "error" : "disabled"}
-                    />
-                </IconButton>
-            </Tooltip >
+            {permissions?.termsAndConditions?.isDelete && user?.user?._id === params.data?.owner ?
+                <Tooltip title="Delete" >
+                    <IconButton aria-label="Delete" onClick={() => {
+                        setDeleteRec(params.data);
+                        setShowDeleteConfirmBox(true)
+                    }}>
+                        <DeleteIcon
+                            fontSize="small" color="error" />
+                    </IconButton>
+                </Tooltip> :
+                <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
+                    <IconButton aria-label="Delete">
+                        <DeleteIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            }
         </>
     )
 
@@ -244,7 +249,9 @@ export default function TermsAndCondition(props) {
                                             onClick={() => {
                                                 closeActions();
                                                 setShowDeleteConfirmBox(true);
-                                            }}>Delete</MenuItem>
+                                            }}
+                                            disabled={selectedRecords.some((item) => item?.owner !== user?.user._id)}
+                                            >Delete</MenuItem>
                                     }
 
                                 </Menu>
@@ -263,9 +270,9 @@ export default function TermsAndCondition(props) {
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    actionWidth={150} 
+                    actionWidth={150}
                     loading={loading}
-                    />
+                />
 
                 {
                     showDeleteConfirmBox ?

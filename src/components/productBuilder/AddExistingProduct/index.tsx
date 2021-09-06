@@ -36,36 +36,17 @@ const AddExistingProduct = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { handleClose, addProductInBuilder } = props;
     const [columns, setColumns] = useState(null);
-
+    const [productList, setProductList] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
 
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
 
-
-    const ProductCategoryRenderer = params => <>
-        {
-            params.data.productCategory || params.data.productCategory === 0 ?
-                typeof params.data.productCategory === 'object' ? params.data.productCategory["optionLabel"] : params.data.productCategory
-                : <NoDataCell />
-        }
-    </>
-    const ProductTemplateRenderer = params => <>
-        {
-            params.data.productTemplate || params.data.productTemplate === 0 ?
-                typeof params.data.productTemplate === 'object' ? params.data.productTemplate["optionLabel"] : params.data.productTemplate
-                : <NoDataCell />
-        }
-    </>
-
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
-        productCategoryRenderer: ProductCategoryRenderer,
-        productTemplateRenderer: ProductTemplateRenderer,
     };
 
     const getQueryString = () => {
@@ -107,10 +88,20 @@ const AddExistingProduct = (props) => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
-                ...u,
-                id: u._id,
-            }));
+            setProductList(data.data);
+            data.data = data.data?.map((u, index) => {
+                let res = {
+                    ...u,
+                    id: u._id,
+                    srno: index + 1,
+                }
+                for (let col in res) {
+                    if (res[col] && res[col].optionLabel) {
+                        res[col] = res[col].optionLabel;
+                    }
+                }
+                return res;
+            });
             let column = []
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {
@@ -175,12 +166,6 @@ const AddExistingProduct = (props) => {
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
-                            if (ele.fieldName === "productCategory") {
-                                col.cellRenderer = "productCategoryRenderer"
-                            }
-                            if (ele.fieldName === "productTemplate") {
-                                col.cellRenderer = "productTemplateRenderer"
-                            }
                             if (ele.fieldName === "entity") {
                                 return
                             }
@@ -199,7 +184,6 @@ const AddExistingProduct = (props) => {
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -207,7 +191,9 @@ const AddExistingProduct = (props) => {
     };
 
     const handleAdd = () => {
-        let rows = selectedRecords
+        let rows = productList.filter(
+            (val) => selectedRecords.filter((u) => val._id === u._id).length > 0
+        );
         rows.forEach((_d) => {
             _d.productId = _d._id
             if (_d.fields) {

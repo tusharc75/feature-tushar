@@ -9,25 +9,27 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "./../../constants/helpers";
+import { CustomDialogTransition } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const ManageAddressResource = (props) => {
+const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { addressResourceId, onClose, onSuccess } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Address").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResourceId) {
-                axiosInstance().get(`/address/` + addressResourceId).then(({ data: { data } }) => {
+                axiosInstance().get(`/warehouse/` + addressResourceId).then(({ data: { data } }) => {
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -52,7 +54,7 @@ const ManageAddressResource = (props) => {
     const handleSubmit = (values) => {
         if (addressResourceId) {
             values._id = addressResourceId
-            axiosInstance().put(`/address`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {
@@ -61,7 +63,7 @@ const ManageAddressResource = (props) => {
             });
         }
         else {
-            axiosInstance().post(`/address`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
             }).catch((error) => {
@@ -78,6 +80,11 @@ const ManageAddressResource = (props) => {
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                setShowConfirmDialog(true)
+            }
+        }}
     >
         {initialData && initialData.fields.length ?
             <Formik
@@ -95,7 +102,7 @@ const ManageAddressResource = (props) => {
                     <Fragment>
                         <CustomDialogHeader
                             title={addressResourceId ? "Update " + routes.address.title : "Create " + routes.address.title}
-                            onClose={onClose}></CustomDialogHeader>
+                            onClose={() => setShowConfirmDialog(true)}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
@@ -111,7 +118,12 @@ const ManageAddressResource = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={onClose}>Cancel</Button>
+                            <Button size="small" color="primary"
+                                onClick={() => {
+                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    else setShowConfirmDialog(true)
+                                }}
+                            >Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"
@@ -120,6 +132,20 @@ const ManageAddressResource = (props) => {
                                 onClick={submitForm}
                             > Save</CustomButton>
                         </CustomDialogFooter>
+                        {
+                            showConfirmDialog ?
+                                <ConfirmCancelDialog
+                                    open={showConfirmDialog}
+                                    onSave={() => {
+                                        setShowConfirmDialog(false)
+                                        submitForm();
+                                    }}
+                                    onClose={() => {
+                                        setShowConfirmDialog(false)
+                                        onClose()
+                                    }}
+                                /> : null
+                        }
                     </Fragment>
                 )}
             </Formik>
@@ -131,4 +157,4 @@ const ManageAddressResource = (props) => {
     );
 }
 
-export default ManageAddressResource;
+export default ManageWarehouse;

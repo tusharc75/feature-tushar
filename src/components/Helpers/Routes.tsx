@@ -119,7 +119,7 @@ const routes = {
   },
   formBuilderResource: {
     title: "Resource",
-    path: "/resource",
+    path: "/:resource",
   },
   termsAndConditions: {
     title: storedRoutes ? storedRoutes.termsAndConditions?.title : RESOURCE_LABEL.termsAndConditions,
@@ -230,8 +230,8 @@ const routes = {
     path: "/product-list",
   },
   address: {
-    title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.address,
-    path: "/address",
+    title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.warehouse,
+    path: "/warehouse",
   },
 };
 

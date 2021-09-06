@@ -20,6 +20,7 @@ import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, i
 import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import ImagePreview from "../Email/ImagePreview";
 import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const AttachmentSchema = Yup.object().shape({
     name: Yup.string().required("please add attachment name"),
@@ -73,6 +74,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [canEdit, setCanEdit] = useState(true);
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
     const [attachmentToDelete, setAttachemnetToDelete] = useState("");
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         fetchAttachmentDetail();
@@ -307,7 +309,10 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <>
-                <CustomDialogHeader onClose={handleClose}
+                <CustomDialogHeader
+                    onClose={() => {
+                        setShowConfirmDialog(true)
+                    }}
                     title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
@@ -430,7 +435,10 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
+                    <Button color="primary" size="small"
+                        onClick={() => {
+                            setShowConfirmDialog(true)
+                        }}>Cancel</Button>
                     <CustomButton
                         type="button"
                         color="primary"
@@ -438,6 +446,20 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         loading={loading}
                         variant="contained" onClick={submitForm}>Save</CustomButton>
                 </CustomDialogFooter>
+                {
+                    showConfirmDialog ?
+                        <ConfirmCancelDialog
+                            open={showConfirmDialog}
+                            onSave={() => {
+                                setShowConfirmDialog(false)
+                                submitForm()
+                            }}
+                            onClose={() => {
+                                setShowConfirmDialog(false)
+                                handleClose()
+                            }}
+                        /> : null
+                }
                 {
                     open ?
                         <ImagePreview

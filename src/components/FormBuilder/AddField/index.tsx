@@ -26,6 +26,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import axiosInstance from "../../../axios/axiosInstance";
 import { checkFormula } from "../../../constants/formulaUtility";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const FieldSchema = Yup.object().shape({
   type: Yup.string()
@@ -37,6 +38,7 @@ const FieldSchema = Yup.object().shape({
 export const AddField = (props) => {
 
   const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const [initialValues,] = useState(fieldData ? fieldData : {
     sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
@@ -213,11 +215,19 @@ export const AddField = (props) => {
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth
     fullScreen={isMobile || isTablet}
     TransitionComponent={CustomDialogTransition}
-    maxWidth={"md"} open={true}>
+    maxWidth={"md"} open={true}
+    onClose={(e, reason) => {
+      if (reason !== 'backdropClick') {
+        setShowConfirmDialog(true)
+      }
+    }}
+  >
     <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Fragment>
-          <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
+          <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"}
+            onClose={() => setShowConfirmDialog(true)}
+          ></CustomDialogHeader>
           <CustomDialogContent>
             <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
               {refrence === "builder" &&
@@ -436,9 +446,27 @@ export const AddField = (props) => {
             </Form>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" onClick={handleClose} color="primary">Cancel</Button>
+            <Button size="small"
+              onClick={() => {
+                setShowConfirmDialog(true)
+              }}
+              color="primary">Cancel</Button>
             <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">{fieldData ? "Update" : "Add"}</Button>
           </CustomDialogFooter>
+          {
+            showConfirmDialog ?
+              <ConfirmCancelDialog
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false)
+                  submitForm();
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false)
+                  handleClose()
+                }}
+              /> : null
+          }
         </Fragment>
       )}
     </Formik>

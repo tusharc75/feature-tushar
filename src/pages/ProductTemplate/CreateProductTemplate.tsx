@@ -8,7 +8,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { camelCase, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from "../../constants/helpers";
+import { camelCase } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -24,7 +24,7 @@ import { useData } from "../../StateProvider/Provider";
 import HistoryDialog from "../../components/Activity/History"
 import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
-import { user } from "../../routes/User";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -51,7 +51,9 @@ const ProductTemplate = () => {
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [productField, setProductField] = useState([]);
-    const [disableSaveButton, setDisableSaveButton] = useState(false)
+    const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     const {
         state: { user, permissions },
@@ -62,6 +64,22 @@ const ProductTemplate = () => {
         isRead: false,
         isDelete: false,
     });
+
+    const onBackButtonEvent = (e) => {
+        if (hasPermissionToUpdate) {
+            e.preventDefault();
+            window.history.pushState(null, null, window.location.pathname);
+            setShowConfirmDialog(true)
+        }
+    }
+
+    useEffect(() => {
+        window.history.pushState(null, null, window.location.pathname);
+        window.addEventListener('popstate', onBackButtonEvent);
+        return () => {
+            window.removeEventListener('popstate', onBackButtonEvent);
+        };
+    }, []);
 
     useEffect(() => {
         fetchOneProductTemplate();
@@ -103,13 +121,13 @@ const ProductTemplate = () => {
                 if (isClone) {
                     data.name = ""
                 }
-                if (data.owner || data.owner === undefined) {
+                if (!data.owner) {
                     data.owner = user.user._id
                 }
                 setInitialValues(data);
                 setSection(data.section);
                 if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
-                    setDisableSaveButton(true)
+                    setHasPermissionToUpdate(false)
                 }
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -199,7 +217,8 @@ const ProductTemplate = () => {
             data.deleteField = deleteField;
             axiosInstance().put("/product-template", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: routes.productTemplate.path });
+                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path });
+                setIsBreakCrumbPath("")
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
@@ -246,7 +265,16 @@ const ProductTemplate = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
+                <CustomBreadCrumbs
+                    routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]}
+                    isConfirmBeforeClick={hasPermissionToUpdate}
+                    onBreadCrumbClick={(path) => {
+                        setIsBreakCrumbPath(path)
+                        if (hasPermissionToUpdate) {
+                            setShowConfirmDialog(true)
+                        }
+                    }}
+                />
             </Grid>
             <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
                 <label htmlFor="importField" style={{ color: "white" }} className="cursor-pointer mr-3">
@@ -280,6 +308,7 @@ const ProductTemplate = () => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}  >
                                         <TextField
+                                            disabled={!hasPermissionToUpdate}
                                             variant="outlined"
                                             type="text"
                                             label="Product Template Name"
@@ -298,6 +327,7 @@ const ProductTemplate = () => {
                                             <FormControlLabel
                                                 control={
                                                     <Checkbox
+                                                        disabled={!hasPermissionToUpdate}
                                                         name="isStandard"
                                                         checked={values["isStandard"]}
                                                         onChange={(e) => {
@@ -312,6 +342,7 @@ const ProductTemplate = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {!values["isStandard"] && <Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             options={productCategory}
                                             getOptionLabel={(option: any) => (option ? option.name : "")}
                                             getOptionSelected={(option: any, val) => option._id === val}
@@ -340,23 +371,32 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={2} container justify="flex-end">
+                                    <Grid item xs={12} sm={5} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
-                                                <Button disabled={isUpdating || disableSaveButton} color="primary" size="small" onClick={submitForm} variant="contained" >
+                                                <Button disabled={isUpdating || !hasPermissionToUpdate} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                     Save{isUpdating && <CircularProgress size={24} />}
                                                 </Button>
                                             }
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/product-Template" })} >Close</Button>
+                                            <Button color="primary" variant="contained" size="small"
+                                                onClick={() => {
+                                                    if (hasPermissionToUpdate) {
+                                                        setShowConfirmDialog(true)
+                                                    } else {
+                                                        history.push(routes.productTemplate.path)
+                                                    }
+                                                }}
+                                            >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
@@ -385,6 +425,7 @@ const ProductTemplate = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                                             value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                                                 ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -415,6 +456,7 @@ const ProductTemplate = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
                                             multiple
                                             options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -457,6 +499,21 @@ const ProductTemplate = () => {
                                     module="product-template"
                                 />
                             </Box>
+                            {
+                                showConfirmDialog ?
+                                    <ConfirmCancelDialog
+                                        open={showConfirmDialog}
+                                        onSave={() => {
+                                            setShowConfirmDialog(false)
+                                            submitForm();
+                                        }}
+                                        onClose={() => {
+                                            setShowConfirmDialog(false)
+                                            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/product-Template" })
+                                            setIsBreakCrumbPath("")
+                                        }}
+                                    /> : null
+                            }
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
@@ -469,7 +526,7 @@ const ProductTemplate = () => {
                 /> : null
             }
         </CustomContainer>
-    </Fragment>
+    </Fragment >
     );
 }
 

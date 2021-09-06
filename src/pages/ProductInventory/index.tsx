@@ -48,9 +48,16 @@ const ProductInventory = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "CommonRenderer" },
+        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "CommonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -67,6 +74,11 @@ const ProductInventory = () => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                inServiceDate: u.inServiceDate,
+                bornInDate: u.bornInDate,
+                status: u.status?.optionLabel,
+                warehouse: u.warehouse?.optionLabel,
+                productCategory: u.productCategory?.optionLabel,
                 productName: u.product?.optionLabel,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
@@ -288,7 +300,7 @@ const ProductInventory = () => {
                     page={page}
                     actionWidth={150}
                     loading={loading}
-                    renderedFrom="productPage"
+                    renderedFrom="productInventoryPage"
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

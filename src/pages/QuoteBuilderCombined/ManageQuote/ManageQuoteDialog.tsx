@@ -23,6 +23,7 @@ import {
   customerContact,
   getUniqueCurrencies,
   formFieldNames,
+  setFieldsInAscendingOrder,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -43,6 +44,7 @@ import ManageContactDialog from "../../Contact/ManageContact";
 import { isMobile, isTablet } from "react-device-detect";
 import routes from "../../../components/Helpers/Routes";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -74,7 +76,9 @@ export default function ManageQuoteDialog({
   isRenderedFromProjectSales = false,
   cloneQuoteWithVersionNumber = 0,
   isCreateQuoteFromCart = false,
-  onHandleSubmit = null
+  onHandleSubmit = null,
+  isFromProjectSales = false,
+  projectSalesTeam = []
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -89,6 +93,7 @@ export default function ManageQuoteDialog({
     initialValues: {},
   });
 
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
@@ -133,13 +138,19 @@ export default function ManageQuoteDialog({
   }, [entityData]);
 
   useEffect(() => {
-    let ownerCollaboratorOptions = entityData.fields.filter(
-      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-    );
-    if (ownerCollaboratorOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
-      setOwnerData(ownerCollaboratorOptions[0].option);
-      setCollaboratorData(ownerCollaboratorOptions[0].option);
+    if (isFromProjectSales) {
+      setOwnerCollaboratorData(projectSalesTeam);
+      setOwnerData(projectSalesTeam);
+      setCollaboratorData(projectSalesTeam);
+    } else {
+      let ownerCollaboratorOptions = entityData.fields.filter(
+        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+      );
+      if (ownerCollaboratorOptions.length > 0) {
+        setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
+        setOwnerData(ownerCollaboratorOptions[0].option);
+        setCollaboratorData(ownerCollaboratorOptions[0].option);
+      }
     }
 
     let customerAccountOptions = entityData.fields.find(
@@ -167,7 +178,7 @@ export default function ManageQuoteDialog({
       isRenderedFromCustomerAccount || isRenderedFromOpportunity || contactId
     );
 
-    sortArray();
+    // sortArray();
 
     const customerContactDropdownData = entityData.fields.find(
       (d) => d.fieldName === "customerContactName"
@@ -222,6 +233,8 @@ export default function ManageQuoteDialog({
         );
       }
     }
+
+    setFormsData(setFieldsInAscendingOrder(entityData.fields));
 
     return () => {
       setOwnerCollaboratorData([]);
@@ -681,20 +694,52 @@ export default function ManageQuoteDialog({
       });
   }
 
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
+  const isFieldNotTouched = (entityData, values) => {
+    return Object.values(
+      simplifyValues(
+        entityData.initialValues,
+        entityData.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, entityData.fields)
+      ).toString()
+  }
+
   return (
     <>
       <Dialog
         maxWidth="md"
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            setShowConfirmDialog(true)
+          }
+        }}
         open={open}
-        disableBackdropClick={true}
         fullWidth
         fullScreen={isMobile || isTablet}
       >
         <CustomDialogHeader
           title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
-          onClose={onClose}
+          onClose={(e, reason) => {
+            setShowConfirmDialog(true)
+          }}
         />
 
         {entityData.fields.length === 0 && (
@@ -1663,7 +1708,10 @@ export default function ManageQuoteDialog({
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={onClose}
+                    onClick={() => {
+                      if (isFieldNotTouched(entityData, values)) onClose()
+                      else setShowConfirmDialog(true)
+                    }}
                   >
                     Cancel
                   </Button>
@@ -1676,39 +1724,32 @@ export default function ManageQuoteDialog({
                     disabled={
                       loading ||
                       uploadingImageOrFileProgress > 0 ||
-                      Object.values(
-                        simplifyValues(
-                          entityData.initialValues,
-                          entityData.fields
-                        )
-                      ).toString() ===
-                      Object.values(
-                        simplifyValues(values, entityData.fields)
-                      ).toString()
+                      isFieldNotTouched(entityData, values)
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      const err = Object.keys({ ...errors, ...customError });
-                      if (err.length) {
-                        const input = document.querySelector(
-                          `input[name=${err[0]}]`,
-                        );
-
-                        input.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                          inline: 'start',
-                        });
-                      }
-                      // if (Object.keys(customError).length > 0) {
-                      //   return;
-                      // } else 
+                      handleScroll({ ...errors, ...customError })
                       submitForm();
                     }}
                   >
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
+                {
+                  showConfirmDialog ?
+                    <ConfirmCancelDialog
+                      open={showConfirmDialog}
+                      onSave={() => {
+                        setShowConfirmDialog(false)
+                        handleScroll({ ...errors, ...customError })
+                        submitForm();
+                      }}
+                      onClose={() => {
+                        setShowConfirmDialog(false)
+                        onClose()
+                      }}
+                    /> : null
+                }
               </>
             )}
           </Formik>
