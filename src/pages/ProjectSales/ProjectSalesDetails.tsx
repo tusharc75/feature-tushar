@@ -332,6 +332,7 @@ const ProjectSalesDetails = () => {
           type={dialogType}
           existingData={getExisitingData}
           accountId={currentAccountId}
+          entityIds={projectSalesData?.entity?.map(m => m.optionValue) || []}
         />
       )}
       <Fragment>
