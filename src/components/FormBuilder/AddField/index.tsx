@@ -14,7 +14,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { Formik, Form } from "formik";
 import { camelCase } from "./../../../constants/helpers";
 import { Vlookup } from "./vlookup";
@@ -28,10 +28,10 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { checkFormula } from "../../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
-const FieldSchema = Yup.object().shape({
-  type: Yup.string()
+const FieldSchema = object().shape({
+  type: string()
     .required("please select field type"),
-  fieldLabel: Yup.string()
+  fieldLabel: string()
     .required("please enter field label"),
 });
 

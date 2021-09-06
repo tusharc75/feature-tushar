@@ -8,7 +8,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import TextField from "@material-ui/core/TextField";
-import * as Yup from "yup";
+import { object, string, array } from "yup";
 import {
   GetEmailDetail,
   CreateNewEmail,
@@ -46,18 +46,18 @@ import { useData } from "../../../StateProvider/Provider";
 import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
-// const emailSchemaHelper = Yup.array()
+// const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
 //     if (this.isType(value) && value !== null) {
 //       return value;
 //     }
 //     return originalValue ? originalValue.split(/[\s,]+/) : [];
 //   })
-//   .of(Yup.string().email(({ value }) => `${value} is not a valid email`));
+//   .of(string().email(({ value }) => `${value} is not a valid email`));
 
-const EmailSchema = Yup.object().shape({
-  name: Yup.string().required("please enter subject"),
-  to: Yup.array()
+const EmailSchema = object().shape({
+  name: string().required("please enter subject"),
+  to: array()
     .min(1)
     .transform(function (value, originalValue) {
       if (this.isType(value) && value !== null) {
@@ -65,7 +65,7 @@ const EmailSchema = Yup.object().shape({
       }
       return originalValue ? originalValue.split(/[\s,]+/) : [];
     })
-    .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
+    .of(string().email(({ value }) => `${value} is not a valid email`)),
   // to: emailSchemaHelper.min(1),
   // cc: emailSchemaHelper,   //  Commented by punit
 });

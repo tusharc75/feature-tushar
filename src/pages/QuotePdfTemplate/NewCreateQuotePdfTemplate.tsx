@@ -7,7 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
+import { object, string, boolean } from "yup";
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Checkbox from "@material-ui/core/Checkbox"
 import { useParams, useHistory } from 'react-router-dom';
@@ -22,10 +22,10 @@ import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const PdfTemplateSchema = Yup.object().shape({
-    name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
-    owner: Yup.string().required('Owner is required'),
-    showPageNumberInFooter: Yup.boolean()
+const PdfTemplateSchema = object().shape({
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    owner: string().required('Owner is required'),
+    showPageNumberInFooter: boolean()
 });
 
 const useStyles = makeStyles((theme) => ({
