@@ -27,7 +27,6 @@ import PrivateRoute from "./components/PrivateRoute";
 import { useData } from "./StateProvider/Provider";
 import ErrorBoundaryComponent from "./ErrorBoundary"
 import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
-
 import Login from "./pages/Auth/Login";
 import AzureLogin from "./pages/Auth/AzureLogin";
 import Leads from "./pages/Leads";
@@ -94,6 +93,8 @@ import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInvento
 import ProductDetailsPage from "./pages/Product/ProductDetailsPage";
 import RentalManagement from "./pages/RentalManagement";
 import RentalManagementDetailsPage from "./pages/RentalManagement/RentalManagementDetailsPage";
+import DeliveryTicket from "./pages/DeliveryTicket/index"
+import DeliveryTicketDetailsPage from "./pages/DeliveryTicket/DeliveryTicketDetailPage"
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -455,7 +456,7 @@ function App() {
             <PrivateRoute exact path={routes.productInventoryDetail.path + "/:id"}>
               <ProductInventoryDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.equipmentRentalMaster.path}>
+            <PrivateRoute exact path={routes.equiptmentRentalMaster.path}>
               <EquipmentRentalMaster />
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagement.path}>
@@ -554,6 +555,13 @@ function App() {
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.deliveryTicket.path}>
+              <DeliveryTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.deliveryTicketDetail.path}>
+              <DeliveryTicketDetailsPage />
+            </PrivateRoute>
+
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

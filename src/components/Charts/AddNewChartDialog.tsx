@@ -10,7 +10,7 @@ import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import BarChartIcon from '@material-ui/icons/BarChart';
@@ -19,8 +19,8 @@ import { CustomDialogTransition } from "./../../constants/helpers";
 import { ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from "@material-ui/core";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
-const ProductBuilderSchema = Yup.object().shape({
-    name: Yup.string()
+const ProductBuilderSchema = object().shape({
+    name: string()
         .required("please enter name"),
 });
 

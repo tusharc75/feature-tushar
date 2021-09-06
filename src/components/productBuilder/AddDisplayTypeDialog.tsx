@@ -10,13 +10,11 @@ import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
-import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormTypes from "../../components/Helpers/FormTypes";
-
 
 const AddDisplayTypeDialog = (props) => {
 

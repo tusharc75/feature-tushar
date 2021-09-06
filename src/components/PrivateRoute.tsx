@@ -57,7 +57,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "quote-pdf-template",
         "product-inventory",
         "equiptment-rental-master",
-        "rental-management"
+        "rental-management",
+        "loading-ticket"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -83,7 +84,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
           ) : access ? (
             <Layout>
               {/* <Suspense fallback={<div>Loading...</div>}> */}
-                {children}
+              {children}
               {/* </Suspense> */}
             </Layout>
           ) : (

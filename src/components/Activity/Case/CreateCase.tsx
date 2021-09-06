@@ -20,7 +20,7 @@ import { Formik, Form, Field } from "formik";
 import { KeyboardDatePicker } from "formik-material-ui-pickers";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import moment from "moment";
 
 import {
@@ -41,12 +41,12 @@ import { dateFormat } from "../../../constants/helpers"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
 
-const CaseSchema = Yup.object().shape({
-  name: Yup.string().required("Please enter case name"),
-  assignee: Yup.string().required("Please select assignee"),
-  reporter: Yup.string().required(),
-  startDate: Yup.string().required("Please enter start date"),
-  dueDate: Yup.string().required("Please enter due date"),
+const CaseSchema = object().shape({
+  name: string().required("Please enter case name"),
+  assignee: string().required("Please select assignee"),
+  reporter: string().required(),
+  startDate: string().required("Please enter start date"),
+  dueDate: string().required("Please enter due date"),
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {

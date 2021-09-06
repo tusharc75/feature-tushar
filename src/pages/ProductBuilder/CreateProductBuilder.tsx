@@ -5,7 +5,7 @@ import Button from "@material-ui/core/Button";
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { TextField } from "formik-material-ui";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -19,8 +19,8 @@ import Tab from "@material-ui/core/Tab";
 import FormTypes from "../../components/Helpers/FormTypes";
 import { useData } from "../../StateProvider/Provider";
 
-const ProductBuilderSchema = Yup.object().shape({
-  name: Yup.string()
+const ProductBuilderSchema = object().shape({
+  name: string()
     .min(3, "Too Short!")
     .max(50, "Too Long")
     .required("name is required"),

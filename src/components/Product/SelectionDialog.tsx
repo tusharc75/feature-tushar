@@ -8,7 +8,7 @@ import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
-import * as Yup from "yup";
+import { object, string } from "yup";
 import FormTypes from "../Helpers/FormTypes";
 import { downloadExcel } from "../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -18,8 +18,8 @@ import CreateProductCategory from "../../pages/ProductCategory/CreateProductCate
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from "@material-ui/icons/AddCircle";
 
-const ProductBuilderSchema = Yup.object().shape({
-    productTemplate: Yup.string()
+const ProductBuilderSchema = object().shape({
+    productTemplate: string()
         .required("please select product template"),
 });
 

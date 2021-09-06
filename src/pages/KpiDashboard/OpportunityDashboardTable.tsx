@@ -2,12 +2,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { Box, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, MenuItem, Menu, Button } from '@material-ui/core';
 import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { ImportExport } from '@material-ui/icons';
-import { startCase } from 'lodash';
-import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
+import { saveAs } from "file-saver";
+import { utils, write } from "xlsx";
 
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
@@ -137,7 +135,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
       case 'excel': {
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = XLSX.utils.json_to_sheet(
+        const ws = utils.json_to_sheet(
           topProducts.map((p) => ({ 'Product Category': p.productCategory, 'Total Sell': p.totalSell, 'Total Cost': p.totalCost }))
         );
         const wb = {
@@ -146,15 +144,15 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
           },
           SheetNames: ['data']
         };
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs(data, 'Top Selling Products' + fileExtension);
+        saveAs(data, 'Top Selling Products' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(topProducts)], { type: 'text/plain;charset=utf-8' });
-        FileSaver.saveAs(blob, 'Top Selling Products.json');
+        saveAs(blob, 'Top Selling Products.json');
         break;
       }
       default:

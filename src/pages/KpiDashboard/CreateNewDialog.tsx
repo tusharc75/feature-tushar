@@ -10,13 +10,13 @@ import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 
-const ProductBuilderSchema = Yup.object().shape({
-    name: Yup.string()
+const ProductBuilderSchema = object().shape({
+    name: string()
         .required("Please enter name"),
 });
 
