@@ -133,12 +133,14 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master"
+  equiptmentRentalMaster: 'Equiptment Rental Master',
+  rentalManagement: 'Rental Management',
+  deliveryTicket: 'Loading Ticket'
 };
 
 export const RESOURCE_LABEL = {
-  warehouse: "Warehouse",
   account: 'Supplier Accounts',
+  warehouse: "Warehouses",
   customerAccount: 'Customer Accounts',
   user: 'Users',
   contact: 'Supplier Contacts',
@@ -175,7 +177,9 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master"
+  equiptmentRentalMaster: 'Equiptment Rental Master',
+  rentalManagement: 'Rental Management',
+  deliveryTicket: 'Loading Tickets'
 };
 
 export const lead = {
