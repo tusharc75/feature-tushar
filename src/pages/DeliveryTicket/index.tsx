@@ -101,7 +101,7 @@ const DeliveryTicket = () => {
       field: "deliveryDate",
       headerName: "Delivery Date",
       show: true,
-      cellRenderer: "DateRenderer"
+      cellRenderer: "dateRenderer"
     },
     {
       field: "deliveryType",
@@ -109,13 +109,13 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "commonRenderer",
     },
-    {
-      field: "productInventory",
-      headerName: "Product Inventory",
-      show: true,
-      filter: false,
-      cellRenderer: "productInventoryRenderer",
-    },
+    // {
+    //   field: "productInventory",
+    //   headerName: "Product Inventory",
+    //   show: true,
+    //   filter: false,
+    //   cellRenderer: "productInventoryRenderer",
+    // },
     {
       field: "rental",
       headerName: "Rental",
@@ -144,7 +144,7 @@ const DeliveryTicket = () => {
       field: "pick-UpDate",
       headerName: "Pick-UpDate",
       show: true,
-      cellRenderer: "DateRenderer",
+      cellRenderer: "dateRenderer",
     }
   ];
 
@@ -201,15 +201,15 @@ const DeliveryTicket = () => {
     </Link>
   );
 
-  const ProductInventoryRenderer = params => <>
-    {
-      params.value ?
-        <Link className="link" to={``} title={params.value}>
-          {params.value}
-        </Link>
-        : <NoDataCell />
-    }
-  </>
+  // const ProductInventoryRenderer = params => <>
+  //   {
+  //     params.value ?
+  //       <Link className="link" to={``} title={params.value}>
+  //         {params.value}
+  //       </Link>
+  //       : <NoDataCell />
+  //   }
+  // </>
 
   const RentalRenderer = params => <>
     {
@@ -221,6 +221,7 @@ const DeliveryTicket = () => {
     }
   </>
 
+  console.log('deliveryPermissions?.isDelete', deliveryPermissions)
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -229,7 +230,7 @@ const DeliveryTicket = () => {
         userId={user?.user?._id}
         onDelete={() => {
           setDeleteRecord(params.data)
-          setShowDeleteWarningConfirmBox(true)
+          setIsConformDialogVisible(true)
         }
         }
         entity="Delivery Ticket"
@@ -240,8 +241,9 @@ const DeliveryTicket = () => {
   const frameworkComponents = {
     deliveryJobNameRenderer: DeliveryJobNameRenderer,
     customerAccountNameRenderer: CustomerAccountNameRenderer,
-    productInventoryRenderer: ProductInventoryRenderer,
+    // productInventoryRenderer: ProductInventoryRenderer,
     rentalRenderer: RentalRenderer,
+    dateRenderer: DateRenderer,
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
   };
@@ -270,9 +272,6 @@ const DeliveryTicket = () => {
 
       case "customerAccountName":
         return "customerAccountName.optionLabel";
-
-      case "supplierAccountName":
-        return "supplierAccountName.optionLabel";
 
       default:
         return field;
@@ -329,24 +328,38 @@ const DeliveryTicket = () => {
             const {
               createdBy,
               updatedBy,
-              customerAccountName,
+              customerAccount,
+              deliveryPerson,
+              warehouse,
+              productInventory,
               ...restProperties
             } = u;
+
+            // let productInventories = []
+            // Object.keys(u.productInventory).forEach(o => {
+            //   productInventories.push(o?.optionLabel)
+            // })
 
             let res = {
               ...restProperties,
               id: u._id,
-
+              ownerId: u?.createdBy?.user?._id,
               canDelete: u?.createdBy?.user?._id === user?.user._id,
               expiryDate: u.deliveryDate || "",
 
-              customerAccountName: u.customerAccountName?.optionLabel,
-              customerAccountId: u.customerAccountName?.optionValue,
+              customerAccountName: u?.customerAccount?.optionLabel,
+              customerAccountId: u?.customerAccount?.optionValue,
 
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date,
+              deliveryPersonName: u?.deliveryPerson?.optionLabel,
+              deliveryPersonId: u?.deliveryPerson?.optionValue,
+
+              warehouseName: u?.warehouse?.optionLabel,
+              warehouseId: u?.warehouse?.optionValue,
+
+              createdBy: u?.createdBy?.user?.concatedName,
+              createdByDate: u?.createdBy?.date,
+              updatedBy: u?.updatedBy?.user?.concatedName,
+              updatedByDate: u?.updatedBy?.date,
             };
             return res;
           });
@@ -492,7 +505,10 @@ const DeliveryTicket = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    <MenuItem onClick={() => setShowDeleteWarningConfirmBox(true)}>Delete</MenuItem>
+                    <MenuItem onClick={() => {
+                      setIsConformDialogVisible(true)
+                      closeActions()
+                    }}>Delete</MenuItem>
                   </Menu>
                 </Box>
               </Grid>
