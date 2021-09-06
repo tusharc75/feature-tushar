@@ -115,7 +115,7 @@ const CreateRentalManagementDialog = (props) => {
         setLoading(true);
         if (rentalManagementId) {
             values._id = rentalManagementId
-            axiosInstance().put(`${rentalManagement.rentalManagementApi}`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementId}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {

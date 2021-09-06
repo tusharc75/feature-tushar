@@ -19,7 +19,7 @@ const ManageDeliveryTicket = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { deliveryTicketApi } = deliveryTicket;
-    const { deliveryTicketId, onClose, onSuccess } = props;
+    const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -41,7 +41,7 @@ const ManageDeliveryTicket = (props) => {
             }
             else {
                 setInitialData({
-                    fields: fieldsDataForCreate,
+                    fields: fieldsDataForCreate.filter(d => d.fieldLabel !== "Product Inventory" && d.fieldLabel !== "Warehouse"),
                     values: getObjKeys("", fieldsDataForCreate),
                 });
             }
@@ -64,6 +64,11 @@ const ManageDeliveryTicket = (props) => {
             });
         }
         else {
+
+            if (productInventoryForDeliveryTicket && warehouseId) {
+                values.productInventory = productInventoryForDeliveryTicket.map(d => d.inventory._id)
+                values.warehouse = warehouseId.optionValue
+            }
             axiosInstance().post(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()

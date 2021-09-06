@@ -7,68 +7,99 @@ import CustomAgGrid, { intialState, reducer } from "../../components/AgGridCompo
 import { CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
+import Grid from "@material-ui/core/Grid/Grid";
+import { Button } from "@material-ui/core";
 
-const DeliveryTicket = ({warehouselist,productInventory}) => {
+const DeliveryTicket = ({ warehouselist, productInventory, handleDeliveryTicketDialog }) => {
 
-    const costTypeList = ["Repair", "Delivery", "Assembly"]
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-  
-    useEffect(() => {
-      dispatch({ type: "initialize", data:productInventory, count: productInventory.length });
-      // eslint-disable-next-line
-    }, []);
+  const costTypeList = ["Repair", "Delivery", "Assembly"]
+  const [gridApi, setGridApi] = useState(null);
+  const [warehouse, setWarehouse] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-    const NameRenderer = (params) => (
-      <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-        {params.value}
-      </Link>
-    );
-    const frameworkComponents = {
-      nameRenderer: NameRenderer,
-    };
-    const columns = [
-      { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-      { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-      { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
+  useEffect(() => {
+
+    if (warehouse) {
+      dispatch({ type: "initialize", data: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length });
+    }
+    else {
+      dispatch({ type: "initialize", data: productInventory, count: productInventory.length });
+    }
+    // eslint-disable-next-line
+  }, [warehouse]);
+
+  const NameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+      {params.value}
+    </Link>
+  );
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+  };
+  const columns = [
+    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
   ];
-    return (<>
+  return (<>
+
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
         <Autocomplete
           id="combo-box-demo"
           size="small"
-          style={{ minWidth: 200 }}
-          value={null}
+          style={{ minWidth: 300 }}
+          value={warehouse}
           options={warehouselist}
+          getOptionLabel={(option: any) => option ? option?.optionLabel : ""}
           onChange={(event, newValue) => {
-
+            setWarehouse(newValue)
           }}
           placeholder="Select Warehouse"
           renderInput={(params) => <TextField
             {...params}
             variant="outlined"
-            name="nameField"
+            label="Select Warehouse"
+            name="warehouseField"
           />}
         />
-        {columns ?
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-          />
-          : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          size="small"
+          disabled={!warehouse || (selectedRecords.length === 0)}
+          onClick={() => {
+            handleDeliveryTicketDialog(selectedRecords, warehouse)
+          }}
+        >
+          Create Delivery Ticket
+        </Button>
+      </Grid>
+    </Grid>
+    <Grid item xs={12} md={12} sm={12} >
 
-        }
-      </>
-    );
+      {columns ?
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          allowAction={false}
+          loading={loading}
+        />
+        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+
+      }
+    </Grid>
+  </>
+  );
 }
 
 export default DeliveryTicket;

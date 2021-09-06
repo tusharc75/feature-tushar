@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import { useState, useEffect, useContext, Fragment, useReducer, useRef } from "react";
 import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom'
 import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
 import TextField from "@material-ui/core/TextField/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import { Field, FieldArray, Form, Formik } from "formik";
+import { Field, FieldArray, Form, Formik, FormikProps } from "formik";
 import Container from "@material-ui/core/Container/Container";
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
@@ -29,6 +29,7 @@ import Delete from "@material-ui/icons/Delete";
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
+import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -47,9 +48,13 @@ const RentalManagementDetailsPage = () => {
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [warehouseList, setWarehouseList] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [additionalCost, setAdditionalCost] = useState<any[]>([]);
   const [productInventory, setProductInventory] = useState<any[]>([]);
+  const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
+  const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
+  const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -60,11 +65,32 @@ const RentalManagementDetailsPage = () => {
     // eslint-disable-next-line
   }, [id]);
 
+  useEffect(() => {
+    if (currentStep === 2) {
+    }
+    // eslint-disable-next-line
+  }, [currentStep]);
+
   const handleMainPoints = (data) => {
     let mainPoint = {};
     // mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
     setMainPoints(mainPoint);
   };
+
+  const handleSaveAdditionalCost = (values) => {
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount } }) })
+      .then(({ data }) => {
+        setAddExistingProductDialog(false)
+        fetchProductInventory()
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
+  }
 
   const fetchRentalManagementData = async () => {
     setLoadingDetails(true);
@@ -77,6 +103,7 @@ const RentalManagementDetailsPage = () => {
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
+      setAdditionalCost(data.additionalCost.map(d => { return { "id": d._id, "type": d.type, "amount": d.value } }))
       setLoadingDetails(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -107,6 +134,12 @@ const RentalManagementDetailsPage = () => {
       toastConfig.setToastConfig(error)
       setShowConfirmBox(false);
     });
+  }
+
+  const handleDeliveryTicketDialog = (selectedProductInventory,warehouse) => {
+    setProductInventoryForDeliveryTicket(selectedProductInventory)
+    setWarehouseForDeliveryTicket(warehouse)
+    setShowDeliveryTicketDialog(true)
   }
   const costTypeList = ["Repair", "Delivery", "Assembly"]
   const [gridApi, setGridApi] = useState(null);
@@ -162,6 +195,14 @@ const RentalManagementDetailsPage = () => {
         serialNumber: u.inventory?.serialNumber,
       }));
       setProductInventory(data.data)
+
+      let tempWareHouse = []
+      data.data.map(d => {
+        if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
+          tempWareHouse.push(d.inventory.warehouse)
+        }
+      })
+      setWarehouseList(tempWareHouse)
       dispatch({ type: "initialize", data: data.data, count: data.count });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
@@ -182,7 +223,7 @@ const RentalManagementDetailsPage = () => {
           open: true,
           type: "success",
           message: data.message,
-      });
+        });
       }).catch((error) => {
         setAddExistingProductDialog(false)
         toastConfig.setToastConfig(error)
@@ -346,13 +387,13 @@ const RentalManagementDetailsPage = () => {
                                               id="combo-box-demo"
                                               size="small"
                                               style={{ minWidth: 200 }}
-                                              value={costTypeList.find(v => v === userVal)}
-                                              options={costTypeList.filter(element => !values.additionalCost.includes(element))}
+                                              value={userVal.type}
+                                              options={costTypeList}
                                               getOptionLabel={(option: any) => option ? option : ""}
                                               onChange={(event, newValue) => {
                                                 arrayHelpers.replace(index, {
                                                   ...values.additionalCost[index],
-                                                  ["name"]: newValue,
+                                                  ["type"]: newValue,
                                                 });
                                               }}
 
@@ -433,16 +474,33 @@ const RentalManagementDetailsPage = () => {
                         </Grid>
                       </Container>
                     </Form>
-                    <div>
-                      {`Total Cost :  `}
-                    </div>
+
+                    <Grid container >
+                      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
+                        {/* <div>
+                          {`Total Cost :  `}
+                        </div> */}
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          type="submit"
+                          size="small"
+
+                          onClick={() => {
+                            handleSaveAdditionalCost(values.additionalCost)
+                          }}
+                        >
+                          {"Save"}
+                        </Button>
+                      </Grid>
+                    </Grid>
                   </>
                 )}
               </Formik>
 
             )}
             {(currentStep === 2) && (
-              <DeliveryTicket warehouselist={["1", "2", "3"]} productInventory={productInventory} />
+              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
             )}
           </Grid>
         </Grid>
@@ -471,6 +529,16 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       )}
+      {showDeliveryTicketDialog &&
+        <ManageDeliveryTicket
+          onClose={() => setShowDeliveryTicketDialog(false)}
+          productInventoryForDeliveryTicket ={productInventoryForDeliveryTicket}
+          warehouseId={warehouseForDeliveryTicket}
+          onSuccess={() => {
+            setShowDeliveryTicketDialog(false)
+          }}
+        />
+      }
     </>
   );
 };

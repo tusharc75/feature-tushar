@@ -166,14 +166,7 @@ const Steps = (props) => {
         );
     };
 
-    const handleNext = () => {
 
-    };
-
-
-    const handleBack = () => {
-        setCurrentStep(currentStep - 1)
-    };
 
     return (
         <div>
@@ -203,8 +196,10 @@ const Steps = (props) => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                disabled={currentStep === 3}
-                                                onClick={handleBack}
+                                                disabled={currentStep === 3 || currentStep === 0}
+                                                onClick={() => {
+                                                    setCurrentStep(currentStep - 1)
+                                                }}
                                                 size="small"
                                                 startIcon={<IoIosArrowDropleftCircle />}
                                             >
@@ -232,7 +227,9 @@ const Steps = (props) => {
                                                         <IconButton
                                                             color="primary"
                                                             disabled={currentStep === 3}
-                                                            onClick={handleBack}
+                                                            onClick={() => {
+                                                                setCurrentStep(currentStep + 1)
+                                                            }}
                                                             size="small"
                                                         >
                                                             <IoIosArrowDropleftCircle />
@@ -262,7 +259,7 @@ const Steps = (props) => {
                                                                 size="small"
                                                                 disabled={currentStep === 3}
                                                             >
-                                                                {currentStep === 0 ? "Next" : "Save"}
+                                                                Next
                                                             </IconButton>
                                                         )}
                                                     </div>
@@ -319,7 +316,7 @@ const Steps = (props) => {
                                                     disabled={currentStep === 3}
                                                     endIcon={<IoIosArrowDroprightCircle />}
                                                 >
-                                                    {currentStep === 0 ? "Next" : "Save"}
+                                                    Next
                                                 </Button>
                                             )}
                                         </div>
