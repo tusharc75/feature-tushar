@@ -358,6 +358,9 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "entity" ? (
                                       <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -365,7 +368,6 @@ export default function ManageAccount(props) {
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-
                                         options={field.option}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
