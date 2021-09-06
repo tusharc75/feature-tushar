@@ -595,7 +595,7 @@ const RentalManagement = () => {
       {showCreateRentalManagementDialog && (
         <CreateRentalManagementDialog
           open={showCreateRentalManagementDialog}
-          productInventoryId={null}
+          rentalManagementId={null}
           onClose={() => setshowCreateRentalManagementDialog(false)}
           onSuccess={() => {
             setshowCreateRentalManagementDialog(false);

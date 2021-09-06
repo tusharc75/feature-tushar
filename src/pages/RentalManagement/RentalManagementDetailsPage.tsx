@@ -27,6 +27,8 @@ import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
 import DeliveryTicket from "./DeliveryTicket";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,7 +36,7 @@ const RentalManagementDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -72,8 +74,8 @@ const RentalManagementDetailsPage = () => {
       } = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data._id);
-      setCustomizedRoutes([routes.rentalManagement, { title: `${data._id}` }]);
+      setHeadingLbl(data.rentalJobName);
+      setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
       setLoadingDetails(false);
     } catch (error) {
@@ -116,16 +118,33 @@ const RentalManagementDetailsPage = () => {
       {params.value}
     </Link>
   );
+
+  const ActionsRenderer = (params) => (
+    <>
+      <GridDeleteIcon
+        hasDeletePermission={permissions?.rentalManagement?.isDelete}
+        ownerId={user?.user?._id}
+        userId={user?.user?._id}
+        onDelete={() => {
+          handleRemoveProductInventory(params.data.inventory._id)
+        }
+        }
+        entity="rentalManagement"
+      />
+    </>
+  );
+
   const frameworkComponents = {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     nameRenderer: NameRenderer,
+    actionsRenderer: ActionsRenderer,
   };
   const columns = [
     { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
-];
+  ];
 
   const fetchProductInventory = () => {
     dispatch({ type: "loading", loading: true });
@@ -139,8 +158,8 @@ const RentalManagementDetailsPage = () => {
         ...u,
         id: u.inventory?._id,
         productName: u.product?.productName,
-        assetNumber:u.inventory?.assetNumber,
-        serialNumber:u.inventory?.serialNumber,
+        assetNumber: u.inventory?.assetNumber,
+        serialNumber: u.inventory?.serialNumber,
       }));
       setProductInventory(data.data)
       dispatch({ type: "initialize", data: data.data, count: data.count });
@@ -158,8 +177,23 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": productInventoryArray.map(d => d._id) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
+        fetchProductInventory()
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+      });
       }).catch((error) => {
         setAddExistingProductDialog(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+  const handleRemoveProductInventory = (productInventoryId) => {
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/inventory/remove`, { "products": [productInventoryId] })
+      .then(({ data }) => {
+        fetchProductInventory()
+      }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
   }
@@ -307,14 +341,14 @@ const RentalManagementDetailsPage = () => {
                                         >
                                           <Grid item md={1}>{index + 1}</Grid>
                                           <Grid item md={5}>
-                                           
+
                                             <Autocomplete
                                               id="combo-box-demo"
                                               size="small"
                                               style={{ minWidth: 200 }}
                                               value={costTypeList.find(v => v === userVal)}
-                                              options={costTypeList.filter(element => !values.additionalCost.includes(element)) }
-                                              getOptionLabel={(option: any) => option?  option : ""}
+                                              options={costTypeList.filter(element => !values.additionalCost.includes(element))}
+                                              getOptionLabel={(option: any) => option ? option : ""}
                                               onChange={(event, newValue) => {
                                                 arrayHelpers.replace(index, {
                                                   ...values.additionalCost[index],
@@ -408,7 +442,7 @@ const RentalManagementDetailsPage = () => {
 
             )}
             {(currentStep === 2) && (
-              <DeliveryTicket warehouselist={["1","2","3"]} productInventory={productInventory}/>
+              <DeliveryTicket warehouselist={["1", "2", "3"]} productInventory={productInventory} />
             )}
           </Grid>
         </Grid>
@@ -426,6 +460,17 @@ const RentalManagementDetailsPage = () => {
         />
       )}
       {addExistingProductDialog && <AddExistingProductInventory addProductInventory={handleAddProductInventory} handleProductInventoryClose={() => { setAddExistingProductDialog(false) }} />}
+      {openUpdateDialog && (
+        <CreateRentalManagementDialog
+          open={openUpdateDialog}
+          rentalManagementId={id}
+          onClose={() => setOpenUpdateDialog(false)}
+          onSuccess={() => {
+            setOpenUpdateDialog(false);
+            fetchRentalManagementData();
+          }}
+        />
+      )}
     </>
   );
 };

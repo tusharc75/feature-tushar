@@ -138,10 +138,10 @@ const Steps = (props) => {
         }
         if (props.icon === steps.length && props.active) {
 
-                status = 4;
-                active = false;
-                completed = false;
-                rejected = true;
+            status = 4;
+            active = false;
+            completed = false;
+            rejected = true;
 
         }
 
@@ -172,7 +172,7 @@ const Steps = (props) => {
 
 
     const handleBack = () => {
-        setCurrentStep(currentStep-1)
+        setCurrentStep(currentStep - 1)
     };
 
     return (
@@ -195,7 +195,7 @@ const Steps = (props) => {
                         md={1}
                         className="d-flex align-items-center justify-content-center mt-2"
                     >
-                        {!isMobile  && (
+                        {!isMobile && (
                             <>
                                 <div>
                                     {(
@@ -203,7 +203,7 @@ const Steps = (props) => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                disabled={currentStep === 3 }
+                                                disabled={currentStep === 3}
                                                 onClick={handleBack}
                                                 size="small"
                                                 startIcon={<IoIosArrowDropleftCircle />}
@@ -224,14 +224,14 @@ const Steps = (props) => {
                                     xs={6}
                                     className="d-flex align-items-center justify-content-start mt-1 mb-1"
                                 >
-                                    {isMobile  && (
+                                    {isMobile && (
                                         <>
                                             <div>
                                                 {(
                                                     <div>
                                                         <IconButton
                                                             color="primary"
-                                                            disabled={currentStep === 3 }
+                                                            disabled={currentStep === 3}
                                                             onClick={handleBack}
                                                             size="small"
                                                         >
@@ -257,12 +257,12 @@ const Steps = (props) => {
                                                             <IconButton
                                                                 color="primary"
                                                                 onClick={() => {
-                                                                    setCurrentStep(currentStep+1)
+                                                                    setCurrentStep(currentStep + 1)
                                                                 }}
                                                                 size="small"
-                                                                disabled={currentStep === 3 }
+                                                                disabled={currentStep === 3}
                                                             >
-                                                                    End
+                                                                {currentStep === 0 ? "Next" : "Save"}
                                                             </IconButton>
                                                         )}
                                                     </div>
@@ -279,7 +279,7 @@ const Steps = (props) => {
                                         className={clsx(classes.step, {
                                             [classes.active]:
                                                 currentStep > i ||
-                                                steps[currentStep] === "End" ,
+                                                steps[currentStep] === "End",
                                             [classes.currentStep]: currentStep === i,
                                             [classes.inActive]: currentStep !== i,
                                         })}
@@ -303,7 +303,7 @@ const Steps = (props) => {
                         md={1}
                         className="d-flex align-items-center justify-content-center"
                     >
-                        {!isMobile  && (
+                        {!isMobile && (
                             <>
                                 <div>
                                     {(
@@ -313,15 +313,15 @@ const Steps = (props) => {
                                                     variant="contained"
                                                     color="primary"
                                                     onClick={() => {
-                                                        setCurrentStep(currentStep+1)
+                                                        setCurrentStep(currentStep + 1)
                                                     }}
                                                     size="small"
-                                                    disabled={currentStep === 3 }
+                                                    disabled={currentStep === 3}
                                                     endIcon={<IoIosArrowDroprightCircle />}
                                                 >
-                                                    { "Next"}
+                                                    {currentStep === 0 ? "Next" : "Save"}
                                                 </Button>
-                                            ) }
+                                            )}
                                         </div>
                                     )}
                                 </div>
