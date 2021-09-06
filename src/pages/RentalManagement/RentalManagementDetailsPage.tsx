@@ -103,7 +103,7 @@ const RentalManagementDetailsPage = () => {
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setAdditionalCost(data.additionalCost.map(d => { return { "id": d._id, "type": d.type, "amount": d.value } }))
+      setAdditionalCost(data?.additionalCost?.map(d => { return { "id": d?._id, "type": d.type, "amount": d?.value } }))
       setLoadingDetails(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
