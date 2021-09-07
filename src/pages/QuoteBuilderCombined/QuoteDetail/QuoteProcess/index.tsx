@@ -771,7 +771,7 @@ export default function QuoteProcess(props) {
                         : item[key];
                 });
                 return result;
-            }, { ["Product Name"]: "Total" });
+            }, { ["Product Description"]: "Total" });
 
             Object.keys(res).forEach(k => {
                 if (k.includes(quoteCurrency)) {
