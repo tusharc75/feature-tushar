@@ -147,6 +147,7 @@ const GreenSwitch = withStyles({
 
 const AddOptionDialog = ({addFieldOption, options, setOptions, setOpen }) => {
   const [values, setValues] = React.useState([]);
+  const [inputVal, setInputVal] = React.useState("")
 
   const handleChange = (val) => {
     setValues(val)
@@ -181,6 +182,7 @@ const AddOptionDialog = ({addFieldOption, options, setOptions, setOpen }) => {
                 <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
             }
             onChange={(_, val) => handleChange(val)}
+            onInputChange={((_, val) => setInputVal(val))}
             renderInput={(params) => <TextField {...params}
               variant="outlined"
               label="Options"
@@ -189,12 +191,13 @@ const AddOptionDialog = ({addFieldOption, options, setOptions, setOpen }) => {
               placeholder="New Option" />
             }
           />
+          <Typography variant="caption" color="textSecondary">Press "Enter" to save an option</Typography>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button color="primary" onClick={() => setOpen(false)}>
+          <Button variant="outlined" color="primary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button color="primary" onClick={onSave}>
+          <Button variant="contained" disabled={!Boolean(values.length)} color="primary" onClick={onSave}>
             Save
           </Button>
         </CustomDialogFooter>

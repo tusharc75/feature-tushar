@@ -222,7 +222,7 @@ const ProductInventory = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
+                <CustomBreadCrumbs routes={[routes.productInventory]} />
             </Grid>
         </Grid>
         <div className="main-container">
@@ -230,7 +230,7 @@ const ProductInventory = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <GiAbstract055 className="headerLogo" />
-                        <span className="listingHeader">{routes.deliveryTicket.title} </span>
+                        <span className="listingHeader">{routes.productInventory?.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
@@ -242,8 +242,10 @@ const ProductInventory = () => {
                                 size="small"
                                 value={search}
                             />
-
-                            {/* {permissions?.productInventory?.isDelete &&
+                            {permissions?.productInventory?.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            }
+                            {permissions?.productInventory?.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
@@ -254,8 +256,8 @@ const ProductInventory = () => {
                                     aria-controls="action-menu"
                                 >Actions <ExpandMore />
                                 </Button>
-                            } */}
-                            {/* <Menu
+                            }
+                            <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
                                 getContentAnchorEl={null}
@@ -268,7 +270,7 @@ const ProductInventory = () => {
                                 onClose={closeActions}
                             >
                                 <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu> */}
+                            </Menu>
                         </Box>
                     </Grid>
                 </Grid>
