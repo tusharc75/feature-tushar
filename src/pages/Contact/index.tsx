@@ -427,7 +427,7 @@ export default function Contact(props) {
                     </ToggleButtonGroup>
                   )}
                 </Grid>
-                <Grid item md={4} sm={4} xs={12}>
+                <Grid className={styles.Related_Account}>
                   {accountDetails.accountId && (
                     <Chip
                       className="ml-3"

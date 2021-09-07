@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 const style = {
     cursor: "pointer",
     backgroundColor: 'white',
+    paddingTop: '8px'
 };
 
 

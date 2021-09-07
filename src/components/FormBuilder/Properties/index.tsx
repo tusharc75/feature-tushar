@@ -32,6 +32,7 @@ import FormTypes from '../../Helpers/FormTypes';
 import { startCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import styles from "../Form.module.scss";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string().required('please enter field label')
@@ -370,7 +371,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   return (
     <Dialog
-      maxWidth="md"
+      className={styles.Popup_Layout}
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -382,14 +383,16 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         }
       }}
     >
-      <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <Fragment>
-            <CustomDialogHeader
+      <CustomDialogHeader
               title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
               onClose={() => setShowConfirmDialog(true)}
             ></CustomDialogHeader>
-            <CustomDialogContent>
+
+
+      <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
+        {({ submitForm, touched, errors, setFieldValue, values }) => (
+          <>
+          <CustomDialogContent>  
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                   <TextField
@@ -909,7 +912,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   </Box>
                 </Form>
               </Box>
-            </CustomDialogContent>
+          </CustomDialogContent>
+          
             <CustomDialogFooter>
               <Button
                 size="small"
@@ -923,7 +927,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
                 Save
               </Button>
-            </CustomDialogFooter>
+            </CustomDialogFooter> 
+           
             {showConfirmDialog ? (
               <ConfirmCancelDialog
                 open={showConfirmDialog}
@@ -937,9 +942,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }}
               />
             ) : null}
-          </Fragment>
+        </>
         )}
-      </Formik>
+        
+        </Formik>
+  
     </Dialog>
   );
 };

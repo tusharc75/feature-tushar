@@ -1,0 +1,50 @@
+.set_GridBox_layout {
+    height: calc(85vh - 194px);
+    overflow: auto;
+}
+.MuiDialog-root{
+    overflow-y: hidden !important;
+}
+
+.Popup_Layout{
+    overflow-y: hidden !important;
+    .MuiDialog-paperFullScreen{
+        overflow-y: hidden !important;
+    }
+    .MuiDialog-root{
+        overflow-y: hidden !important;
+    }
+    .MuiDialog-paper{
+        overflow-y: hidden !important;
+
+    }
+    
+}
+
+
+
+@media screen and (max-width: 960px) {
+  .set_GridBox_layout {
+    height: calc(85vh - 194px);
+    overflow-x: hidden;
+  }
+  .Form_Grid_Box{
+      display: grid !important;
+      grid-template-columns: 1fr;
+      width: 200% !important;
+      padding-bottom: 15px;
+  }
+  .Custom_Field{
+      display: grid !important;
+      width: 200% !important;
+  }
+  .Addiction_Field{
+    display: grid !important;
+    width: 200% !important;
+
+  }
+  .MuiDialog-root{
+    overflow-y: hidden !important;
+}
+
+}

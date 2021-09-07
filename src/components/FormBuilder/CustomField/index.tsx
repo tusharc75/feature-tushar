@@ -6,6 +6,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { Box, Grid } from "@material-ui/core";
 import { DragBox } from "./DragBox";
 import { makeStyles } from '@material-ui/core/styles';
+import styles from "../Form.module.scss"
 
 const useStyles = makeStyles(() => ({
     acionBtn: {
@@ -105,7 +106,7 @@ export const CustomField = ({ }) => {
             </Box>
 
             <Box>
-                <Grid spacing={1} container>
+                <Grid spacing={1} container className={styles.Custom_Field}>
                     <Grid item xs={12} sm={6} md={6}>
                         <label  className={classes.acionBtn} onClick={handleOpenAddField} >Add Custom Field</label>
                     </Grid>
@@ -128,8 +129,8 @@ export const CustomField = ({ }) => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box mt={1} mb={1}>
-                <Grid container spacing={1} >
+            <Box mt={1} mb={1} >
+                <Grid container spacing={1} className={styles.Addiction_Field}>
                     {fields && fields.map((data, i) => (
                         <DragBox data={data} handleDelete={handleDelete} handleEdit={handleEdit} handleAddField={handleAddField} />
                     ))}
