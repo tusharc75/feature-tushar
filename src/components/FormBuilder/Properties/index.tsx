@@ -15,7 +15,7 @@ import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { object, string } from "yup";
+import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
@@ -62,7 +62,8 @@ const LookupResource = [
   { name: 'Market Segment', value: 'Market Segment' },
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Loading Ticket', value: 'Loading Ticket' },
-].sort((a,b) =>  a.name.localeCompare(b.name));
+  { name: 'Project Sales', value: 'Project Sales' }
+].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
