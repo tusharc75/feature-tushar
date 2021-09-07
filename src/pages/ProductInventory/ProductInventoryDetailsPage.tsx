@@ -54,7 +54,7 @@ const ProductInventoryDetailsPage = () => {
 
       handleMainPoints(data);
       setHeadingLbl(data._id);
-      setCustomizedRoutes([routes.productInventory, { title: `${data._id}` }]);
+      setCustomizedRoutes([routes.productInventory, { title: `${data?.serialNumber || data?._id}` }]);
       setProductInventoryData(data);
       setLoading(false);
     } catch (error) {
