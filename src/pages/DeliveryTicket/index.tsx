@@ -147,7 +147,9 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "dateRenderer",
       filter: false,
-    }
+    },
+    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
   ];
 
   useEffect(() => {
@@ -223,7 +225,6 @@ const DeliveryTicket = () => {
     }
   </>
 
-  console.log('deliveryPermissions?.isDelete', deliveryPermissions)
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -246,6 +247,8 @@ const DeliveryTicket = () => {
     // productInventoryRenderer: ProductInventoryRenderer,
     rentalRenderer: RentalRenderer,
     dateRenderer: DateRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
   };
@@ -269,9 +272,6 @@ const DeliveryTicket = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "owner":
-        return "owner.optionLabel";
-
       case "customerAccountName":
         return "customerAccountName.optionLabel";
 
@@ -426,6 +426,7 @@ const DeliveryTicket = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
         });
+
     }
   };
   const openActions = (event) => {

@@ -179,7 +179,7 @@ export const RESOURCE_LABEL = {
   productInventory: 'Product Inventory',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   rentalManagement: 'Rental Management',
-  deliveryTicket: "Delivery Ticket"
+  deliveryTicket: "Loading Ticket"
 };
 
 export const lead = {
