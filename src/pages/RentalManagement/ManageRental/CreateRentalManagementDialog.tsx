@@ -114,18 +114,28 @@ const CreateRentalManagementDialog = (props) => {
         setLoading(true);
         if (rentalManagementId) {
             values._id = rentalManagementId
-            axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementId}`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
                 setLoading(false);
                 onSuccess()
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
             });
         }
         else {
-            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
                 setLoading(false);
                 onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
