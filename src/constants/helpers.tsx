@@ -134,6 +134,7 @@ export const sidebarResource = {
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
   equipmentRentalMaster: "Equiptment Rental Master",
+  rentalManagement: "Rental Management",
   deliveryTicket: 'Loading Ticket'
 };
 
@@ -211,6 +212,11 @@ export const priceTemplate = {
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
   qbApi: "/quote-builder",
+};
+
+export const rentalManagement = {
+  rentalManagementResource: "rentalManagement",
+  rentalManagementApi: "/rental-management",
 };
 
 export const deliveryTicket = {

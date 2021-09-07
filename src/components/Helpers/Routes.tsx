@@ -173,6 +173,14 @@ const routes = {
     title: (storedRoutes && storedRoutes.equiptmentRentalMaster && storedRoutes.equiptmentRentalMaster) ? storedRoutes.equiptmentRentalMaster.title : RESOURCE_LABEL.equiptmentRentalMaster,
     path: "/equiptment-rental-master",
   },
+  rentalManagement: {
+    title: (storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement) ? storedRoutes.rentalManagement.title : RESOURCE_LABEL.rentalManagement,
+    path: "/rental-management",
+  },
+  rentalManagementDetail: {
+    title: (storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement) ? storedRoutes.rentalManagement.title : RESOURCE_LABEL.rentalManagement,
+    path: "/rental-management/detail",
+  },
   quoteBuilder: {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",

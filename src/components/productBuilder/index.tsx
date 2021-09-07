@@ -28,6 +28,7 @@ import Loader from "../Loader";
 import { handleAutoCalculation } from "../../constants/formulaUtility";
 import { gridLoadingTimeout } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import routes from "../../components/Helpers/Routes";
 
 let levalOrderBy = [
   "product",
@@ -144,6 +145,21 @@ const ProductBuilder = (props) => {
     );
   };
 
+  const EntityNameRenderer = (params) => params.value ? (
+    <>
+      <h5 className="createBy d-flex">
+        <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+          {params.value}
+        </Link>
+        {params.data.restEntity.length > 0 && (
+          <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
+        )}
+      </h5>
+    </>
+  ) : (
+    <NoDataCell />
+  );
+
   const ProductNameRenderer = (params) => (
     <>
       {Editable ? (
@@ -164,6 +180,7 @@ const ProductBuilder = (props) => {
   const frameworkComponents = {
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
+    entityRenderer: EntityNameRenderer,
     productNameRenderer: ProductNameRenderer,
   };
 
@@ -175,10 +192,15 @@ const ProductBuilder = (props) => {
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
       setProduct(data.data);
       data = data.data?.map((u, index) => {
+        const { entity, ...restProperties } = u;
+        const [firstEntity, ...restEntity] = entity;
         let res = {
-          ...u,
+          ...restProperties,
           id: u._id,
           srno: index + 1,
+          entity: firstEntity?.optionLabel,
+          entityId: firstEntity?.optionValue,
+          restEntity: restEntity,
         }
         for (let col in res) {
           if (res[col] && res[col].optionLabel) {
@@ -207,7 +229,7 @@ const ProductBuilder = (props) => {
                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase();
                 let fieldLabel = ele.fieldLabel + " " + _unit;
                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = { };
+                  let col: any = {};
                   col.field = fieldName;
                   col.headerName = fieldLabel;
                   col.width = 180;
@@ -227,7 +249,7 @@ const ProductBuilder = (props) => {
                   let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
                   let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency;
                   if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                    let col: any = { };
+                    let col: any = {};
                     col.field = fieldName;
                     col.headerName = fieldLabel;
                     col.width = 180;
@@ -247,7 +269,7 @@ const ProductBuilder = (props) => {
                 let fieldName = ele.fieldName + "_" + _currency.toLowerCase();
                 let fieldLabel = ele.fieldLabel + " " + _currency;
                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = { };
+                  let col: any = {};
                   col.field = fieldName;
                   col.headerName = fieldLabel;
                   col.width = 180;
@@ -264,7 +286,7 @@ const ProductBuilder = (props) => {
             }
           } else {
             if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-              let col: any = { };
+              let col: any = {};
               col.field = ele.fieldName;
               col.headerName = ele.fieldLabel;
               col.width = 180;
@@ -281,7 +303,7 @@ const ProductBuilder = (props) => {
                 }
               }
               if (ele.fieldName === "entity") {
-                return
+                col.cellRenderer = "entityRenderer"
               }
               column.push(col);
             }
@@ -313,7 +335,7 @@ const ProductBuilder = (props) => {
   }
 
   const addProductInBuilder = (rows) => {
-    let data: any = { };
+    let data: any = {};
     data.product = rows;
     data._id = productBuilderId;
     axiosInstance()
@@ -332,7 +354,7 @@ const ProductBuilder = (props) => {
       setProductData(null);
       setIsClone(false);
     } else {
-      let data: any = { };
+      let data: any = {};
       data.product = rows;
       data._id = productBuilderId;
       axiosInstance()
@@ -356,7 +378,7 @@ const ProductBuilder = (props) => {
     } else {
       ids = selectedRecords.map((d) => d.id);
     }
-    let data: any = { };
+    let data: any = {};
     data.productBuilderId = productBuilderId;
     data._ids = ids;
     axiosInstance()
@@ -440,7 +462,7 @@ const ProductBuilder = (props) => {
   };
 
   const handleAddField = (field) => {
-    let data: any = { };
+    let data: any = {};
     data.productBuilderId = productBuilderId;
     data._ids = selectedRecords.map((d) => d.id);
     data.field = field;
@@ -549,7 +571,7 @@ const ProductBuilder = (props) => {
           unit,
           value
         );
-        let data: any = { };
+        let data: any = {};
         data.values = result;
         data.id = row.data.id;
         data._id = productBuilderId;
