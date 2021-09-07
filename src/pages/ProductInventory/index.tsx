@@ -242,8 +242,10 @@ const ProductInventory = () => {
                                 size="small"
                                 value={search}
                             />
-
-                            {/* {permissions?.productInventory?.isDelete &&
+                            {permissions?.productInventory?.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            }
+                            {permissions?.productInventory?.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
@@ -254,8 +256,8 @@ const ProductInventory = () => {
                                     aria-controls="action-menu"
                                 >Actions <ExpandMore />
                                 </Button>
-                            } */}
-                            {/* <Menu
+                            }
+                            <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
                                 getContentAnchorEl={null}
@@ -268,7 +270,7 @@ const ProductInventory = () => {
                                 onClose={closeActions}
                             >
                                 <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu> */}
+                            </Menu>
                         </Box>
                     </Grid>
                 </Grid>
