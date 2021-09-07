@@ -27,11 +27,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({ user,
-  unassignEntity,
-  permissions,
-  selectedEntity,
-  type }) => {
+const AssignedUsers = (props) => {
+  const { user,
+    unassignEntity,
+    permissions,
+    selectedEntity,
+    type } = props
   const classes = useStyles();
 
   return (
