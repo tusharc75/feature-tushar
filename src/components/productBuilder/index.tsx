@@ -216,6 +216,7 @@ const ProductBuilder = (props) => {
           headerName: "Item #",
           width: 70,
           show: true,
+          disabled: true,
           cellRenderer: "productNameRenderer",
         },
       ];
@@ -314,6 +315,22 @@ const ProductBuilder = (props) => {
       column = sortBy(column, (item: any) => {
         return levalOrderBy.indexOf(item.leval);
       });
+
+      column.forEach(m => {
+        m.show = true
+      })
+
+      const columnState = JSON.parse(localStorage.getItem("productBuilderGrid"));
+      if (columnState) {
+        column.forEach((item) => {
+          columnState.forEach((d) => {
+            if (d.colId == item.field) {
+              item.show = !d.hide;
+            }
+          });
+        });
+      }
+
       setColumns(column);
       dispatch({ type: "initialize", data: [], count: 0 });
       dispatch({ type: "initialize", data: data, count: data.length });
@@ -674,6 +691,7 @@ const ProductBuilder = (props) => {
             onCellValueChanged={onCellValueChanged}
             loading={loading}
             className="product-builder-edit-grid"
+            renderedFrom="productBuilderGrid"
           />
         ) : (
           <Loader style={{ minHeight: 300 }} text="Loading..." />
