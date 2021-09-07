@@ -22,6 +22,8 @@ import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
+const defaultProductColumns = 7;
+
 const PdfTemplateSchema = object().shape({
     name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
     owner: string().required('Owner is required'),
@@ -131,7 +133,7 @@ export default function NewCreateQuotePdfTemplate() {
         else {
             setInitialValues({
                 landscape: false,
-                productColumns: 7,
+                productColumns: defaultProductColumns,
                 name: "",
                 showPageNumberInFooter: false,
                 header: "",
@@ -201,6 +203,8 @@ export default function NewCreateQuotePdfTemplate() {
                     entity: values?.entity,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
+                    landscape: values?.landscape,
+                    productColumns: parseInt(values?.productColumns)
                 })
                 .then(({ data: { data } }) => {
                     if (isPreview === true) {
@@ -227,6 +231,8 @@ export default function NewCreateQuotePdfTemplate() {
                     entity: values?.entity,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
+                    landscape: values?.landscape,
+                    productColumns: parseInt(values?.productColumns)
                 })
                 .then(({ data: { data } }) => {
                     if (isPreview === true) {
@@ -333,7 +339,12 @@ export default function NewCreateQuotePdfTemplate() {
                                                 onClose={() => {
                                                     //  This condition is to check either user is redirected from quote details screen or not
                                                     if (history.location?.state?.redirectTo) {
-                                                        history.push(history.location?.state?.redirectTo);
+                                                        if (isBreakCrumbPath) {
+                                                            history.push({ pathname: routes.quotePdfTemplate.path });
+                                                            setIsBreakCrumbPath("")
+                                                        } else {
+                                                            history.push(history.location?.state?.redirectTo);
+                                                        }
                                                     } else {
                                                         setShowConfirmDialog(false)
                                                         history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
@@ -436,55 +447,60 @@ export default function NewCreateQuotePdfTemplate() {
                                         />}
                                     </Grid>
                                 </Grid>
-                                
+
                                 <Grid container spacing={1}>
-                                <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
-                                    <FormControlLabel
-                                        disabled={!hasPermissionToUpdate}
-                                        value={values['showPageNumberInFooter']}
-                                        control={
-                                            <Checkbox
-                                                name="showPageNumberInFooter"
-                                                checked={values['showPageNumberInFooter']}
-                                                onChange={(e) => setFieldValue('showPageNumberInFooter', e.target.checked)}
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Show page number in footer"
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
-                                    <FormControlLabel
-                                        disabled={!hasPermissionToUpdate}
-                                        value={values['landscape']}
-                                        control={
-                                            <Checkbox
-                                                name="landscape"
-                                                checked={values['landscape']}
-                                                onChange={(e) => setFieldValue('landscape', e.target.checked)}
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Landscape"
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
-                                    <TextField
-                                      name="productColumns"
-                                      label="No. of Product Columns"
-                                      value={values["productColumns"]}
-                                      type="number"
-                                      fullWidth
-                                      variant="outlined"
-                                      size="small"
-                                      InputProps={{inputProps:{min: 5, max: 20} }}
-                                      onChange={(e) => {
-                                        const val = parseInt(e.target.value)
-                                        if (val >= 5 && val <= 20) {
-                                            setFieldValue('productColumns', e.target.value)}}                                              
-                                        }
-                                    />
-                                </Grid>
+                                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                        <FormControlLabel
+                                            disabled={!hasPermissionToUpdate}
+                                            value={values['showPageNumberInFooter']}
+                                            control={
+                                                <Checkbox
+                                                    name="showPageNumberInFooter"
+                                                    checked={values['showPageNumberInFooter']}
+                                                    onChange={(e) => setFieldValue('showPageNumberInFooter', e.target.checked)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Show page number in footer"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                        <FormControlLabel
+                                            disabled={!hasPermissionToUpdate}
+                                            value={values['landscape']}
+                                            control={
+                                                <Checkbox
+                                                    name="landscape"
+                                                    checked={values['landscape']}
+                                                    onChange={(e) => setFieldValue('landscape', e.target.checked)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Landscape"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                        <TextField
+                                            name="productColumns"
+                                            label="No. of Product Columns"
+                                            value={values["productColumns"]}
+                                            type="number"
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            InputProps={{ inputProps: { min: 5, max: 20 } }}
+                                            onChange={(e) => {
+                                                setFieldValue('productColumns', e.target.value)
+                                            }}
+                                            onBlur={(e) => {
+                                                const val = parseInt(e.target.value)
+                                                if (!(val >= 5 && val <= 20)) {
+                                                    setFieldValue('productColumns', defaultProductColumns.toString())
+                                                }
+                                            }}
+                                            helperText="Value must be between 5 to 20"
+                                        />
+                                    </Grid>
                                 </Grid>
                             </Form>
                         )}
