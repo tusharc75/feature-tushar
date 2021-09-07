@@ -192,7 +192,7 @@ const CreateProduct = (props) => {
                     }
                     if (defaultproductTemplate !== "") {
                         axiosInstance().get(`/product-template/fields/` + defaultproductTemplate).then(({ data: { data } }) => {
-                            let newField = [...masterFields];
+                            let newField = [...masterFields, ...fields];
                             data.fields.forEach(_f => {
                                 newField.push(_f)
                             })
@@ -223,7 +223,7 @@ const CreateProduct = (props) => {
             const result = productTemplate.filter((_f) => _f.optionValue === value)
             if (result.length) {
                 axiosInstance().get(`/product-template/fields/` + result[0].optionValue).then(({ data: { data } }) => {
-                    let newField = [...masterFields];
+                    let newField = [...masterFields, ...fields];
                     data.fields.forEach(_f => {
                         newField.push(_f)
                     })
