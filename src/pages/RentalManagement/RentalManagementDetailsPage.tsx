@@ -78,7 +78,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleSaveAdditionalCost = (values) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount } }) })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0 } }) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -554,7 +554,7 @@ const RentalManagementDetailsPage = () => {
           onClose={() => setShowDeliveryTicketDialog(false)}
           productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
           warehouseId={warehouseForDeliveryTicket}
-          rentalId={id}
+          rentalData={rentalManagementData}
           onSuccess={() => {
             setShowDeliveryTicketDialog(false)
             fetchProductInventory()
