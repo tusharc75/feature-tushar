@@ -105,7 +105,7 @@ const ProductBuilder = (props) => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setProductData(params.data);
+            openProductModel(params.data._id)
             setIsClone(true);
           }}
         >
@@ -119,7 +119,7 @@ const ProductBuilder = (props) => {
           disabled={permission ? false : true}
           aria-label="Edit"
           onClick={() => {
-            setProductData(params.data);
+            openProductModel(params.data._id)
           }}
         >
           <EditIcon
@@ -315,11 +315,9 @@ const ProductBuilder = (props) => {
       column = sortBy(column, (item: any) => {
         return levalOrderBy.indexOf(item.leval);
       });
-
       column.forEach(m => {
         m.show = true
       })
-
       const columnState = JSON.parse(localStorage.getItem("productBuilderGrid"));
       if (columnState) {
         column.forEach((item) => {
@@ -330,7 +328,6 @@ const ProductBuilder = (props) => {
           });
         });
       }
-
       setColumns(column);
       dispatch({ type: "initialize", data: [], count: 0 });
       dispatch({ type: "initialize", data: data, count: data.length });
