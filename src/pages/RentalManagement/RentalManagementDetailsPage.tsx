@@ -136,7 +136,7 @@ const RentalManagementDetailsPage = () => {
     });
   }
 
-  const handleDeliveryTicketDialog = (selectedProductInventory,warehouse) => {
+  const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
     setProductInventoryForDeliveryTicket(selectedProductInventory)
     setWarehouseForDeliveryTicket(warehouse)
     setShowDeliveryTicketDialog(true)
@@ -168,8 +168,6 @@ const RentalManagementDetailsPage = () => {
   );
 
   const frameworkComponents = {
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
     nameRenderer: NameRenderer,
     actionsRenderer: ActionsRenderer,
   };
@@ -194,7 +192,7 @@ const RentalManagementDetailsPage = () => {
         assetNumber: u.inventory?.assetNumber,
         serialNumber: u.inventory?.serialNumber,
       }));
-      setProductInventory(data.data)
+      fetchDeliveryTicket(data.data);
 
       let tempWareHouse = []
       data.data.map(d => {
@@ -207,11 +205,33 @@ const RentalManagementDetailsPage = () => {
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
-
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
     });
+  };
+
+  const fetchDeliveryTicket = (values) => {
+    axiosInstance()
+      .get(`${rentalManagement.rentalManagementApi}/${id}/delivery-ticket `)
+      .then(({ data }) => {
+        let tempProductInventory = values
+        data.data.map(obj => {
+          tempProductInventory.map((d, index) => {
+            if (obj.productInventory.some(p => d.id === p.optionValue)) {
+              tempProductInventory[index]["deliveryTicket"] = obj.deliveryJobName
+            }
+          })
+
+        })
+        setProductInventory(tempProductInventory)
+        if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
+          setCurrentStep(3)
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleAddProductInventory = (productInventoryArray) => {
@@ -302,7 +322,7 @@ const RentalManagementDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Steps steps={["New", "Additional Cost", "Delivery Ticket"]} currentStep={currentStep} setCurrentStep={setCurrentStep} />
+            <Steps steps={["New", "Additional Cost", "Loading Ticket"]} currentStep={currentStep} setCurrentStep={setCurrentStep} />
             {(currentStep === 0) && (
               <>
                 <Button
@@ -499,8 +519,8 @@ const RentalManagementDetailsPage = () => {
               </Formik>
 
             )}
-            {(currentStep === 2) && (
-              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
+            {(currentStep === 2 || currentStep === 3) && (
+              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
             )}
           </Grid>
         </Grid>
@@ -532,10 +552,12 @@ const RentalManagementDetailsPage = () => {
       {showDeliveryTicketDialog &&
         <ManageDeliveryTicket
           onClose={() => setShowDeliveryTicketDialog(false)}
-          productInventoryForDeliveryTicket ={productInventoryForDeliveryTicket}
+          productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
           warehouseId={warehouseForDeliveryTicket}
+          rentalId={id}
           onSuccess={() => {
             setShowDeliveryTicketDialog(false)
+            fetchProductInventory()
           }}
         />
       }
