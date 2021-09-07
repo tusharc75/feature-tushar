@@ -374,6 +374,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
+      className="properties_dialog_height"
       open={true}
       fullWidth
       onClose={(e, reason) => {
