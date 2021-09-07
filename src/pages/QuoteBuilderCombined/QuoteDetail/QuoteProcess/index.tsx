@@ -14,8 +14,8 @@ import ProductBuilder from "../../../../components/productBuilder";
 import { currencyCodeToSymbol, CustomDialogTransition, customerAccount, customerContact, formatAmountWithCurrency, opportunity, quote, quoteBuilder, sidebarResource, supplierAccount } from "../../../../constants/helpers";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import Steps from "./Steps";
-import * as FileSaver from "file-saver";
-import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { utils, write } from "xlsx";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
@@ -623,7 +623,7 @@ export default function QuoteProcess(props) {
     };
 
     const fetchDoaLimit = () => {
-       if (quoteData) {
+        if (quoteData) {
             axiosInstance()
                 .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
                 .then(({ data: { data } }) => {
@@ -771,7 +771,7 @@ export default function QuoteProcess(props) {
                         : item[key];
                 });
                 return result;
-            }, { ["Product Name"]: "Total" });
+            }, { ["Product Description"]: "Total" });
 
             Object.keys(res).forEach(k => {
                 if (k.includes(quoteCurrency)) {
@@ -785,9 +785,9 @@ export default function QuoteProcess(props) {
 
             newTable.push(res);
 
-            const ws = XLSX.utils.json_to_sheet(newTable);
+            const ws = utils.json_to_sheet(newTable);
             const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-            const excelBuffer = XLSX.write(wb, {
+            const excelBuffer = write(wb, {
                 bookType: "xlsx",
                 type: "array",
             });
@@ -796,7 +796,7 @@ export default function QuoteProcess(props) {
             if (send) {
                 generateBase64forFile(data, "excel");
             } else {
-                FileSaver.saveAs(
+                saveAs(
                     data,
                     `Quotation - v${currentVersion}` + fileExtension
                 );
@@ -1516,9 +1516,9 @@ export default function QuoteProcess(props) {
                                 >
                                     Download
                                 </Button>
-                                {(permissions[qbResource]?.isUpdate && permissions?.quotePdfTemplate.isUpdate && 
-                                (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id)) && 
-                                (user?.user?._id === quoteData?.pDFTemplate?.owner || quoteData?.pDFTemplate?.collaborator?.some(d => d === user?.user?._id))) &&
+                                {(permissions[qbResource]?.isUpdate && permissions?.quotePdfTemplate.isUpdate &&
+                                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id)) &&
+                                    (user?.user?._id === quoteData?.pDFTemplate?.owner || quoteData?.pDFTemplate?.collaborator?.some(d => d === user?.user?._id))) &&
                                     <Button
                                         onClick={() => {
                                             quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {

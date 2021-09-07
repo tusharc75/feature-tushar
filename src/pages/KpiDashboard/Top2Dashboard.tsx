@@ -4,8 +4,8 @@ import { Box, Paper, Typography, Button, Menu, MenuItem, TableContainer, Table, 
 import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
-import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
+import { saveAs } from "file-saver";
+import { utils, write } from "xlsx";
 import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
 
@@ -80,7 +80,7 @@ const Top2Dashboard = (props) => {
           let obj = {};
           let dataset = [];
           const entitySale = await data.filter((d) => d.entityId === id);
-          
+
           for (const sale of entitySale) {
             if (filterCurrency && filterCurrency !== currency) {
               const totalSelldata = await getExchangeRates(moment(sale.date).format('YYYY-MM-DD'), sale.totalSell);
@@ -107,7 +107,7 @@ const Top2Dashboard = (props) => {
 
           allEntities.push(obj);
           allEntitiesChart.push(chartObj);
-       }
+        }
 
         setAllEntitySalesData({
           labels: labels.map((d) => moment(d).format('MMM/YY')),
@@ -168,22 +168,22 @@ const Top2Dashboard = (props) => {
         // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = XLSX.utils.json_to_sheet(tableDataRaw);
+        const ws = utils.json_to_sheet(tableDataRaw);
         const wb = {
           Sheets: {
             data: ws
           },
           SheetNames: ['data']
         };
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs(data, 'All Entity Sales Chart' + fileExtension);
+        saveAs(data, 'All Entity Sales Chart' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
-        FileSaver.saveAs(blob, 'All Entity Sales Chart.json');
+        saveAs(blob, 'All Entity Sales Chart.json');
         break;
       }
       default:

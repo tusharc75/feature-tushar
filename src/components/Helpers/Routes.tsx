@@ -169,9 +169,17 @@ const routes = {
     title: (storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title) ? storedRoutes.productInventory.title : RESOURCE_LABEL.productInventory,
     path: "/product-inventory/detail",
   },
-  equipmentRentalMaster: {
-    title: (storedRoutes && storedRoutes.equipmentRentalMaster && storedRoutes.equipmentRentalMaster) ? storedRoutes.equipmentRentalMaster.title : RESOURCE_LABEL.equipmentRentalMaster,
+  equiptmentRentalMaster: {
+    title: (storedRoutes && storedRoutes.equiptmentRentalMaster && storedRoutes.equiptmentRentalMaster) ? storedRoutes.equiptmentRentalMaster.title : RESOURCE_LABEL.equiptmentRentalMaster,
     path: "/equiptment-rental-master",
+  },
+  rentalManagement: {
+    title: (storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement) ? storedRoutes.rentalManagement.title : RESOURCE_LABEL.rentalManagement,
+    path: "/rental-management",
+  },
+  rentalManagementDetail: {
+    title: (storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement) ? storedRoutes.rentalManagement.title : RESOURCE_LABEL.rentalManagement,
+    path: "/rental-management/detail",
   },
   quoteBuilder: {
     title: storedRoutes ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
@@ -232,6 +240,14 @@ const routes = {
   address: {
     title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",
+  },
+  deliveryTicket: {
+    title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
+    path: "/loading-ticket",
+  },
+  deliveryTicketDetail: {
+    title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
+    path: "/loading-ticket/detail",
   },
 };
 

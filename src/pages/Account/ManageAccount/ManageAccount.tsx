@@ -81,7 +81,7 @@ export default function ManageAccount(props) {
         (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
       );
       if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].options);
+        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
         setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
         setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
       }
@@ -364,6 +364,9 @@ export default function ManageAccount(props) {
                                       />
                                     ) : field.fieldName === "entity" ? (
                                       <FormTypes
+                                        isNew={isNew}
+                                        {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -371,7 +374,6 @@ export default function ManageAccount(props) {
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-
                                         options={field.option}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}

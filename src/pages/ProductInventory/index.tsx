@@ -143,9 +143,9 @@ const ProductInventory = () => {
 
     const NameRenderer = (params) => (
         <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-          {params.value}
+            {params.value}
         </Link>
-      );
+    );
 
 
     const ActionsRenderer = params => (
@@ -222,27 +222,15 @@ const ProductInventory = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.productInventory.title }]} />
-            </Grid>
-            <Grid item md={8} sm={1} xs={2}>
-                <ImportExportLinks
-                    permissions={permissions.product}
-                    module="product(s)"
-                    api={"product"}
-                    refrenceId={null}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                        if (isImportedSuccessfully) {
-                            fetchProductInventory();
-                        }
-                    }}
-                />
+                <CustomBreadCrumbs routes={[routes.productInventory]} />
             </Grid>
         </Grid>
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.productInventory.title} </span>
+                        <GiAbstract055 className="headerLogo" />
+                        <span className="listingHeader">{routes.productInventory?.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >

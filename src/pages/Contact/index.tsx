@@ -31,6 +31,8 @@ import {
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import contactClass from './contact.module.scss'
+import {SET_SELECTED_ENTITY} from '../../StateProvider/actionTypes';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 
 const ContactTypes = [
   {
@@ -49,7 +51,7 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity, permissions}
+    state: { user, selectedEntity, permissions}, dispatch: entityDispatch
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
@@ -149,6 +151,15 @@ export default function Contact(props) {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
+  const handleEntityChange = (entityId) => {
+    entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
+  }
+
+  const hasAccessToEntity = (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  }
+
   const ConcatedNameRenderer = (params) => (
     <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
       {params.value}
@@ -156,13 +167,32 @@ export default function Contact(props) {
   );
 
   const RelatedLeadRenderer = (params) =>
-    params.value ? (
+  params.value ? (
+    params?.data?.relatedLeadEntity === selectedEntity ?
       <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
         {params.value}
       </Link>
-    ) : (
-      <NoDataCell />
-    );
+      :
+      hasAccessToEntity(params?.data?.relatedLeadEntity) ?
+        <span
+          className="link"
+          onClick={() => {
+            handleEntityChange(params.data?.relatedLeadEntity)
+            history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
+          }}
+          title={params.value}
+        >
+          {params.value}
+        </span>
+        :
+        <span
+          title={params.value}
+        >
+          <CustomRenderCell value={params.value} />
+        </span>
+  ) : (
+    <NoDataCell />
+  );
 
   const AccountNameRenderer = (params) => (
     <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
@@ -295,7 +325,7 @@ export default function Contact(props) {
               entity: entity?.optionLabel,
               relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
               relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-
+              relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
 

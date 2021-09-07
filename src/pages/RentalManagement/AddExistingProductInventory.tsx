@@ -1,35 +1,43 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import AddIcon from "@material-ui/icons/Add";
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { Box } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
+import { Box} from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
-import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
+import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, displayDate } from '../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition } from '../../constants/helpers';
 import {
-    CommonRenderer,
     CreatedByRenderer,
-    DateRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
+import Dialog from "@material-ui/core/Dialog/Dialog";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 
-const EquipmentRentalMaster = () => {
-
+const AddExistingProductInventory = ({addProductInventory,handleProductInventoryClose}) => {
     const toastConfig = useContext(CustomToastContext)
+    const [open, setOpen] = useState(false);
+    const [productInventoryId, setProductInventoryId] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-    
+
     const {
         state: { permissions },
     }: any = useData();
@@ -39,12 +47,9 @@ const EquipmentRentalMaster = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "rentalStartDate", headerName: "Rental Start Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
-        { field: "rentalBackDate", headerName: "Rental Back Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -62,9 +67,6 @@ const EquipmentRentalMaster = () => {
                 ...u,
                 id: u._id,
                 productName: u.product?.optionLabel,
-                rentalStartDate: u.createdBy?.date ? displayDate(u.createdBy?.date) : "",
-                rentalBackDate: u.createdBy?.date ? displayDate(u.createdBy?.date) : "",
-                warehouse: "warehouse",
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
@@ -126,26 +128,21 @@ const EquipmentRentalMaster = () => {
         });
     }
 
+    const NameRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+            {params.value}
+        </Link>
+    );
 
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
 
-
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
-
     const frameworkComponents = {
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        commonRenderer: CommonRenderer,
-        dateRenderer: DateRenderer
+        nameRenderer: NameRenderer,
     };
 
     const replaceFieldName = (field) => {
@@ -162,58 +159,54 @@ const EquipmentRentalMaster = () => {
     };
 
     return (<Fragment>
-        <Grid container className="headerbox">
-            <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.equiptmentRentalMaster.title }]} />
-            </Grid>
-        </Grid>
-        <div className="main-container">
-            <div className="header-panel">
-                <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.equiptmentRentalMaster.title} </span>
-                    </Grid>
-                    <Grid xs={6} container className={styles.filter_side} >
-                        <Box className={styles.filter_side_header} component="div" >
+        {(<Dialog
+            fullScreen={true}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            open={true}
+        >
+            <CustomDialogHeader title={"Add Existing Product"} onClose={handleProductInventoryClose} ></CustomDialogHeader>
+            <div className="listing-grid p-3">
+                <Box mb={2}>
+                    <Grid container >
+                        <Grid item xs={12} sm={6}>
 
+                        </Grid>
+                        <Grid item xs={12} sm={6} container justify="flex-end">
                             <SearchBox
                                 onSearch={handleSearch}
-                                searchbox={styles.search_box_input}
-                                width="242px"
-                                size="small"
+                                searchbox="terms_header_search_bar"
+                                width="300px"
                                 value={search}
                             />
-                        </Box>
+                            <Box ml={1} mt={1} >
+                                <Button size="small" color="primary" onClick={() => addProductInventory(selectedRecords)} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
+                                    {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                    Add</Button>
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Box>
+                {columns ?
+                    <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        allowAction={false}
+                        loading={loading}
+                    />
+                    : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>
-            {columns ?
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    allowAction={false}
-                    loading={loading}
-                    renderedFrom="equipmentRentalMasterPage"
-                />
-                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-        </div>
-        {showDeleteConfirmBox &&
-            <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
-                onClose={() => setShowDeleteConfirmBox(false)}
-                onOk={handleDelete}
-            />
-        }
+        </Dialog>
+        )}
     </Fragment>
     );
 }
 
-export default EquipmentRentalMaster;
+export default AddExistingProductInventory;

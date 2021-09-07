@@ -7,7 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
+import { object, string, boolean } from "yup";
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Checkbox from "@material-ui/core/Checkbox"
 import { useParams, useHistory } from 'react-router-dom';
@@ -22,10 +22,10 @@ import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const PdfTemplateSchema = Yup.object().shape({
-    name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
-    owner: Yup.string().required('Owner is required'),
-    showPageNumberInFooter: Yup.boolean()
+const PdfTemplateSchema = object().shape({
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    owner: string().required('Owner is required'),
+    showPageNumberInFooter: boolean()
 });
 
 const useStyles = makeStyles((theme) => ({
@@ -102,6 +102,8 @@ export default function NewCreateQuotePdfTemplate() {
                         data: { data }
                     } = res;
                     setInitialValues({
+                        landscape: data?.landscape,
+                        productColumns: data?.productColumns,
                         name: data?.name,
                         showPageNumberInFooter: data?.pageNumberInFooter,
                         header: data?.header,
@@ -128,6 +130,8 @@ export default function NewCreateQuotePdfTemplate() {
         }
         else {
             setInitialValues({
+                landscape: false,
+                productColumns: 7,
                 name: "",
                 showPageNumberInFooter: false,
                 header: "",
@@ -432,7 +436,9 @@ export default function NewCreateQuotePdfTemplate() {
                                         />}
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} style={{ textAlign: 'left' }}>
+                                
+                                <Grid container spacing={1}>
+                                <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
                                     <FormControlLabel
                                         disabled={!hasPermissionToUpdate}
                                         value={values['showPageNumberInFooter']}
@@ -446,6 +452,39 @@ export default function NewCreateQuotePdfTemplate() {
                                         }
                                         label="Show page number in footer"
                                     />
+                                </Grid>
+                                <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                    <FormControlLabel
+                                        disabled={!hasPermissionToUpdate}
+                                        value={values['landscape']}
+                                        control={
+                                            <Checkbox
+                                                name="landscape"
+                                                checked={values['landscape']}
+                                                onChange={(e) => setFieldValue('landscape', e.target.checked)}
+                                                color="primary"
+                                            />
+                                        }
+                                        label="Landscape"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                    <TextField
+                                      name="productColumns"
+                                      label="No. of Product Columns"
+                                      value={values["productColumns"]}
+                                      type="number"
+                                      fullWidth
+                                      variant="outlined"
+                                      size="small"
+                                      InputProps={{inputProps:{min: 5, max: 20} }}
+                                      onChange={(e) => {
+                                        const val = parseInt(e.target.value)
+                                        if (val >= 5 && val <= 20) {
+                                            setFieldValue('productColumns', e.target.value)}}                                              
+                                        }
+                                    />
+                                </Grid>
                                 </Grid>
                             </Form>
                         )}

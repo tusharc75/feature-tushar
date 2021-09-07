@@ -13,7 +13,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { Formik, Form } from "formik";
 import { Autocomplete } from "@material-ui/lab";
 import {
@@ -23,10 +23,10 @@ import {
 import { dateFormat } from "../../../constants/helpers";
 import MomentUtils from "@date-io/moment";
 
-const AddProxySchema = Yup.object().shape({
-    user: Yup.string().required("Please select user"),
-    startDate: Yup.string().required("Please enter start date").nullable(),
-    endDate: Yup.string().required("Please enter end date").nullable(),
+const AddProxySchema = object().shape({
+    user: string().required("Please select user"),
+    startDate: string().required("Please enter start date").nullable(),
+    endDate: string().required("Please enter end date").nullable(),
 });
 
 export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {

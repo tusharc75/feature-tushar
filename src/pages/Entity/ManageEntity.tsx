@@ -15,9 +15,8 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder } from "../../constants/helpers";
+import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, getObjKeysWithValues } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
 
@@ -40,7 +39,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
   const [formsData, setFormsData] = useState([]);
   const [parentEntityDataSource, setParentEntityDataSource] = useState([]);
 
-
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const history = useHistory();
@@ -60,7 +58,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
         isNew
           ? parentEntityDropdownData.option
           : parentEntityDropdownData.option.filter(
-            (d) => d?.optionValue !== initialData.values["_id"]
+            (d) => d?.optionValue !== values["_id"]
           )
       );
     }
@@ -81,7 +79,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
 
         setInitialData({
           fields: fieldsData,
-          values: isNew ? getObjKeys("", fieldsData) : values,
+          values: isNew ? getObjKeys("", fieldsData) : getObjKeysWithValues(values, fieldsData),
         });
         setLoading(false);
       })

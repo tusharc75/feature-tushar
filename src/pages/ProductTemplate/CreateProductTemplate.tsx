@@ -3,18 +3,18 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { useParams, useHistory } from 'react-router-dom';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { FormBuilder } from '../../components/FormBuilder';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-import { camelCase } from '../../constants/helpers';
-import routes from '../../components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import CustomContainer from '../../components/CustomContainer';
-import { Autocomplete } from '@material-ui/lab';
+import { useParams, useHistory } from "react-router-dom";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import { FormBuilder } from "../../components/FormBuilder";
+import { Formik, Form } from "formik";
+import { object, string } from "yup";
+import { camelCase } from "../../constants/helpers";
+import routes from "../../components/Helpers/Routes";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../axios/axiosInstance";
+import CustomContainer from "../../components/CustomContainer";
+import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -27,8 +27,11 @@ import HistoryButton from '../../components/Helpers/HistoryButton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import styles from './ProductTem.module.scss';
 
-const ProductTemplateSchema = Yup.object().shape({
-  name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('Template name is required')
+const ProductTemplateSchema = object().shape({
+    name: string()
+        .min(3, "Too Short!")
+        .max(50, "Too Long")
+        .required("Template name is required"),
 });
 
 const ProductTemplate = () => {

@@ -97,7 +97,7 @@ export default function NewOpportunityProjectSales({
         (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
       );
       if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].options);
+        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
         setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
         setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
       }

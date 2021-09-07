@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import InputAdornment from '@material-ui/core/InputAdornment'
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -19,20 +19,19 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 
-const updatePassWordSchema = Yup.object().shape({
-    oldPassword: Yup.string()
+const updatePassWordSchema = object().shape({
+    oldPassword: string()
         .required("please enter Old Password"),
-    newPassword: Yup.string()
+    newPassword: string()
         .required("please enter New Password"),
-    confirmPassword: Yup.string()
+    confirmPassword: string()
         .required("please enter Confirm Password"),
 
 });
 
-const updateEmailSchema = Yup.object().shape({
-    email: Yup.string()
-        .required("please enter valid email"),
-
+const updateEmailSchema = object().shape({
+    email: string()
+        .required("please enter valid email")
 });
 
 export default function ManageUpdateEmailAndPassword({
