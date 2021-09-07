@@ -101,7 +101,8 @@ const DeliveryTicket = () => {
       field: "deliveryDate",
       headerName: "Delivery Date",
       show: true,
-      cellRenderer: "dateRenderer"
+      cellRenderer: "dateRenderer",
+      filter: false,
     },
     {
       field: "deliveryType",
@@ -129,7 +130,7 @@ const DeliveryTicket = () => {
       cellRenderer: "commonRenderer",
     },
     {
-      field: "warehouse",
+      field: "warehouseName",
       headerName: "Warehouse",
       show: true,
       cellRenderer: "commonRenderer",
@@ -145,6 +146,7 @@ const DeliveryTicket = () => {
       headerName: "Pick-UpDate",
       show: true,
       cellRenderer: "dateRenderer",
+      filter: false,
     }
   ];
 
