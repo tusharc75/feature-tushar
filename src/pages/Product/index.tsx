@@ -193,7 +193,21 @@ const Product = () => {
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
                 )
             }
+
+            const columnState = JSON.parse(localStorage.getItem("productPage"));
+
+            if (columnState) {
+                column.forEach((item) => {
+                    columnState.forEach((d) => {
+                        if (d.colId == item.field) {
+                            item.show = !d.hide;
+                        }
+                    });
+                });
+            }
+
             setColumns(column);
+
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
