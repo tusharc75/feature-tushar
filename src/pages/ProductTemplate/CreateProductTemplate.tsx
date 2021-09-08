@@ -171,9 +171,9 @@ const ProductTemplate = () => {
         if (data.isStandard) {
             data.productCategory = null;
             data.unit = null;
-            data.entity = null;
-            data.owner = null;
-            data.collaborator = null;
+            data.entity = values?.entity;
+            data.owner = values?.owner;
+            data.collaborator = values?.collaborator;
         }
         else {
             data.productCategory = values.productCategory;
