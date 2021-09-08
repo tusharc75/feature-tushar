@@ -93,7 +93,7 @@ const ProductDetailsPage = () => {
                     })
                     setProductFields(displayField)
                     handleMainPoints(data.productData);
-                    setHeadingLabel(data.productData.productName);
+                    setHeadingLabel(data.productData?.productNumber ? `${data.productData?.productNumber} - ${data.productData?.productName}` : data.productData?.productName);
                     setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
                     if (data.productData.entity && data.productData.entity !== undefined) {
                         data.productData.entity = user.entity.filter(d => data.productData.entity.some(e => d._id === e)).map(d => { return { "optionValue": d._id, "optionLabel": d.entityName } })
