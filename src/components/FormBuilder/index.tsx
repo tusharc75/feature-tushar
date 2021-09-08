@@ -77,8 +77,8 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
-            <Box border={1} p={2} borderColor="grey.300" className={styles.set_GridBox_layout}>
-              <Grid container spacing={1} className={styles.Form_Grid_Box}>
+            <Box border={1} p={2} borderColor="grey.300" className={styles.set_gridbox_layout}>
+              <Grid container spacing={1} className={styles.form_grid_box}>
                 {module !== 'pdf-template'
                   ? Object.keys(FieldList).map((type, index) => {
                       return !filterFieldType.includes(type) ? (

@@ -281,7 +281,7 @@ const ProductTemplate = () => {
     <Fragment>
       <Grid className={styles.head_box}>
         {/* <Grid item md={4} sm={11} xs={10}> */}
-        <Grid className={styles.bread_Crumb}>
+        <Grid className={styles.bread_crumb}>
           <CustomBreadCrumbs
             routes={[
               { title: routes.productTemplate.title, path: routes.productTemplate.path },

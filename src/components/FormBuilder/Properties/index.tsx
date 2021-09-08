@@ -371,7 +371,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   return (
     <Dialog
-      className={styles.Popup_Layout}
+      // className={styles.Popup_Layout}
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"

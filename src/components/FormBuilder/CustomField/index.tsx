@@ -106,7 +106,7 @@ export const CustomField = ({ }) => {
             </Box>
 
             <Box>
-                <Grid spacing={1} container className={styles.Custom_Field}>
+                <Grid spacing={1} container className={styles.custom_field}>
                     <Grid item xs={12} sm={6} md={6}>
                         <label  className={classes.acionBtn} onClick={handleOpenAddField} >Add Custom Field</label>
                     </Grid>
@@ -130,7 +130,7 @@ export const CustomField = ({ }) => {
                 </Grid>
             </Box>
             <Box mt={1} mb={1} >
-                <Grid container spacing={1} className={styles.Addiction_Field}>
+                <Grid container spacing={1} className={styles.addiction_field}>
                     {fields && fields.map((data, i) => (
                         <DragBox data={data} handleDelete={handleDelete} handleEdit={handleEdit} handleAddField={handleAddField} />
                     ))}
