@@ -432,7 +432,7 @@ export default function TinyMCE(props) {
                     }
                     {
                         isInitiated ?
-                            <div className={classes.buttonContainer} style={{ width: width }} >
+                            <div className={classes.buttonContainer} >
                                 {
                                     doNotShowUploadFile ? null :
                                         <Fragment>
