@@ -1,55 +1,48 @@
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { TouchBackend } from "react-dnd-touch-backend";
-import { isMobile, isTablet } from "react-device-detect";
-import { makeStyles } from "@material-ui/core/styles";
-import FieldList from "./FieldList";
-import { DragBox } from "./DragBox";
-import { DropMaster } from "./DropMaster";
-import { CustomField } from "./CustomField/index";
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Divider from '@material-ui/core/Divider';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { isMobile, isTablet } from 'react-device-detect';
+import { makeStyles } from '@material-ui/core/styles';
+import FieldList from './FieldList';
+import { DragBox } from './DragBox';
+import { DropMaster } from './DropMaster';
+import { CustomField } from './CustomField/index';
+import  styles  from './Form.module.scss';
 
 const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1,
-    margin: 10,
+    margin: 10
   },
   screenHeightAuto: {
-    height: "calc(100vh - 194px)",
-    overflow: "auto"
+    height: 'calc(85vh - 194px)',
+    overflow: 'auto'
   },
   screenHeight: {
-    overflow: "auto"
-  },
+    overflow: 'auto'
+  }
 }));
 
-export const FormBuilder = ({
-  section,
-  setSection,
-  deleteField,
-  setDeleteField,
-  isCustomField,
-  module,
-  extraFields,
-}) => {
+export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module, extraFields }) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
     if (sectionHoverIndex !== null) {
       const obj = {
         sectionId: parseInt((Math.random() * 100000).toString()),
-        sectionName: "New Section " + (data.length + 1),
+        sectionName: 'New Section ' + (data.length + 1),
         srno: data.length + 1,
-        field: [],
+        field: []
       };
       data.splice(sectionHoverIndex, 0, obj);
     } else {
       data.push({
         sectionId: parseInt((Math.random() * 100000).toString()),
-        sectionName: "New Section " + (data.length + 1),
+        sectionName: 'New Section ' + (data.length + 1),
         srno: data.length + 1,
-        field: [],
+        field: []
       });
     }
     setSection(data);
@@ -70,18 +63,12 @@ export const FormBuilder = ({
   };
 
   var filterFieldType = [];
-  if (module === "form-builder") {
-    filterFieldType = [
-      "DECIMAL",
-      "CURRENCYAMOUNT",
-      "FORMULA",
-      "VLOOKUPDROPDOWN",
-      "CONVERTER",
-    ];
+  if (module === 'form-builder') {
+    filterFieldType = ['DECIMAL', 'CURRENCYAMOUNT', 'FORMULA', 'VLOOKUPDROPDOWN', 'CONVERTER'];
   }
 
-  if (module === "pdf-template") {
-    filterFieldType = ["SINGLELINE", "MULTILINE", "IMAGEUPLOAD"];
+  if (module === 'pdf-template') {
+    filterFieldType = ['SINGLELINE', 'MULTILINE', 'IMAGEUPLOAD'];
   }
 
   const classes = useStyles();
@@ -90,14 +77,9 @@ export const FormBuilder = ({
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
-            <Box
-              border={1}
-              p={2}
-              borderColor="grey.300"
-              className={classes.screenHeightAuto}
-            >
-              <Grid container spacing={1}>
-                {module !== "pdf-template"
+            <Box border={1} p={2} borderColor="grey.300" className={styles.set_gridbox_layout}>
+              <Grid container spacing={1} className={styles.form_grid_box}>
+                {module !== 'pdf-template'
                   ? Object.keys(FieldList).map((type, index) => {
                       return !filterFieldType.includes(type) ? (
                         <DragBox
@@ -121,18 +103,14 @@ export const FormBuilder = ({
                       ) : null;
                     })}
               </Grid>
-              {module !== "pdf-template" && (
+              {module !== 'pdf-template' && (
                 <>
-                  <Box mt={2} mb={2}>
+                  <Box >
                     <Divider />
                   </Box>
-                  <DragBox
-                    name="New Section"
-                    label="New Section"
-                    type="master"
-                  ></DragBox>
+                  <DragBox name="New Section" label="New Section" type="master"></DragBox>
                   {isCustomField && (
-                    <Box mt={2}>
+                    <Box>
                       <CustomField />
                     </Box>
                   )}
@@ -141,13 +119,7 @@ export const FormBuilder = ({
             </Box>
           </Grid>
           <Grid item xs={12} md={9} sm={8}>
-            <Box
-              border={1}
-              p={2}
-              bgcolor="grey.100"
-              borderColor="grey.300"
-              className={classes.screenHeightAuto}
-            >
+            <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
               <DropMaster
                 addSection={addSection}
                 setSection={setSection}
