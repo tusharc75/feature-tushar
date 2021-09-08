@@ -494,11 +494,11 @@ const DeliveryTicket = () => {
                     size="small"
                     value={search}
                   />
-                  {deliveryPermissions?.isCreate &&
+                  {/* {deliveryPermissions?.isCreate &&
                     <Button className={styles.add_submit_btn}
                       onClick={() => setShowManageDeliveryTicket(true)}
                       variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                  }
+                  } */}
                   {deliveryPermissions?.isDelete &&
                     <Button
                       className={styles.action_submit_btn}
