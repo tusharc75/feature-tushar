@@ -15,7 +15,8 @@ import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import {
   CreatedByRenderer,
-  UpdatedByRenderer
+  UpdatedByRenderer,
+  CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from "react-router-dom";
 import { isObjectEmpty, productInventory, gridLoadingTimeout } from "../../constants/helpers"
@@ -50,10 +51,10 @@ export default function DeliveryTicketDetail(props) {
     { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "CommonRenderer" },
-    { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "CommonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "commonRenderer" },
+    { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
@@ -162,7 +163,7 @@ export default function DeliveryTicketDetail(props) {
   const handleDeleteLoadingTicket = () => {
     if (deliveryTicketData?._id) {
       axiosInstance()
-        .put(`${deliveryTicketApi} / remove ? entity = ${selectedEntity}`, {
+        .put(`${deliveryTicketApi}/remove?entity=${selectedEntity}`, {
           ids: [deliveryTicketData._id],
         })
         .then(({ data }) => {
@@ -199,6 +200,7 @@ export default function DeliveryTicketDetail(props) {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     nameRenderer: NameRenderer,
+    commonRenderer: CommonRenderer,
   };
 
   const replaceFieldName = (field) => {

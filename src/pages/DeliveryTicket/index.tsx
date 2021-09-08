@@ -64,7 +64,7 @@ const DeliveryTicket = () => {
     useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
 
-  const { deliveryTicketApi } = deliveryTicket;
+  const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -152,6 +152,16 @@ const DeliveryTicket = () => {
     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
   ];
 
+  const columnState = JSON.parse(localStorage.getItem(deliveryTicketResource));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   useEffect(() => {
     if (permissions && permissions.deliveryTicket) {
       setdeliveryPermissions(permissions.deliveryTicket);
@@ -537,6 +547,7 @@ const DeliveryTicket = () => {
             page={page}
             actionWidth={100}
             loading={loading}
+            renderedFrom={deliveryTicketResource}
           />
 
           {showDeleteWarningConfirmBox ? (
