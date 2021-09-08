@@ -118,7 +118,7 @@ const DeliveryTicket = () => {
     //   cellRenderer: "productInventoryRenderer",
     // },
     {
-      field: "rental",
+      field: "rentalName",
       headerName: "Rental",
       show: true,
       cellRenderer: "rentalRenderer",
@@ -218,7 +218,9 @@ const DeliveryTicket = () => {
   const RentalRenderer = params => <>
     {
       params.value ?
-        <Link className="link" to={``} title={params.value}>
+        <Link className="link"
+          to={`${routes.rentalManagement.path}/detail/${params?.data?.rentalId}`}
+          title={params.value}>
           {params.value}
         </Link>
         : <NoDataCell />
@@ -334,6 +336,7 @@ const DeliveryTicket = () => {
               deliveryPerson,
               warehouse,
               productInventory,
+              rental,
               ...restProperties
             } = u;
 
@@ -358,6 +361,9 @@ const DeliveryTicket = () => {
               warehouseName: u?.warehouse?.optionLabel,
               warehouseId: u?.warehouse?.optionValue,
 
+              rentalName: u?.rental?.optionLabel,
+              rentalId: u?.rental?.optionValue,
+
               createdBy: u?.createdBy?.user?.concatedName,
               createdByDate: u?.createdBy?.date,
               updatedBy: u?.updatedBy?.user?.concatedName,
@@ -365,7 +371,7 @@ const DeliveryTicket = () => {
             };
             return res;
           });
-
+          console.log('rows', rows)
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });

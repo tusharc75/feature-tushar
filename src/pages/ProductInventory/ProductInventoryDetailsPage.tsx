@@ -38,12 +38,21 @@ const ProductInventoryDetailsPage = () => {
   const [statusOptions, setStatusOptions] = useState([])
   const [showReasonDialog, setShowReasonDialog] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
+  const [customField, setCustomField] = useState({
+    fieldData: {
+      fieldLabel: "Scraping Reason",
+      fieldName: "scrapingReason",
+      type: "singleLine",
+      sectionName: "Product Inventory"
+    }
+  })
 
   useEffect(() => {
     if (id) {
       getProductInventoryFields();
       fetchProductInventoryData();
     }
+
   }, [id]);
 
   const handleMainPoints = (data) => {
@@ -60,7 +69,7 @@ const ProductInventoryDetailsPage = () => {
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data._id);
+      setHeadingLbl(data?.serialNumber);
       setCustomizedRoutes([routes.productInventory, { title: `${data?.serialNumber || data?._id}` }]);
       setProductInventoryData(data);
       setLoading(false);
@@ -111,7 +120,7 @@ const ProductInventoryDetailsPage = () => {
     setAnchorEl(null);
   };
   const handleStatusChange = o => {
-    if (o.optionValue === "scrapping") {
+    if (o.optionValue === "Scrap") {
       setShowReasonDialog(true)
     }
     else {
@@ -125,7 +134,7 @@ const ProductInventoryDetailsPage = () => {
       const fieldsDataForUpdate = productInventoryFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(productInventoryData, fieldsDataForUpdate)
       values["status"] = obj.status
-      if (obj.reason) values["statusReason"] = obj.reason
+      if (obj.reason) values["scrapingReason"] = obj.reason
       values["_id"] = productInventoryData._id
       axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
         setUpdateLoading(false)
@@ -197,7 +206,10 @@ const ProductInventoryDetailsPage = () => {
                         {
                           statusOptions.map(o => {
                             return <MenuItem
-                              onClick={() => handleStatusChange(o)}
+                              onClick={() => {
+                                closeActions()
+                                handleStatusChange(o)
+                              }}
                               value={o}>{o?.optionLabel}</MenuItem>
                           })
                         }
@@ -224,7 +236,11 @@ const ProductInventoryDetailsPage = () => {
                   </Grid>
                 ) : (
                   <>
-                    <DetailsPage data={productInventoryData} fields={productInventoryFields} />
+                    <DetailsPage data={productInventoryData}
+                      fields={productInventoryData?.status &&
+                        productInventoryData?.status === "Scrap" ?
+                        [...productInventoryFields, customField] :
+                        productInventoryFields} />
                   </>
                 )}
               </Box>
@@ -264,7 +280,7 @@ const ProductInventoryDetailsPage = () => {
           <ReasonDialog
             onClose={() => setShowReasonDialog(false)}
             onAddReason={(reason) => {
-              handleUpdateData({ status: "scrapping", reason: reason })
+              handleUpdateData({ status: "Scrap", reason: reason })
               setShowReasonDialog(false)
             }}
           /> : null

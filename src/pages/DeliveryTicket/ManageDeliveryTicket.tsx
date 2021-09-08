@@ -41,7 +41,7 @@ const ManageDeliveryTicket = (props) => {
             }
             else {
                 setInitialData({
-                    fields: fieldsDataForCreate.filter(d => d.fieldLabel !== "Product Inventory" && d.fieldLabel !== "Warehouse"),
+                    fields: fieldsDataForCreate,
                     values: getObjKeys("", fieldsDataForCreate),
                 });
             }
