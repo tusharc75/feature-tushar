@@ -24,11 +24,20 @@ const CreateProductInventory = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [productCategoryOptions, setProductCategoryOptions] = useState([])
+    const desc = {
+        productCategory: "",
+        product: "",
+        serialNumber: ""
+    }
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            const categoryOptions = data.find(obj => obj?.fieldData.fieldName === "productCategory")?.fieldData.option
+            
+            setProductCategoryOptions(categoryOptions)
 
             if (productInventoryId) {
                 axiosInstance().get(`${productInventory.api}/` + productInventoryId).then(({ data: { data } }) => {
@@ -54,6 +63,7 @@ const CreateProductInventory = (props) => {
 
 
     const handleSubmit = (values) => {
+        setLoading(true)
         if (productInventoryId) {
             values._id = productInventoryId
             axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
@@ -75,6 +85,12 @@ const CreateProductInventory = (props) => {
         }
     };
 
+
+    const setDescription = (setValue) => {
+        const value = Object.values(desc).join(" - ")
+        setValue("description", value);
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={isMobile || isTablet}
@@ -91,11 +107,10 @@ const CreateProductInventory = (props) => {
     >
         {initialData && initialData.fields.length ?
             <Formik
-                enableReinitialize={true}
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
-                validateOnMount
-                onSubmit={handleSubmit}>
+                onSubmit={handleSubmit}
+            >
                 {({ values,
                     errors,
                     touched,
@@ -120,31 +135,45 @@ const CreateProductInventory = (props) => {
                                                     {form.sectionFields.map((field, index2) => (
                                                         <Grid key={index2} item xs={12} sm={6} md={6}>
                                                             {field.fieldName === "product" ?
-
                                                                 <FormTypes
                                                                     isNew={Boolean(productInventoryId)}
                                                                     {...field}
-                                                                    disabled={!productInventoryId && field.disableOnEdit || !Boolean(values?.productCategory)}
+                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
                                                                     label={field.fieldLabel}
                                                                     name={field.fieldName}
                                                                     type={field.type}
-                                                                    options={values.productCategory ? field.option.filter(o => o.productCategory === values.productCategory) : []}
+                                                                    options={
+                                                                        values?.productCategory
+                                                                            ? field?.option.filter((opt) => opt?.productCategory === values?.productCategory)
+                                                                            : field?.option
+                                                                    }
                                                                     setFieldValue={setFieldValue}
                                                                     required={field.required}
                                                                     fullWidth
                                                                     isTooltip={field?.isTooltip || false}
                                                                     tooltipMessage={field?.tooltipMessage}
                                                                     size="small"
-                                                                    imageOrFileUploadCompletePercentage={null}
+                                                                    onChange={(_, val) => {
+                                                                        const value = val && val.optionValue ? val.optionValue : ''
+                                                                        const label = val && val.optionLabel ? val.optionLabel : ''
+                                                                        const productCategory = val && val.productCategory ? val.productCategory : ''
+                                                                        setFieldValue(field.fieldName, value);
+                                                                        setFieldValue("productCategory", productCategory);
+                                                                        const productLabel = productCategory ? productCategoryOptions.find(obj => obj.optionValue === productCategory).optionLabel : ""
+                                                                        desc.product = label
+                                                                        desc.productCategory = productLabel
+                                                                        setDescription(setFieldValue)
+                                                                        
+                                                                    }}
                                                                 />
-
-                                                                : <FormTypes
+                                                                : field.fieldName === "productCategory" ?
+                                                                <FormTypes
                                                                     isNew={Boolean(productInventoryId)}
                                                                     {...field}
-                                                                    disabled={!productInventoryId && field.disableOnEdit}
+                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
@@ -158,7 +187,76 @@ const CreateProductInventory = (props) => {
                                                                     isTooltip={field?.isTooltip || false}
                                                                     tooltipMessage={field?.tooltipMessage}
                                                                     size="small"
-                                                                    imageOrFileUploadCompletePercentage={null}
+                                                                    onChange={(_, val) => {
+                                                                        const value = val && val.optionValue ? val.optionValue : ''
+                                                                        const label = val && val.optionLabel ? val.optionLabel : ''
+                                                                        desc.productCategory = label
+                                                                        setFieldValue(field.fieldName, value);
+                                                                        setDescription(setFieldValue)
+                                                                        
+
+                                                                    }}
+                                                                />
+                                                                : field.fieldName === "serialNumber" ?
+                                                                <FormTypes
+                                                                    isNew={Boolean(productInventoryId)}
+                                                                    {...field}
+                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
+                                                                    onChange={(e) => {                                                                        
+                                                                        const val = (e.target.value.trim())
+                                                                        setFieldValue(field.fieldName, val)
+                                                                        desc.serialNumber = val
+                                                                        setDescription(setFieldValue)
+                                                                    }}
+                                                                />
+                                                                : field.fieldName === "description" ?
+                                                                <FormTypes
+                                                                    isNew={Boolean(productInventoryId)}
+                                                                    {...field}
+                                                                    disabled={true}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
+                                                                />
+                                                                : <FormTypes
+                                                                    isNew={Boolean(productInventoryId)}
+                                                                    {...field}
+                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    setFieldValue={setFieldValue}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
+                                                                    
                                                                 />}
                                                         </Grid>
                                                     ))}
