@@ -11,8 +11,12 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues } from "../../constants/helpers";
 import CreateProductInventory from "./CreateProductInventory";
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import MenuItem from "@material-ui/core/MenuItem"
+import Menu from "@material-ui/core/Menu"
+import ReasonDialog from "./ReasonDialog"
 
 const ProductInventoryDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,13 +34,25 @@ const ProductInventoryDetailsPage = () => {
   const [productInventoryFields, setProductInventoryFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([])
+  const [showReasonDialog, setShowReasonDialog] = useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
+  const [customField, setCustomField] = useState({
+    fieldData: {
+      fieldLabel: "Scraping Reason",
+      fieldName: "scrapingReason",
+      type: "singleLine",
+      sectionName: "Product Inventory"
+    }
+  })
 
   useEffect(() => {
     if (id) {
       getProductInventoryFields();
       fetchProductInventoryData();
     }
-    // eslint-disable-next-line
+
   }, [id]);
 
   const handleMainPoints = (data) => {
@@ -53,7 +69,7 @@ const ProductInventoryDetailsPage = () => {
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data._id);
+      setHeadingLbl(data?.serialNumber);
       setCustomizedRoutes([routes.productInventory, { title: `${data?.serialNumber || data?._id}` }]);
       setProductInventoryData(data);
       setLoading(false);
@@ -66,6 +82,14 @@ const ProductInventoryDetailsPage = () => {
     axiosInstance()
       .get("/field?resource=Product Inventory")
       .then(({ data }) => {
+        if (data.data && data.data.length) {
+          data.data.some(o => {
+            if (o?.fieldData?.fieldName === "status") {
+              setStatusOptions([...o.fieldData.option])
+              return true
+            }
+          })
+        }
         setProductInventoryFields(data.data);
       })
       .catch((err) => {
@@ -86,6 +110,40 @@ const ProductInventoryDetailsPage = () => {
       toastConfig.setToastConfig(error)
       setShowConfirmBox(false);
     });
+  }
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+  const handleStatusChange = o => {
+    if (o.optionValue === "Scrap") {
+      setShowReasonDialog(true)
+    }
+    else {
+      handleUpdateData({ status: o.optionValue })
+    }
+  }
+
+  const handleUpdateData = (obj) => {
+    setUpdateLoading(true)
+    if (obj.status) {
+      const fieldsDataForUpdate = productInventoryFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let values = getObjKeysWithValues(productInventoryData, fieldsDataForUpdate)
+      values["status"] = obj.status
+      if (obj.reason) values["scrapingReason"] = obj.reason
+      values["_id"] = productInventoryData._id
+      axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
+        setUpdateLoading(false)
+        fetchProductInventoryData()
+      }).catch((error) => {
+        setUpdateLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+    }
   }
 
   return (
@@ -123,14 +181,48 @@ const ProductInventoryDetailsPage = () => {
                   showHeading={true}
                 >
                   {permissions?.productInventory?.isUpdate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={updateLoading}
+                        aria-controls="action-menu"
+                      >
+                        Status <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}>
+                        {
+                          statusOptions.map(o => {
+                            return <MenuItem
+                              onClick={() => {
+                                closeActions()
+                                handleStatusChange(o)
+                              }}
+                              value={o}>{o?.optionLabel}</MenuItem>
+                          })
+                        }
+                      </Menu>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
+                    </>
                   )}
 
                 </DetailsPageHeader>
@@ -144,7 +236,11 @@ const ProductInventoryDetailsPage = () => {
                   </Grid>
                 ) : (
                   <>
-                    <DetailsPage data={productInventoryData} fields={productInventoryFields} />
+                    <DetailsPage data={productInventoryData}
+                      fields={productInventoryData?.status &&
+                        productInventoryData?.status === "Scrap" ?
+                        [...productInventoryFields, customField] :
+                        productInventoryFields} />
                   </>
                 )}
               </Box>
@@ -178,6 +274,16 @@ const ProductInventoryDetailsPage = () => {
             fetchProductInventoryData()
           }}
         />
+      }
+      {
+        showReasonDialog ?
+          <ReasonDialog
+            onClose={() => setShowReasonDialog(false)}
+            onAddReason={(reason) => {
+              handleUpdateData({ status: "Scrap", reason: reason })
+              setShowReasonDialog(false)
+            }}
+          /> : null
       }
     </>
   );
