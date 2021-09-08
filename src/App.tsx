@@ -558,7 +558,7 @@ function App() {
             <PrivateRoute exact path={routes.deliveryTicket.path}>
               <DeliveryTicket />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.deliveryTicketDetail.path}>
+            <PrivateRoute exact path={`${routes.deliveryTicket.path}/detail/:id`} >
               <DeliveryTicketDetailsPage />
             </PrivateRoute>
 

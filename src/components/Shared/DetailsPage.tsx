@@ -220,6 +220,7 @@ const Details = (props: DetailProps) => {
    * Render Link  or Typography component
    */
   const renderData = (val: any, fieldData: any) => {
+
     const value = normalizeValues(val, fieldData);
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && permissions[camelCase(fieldData.lookupResource)]?.isRead && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
