@@ -331,7 +331,7 @@ export default function Contact(props) {
         let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
           const [firstEntity, ...restEntity] = entity;
-          let res = {
+          return {
             ...restProperties,
             id: u._id,
 
@@ -354,7 +354,6 @@ export default function Contact(props) {
             updatedBy: u.updatedBy?.user?.concatedName,
             updatedByDate: u.updatedBy?.date
           };
-          return res;
         });
 
         dispatch({ type: 'initialize', data: rows, count: count });
