@@ -4,7 +4,7 @@ import { Paper, Box, Grid, Button, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
-import { yyyyMMDD, deliveryTicket, sidebarResource } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -21,6 +21,11 @@ import {
 import { Link } from "react-router-dom";
 import { isObjectEmpty, productInventory, gridLoadingTimeout } from "../../constants/helpers"
 
+const mappedStatus = {
+  "Start Delivery": "In-Transit",
+  "Sign-Off": "Delivered"
+}
+
 export default function DeliveryTicketDetail(props) {
   const history = useHistory();
   const location = useLocation();
@@ -34,6 +39,7 @@ export default function DeliveryTicketDetail(props) {
   const { deliveryTicketApi } = deliveryTicket;
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -216,6 +222,27 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
+  const handleChangeStatus = (label) => {
+    setUpdateLoading(true)
+    if (mappedStatus[label]) {
+      const fieldsDataForUpdate = deliveryTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
+      values["status"] = mappedStatus[label]
+      values["_id"] = deliveryTicketData._id
+      axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
+        setUpdateLoading(false)
+        fetchDeliveryTicketData()
+      }).catch((error) => {
+        setUpdateLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
+
+
+  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Start Delivery" :
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
+
   return (
     <>
       <Fragment>
@@ -248,7 +275,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && (
+                  {/* {permissions?.deliveryTicket?.isUpdate && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -268,7 +295,17 @@ export default function DeliveryTicketDetail(props) {
                       >
                         Delete
                       </Button>
-                    )}
+                    )} */}
+                  {
+                    label !== "" ?
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleChangeStatus(label)}>
+                        {label}
+                      </Button> : null
+                  }
                 </DetailsPageHeader>
               )}
 
