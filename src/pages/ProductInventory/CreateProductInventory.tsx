@@ -24,11 +24,20 @@ const CreateProductInventory = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [productCategoryOptions, setProductCategoryOptions] = useState([])
+    const desc = {
+        productCategory: "",
+        product: "",
+        serialNumber: ""
+    }
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            const categoryOptions = data.find(obj => obj?.fieldData.fieldName === "productCategory")?.fieldData.option
+            
+            setProductCategoryOptions(categoryOptions)
 
             if (productInventoryId) {
                 axiosInstance().get(`${productInventory.api}/` + productInventoryId).then(({ data: { data } }) => {
@@ -75,6 +84,12 @@ const CreateProductInventory = (props) => {
             });
         }
     };
+
+
+    const setDescription = (setValue) => {
+        const value = Object.values(desc).join(" - ")
+        setValue("description", value);
+    }
 
     return (<Dialog
         maxWidth="md"
@@ -143,10 +158,14 @@ const CreateProductInventory = (props) => {
                                                                     size="small"
                                                                     onChange={(_, val) => {
                                                                         const value = val && val.optionValue ? val.optionValue : ''
+                                                                        const label = val && val.optionLabel ? val.optionLabel : ''
                                                                         const productCategory = val && val.productCategory ? val.productCategory : ''
                                                                         setFieldValue(field.fieldName, value);
                                                                         setFieldValue("productCategory", productCategory);
-                                                                    
+                                                                        const productLabel = productCategory ? productCategoryOptions.find(obj => obj.optionValue === productCategory).optionLabel : ""
+                                                                        desc.product = label
+                                                                        desc.productCategory = productLabel
+                                                                        setDescription(setFieldValue)
                                                                         
                                                                     }}
                                                                 />
@@ -170,7 +189,11 @@ const CreateProductInventory = (props) => {
                                                                     size="small"
                                                                     onChange={(_, val) => {
                                                                         const value = val && val.optionValue ? val.optionValue : ''
+                                                                        const label = val && val.optionLabel ? val.optionLabel : ''
+                                                                        desc.productCategory = label
                                                                         setFieldValue(field.fieldName, value);
+                                                                        setDescription(setFieldValue)
+                                                                        
 
                                                                     }}
                                                                 />
@@ -194,7 +217,27 @@ const CreateProductInventory = (props) => {
                                                                     onChange={(e) => {                                                                        
                                                                         const val = (e.target.value.trim())
                                                                         setFieldValue(field.fieldName, val)
+                                                                        desc.serialNumber = val
+                                                                        setDescription(setFieldValue)
                                                                     }}
+                                                                />
+                                                                : field.fieldName === "description" ?
+                                                                <FormTypes
+                                                                    isNew={Boolean(productInventoryId)}
+                                                                    {...field}
+                                                                    disabled={true}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
                                                                 />
                                                                 : <FormTypes
                                                                     isNew={Boolean(productInventoryId)}
