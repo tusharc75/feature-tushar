@@ -1,0 +1,42 @@
+.import_export_file{
+  
+}
+.head_box{
+    position: fixed;
+    height: 140px;
+    top: 55px;
+    padding: 10PX;
+    z-index: 1;
+    background: var(--primary);
+    width: 100%;
+    background-image: url(../../assets/header-bg.png);
+    background-blend-mode: overlay;
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 48px) !important;
+}
+.bread_crumb{
+    div{
+        nav{
+            margin: 0 4px;
+            color: var(--tertiary-light) ;
+        }
+    }
+   
+
+}
+.import_export_file{
+    
+    padding: 0 3px 0 0;
+    font-size: 16px !important;
+    label{
+        color: var(--tertiary-light) !important ;
+    }
+}
+@media screen and (max-width: 960px) {
+    .head_box {
+      width: 100% !important;
+      overflow: auto;
+    }
+  }
+  

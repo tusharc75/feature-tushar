@@ -70,8 +70,9 @@ const ProductInventoryDetailsPage = () => {
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data?.serialNumber);
-      setCustomizedRoutes([routes.productInventory, { title: `${data?.serialNumber || data?._id}` }]);
+      setHeadingLbl(`${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
+      setCustomizedRoutes([routes.productInventory,
+      { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductInventoryData(data);
       setLoading(false);
     } catch (error) {
@@ -191,7 +192,7 @@ const ProductInventoryDetailsPage = () => {
                         disabled={updateLoading}
                         aria-controls="action-menu"
                       >
-                        Status <ExpandMore />
+                        Change Status <ExpandMore />
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
