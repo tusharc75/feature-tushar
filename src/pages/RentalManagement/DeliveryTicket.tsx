@@ -10,9 +10,8 @@ import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button } from "@material-ui/core";
 
-const DeliveryTicket = ({ warehouselist, productInventory, handleDeliveryTicketDialog }) => {
+const DeliveryTicket = ({ warehouselist, productInventory,currentStep, handleDeliveryTicketDialog }) => {
 
-  const costTypeList = ["Repair", "Delivery", "Assembly"]
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -27,7 +26,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, handleDeliveryTicketD
       dispatch({ type: "initialize", data: productInventory, count: productInventory.length });
     }
     // eslint-disable-next-line
-  }, [warehouse]);
+  }, [warehouse, productInventory]);
 
   const NameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -41,6 +40,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, handleDeliveryTicketD
     { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "CommonRenderer" },
   ];
   return (<>
 
@@ -69,12 +69,12 @@ const DeliveryTicket = ({ warehouselist, productInventory, handleDeliveryTicketD
           color="primary"
           type="submit"
           size="small"
-          disabled={!warehouse || (selectedRecords.length === 0)}
+          disabled={!warehouse || (selectedRecords.length === 0) || currentStep === 3}
           onClick={() => {
             handleDeliveryTicketDialog(selectedRecords, warehouse)
           }}
         >
-          Create Delivery Ticket
+          Create Loading Ticket
         </Button>
       </Grid>
     </Grid>

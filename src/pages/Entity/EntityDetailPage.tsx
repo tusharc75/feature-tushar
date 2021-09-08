@@ -396,7 +396,6 @@ const EntityDetailsPage = () => {
                           permissions={permissions}
                           user={users.slice(0, showUsers)}
                           unassignEntity={handleUnassignUser}
-                          selectedEntity={null}
                           type="entity"
                         />
 

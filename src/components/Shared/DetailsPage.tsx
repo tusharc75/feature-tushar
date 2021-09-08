@@ -155,6 +155,11 @@ const Details = (props: DetailProps) => {
         ? filterOptions.map((d) => d.optionLabel).join(", ")
         : "";
       text = value ? value : "-";
+    } else if (input.type === "freeStyleMultiSelect") {
+      const value = values[input.fieldName].length
+        ? values[input.fieldName].map((d) => d).join(", ")
+        : "";
+      text = value ? value : "-";
     } else if (input.type === "dropDown") {
       const opt = input.option?.find(
         (o) => o.optionValue === values[input.fieldName]
