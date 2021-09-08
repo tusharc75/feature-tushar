@@ -1,25 +1,18 @@
-import { useState, useEffect, Fragment, useContext } from "react";
-import { Box, Dialog, Button, Grid, Tooltip, CircularProgress } from '@material-ui/core';
+import { useState, useEffect, useContext } from "react";
+import { Box, Dialog, Button, Grid, CircularProgress } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomButton from '../../components/Helpers/CustomButton'
-import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, setFieldsInAscendingOrder } from "./../../constants/helpers";
-import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
-import IconButton from "@material-ui/core/IconButton/IconButton";
-import AddIcon from "@material-ui/icons/AddCircle";
 import { useData } from "../../StateProvider/Provider";
-import InfoIcon from "@material-ui/icons/Info";
 
 const ManageDeliveryTicket = (props) => {
     const {
