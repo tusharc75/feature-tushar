@@ -303,6 +303,12 @@ export default function CustomAgGridEditable({
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
+              isRowSelectable={(rowNode) => {
+                if (allowSelection) {
+                  return rowNode.data && rowNode.data.hideSelection === true ? false : true;
+                }
+                return false;
+              }}
               pinnedBottomRowData={fromProductGrid || forProductBuilder ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{

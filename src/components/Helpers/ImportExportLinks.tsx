@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ permissions, module, api, afterImportCompleted }) {
+export default function ImportExportLinks({ permissions, module, api, afterImportCompleted, recordsToExport = 0, exportSelectedRecords = () => { } }) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
   const toastConfig = useContext(CustomToastContext);
@@ -109,6 +109,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
    * EXPORT TABLES INTO EXCEL
    */
   const exportToExcel = () => {
+    // if (recordsToExport === 0) {
     axiosInstance()
       .get(`${api}/template?export=true`, {
         responseType: "arraybuffer",
@@ -118,10 +119,20 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
           "filename="
         )[1];
         downloadExcel(response.data, fileName);
+
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: "Exported to excel successfully.",
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+    // }
+    // else {
+    //   exportSelectedRecords()
+    // }
   };
 
   /**
@@ -161,26 +172,26 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
   return (
     <div className={`${classes.root}`}>
       <div className={classes.linksContainer}>
-       {permissions?.isCreate && <>
-       <label
-          htmlFor="importFromExcel"
-          className={`${classes.links} cursor-pointer`}
-        >
-          {ImportInput}
-          Import from Excel
-        </label>
-        <Divider
-          orientation="vertical"
-          flexItem
-          className={classes.linkDivider}
-        />
+        {permissions?.isCreate && <>
+          <label
+            htmlFor="importFromExcel"
+            className={`${classes.links} cursor-pointer`}
+          >
+            {ImportInput}
+            Import from Excel
+          </label>
+          <Divider
+            orientation="vertical"
+            flexItem
+            className={classes.linkDivider}
+          />
         </>
         }
         <label
           onClick={exportToExcel}
           className={`${classes.links} cursor-pointer`}
         >
-          Export to Excel
+          Export to Excel {/* ({recordsToExport === 0 ? "All" : recordsToExport}) */}
         </label>
         <Divider
           orientation="vertical"
@@ -224,7 +235,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
             handleClose();
           }}
         >
-          Export to Excel
+          Export to Excel {/* ({recordsToExport === 0 ? "All" : recordsToExport}) */}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -238,7 +249,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown  className={classes.expandIcon}/>
+          <IoIosArrowDropdown className={classes.expandIcon} />
         </IconButton>
       )}
     </div>

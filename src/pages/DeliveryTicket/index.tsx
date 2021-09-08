@@ -64,7 +64,7 @@ const DeliveryTicket = () => {
     useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
 
-  const { deliveryTicketApi } = deliveryTicket;
+  const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -118,7 +118,7 @@ const DeliveryTicket = () => {
     //   cellRenderer: "productInventoryRenderer",
     // },
     {
-      field: "rental",
+      field: "rentalName",
       headerName: "Rental",
       show: true,
       cellRenderer: "rentalRenderer",
@@ -147,9 +147,21 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "dateRenderer",
       filter: false,
-    }
+    },
+    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
   ];
 
+  const columnState = JSON.parse(localStorage.getItem(deliveryTicketResource));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   useEffect(() => {
     if (permissions && permissions.deliveryTicket) {
       setdeliveryPermissions(permissions.deliveryTicket);
@@ -216,14 +228,15 @@ const DeliveryTicket = () => {
   const RentalRenderer = params => <>
     {
       params.value ?
-        <Link className="link" to={``} title={params.value}>
+        <Link className="link"
+          to={`${routes.rentalManagement.path}/detail/${params?.data?.rentalId}`}
+          title={params.value}>
           {params.value}
         </Link>
         : <NoDataCell />
     }
   </>
 
-  console.log('deliveryPermissions?.isDelete', deliveryPermissions)
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -246,6 +259,8 @@ const DeliveryTicket = () => {
     // productInventoryRenderer: ProductInventoryRenderer,
     rentalRenderer: RentalRenderer,
     dateRenderer: DateRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
   };
@@ -269,9 +284,6 @@ const DeliveryTicket = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "owner":
-        return "owner.optionLabel";
-
       case "customerAccountName":
         return "customerAccountName.optionLabel";
 
@@ -334,6 +346,7 @@ const DeliveryTicket = () => {
               deliveryPerson,
               warehouse,
               productInventory,
+              rental,
               ...restProperties
             } = u;
 
@@ -358,6 +371,9 @@ const DeliveryTicket = () => {
               warehouseName: u?.warehouse?.optionLabel,
               warehouseId: u?.warehouse?.optionValue,
 
+              rentalName: u?.rental?.optionLabel,
+              rentalId: u?.rental?.optionValue,
+
               createdBy: u?.createdBy?.user?.concatedName,
               createdByDate: u?.createdBy?.date,
               updatedBy: u?.updatedBy?.user?.concatedName,
@@ -365,7 +381,6 @@ const DeliveryTicket = () => {
             };
             return res;
           });
-
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
@@ -426,6 +441,7 @@ const DeliveryTicket = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
         });
+
     }
   };
   const openActions = (event) => {
@@ -478,11 +494,11 @@ const DeliveryTicket = () => {
                     size="small"
                     value={search}
                   />
-                  {deliveryPermissions?.isCreate &&
+                  {/* {deliveryPermissions?.isCreate &&
                     <Button className={styles.add_submit_btn}
                       onClick={() => setShowManageDeliveryTicket(true)}
                       variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                  }
+                  } */}
                   {deliveryPermissions?.isDelete &&
                     <Button
                       className={styles.action_submit_btn}
@@ -530,6 +546,7 @@ const DeliveryTicket = () => {
             page={page}
             actionWidth={100}
             loading={loading}
+            renderedFrom={deliveryTicketResource}
           />
 
           {showDeleteWarningConfirmBox ? (
