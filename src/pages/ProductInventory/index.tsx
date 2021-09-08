@@ -48,16 +48,18 @@ const ProductInventory = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "CommonRenderer" },
         { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "CommonRenderer" },
+        { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
+        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -74,9 +76,10 @@ const ProductInventory = () => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                serialNumber: u.serialNumber,
                 inServiceDate: u.inServiceDate,
                 bornInDate: u.bornInDate,
-                status: u.status?.optionLabel,
+                status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 productCategory: u.productCategory?.optionLabel,
                 productName: u.product?.optionLabel,
