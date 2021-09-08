@@ -248,25 +248,6 @@ const Entity: FC = () => {
     setUsersDialogOpen(false);
   };
 
-  const exportSelectedEntities = () => {
-    const data = [];
-    
-    selectedRecords.forEach((record) => {
-      data.push({
-        "ENTITY NAME": record.entityName,
-        "PARENT ENTITY": record.parentEntity?.optionLabel || "",
-        "TAX JURISDICTION": record.taxJurisdiction || "",
-        "CURRENCY": record.currency,
-        "ADDRESS": record.address,
-      })
-    })
-
-    var ws = utils.json_to_sheet(data, { header: ["ENTITY NAME", "PARENT ENTITY", "TAX JURISDICTION", "CURRENCY", "ADDRESS"] });
-    var wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Sheet1");
-    writeFile(wb, "Selected_Entities.xlsx");
-  }
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -298,7 +279,6 @@ const Entity: FC = () => {
             onCreate={handleCreate}
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
-            exportSelectedEntities={exportSelectedEntities}
           />
         </div>
 
