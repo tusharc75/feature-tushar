@@ -507,6 +507,7 @@ export default function ManageContact(props) {
                                     ) : field.fieldName === "entity" ? (
                                       <FormTypes
                                         multiple
+                                        {...field}
                                         values={values}
                                         errors={errors}
                                         touched={touched}

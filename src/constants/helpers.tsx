@@ -179,7 +179,7 @@ export const RESOURCE_LABEL = {
   productInventory: 'Product Inventory',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   rentalManagement: 'Rental Management',
-  deliveryTicket: "Delivery Ticket"
+  deliveryTicket: "Loading Ticket"
 };
 
 export const lead = {
@@ -375,7 +375,6 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       : typeof data === "object"
         ? data.optionValue
         : "";
-
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = dataObj[key.fieldName]

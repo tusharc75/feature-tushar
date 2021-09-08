@@ -155,14 +155,14 @@ export default function CustomAgGrid({
 
   useEffect(() => {
     if (clientSideGridApi && selectedRecords.length) {
-          clientSideGridApi.forEachNode(function (node) {
-            node.setSelected(
-              selectedRecords.some((o) => o._id === node.data._id)
-            );
-        });
+      clientSideGridApi.forEachNode(function (node) {
+        node.setSelected(
+          selectedRecords.some((o) => o._id === node.data._id)
+        );
+      });
     }
-    
-  },[clientSideGridApi, selectedRecords])
+
+  }, [clientSideGridApi, selectedRecords])
 
   var customFilterParams = {
     filterOptions: ['contains'],
@@ -185,10 +185,10 @@ export default function CustomAgGrid({
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -204,10 +204,10 @@ export default function CustomAgGrid({
         comparator={() => {
           return 0;
         }}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });
@@ -249,6 +249,12 @@ export default function CustomAgGrid({
                 customFloatingFilter: CustomFloatingFilter
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
+              }}
+              isRowSelectable={(rowNode) => {
+                if (allowSelection) {
+                  return rowNode.data && rowNode.data.hideSelection === true ? false : true;
+                }
+                return false;
               }}
               enableCellChangeFlash={false}
               defaultColDef={{

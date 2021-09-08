@@ -14,7 +14,6 @@ const EntityHeader = (props) => {
     entityPermissions,
     openUserDialog,
     anyEntitySelected,
-    exportSelectedEntities
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -90,14 +89,6 @@ const EntityHeader = (props) => {
                     Delete
                   </MenuItem>
                 )} */}
-                <MenuItem
-                  disabled={!anyEntitySelected}
-                  onClick={() => {
-                    exportSelectedEntities();
-                  }}
-                >
-                  Export Selected Entities
-                </MenuItem>
                 {entityPermissions.isUpdate && (
                   <MenuItem
                     disabled={!anyEntitySelected}

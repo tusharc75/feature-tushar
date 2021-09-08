@@ -114,6 +114,7 @@ const PriceTemplate = () => {
   const fetchOnePriceTemplate = () => {
     if (id === "0") {
       setInitialValues({ name: "", productTemplate: "", entity: [], owner: user.user._id, collaborator: [] });
+      setHasPermissionToUpdate(true)
       axiosInstance()
         .get(`/price-template/default-field`)
         .then(({ data: { data } }) => {
