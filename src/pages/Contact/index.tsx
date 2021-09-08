@@ -31,7 +31,7 @@ import {
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import contactClass from './contact.module.scss'
-import {SET_SELECTED_ENTITY} from '../../StateProvider/actionTypes';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 
 const ContactTypes = [
@@ -51,7 +51,7 @@ export default function Contact(props) {
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity, permissions}, dispatch: entityDispatch
+    state: { user, selectedEntity, permissions }, dispatch: entityDispatch
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
@@ -93,7 +93,7 @@ export default function Contact(props) {
   const columns = [
     { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'concatedNameRenderer' },
     { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
-    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
     { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
     { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
@@ -166,33 +166,50 @@ export default function Contact(props) {
     </Link>
   );
 
-  const RelatedLeadRenderer = (params) =>
-  params.value ? (
-    params?.data?.relatedLeadEntity === selectedEntity ?
-      <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
-        {params.value}
-      </Link>
-      :
-      hasAccessToEntity(params?.data?.relatedLeadEntity) ?
-        <span
-          className="link"
-          onClick={() => {
-            handleEntityChange(params.data?.relatedLeadEntity)
-            history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
-          }}
-          title={params.value}
-        >
-          {params.value}
-        </span>
+  const EntityRenderer = (params) => (
+
+    <h5 className="createBy d-flex">
+      {params.data?.firstEntity ?
+        <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.firstEntityId}`}>
+          {params.data.firstEntity}
+        </Link>
         :
-        <span
-          title={params.value}
-        >
-          <CustomRenderCell value={params.value} />
-        </span>
-  ) : (
-    <NoDataCell />
-  );
+        <NoDataCell />
+      }
+      {params.data?.restEntity?.length > 0 && (
+        <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
+      )}
+    </h5>
+  )
+
+
+  const RelatedLeadRenderer = (params) =>
+    params.value ? (
+      params?.data?.relatedLeadEntity === selectedEntity ?
+        <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+          {params.value}
+        </Link>
+        :
+        hasAccessToEntity(params?.data?.relatedLeadEntity) ?
+          <span
+            className="link"
+            onClick={() => {
+              handleEntityChange(params.data?.relatedLeadEntity)
+              history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
+            }}
+            title={params.value}
+          >
+            {params.value}
+          </span>
+          :
+          <span
+            title={params.value}
+          >
+            <CustomRenderCell value={params.value} />
+          </span>
+    ) : (
+      <NoDataCell />
+    );
 
   const AccountNameRenderer = (params) => (
     <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
@@ -226,7 +243,8 @@ export default function Contact(props) {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     accountNameRenderer: AccountNameRenderer,
-    actionsRenderer: ActionsRenderer
+    actionsRenderer: ActionsRenderer,
+    entityRenderer: EntityRenderer,
   };
 
   const replaceFieldName = (field) => {
@@ -300,52 +318,55 @@ export default function Contact(props) {
   };
 
   const getContacts = () => {
-      dispatch({ type: 'loading', loading: true });
-      const queryString = getQueryString();
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
 
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
 
-      axiosInstance()
-        .get(`${contactApi}${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
+    axiosInstance()
+      .get(`${contactApi}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
+          const [firstEntity, ...restEntity] = entity;
+          let res = {
+            ...restProperties,
+            id: u._id,
 
-            return {
-              ...restProperties,
-              id: u._id,
+            canDelete: u.owner?.optionValue === user?.user._id,
 
-              canDelete: u.owner?.optionValue === user?.user._id,
+            accountId: u.accountName?.optionValue,
+            accountName: u.accountName?.optionLabel,
 
-              accountId: u.accountName?.optionValue,
-              accountName: u.accountName?.optionLabel,
+            firstEntity: firstEntity?.optionLabel ?? '',
+            firstEntityId: firstEntity?.optionValue ?? '',
+            restEntity: restEntity,
+            relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+            relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
 
-              entity: entity?.optionLabel,
-              relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-              relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-              relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
-
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date
-            };
-          });
-
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          dispatch({ type: 'loading', loading: false });
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date
+          };
+          return res;
         });
-    
+
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
+      });
+
   };
 
   const handleSingleDeleteContacts = async () => {
