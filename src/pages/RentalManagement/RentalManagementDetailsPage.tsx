@@ -296,267 +296,270 @@ const RentalManagementDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-            <Paper>
-              {!rentalManagementData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                  </Box>
-                </div>
-              ) : (
 
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  {permissions?.rentalManagement?.isUpdate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                  )}
-
-                </DetailsPageHeader>
-              )}
-
-
-              <Box>
-                {loadingDetails || !rentalManagementFields.length ? (
-                  <Grid container spacing={2} style={{ padding: "8px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
+        <div className="detail-container">
+          <Grid container spacing={1} className="bg-white">
+            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+              <Paper>
+                {!rentalManagementData ? (
+                  <div>
+                    <Skeleton variant="text" width="150px" height="40px" />
+                    <Box display="flex">
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                      <Box marginX={1} />
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                    </Box>
+                  </div>
                 ) : (
-                  <>
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                  </>
+
+                  <DetailsPageHeader
+                    heading={headingLbl}
+                    mainPoints={mainPoints}
+                    showHeading={true}
+                  >
+                    {permissions?.rentalManagement?.isUpdate && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
+                    )}
+
+                  </DetailsPageHeader>
                 )}
-              </Box>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Steps steps={rentalProcessSteps.slice(0, 4)} currentStep={currentStep} setCurrentStep={setCurrentStep} />
-            {(currentStep === 0) && (
-              <>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => { setAddExistingProductDialog(true) }}
-                >
-                  Add Serialized Assets
-                </Button>
-                {columns ?
-                  <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    allowAction={true}
-                    loading={loading}
-                  />
-                  : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                }
-              </>
-            )}
-            {(currentStep === 1) && (
-              <AddRentalCost productInventory={productInventory} rentalId={id} currencySymbol={currencySymbol} fetchProductInventory={fetchProductInventory} />
-            )}
-            {(currentStep === 2) && (
-              <Formik
-                initialValues={{ additionalCost: additionalCost }}
-                enableReinitialize={true}
-                onSubmit={() => { }}>
-                {({ values }) => (
-                  <>
-                    <Form>
-                      <Container className="p-0">
-                        <Grid
-                          container
-                          direction="row"
-                          justify="space-evenly"
-                          alignItems="center"
-                        >
-                          <Grid item md={12}>
-                            {values.additionalCost && values.additionalCost.length > 0 && (
 
-                              <Box className={""}>
-                                <Grid
-                                  container
-                                  spacing={2}
-                                  direction="row"
-                                  justify="flex-start"
-                                  alignItems="center"
-                                >
-                                  <Grid item md={1}> # </Grid>
-                                  <Grid item md={5}> Cost Type </Grid>
-                                  <Grid item md={4}> Amount </Grid>
-                                  <Grid item md={2}></Grid>
 
-                                </Grid>
-                              </Box>
-                            )}
-                            <Box className="p-1">
-                              <FieldArray
-                                name="additionalCost"
-                                render={arrayHelpers => (
-                                  <div>
-                                    {values.additionalCost && values.additionalCost.length > 0 ? (
-                                      values.additionalCost.map((userVal, index) => (
-                                        <Grid
-                                          container
-                                          spacing={2}
-                                          direction="row"
-                                          justify="flex-start"
-                                          alignItems="center"
-                                          key={index}
-                                        >
-                                          <Grid item md={1}>{index + 1}</Grid>
-                                          <Grid item md={5}>
+                <Box>
+                  {loadingDetails || !rentalManagementFields.length ? (
+                    <Grid container spacing={2} style={{ padding: "8px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
+                  ) : (
+                    <>
+                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                    </>
+                  )}
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              <Steps steps={rentalProcessSteps.slice(0, 4)} currentStep={currentStep} setCurrentStep={setCurrentStep} />
+              {(currentStep === 0) && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => { setAddExistingProductDialog(true) }}
+                  >
+                    Add Serialized Assets
+                  </Button>
+                  {columns ?
+                    <CustomAgGrid
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameworkComponents}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      allowAction={true}
+                      loading={loading}
+                    />
+                    : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                  }
+                </>
+              )}
+              {(currentStep === 1) && (
+                <AddRentalCost productInventory={productInventory} rentalId={id} currencySymbol={currencySymbol} fetchProductInventory={fetchProductInventory} />
+              )}
+              {(currentStep === 2) && (
+                <Formik
+                  initialValues={{ additionalCost: additionalCost }}
+                  enableReinitialize={true}
+                  onSubmit={() => { }}>
+                  {({ values }) => (
+                    <>
+                      <Form>
+                        <Container className="p-0">
+                          <Grid
+                            container
+                            direction="row"
+                            justify="space-evenly"
+                            alignItems="center"
+                          >
+                            <Grid item md={12}>
+                              {values.additionalCost && values.additionalCost.length > 0 && (
 
-                                            <Autocomplete
-                                              id="combo-box-demo"
-                                              size="small"
-                                              style={{ minWidth: 200 }}
-                                              value={userVal.type}
-                                              options={costTypeList}
-                                              getOptionLabel={(option: any) => option ? option : ""}
-                                              onChange={(event, newValue) => {
-                                                arrayHelpers.replace(index, {
-                                                  ...values.additionalCost[index],
-                                                  ["type"]: newValue,
-                                                });
-                                              }}
+                                <Box className={""}>
+                                  <Grid
+                                    container
+                                    spacing={2}
+                                    direction="row"
+                                    justify="flex-start"
+                                    alignItems="center"
+                                  >
+                                    <Grid item md={1}> # </Grid>
+                                    <Grid item md={5}> Cost Type </Grid>
+                                    <Grid item md={4}> Amount </Grid>
+                                    <Grid item md={2}></Grid>
 
-                                              renderInput={(params) => <TextField
-                                                {...params}
-                                                variant="outlined"
-                                                name="nameField"
-                                                required
-                                              />}
-                                            />
-                                          </Grid>
-                                          {
-                                            <Grid item md={4}>
-                                              <Field
-                                                fullWidth
-                                                InputProps={{
-                                                  startAdornment: (
-                                                    <InputAdornment position="start">
-                                                      {currencySymbol ? currencySymbol : ""}
-                                                    </InputAdornment>
-                                                  ),
-                                                }}
-                                                startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                variant="outlined"
-                                                type="text"
+                                  </Grid>
+                                </Box>
+                              )}
+                              <Box className="p-1">
+                                <FieldArray
+                                  name="additionalCost"
+                                  render={arrayHelpers => (
+                                    <div>
+                                      {values.additionalCost && values.additionalCost.length > 0 ? (
+                                        values.additionalCost.map((userVal, index) => (
+                                          <Grid
+                                            container
+                                            spacing={2}
+                                            direction="row"
+                                            justify="flex-start"
+                                            alignItems="center"
+                                            key={index}
+                                          >
+                                            <Grid item md={1}>{index + 1}</Grid>
+                                            <Grid item md={5}>
+
+                                              <Autocomplete
+                                                id="combo-box-demo"
                                                 size="small"
-                                                component={TextField}
-                                                name="amount"
-                                                placeholder="Enter Amount"
-                                                value={userVal.amount}
-                                                onChange={(e) => {
+                                                style={{ minWidth: 200 }}
+                                                value={userVal.type}
+                                                options={costTypeList}
+                                                getOptionLabel={(option: any) => option ? option : ""}
+                                                onChange={(event, newValue) => {
                                                   arrayHelpers.replace(index, {
                                                     ...values.additionalCost[index],
-                                                    ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                  })
+                                                    ["type"]: newValue,
+                                                  });
                                                 }}
-                                                required
+
+                                                renderInput={(params) => <TextField
+                                                  {...params}
+                                                  variant="outlined"
+                                                  name="nameField"
+                                                  required
+                                                />}
                                               />
                                             </Grid>
-                                          }
-                                          <Grid item md={2}>
-                                            <ButtonGroup size="small" aria-label="small outlined button group">
-                                              <IconButton
-                                                size="small"
-                                                aria-label="add"
-                                                onClick={() => {
-                                                  arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
-                                                }
-                                                } >
-                                                <Add />
-                                              </IconButton>
-                                              <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                <Delete />
-                                              </IconButton>
-                                            </ButtonGroup>
+                                            {
+                                              <Grid item md={4}>
+                                                <Field
+                                                  fullWidth
+                                                  InputProps={{
+                                                    startAdornment: (
+                                                      <InputAdornment position="start">
+                                                        {currencySymbol ? currencySymbol : ""}
+                                                      </InputAdornment>
+                                                    ),
+                                                  }}
+                                                  startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
+                                                  variant="outlined"
+                                                  type="text"
+                                                  size="small"
+                                                  component={TextField}
+                                                  name="amount"
+                                                  placeholder="Enter Amount"
+                                                  value={userVal.amount}
+                                                  onChange={(e) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.additionalCost[index],
+                                                      ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                    })
+                                                  }}
+                                                  required
+                                                />
+                                              </Grid>
+                                            }
+                                            <Grid item md={2}>
+                                              <ButtonGroup size="small" aria-label="small outlined button group">
+                                                <IconButton
+                                                  size="small"
+                                                  aria-label="add"
+                                                  onClick={() => {
+                                                    arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
+                                                  }
+                                                  } >
+                                                  <Add />
+                                                </IconButton>
+                                                <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
+                                                  <Delete />
+                                                </IconButton>
+                                              </ButtonGroup>
+                                            </Grid>
                                           </Grid>
+                                        ))
+                                      ) : (
+                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                          <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="large"
+                                            onClick={() => {
+                                              arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
+                                            }}
+                                          >
+                                            Add Cost Type
+                                          </Button>
                                         </Grid>
-                                      ))
-                                    ) : (
-                                      <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                        <Button
-                                          variant="contained"
-                                          color="primary"
-                                          size="large"
-                                          onClick={() => {
-                                            arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
-                                          }}
-                                        >
-                                          Add Cost Type
-                                        </Button>
-                                      </Grid>
-                                    )}
-                                  </div>
-                                )}
-                              />
-                            </Box>
+                                      )}
+                                    </div>
+                                  )}
+                                />
+                              </Box>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </Container>
-                    </Form>
+                        </Container>
+                      </Form>
 
-                    <Grid container >
-                      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
-                        {/* <div>
+                      <Grid container >
+                        <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
+                          {/* <div>
                           {`Total Cost :  `}
                         </div> */}
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          type="submit"
-                          size="small"
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            type="submit"
+                            size="small"
 
-                          onClick={() => {
-                            handleSaveAdditionalCost(values.additionalCost)
-                          }}
-                        >
-                          {"Save"}
-                        </Button>
+                            onClick={() => {
+                              handleSaveAdditionalCost(values.additionalCost)
+                            }}
+                          >
+                            {"Save"}
+                          </Button>
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </>
-                )}
-              </Formik>
+                    </>
+                  )}
+                </Formik>
 
-            )}
-            {(currentStep === 3 || currentStep === 4) && (
-              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
-            )}
+              )}
+              {(currentStep === 3 || currentStep === 4) && (
+                <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
+              )}
+            </Grid>
           </Grid>
-        </Grid>
+        </div>
 
       </Fragment>
       {showConfirmBox && (
