@@ -27,6 +27,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
           dueDate: u.costing?.dueDate,
+          deliveryTicket: u.deliveryTicket,
           hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
         })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
       });
@@ -39,6 +40,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
           dueDate: u.costing?.dueDate,
+          deliveryTicket: u.deliveryTicket,
           hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
         })), count: productInventory.length
       });
@@ -71,7 +73,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
     <Grid container spacing={3}>
       <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
-        <Autocomplete
+        {/* <Autocomplete
           id="combo-box-demo"
           size="small"
           style={{ minWidth: 300 }}
@@ -88,7 +90,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
             label="Select Warehouse"
             name="warehouseField"
           />}
-        />
+        /> */}
         <Button
           variant="contained"
           color="primary"
