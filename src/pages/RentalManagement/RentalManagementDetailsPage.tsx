@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton, Autocomplete } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
+import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -24,11 +25,13 @@ import IconButton from "@material-ui/core/IconButton/IconButton";
 import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import AddRentalCost from "./AddRentalCost";
+import Activity from "../../components/Activity";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
 
@@ -41,7 +44,7 @@ const RentalManagementDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -57,6 +60,10 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [showActivity, setActivityShow] = useState(true);
+  const handleActivityHideShow = () => {
+      setActivityShow(!showActivity)
+  }
 
   useEffect(() => {
     if (id) {
@@ -144,7 +151,6 @@ const RentalManagementDetailsPage = () => {
   }
 
   const fetchRentalManagementData = async () => {
-    setLoadingDetails(true);
     try {
       const {
         data: { data },
@@ -163,6 +169,7 @@ const RentalManagementDetailsPage = () => {
         )?.symbolNative
       );
     } catch (error) {
+      setLoadingDetails(false)
       toastConfig.setToastConfig(error);
     }
   };
@@ -338,8 +345,9 @@ const RentalManagementDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
+          <div>
             <Paper>
               {!rentalManagementData ? (
                 <div>
@@ -392,8 +400,8 @@ const RentalManagementDetailsPage = () => {
                 )}
               </Box>
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+          </div>
+          <div>
             <Steps
               steps={rentalProcessSteps.slice(0, 4)}
               currentStep={currentStep}
@@ -609,8 +617,48 @@ const RentalManagementDetailsPage = () => {
             {(currentStep === 3 || currentStep === 4) && (
               <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
             )}
-          </Grid>
-        </Grid>
+          </div>
+          </div>
+          <div className="position-relative">
+          {showActivity ?
+            <Paper>
+              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                <IoIosArrowDropright className="icon" />
+              </a>}
+              <Grid container>
+                <Grid item xs={12}>
+                  {rentalManagementData && (
+                    <div>
+                      <Activity
+                        resourceId={rentalManagementData._id}
+                        resource={routes.rentalManagement}
+                        restrictedAddActivities={
+                          permissions &&
+                            permissions["rentalManagement"] &&
+                            permissions["rentalManagement"].isUpdate
+                            ? []
+                            : ["Attachment", "Case"]
+                        }
+                        relatedTo={[
+                          {
+                            type: rentalManagement,
+                            referenceId: rentalManagementData._id,
+                            access: true,
+                          },
+                        ]}
+                        handleActivityRefresh={() => { }}
+                        emails={[]}
+                      />
+                    </div>
+                  )}
+                   </Grid> 
+                  </Grid> 
+                </Paper> :
+               !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              <IoIosArrowDropleft className="icon" />
+            </a>}
+         </div>
+        </div>
 
       </Fragment>
       {showConfirmBox && (
