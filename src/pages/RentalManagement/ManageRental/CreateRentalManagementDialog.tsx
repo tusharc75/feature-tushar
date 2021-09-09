@@ -75,9 +75,11 @@ const CreateRentalManagementDialog = (props) => {
                 });
             }
             else {
+                let initialData = getObjKeys("", fieldsDataForCreate);
+                initialData["currency"] = user.user?.brandCurrency || "";               
                 setRentalData({
                     fields: fieldsDataForCreate,
-                    initialValues: getObjKeys("", fieldsDataForCreate),
+                    initialValues: initialData,
                 });
                 setLoading(false)
             }
