@@ -30,7 +30,7 @@ class ErrorBoundary extends React.Component<any, any> {
       return (
         <div className={styles.main}>
           <div style={{ textAlign: 'center' }} className={styles.submain}>
-            <div className={styles.vector}>
+            {/* <div className={styles.vector}>
               <img src={errorImage} />
             </div>
             <Typography style={{ fontWeight: 600 }} variant="h2" component="h2" className={styles.error}>
@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component<any, any> {
             </Typography>
             <Button variant="contained" color="primary" className={styles.reload} onClick={() => (window.location.href = '/')}>
               Try again
-            </Button>
+            </Button> */}
             {['local', 'development'].includes(process.env.REACT_APP_ENV) ? (
               <Typography variant="body1">
                 <details style={{ whiteSpace: 'pre-wrap' }} className={styles.detailScreen}>

@@ -31,6 +31,9 @@ const PdfTemplateSchema = object().shape({
 });
 
 const useStyles = makeStyles((theme) => ({
+    mainContainer: {
+        overflowY: 'scroll'
+    },
     root: {
         flexGrow: 1,
     },
@@ -77,6 +80,8 @@ export default function NewCreateQuotePdfTemplate() {
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isLandscapChecked, setIsLandscapChecked] = useState(false)
+    console.log('isLandscapChecked', isLandscapChecked)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     const onBackButtonEvent = (e) => {
@@ -103,6 +108,7 @@ export default function NewCreateQuotePdfTemplate() {
                     const {
                         data: { data }
                     } = res;
+                    setIsLandscapChecked(data?.landscape)
                     setInitialValues({
                         landscape: data?.landscape,
                         productColumns: data?.productColumns,
@@ -268,6 +274,7 @@ export default function NewCreateQuotePdfTemplate() {
     }
 
     return <div className={classes.root}>
+
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs
@@ -291,7 +298,7 @@ export default function NewCreateQuotePdfTemplate() {
                 />
             </Grid>
         </Grid>
-        <div className="main-container">
+        <div className={`main-container ${classes.mainContainer}`} >
             <Paper className={classes.paper}>
                 {initialValues ? (
                     <Formik
@@ -457,7 +464,9 @@ export default function NewCreateQuotePdfTemplate() {
                                                 <Checkbox
                                                     name="showPageNumberInFooter"
                                                     checked={values['showPageNumberInFooter']}
-                                                    onChange={(e) => setFieldValue('showPageNumberInFooter', e.target.checked)}
+                                                    onChange={(e) => {
+                                                        setFieldValue('showPageNumberInFooter', e.target.checked)
+                                                    }}
                                                     color="primary"
                                                 />
                                             }
@@ -472,7 +481,10 @@ export default function NewCreateQuotePdfTemplate() {
                                                 <Checkbox
                                                     name="landscape"
                                                     checked={values['landscape']}
-                                                    onChange={(e) => setFieldValue('landscape', e.target.checked)}
+                                                    onChange={(e) => {
+                                                        setIsLandscapChecked(e.target.checked)
+                                                        setFieldValue('landscape', e.target.checked)
+                                                    }}
                                                     color="primary"
                                                 />
                                             }
@@ -517,7 +529,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     header: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 700}
                             height={300}
                             initialValue={initialValues?.header}
                             imageOrFileUploadCompletePercentage={(
@@ -542,7 +554,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     aboveTable: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 700}
                             height={400}
                             initialValue={initialValues?.aboveTable}
                             imageOrFileUploadCompletePercentage={(
@@ -564,7 +576,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     belowTable: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 700}
                             height={400}
                             initialValue={initialValues?.belowTable}
                             imageOrFileUploadCompletePercentage={(
@@ -587,7 +599,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     footer: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 729}
                             height={300}
                             initialValue={initialValues?.footer}
                             imageOrFileUploadCompletePercentage={(
