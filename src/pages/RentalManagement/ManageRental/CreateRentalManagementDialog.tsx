@@ -14,9 +14,12 @@ import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
+import { useHistory } from 'react-router-dom'
+import routes from "../../../components/Helpers/Routes";
 
 const CreateRentalManagementDialog = (props) => {
 
+    const history = useHistory()
     const toastConfig = useContext(CustomToastContext)
     const { rentalManagementId, onClose, onSuccess, open } = props;
     const [loading, setLoading] = useState(false);
@@ -126,7 +129,8 @@ const CreateRentalManagementDialog = (props) => {
             });
         }
         else {
-            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
+            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: {data} }) => {
+                history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
                 setLoading(false);
                 onSuccess(data)
                 toastConfig.setToastConfig({
