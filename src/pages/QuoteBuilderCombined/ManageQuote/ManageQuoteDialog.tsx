@@ -116,12 +116,16 @@ export default function ManageQuoteDialog({
   const [opportunityMainDataSource, setOpportunityMainDataSource] = useState(
     []
   );
+  const [projectSalesMainDataSource, setProjectSalesMainDataSource] = useState(
+    []
+  );
   const [opportunityData, setOpportunityData] = useState([]);
   const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null);
   const [customerContactDataSource, setCustomerContactDataSource] = useState(
     []
   );
   const [opportunityDataSource, setOpportunityDataSource] = useState([]);
+  const [projectSalesDataSource, setProjectSalesDataSource] = useState([]);
   const [customError, setCustomError] = useState({});
 
   const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
@@ -210,6 +214,29 @@ export default function ManageQuoteDialog({
       (field) => field.fieldName === "opportunity"
     );
 
+    const projectSalesDropDownData = entityData.fields.find(
+      (field) => field.fieldName === "projectSales"
+    );
+
+    if (projectSalesDropDownData) {
+      setProjectSalesMainDataSource(projectSalesDropDownData.option);
+      if (isNew) {
+        setProjectSalesDataSource(
+          projectSalesDropDownData.option.filter(
+            (d) => d?.customerAccount && d?.customerAccount.indexOf(entityData.initialValues["customerAccountName"]) >= 0
+          )
+        );
+      }
+
+      if (!isNew) {
+        setProjectSalesDataSource(
+          projectSalesDropDownData.option.filter(
+            (d) => d?.customerAccount && d?.customerAccount.indexOf(dataToUpdate.customerAccountName.optionValue) >= 0
+          )
+        );
+      }
+    }
+
     if (opportunityDropDownData) {
       setOpportunityMainDataSource(opportunityDropDownData.option);
 
@@ -291,6 +318,15 @@ export default function ManageQuoteDialog({
     setOpportunityDataSource(
       opportunityMainDataSource.filter(
         (opportunity) => opportunity.customerAccountName === selectedAccount
+      )
+    );
+  };
+
+  const onProjectSalesDropDownOpen = (selectedAccount) => {
+    setProjectSalesDataSource(
+      projectSalesMainDataSource.filter(
+        (projectSales) => projectSales?.customerAccount &&
+          projectSales?.customerAccount.indexOf(selectedAccount) >= 0
       )
     );
   };
@@ -859,6 +895,10 @@ export default function ManageQuoteDialog({
                                                 "customerContactName",
                                                 []
                                               );
+                                              setFieldValue(
+                                                "projectSales",
+                                                []
+                                              );
                                               setFieldValue("opportunity", "");
                                             }}
                                           />
@@ -1071,6 +1111,7 @@ export default function ManageQuoteDialog({
                                           </Grid>
                                         ) : null}
                                       </Grid>
+
                                     ) : field.fieldName === "pDFTemplate" ? (
                                       <Grid container spacing={1}>
                                         <Grid
@@ -1566,37 +1607,74 @@ export default function ManageQuoteDialog({
                                             </Grid>
                                           ) : null}
                                         </Grid>
-                                      </Grid> : (
+                                      </Grid> : field.fieldName == "projectSales" ?
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
-                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option}
+                                          options={projectSalesDataSource}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           setFieldValue={setFieldValue}
                                           required={field.required}
                                           fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ["imageUpload", "fileUpload"].some(
-                                              (s) => s === field.type
-                                            )
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(
-                                                  completePercentage
-                                                );
-                                              }
-                                              : null
+                                          isTooltip={
+                                            field?.isTooltip || false
                                           }
+                                          tooltipMessage={
+                                            field?.tooltipMessage
+                                          }
+                                          doNotShowInfoTooltip={true}
+                                          size="small"
+                                          onOpen={() =>
+                                            onProjectSalesDropDownOpen(
+                                              values.customerAccountName
+                                            )
+                                          }
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(
+                                        //     field.fieldName,
+                                        //     value && value.optionValue
+                                        //       ? value.optionValue
+                                        //       : ""
+                                        //   );
+                                        // }}
                                         />
-                                      )}
+                                        : (
+                                          <FormTypes
+                                            {...field}
+                                            isNew={isNew}
+                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={
+                                              ["imageUpload", "fileUpload"].some(
+                                                (s) => s === field.type
+                                              )
+                                                ? (completePercentage) => {
+                                                  setUploadingImageOrFileProgress(
+                                                    completePercentage
+                                                  );
+                                                }
+                                                : null
+                                            }
+                                          />
+                                        )}
                                   </Grid>
                                 ))}
                               </Grid>
