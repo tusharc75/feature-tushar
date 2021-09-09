@@ -69,6 +69,12 @@ export default (history = null, passedHeaders = null) => {
                     reject({ open: true, type: "error", message: err.error });
                 })
             }
+            if(error.request.responseType === "arraybuffer"){
+                const enc = new TextDecoder("utf-8");
+                const data = enc.decode(error.response.data);
+                const err = JSON.parse(data);
+                return new Promise((resolve, reject) => reject({ open: true, type: "error", message: err.error }));
+            }
 
             if (error.message == "Network Error") {
                 return new Promise((resolve, reject) => {
