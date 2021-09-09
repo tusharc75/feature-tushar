@@ -15,7 +15,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
 

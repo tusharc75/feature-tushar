@@ -8,7 +8,6 @@ import {
     Dialog,
     InputAdornment,
 } from "@material-ui/core";
-import TableChartIcon from "@material-ui/icons/TableChart";
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
 import { KeyboardDatePicker } from "formik-material-ui-pickers";
