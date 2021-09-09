@@ -16,7 +16,6 @@ import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
-import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import {
@@ -25,13 +24,13 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
-import CreateProductInventory from "./CreateProductInventory";
+import ManageProductInventory from "./ManageProductInventory";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 const ProductInventory = () => {
 
     const toastConfig = useContext(CustomToastContext)
-    const [open, setOpen] = useState(false);
-    const [productInventoryId, setProductInventoryId] = useState(null);
+    const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -49,7 +48,7 @@ const ProductInventory = () => {
 
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "CommonRenderer" },
@@ -82,7 +81,8 @@ const ProductInventory = () => {
                 status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 productCategory: u.productCategory?.optionLabel,
-                productName: u.product?.optionLabel,
+                product: u.product?.optionLabel,
+                productId: u.product?.optionValue,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
@@ -150,20 +150,28 @@ const ProductInventory = () => {
         </Link>
     );
 
+    const ProductRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
+            {params.value}
+        </Link>
+    );
 
     const ActionsRenderer = params => (
         <>
-            {/* {permissions?.productInventory?.isCreate &&
+            {
+                permissions?.productInventory?.isCreate &&
                 <Tooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
-                        onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
+                        onClick={() => {
+                            setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: params.data._id });
+                        }}
                     >
                         <FileCopyIcon color="primary" />
                     </IconButton>
                 </Tooltip>
-            } */}
+            }
             {permissions?.productInventory?.isDelete &&
                 <Tooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
@@ -183,17 +191,6 @@ const ProductInventory = () => {
         dispatch({ type: "search", search: e.target.value });
     };
 
-    const OpenProduct = (_id) => {
-        setProductInventoryId(_id)
-        setOpen(true)
-    }
-
-    const handleClose = () => {
-        setProductInventoryId(null)
-        setOpen(false)
-        fetchProductInventory();
-    }
-
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -204,6 +201,7 @@ const ProductInventory = () => {
 
     const frameworkComponents = {
         createdByRenderer: CreatedByRenderer,
+        productRenderer: ProductRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         nameRenderer: NameRenderer,
@@ -246,7 +244,9 @@ const ProductInventory = () => {
                                 value={search}
                             />
                             {permissions?.productInventory?.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                <Button className={styles.add_submit_btn} onClick={() => {
+                                    setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
+                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
                             {permissions?.productInventory?.isDelete &&
                                 <Button
@@ -295,17 +295,20 @@ const ProductInventory = () => {
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {open &&
-            <CreateProductInventory
-                productInventoryId={productInventoryId}
-                onClose={() => setOpen(false)}
+        {
+            showManageProductInventoryDialog.open &&
+            <ManageProductInventory
+                isClone={showManageProductInventoryDialog.isClone}
+                productInventoryId={showManageProductInventoryDialog.idToClone}
+                onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
-                    setOpen(false);
+                    setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
                     fetchProductInventory()
                 }}
             />
         }
-        {showDeleteConfirmBox &&
+        {
+            showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
@@ -313,7 +316,7 @@ const ProductInventory = () => {
                 onOk={handleDelete}
             />
         }
-    </Fragment>
+    </Fragment >
     );
 }
 

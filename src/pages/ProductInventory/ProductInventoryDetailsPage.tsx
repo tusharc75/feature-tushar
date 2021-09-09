@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton } from "@material-ui/core";
+import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -12,12 +12,11 @@ import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { productInventory, getObjKeysWithValues } from "../../constants/helpers";
-import CreateProductInventory from "./CreateProductInventory";
+import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
-import BoxWithBorder from "../../components/BoxWithBorder";
 
 const ProductInventoryDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,8 +69,9 @@ const ProductInventoryDetailsPage = () => {
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data?.serialNumber);
-      setCustomizedRoutes([routes.productInventory, { title: `${data?.serialNumber || data?._id}` }]);
+      setHeadingLbl(`${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
+      setCustomizedRoutes([routes.productInventory,
+      { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductInventoryData(data);
       setLoading(false);
     } catch (error) {
@@ -191,7 +191,7 @@ const ProductInventoryDetailsPage = () => {
                         disabled={updateLoading}
                         aria-controls="action-menu"
                       >
-                        Status <ExpandMore />
+                        Change Status <ExpandMore />
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -247,45 +247,7 @@ const ProductInventoryDetailsPage = () => {
               </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Paper>
-                            <Box
-                                padding={1}
-                                bgcolor="grey.200"
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                            >
-                                <Typography variant="subtitle2">
-                                    Frequently Bought Product
-                                </Typography>
-                            </Box>
-                            {(
-                                <Box>
-                                    {loading ? (
-                                        [1, 2].map((i) => (
-                                            <BoxWithBorder
-                                                key={i}
-                                                style={{
-                                                    margin: "8px",
-                                                }}
-                                            >
-                                                <Box padding={1}>
-                                                    <Skeleton
-                                                        variant="text"
-                                                        width="100px"
-                                                        height="20px"
-                                                    />
-                                                    <Box marginTop={1} />
-                                                    <Skeleton variant="text" width="100%" height="15px" />
-                                                </Box>
-                                            </BoxWithBorder>
-                                        ))
 
-                                    ) :  <></>
-                                    }
-                                </Box>
-                            )}
-                        </Paper>
                 </Grid>
               </Grid>
             </Paper>
@@ -305,7 +267,8 @@ const ProductInventoryDetailsPage = () => {
         />
       )}
       {openUpdateDialog &&
-        <CreateProductInventory
+        <ManageProductInventory
+          isClone={false}
           productInventoryId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {

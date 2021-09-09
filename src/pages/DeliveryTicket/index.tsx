@@ -499,7 +499,7 @@ const DeliveryTicket = () => {
                       onClick={() => setShowManageDeliveryTicket(true)}
                       variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                   } */}
-                  {deliveryPermissions?.isDelete &&
+                  {/* {deliveryPermissions?.isDelete &&
                     <Button
                       className={styles.action_submit_btn}
                       variant="outlined"
@@ -527,11 +527,10 @@ const DeliveryTicket = () => {
                       setIsConformDialogVisible(true)
                       closeActions()
                     }}>Delete</MenuItem>
-                  </Menu>
+                  </Menu> */}
                 </Box>
               </Grid>
             </Grid>
-
           </div>
 
           <CustomAgGrid
@@ -546,8 +545,11 @@ const DeliveryTicket = () => {
             page={page}
             actionWidth={100}
             loading={loading}
+            allowSelection={false}
+            allowAction={false}
             renderedFrom={deliveryTicketResource}
           />
+
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

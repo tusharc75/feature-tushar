@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { Formik, Form } from "formik";
-import { Box, Button, Grid, IconButton, Tooltip } from "@material-ui/core";
+import { Box, Button, Grid } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
@@ -11,18 +10,17 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema } from "../../../constants/helpers";
-import AddIcon from "@material-ui/icons/AddCircle";
-import InfoIcon from "@material-ui/icons/Info";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
-
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
+import { useHistory } from 'react-router-dom'
+import routes from "../../../components/Helpers/Routes";
 
-const CreateRentalManagementDialog = (props) => {
+const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, onSuccess, open }) => {
 
+    const history = useHistory()
     const toastConfig = useContext(CustomToastContext)
-    const { rentalManagementId, onClose, onSuccess, open } = props;
     const [loading, setLoading] = useState(false);
     const [rentalData, setRentalData] = useState({ fields: [], initialValues: {} });
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
@@ -32,7 +30,7 @@ const CreateRentalManagementDialog = (props) => {
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
     const {
-        state: { user, permissions },
+        state: { user },
     }: any = useData();
 
     useEffect(() => {
@@ -69,19 +67,31 @@ const CreateRentalManagementDialog = (props) => {
 
             if (rentalManagementId) {
                 axiosInstance().get(`${rentalManagement.rentalManagementApi}/` + rentalManagementId).then(({ data: { data } }) => {
-                    setRentalData({
-                        fields: fieldsDataForUpdate,
-                        initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
-                    });
-                    setLoading(false)
+                    if (isClone) {
+                        const { _id, brand, createdBy, entity, history, products, rentalJobName, updatedBy, ...rest } = data
+
+                        setRentalData({
+                            fields: fieldsDataForCreate,
+                            initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
+                        });
+                        setLoading(false)
+                    } else {
+                        setRentalData({
+                            fields: fieldsDataForUpdate,
+                            initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
+                        });
+                        setLoading(false)
+                    }
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
-                });
+                })
             }
             else {
+                let initialData = getObjKeys("", fieldsDataForCreate);
+                initialData["currency"] = user.user?.brandCurrency || "";
                 setRentalData({
                     fields: fieldsDataForCreate,
-                    initialValues: getObjKeys("", fieldsDataForCreate),
+                    initialValues: initialData,
                 });
                 setLoading(false)
             }
@@ -112,7 +122,7 @@ const CreateRentalManagementDialog = (props) => {
 
     const handleUpdateRentalManagement = (values) => {
         setLoading(true);
-        if (rentalManagementId) {
+        if (rentalManagementId && isClone === false) {
             values._id = rentalManagementId
             axiosInstance().put(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
                 setLoading(false);
@@ -128,13 +138,14 @@ const CreateRentalManagementDialog = (props) => {
             });
         }
         else {
-            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
+            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: { data, message } }) => {
+                history.push(`${routes.rentalManagementDetail.path}/${data}`)
                 setLoading(false);
                 onSuccess(data)
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
-                    message: data.message,
+                    message: message,
                 });
             }).catch((error) => {
                 setLoading(false);
@@ -177,7 +188,7 @@ const CreateRentalManagementDialog = (props) => {
                     title={
                         !rentalManagementId
                             ? "Create Rental Management"
-                            : `Editing `
+                            : `${isClone ? "Clone" : "Editing"}`
                     }
                     onClose={(e, reason) => {
                         setShowConfirmDialog(true)
@@ -435,5 +446,5 @@ const CreateRentalManagementDialog = (props) => {
 
 }
 
-export default CreateRentalManagementDialog;
+export default ManageRentalManagementDialog;
 
