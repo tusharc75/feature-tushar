@@ -12,14 +12,9 @@ import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, isFieldNot
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
-import { useData } from "../../StateProvider/Provider";
 
 const ManageDeliveryTicket = (props) => {
-    const {
-        state: {
-            user: { user }, permissions
-        },
-    } = useData();
+
     const toastConfig = useContext(CustomToastContext)
     const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null } = props;
@@ -51,10 +46,25 @@ const ManageDeliveryTicket = (props) => {
                 });
             }
             else {
-                setInitialData({
-                    fields: fieldsDataForCreate,
-                    values: getObjKeys("", fieldsDataForCreate),
-                });
+                if (productInventoryForDeliveryTicket && rentalData) {
+                    const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                    tempInitialData["productInventory"] = productInventoryForDeliveryTicket.map(d => d.inventory._id)
+                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    tempInitialData["rental"] = rentalData._id
+                    tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
+                    tempInitialData["shippingAddress"] = rentalData.shippingAddress
+                    tempInitialData["deliveryType"] = "To Customer"
+                    setInitialData({
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        values: tempInitialData,
+                    });
+                }
+                else {
+                    setInitialData({
+                        fields: fieldsDataForCreate,
+                        values: getObjKeys("", fieldsDataForCreate),
+                    });
+                }
             }
         })
             .catch((error) => {
