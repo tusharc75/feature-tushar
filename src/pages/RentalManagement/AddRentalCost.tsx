@@ -14,20 +14,12 @@ import { gridLoadingTimeout } from "../../constants/helpers";
 import { AddRentalCostDialog } from "./AddRentalCostDialog";
 
 
-const TaskSchema = object().shape({
-  name: string().required("Please enter task name"),
-  assignee: string().required("Please select assignee"),
-  reporter: string().required(),
-  startDate: string().required("Please enter start date"),
-  dueDate: string().required("Please enter due date"),
-});
-
 const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchProductInventory }) => {
   const [addRentalCostDialog, setAddRentalCostDialog] = useState(false);
   const [addRentalCostData, setAddRentalCostData] = useState(null);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   useEffect(() => {
     dispatch({ type: "loading", loading: true });
@@ -122,4 +114,3 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
 }
 
 export default AddRentalCost;
-
