@@ -120,6 +120,7 @@ export const CreateEmail = ({
     "E-Sign": isESign,
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [quoteBuilderOtherAttachments, setQuoteBuilderOtherAttachments] = useState([])
 
   useEffect(() => {
     fetchEmailDetail();
@@ -236,7 +237,7 @@ export const CreateEmail = ({
       emailSubject: values.name,
       cc: values.cc,
       id: id,
-      attachments: [...qouteBuilderAttachments],
+      attachments: [...qouteBuilderAttachments, ...quoteBuilderOtherAttachments],
       eSign: toogle["E-Sign"],
     };
     axiosInstance()
@@ -318,6 +319,7 @@ export const CreateEmail = ({
       fileImageAttachments.filter((currentUrl) => currentUrl !== url)
     );
   };
+
   const getFileIconSrc = (file) => {
     let extension = isQuoteBuilder
       ? file
@@ -327,6 +329,36 @@ export const CreateEmail = ({
   };
 
   const classes = useStyles();
+
+  const renderQuotesOtherFileThumbnails = (
+    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+      {quoteBuilderOtherAttachments && quoteBuilderOtherAttachments.length > 0 ? (
+        <>
+          {quoteBuilderOtherAttachments.map((attachment, i) => {
+            return (
+              <>
+                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                  <Paper className={emailStyles.fileContainer}>
+                    <img
+                      src={getFileIconSrc(attachment?.extension)}
+                      className={emailStyles.file}
+                      alt="attchment"
+                    />
+                    <Typography noWrap variant="body2">
+                      {attachment && attachment?.name
+                        ? attachment?.name
+                        : "Quotation"}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </>
+            );
+          })}
+        </>
+      ) : null}
+    </Grid>
+  );
+
 
   const renderQuotesFileThumbnails = (
     <Grid container spacing={1} className={emailStyles.createEmailContainer}>
@@ -421,6 +453,10 @@ export const CreateEmail = ({
       [e.target.name]: e.target.checked,
     }));
   };
+
+  const handleQuoteUpload = (attachment) => {
+    setQuoteBuilderOtherAttachments((prevState) => ([...prevState, attachment]))
+  }
 
   return (
     <>
@@ -677,6 +713,10 @@ export const CreateEmail = ({
                                 {isQuoteBuilder
                                   ? renderQuotesFileThumbnails
                                   : null}
+                                {
+                                  isQuoteBuilder ?
+                                    renderQuotesOtherFileThumbnails : null
+                                }
                                 <ImageAttachments
                                   imageAttachments={fileImageAttachments}
                                   onImageClick={(attachment) => {
@@ -709,10 +749,12 @@ export const CreateEmail = ({
                                       completePercentage
                                     );
                                   }}
-                                  doNotShowUploadFile={isQuoteBuilder ? true : false}
+                                  doNotShowUploadFile={false}
                                   onUploadFile={onUploadFile}
                                   onUploadImage={handleUploadImage}
                                   usePublicUrlforFileUpload={true}
+                                  isSendToCustomer={isQuoteBuilder ? true : false}
+                                  onQuoteUpload={handleQuoteUpload}
                                 />
                               </Box>
                             </Grid>

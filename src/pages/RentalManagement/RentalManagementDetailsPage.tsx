@@ -1,7 +1,8 @@
-import { useState, useEffect, useContext, Fragment, useReducer, useRef } from "react";
+import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton, Autocomplete } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
+import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -11,25 +12,28 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, productInventory, rentalManagement } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
 import TextField from "@material-ui/core/TextField/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import { Field, FieldArray, Form, Formik, FormikProps } from "formik";
+import { Field, FieldArray, Form, Formik } from "formik";
 import Container from "@material-ui/core/Container/Container";
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
+import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
+import AddRentalCost from "./AddRentalCost";
+import Activity from "../../components/Activity";
+
+const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,7 +44,7 @@ const RentalManagementDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,6 +59,13 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [showActivity, setActivityShow] = useState(true);
+  const [allowedToEdit, setAllowedToEdit] = useState(false)
+
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
 
   useEffect(() => {
     if (id) {
@@ -66,10 +77,58 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep === 2) {
+    if (currentStep === 3 && additionalCost.length > 0) {
+      handleSaveAdditionalCost(additionalCost)
+    }
+
+    if (currentStep > 0) {
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status `, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
     }
     // eslint-disable-next-line
   }, [currentStep]);
+
+  useEffect(() => {
+    const updateStatus = () => {
+      const leftItems = [];
+      for (const product of productInventory) {
+        if (!product.deliveryTicket) {
+          leftItems.push(product.id)
+        }
+      }
+
+      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+        if (!rentalManagementData.status.includes("Ready to Ship")) {
+          const tempUpdateData = {
+            "_id": rentalManagementData._id,
+            "rentalJobName": rentalManagementData.rentalJobName,
+            // "rentalJobID":rentalManagementData.rentalJobID,
+            // "customerAccount": rentalManagementData.customerAccount.optionValue,
+            // "customerContact": rentalManagementData.customerContact.optionValue,
+            // "shippingAddress": rentalManagementData.shippingAddress,
+            // "currency": rentalManagementData.currency,
+            // "rentalStartDate": rentalManagementData.rentalStartDate,
+            // "rentalEndDate": rentalManagementData.rentalEndDate,
+            // "jobDescription": rentalManagementData.jobDescription,
+            "status": "Ready to Ship",
+            // "owner": rentalManagementData.owner.optionValue,
+            // "collaborator": rentalManagementData.collaborator,
+
+          }
+          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+            .then(() => {
+              fetchRentalManagementData()
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+        }
+      }
+    }
+
+    updateStatus()
+  }, [currentStep, productInventory])
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -81,7 +140,8 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0 } }) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
-        fetchProductInventory()
+        // fetchProductInventory()
+        // fetchRentalManagementData()
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -93,7 +153,6 @@ const RentalManagementDetailsPage = () => {
   }
 
   const fetchRentalManagementData = async () => {
-    setLoadingDetails(true);
     try {
       const {
         data: { data },
@@ -104,8 +163,16 @@ const RentalManagementDetailsPage = () => {
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
       setAdditionalCost(data?.additionalCost?.map(d => { return { "id": d?._id, "type": d.type, "amount": d?.value } }))
+      setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
+      setCurrencySymbol(
+        getUniqueCurrencies().find(
+          (d) => d.currencyCode === data["currency"]
+        )?.symbolNative
+      );
+      setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
     } catch (error) {
+      setLoadingDetails(false)
       toastConfig.setToastConfig(error);
     }
   };
@@ -152,6 +219,8 @@ const RentalManagementDetailsPage = () => {
     </Link>
   );
 
+
+
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -172,23 +241,27 @@ const RentalManagementDetailsPage = () => {
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
+    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
   ];
 
   const fetchProductInventory = () => {
     dispatch({ type: "loading", loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
         productName: u.product?.productName,
+        productCategory: u.product?.productCategory?.optionLabel,
+        warehouse: u.inventory?.warehouse?.optionLabel,
+        status: u.inventory?.status,
         assetNumber: u.inventory?.assetNumber,
         serialNumber: u.inventory?.serialNumber,
       }));
@@ -200,6 +273,13 @@ const RentalManagementDetailsPage = () => {
           tempWareHouse.push(d.inventory.warehouse)
         }
       })
+      if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
+        setCurrentStep(4)
+        axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      }
       setWarehouseList(tempWareHouse)
       dispatch({ type: "initialize", data: data.data, count: data.count });
       setTimeout(() => {
@@ -212,6 +292,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchDeliveryTicket = (values) => {
+    setProductInventory([])
     axiosInstance()
       .get(`${rentalManagement.rentalManagementApi}/${id}/delivery-ticket `)
       .then(({ data }) => {
@@ -226,7 +307,7 @@ const RentalManagementDetailsPage = () => {
         })
         setProductInventory(tempProductInventory)
         if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
-          setCurrentStep(3)
+          setCurrentStep(4)
         }
       })
       .catch((err) => {
@@ -235,7 +316,8 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleAddProductInventory = (productInventoryArray) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": productInventoryArray.map(d => d._id) })
+    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": tempProductArray })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -266,240 +348,256 @@ const RentalManagementDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-            <Paper>
-              {!rentalManagementData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                  </Box>
-                </div>
-              ) : (
-
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  {permissions?.rentalManagement?.isUpdate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                  )}
-
-                </DetailsPageHeader>
-              )}
-
-
-              <Box>
-                {loadingDetails || !rentalManagementFields.length ? (
-                  <Grid container spacing={2} style={{ padding: "8px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
+            <div>
+              <Paper>
+                {!rentalManagementData ? (
+                  <div>
+                    <Skeleton variant="text" width="150px" height="40px" />
+                    <Box display="flex">
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                      <Box marginX={1} />
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                    </Box>
+                  </div>
                 ) : (
-                  <>
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                  </>
+
+                  <DetailsPageHeader
+                    heading={headingLbl}
+                    mainPoints={mainPoints}
+                    showHeading={true}
+                  >
+                    {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
+                    )}
+
+                  </DetailsPageHeader>
                 )}
-              </Box>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Steps steps={["New", "Additional Cost", "Loading Ticket"]} currentStep={currentStep} setCurrentStep={setCurrentStep} />
-            {(currentStep === 0) && (
-              <>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => { setAddExistingProductDialog(true) }}
-                >
-                  Add Existing
-                </Button>
-                {columns ?
-                  <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    allowAction={true}
-                    loading={loading}
-                  />
-                  : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                }
-              </>
-            )}
-            {(currentStep === 1) && (
-              <Formik
-                initialValues={{ additionalCost: additionalCost }}
-                enableReinitialize={true}
-                onSubmit={() => { }}>
-                {({ values }) => (
-                  <>
-                    <Form>
-                      <Container className="p-0">
-                        <Grid
-                          container
-                          direction="row"
-                          justify="space-evenly"
-                          alignItems="center"
-                        >
-                          <Grid item md={12}>
-                            {values.additionalCost && values.additionalCost.length > 0 && (
 
-                              <Box className={""}>
-                                <Grid
-                                  container
-                                  spacing={2}
-                                  direction="row"
-                                  justify="flex-start"
-                                  alignItems="center"
-                                >
-                                  <Grid item md={1}> # </Grid>
-                                  <Grid item md={5}> Cost Type </Grid>
-                                  <Grid item md={4}> Amount </Grid>
-                                  <Grid item md={2}></Grid>
 
-                                </Grid>
-                              </Box>
-                            )}
-                            <Box className="p-1">
-                              <FieldArray
-                                name="additionalCost"
-                                render={arrayHelpers => (
-                                  <div>
-                                    {values.additionalCost && values.additionalCost.length > 0 ? (
-                                      values.additionalCost.map((userVal, index) => (
-                                        <Grid
-                                          container
-                                          spacing={2}
-                                          direction="row"
-                                          justify="flex-start"
-                                          alignItems="center"
-                                          key={index}
-                                        >
-                                          <Grid item md={1}>{index + 1}</Grid>
-                                          <Grid item md={5}>
+                <Box>
+                  {loadingDetails || !rentalManagementFields.length ? (
+                    <Grid container spacing={2} style={{ padding: "8px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
+                  ) : (
+                    <>
+                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                    </>
+                  )}
+                </Box>
+              </Paper>
+            </div>
+            <div>
+              <Steps
+                steps={rentalProcessSteps.slice(0, 4)}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+              />
+              {(currentStep === 0) && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => { setAddExistingProductDialog(true) }}
+                  >
+                    Add Serialized Assets
+                  </Button>
+                  {columns ?
+                    <CustomAgGrid
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameworkComponents}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      allowAction={true}
+                      loading={loading}
+                    />
+                    : <Box
+                      p={2}
+                      height={500}
+                      bgcolor="white">
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  }
+                </>
+              )}
+              {(currentStep === 1) && (
+                <AddRentalCost
+                  productInventory={productInventory}
+                  rentalId={id}
+                  currencySymbol={currencySymbol}
+                  fetchProductInventory={fetchProductInventory}
+                />
+              )}
+              {(currentStep === 2) && (
+                <Formik
+                  initialValues={{ additionalCost: additionalCost }}
+                  enableReinitialize={true}
+                  onSubmit={() => { }}>
+                  {({ values }) => (
+                    <>
+                      <Form>
+                        {setAdditionalCost(values.additionalCost)}
+                        <Container className="p-0">
+                          <Grid
+                            container
+                            direction="row"
+                            justify="space-evenly"
+                            alignItems="center"
+                          >
+                            <Grid item md={12}>
+                              {values.additionalCost && values.additionalCost.length > 0 && (
 
-                                            <Autocomplete
-                                              id="combo-box-demo"
-                                              size="small"
-                                              style={{ minWidth: 200 }}
-                                              value={userVal.type}
-                                              options={costTypeList}
-                                              getOptionLabel={(option: any) => option ? option : ""}
-                                              onChange={(event, newValue) => {
-                                                arrayHelpers.replace(index, {
-                                                  ...values.additionalCost[index],
-                                                  ["type"]: newValue,
-                                                });
-                                              }}
+                                <Box className={""}>
+                                  <Grid
+                                    container
+                                    spacing={2}
+                                    direction="row"
+                                    justify="flex-start"
+                                    alignItems="center"
+                                  >
+                                    <Grid item md={1}> # </Grid>
+                                    <Grid item md={5}> Cost Type </Grid>
+                                    <Grid item md={4}> Amount </Grid>
+                                    <Grid item md={2}></Grid>
 
-                                              renderInput={(params) => <TextField
-                                                {...params}
-                                                variant="outlined"
-                                                name="nameField"
-                                                required
-                                              />}
-                                            />
-                                          </Grid>
-                                          {
-                                            <Grid item md={4}>
-                                              <Field
-                                                fullWidth
-                                                InputProps={{
-                                                  startAdornment: (
-                                                    <InputAdornment position="start">
-                                                      {/* {currencySymbol ? currencySymbol : ""} */}
-                                                    </InputAdornment>
-                                                  ),
-                                                }}
-                                                // startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                variant="outlined"
-                                                type="text"
+                                  </Grid>
+                                </Box>
+                              )}
+                              <Box className="p-1">
+                                <FieldArray
+                                  name="additionalCost"
+                                  render={arrayHelpers => (
+                                    <div>
+                                      {values.additionalCost && values.additionalCost.length > 0 ? (
+                                        values.additionalCost.map((userVal, index) => (
+                                          <Grid
+                                            container
+                                            spacing={2}
+                                            direction="row"
+                                            justify="flex-start"
+                                            alignItems="center"
+                                            key={index}
+                                          >
+                                            <Grid item md={1}>{index + 1}</Grid>
+                                            <Grid item md={5}>
+
+                                              <Autocomplete
                                                 size="small"
-                                                component={TextField}
-                                                name="amount"
-                                                placeholder="Enter Amount"
-                                                value={userVal.amount}
-                                                onChange={(e) => {
+                                                style={{ minWidth: 200 }}
+                                                value={userVal.type}
+                                                options={costTypeList}
+                                                getOptionLabel={(option: any) => option ? option : ""}
+                                                onChange={(_, newValue) => {
                                                   arrayHelpers.replace(index, {
                                                     ...values.additionalCost[index],
-                                                    ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                  })
+                                                    ["type"]: newValue,
+                                                  });
                                                 }}
-                                                required
+
+                                                renderInput={(params) => <TextField
+                                                  {...params}
+                                                  variant="outlined"
+                                                  name="nameField"
+                                                  label="Cost Type"
+                                                  required
+                                                />}
                                               />
                                             </Grid>
-                                          }
-                                          <Grid item md={2}>
-                                            <ButtonGroup size="small" aria-label="small outlined button group">
-                                              <IconButton
-                                                size="small"
-                                                aria-label="add"
-                                                onClick={() => {
-                                                  arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
-                                                }
-                                                } >
-                                                <Add />
-                                              </IconButton>
-                                              <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                <Delete />
-                                              </IconButton>
-                                            </ButtonGroup>
+                                            {
+                                              <Grid item md={4}>
+                                                <Field
+                                                  fullWidth
+                                                  InputProps={{
+                                                    startAdornment: (
+                                                      <InputAdornment position="start">
+                                                        {currencySymbol ? currencySymbol : ""}
+                                                      </InputAdornment>
+                                                    ),
+                                                  }}
+                                                  startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
+                                                  variant="outlined"
+                                                  type="text"
+                                                  size="small"
+                                                  component={TextField}
+                                                  name="amount"
+                                                  placeholder="Enter Amount"
+                                                  value={userVal.amount}
+                                                  onChange={(e) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.additionalCost[index],
+                                                      ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                    })
+                                                  }}
+                                                  required
+                                                />
+                                              </Grid>
+                                            }
+                                            <Grid item md={2}>
+                                              <ButtonGroup size="small" aria-label="small outlined button group">
+                                                <IconButton
+                                                  size="small"
+                                                  aria-label="add"
+                                                  onClick={() => {
+                                                    arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
+                                                  }
+                                                  } >
+                                                  <Add />
+                                                </IconButton>
+                                                <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
+                                                  <Delete />
+                                                </IconButton>
+                                              </ButtonGroup>
+                                            </Grid>
                                           </Grid>
+                                        ))
+                                      ) : (
+                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                          <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="large"
+                                            onClick={() => {
+                                              arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
+                                            }}
+                                          >
+                                            Add Cost Type
+                                          </Button>
                                         </Grid>
-                                      ))
-                                    ) : (
-                                      <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                        <Button
-                                          variant="contained"
-                                          color="primary"
-                                          size="large"
-                                          onClick={() => {
-                                            arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
-                                          }}
-                                        >
-                                          Add Cost Type
-                                        </Button>
-                                      </Grid>
-                                    )}
-                                  </div>
-                                )}
-                              />
-                            </Box>
+                                      )}
+                                    </div>
+                                  )}
+                                />
+                              </Box>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </Container>
-                    </Form>
+                        </Container>
+                      </Form>
 
-                    <Grid container >
+                      {/* <Grid container >
                       <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
-                        {/* <div>
-                          {`Total Cost :  `}
-                        </div> */}
                         <Button
                           variant="contained"
                           color="primary"
@@ -513,17 +611,57 @@ const RentalManagementDetailsPage = () => {
                           {"Save"}
                         </Button>
                       </Grid>
-                    </Grid>
-                  </>
-                )}
-              </Formik>
+                    </Grid> */}
+                    </>
+                  )}
+                </Formik>
 
-            )}
-            {(currentStep === 2 || currentStep === 3) && (
-              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
-            )}
-          </Grid>
-        </Grid>
+              )}
+              {(currentStep === 3 || currentStep === 4) && (
+                <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
+              )}
+            </div>
+          </div>
+          <div className="position-relative">
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </a>}
+                <Grid container>
+                  <Grid item xs={12}>
+                    {rentalManagementData && (
+                      <div>
+                        <Activity
+                          resourceId={rentalManagementData._id}
+                          resource={routes.rentalManagement}
+                          restrictedAddActivities={
+                            permissions &&
+                              permissions["rentalManagement"] &&
+                              permissions["rentalManagement"].isUpdate
+                              ? []
+                              : ["Attachment", "Case"]
+                          }
+                          relatedTo={[
+                            {
+                              type: rentalManagement,
+                              referenceId: rentalManagementData._id,
+                              access: true,
+                            },
+                          ]}
+                          handleActivityRefresh={() => { }}
+                          emails={[]}
+                        />
+                      </div>
+                    )}
+                  </Grid>
+                </Grid>
+              </Paper> :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </a>}
+          </div>
+        </div>
 
       </Fragment>
       {showConfirmBox && (
@@ -539,7 +677,8 @@ const RentalManagementDetailsPage = () => {
       )}
       {addExistingProductDialog && <AddExistingProductInventory addProductInventory={handleAddProductInventory} handleProductInventoryClose={() => { setAddExistingProductDialog(false) }} />}
       {openUpdateDialog && (
-        <CreateRentalManagementDialog
+        <ManageRentalManagementDialog
+          isClone={false}
           open={openUpdateDialog}
           rentalManagementId={id}
           onClose={() => setOpenUpdateDialog(false)}
@@ -566,4 +705,3 @@ const RentalManagementDetailsPage = () => {
 };
 
 export default RentalManagementDetailsPage;
-

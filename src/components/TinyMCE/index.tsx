@@ -52,11 +52,19 @@ const mappedVariablesNames = {
     incoTerms: "Inco Terms"
 }
 
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
 export default function TinyMCE(props) {
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
         onUploadImage = null, usePublicUrlforFileUpload = false,
-        doNotShowUploadFile = false, showVariableDropdown = false, id, isCheckHeight = false, disabledEditor = false
+        doNotShowUploadFile = false, showVariableDropdown = false, id, isCheckHeight = false, disabledEditor = false,
+        isSendToCustomer = false, onQuoteUpload = null
     } = props
 
     const classes = useStyles();
@@ -80,7 +88,7 @@ export default function TinyMCE(props) {
         }
     }, [])
 
-    const handleUploadFile = (ev) => {
+    const handleUploadFile = async (ev) => {
         if (ev.target.files && ev.target.files.length) {
             let files = ev.target.files;
 
@@ -94,7 +102,19 @@ export default function TinyMCE(props) {
                     });
                     break;
                 }
-                getFileUrl(file, "", {});
+                if (isSendToCustomer) {
+                    let base64String = ""
+                    base64String = (await toBase64(file)) + ""
+                    base64String = base64String.substring(base64String.indexOf("base64,") + 7, base64String.length)
+                    let name = file.name
+                    let type = file.type
+                    let lastIndex = name.lastIndexOf(".")
+                    let ext = name.substring(lastIndex);
+                    onQuoteUpload({ name: name.substring(0, lastIndex), extension: ext, contentType: type, base64: base64String })
+                }
+                else {
+                    getFileUrl(file, "", {});
+                }
             }
             ev.target.value = '';
         }
@@ -412,7 +432,7 @@ export default function TinyMCE(props) {
                     }
                     {
                         isInitiated ?
-                            <div className={classes.buttonContainer} >
+                            <div style={{ width: width }} className={classes.buttonContainer} >
                                 {
                                     doNotShowUploadFile ? null :
                                         <Fragment>
@@ -495,59 +515,60 @@ export default function TinyMCE(props) {
                     }
                 </>
             }
-
-            <Editor
-                disabled={disabledEditor}
-                id={id ?? "editor"}
-                onInit={(evt, editor) => {
-                    setIsInitiated(true)
-                    editorRef.current = editor
-                }}
-                initialValue={initialValue || ""}
-                onChange={(content) => {
-                    if (editorRef.current.isDirty()) {
-                        if (isCheckHeight) {
-                            if (isValidHeight()) {
-                                onChange(editorRef.current.getContent())
+            <div style={{ width: width }}>
+                <Editor
+                    disabled={disabledEditor}
+                    id={id ?? "editor"}
+                    onInit={(evt, editor) => {
+                        setIsInitiated(true)
+                        editorRef.current = editor
+                    }}
+                    initialValue={initialValue || ""}
+                    onChange={(content) => {
+                        if (editorRef.current.isDirty()) {
+                            if (isCheckHeight) {
+                                if (isValidHeight()) {
+                                    onChange(editorRef.current.getContent())
+                                }
+                                else {
+                                    setToastConfig({
+                                        open: true,
+                                        type: 'error',
+                                        message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
+                                    });
+                                }
                             }
-                            else {
-                                setToastConfig({
-                                    open: true,
-                                    type: 'error',
-                                    message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
-                                });
-                            }
+                            else onChange(editorRef.current.getContent())
                         }
-                        else onChange(editorRef.current.getContent())
-                    }
-                }}
-                init={{
-                    height: height,
-                    width: width,
-                    // menubar: false,
-                    table_default_attributes: {
-                        border: '0'
-                    },
-                    block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
-                    font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-                    plugins: [
-                        'advlist autolink lists link charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code wordcount'
-                    ],
-                    toolbar: 'undo redo | formatselect  | ' +
-                        'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent ',
-                    content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                    }}
+                    init={{
+                        height: height,
+                        width: "100%",
+                        // menubar: false,
+                        table_default_attributes: {
+                            border: '0'
+                        },
+                        block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
+                        font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+                        plugins: [
+                            'advlist autolink lists link charmap print preview anchor',
+                            'searchreplace visualblocks code fullscreen',
+                            'insertdatetime media table paste code wordcount'
+                        ],
+                        toolbar: 'undo redo | formatselect  | ' +
+                            'bold italic backcolor | alignleft aligncenter ' +
+                            'alignright alignjustify | bullist numlist outdent indent ',
+                        content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
 
-                    // setup: (editor) => {
-                    //     editor.ui.registry.addButton("myCustomToolbarButton", {
-                    //         text: "Upload File",
-                    //         onAction: () => console.log("button text")
-                    //     });
-                    // }
-                }}
-            />
+                        // setup: (editor) => {
+                        //     editor.ui.registry.addButton("myCustomToolbarButton", {
+                        //         text: "Upload File",
+                        //         onAction: () => console.log("button text")
+                        //     });
+                        // }
+                    }}
+                />
+            </div>
             <div style={{ visibility: "hidden" }} id="contentDiv"></div>
         </>
 
