@@ -1,21 +1,12 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { GiAbstract055 } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { ExpandMore } from "@material-ui/icons";
-import { Box} from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import routes from "../../components/Helpers/Routes";
-import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition } from '../../constants/helpers';
 import {
@@ -27,13 +18,9 @@ import { useData } from "../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 
-const AddExistingProductInventory = ({addProductInventory,handleProductInventoryClose}) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose }) => {
     const toastConfig = useContext(CustomToastContext)
-    const [open, setOpen] = useState(false);
-    const [productInventoryId, setProductInventoryId] = useState(null);
-    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
-    const [deleteRecord, setDeleteRecord] = useState(null)
-    const [anchorEl, setAnchorEl] = useState(null);
+
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -47,11 +34,12 @@ const AddExistingProductInventory = ({addProductInventory,handleProductInventory
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
+        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
     ];
 
     const fetchProductInventory = () => {
@@ -67,10 +55,8 @@ const AddExistingProductInventory = ({addProductInventory,handleProductInventory
                 ...u,
                 id: u._id,
                 productName: u.product?.optionLabel,
-                createdBy: u.createdBy?.user?.concatedName,
-                createdByDate: u.createdBy?.date,
-                updatedBy: u.updatedBy?.user?.concatedName,
-                updatedByDate: u.updatedBy?.date,
+                productCategory: u.productCategory?.optionLabel,
+                warehouse: u.warehouse?.optionLabel,
             }));
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
@@ -110,23 +96,6 @@ const AddExistingProductInventory = ({addProductInventory,handleProductInventory
         return deepFilter;
     };
 
-    const handleDelete = () => {
-        let ids = []
-        if (deleteRecord) {
-            ids.push(deleteRecord._id)
-        }
-        else {
-            ids = selectedRecords.map(d => d._id);
-        }
-        axiosInstance().put(`${productInventory.api}/remove`, { "ids": ids }).then(() => {
-            fetchProductInventory();
-            setShowDeleteConfirmBox(false)
-            setDeleteRecord(null)
-            setAnchorEl(null)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error)
-        });
-    }
 
     const NameRenderer = (params) => (
         <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -165,7 +134,7 @@ const AddExistingProductInventory = ({addProductInventory,handleProductInventory
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={"Add Existing Product"} onClose={handleProductInventoryClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={"Add Serialized Assets"} onClose={handleProductInventoryClose} ></CustomDialogHeader>
             <div className="listing-grid p-3">
                 <Box mb={2}>
                     <Grid container >
