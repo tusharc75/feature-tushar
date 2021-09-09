@@ -182,7 +182,7 @@ export default function DeliveryTicketDetail(props) {
   // };
 
   const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path} / ${params.data._id}`}>
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
