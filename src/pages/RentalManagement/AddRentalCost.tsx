@@ -44,6 +44,16 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
     </Link>
   );
 
+  const LinkRenderer = (params) => (
+    <span className="link" title={params.value}
+      onClick={() => {
+      setAddRentalCostData(params.data)
+      setAddRentalCostDialog(true)
+    }}>
+      {params.value}
+    </span>
+  );
+
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="Add Rental Cost">
@@ -63,12 +73,13 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    linkRenderer: LinkRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "linkRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
