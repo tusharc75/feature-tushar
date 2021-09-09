@@ -196,7 +196,7 @@ const Steps = (props) => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                disabled={currentStep === 3 || currentStep === 0}
+                                                disabled={currentStep === 4 || currentStep === 0}
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
@@ -226,7 +226,7 @@ const Steps = (props) => {
                                                     <div>
                                                         <IconButton
                                                             color="primary"
-                                                            disabled={currentStep === 3}
+                                                            disabled={currentStep === 4}
                                                             onClick={() => {
                                                                 setCurrentStep(currentStep + 1)
                                                             }}
@@ -257,7 +257,7 @@ const Steps = (props) => {
                                                                     setCurrentStep(currentStep + 1)
                                                                 }}
                                                                 size="small"
-                                                                disabled={currentStep === 3}
+                                                                disabled={currentStep === 4}
                                                             >
                                                                 Next
                                                             </IconButton>
@@ -313,7 +313,7 @@ const Steps = (props) => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
                                                     size="small"
-                                                    disabled={currentStep === 3}
+                                                    disabled={currentStep === 4}
                                                     endIcon={<IoIosArrowDroprightCircle />}
                                                 >
                                                     Next

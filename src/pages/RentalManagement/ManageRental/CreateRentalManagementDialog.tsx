@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { Formik, Form } from "formik";
-import { Box, Button, Grid, IconButton, Tooltip } from "@material-ui/core";
+import { Box, Button, Grid } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
@@ -11,11 +10,8 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema } from "../../../constants/helpers";
-import AddIcon from "@material-ui/icons/AddCircle";
-import InfoIcon from "@material-ui/icons/Info";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
-
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 

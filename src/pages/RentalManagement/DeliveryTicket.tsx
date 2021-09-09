@@ -1,16 +1,16 @@
 import Box from "@material-ui/core/Box/Box";
 import TextField from "@material-ui/core/TextField/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import { useState, useEffect, Fragment, useContext, useReducer } from "react";
+import { useState, useEffect, useReducer } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button } from "@material-ui/core";
 
-const DeliveryTicket = ({ warehouselist, productInventory,currentStep, handleDeliveryTicketDialog }) => {
+const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog }) => {
 
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
@@ -20,10 +20,28 @@ const DeliveryTicket = ({ warehouselist, productInventory,currentStep, handleDel
   useEffect(() => {
 
     if (warehouse) {
-      dispatch({ type: "initialize", data: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length });
+      dispatch({
+        type: "initialize", data: productInventory.map((u) => ({
+          ...u,
+          costPerDay: u.costing?.costPerDay,
+          totalCost: u.costing?.totalCost,
+          startDate: u.costing?.startDate,
+          dueDate: u.costing?.dueDate,
+          hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
+        })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
+      });
     }
     else {
-      dispatch({ type: "initialize", data: productInventory, count: productInventory.length });
+      dispatch({
+        type: "initialize", data: productInventory.map((u) => ({
+          ...u,
+          costPerDay: u.costing?.costPerDay,
+          totalCost: u.costing?.totalCost,
+          startDate: u.costing?.startDate,
+          dueDate: u.costing?.dueDate,
+          hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
+        })), count: productInventory.length
+      });
     }
     // eslint-disable-next-line
   }, [warehouse, productInventory]);
@@ -35,12 +53,19 @@ const DeliveryTicket = ({ warehouselist, productInventory,currentStep, handleDel
   );
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    commonRenderer: CommonRenderer,
+    dateRenderer: DateRenderer,
   };
   const columns = [
     { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "CommonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "commonRenderer" },
+    { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
+    { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
+    { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
+    { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
+
   ];
   return (<>
 
@@ -69,7 +94,7 @@ const DeliveryTicket = ({ warehouselist, productInventory,currentStep, handleDel
           color="primary"
           type="submit"
           size="small"
-          disabled={!warehouse || (selectedRecords.length === 0) || currentStep === 3}
+          disabled={(selectedRecords.length === 0) || currentStep === 4}
           onClick={() => {
             handleDeliveryTicketDialog(selectedRecords, warehouse)
           }}
