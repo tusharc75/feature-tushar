@@ -130,7 +130,6 @@ const CreateRentalManagementDialog = (props) => {
         }
         else {
             axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: {data} }) => {
-                console.log(data)
                 history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
                 setLoading(false);
                 onSuccess(data)
