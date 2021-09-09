@@ -46,7 +46,7 @@ export default function DeliveryTicketDetail(props) {
   const [gridApi, setGridApi] = useState(null);
   const [showActivity, setActivityShow] = useState(true);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, page, limit, pageSizes } = state;
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -177,9 +177,9 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  const handleOpenUpdateDialog = () => {
-    setOpenUpdateDialog(true);
-  };
+  // const handleOpenUpdateDialog = () => {
+  //   setOpenUpdateDialog(true);
+  // };
 
   const NameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path} / ${params.data._id}`}>
