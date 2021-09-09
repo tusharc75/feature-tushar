@@ -1635,14 +1635,6 @@ export default function ManageQuoteDialog({
                                               values.customerAccountName
                                             )
                                           }
-                                        // onChange={(e, value) => {
-                                        //   setFieldValue(
-                                        //     field.fieldName,
-                                        //     value && value.optionValue
-                                        //       ? value.optionValue
-                                        //       : ""
-                                        //   );
-                                        // }}
                                         />
                                         : (
                                           <FormTypes
