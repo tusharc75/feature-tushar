@@ -129,8 +129,8 @@ const CreateRentalManagementDialog = (props) => {
             });
         }
         else {
-            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: {data} }) => {
-                history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+            axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: {data}}) => {
+                history.push(`${routes.rentalManagementDetail.path}/${data}`)
                 setLoading(false);
                 onSuccess(data)
                 toastConfig.setToastConfig({
