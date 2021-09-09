@@ -300,7 +300,7 @@ const Steps = (props) => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
                                                     size="small"
-                                                    disabled={currentStep === 4}
+                                                    disabled={currentStep >=3}
                                                     endIcon={<IoIosArrowDroprightCircle />}
                                                 >
                                                     Next
