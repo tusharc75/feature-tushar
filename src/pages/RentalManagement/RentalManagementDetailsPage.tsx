@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton, Autocomplete } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
+import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -18,18 +19,19 @@ import CustomAgGrid, { intialState, reducer } from "../../components/AgGridCompo
 import { Link } from 'react-router-dom'
 import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
 import TextField from "@material-ui/core/TextField/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
 import { Field, FieldArray, Form, Formik } from "formik";
 import Container from "@material-ui/core/Container/Container";
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import AddRentalCost from "./AddRentalCost";
+import Activity from "../../components/Activity";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
 
@@ -42,7 +44,7 @@ const RentalManagementDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -58,7 +60,12 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [showActivity, setActivityShow] = useState(true);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
+
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
 
   useEffect(() => {
     if (id) {
@@ -70,6 +77,10 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
+    if (currentStep === 3 && additionalCost.length > 0) {
+      handleSaveAdditionalCost(additionalCost)
+    }
+
     if (currentStep > 0) {
       axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status `, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
@@ -78,6 +89,46 @@ const RentalManagementDetailsPage = () => {
     }
     // eslint-disable-next-line
   }, [currentStep]);
+
+  useEffect(() => {
+    const updateStatus = () => {
+      const leftItems = [];
+      for (const product of productInventory) {
+        if (!product.deliveryTicket) {
+          leftItems.push(product.id)
+        }
+      }
+
+      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+        if (!rentalManagementData.status.includes("Ready to Ship")) {
+          const tempUpdateData = {
+            "_id": rentalManagementData._id,
+            "rentalJobName": rentalManagementData.rentalJobName,
+            // "rentalJobID":rentalManagementData.rentalJobID,
+            // "customerAccount": rentalManagementData.customerAccount.optionValue,
+            // "customerContact": rentalManagementData.customerContact.optionValue,
+            // "shippingAddress": rentalManagementData.shippingAddress,
+            // "currency": rentalManagementData.currency,
+            // "rentalStartDate": rentalManagementData.rentalStartDate,
+            // "rentalEndDate": rentalManagementData.rentalEndDate,
+            // "jobDescription": rentalManagementData.jobDescription,
+            "status": "Ready to Ship",
+            // "owner": rentalManagementData.owner.optionValue,
+            // "collaborator": rentalManagementData.collaborator,
+
+          }
+          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+            .then(() => {
+              fetchRentalManagementData()
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+        }
+      }
+    }
+
+    updateStatus()
+  }, [currentStep, productInventory])
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -89,8 +140,8 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0 } }) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
-        fetchProductInventory()
-        fetchRentalManagementData()
+        // fetchProductInventory()
+        // fetchRentalManagementData()
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -102,7 +153,6 @@ const RentalManagementDetailsPage = () => {
   }
 
   const fetchRentalManagementData = async () => {
-    setLoadingDetails(true);
     try {
       const {
         data: { data },
@@ -120,10 +170,9 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
-
       setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
-
     } catch (error) {
+      setLoadingDetails(false)
       toastConfig.setToastConfig(error);
     }
   };
@@ -299,10 +348,9 @@ const RentalManagementDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-
-        <div className="detail-container">
-          <Grid container spacing={1} className="bg-white">
-            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
+            <div>
               <Paper>
                 {!rentalManagementData ? (
                   <div>
@@ -328,18 +376,17 @@ const RentalManagementDetailsPage = () => {
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
-                    {
-                      permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenUpdateDialog}
-                        >
-                          Edit
-                        </Button>
-                      )
-                    }
+                    {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
+                    )}
+
                   </DetailsPageHeader>
                 )}
 
@@ -356,9 +403,13 @@ const RentalManagementDetailsPage = () => {
                   )}
                 </Box>
               </Paper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <Steps steps={rentalProcessSteps.slice(0, 4)} currentStep={currentStep} setCurrentStep={setCurrentStep} />
+            </div>
+            <div>
+              <Steps
+                steps={rentalProcessSteps.slice(0, 4)}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+              />
               {(currentStep === 0) && (
                 <>
                   <Button
@@ -383,12 +434,22 @@ const RentalManagementDetailsPage = () => {
                       allowAction={true}
                       loading={loading}
                     />
-                    : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                    : <Box
+                      p={2}
+                      height={500}
+                      bgcolor="white">
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
                   }
                 </>
               )}
               {(currentStep === 1) && (
-                <AddRentalCost productInventory={productInventory} rentalId={id} currencySymbol={currencySymbol} fetchProductInventory={fetchProductInventory} />
+                <AddRentalCost
+                  productInventory={productInventory}
+                  rentalId={id}
+                  currencySymbol={currencySymbol}
+                  fetchProductInventory={fetchProductInventory}
+                />
               )}
               {(currentStep === 2) && (
                 <Formik
@@ -398,6 +459,7 @@ const RentalManagementDetailsPage = () => {
                   {({ values }) => (
                     <>
                       <Form>
+                        {setAdditionalCost(values.additionalCost)}
                         <Container className="p-0">
                           <Grid
                             container
@@ -443,13 +505,12 @@ const RentalManagementDetailsPage = () => {
                                             <Grid item md={5}>
 
                                               <Autocomplete
-                                                id="combo-box-demo"
                                                 size="small"
                                                 style={{ minWidth: 200 }}
                                                 value={userVal.type}
                                                 options={costTypeList}
                                                 getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(event, newValue) => {
+                                                onChange={(_, newValue) => {
                                                   arrayHelpers.replace(index, {
                                                     ...values.additionalCost[index],
                                                     ["type"]: newValue,
@@ -460,6 +521,7 @@ const RentalManagementDetailsPage = () => {
                                                   {...params}
                                                   variant="outlined"
                                                   name="nameField"
+                                                  label="Cost Type"
                                                   required
                                                 />}
                                               />
@@ -534,25 +596,22 @@ const RentalManagementDetailsPage = () => {
                         </Container>
                       </Form>
 
-                      <Grid container >
-                        <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
-                          {/* <div>
-                          {`Total Cost :  `}
-                        </div> */}
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            size="small"
+                      {/* <Grid container >
+                      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          type="submit"
+                          size="small"
 
-                            onClick={() => {
-                              handleSaveAdditionalCost(values.additionalCost)
-                            }}
-                          >
-                            {"Save"}
-                          </Button>
-                        </Grid>
+                          onClick={() => {
+                            handleSaveAdditionalCost(values.additionalCost)
+                          }}
+                        >
+                          {"Save"}
+                        </Button>
                       </Grid>
+                    </Grid> */}
                     </>
                   )}
                 </Formik>
@@ -561,8 +620,47 @@ const RentalManagementDetailsPage = () => {
               {(currentStep === 3 || currentStep === 4) && (
                 <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
               )}
-            </Grid>
-          </Grid>
+            </div>
+          </div>
+          <div className="position-relative">
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </a>}
+                <Grid container>
+                  <Grid item xs={12}>
+                    {rentalManagementData && (
+                      <div>
+                        <Activity
+                          resourceId={rentalManagementData._id}
+                          resource={routes.rentalManagement}
+                          restrictedAddActivities={
+                            permissions &&
+                              permissions["rentalManagement"] &&
+                              permissions["rentalManagement"].isUpdate
+                              ? []
+                              : ["Attachment", "Case"]
+                          }
+                          relatedTo={[
+                            {
+                              type: rentalManagement,
+                              referenceId: rentalManagementData._id,
+                              access: true,
+                            },
+                          ]}
+                          handleActivityRefresh={() => { }}
+                          emails={[]}
+                        />
+                      </div>
+                    )}
+                  </Grid>
+                </Grid>
+              </Paper> :
+              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </a>}
+          </div>
         </div>
 
       </Fragment>
@@ -578,19 +676,18 @@ const RentalManagementDetailsPage = () => {
         />
       )}
       {addExistingProductDialog && <AddExistingProductInventory addProductInventory={handleAddProductInventory} handleProductInventoryClose={() => { setAddExistingProductDialog(false) }} />}
-      {
-        openUpdateDialog && (
-          <ManageRentalManagementDialog
-            isClone={false}
-            open={openUpdateDialog}
-            rentalManagementId={id}
-            onClose={() => setOpenUpdateDialog(false)}
-            onSuccess={() => {
-              setOpenUpdateDialog(false);
-              fetchRentalManagementData();
-            }}
-          />
-        )}
+      {openUpdateDialog && (
+        <ManageRentalManagementDialog
+          isClone={false}
+          open={openUpdateDialog}
+          rentalManagementId={id}
+          onClose={() => setOpenUpdateDialog(false)}
+          onSuccess={() => {
+            setOpenUpdateDialog(false);
+            fetchRentalManagementData();
+          }}
+        />
+      )}
       {showDeliveryTicketDialog &&
         <ManageDeliveryTicket
           onClose={() => setShowDeliveryTicketDialog(false)}
@@ -608,4 +705,3 @@ const RentalManagementDetailsPage = () => {
 };
 
 export default RentalManagementDetailsPage;
-
