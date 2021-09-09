@@ -27,7 +27,7 @@ import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
+import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import AddRentalCost from "./AddRentalCost";
 
@@ -58,7 +58,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-
+  const [allowedToEdit, setAllowedToEdit] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -120,6 +120,9 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
+
+      setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
+
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -325,17 +328,18 @@ const RentalManagementDetailsPage = () => {
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
-                    {permissions?.rentalManagement?.isUpdate && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                      >
-                        Edit
-                      </Button>
-                    )}
-
+                    {
+                      permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                        >
+                          Edit
+                        </Button>
+                      )
+                    }
                   </DetailsPageHeader>
                 )}
 
@@ -574,17 +578,19 @@ const RentalManagementDetailsPage = () => {
         />
       )}
       {addExistingProductDialog && <AddExistingProductInventory addProductInventory={handleAddProductInventory} handleProductInventoryClose={() => { setAddExistingProductDialog(false) }} />}
-      {openUpdateDialog && (
-        <CreateRentalManagementDialog
-          open={openUpdateDialog}
-          rentalManagementId={id}
-          onClose={() => setOpenUpdateDialog(false)}
-          onSuccess={() => {
-            setOpenUpdateDialog(false);
-            fetchRentalManagementData();
-          }}
-        />
-      )}
+      {
+        openUpdateDialog && (
+          <ManageRentalManagementDialog
+            isClone={false}
+            open={openUpdateDialog}
+            rentalManagementId={id}
+            onClose={() => setOpenUpdateDialog(false)}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchRentalManagementData();
+            }}
+          />
+        )}
       {showDeliveryTicketDialog &&
         <ManageDeliveryTicket
           onClose={() => setShowDeliveryTicketDialog(false)}
