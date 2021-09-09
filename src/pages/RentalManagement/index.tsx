@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { Grid, Chip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -14,7 +13,6 @@ import {
   isObjectEmpty,
   customerAccount,
   supplierAccount,
-  formatAmountWithCurrency,
   gridLoadingTimeout,
   rentalManagement,
 } from "../../constants/helpers";

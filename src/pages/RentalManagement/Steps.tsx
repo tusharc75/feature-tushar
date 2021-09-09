@@ -1,26 +1,16 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
 import IconButton from '@material-ui/core/IconButton';
-
 import {
     StepIconProps,
     Grid,
-    Dialog,
-    ListItemText,
-    ListItem,
-    List,
-    ListItemIcon,
-    Checkbox,
-    TextField,
 } from "@material-ui/core";
 import {
     IoIosArrowDroprightCircle,
@@ -29,9 +19,6 @@ import {
 import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
-import { FcCancel } from "react-icons/fc";
-import { FcClock } from "react-icons/fc";
-import { FcApproval } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
 
 import { isMobile } from "react-device-detect";
