@@ -49,7 +49,7 @@ const ProductInventory = () => {
 
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "CommonRenderer" },
@@ -82,7 +82,8 @@ const ProductInventory = () => {
                 status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 productCategory: u.productCategory?.optionLabel,
-                productName: u.product?.optionLabel,
+                product: u.product?.optionLabel,
+                productId: u.product?.optionValue,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
@@ -150,6 +151,13 @@ const ProductInventory = () => {
         </Link>
     );
 
+    const ProductRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
+            {params.value}
+            {console.log(params.data)}
+        </Link>
+    );
+
 
     const ActionsRenderer = params => (
         <>
@@ -204,6 +212,7 @@ const ProductInventory = () => {
 
     const frameworkComponents = {
         createdByRenderer: CreatedByRenderer,
+        productRenderer: ProductRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         nameRenderer: NameRenderer,
