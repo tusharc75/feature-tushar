@@ -15,6 +15,7 @@ import { FaEye } from "react-icons/fa";
 import { BsPerson } from "react-icons/bs";
 import { BiFace } from "react-icons/bi";
 import { Delete } from "@material-ui/icons";
+import "./style.scss";
 
 function DisplayData({ key, label, value, icon }) {
   return (
@@ -44,19 +45,22 @@ function RelatedContacts({
 
   return (
     <div>
+        <div className={"detail_main"}>
       {contacts && contacts.length ? (
         <>
           {contacts.map((obj, index) => {
             return (
               <>
-                <div className="omsAccordian accordOpportunity">
+
+                <div className="detailFromCard">
                   <Card
                     key={obj?._id ?? `contact${index}`}
                     className="detailCard"
-                  >
-                    <CardContent className="detailListing">
-                      <Grid container className="detailCardHeader">
-                        <Grid item xs={11}>
+                   >
+                    <CardContent className="detail_view" >
+                      <Grid container className="detail_header">
+                        <Grid
+                        >
                           <Link
                             className="account_name_link f_size"
                             to={`/${contactRoute}/detail/${obj._id}`}
@@ -64,8 +68,10 @@ function RelatedContacts({
                             {`${obj.firstName || ""}  ${obj.lastName || ""}`}
                           </Link>
                         </Grid>
-                        <Grid item xs={1}>
+
+                        <Grid item xs={1}  className={"delete_contact"}>
                           <IconButton
+                              className={"delete_contact_icon"}
                             title={`Remove contact: ${obj?.firstName} ${obj?.lastName}`}
                             aria-haspopup="true"
                             color="primary"
@@ -79,17 +85,18 @@ function RelatedContacts({
                         </Grid>
                       </Grid>
                       <Grid container>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid item xs={6} sm={6} md={6} className={"detail_account"}>
                           {
                             <DisplayData
                               key={index}
                               label="Account"
                               value={accountName || "-"}
                               icon={<BsPerson size={15} />}
+
                             />
                           }
                         </Grid>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid item xs={12} sm={6} md={6} className={"detail_account"}>
                           {
                             <DisplayData
                               key={index}
@@ -102,29 +109,38 @@ function RelatedContacts({
                       </Grid>
                     </CardContent>
                   </Card>
-                </div>
+                  </div>
+
+
               </>
+
             );
           })}
-          <Box margin={1} />
-          <Box
-            className="btn-view gap-1"
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            onClick={() =>
-              history.push(`/${contactRoute}`, {
-                accountId: accountId,
-                accountName: accountName,
-              })
-            }
-          >
-            <FaEye /> View All &#8599;
-          </Box>
+
         </>
       ) : null}
+        </div>
+        <div >
+            <Box margin={1} />
+            <Box
+                className="btn-view gap-1"
+                p={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                onClick={() =>
+                    history.push(`/${contactRoute}`, {
+                        accountId: accountId,
+                        accountName: accountName,
+                    })
+                }
+            >
+                <FaEye /> View All &#8599;
+            </Box>
+        </div>
     </div>
+
+
   );
 }
 export default RelatedContacts;
