@@ -72,7 +72,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   return (<>
 
     <Grid container spacing={3}>
-      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
+      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end gap-2">
         {/* <Autocomplete
           id="combo-box-demo"
           size="small"
@@ -105,7 +105,8 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         </Button>
       </Grid>
     </Grid>
-    <Grid item xs={12} md={12} sm={12} >
+  
+    <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
         <CustomAgGrid

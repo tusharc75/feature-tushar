@@ -228,7 +228,6 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     ));
   }, [isUpdate]);
 
-  console.log(lookupOptions)
   return (
     <Box marginTop={2}>
       <Autocomplete
