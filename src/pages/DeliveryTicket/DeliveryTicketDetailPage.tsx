@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
-import { useHistory, useParams, useLocation } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { Paper, Box, Grid, Button, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -32,18 +32,16 @@ const mappedStatus = {
 
 export default function DeliveryTicketDetail(props) {
   const history = useHistory();
-  const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, selectedEntity }
   }: any = useData();
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
   const { deliveryTicketApi } = deliveryTicket;
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [updateLoading, setUpdateLoading] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const [showActivity, setActivityShow] = useState(true);
@@ -205,17 +203,14 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const handleChangeStatus = (label) => {
-    setUpdateLoading(true)
     if (mappedStatus[label]) {
       const fieldsDataForUpdate = deliveryTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
       values["status"] = mappedStatus[label]
       values["_id"] = deliveryTicketData._id
       axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
-        setUpdateLoading(false)
         fetchDeliveryTicketData()
       }).catch((error) => {
-        setUpdateLoading(false)
         toastConfig.setToastConfig(error);
       });
     }
