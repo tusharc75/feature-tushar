@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useReducer, useRef } from "react";
+import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -11,16 +11,15 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, productInventory, rentalManagement } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
 import TextField from "@material-ui/core/TextField/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import { Field, FieldArray, Form, Formik, FormikProps } from "formik";
+import { Field, FieldArray, Form, Formik } from "formik";
 import Container from "@material-ui/core/Container/Container";
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
@@ -30,6 +29,9 @@ import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
+import AddRentalCost from "./AddRentalCost";
+
+const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,6 +57,8 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
+
 
   useEffect(() => {
     if (id) {
@@ -66,7 +70,11 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep === 2) {
+    if (currentStep > 0) {
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status `, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
     }
     // eslint-disable-next-line
   }, [currentStep]);
@@ -78,10 +86,11 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleSaveAdditionalCost = (values) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount } }) })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0 } }) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
+        fetchRentalManagementData()
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -104,7 +113,13 @@ const RentalManagementDetailsPage = () => {
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
       setAdditionalCost(data?.additionalCost?.map(d => { return { "id": d?._id, "type": d.type, "amount": d?.value } }))
+      setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
+      setCurrencySymbol(
+        getUniqueCurrencies().find(
+          (d) => d.currencyCode === data["currency"]
+        )?.symbolNative
+      );
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -136,7 +151,7 @@ const RentalManagementDetailsPage = () => {
     });
   }
 
-  const handleDeliveryTicketDialog = (selectedProductInventory,warehouse) => {
+  const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
     setProductInventoryForDeliveryTicket(selectedProductInventory)
     setWarehouseForDeliveryTicket(warehouse)
     setShowDeliveryTicketDialog(true)
@@ -151,6 +166,8 @@ const RentalManagementDetailsPage = () => {
       {params.value}
     </Link>
   );
+
+
 
   const ActionsRenderer = (params) => (
     <>
@@ -168,33 +185,35 @@ const RentalManagementDetailsPage = () => {
   );
 
   const frameworkComponents = {
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
     nameRenderer: NameRenderer,
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
+    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
   ];
 
   const fetchProductInventory = () => {
     dispatch({ type: "loading", loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
         productName: u.product?.productName,
+        productCategory: u.product?.productCategory?.optionLabel,
+        warehouse: u.inventory?.warehouse?.optionLabel,
+        status: u.inventory?.status,
         assetNumber: u.inventory?.assetNumber,
         serialNumber: u.inventory?.serialNumber,
       }));
-      setProductInventory(data.data)
+      fetchDeliveryTicket(data.data);
 
       let tempWareHouse = []
       data.data.map(d => {
@@ -202,20 +221,51 @@ const RentalManagementDetailsPage = () => {
           tempWareHouse.push(d.inventory.warehouse)
         }
       })
+      if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
+        setCurrentStep(4)
+        axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      }
       setWarehouseList(tempWareHouse)
       dispatch({ type: "initialize", data: data.data, count: data.count });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
-
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
     });
   };
 
+  const fetchDeliveryTicket = (values) => {
+    setProductInventory([])
+    axiosInstance()
+      .get(`${rentalManagement.rentalManagementApi}/${id}/delivery-ticket `)
+      .then(({ data }) => {
+        let tempProductInventory = values
+        data.data.map(obj => {
+          tempProductInventory.map((d, index) => {
+            if (obj.productInventory.some(p => d.id === p.optionValue)) {
+              tempProductInventory[index]["deliveryTicket"] = obj.deliveryJobName
+            }
+          })
+
+        })
+        setProductInventory(tempProductInventory)
+        if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
+          setCurrentStep(4)
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const handleAddProductInventory = (productInventoryArray) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": productInventoryArray.map(d => d._id) })
+    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": tempProductArray })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -302,7 +352,7 @@ const RentalManagementDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Steps steps={["New", "Additional Cost", "Delivery Ticket"]} currentStep={currentStep} setCurrentStep={setCurrentStep} />
+            <Steps steps={rentalProcessSteps.slice(0, 4)} currentStep={currentStep} setCurrentStep={setCurrentStep} />
             {(currentStep === 0) && (
               <>
                 <Button
@@ -311,7 +361,7 @@ const RentalManagementDetailsPage = () => {
                   size="small"
                   onClick={() => { setAddExistingProductDialog(true) }}
                 >
-                  Add Existing
+                  Add Serialized Assets
                 </Button>
                 {columns ?
                   <CustomAgGrid
@@ -332,6 +382,9 @@ const RentalManagementDetailsPage = () => {
               </>
             )}
             {(currentStep === 1) && (
+              <AddRentalCost productInventory={productInventory} rentalId={id} currencySymbol={currencySymbol} fetchProductInventory={fetchProductInventory} />
+            )}
+            {(currentStep === 2) && (
               <Formik
                 initialValues={{ additionalCost: additionalCost }}
                 enableReinitialize={true}
@@ -412,11 +465,11 @@ const RentalManagementDetailsPage = () => {
                                                 InputProps={{
                                                   startAdornment: (
                                                     <InputAdornment position="start">
-                                                      {/* {currencySymbol ? currencySymbol : ""} */}
+                                                      {currencySymbol ? currencySymbol : ""}
                                                     </InputAdornment>
                                                   ),
                                                 }}
-                                                // startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
+                                                startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
                                                 variant="outlined"
                                                 type="text"
                                                 size="small"
@@ -499,8 +552,8 @@ const RentalManagementDetailsPage = () => {
               </Formik>
 
             )}
-            {(currentStep === 2) && (
-              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
+            {(currentStep === 3 || currentStep === 4) && (
+              <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
             )}
           </Grid>
         </Grid>
@@ -532,10 +585,12 @@ const RentalManagementDetailsPage = () => {
       {showDeliveryTicketDialog &&
         <ManageDeliveryTicket
           onClose={() => setShowDeliveryTicketDialog(false)}
-          productInventoryForDeliveryTicket ={productInventoryForDeliveryTicket}
+          productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
           warehouseId={warehouseForDeliveryTicket}
+          rentalData={rentalManagementData}
           onSuccess={() => {
             setShowDeliveryTicketDialog(false)
+            fetchProductInventory()
           }}
         />
       }

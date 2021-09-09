@@ -21,9 +21,9 @@ import { kebabCase, lowerCase } from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdLocalActivity } from "react-icons/md";
-import { RiFolderSettingsFill } from "react-icons/ri";
-import { RiAccountPinCircleFill } from "react-icons/ri";
+import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
+import { AiFillSetting } from "react-icons/ai"
 
 import { AccountCircle } from "@material-ui/icons";
 const drawerWidth = 240;
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   drawerOpen: {
-    overflowY: "auto",
+    overflowY: "hidden",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
@@ -284,7 +284,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         {
                           iconMapping.find((mapping) => {
                             return mapping.key === listItem.section;
-                          })?.icon
+                          })?.icon || <AiFillSetting size={18} className="sidebar-icon" />
                         }
                       </ListItemIcon>
                       <ListItemText primary={listItem.section} />

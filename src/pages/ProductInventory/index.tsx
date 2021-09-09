@@ -48,16 +48,18 @@ const ProductInventory = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "CommonRenderer" },
         { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "CommonRenderer" },
+        { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
+        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -74,12 +76,14 @@ const ProductInventory = () => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                serialNumber: u.serialNumber,
                 inServiceDate: u.inServiceDate,
                 bornInDate: u.bornInDate,
-                status: u.status?.optionLabel,
+                status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 productCategory: u.productCategory?.optionLabel,
-                productName: u.product?.optionLabel,
+                product: u.product?.optionLabel,
+                productId: u.product?.optionValue,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
@@ -147,6 +151,13 @@ const ProductInventory = () => {
         </Link>
     );
 
+    const ProductRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
+            {params.value}
+            {console.log(params.data)}
+        </Link>
+    );
+
 
     const ActionsRenderer = params => (
         <>
@@ -201,6 +212,7 @@ const ProductInventory = () => {
 
     const frameworkComponents = {
         createdByRenderer: CreatedByRenderer,
+        productRenderer: ProductRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         nameRenderer: NameRenderer,
@@ -242,8 +254,10 @@ const ProductInventory = () => {
                                 size="small"
                                 value={search}
                             />
-
-                            {/* {permissions?.productInventory?.isDelete &&
+                            {permissions?.productInventory?.isCreate &&
+                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                            }
+                            {permissions?.productInventory?.isDelete &&
                                 <Button
                                     className={styles.action_submit_btn}
                                     variant="outlined"
@@ -254,8 +268,8 @@ const ProductInventory = () => {
                                     aria-controls="action-menu"
                                 >Actions <ExpandMore />
                                 </Button>
-                            } */}
-                            {/* <Menu
+                            }
+                            <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
                                 getContentAnchorEl={null}
@@ -268,7 +282,7 @@ const ProductInventory = () => {
                                 onClose={closeActions}
                             >
                                 <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu> */}
+                            </Menu>
                         </Box>
                     </Grid>
                 </Grid>

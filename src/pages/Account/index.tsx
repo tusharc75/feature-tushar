@@ -203,7 +203,7 @@ export default function Account(props) {
     ) : (
       <NoDataCell />
     );
-    
+
 
   const ParentAccountRenderer = (params) =>
     params.value ? (

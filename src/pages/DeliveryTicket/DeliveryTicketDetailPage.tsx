@@ -1,19 +1,30 @@
-import React, { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
+import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { Paper, Box, Grid } from "@material-ui/core";
+import { Paper, Box, Grid, Button, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
-import { yyyyMMDD, formatAmountWithCurrency, deliveryTicket } from "../../constants/helpers";
-import Activity from "../../components/Activity";
+import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
 import axiosInstance from "../../axios/axiosInstance";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import { isMobile, isTablet } from "react-device-detect";
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import QuoteDetailPage from './DeliveryDetailPage';
+import DetailsPage from "../../components/Shared/DetailsPage";
+import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import {
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CommonRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { Link } from "react-router-dom";
+import { isObjectEmpty, productInventory, gridLoadingTimeout } from "../../constants/helpers"
+
+const mappedStatus = {
+  "Start Delivery": "In-Transit",
+  "Sign-Off": "Delivered"
+}
 
 export default function DeliveryTicketDetail(props) {
   const history = useHistory();
@@ -21,35 +32,58 @@ export default function DeliveryTicketDetail(props) {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { selectedEntity },
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
   const { deliveryTicketApi } = deliveryTicket;
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [showActivity, setActivityShow] = useState(true);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
   useEffect(() => {
     fetchDeliveryTicketData();
+    getDeliveryTicketFields()
   }, [id]);
 
+  const columns = [
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "commonRenderer" },
+    { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "commonRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+  ];
+
+  const getDeliveryTicketFields = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource["deliveryTicket"]}`)
+      .then(({ data }) => {
+        setDeliveryTicketFields(data.data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
     if (deliveryTicketData) {
-      mainPoint["Account Name"] = deliveryTicketData?.accountName?.optionLabel || "";
-      mainPoint["Expiry Date"] = yyyyMMDD(deliveryTicketData?.closeDate);
-      mainPoint["Estimated Amount"] = deliveryTicketData?.estimatedAmount
-        ? formatAmountWithCurrency(deliveryTicketData?.currency, deliveryTicketData?.estimatedAmount)
-          .shortFormatAmount
-        : "";
-      mainPoint["Quote Owner"] = deliveryTicketData?.owner?.optionLabel || "";
+      mainPoint["Pick-UpDate:"] = yyyyMMDD(deliveryTicketData?.["pick-UpDate"]) || "";
+      mainPoint["Delivery Date"] = yyyyMMDD(deliveryTicketData?.deliveryDate) || "";
+      mainPoint["deliveryPerson"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
     return mainPoint;
-  }, [deliveryTicketData?.accountName, deliveryTicketData?.closeDate, deliveryTicketData?.estimatedAmount, deliveryTicketData?.currency, deliveryTicketData?.owner,]);
-
+  }, [deliveryTicketData?.deliveryJobName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
 
   const fetchDeliveryTicketData = () => {
     if (selectedEntity) {
@@ -58,6 +92,10 @@ export default function DeliveryTicketDetail(props) {
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setDeliveryTicketData(data)
+          if (data?.productInventory && data?.productInventory.length) {
+            fetchProductInventory(data?.productInventory)
+          }
+          setLoading(false);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -66,7 +104,69 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  const handleDeleteQuote = () => {
+  const fetchProductInventory = (productInventories) => {
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+
+    const queryString = getQueryString();
+    axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
+      data.data = data.data.filter((u) => productInventories.indexOf(u?._id) >= 0)
+        ?.map((u) => ({
+          ...u,
+          id: u._id,
+          inServiceDate: u.inServiceDate,
+          bornInDate: u.bornInDate,
+          status: u.status?.optionLabel,
+          warehouse: u.warehouse?.optionLabel,
+          productCategory: u.productCategory?.optionLabel,
+          productName: u.product?.optionLabel,
+          createdBy: u.createdBy?.user?.concatedName,
+          createdByDate: u.createdBy?.date,
+          updatedBy: u.updatedBy?.user?.concatedName,
+          updatedByDate: u.updatedBy?.date,
+        }));
+
+      dispatch({ type: "initialize", data: data.data, count: data.count });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: "loading", loading: false });
+    });
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `? page = ${page} & limit=${limit}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter} & deepFilter=${JSON.stringify(updatedFilters)} & filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter} & sortBy=${sorting[0].colId} & orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter} & search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const handleDeleteLoadingTicket = () => {
     if (deliveryTicketData?._id) {
       axiosInstance()
         .put(`${deliveryTicketApi}/remove?entity=${selectedEntity}`, {
@@ -79,7 +179,7 @@ export default function DeliveryTicketDetail(props) {
             message: data.message,
           });
           history.push({
-            pathname: routes.quoteBuilder.path,
+            pathname: routes.deliveryTicket.path,
           });
           setShowConfirmBox(false);
         })
@@ -92,13 +192,64 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const NameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path} / ${params.data._id}`}>
+      {params.value}
+    </Link>
+  );
+
+  const frameworkComponents = {
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    nameRenderer: NameRenderer,
+    commonRenderer: CommonRenderer,
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  };
+
+  const handleChangeStatus = (label) => {
+    setUpdateLoading(true)
+    if (mappedStatus[label]) {
+      const fieldsDataForUpdate = deliveryTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
+      values["status"] = mappedStatus[label]
+      values["_id"] = deliveryTicketData._id
+      axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
+        setUpdateLoading(false)
+        fetchDeliveryTicketData()
+      }).catch((error) => {
+        setUpdateLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
+
+
+  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Start Delivery" :
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
+
   return (
     <>
       <Fragment>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.deliveryJobName }]} />
+        </Grid >
+        <div className={`detail-container grid-without-activity`} >
           <div>
             <Paper>
               {!deliveryTicketData ? (
@@ -120,11 +271,41 @@ export default function DeliveryTicketDetail(props) {
                 </div>
               ) : (
                 <DetailsPageHeader
-                  heading={deliveryTicketData ? deliveryTicketData.quoteName : ""}
-                  logo={deliveryTicketData?.leadLogo ? deliveryTicketData.leadLogo : undefined}
+                  heading={deliveryTicketData ? deliveryTicketData?.deliveryJobName : ""}
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
+                  {/* {permissions?.deliveryTicket?.isUpdate && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  {(permissions?.deliveryTicket?.isDelete &&
+                    deliveryTicketData?.createdBy?.user?._id === user?.user._id) && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => setShowConfirmBox(true)}
+                      >
+                        Delete
+                      </Button>
+                    )} */}
+                  {
+                    label !== "" ?
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleChangeStatus(label)}>
+                        {label}
+                      </Button> : null
+                  }
                 </DetailsPageHeader>
               )}
 
@@ -142,61 +323,77 @@ export default function DeliveryTicketDetail(props) {
                 </Box>
               ) : (
                 <>
-                  {(deliveryTicketData && <QuoteDetailPage
-                    deliveryTicketData={deliveryTicketData}
-                    selectedEntity={selectedEntity}
-                  />)}
+                  {(deliveryTicketData && deliveryTicketFields.length > 0 ?
+                    <DetailsPage
+                      data={deliveryTicketData}
+                      fields={deliveryTicketFields} /> : null
+                  )}
+                  {
+                    dataRows && dataRows.length ?
+                      <>
+                        <Grid container>
+                          <Grid item xs={12} alignItems='center'>
+                            <Box
+                              component="div"
+                              display="flex"
+                              alignItems="center"
+                              flexGrow={1}
+                            >
+                              <Box padding="5px">
+                                <Typography variant="subtitle1">
+                                  Product Inventory
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} alignItems='center'>
+                            <CustomAgGrid
+                              allowSelection={false}
+                              allowAction={false}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameworkComponents}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              actionWidth={150}
+                              loading={false}
+                              renderedFrom="deliveryDetailPage"
+                            />
+                          </Grid>
+                        </Grid>
+                      </>
+                      : null
+                  }
+
                 </>
               )}
             </Paper>
           </div>
-          <div className="position-relative">
-            {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </a>}
-                {!deliveryTicketData ? (
-                  <Box>
-                    <Skeleton variant="text" width="100px" height="25px" />
-                    <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Skeleton key={i} width="100%" height="50px" />
-                    ))}
-                  </Box>
-                ) : (
-                  <div>
-                    <Activity
-                      resourceId={deliveryTicketData?._id}
-                      resource={deliveryTicket.deliveryTicketResource}
-                      restrictedAddActivities={["Attachment", "Case"]}
-                      relatedTo={[
-                        {
-                          type: deliveryTicket.deliveryTicketResource,
-                          referenceId: deliveryTicketData?._id,
-                          access: true,
-                        },
-                      ]}
-                      handleActivityRefresh={() => { }}
-                      //   emails={contactsEmailsData}
-                      emails={null}
-                    />
-                  </div>
-                )}
-              </Paper> :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </a>}
-          </div>
         </div>
+
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this Quote?`}
+            message={`Are you sure you want to delete this Loading Ticket ? `}
             onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteQuote}
+            onOk={handleDeleteLoadingTicket}
           />
         ) : null}
+        {openUpdateDialog && (
+          <ManageDeliveryTicketDialog
+            deliveryTicketId={deliveryTicketData?._id}
+            open={openUpdateDialog}
+            onClose={() => setOpenUpdateDialog(false)}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchDeliveryTicketData();
+            }}
+          />
+        )}
 
       </Fragment>
     </>
