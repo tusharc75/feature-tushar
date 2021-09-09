@@ -83,10 +83,6 @@ export default function TinyMCE(props) {
     const editorRef = useRef(null);
 
     useEffect(() => {
-        console.log('width changed', width)
-    }, [width])
-
-    useEffect(() => {
         if (id && ["header", "footer"].indexOf(id) >= 0) {
             setImageDetails({ width: 0, height: 60, alt: "" })
         }

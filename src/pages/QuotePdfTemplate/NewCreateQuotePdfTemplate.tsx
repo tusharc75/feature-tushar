@@ -81,7 +81,6 @@ export default function NewCreateQuotePdfTemplate() {
     const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
-    console.log('isLandscapChecked', isLandscapChecked)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     const onBackButtonEvent = (e) => {
@@ -529,7 +528,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     header: value
                                 }))
                             }}
-                            width={isLandscapChecked ? 793 : 700}
+                            width={isLandscapChecked ? 793 : 725}
                             height={300}
                             initialValue={initialValues?.header}
                             imageOrFileUploadCompletePercentage={(
@@ -554,7 +553,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     aboveTable: value
                                 }))
                             }}
-                            width={isLandscapChecked ? 793 : 700}
+                            width={isLandscapChecked ? 793 : 725}
                             height={400}
                             initialValue={initialValues?.aboveTable}
                             imageOrFileUploadCompletePercentage={(
@@ -576,7 +575,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     belowTable: value
                                 }))
                             }}
-                            width={isLandscapChecked ? 793 : 700}
+                            width={isLandscapChecked ? 793 : 725}
                             height={400}
                             initialValue={initialValues?.belowTable}
                             imageOrFileUploadCompletePercentage={(
@@ -599,7 +598,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     footer: value
                                 }))
                             }}
-                            width={isLandscapChecked ? 793 : 729}
+                            width={isLandscapChecked ? 793 : 725}
                             height={300}
                             initialValue={initialValues?.footer}
                             imageOrFileUploadCompletePercentage={(
