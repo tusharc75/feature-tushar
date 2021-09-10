@@ -327,6 +327,15 @@ export default function NewCreateQuotePdfTemplate() {
                                             {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
                                         </Button>
 
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={()=>history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path })}
+                                        >
+                                            Close
+                                        </Button>
+
                                     </Grid>
                                     {
                                         showConfirmDialog ?
