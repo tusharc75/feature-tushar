@@ -14,7 +14,8 @@ import { gridLoadingTimeout } from "../../constants/helpers";
 import { AddRentalCostDialog } from "./AddRentalCostDialog";
 
 
-const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchProductInventory }) => {
+const AddRentalCost = (props) => {
+  const { productInventory, rentalId, currencySymbol = "", fetchProductInventory, rentalEndDate, rentalStartDate } = props
   const [addRentalCostDialog, setAddRentalCostDialog] = useState(false);
   const [addRentalCostData, setAddRentalCostData] = useState(null);
   const [gridApi, setGridApi] = useState(null);
@@ -119,15 +120,19 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
           }
         </Grid>
       </Grid>
-      {addRentalCostDialog && (<AddRentalCostDialog RentalCostData={addRentalCostData}
-        open={addRentalCostDialog}
-        rentalId={rentalId}
-        currencySymbol={currencySymbol}
-        onClose={() => setAddRentalCostDialog(false)}
-        onSuccess={() => {
-          setAddRentalCostDialog(false);
-          fetchProductInventory()
-        }}
+      {addRentalCostDialog && (
+        <AddRentalCostDialog
+          rentalEndDate={rentalEndDate}
+          rentalStartDate={rentalStartDate}
+          RentalCostData={addRentalCostData}
+          open={addRentalCostDialog}
+          rentalId={rentalId}
+          currencySymbol={currencySymbol}
+          onClose={() => setAddRentalCostDialog(false)}
+          onSuccess={() => {
+            setAddRentalCostDialog(false);
+            fetchProductInventory()
+          }}
       />)}
     </>
   );
