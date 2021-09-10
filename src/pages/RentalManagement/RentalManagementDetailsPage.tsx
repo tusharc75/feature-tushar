@@ -142,11 +142,11 @@ const RentalManagementDetailsPage = () => {
         setAddExistingProductDialog(false)
         // fetchProductInventory()
         // fetchRentalManagementData()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
+        // toastConfig.setToastConfig({
+        //   open: true,
+        //   type: "success",
+        //   message: data.message,
+        // });
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
