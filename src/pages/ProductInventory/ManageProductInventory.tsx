@@ -17,7 +17,7 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSuccess }) => {
+const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
@@ -32,7 +32,8 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
-            const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+            const fieldsDataForCreate = data.filter((obj) => obj.isCreate)
+                .map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             const categoryOptions = data.find(obj => obj?.fieldData.fieldName === "productCategory")?.fieldData.option
 
@@ -60,9 +61,16 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                 });
             }
             else {
+                let createValues = getObjKeys("", fieldsDataForCreate)
+                if (productId && createValues) {
+                    createValues["product"] = productId
+                }
+                if (productCategory && createValues) {
+                    createValues["productCategory"] = productCategory
+                }
                 setInitialData({
                     fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                    values: getObjKeys("", fieldsDataForCreate),
+                    values: createValues
                 });
             }
         })
@@ -111,7 +119,6 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                 setShowConfirmDialog(true)
             }
         }}
-
         fullWidth
     >
         {initialData && initialData.fields.length ?
@@ -147,7 +154,7 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                 <FormTypes
                                                                     isNew={Boolean(productInventoryId)}
                                                                     {...field}
-                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                                    disabled={productId ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
@@ -168,7 +175,7 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                     onChange={(_, val) => {
                                                                         const value = val && val.optionValue ? val.optionValue : ''
                                                                         const label = val && val.optionLabel ? val.optionLabel : ''
-                                                                        const productCategory = val && val.productCategory ? val.productCategory : ''
+                                                                        const productCategory = val && val?.productCategory ? val?.productCategory : ''
                                                                         setFieldValue(field.fieldName, value);
                                                                         setFieldValue("productCategory", productCategory);
                                                                         const productLabel = productCategory ? productCategoryOptions.find(obj => obj.optionValue === productCategory).optionLabel : ""
@@ -182,13 +189,9 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                     <FormTypes
                                                                         isNew={Boolean(productInventoryId)}
                                                                         {...field}
-                                                                        disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                                        disabled={productCategory ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                         values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
                                                                         name={field.fieldName}
-                                                                        type={field.type}
                                                                         options={field.option}
                                                                         setFieldValue={setFieldValue}
                                                                         required={field.required}
