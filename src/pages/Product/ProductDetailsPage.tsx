@@ -465,8 +465,8 @@ const ProductDetailsPage = () => {
 
             {openProductInventoryDialog ?
                 <ManageProductInventory
-                    // productId={productData?._id}
-                    // productCategory={productData?.productCategory}
+                    productId={productData?._id}
+                    productCategory={productData?.productCategory}
                     productInventoryId={null}
                     onClose={() => setOpenProductInventoryDialog(false)}
                     onSuccess={() => {
