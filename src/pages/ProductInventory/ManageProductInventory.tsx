@@ -24,11 +24,11 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [productCategoryOptions, setProductCategoryOptions] = useState([])
-    const desc = {
-        productCategory: "",
-        product: "",
-        serialNumber: ""
-    }
+    // const desc = {
+    //     productCategory: "",
+    //     product: "",
+    //     serialNumber: ""
+    // }
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
@@ -95,10 +95,10 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
     };
 
 
-    const setDescription = (setValue) => {
-        const value = Object.values(desc).join(" - ")
-        setValue("description", value);
-    }
+    // const setDescription = (setValue) => {
+    //     const value = Object.values(desc).join(" - ")
+    //     setValue("description", value);
+    // }
 
     return (<Dialog
         maxWidth="md"
@@ -172,9 +172,9 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                         setFieldValue(field.fieldName, value);
                                                                         setFieldValue("productCategory", productCategory);
                                                                         const productLabel = productCategory ? productCategoryOptions.find(obj => obj.optionValue === productCategory).optionLabel : ""
-                                                                        desc.product = label
-                                                                        desc.productCategory = productLabel
-                                                                        setDescription(setFieldValue)
+                                                                        // desc.product = label
+                                                                        // desc.productCategory = productLabel
+                                                                        // setDescription(setFieldValue)
 
                                                                     }}
                                                                 />
@@ -199,9 +199,9 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                         onChange={(_, val) => {
                                                                             const value = val && val.optionValue ? val.optionValue : ''
                                                                             const label = val && val.optionLabel ? val.optionLabel : ''
-                                                                            desc.productCategory = label
+                                                                            // desc.productCategory = label
                                                                             setFieldValue(field.fieldName, value);
-                                                                            setDescription(setFieldValue)
+                                                                            // setDescription(setFieldValue)
                                                                         }}
                                                                     />
                                                                     : field.fieldName === "serialNumber" ?
@@ -224,8 +224,8 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                             onChange={(e) => {
                                                                                 const val = (e.target.value.trim())
                                                                                 setFieldValue(field.fieldName, val)
-                                                                                desc.serialNumber = val
-                                                                                setDescription(setFieldValue)
+                                                                                // desc.serialNumber = val
+                                                                                // setDescription(setFieldValue)
                                                                             }}
                                                                         />
                                                                         : field.fieldName === "description" ?
