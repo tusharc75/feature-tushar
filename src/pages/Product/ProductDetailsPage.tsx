@@ -387,14 +387,14 @@ const ProductDetailsPage = () => {
                                                  </Box>
                                                  <Box p={1}>
                                                  {selectedWarehouse === warehouse && inventory?.map((i,idx) => (
-                                                     <Fragment key={i._id}>
+                                                     <Box mb={1} key={i._id}>
                                                          <Chip
-                                                             label={i.description}
+                                                             label={`${i?.productCategory.optionLabel} - ${i?.product.optionLabel} - ${i?.serialNumber}` || i.description }
                                                              color="secondary"
                                                              onClick={() => {
                                                                  history.push({pathname: `${routes.productInventoryDetail.path}/${i._id}`})
                                                              }} />
-                                                     </Fragment>
+                                                     </Box>
                                                     ))}
                                                 </Box>
                                             </Box>

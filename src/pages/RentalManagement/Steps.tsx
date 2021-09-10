@@ -105,6 +105,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
 
 const Steps = (props) => {
     const {
+        isNextStep,
         steps,
         currentStep,
         setCurrentStep
@@ -288,28 +289,28 @@ const Steps = (props) => {
                         className="d-flex align-items-center justify-content-center"
                     >
                         {!isMobile && (
-                            <>
+                          <>
+                            <div>
+                              {(
                                 <div>
-                                    {(
-                                        <div>
-                                            {(
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={() => {
-                                                        setCurrentStep(currentStep + 1)
-                                                    }}
-                                                    size="small"
-                                                    disabled={currentStep >=3}
-                                                    endIcon={<IoIosArrowDroprightCircle />}
-                                                >
-                                                    Next
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
+                                  {(
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => {
+                                            setCurrentStep(currentStep + 1)
+                                        }}
+                                        size="small"
+                                        disabled={currentStep >=3 || (currentStep === 0 && isNextStep)}
+                                        endIcon={<IoIosArrowDroprightCircle />}
+                                    >
+                                        Next
+                                    </Button>
+                                  )}
                                 </div>
-                            </>
+                              )}
+                            </div>
+                          </>
                         )}
                     </Grid>
                 </Grid>

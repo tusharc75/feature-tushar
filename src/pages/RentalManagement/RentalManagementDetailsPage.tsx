@@ -91,44 +91,46 @@ const RentalManagementDetailsPage = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    const updateStatus = () => {
+    updateStatus()
+  }, [currentStep, productInventory])
+
+  const updateStatus = () => {
+    if (productInventory.length > 0 && rentalManagementData) {
       const leftItems = [];
-      for (const product of productInventory) {
-        if (!product.deliveryTicket) {
-          leftItems.push(product.id)
-        }
-      }
-
-      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-        if (!rentalManagementData.status.includes("Ready to Ship")) {
-          const tempUpdateData = {
-            "_id": rentalManagementData._id,
-            "rentalJobName": rentalManagementData.rentalJobName,
-            // "rentalJobID":rentalManagementData.rentalJobID,
-            // "customerAccount": rentalManagementData.customerAccount.optionValue,
-            // "customerContact": rentalManagementData.customerContact.optionValue,
-            // "shippingAddress": rentalManagementData.shippingAddress,
-            // "currency": rentalManagementData.currency,
-            // "rentalStartDate": rentalManagementData.rentalStartDate,
-            // "rentalEndDate": rentalManagementData.rentalEndDate,
-            // "jobDescription": rentalManagementData.jobDescription,
-            "status": "Ready to Ship",
-            // "owner": rentalManagementData.owner.optionValue,
-            // "collaborator": rentalManagementData.collaborator,
-
-          }
-          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-            .then(() => {
-              fetchRentalManagementData()
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        }
+    for (const product of productInventory) {
+      if (!product.deliveryTicket) {
+        leftItems.push(product.id)
       }
     }
 
-    updateStatus()
-  }, [currentStep, productInventory])
+    if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+      if (rentalManagementData.status === "New") {
+        const tempUpdateData = {
+          "_id": rentalManagementData._id,
+          "rentalJobName": rentalManagementData.rentalJobName,
+          "rentalJobID":rentalManagementData.rentalJobID,
+          "customerAccount": rentalManagementData.customerAccount.optionValue,
+          "customerContact": rentalManagementData.customerContact.optionValue,
+          "shippingAddress": rentalManagementData.shippingAddress,
+          "currency": rentalManagementData.currency,
+          "rentalStartDate": rentalManagementData.rentalStartDate,
+          "rentalEndDate": rentalManagementData.rentalEndDate,
+          "jobDescription": rentalManagementData.jobDescription,
+          "status": "Ready to Ship",
+          "owner": rentalManagementData.owner.optionValue,
+          // "collaborator": rentalManagementData.collaborator,
+
+        }
+        axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+          .then(() => {
+            fetchRentalManagementData()
+          }).catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
+    }
+    }
+  }
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -142,11 +144,11 @@ const RentalManagementDetailsPage = () => {
         setAddExistingProductDialog(false)
         // fetchProductInventory()
         // fetchRentalManagementData()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
+        // toastConfig.setToastConfig({
+        //   open: true,
+        //   type: "success",
+        //   message: data.message,
+        // });
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
@@ -213,41 +215,6 @@ const RentalManagementDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-
-
-  const ActionsRenderer = (params) => (
-    <>
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.rentalManagement?.isDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          handleRemoveProductInventory(params.data.inventory._id)
-        }
-        }
-        entity="rentalManagement"
-      />
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    actionsRenderer: ActionsRenderer,
-  };
-  const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
-  ];
 
   const fetchProductInventory = () => {
     dispatch({ type: "loading", loading: true });
@@ -258,6 +225,7 @@ const RentalManagementDetailsPage = () => {
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
+        productId: u.product?._id,
         productName: u.product?.productName,
         productCategory: u.product?.productCategory?.optionLabel,
         warehouse: u.inventory?.warehouse?.optionLabel,
@@ -291,6 +259,51 @@ const RentalManagementDetailsPage = () => {
     });
   };
 
+
+  const NameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.id}`}>
+      {params.value}
+    </Link>
+  );
+
+  const ProductRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+      {params.value}
+    </Link>
+  );
+
+
+
+  const ActionsRenderer = (params) => (
+    <>
+      <GridDeleteIcon
+        hasDeletePermission={permissions?.rentalManagement?.isDelete}
+        ownerId={user?.user?._id}
+        userId={user?.user?._id}
+        onDelete={() => {
+          handleRemoveProductInventory(params.data.inventory._id)
+        }
+        }
+        entity="rentalManagement"
+      />
+    </>
+  );
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    productRenderer: ProductRenderer,
+    actionsRenderer: ActionsRenderer,
+  };
+  const columns = [
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
+    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+  ];
+
+ 
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
     axiosInstance()
@@ -301,6 +314,7 @@ const RentalManagementDetailsPage = () => {
           tempProductInventory.map((d, index) => {
             if (obj.productInventory.some(p => d.id === p.optionValue)) {
               tempProductInventory[index]["deliveryTicket"] = obj.deliveryJobName
+              tempProductInventory[index]["deliveryTicketId"] = obj._id
             }
           })
 
@@ -406,6 +420,7 @@ const RentalManagementDetailsPage = () => {
             </div>
             <div>
               <Steps
+                isNextStep={!Boolean(productInventory.length)}
                 steps={rentalProcessSteps.slice(0, 4)}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
@@ -445,6 +460,8 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 1) && (
                 <AddRentalCost
+                  rentalEndDate={rentalManagementData?.rentalEndDate}
+                  rentalStartDate={rentalManagementData?.rentalStartDate}
                   productInventory={productInventory}
                   rentalId={id}
                   currencySymbol={currencySymbol}
@@ -618,7 +635,12 @@ const RentalManagementDetailsPage = () => {
 
               )}
               {(currentStep === 3 || currentStep === 4) && (
-                <DeliveryTicket warehouselist={warehouseList} productInventory={productInventory} currentStep={currentStep} handleDeliveryTicketDialog={handleDeliveryTicketDialog} />
+                <DeliveryTicket
+                  warehouselist={warehouseList}
+                  productInventory={productInventory}
+                  currentStep={currentStep}
+                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                />
               )}
             </div>
           </div>

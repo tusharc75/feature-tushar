@@ -27,10 +27,20 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 const TaskSchema = object().shape({
     costPerDay: string().required("Please enter cost per day"),
     startDate: string().required("Please enter start date"),
-    dueDate: string().required("Please enter due date"),
+    dueDate: string().required("Please enter end date"),
 });
 
-export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, currencySymbol, open, rentalId }) => {
+export const AddRentalCostDialog = (props) => {
+    const {
+        RentalCostData,
+        onClose,
+        onSuccess,
+        currencySymbol,
+        open,
+        rentalId,
+        rentalEndDate,
+        rentalStartDate
+    } = props
     const toastConfig = useContext(CustomToastContext);
     const [initialValues, setInitialValues] = useState(null);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -47,6 +57,7 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
     const handleSave = (values) => {
         setSubmitting(true);
         values.costPerDay = parseInt(values.costPerDay)
+        values.totalCost = parseInt(values.totalCost)
         values.dueDate = moment(values.dueDate).format(dateFormat)
         values.startDate = moment(values.startDate).format(dateFormat)
         axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalId}/inventory/${RentalCostData.inventory._id}`, { "costing": values })
@@ -73,9 +84,16 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
         return errors;
     }
     
-  const calculateTotalCost = (setValue, cPD, startDate, endDate) => {
-      const dateDiff = new Date(endDate).getDate() - new Date(startDate).getDate();
+    const calculateTotalCost = (setValue, cPD, startDate, endDate) => {
+      let start:any = moment(startDate).format("YYYY-MM-DD")
+      let end:any = moment(endDate).format("YYYY-MM-DD")
+      
+      start = moment(start, "YYYY-MM-DD")
+      end = moment(end, "YYYY-MM-DD")
+      
+      const dateDiff = moment.duration(end.diff(start)).asDays();
       const tCost = dateDiff > 0 ? cPD * dateDiff : cPD
+      
       setValue("totalCost", tCost)
     }
 
@@ -136,6 +154,50 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                         }
                                                     />
                                                     <Box pt={1}>
+                                                        <Grid container spacing={1}>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                <Field
+                                                                  disablePast
+                                                                  component={KeyboardDatePicker}
+                                                                  label="Start Date"
+                                                                  name="startDate"
+                                                                  autoOk
+                                                                  variant="inline"
+                                                                  inputVariant="outlined"
+                                                                  fullWidth
+                                                                  minDate={rentalStartDate}
+                                                                  maxDate={rentalEndDate}
+                                                                  margin="dense"
+                                                                  format={dateFormat}
+                                                                  onChange={(date) => {
+                                                                    setFieldValue("startDate", date)
+                                                                    calculateTotalCost(setFieldValue, values?.costPerDate, date, values?.dueDate)
+
+                                                                  }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                <Field
+                                                                    component={KeyboardDatePicker}
+                                                                    label="End Date"
+                                                                    name="dueDate"
+                                                                    autoOk
+                                                                    variant="inline"
+                                                                    inputVariant="outlined"
+                                                                    fullWidth
+                                                                    margin="dense"
+                                                                    minDate={values?.startDate}
+                                                                    maxDate={rentalEndDate}
+                                                                    format={dateFormat}
+                                                                    onChange={(date) => {
+                                                                      setFieldValue("dueDate", date)
+                                                                      calculateTotalCost(setFieldValue, values?.costPerDay, values?.startDate, date)
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                    <Box pt={1}>
                                                         <Field
                                                           component={TextFieldFormik}
                                                           disabled={true}
@@ -153,47 +215,6 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                           name="totalCost"
                                                           variant="outlined"
                                                         />
-                                                    </Box>
-                                                    <Box pt={1}>
-                                                        <Grid container spacing={1}>
-                                                            <Grid item xs={12} sm={6} md={6}>
-                                                                <Field
-                                                                  disablePast
-                                                                  component={KeyboardDatePicker}
-                                                                  label="Start Date"
-                                                                  name="startDate"
-                                                                  autoOk
-                                                                  variant="inline"
-                                                                  inputVariant="outlined"
-                                                                  fullWidth
-                                                                  margin="dense"
-                                                                  format={dateFormat}
-                                                                  onChange={(date) => {
-                                                                    setFieldValue("startDate", date._d)
-                                                                    calculateTotalCost(setFieldValue, values?.costPerDate, date._d, values?.dueDate)
-
-                                                                  }}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={12} sm={6} md={6}>
-                                                                <Field
-                                                                    component={KeyboardDatePicker}
-                                                                    label="Due Date"
-                                                                    name="dueDate"
-                                                                    autoOk
-                                                                    variant="inline"
-                                                                    inputVariant="outlined"
-                                                                    fullWidth
-                                                                    margin="dense"
-                                                                    minDate={values.startDate}
-                                                                    format={dateFormat}
-                                                                    onChange={(date) => {
-                                                                      setFieldValue("dueDate", date._d)
-                                                                      calculateTotalCost(setFieldValue, values?.costPerDay, values?.startDate, date._d)
-                                                                    }}
-                                                                />
-                                                            </Grid>
-                                                        </Grid>
                                                     </Box>
                                                 </Grid>
 
