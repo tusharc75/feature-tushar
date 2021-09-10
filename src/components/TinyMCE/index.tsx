@@ -432,7 +432,7 @@ export default function TinyMCE(props) {
                     }
                     {
                         isInitiated ?
-                            <div className={classes.buttonContainer} >
+                            <div style={{ width: width }} className={classes.buttonContainer} >
                                 {
                                     doNotShowUploadFile ? null :
                                         <Fragment>
@@ -515,60 +515,60 @@ export default function TinyMCE(props) {
                     }
                 </>
             }
-
-            <Editor
-                disabled={disabledEditor}
-                id={id ?? "editor"}
-                onInit={(evt, editor) => {
-                    setIsInitiated(true)
-                    editorRef.current = editor
-                }}
-
-                initialValue={initialValue || ""}
-                onChange={(content) => {
-                    if (editorRef.current.isDirty()) {
-                        if (isCheckHeight) {
-                            if (isValidHeight()) {
-                                onChange(editorRef.current.getContent())
+            <div style={{ width: width }}>
+                <Editor
+                    disabled={disabledEditor}
+                    id={id ?? "editor"}
+                    onInit={(evt, editor) => {
+                        setIsInitiated(true)
+                        editorRef.current = editor
+                    }}
+                    initialValue={initialValue || ""}
+                    onChange={(content) => {
+                        if (editorRef.current.isDirty()) {
+                            if (isCheckHeight) {
+                                if (isValidHeight()) {
+                                    onChange(editorRef.current.getContent())
+                                }
+                                else {
+                                    setToastConfig({
+                                        open: true,
+                                        type: 'error',
+                                        message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
+                                    });
+                                }
                             }
-                            else {
-                                setToastConfig({
-                                    open: true,
-                                    type: 'error',
-                                    message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
-                                });
-                            }
+                            else onChange(editorRef.current.getContent())
                         }
-                        else onChange(editorRef.current.getContent())
-                    }
-                }}
-                init={{
-                    height: height,
-                    width: width,
-                    // menubar: false,
-                    table_default_attributes: {
-                        border: '0'
-                    },
-                    block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
-                    font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-                    plugins: [
-                        'advlist autolink lists link charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code wordcount'
-                    ],
-                    toolbar: 'undo redo | formatselect  | ' +
-                        'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent ',
-                    content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                    }}
+                    init={{
+                        height: height,
+                        width: "100%",
+                        // menubar: false,
+                        table_default_attributes: {
+                            border: '0'
+                        },
+                        block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
+                        font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+                        plugins: [
+                            'advlist autolink lists link charmap print preview anchor',
+                            'searchreplace visualblocks code fullscreen',
+                            'insertdatetime media table paste code wordcount'
+                        ],
+                        toolbar: 'undo redo | formatselect  | ' +
+                            'bold italic backcolor | alignleft aligncenter ' +
+                            'alignright alignjustify | bullist numlist outdent indent ',
+                        content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
 
-                    // setup: (editor) => {
-                    //     editor.ui.registry.addButton("myCustomToolbarButton", {
-                    //         text: "Upload File",
-                    //         onAction: () => console.log("button text")
-                    //     });
-                    // }
-                }}
-            />
+                        // setup: (editor) => {
+                        //     editor.ui.registry.addButton("myCustomToolbarButton", {
+                        //         text: "Upload File",
+                        //         onAction: () => console.log("button text")
+                        //     });
+                        // }
+                    }}
+                />
+            </div>
             <div style={{ visibility: "hidden" }} id="contentDiv"></div>
         </>
 

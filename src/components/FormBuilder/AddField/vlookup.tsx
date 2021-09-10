@@ -228,7 +228,6 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     ));
   }, [isUpdate]);
 
-  console.log(lookupOptions)
   return (
     <Box marginTop={2}>
       <Autocomplete
@@ -250,7 +249,8 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
         }
         onChange={(e, value) => {
           setFieldValue('vlookupInputFields', convertLabelToValue(value));
-          GetLookupOption([...values['vlookupInputFields'], ...convertLabelToValue(value)])
+          const vlookupInputFields = values['vlookupInputFields'] ? values['vlookupInputFields'] : []
+          GetLookupOption([...vlookupInputFields, ...convertLabelToValue(value)])
           setUpdate(!isUpdate);
         }}
         renderInput={(params) => (

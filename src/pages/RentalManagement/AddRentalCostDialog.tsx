@@ -72,10 +72,23 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
         }
         return errors;
     }
+    
+    const calculateTotalCost = (setValue, cPD, startDate, endDate) => {
+      let start:any = moment(startDate).format("YYYY-MM-DD")
+      let end:any = moment(endDate).format("YYYY-MM-DD")
+      
+      start = moment(start, "YYYY-MM-DD")
+      end = moment(end, "YYYY-MM-DD")
+      
+      const dateDiff = moment.duration(end.diff(start)).asDays();
+      const tCost = dateDiff > 0 ? cPD * dateDiff : cPD
+      
+      setValue("totalCost", tCost)
+    }
 
     return (
         <Dialog
-            maxWidth="md"
+            maxWidth="sm"
             fullWidth
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
@@ -103,16 +116,16 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                     <Box padding={1}>
                                         <MuiPickersUtilsProvider utils={MomentUtils}>
                                             <Grid container spacing={3}>
-                                                <Grid item xs={12} md={7} sm={6}>
+                                                <Grid item xs={12}>
                                                     <TextField
                                                         variant="outlined"
-                                                        type="text"
+                                                        type="number"
                                                         InputProps={{
-                                                            startAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    {currencySymbol ? currencySymbol : ""}
-                                                                </InputAdornment>
-                                                            ),
+                                                          startAdornment: (
+                                                            <InputAdornment position="start">
+                                                              {currencySymbol ? currencySymbol : ""}
+                                                            </InputAdornment>
+                                                          ),
                                                         }}
                                                         label="Cost Per Day"
                                                         required={true}
@@ -123,50 +136,50 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                         error={touched["costPerDay"] && Boolean(errors["costPerDay"])}
                                                         helperText={touched["costPerDay"] && errors["costPerDay"]}
                                                         onChange={(e) => {
-                                                            setFieldValue("costPerDay", e.target.value.trimStart().replace(/[^0-9]/g, ''))
-                                                            let totalDays = Math.round(Math.abs((values["dueDate"] - values["startDate"]) / (1000 * 60 * 60 * 24)));
-                                                            setFieldValue("totalCost", totalDays * parseInt(e.target.value.trimStart().replace(/[^0-9]/g, '')))
-
-                                                        }
+                                                            const val = e.target.value;
+                                                            setFieldValue("costPerDay", val)
+                                                            calculateTotalCost(setFieldValue, val, values?.startDate, values?.dueDate)
+                                                          }
                                                         }
                                                     />
                                                     <Box pt={1}>
                                                         <Field
-                                                            component={TextFieldFormik}
-                                                            disabled={true}
-                                                            fullWidth
-                                                            InputProps={{
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        {currencySymbol ? currencySymbol : ""}
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                            margin="dense"
-                                                            type="text"
-                                                            label="Total Cost"
-                                                            name="totalCost"
-                                                            variant="outlined"
+                                                          component={TextFieldFormik}
+                                                          disabled={true}
+                                                          fullWidth
+                                                          InputProps={{
+                                                            startAdornment: (
+                                                              <InputAdornment position="start">
+                                                                {currencySymbol ? currencySymbol : ""}
+                                                              </InputAdornment>
+                                                            ),
+                                                          }}
+                                                          margin="dense"
+                                                          type="number"
+                                                          label="Total Cost"
+                                                          name="totalCost"
+                                                          variant="outlined"
                                                         />
                                                     </Box>
                                                     <Box pt={1}>
                                                         <Grid container spacing={1}>
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 <Field
-                                                                    component={KeyboardDatePicker}
-                                                                    label="Start Date"
-                                                                    name="startDate"
-                                                                    autoOk
-                                                                    variant="inline"
-                                                                    inputVariant="outlined"
-                                                                    fullWidth
-                                                                    margin="dense"
-                                                                    format={dateFormat}
-                                                                    onClose={() => {
-                                                                        let totalDays = Math.round(Math.abs((values["dueDate"] - values["startDate"]) / (1000 * 60 * 60 * 24)));
-                                                                        setFieldValue("totalCost", totalDays * parseInt(values["costPerDay"]))
+                                                                  disablePast
+                                                                  component={KeyboardDatePicker}
+                                                                  label="Start Date"
+                                                                  name="startDate"
+                                                                  autoOk
+                                                                  variant="inline"
+                                                                  inputVariant="outlined"
+                                                                  fullWidth
+                                                                  margin="dense"
+                                                                  format={dateFormat}
+                                                                  onChange={(date) => {
+                                                                    setFieldValue("startDate", date)
+                                                                    calculateTotalCost(setFieldValue, values?.costPerDate, date, values?.dueDate)
 
-                                                                    }}
+                                                                  }}
                                                                 />
                                                             </Grid>
                                                             <Grid item xs={12} sm={6} md={6}>
@@ -181,10 +194,9 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                                     margin="dense"
                                                                     minDate={values.startDate}
                                                                     format={dateFormat}
-                                                                    onClose={() => {
-                                                                        let totalDays = Math.round(Math.abs((values["dueDate"] - values["startDate"]) / (1000 * 60 * 60 * 24)));
-                                                                        setFieldValue("totalCost", totalDays * parseInt(values["costPerDay"]))
-
+                                                                    onChange={(date) => {
+                                                                      setFieldValue("dueDate", date)
+                                                                      calculateTotalCost(setFieldValue, values?.costPerDay, values?.startDate, date)
                                                                     }}
                                                                 />
                                                             </Grid>

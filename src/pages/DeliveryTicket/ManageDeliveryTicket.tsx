@@ -54,6 +54,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryType"] = "To Customer"
+                    tempInitialData["deliveryJobName"] = rentalData?.rentalJobName
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
