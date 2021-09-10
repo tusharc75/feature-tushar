@@ -77,6 +77,12 @@
   border: none;
 }
 
+.MuiAutocomplete-inputRoot[class*='MuiOutlinedInput-root'] .MuiAutocomplete-endAdornment {
+  .MuiIconButton-root {
+    padding: 2px !important;
+  }
+}
+
 .MuiDialog-container {
   .MuiDialogTitle-root {
     background: var(--primary-light);
