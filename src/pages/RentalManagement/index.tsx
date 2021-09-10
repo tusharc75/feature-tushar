@@ -105,6 +105,13 @@ const RentalManagement = () => {
       cellRenderer: "rentalManagementNameRenderer",
     },
     {
+      field: "status",
+      headerName: "Status",
+      show: true,
+      disabled: false,
+      cellRenderer: "commonRenderer",
+    },
+    {
       field: "rentalJobID",
       headerName: "Rental Job ID",
       show: true,
@@ -125,10 +132,10 @@ const RentalManagement = () => {
       cellRenderer: "dateRenderer",
     },
     {
-      field: "customerAccountName",
+      field: "customerAccount",
       headerName: "Customer Account Name",
       show: true,
-      cellRenderer: "customerAccountNameRenderer",
+      cellRenderer: "customerAccountRenderer",
     },
     {
       field: "relatedOpportunity",
@@ -219,15 +226,19 @@ const RentalManagement = () => {
     </>
   );
 
-  const CustomerAccountNameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
-    >
-      {params.value}
-    </Link>
-  );
+  const CustomerAccountRenderer = (params) => <>
+    {
+      params.value ?
+        <Link
+          className="link"
+          title={params.value}
+          to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
+        >
+          {params.value}
+        </Link> : <NoDataCell />
+    }
+  </>
+
 
   const RelatedOpportunityRenderer = params => <>
     {
@@ -280,7 +291,7 @@ const RentalManagement = () => {
 
   const frameworkComponents = {
     rentalManagementNameRenderer: RentalManagementNameRenderer,
-    customerAccountNameRenderer: CustomerAccountNameRenderer,
+    customerAccountRenderer: CustomerAccountRenderer,
     relatedOpportunityRenderer: RelatedOpportunityRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
@@ -311,8 +322,8 @@ const RentalManagement = () => {
       case "owner":
         return "owner.optionLabel";
 
-      case "customerAccountName":
-        return "customerAccountName.optionLabel";
+      case "customerAccount":
+        return "customerAccount.optionLabel";
 
       case "supplierAccountName":
         return "supplierAccountName.optionLabel";
@@ -328,7 +339,7 @@ const RentalManagement = () => {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
           {
-            field: replaceFieldName("customerAccountName"),
+            field: replaceFieldName("customerAccount"),
             term: accountDetails.accountId,
           },
         ])}`;
@@ -386,19 +397,19 @@ const RentalManagement = () => {
             collaborator,
             createdBy,
             updatedBy,
-            customerAccountName,
+            customerAccount,
             ...restProperties
           } = u;
 
           let res = {
             ...restProperties,
             id: u._id,
-
+            status: u.status,
             owner: u.owner?.optionLabel,
             ownerId: u.owner?.optionValue,
-            customerAccountName: u.customerAccountName?.optionLabel,
-            customerAccountId: u.customerAccountName?.optionValue,
-            customerContactName: u.customerAccountName?.optionLabel,
+            customerAccount: u.customerAccount?.optionLabel,
+            customerAccountId: u.customerAccount?.optionValue,
+            customerContact: u.customerContact?.optionLabel,
             relatedOpportunity: u.opportunity?.optionLabel,
             relatedOpportunityId: u.opportunity?.optionValue,
             createdBy: u.createdBy?.user?.concatedName,
