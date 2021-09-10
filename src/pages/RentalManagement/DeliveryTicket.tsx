@@ -87,13 +87,12 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   const columns = [
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "productName", headerName: "Product Description", show: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
     { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
-
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
   return (<>
 
@@ -183,6 +182,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           page={page}
           allowAction={false}
           loading={loading}
+          renderedFrom="deliveryTicket"
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 

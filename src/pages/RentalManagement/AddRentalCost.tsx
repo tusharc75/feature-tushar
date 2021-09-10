@@ -90,12 +90,12 @@ const AddRentalCost = (props) => {
   };
   const columns = [
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
     { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
 
   return (
@@ -115,6 +115,7 @@ const AddRentalCost = (props) => {
               page={page}
               allowAction={true}
               loading={loading}
+              renderedFrom="addRentalCost"
             />
             : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
           }

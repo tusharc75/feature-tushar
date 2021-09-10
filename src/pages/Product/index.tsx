@@ -43,11 +43,11 @@ var levalOrderBy = [
 ];
 
 const mappedProductCategoryColor = {
-    Iron: "#ffb9ea",
-    Block: "#ceb9ff",
-    Paloma: "#b9ffce",
-    FB: "#eaffb9",
-    Valves: "#86ffaa"
+    Iron: "#D9E1C1",
+    Block: "#F2EAE0",
+    Paloma: "#EDE0E7",
+    FB: "#EDE0E7",
+    Valves: "#BED8E2"
 }
 const Product = () => {
 
