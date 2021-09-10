@@ -103,7 +103,7 @@ const RentalManagementDetailsPage = () => {
         const tempUpdateData = {
           "_id": rentalManagementData._id,
           "rentalJobName": rentalManagementData.rentalJobName,
-          "rentalJobID":rentalManagementData.rentalJobID,
+          "rentalJobID": rentalManagementData.rentalJobID,
           "customerAccount": rentalManagementData.customerAccount.optionValue,
           "customerContact": rentalManagementData.customerContact.optionValue,
           "shippingAddress": rentalManagementData.shippingAddress,
@@ -216,6 +216,7 @@ const RentalManagementDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
+      console.log('data.data', data.data)
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
@@ -266,8 +267,6 @@ const RentalManagementDetailsPage = () => {
     </Link>
   );
 
-
-
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -297,7 +296,7 @@ const RentalManagementDetailsPage = () => {
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
   ];
 
- 
+
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
     axiosInstance()

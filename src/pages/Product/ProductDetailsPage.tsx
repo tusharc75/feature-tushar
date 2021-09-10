@@ -18,7 +18,7 @@ import BoxWithBorder from "../../components/BoxWithBorder";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
-import CreateProductInventory from "../ProductInventory/CreateProductInventory"
+import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -464,7 +464,7 @@ const ProductDetailsPage = () => {
             }
 
             {openProductInventoryDialog ?
-                <CreateProductInventory
+                <ManageProductInventory
                     productId={productData?._id}
                     productCategory={productData?.productCategory}
                     productInventoryId={null}

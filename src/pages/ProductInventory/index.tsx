@@ -78,7 +78,7 @@ const ProductInventory = () => {
                 serialNumber: u.serialNumber,
                 inServiceDate: u.inServiceDate,
                 bornInDate: u.bornInDate,
-                status: (i == 0) ? "New" : u.status,
+                status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 productCategory: u.productCategory?.optionLabel,
                 product: u.product?.optionLabel,

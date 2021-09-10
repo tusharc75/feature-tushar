@@ -17,7 +17,7 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSuccess, productId, productCategory }) => {
+const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
@@ -38,9 +38,6 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
             const categoryOptions = data.find(obj => obj?.fieldData.fieldName === "productCategory")?.fieldData.option
 
             setProductCategoryOptions(categoryOptions)
-
-
-            console.log('fieldsDataForCreate', fieldsDataForCreate)
 
             if (productInventoryId) {
                 axiosInstance().get(`${productInventory.api}/` + productInventoryId).then(({ data: { data } }) => {
@@ -65,10 +62,10 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
             }
             else {
                 let createValues = getObjKeys("", fieldsDataForCreate)
-                if (productId) {
+                if (productId && createValues) {
                     createValues["product"] = productId
                 }
-                if (productCategory) {
+                if (productCategory && createValues) {
                     createValues["productCategory"] = productCategory
                 }
                 setInitialData({
@@ -157,7 +154,7 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                 <FormTypes
                                                                     isNew={Boolean(productInventoryId)}
                                                                     {...field}
-                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                                    disabled={productId ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
@@ -178,7 +175,7 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                     onChange={(_, val) => {
                                                                         const value = val && val.optionValue ? val.optionValue : ''
                                                                         const label = val && val.optionLabel ? val.optionLabel : ''
-                                                                        const productCategory = val && val.productCategory ? val.productCategory : ''
+                                                                        const productCategory = val && val?.productCategory ? val?.productCategory : ''
                                                                         setFieldValue(field.fieldName, value);
                                                                         setFieldValue("productCategory", productCategory);
                                                                         const productLabel = productCategory ? productCategoryOptions.find(obj => obj.optionValue === productCategory).optionLabel : ""
@@ -192,7 +189,7 @@ const ManageProductInventory = ({ isClone, productInventoryId, onClose, onSucces
                                                                     <FormTypes
                                                                         isNew={Boolean(productInventoryId)}
                                                                         {...field}
-                                                                        disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                                        disabled={productCategory ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                         values={values}
                                                                         name={field.fieldName}
                                                                         options={field.option}
