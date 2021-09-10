@@ -72,7 +72,7 @@ const ProductInventory = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
+            data.data = data.data?.map((u, i) => ({
                 ...u,
                 id: u._id,
                 serialNumber: u.serialNumber,
@@ -220,6 +220,19 @@ const ProductInventory = () => {
         }
     };
 
+    const getRowStyleScheduled = (params) => {
+        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
+            return {
+                'background-color': "#d3ffe0",
+            }
+        } else {
+            return {
+                'background-color': '#ffe7e7',
+            };
+        }
+        return null;
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -292,6 +305,7 @@ const ProductInventory = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productInventoryPage"
+                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
