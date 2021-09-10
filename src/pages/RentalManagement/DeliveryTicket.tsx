@@ -27,7 +27,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
           dueDate: u.costing?.dueDate,
-          deliveryTicket: u.deliveryTicket,
+          deliveryTicket: u?.deliveryTicket,
           hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
         })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
       });
@@ -40,7 +40,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
           dueDate: u.costing?.dueDate,
-          deliveryTicket: u.deliveryTicket,
+          deliveryTicket: u?.deliveryTicket,
           hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
         })), count: productInventory.length
       });
