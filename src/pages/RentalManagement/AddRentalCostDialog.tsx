@@ -74,9 +74,16 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
         return errors;
     }
     
-  const calculateTotalCost = (setValue, cPD, startDate, endDate) => {
-      const dateDiff = new Date(endDate).getDate() - new Date(startDate).getDate();
+    const calculateTotalCost = (setValue, cPD, startDate, endDate) => {
+      let start:any = moment(startDate).format("YYYY-MM-DD")
+      let end:any = moment(endDate).format("YYYY-MM-DD")
+      
+      start = moment(start, "YYYY-MM-DD")
+      end = moment(end, "YYYY-MM-DD")
+      
+      const dateDiff = moment.duration(end.diff(start)).asDays();
       const tCost = dateDiff > 0 ? cPD * dateDiff : cPD
+      
       setValue("totalCost", tCost)
     }
 
@@ -151,8 +158,8 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                                   margin="dense"
                                                                   format={dateFormat}
                                                                   onChange={(date) => {
-                                                                    setFieldValue("startDate", date._d)
-                                                                    calculateTotalCost(setFieldValue, values?.costPerDate, date._d, values?.dueDate)
+                                                                    setFieldValue("startDate", date)
+                                                                    calculateTotalCost(setFieldValue, values?.costPerDate, date, values?.dueDate)
 
                                                                   }}
                                                                 />
@@ -170,8 +177,8 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                                     minDate={values.startDate}
                                                                     format={dateFormat}
                                                                     onChange={(date) => {
-                                                                      setFieldValue("dueDate", date._d)
-                                                                      calculateTotalCost(setFieldValue, values?.costPerDay, values?.startDate, date._d)
+                                                                      setFieldValue("dueDate", date)
+                                                                      calculateTotalCost(setFieldValue, values?.costPerDay, values?.startDate, date)
                                                                     }}
                                                                 />
                                                             </Grid>

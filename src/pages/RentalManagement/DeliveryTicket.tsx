@@ -1,6 +1,4 @@
 import Box from "@material-ui/core/Box/Box";
-import TextField from "@material-ui/core/TextField/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
 import { useState, useEffect, useReducer } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -9,9 +7,10 @@ import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button } from "@material-ui/core";
+import { AiFillFilePdf } from "react-icons/ai";
 
-const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog }) => {
-
+const DeliveryTicket = (props) => {
+  const { warehouselist, productInventory, currentStep, handleDeliveryTicketDialog } = props
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -23,11 +22,15 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       dispatch({
         type: "initialize", data: productInventory.map((u) => ({
           ...u,
+          productName: u.productName || "",
+          inventoryId: u?.inventory._id,
+          productId: u?.product._id,
           costPerDay: u.costing?.costPerDay,
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
           dueDate: u.costing?.dueDate,
-          deliveryTicket: u?.deliveryTicket,
+          deliveryTicket: u.deliveryTicket || "",
+          deliveryTicketId: u.deliveryTicketId || "",
           hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
         })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
       });
@@ -36,11 +39,15 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       dispatch({
         type: "initialize", data: productInventory.map((u) => ({
           ...u,
+          productName: u.productName || "",
+          inventoryId: u?.inventory._id,
+          productId: u?.product._id,
           costPerDay: u.costing?.costPerDay,
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
           dueDate: u.costing?.dueDate,
-          deliveryTicket: u?.deliveryTicket,
+          deliveryTicket: u.deliveryTicket || "",
+          deliveryTicketId: u.deliveryTicketId || "",
           hideSelection: u.deliveryTicket === null || u.deliveryTicket === undefined ? false : true,
         })), count: productInventory.length
       });
@@ -49,20 +56,35 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   }, [warehouse, productInventory]);
 
   const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
       {params.value}
     </Link>
   );
+
+  const InventoryRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.inventoryId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const TicketRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      {params.value}
+    </Link>
+  );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    TicketRenderer: TicketRenderer,
+    inventoryRenderer: InventoryRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, cellRenderer: "nameRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "commonRenderer" },
+    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
@@ -71,8 +93,8 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   ];
   return (<>
 
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end gap-2">
+    <Box display="flex" justifyContent="flex-end">
+      
         {/* <Autocomplete
           id="combo-box-demo"
           size="small"
@@ -91,6 +113,16 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
             name="warehouseField"
           />}
         /> */}
+       <Button
+          variant="outlined"
+          color="primary"
+          type="submit"
+          size="small"
+          startIcon={<AiFillFilePdf/>}
+        >
+          Preview
+        </Button>
+         <Box mx={1}/>
         <Button
           variant="contained"
           color="primary"
@@ -103,8 +135,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         >
           Create Loading Ticket
         </Button>
-      </Grid>
-    </Grid>
+    </Box>
   
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
