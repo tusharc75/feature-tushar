@@ -17,7 +17,7 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null }) => {
+const ManageProductInventory = ({ isClone = false, productInventoryId, onClose, onSuccess }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
@@ -32,8 +32,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
-            const fieldsDataForCreate = data.filter((obj) => obj.isCreate)
-                .map((d: any) => d.fieldData);
+            const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             const categoryOptions = data.find(obj => obj?.fieldData.fieldName === "productCategory")?.fieldData.option
 
@@ -61,16 +60,21 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                 });
             }
             else {
-                let createValues = getObjKeys("", fieldsDataForCreate)
-                if (productId && createValues) {
-                    createValues["product"] = productId
-                }
-                if (productCategory && createValues) {
-                    createValues["productCategory"] = productCategory
-                }
+                // let createValues = getObjKeys("", fieldsDataForCreate)
+                // console.log('createValues', createValues)
+                // if (productId && productCategory) {
+                //     if (productId && createValues) {
+                //         createValues = {
+                //             ...createValues,
+                //             product: productId,
+                //             productCategory: productCategory
+                //         }
+                //     }
+                // }
+
                 setInitialData({
                     fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                    values: createValues
+                    values: getObjKeys("", fieldsDataForCreate),
                 });
             }
         })
@@ -154,7 +158,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                 <FormTypes
                                                                     isNew={Boolean(productInventoryId)}
                                                                     {...field}
-                                                                    disabled={productId ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                                    disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
@@ -189,7 +193,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                     <FormTypes
                                                                         isNew={Boolean(productInventoryId)}
                                                                         {...field}
-                                                                        disabled={productCategory ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                                        disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                         values={values}
                                                                         name={field.fieldName}
                                                                         options={field.option}
