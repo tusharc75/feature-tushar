@@ -57,6 +57,7 @@ export const AddRentalCostDialog = (props) => {
     const handleSave = (values) => {
         setSubmitting(true);
         values.costPerDay = parseInt(values.costPerDay)
+        values.totalCost = parseInt(values.totalCost)
         values.dueDate = moment(values.dueDate).format(dateFormat)
         values.startDate = moment(values.startDate).format(dateFormat)
         axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalId}/inventory/${RentalCostData.inventory._id}`, { "costing": values })
@@ -153,25 +154,6 @@ export const AddRentalCostDialog = (props) => {
                                                         }
                                                     />
                                                     <Box pt={1}>
-                                                        <Field
-                                                          component={TextFieldFormik}
-                                                          disabled={true}
-                                                          fullWidth
-                                                          InputProps={{
-                                                            startAdornment: (
-                                                              <InputAdornment position="start">
-                                                                {currencySymbol ? currencySymbol : ""}
-                                                              </InputAdornment>
-                                                            ),
-                                                          }}
-                                                          margin="dense"
-                                                          type="number"
-                                                          label="Total Cost"
-                                                          name="totalCost"
-                                                          variant="outlined"
-                                                        />
-                                                    </Box>
-                                                    <Box pt={1}>
                                                         <Grid container spacing={1}>
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 <Field
@@ -214,6 +196,25 @@ export const AddRentalCostDialog = (props) => {
                                                                 />
                                                             </Grid>
                                                         </Grid>
+                                                    </Box>
+                                                    <Box pt={1}>
+                                                        <Field
+                                                          component={TextFieldFormik}
+                                                          disabled={true}
+                                                          fullWidth
+                                                          InputProps={{
+                                                            startAdornment: (
+                                                              <InputAdornment position="start">
+                                                                {currencySymbol ? currencySymbol : ""}
+                                                              </InputAdornment>
+                                                            ),
+                                                          }}
+                                                          margin="dense"
+                                                          type="number"
+                                                          label="Total Cost"
+                                                          name="totalCost"
+                                                          variant="outlined"
+                                                        />
                                                     </Box>
                                                 </Grid>
 
