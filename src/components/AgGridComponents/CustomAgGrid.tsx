@@ -213,12 +213,6 @@ export default function CustomAgGrid({
     );
   });
 
-  const getRowClass = (params) => {
-    console.log('params', params)
-    // if (params.node.rowIndex % 2 === 0) {
-    //     return "redStatus"
-    // }
-  };
   return (
     <>
       <div className="ag-grid-main">

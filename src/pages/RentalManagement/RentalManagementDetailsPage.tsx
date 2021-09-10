@@ -97,38 +97,38 @@ const RentalManagementDetailsPage = () => {
   const updateStatus = () => {
     if (productInventory.length > 0 && rentalManagementData) {
       const leftItems = [];
-    for (const product of productInventory) {
-      if (!product.deliveryTicket) {
-        leftItems.push(product.id)
-      }
-    }
-
-    if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-      if (rentalManagementData.status === "New") {
-        const tempUpdateData = {
-          "_id": rentalManagementData._id,
-          "rentalJobName": rentalManagementData.rentalJobName,
-          "rentalJobID": rentalManagementData.rentalJobID,
-          "customerAccount": rentalManagementData.customerAccount.optionValue,
-          "customerContact": rentalManagementData.customerContact.optionValue,
-          "shippingAddress": rentalManagementData.shippingAddress,
-          "currency": rentalManagementData.currency,
-          "rentalStartDate": rentalManagementData.rentalStartDate,
-          "rentalEndDate": rentalManagementData.rentalEndDate,
-          "jobDescription": rentalManagementData.jobDescription,
-          "status": "Ready to Ship",
-          "owner": rentalManagementData.owner.optionValue,
-          // "collaborator": rentalManagementData.collaborator,
-
+      for (const product of productInventory) {
+        if (!product.deliveryTicket) {
+          leftItems.push(product.id)
         }
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-          .then(() => {
-            fetchRentalManagementData()
-          }).catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
       }
-    }
+
+      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+        if (rentalManagementData.status === "New") {
+          const tempUpdateData = {
+            "_id": rentalManagementData._id,
+            "rentalJobName": rentalManagementData.rentalJobName,
+            "rentalJobID": rentalManagementData.rentalJobID,
+            "customerAccount": rentalManagementData.customerAccount.optionValue,
+            "customerContact": rentalManagementData.customerContact.optionValue,
+            "shippingAddress": rentalManagementData.shippingAddress,
+            "currency": rentalManagementData.currency,
+            "rentalStartDate": rentalManagementData.rentalStartDate,
+            "rentalEndDate": rentalManagementData.rentalEndDate,
+            "jobDescription": rentalManagementData.jobDescription,
+            "status": "Ready to Ship",
+            "owner": rentalManagementData.owner.optionValue,
+            // "collaborator": rentalManagementData.collaborator,
+
+          }
+          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+            .then(() => {
+              fetchRentalManagementData()
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+        }
+      }
     }
   }
 
@@ -222,7 +222,6 @@ const RentalManagementDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
-      console.log('data.data', data.data)
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
