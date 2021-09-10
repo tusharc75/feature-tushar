@@ -88,9 +88,9 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "linkRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
