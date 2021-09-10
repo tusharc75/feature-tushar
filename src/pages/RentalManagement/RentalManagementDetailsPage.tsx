@@ -634,6 +634,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 3 || currentStep === 4) && (
                 <DeliveryTicket
+                  rentalManagementId={id}
                   warehouselist={warehouseList}
                   productInventory={productInventory}
                   currentStep={currentStep}
