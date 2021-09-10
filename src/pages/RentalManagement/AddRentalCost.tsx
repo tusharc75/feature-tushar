@@ -14,7 +14,8 @@ import { gridLoadingTimeout } from "../../constants/helpers";
 import { AddRentalCostDialog } from "./AddRentalCostDialog";
 
 
-const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchProductInventory }) => {
+const AddRentalCost = (props) => {
+  const { productInventory, rentalId, currencySymbol = "", fetchProductInventory, rentalEndDate, rentalStartDate } = props
   const [addRentalCostDialog, setAddRentalCostDialog] = useState(false);
   const [addRentalCostData, setAddRentalCostData] = useState(null);
   const [gridApi, setGridApi] = useState(null);
@@ -26,6 +27,8 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
     dispatch({
       type: "initialize", data: productInventory.map((u) => ({
         ...u,
+        productInventoryId: u.inventory?._id,
+        productId: u.product?._id,
         costPerDay: u.costing?.costPerDay,
         totalCost: u.costing?.totalCost,
         startDate: u.costing?.startDate,
@@ -39,9 +42,25 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
   }, [productInventory]);
 
   const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.productInventoryId}`}>
       {params.value}
     </Link>
+  );
+
+  const ProductRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const LinkRenderer = (params) => (
+    <span className="link" title={params.value}
+      onClick={() => {
+      setAddRentalCostData(params.data)
+      setAddRentalCostDialog(true)
+    }}>
+      {params.value}
+    </span>
   );
 
   const ActionsRenderer = (params) => (
@@ -63,14 +82,16 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    productRenderer: ProductRenderer,
+    linkRenderer: LinkRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
@@ -99,15 +120,19 @@ const AddRentalCost = ({ productInventory, rentalId, currencySymbol = "", fetchP
           }
         </Grid>
       </Grid>
-      {addRentalCostDialog && (<AddRentalCostDialog RentalCostData={addRentalCostData}
-        open={addRentalCostDialog}
-        rentalId={rentalId}
-        currencySymbol={currencySymbol}
-        onClose={() => setAddRentalCostDialog(false)}
-        onSuccess={() => {
-          setAddRentalCostDialog(false);
-          fetchProductInventory()
-        }}
+      {addRentalCostDialog && (
+        <AddRentalCostDialog
+          rentalEndDate={rentalEndDate}
+          rentalStartDate={rentalStartDate}
+          RentalCostData={addRentalCostData}
+          open={addRentalCostDialog}
+          rentalId={rentalId}
+          currencySymbol={currencySymbol}
+          onClose={() => setAddRentalCostDialog(false)}
+          onSuccess={() => {
+            setAddRentalCostDialog(false);
+            fetchProductInventory()
+          }}
       />)}
     </>
   );

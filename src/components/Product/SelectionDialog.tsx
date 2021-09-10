@@ -47,7 +47,7 @@ const SelectionDialog = (props) => {
             }));
             setProductCategory(data.data)
         });
-        axiosInstance().get(`/product-template/template/standard`).then(({ data: { data } }) => {
+        axiosInstance().post(`/product-template/template/standard`, { entity: null }).then(({ data: { data } }) => {
             setProductTemplate(data.data)
             if (data.data.length) {
                 let defaultproductTemplate: any = data.data[0].optionValue
@@ -65,7 +65,7 @@ const SelectionDialog = (props) => {
 
     const handleChangeCategory = (value, label) => {
         if (value && value !== "") {
-            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
+            axiosInstance().post(`/product-template/template/` + value, { entity: null }).then(({ data: { data } }) => {
                 setProductTemplate(data.data)
                 if (data.data.length) {
                     var defaultproductTemplate = data.data[0].optionValue
@@ -308,7 +308,7 @@ const SelectionDialog = (props) => {
         {
             showAddProductCategoryDialog && <CreateProductCategory
                 productCategoryId={null}
-                onClose = {() => setShowAddProductCategoryDialog(false)}
+                onClose={() => setShowAddProductCategoryDialog(false)}
                 onSuccess={(data) => {
 
                     if (data?._id) {

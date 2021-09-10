@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip } from "@material-ui/core";
+import { Grid, Chip, IconButton, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
@@ -32,20 +32,20 @@ import CustomAgGrid, {
 } from "../../components/AgGridComponents/CustomAgGrid";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import RentalManagementHeader from "./RentalManagementHeader";
-import CreateRentalManagementDialog from "./ManageRental/CreateRentalManagementDialog";
+import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let rentalManagementTimeout;
 const RentalManagementType = [
   {
-    key: "All RentalManagements",
+    key: "All Rental Managements",
     value: 1,
   },
   {
-    key: "My RentalManagements",
+    key: "My Rental Managements",
     value: 2,
   },
 ];
-const arr = [...Array(9).keys()];
 
 const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,11 +59,9 @@ const RentalManagement = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [loadingVersions, setLoadingVersions] = useState(false);
-  const [showCreateRentalManagementDialog, setshowCreateRentalManagementDialog] = useState(false);
+  const [showManageRentalManagementDialog, setShowManageRentalManagementDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
     useState(false);
-  const [isClone, setIsClone] = useState(false);
   const [singleRentalManagementDelete, setSingleRentalManagementDelete] = useState({
     id: null,
     show: false,
@@ -74,12 +72,12 @@ const RentalManagement = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   });
-  const [rentalManagementPermissions, setRentalManagementPermissions] = useState({
-    isCreate: permissions?.quoteBuilder?.isCreate,
-    isUpdate: permissions?.quoteBuilder?.isUpdate,
-    isRead: permissions?.quoteBuilder?.isRead,
-    isDelete: permissions?.quoteBuilder?.isDelete,
-  });
+  // const [rentalManagementPermissions, setRentalManagementPermissions] = useState({
+  //   isCreate: permissions?.rentalManagement?.isCreate,
+  //   isUpdate: permissions?.quoteBuilder?.isUpdate,
+  //   isRead: permissions?.quoteBuilder?.isRead,
+  //   isDelete: permissions?.quoteBuilder?.isDelete,
+  // });
   const { rentalManagementResource, rentalManagementApi } = rentalManagement;
 
   //  Grid Variables - Start
@@ -209,11 +207,6 @@ const RentalManagement = () => {
       });
   };
 
-  const handleShowCloneRentalManagementDialog = () => {
-    setIsClone(true)
-    setshowCreateRentalManagementDialog(true)
-  }
-
   const RentalManagementNameRenderer = (params) => (
     <>
       <Link
@@ -248,8 +241,29 @@ const RentalManagement = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      {
+        permissions.rentalManagement.isCreate ? (
+          <Tooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: params.data._id })
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
       <GridDeleteIcon
-        hasDeletePermission={rentalManagementPermissions.isDelete}
+        hasDeletePermission={permissions.rentalManagement.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() =>
@@ -272,7 +286,7 @@ const RentalManagement = () => {
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
     commonRenderer: CommonRenderer,
-    dateRenderer:DateRenderer,
+    dateRenderer: DateRenderer,
   };
 
   const replaceFieldName = (field) => {
@@ -356,55 +370,55 @@ const RentalManagement = () => {
   };
 
   const fetchRentalManagement = async () => {
-      dispatch({ type: "loading", loading: true });
-      const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+    const queryString = getQueryString();
 
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
 
-      axiosInstance()
-        .get(`${rentalManagementApi}${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            const {
-              owner,
-              collaborator,
-              createdBy,
-              updatedBy,
-              customerAccountName,
-              ...restProperties
-            } = u;
+    axiosInstance()
+      .get(`${rentalManagementApi}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const {
+            owner,
+            collaborator,
+            createdBy,
+            updatedBy,
+            customerAccountName,
+            ...restProperties
+          } = u;
 
-            let res = {
-              ...restProperties,
-              id: u._id,
+          let res = {
+            ...restProperties,
+            id: u._id,
 
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
-              customerAccountName: u.customerAccountName?.optionLabel,
-              customerAccountId: u.customerAccountName?.optionValue,
-              customerContactName: u.customerAccountName?.optionLabel,
-              relatedOpportunity: u.opportunity?.optionLabel,
-              relatedOpportunityId: u.opportunity?.optionValue,
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date,
-            };
-            return res;
-          });
-
-          dispatch({ type: "initialize", data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((error) => {
-          dispatch({ type: "loading", loading: false });
-          toastConfig.setToastConfig(error);
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+            customerAccountName: u.customerAccountName?.optionLabel,
+            customerAccountId: u.customerAccountName?.optionValue,
+            customerContactName: u.customerAccountName?.optionLabel,
+            relatedOpportunity: u.opportunity?.optionLabel,
+            relatedOpportunityId: u.opportunity?.optionValue,
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+          };
+          return res;
         });
-    
+
+        dispatch({ type: "initialize", data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        dispatch({ type: "loading", loading: false });
+        toastConfig.setToastConfig(error);
+      });
+
   };
 
   const handleSearch = (e) => {
@@ -435,7 +449,7 @@ const RentalManagement = () => {
   };
 
   const clickCreateNew = () => {
-    setshowCreateRentalManagementDialog(true);
+    setShowManageRentalManagementDialog({ open: true, isClone: false, idToClone: null });
   };
 
   const handleDeleteRentalManagement = async () => {
@@ -482,7 +496,7 @@ const RentalManagement = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
-                    permissions={rentalManagementPermissions}
+                    permissions={permissions.rentalManagement}
                     module="rentalManagements"
                     api={rentalManagementApi}
                     afterImportCompleted={() => {
@@ -504,16 +518,16 @@ const RentalManagement = () => {
               options={RentalManagementType}
               onSearch={handleSearch}
               searchVal={search}
-              RentalManagementPermissions={rentalManagementPermissions}
+              RentalManagementPermissions={permissions.rentalManagement}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading={routes.rentalManagement.title}
               showTransferEntityDialog={handleTransferEntityDialog}
-              showCloneRentalManagementDialog={() => {
-                handleShowCloneRentalManagementDialog()
-              }}
+            // showCloneRentalManagementDialog={() => {
+            //   handleShowCloneRentalManagementDialog()
+            // }}
 
             >
               {accountDetails.accountId && (
@@ -585,17 +599,19 @@ const RentalManagement = () => {
         </CustomContainer>
       </Fragment>
 
-      {showCreateRentalManagementDialog && (
-        <CreateRentalManagementDialog
-          open={showCreateRentalManagementDialog}
-          rentalManagementId={null}
-          onClose={() => setshowCreateRentalManagementDialog(false)}
-          onSuccess={() => {
-            setshowCreateRentalManagementDialog(false);
-            fetchRentalManagement();
-          }}
-        />
-      )}
+      {
+        showManageRentalManagementDialog.open && (
+          <ManageRentalManagementDialog
+            isClone={showManageRentalManagementDialog.isClone}
+            open={showManageRentalManagementDialog.open}
+            rentalManagementId={showManageRentalManagementDialog.idToClone}
+            onClose={() => setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null })}
+            onSuccess={() => {
+              fetchRentalManagement();
+              setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null });
+            }}
+          />
+        )}
     </>
   );
 };

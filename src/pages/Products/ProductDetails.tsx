@@ -237,7 +237,6 @@ export default function ProductDetails() {
                     <h5><li>Measuring Unit </li></h5>
                     <a className="option">{` ${productDetails.unit}`}</a>
                   </div>}
-
                 </div>
 
                 {/*<div className={styles.set_width_2}> <hr/> </div>*/}

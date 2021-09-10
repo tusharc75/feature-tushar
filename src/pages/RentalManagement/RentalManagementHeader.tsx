@@ -26,7 +26,7 @@ function RentalManagementHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState("All RentalManagements");
+  const [filter, setFilter] = useState("All Rental Managements");
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -49,7 +49,7 @@ function RentalManagementHeader(props) {
     heading,
     children,
     showTransferEntityDialog,
-    showCloneRentalManagementDialog
+    // showCloneRentalManagementDialog
 
   } = props;
   return (
@@ -82,8 +82,8 @@ function RentalManagementHeader(props) {
             searchbox={styles.search_box_input}
             value={searchVal}
             size="small"
-            placeholder="Search RentalManagements"
-            width="242px"
+            placeholder="Search Rental Managements"
+            width="300px"
           />
 
           {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
@@ -140,7 +140,7 @@ function RentalManagementHeader(props) {
                     }}
                   >Transfer Entity</MenuItem>
                 }
-                <MenuItem
+                {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -148,7 +148,7 @@ function RentalManagementHeader(props) {
                   }}
                 >
                   Clone
-                </MenuItem>
+                </MenuItem> */}
               </Menu>
             </>
           )}

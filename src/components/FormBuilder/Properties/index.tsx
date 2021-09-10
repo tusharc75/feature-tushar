@@ -15,7 +15,7 @@ import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { object, string } from 'yup';
+import { object, string } from "yup";
 import { Formik, Form } from 'formik';
 import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
@@ -63,7 +63,6 @@ const LookupResource = [
   { name: 'Market Segment', value: 'Market Segment' },
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Loading Ticket', value: 'Loading Ticket' },
-  { name: 'Project Sales', value: 'Project Sales' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
@@ -372,7 +371,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   return (
     <Dialog
-      // className={styles.Popup_Layout}
+      maxWidth="md"
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -386,15 +385,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }}
     >
       <CustomDialogHeader
-              title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
-              onClose={() => setShowConfirmDialog(true)}
-            ></CustomDialogHeader>
+        title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
+        onClose={() => setShowConfirmDialog(true)}
+      ></CustomDialogHeader>
 
 
       <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
-          <CustomDialogContent>  
+            <CustomDialogContent>
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                   <TextField
@@ -444,36 +443,36 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                    <Grid spacing={3} container>
-                      {values['type'] === 'formula' && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <FormControl fullWidth margin="dense" variant="outlined">
-                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={values['returnType']}
-                              onChange={(e) => setFieldValue('returnType', e.target.value)}
-                              label="Return Type"
-                              name="returnType"
-                            >
-                              <MenuItem value="decimal">Decimal</MenuItem>
-                              <MenuItem value="string">String</MenuItem>
-                              <MenuItem value="boolean">Boolean</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      )}
-                      {(values['type'] === 'decimal' ||
-                        values['type'] === 'converter' ||
-                        values['type'] === 'currencyAmount' ||
-                        values['returnType'] === 'decimal') && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <DecimalPlaces values={values} setFieldValue={setFieldValue} />
-                        </Grid>
-                      )}
-                    </Grid>
-                  )}
+                      <Grid spacing={3} container>
+                        {values['type'] === 'formula' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values['returnType']}
+                                onChange={(e) => setFieldValue('returnType', e.target.value)}
+                                label="Return Type"
+                                name="returnType"
+                              >
+                                <MenuItem value="decimal">Decimal</MenuItem>
+                                <MenuItem value="string">String</MenuItem>
+                                <MenuItem value="boolean">Boolean</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                        {(values['type'] === 'decimal' ||
+                          values['type'] === 'converter' ||
+                          values['type'] === 'currencyAmount' ||
+                          values['returnType'] === 'decimal') && (
+                            <Grid item xs={12} sm={6} md={6}>
+                              <DecimalPlaces values={values} setFieldValue={setFieldValue} />
+                            </Grid>
+                          )}
+                      </Grid>
+                    )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -914,8 +913,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   </Box>
                 </Form>
               </Box>
-          </CustomDialogContent>
-          
+            </CustomDialogContent>
+
             <CustomDialogFooter>
               <Button
                 size="small"
@@ -929,8 +928,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
                 Save
               </Button>
-            </CustomDialogFooter> 
-           
+            </CustomDialogFooter>
+
             {showConfirmDialog ? (
               <ConfirmCancelDialog
                 open={showConfirmDialog}
@@ -944,11 +943,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }}
               />
             ) : null}
-        </>
+          </>
         )}
-        
-        </Formik>
-  
+
+      </Formik>
+
     </Dialog>
   );
 };

@@ -12,7 +12,7 @@ import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { productInventory, getObjKeysWithValues } from "../../constants/helpers";
-import CreateProductInventory from "./CreateProductInventory";
+import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
@@ -267,7 +267,8 @@ const ProductInventoryDetailsPage = () => {
         />
       )}
       {openUpdateDialog &&
-        <CreateProductInventory
+        <ManageProductInventory
+          isClone={false}
           productInventoryId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
