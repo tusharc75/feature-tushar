@@ -27,10 +27,20 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 const TaskSchema = object().shape({
     costPerDay: string().required("Please enter cost per day"),
     startDate: string().required("Please enter start date"),
-    dueDate: string().required("Please enter due date"),
+    dueDate: string().required("Please enter end date"),
 });
 
-export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, currencySymbol, open, rentalId }) => {
+export const AddRentalCostDialog = (props) => {
+    const {
+        RentalCostData,
+        onClose,
+        onSuccess,
+        currencySymbol,
+        open,
+        rentalId,
+        rentalEndDate,
+        rentalStartDate
+    } = props
     const toastConfig = useContext(CustomToastContext);
     const [initialValues, setInitialValues] = useState(null);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -155,6 +165,8 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                                   variant="inline"
                                                                   inputVariant="outlined"
                                                                   fullWidth
+                                                                  minDate={rentalStartDate}
+                                                                  maxDate={rentalEndDate}
                                                                   margin="dense"
                                                                   format={dateFormat}
                                                                   onChange={(date) => {
@@ -167,14 +179,15 @@ export const AddRentalCostDialog = ({ RentalCostData, onClose, onSuccess, curren
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 <Field
                                                                     component={KeyboardDatePicker}
-                                                                    label="Due Date"
+                                                                    label="End Date"
                                                                     name="dueDate"
                                                                     autoOk
                                                                     variant="inline"
                                                                     inputVariant="outlined"
                                                                     fullWidth
                                                                     margin="dense"
-                                                                    minDate={values.startDate}
+                                                                    minDate={values?.startDate}
+                                                                    maxDate={rentalEndDate}
                                                                     format={dateFormat}
                                                                     onChange={(date) => {
                                                                       setFieldValue("dueDate", date)
