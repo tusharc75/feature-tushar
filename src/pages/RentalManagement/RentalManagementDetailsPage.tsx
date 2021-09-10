@@ -90,8 +90,13 @@ const RentalManagementDetailsPage = () => {
     // eslint-disable-next-line
   }, [currentStep]);
 
+  useEffect(() => {
+    updateStatus()
+  }, [currentStep, productInventory])
+
   const updateStatus = () => {
-    const leftItems = [];
+    if (productInventory.length > 0 && rentalManagementData) {
+      const leftItems = [];
     for (const product of productInventory) {
       if (!product.deliveryTicket) {
         leftItems.push(product.id)
@@ -99,7 +104,7 @@ const RentalManagementDetailsPage = () => {
     }
 
     if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-      if (!rentalManagementData.status.includes("Ready to Ship")) {
+      if (rentalManagementData.status === "New") {
         const tempUpdateData = {
           "_id": rentalManagementData._id,
           "rentalJobName": rentalManagementData.rentalJobName,
@@ -113,7 +118,7 @@ const RentalManagementDetailsPage = () => {
           "jobDescription": rentalManagementData.jobDescription,
           "status": "Ready to Ship",
           "owner": rentalManagementData.owner.optionValue,
-          "collaborator": rentalManagementData.collaborator,
+          // "collaborator": rentalManagementData.collaborator,
 
         }
         axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
@@ -123,6 +128,7 @@ const RentalManagementDetailsPage = () => {
             toastConfig.setToastConfig(error);
           });
       }
+    }
     }
   }
 
@@ -454,6 +460,8 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 1) && (
                 <AddRentalCost
+                  rentalEndDate={rentalManagementData?.rentalEndDate}
+                  rentalStartDate={rentalManagementData?.rentalStartDate}
                   productInventory={productInventory}
                   rentalId={id}
                   currencySymbol={currencySymbol}
