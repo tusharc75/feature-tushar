@@ -4,7 +4,7 @@
 
 .MuiTableCell-head {
   font-size: 14px !important;
-  color: #aaaa !important;
+  color: #aaa !important;
 }
 
 .detail-box {
@@ -18,79 +18,4 @@
 
 .account_name_link:hover {
   text-decoration: underline;
-}
-.detail_main{
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 8px;
-
-}
-.detailFromCard{
-  display:grid;
-}
-.detail_card_view{
-  //padding: 4px !important;
-  box-shadow: none !important;
-  background-color: #E6E6E6;
-}
-.detail_header{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  font-size: 0.8rem;
-}
-.detail_view{
-  padding: 12px !important;
-  padding-bottom: 0 !important;
-  background-color: #E6E6E6;
-}
-.delete_contact{
-  display: flex !important;
-  justify-content: flex-end;
-}
-.delete_contact_icon{
-  svg{
-    width: 20px;
-    height: 20px;
-  }
-
-}
-.detail_account{
-  ul{
-    padding-top: 0 !important;
-  }
-}
-.opportunity_layout{
-  display: grid !important;
-  grid-template-columns: minmax(250px,1fr) minmax(250px,1fr);
-  grid-gap: 8px;
-  //padding: 4px !important;
-  &_container{
-    padding: 4px !important;
-    background-color: #E6E6E6;
-    border-radius: 5px;
-  }
-}
-.opportunity_closed_date{
-  ul{
-    display: flex;
-    justify-content: flex-end;
-    li{
-      width: auto;
-    }
-  }
-}
-.opportunity_layout_box{
-  padding-bottom: 10px;
-}
-
-@media screen and (max-width: 767px){
-  .detail_main{
-    grid-template-columns: 1fr ;
-  }
-  .opportunity_layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-  }
 }

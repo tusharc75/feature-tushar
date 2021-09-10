@@ -37,7 +37,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { useData } from "../../StateProvider/Provider";
 import { formatAmountWithCurrency } from "../../constants/helpers";
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-import "./style.scss"
+import styles from "./ProjectSales.module.scss";
 
 const Accordion = withStyles({
   root: {
@@ -279,7 +279,7 @@ const hasAccessToEntity = (id) => {
             {expandOpportunity && (
               <>
                 {opportunities && opportunities?.length ? (
-                  <Grid container className={'opportunity_layout'}>
+                  <Grid container className={styles.opportunity_layout}>
                     {opportunities
                       .slice(0, maxRecordsToShow)
                       .map((obj, index) => (
@@ -289,9 +289,9 @@ const hasAccessToEntity = (id) => {
                           // sm={12}
                           // md={recordsPerLineInLargeScreen}
                           key={index}
-                          className={"opportunity_layout_container"}
+                          className={styles.opportunity_layout_container}
                         >
-                          <Card className="detail_card_view">
+                          <Card className={styles.detail_card_view}>
                             <CardContent className="detailListing">
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={7} sm={8} >
@@ -358,7 +358,7 @@ const hasAccessToEntity = (id) => {
                                   </Box>
                                 </Grid>
                               </Grid>
-                              <Grid container className={"opportunity_layout_box"}>
+                              <Grid container className={styles.opportunity_layout_box}>
                                 <Grid item xs={12} sm={6} md={6}>
                                   {obj?.stage ? (
                                     <DisplayData
@@ -371,7 +371,7 @@ const hasAccessToEntity = (id) => {
                                     ""
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6} className={"opportunity_closed_date"}>
+                                <Grid item xs={12} sm={6} md={6} className={styles.opportunity_closed_date}>
                                   {obj.closeDate ? (
                                     <DisplayData
                                       key={index}

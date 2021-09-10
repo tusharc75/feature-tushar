@@ -15,7 +15,7 @@ import { FaEye } from "react-icons/fa";
 import { BsPerson } from "react-icons/bs";
 import { BiFace } from "react-icons/bi";
 import { Delete } from "@material-ui/icons";
-import "./style.scss";
+import styles from "./ProjectSales.module.scss";
 
 function DisplayData({ key, label, value, icon }) {
   return (
@@ -45,20 +45,20 @@ function RelatedContacts({
 
   return (
     <div>
-        <div className={"detail_main"}>
+        <div className={styles.detail_main}>
       {contacts && contacts.length ? (
         <>
           {contacts.map((obj, index) => {
             return (
               <>
 
-                <div className="detailFromCard">
+                <div className={styles.detailFromCard}>
                   <Card
                     key={obj?._id ?? `contact${index}`}
                     className="detailCard"
                    >
-                    <CardContent className="detail_view" >
-                      <Grid container className="detail_header">
+                    <CardContent className={styles.detail_view} >
+                      <Grid container className={styles.detail_header}>
                         <Grid
                         >
                           <Link
@@ -69,7 +69,7 @@ function RelatedContacts({
                           </Link>
                         </Grid>
 
-                        <Grid item xs={1}  className={"delete_contact"}>
+                        <Grid item xs={1}  className={styles.delete_contact}>
                           <IconButton
                               className={"delete_contact_icon"}
                             title={`Remove contact: ${obj?.firstName} ${obj?.lastName}`}
@@ -85,7 +85,7 @@ function RelatedContacts({
                         </Grid>
                       </Grid>
                       <Grid container>
-                        <Grid item xs={6} sm={6} md={6} className={"detail_account"}>
+                        <Grid item xs={6} sm={6} md={6} className={styles.detail_account}>
                           {
                             <DisplayData
                               key={index}
@@ -96,7 +96,7 @@ function RelatedContacts({
                             />
                           }
                         </Grid>
-                        <Grid item xs={12} sm={6} md={6} className={"detail_account"}>
+                        <Grid item xs={12} sm={6} md={6} className={styles.detail_account}>
                           {
                             <DisplayData
                               key={index}
