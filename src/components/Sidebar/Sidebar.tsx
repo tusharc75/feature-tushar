@@ -18,12 +18,13 @@ import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.scss";
 import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
 import { kebabCase, lowerCase } from "lodash";
-import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
+import { FaUserTie, FaDatabase, FaHandshake, FaRegistered } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
 import { AiFillSetting } from "react-icons/ai"
+
 
 import { AccountCircle } from "@material-ui/icons";
 const drawerWidth = 240;
@@ -285,7 +286,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         {
                           iconMapping.find((mapping) => {
                             return mapping.key === listItem.section;
-                          })?.icon || <AiFillSetting size={18} className="sidebar-icon" />
+                          })?.icon || <FaRegistered size={17} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />
                         }
                       </ListItemIcon>
                       <ListItemText primary={listItem.section} />
