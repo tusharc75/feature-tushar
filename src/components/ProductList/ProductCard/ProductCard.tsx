@@ -37,17 +37,17 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       </Box>
 
       <div className={styles.text}>
-        <h4 onClick={() => {
-          if (history?.location?.pathname && history?.location?.pathname.indexOf("my-cart") >= 0) {
-            history.push(`details/${product._id}`)
-          }
-          else {
-            history.push(`product/details/${product._id}`)
-          }
-        }}>{`${product?.productName}, ${product?.productCategory ? product.productCategory.optionLabel : ""} `}</h4>
-        <div><Rating name="size-small"
-          precision={0.5}
-          value={Math.round(product?.averageRating)} readOnly size="small" /></div>
+        {/*<h4 onClick={() => {*/}
+        {/*  if (history?.location?.pathname && history?.location?.pathname.indexOf("my-cart") >= 0) {*/}
+        {/*    history.push(`details/${product._id}`)*/}
+        {/*  }*/}
+        {/*  else {*/}
+        {/*    history.push(`product/details/${product._id}`)*/}
+        {/*  }*/}
+        {/*}}>{`${product?.productName}, ${product?.productCategory ? product.productCategory.optionLabel : ""} `}</h4>*/}
+        {/*<div><Rating name="size-small"*/}
+        {/*  precision={0.5}*/}
+        {/*  value={Math.round(product?.averageRating)} readOnly size="small" /></div>*/}
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <div>
             {(product.mrp && parseInt(product.mrp) !== 0) &&
@@ -57,17 +57,18 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
               </>
             }
           </div>
-          <div className={styles.rating}>
+          <div >
+
+              <Avatar className={styles.cart_icon} onClick={() => onAddItem(product)}>
+                  <MdAddShoppingCart size={18} />
+              </Avatar>
+          </div>
+        </Box>
+        <div className={styles.rating}>
             <Rating name="size-small" value={product.rating} defaultValue={4} readOnly size="small" />
             <span>
               <h5>4.1 out of 5.0</h5>
             </span>
-          </div>
-        </Box>
-        <div >
-          <Avatar className={styles.cart_icon} onClick={() => onAddItem(product)}>
-            <MdAddShoppingCart size={18} />
-          </Avatar>
         </div>
       </div>
     </div>
