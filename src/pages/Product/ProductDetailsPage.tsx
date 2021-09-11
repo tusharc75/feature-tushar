@@ -19,6 +19,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 import ManageProductInventory from "../ProductInventory/ManageProductInventory"
+import { extractFields } from "../../constants/formulaUtility";
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -41,6 +42,7 @@ const ProductDetailsPage = () => {
     const [inventoriesData, setInventoriesData] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
+
     const ignoreField = ["priceTemplate"]
 
     useEffect(() => {
@@ -71,31 +73,22 @@ const ProductDetailsPage = () => {
                         _productField.push(_f.fieldData)
                     }
                 })
-
                 const _fields = [];
-                const displayField = [];
                 _productField.map((_f) => _fields.push({ "fieldData": _f }));
-
-                const newField = _fields;
+                var newField = _fields;
                 axiosInstance().get(`/product/` + id).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push({ "fieldData": _f }));
                     data.productData.fields?.map((_f) => newField.push({ "fieldData": _f }));
-                    newField.map(f => {
-                        if (f.fieldData.type === "converter") {
-                            f.fieldData.displayUnits.map(d => {
-                                let tempField = JSON.parse(JSON.stringify(f))
-                                tempField.fieldData._id = `${tempField.fieldData._id}_` + d.toLowerCase()
-                                tempField.fieldData.type = `productSpecification`
-                                tempField.fieldData.fieldName = `${tempField.fieldData.fieldName}_` + d.toLowerCase()
-                                tempField.fieldData.fieldLabel = `${tempField.fieldData.fieldLabel} (${d})`
-                                displayField.push(tempField)
-                            })
-                        }
-                        else {
-                            displayField.push(f)
-                        }
+                    var fields = []
+                    newField.forEach((_f) => {
+                        fields.push(_f.fieldData)
                     })
-                    setProductFields(displayField)
+                    fields = extractFields(fields)
+                    newField = []
+                    fields.forEach((_f) => {
+                        newField.push({ "fieldData": _f })
+                    })
+                    setProductFields(newField)
                     handleMainPoints(data.productData);
                     setHeadingLabel(data.productData?.productNumber ? `${data.productData?.productNumber} - ${data.productData?.productName}` : data.productData?.productName);
                     setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
@@ -184,6 +177,7 @@ const ProductDetailsPage = () => {
                 toastConfig.setToastConfig(err)
             })
     }
+
 
     return (
         <>
