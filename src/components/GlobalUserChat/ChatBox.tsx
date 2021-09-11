@@ -5,6 +5,7 @@ import moment from 'moment'
 
 import axiosInstance from '../../axios/axiosInstance';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import styles from "./Chat.module.scss";
 
 const ChatBox = (props) => {
     const {selectedChat, socket} = useContext(GlobalChatContext)
@@ -87,7 +88,7 @@ const ChatBox = (props) => {
                             }
                             <div className="msg-data">
 
-                            <Typography>
+                            <Typography className={styles.chat_box_text}>
                               {data.message}
                             </Typography>
                             <p className="message-time">

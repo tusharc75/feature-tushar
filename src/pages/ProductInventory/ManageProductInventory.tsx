@@ -191,9 +191,13 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                         {...field}
                                                                         disabled={productCategory ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                                                         values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
                                                                         name={field.fieldName}
+                                                                        type={field.type}
                                                                         options={field.option}
-                                                                        setFieldValue={setFieldValue}
+                                                                        // setFieldValue={setFieldValue}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}

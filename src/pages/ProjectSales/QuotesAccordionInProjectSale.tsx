@@ -36,6 +36,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { formatAmountWithCurrency } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import styles from "./ProjectSales.module.scss";
 
 const Accordion = withStyles({
   root: {
@@ -292,13 +293,14 @@ export default function QuotesAccordionInProjectSale({
             {expandQuote && (
               <>
                 {quotes && quotes?.length ? (
-                  <Grid container spacing={1}>
+                  <Grid container className={styles.opportunity_layout}>
                     {quotes.slice(0, maxRecordsToShow).map((obj, i) => (
                       <Grid
                         item
-                        xs={12}
-                        sm={12}
-                        md={recordsPerLineInLargeScreen}
+                        // xs={12}
+                        // sm={12}
+                        // md={recordsPerLineInLargeScreen}
+                        className={styles.opportunity_layout_container}
                       >
                         <Card className="detailCard">
                           <CardContent className="detailListing">
@@ -363,7 +365,7 @@ export default function QuotesAccordionInProjectSale({
                                   ""
                                 )}
                               </Grid>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid item xs={12} sm={6} md={6} className={styles.opportunity_closed_date}>
                                 {
                                   obj.incoTerms ? (
                                     <DisplayData

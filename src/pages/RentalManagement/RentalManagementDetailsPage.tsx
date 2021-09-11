@@ -294,11 +294,11 @@ const RentalManagementDetailsPage = () => {
   };
   const columns = [
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
 
 
@@ -446,6 +446,7 @@ const RentalManagementDetailsPage = () => {
                       page={page}
                       allowAction={true}
                       loading={loading}
+                      renderedFrom="rentalManagementInDetail"
                     />
                     : <Box
                       p={2}
@@ -634,6 +635,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 3 || currentStep === 4) && (
                 <DeliveryTicket
+                  rentalManagementId={id}
                   warehouselist={warehouseList}
                   productInventory={productInventory}
                   currentStep={currentStep}

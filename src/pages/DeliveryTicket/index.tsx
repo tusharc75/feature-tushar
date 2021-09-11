@@ -92,10 +92,22 @@ const DeliveryTicket = () => {
       cellRenderer: "deliveryJobNameRenderer",
     },
     {
-      field: "deliveryJobID",
-      headerName: "Delivery Job ID",
+      field: "customerAccount",
+      headerName: "Customer Account",
       show: true,
-      cellRenderer: "CommonRenderer",
+      cellRenderer: "customerAccountNameRenderer",
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      show: true,
+      cellRenderer: "commonRenderer",
+    },
+    {
+      field: "rentalName",
+      headerName: "Rental",
+      show: true,
+      cellRenderer: "rentalRenderer",
     },
     {
       field: "deliveryDate",
@@ -110,6 +122,12 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "commonRenderer",
     },
+    {
+      field: "deliveryJobID",
+      headerName: "Delivery Job ID",
+      show: true,
+      cellRenderer: "commonRenderer",
+    },
     // {
     //   field: "productInventory",
     //   headerName: "Product Inventory",
@@ -117,12 +135,6 @@ const DeliveryTicket = () => {
     //   filter: false,
     //   cellRenderer: "productInventoryRenderer",
     // },
-    {
-      field: "rentalName",
-      headerName: "Rental",
-      show: true,
-      cellRenderer: "rentalRenderer",
-    },
     {
       field: "shippingAddress",
       headerName: "Shipping Address",
@@ -135,12 +147,7 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "commonRenderer",
     },
-    {
-      field: "customerAccount",
-      headerName: "Customer Account",
-      show: true,
-      cellRenderer: "customerAccountNameRenderer",
-    },
+
     {
       field: "pick-UpDate",
       headerName: "Pick-UpDate",
@@ -206,14 +213,16 @@ const DeliveryTicket = () => {
     </>
   );
 
-  const CustomerAccountNameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
-      {params.value}
-    </Link>
-  );
+  const CustomerAccountNameRenderer = (params) => <>
+    {
+      params.value ? <Link
+        className="link"
+        title={params.value}
+        to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
+        {params.value}
+      </Link> : <NoDataCell />
+    }
+  </>
 
   // const ProductInventoryRenderer = params => <>
   //   {
@@ -284,8 +293,8 @@ const DeliveryTicket = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "customerAccountName":
-        return "customerAccountName.optionLabel";
+      case "customerAccount":
+        return "customerAccount.optionLabel";
 
       default:
         return field;
@@ -362,7 +371,8 @@ const DeliveryTicket = () => {
               canDelete: u?.createdBy?.user?._id === user?.user._id,
               expiryDate: u.deliveryDate || "",
 
-              customerAccountName: u?.customerAccount?.optionLabel,
+              status: u?.status,
+              customerAccount: u?.customerAccount?.optionLabel,
               customerAccountId: u?.customerAccount?.optionValue,
 
               deliveryPersonName: u?.deliveryPerson?.optionLabel,

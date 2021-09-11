@@ -128,7 +128,7 @@ export default function DeliveryTicketDetail(props) {
           id: u._id,
           inServiceDate: u.inServiceDate,
           bornInDate: u.bornInDate,
-          status: u.status?.optionLabel,
+          status: u.status,
           warehouse: u.warehouse?.optionLabel,
           warehouseId: u.warehouse?.optionValue,
           productCategory: u.productCategory?.optionLabel,
@@ -190,7 +190,6 @@ export default function DeliveryTicketDetail(props) {
   const ProductRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
       {params.value}
-      {console.log(params.data)}
     </Link>
   );
   const frameworkComponents = {
