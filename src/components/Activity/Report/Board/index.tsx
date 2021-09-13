@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Board = ({ type, filter }) => {
+const Board = ({ type, filter, selectedActivityId = null }) => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const classes = useStyles();
@@ -107,8 +107,8 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => {})
-      .catch((err) => {});
+      .then(({ data }) => { })
+      .catch((err) => { });
   };
 
   const resourceOptions = [
@@ -226,6 +226,7 @@ const Board = ({ type, filter }) => {
                   fetchBoard={fetchBoard}
                   type={type}
                   handleChangeStatus={handleChangeStatus}
+                  selectedActivityId={selectedActivityId}
                 />
               </div>
             </Grid>
