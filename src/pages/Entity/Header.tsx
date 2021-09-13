@@ -13,7 +13,7 @@ const EntityHeader = (props) => {
     onCreate,
     entityPermissions,
     openUserDialog,
-    userActionDiabled,
+    anyEntitySelected,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -91,7 +91,7 @@ const EntityHeader = (props) => {
                 )} */}
                 {entityPermissions.isUpdate && (
                   <MenuItem
-                    disabled={userActionDiabled}
+                    disabled={!anyEntitySelected}
                     onClick={() => {
                       openUserDialog();
                       closeActions();

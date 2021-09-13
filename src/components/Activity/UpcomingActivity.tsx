@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -21,10 +21,9 @@ const UpcomingActivity = (props) => {
             .then(({ data }) => {
                 setActivity(data)
             })
-            .catch((err) => {
+            .catch(() => {
             });
     };
-
 
     return (<Box border={1} p={1} bgcolor="white" borderColor="grey.300">
         <Box ml={1} mb={1}>

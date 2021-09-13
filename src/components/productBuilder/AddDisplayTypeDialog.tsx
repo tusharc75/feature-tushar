@@ -1,29 +1,20 @@
-import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
+import { useState, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@material-ui/core/Dialog'
-import axiosInstance from '../../axios/axiosInstance'
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
-import TextField from '@material-ui/core/TextField';
-import * as Yup from "yup";
-import { useHistory } from "react-router-dom";
-import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormTypes from "../../components/Helpers/FormTypes";
 
-
 const AddDisplayTypeDialog = (props) => {
 
-    const toastConfig = useContext(CustomToastContext)
     const { displayType, handleClose, handleAddDisplayType, fieldData } = props;
-    const [initialData, setInitialData] = useState({ currency: "", unit: "" });
-    const history = useHistory();
+    const [initialData,] = useState({ currency: "", unit: "" });
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = (values) => {

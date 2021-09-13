@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import { TextField } from 'formik-material-ui';
-import * as Yup from 'yup';
+import { object, string } from "yup";
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -83,8 +83,8 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const emailValidationSchema = Yup.object().shape({
-    email: Yup.string().email().required(),
+const emailValidationSchema = object().shape({
+    email: string().email().required(),
 });
 
 const ForgetPassword = () => {

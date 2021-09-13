@@ -9,7 +9,7 @@ import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
-import * as XLSX from "xlsx";
+import { read, utils, writeFile } from "xlsx";
 import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { XYCoord } from "dnd-core";
 import update from "immutability-helper";
@@ -20,8 +20,8 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
-  
-  const [options, setOptions] = useState(values.option || []);
+
+  const [options, setOptions] = useState(values.option || [{"optionLabel":"Option 1","optionValue":"Option 1"}]);
 
   const onChangeValue = (index, field, value) => {
     let data = [...values["option"]];
@@ -58,10 +58,10 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     var reader = new FileReader();
     reader.onload = function (e) {
       var data = e.target.result;
-      let readedData = XLSX.read(data, { type: "binary" });
+      let readedData = read(data, { type: "binary" });
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
-      const dataParse = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const dataParse = utils.sheet_to_json(ws, { header: 1 });
       if (dataParse.length > 1) {
         dataParse.splice(0, 1);
         let option = [];
@@ -100,10 +100,10 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
       }
       json_data.push(ele);
     });
-    var ws = XLSX.utils.json_to_sheet(json_data);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "dropdown options.xlsx");
+    var ws = utils.json_to_sheet(json_data);
+    var wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Sheet1");
+    writeFile(wb, "dropdown options.xlsx");
   };
 
   const moveCard = useCallback(

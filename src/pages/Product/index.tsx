@@ -42,6 +42,13 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
+const mappedProductCategoryColor = {
+    Iron: "#D9E1C1",
+    Block: "#F2EAE0",
+    Paloma: "#EDE0E7",
+    FB: "#EDE0E7",
+    Valves: "#BED8E2"
+}
 const Product = () => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -59,6 +66,15 @@ const Product = () => {
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
+
+    const getRowStyleScheduled = (params) => {
+        if (params?.data?.productCategory && mappedProductCategoryColor[params?.data?.productCategory]) {
+            return {
+                'background-color': `${mappedProductCategoryColor[params?.data?.productCategory]}`,
+            }
+        }
+        return null;
+    };
 
     useEffect(() => {
         fetchProduct()
@@ -118,7 +134,7 @@ const Product = () => {
                                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
                                 let fieldLabel = ele.fieldLabel + " " + _unit
                                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = { }
+                                    let col: any = {}
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
@@ -135,7 +151,7 @@ const Product = () => {
                                     let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
                                     let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
                                     if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                        let col: any = { }
+                                        let col: any = {}
                                         col.field = fieldName
                                         col.headerName = fieldLabel
                                         col.width = 180
@@ -152,7 +168,7 @@ const Product = () => {
                                 let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
                                 let fieldLabel = ele.fieldLabel + " " + _currency
                                 if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = { }
+                                    let col: any = {}
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
@@ -166,7 +182,7 @@ const Product = () => {
                     }
                     else {
                         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = { };
+                            let col: any = {};
                             col.field = ele.fieldName;
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
@@ -193,7 +209,21 @@ const Product = () => {
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
                 )
             }
+
+            const columnState = JSON.parse(localStorage.getItem("productPage"));
+
+            if (columnState) {
+                column.forEach((item) => {
+                    columnState.forEach((d) => {
+                        if (d.colId == item.field) {
+                            item.show = !d.hide;
+                        }
+                    });
+                });
+            }
+
             setColumns(column);
+
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
@@ -273,6 +303,7 @@ const Product = () => {
         ) : (
             <NoDataCell />
         );
+
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
@@ -426,6 +457,7 @@ const Product = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productPage"
+                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

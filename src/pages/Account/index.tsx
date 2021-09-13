@@ -113,7 +113,7 @@ export default function Account(props) {
     { field: 'accountName', headerName: 'Account Name', show: true, disabled: true, cellRenderer: 'accountNameRenderer' },
     { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
     { field: 'typeOfAccount', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
     { field: 'industry', headerName: 'Industry', show: true, cellRenderer: 'commonRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
@@ -203,7 +203,22 @@ export default function Account(props) {
     ) : (
       <NoDataCell />
     );
-    
+
+    const EntityRenderer = (params) => (
+      <h5 className="createBy d-flex">
+        {params.value ?
+          <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+            {params.value}
+          </Link>
+          :
+          <NoDataCell />
+        }
+        {params.data?.restEntity?.length > 0 && (
+          <span className="createdAtTime badge-date">{`+${params.data?.restEntity.length} more..`}</span>
+        )}
+      </h5>
+    )
+
 
   const ParentAccountRenderer = (params) =>
     params.value ? (
@@ -304,7 +319,8 @@ export default function Account(props) {
     masterAccountRenderer: MasterAccountRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
+    actionsRenderer: ActionsRenderer,
+    entityRenderer: EntityRenderer
   };
 
   const replaceFieldName = (field) => {
@@ -411,7 +427,7 @@ export default function Account(props) {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
-
+          const [firstEntity, ...restEntity] = entity;
           let res = {
             ...restProperties,
             id: u._id,
@@ -429,7 +445,9 @@ export default function Account(props) {
             parentAccount: parentAccount?.optionLabel,
             parentAccountId: parentAccount?.optionValue,
 
-            entity: entity?.optionLabel,
+            entity: firstEntity?.optionLabel ?? '',
+            entityId: firstEntity?.optionValue ?? '',
+            restEntity: restEntity,
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
             masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
 

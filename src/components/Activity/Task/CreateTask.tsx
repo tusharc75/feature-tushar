@@ -19,7 +19,7 @@ import { Formik, Form, Field } from "formik";
 import { KeyboardDatePicker } from "formik-material-ui-pickers";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import moment from "moment";
 import {
   GetTaskDetail,
@@ -39,12 +39,12 @@ import Loader from "../../Loader";
 import { dateFormat, dateFormatForInputControl } from "../../../constants/helpers"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
-const TaskSchema = Yup.object().shape({
-  name: Yup.string().required("Please enter task name"),
-  assignee: Yup.string().required("Please select assignee"),
-  reporter: Yup.string().required(),
-  startDate: Yup.string().required("Please enter start date"),
-  dueDate: Yup.string().required("Please enter due date"),
+const TaskSchema = object().shape({
+  name: string().required("Please enter task name"),
+  assignee: string().required("Please select assignee"),
+  reporter: string().required(),
+  startDate: string().required("Please enter start date"),
+  dueDate: string().required("Please enter due date"),
 });
 
 export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {

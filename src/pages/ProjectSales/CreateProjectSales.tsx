@@ -497,6 +497,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           />
                                         ) : field.fieldName === "entity" ? (
                                           <FormTypes
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                             multiple
                                             values={values}
                                             errors={errors}
@@ -504,7 +505,6 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-
                                             options={field.option}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}

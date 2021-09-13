@@ -7,7 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
+import { object, string, boolean } from "yup";
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Checkbox from "@material-ui/core/Checkbox"
 import { useParams, useHistory } from 'react-router-dom';
@@ -22,13 +22,18 @@ import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const PdfTemplateSchema = Yup.object().shape({
-    name: Yup.string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
-    owner: Yup.string().required('Owner is required'),
-    showPageNumberInFooter: Yup.boolean()
+const defaultProductColumns = 7;
+
+const PdfTemplateSchema = object().shape({
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    owner: string().required('Owner is required'),
+    showPageNumberInFooter: boolean()
 });
 
 const useStyles = makeStyles((theme) => ({
+    mainContainer: {
+        overflowY: 'scroll'
+    },
     root: {
         flexGrow: 1,
     },
@@ -75,6 +80,7 @@ export default function NewCreateQuotePdfTemplate() {
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
     const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
     const onBackButtonEvent = (e) => {
@@ -101,7 +107,10 @@ export default function NewCreateQuotePdfTemplate() {
                     const {
                         data: { data }
                     } = res;
+                    setIsLandscapChecked(data?.landscape)
                     setInitialValues({
+                        landscape: data?.landscape,
+                        productColumns: data?.productColumns,
                         name: data?.name,
                         showPageNumberInFooter: data?.pageNumberInFooter,
                         header: data?.header,
@@ -128,6 +137,8 @@ export default function NewCreateQuotePdfTemplate() {
         }
         else {
             setInitialValues({
+                landscape: false,
+                productColumns: defaultProductColumns,
                 name: "",
                 showPageNumberInFooter: false,
                 header: "",
@@ -197,6 +208,8 @@ export default function NewCreateQuotePdfTemplate() {
                     entity: values?.entity,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
+                    landscape: values?.landscape,
+                    productColumns: parseInt(values?.productColumns)
                 })
                 .then(({ data: { data } }) => {
                     if (isPreview === true) {
@@ -223,6 +236,8 @@ export default function NewCreateQuotePdfTemplate() {
                     entity: values?.entity,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
+                    landscape: values?.landscape,
+                    productColumns: parseInt(values?.productColumns)
                 })
                 .then(({ data: { data } }) => {
                     if (isPreview === true) {
@@ -258,6 +273,7 @@ export default function NewCreateQuotePdfTemplate() {
     }
 
     return <div className={classes.root}>
+
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs
@@ -281,7 +297,7 @@ export default function NewCreateQuotePdfTemplate() {
                 />
             </Grid>
         </Grid>
-        <div className="main-container">
+        <div className={`main-container ${classes.mainContainer}`} >
             <Paper className={classes.paper}>
                 {initialValues ? (
                     <Formik
@@ -317,6 +333,15 @@ export default function NewCreateQuotePdfTemplate() {
                                             {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
                                         </Button>
 
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={()=>history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path })}
+                                        >
+                                            Close
+                                        </Button>
+
                                     </Grid>
                                     {
                                         showConfirmDialog ?
@@ -329,7 +354,12 @@ export default function NewCreateQuotePdfTemplate() {
                                                 onClose={() => {
                                                     //  This condition is to check either user is redirected from quote details screen or not
                                                     if (history.location?.state?.redirectTo) {
-                                                        history.push(history.location?.state?.redirectTo);
+                                                        if (isBreakCrumbPath) {
+                                                            history.push({ pathname: routes.quotePdfTemplate.path });
+                                                            setIsBreakCrumbPath("")
+                                                        } else {
+                                                            history.push(history.location?.state?.redirectTo);
+                                                        }
                                                     } else {
                                                         setShowConfirmDialog(false)
                                                         history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
@@ -432,20 +462,65 @@ export default function NewCreateQuotePdfTemplate() {
                                         />}
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} style={{ textAlign: 'left' }}>
-                                    <FormControlLabel
-                                        disabled={!hasPermissionToUpdate}
-                                        value={values['showPageNumberInFooter']}
-                                        control={
-                                            <Checkbox
-                                                name="showPageNumberInFooter"
-                                                checked={values['showPageNumberInFooter']}
-                                                onChange={(e) => setFieldValue('showPageNumberInFooter', e.target.checked)}
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Show page number in footer"
-                                    />
+
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                        <FormControlLabel
+                                            disabled={!hasPermissionToUpdate}
+                                            value={values['showPageNumberInFooter']}
+                                            control={
+                                                <Checkbox
+                                                    name="showPageNumberInFooter"
+                                                    checked={values['showPageNumberInFooter']}
+                                                    onChange={(e) => {
+                                                        setFieldValue('showPageNumberInFooter', e.target.checked)
+                                                    }}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Show page number in footer"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                        <FormControlLabel
+                                            disabled={!hasPermissionToUpdate}
+                                            value={values['landscape']}
+                                            control={
+                                                <Checkbox
+                                                    name="landscape"
+                                                    checked={values['landscape']}
+                                                    onChange={(e) => {
+                                                        setIsLandscapChecked(e.target.checked)
+                                                        setFieldValue('landscape', e.target.checked)
+                                                    }}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Landscape"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
+                                        <TextField
+                                            name="productColumns"
+                                            label="No. of Product Columns"
+                                            value={values["productColumns"]}
+                                            type="number"
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            InputProps={{ inputProps: { min: 5, max: 20 } }}
+                                            onChange={(e) => {
+                                                setFieldValue('productColumns', e.target.value)
+                                            }}
+                                            onBlur={(e) => {
+                                                const val = parseInt(e.target.value)
+                                                if (!(val >= 5 && val <= 20)) {
+                                                    setFieldValue('productColumns', defaultProductColumns.toString())
+                                                }
+                                            }}
+                                            helperText="Value must be between 5 to 20"
+                                        />
+                                    </Grid>
                                 </Grid>
                             </Form>
                         )}
@@ -462,7 +537,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     header: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 725}
                             height={300}
                             initialValue={initialValues?.header}
                             imageOrFileUploadCompletePercentage={(
@@ -487,7 +562,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     aboveTable: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 725}
                             height={400}
                             initialValue={initialValues?.aboveTable}
                             imageOrFileUploadCompletePercentage={(
@@ -509,7 +584,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     belowTable: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 725}
                             height={400}
                             initialValue={initialValues?.belowTable}
                             imageOrFileUploadCompletePercentage={(
@@ -532,7 +607,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     footer: value
                                 }))
                             }}
-                            width={725}
+                            width={isLandscapChecked ? 793 : 725}
                             height={300}
                             initialValue={initialValues?.footer}
                             imageOrFileUploadCompletePercentage={(

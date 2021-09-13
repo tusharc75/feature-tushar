@@ -3,7 +3,7 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from "formik";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import PropTypes from 'prop-types'
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
@@ -22,9 +22,9 @@ import ImagePreview from "../Email/ImagePreview";
 import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 
-const AttachmentSchema = Yup.object().shape({
-    name: Yup.string().required("please add attachment name"),
-    fileUrl: Yup.string().required("please upload attachment"),
+const AttachmentSchema = object().shape({
+    name: string().required("please add attachment name"),
+    fileUrl: string().required("please upload attachment"),
 });
 
 const fileIcons = [

@@ -32,7 +32,7 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions },
+    state: { permissions },
   }: any = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
@@ -48,7 +48,7 @@ const Entity: FC = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem("entityPage"));
-  const [columns, setColumns] = useState([
+  const [columns,] = useState([
     { field: "entityName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "address", headerName: "Address", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
@@ -247,7 +247,6 @@ const Entity: FC = () => {
     setUsersDialogOpen(false);
   };
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -278,7 +277,7 @@ const Entity: FC = () => {
             entityPermissions={permissions[entityResource]}
             onCreate={handleCreate}
             openUserDialog={handleOpenDialog}
-            userActionDiabled={selectedRecords.length === 0} //single select entity can assign user
+            anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
           />
         </div>
 

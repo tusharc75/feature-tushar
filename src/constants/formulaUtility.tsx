@@ -1,4 +1,3 @@
-import { Parser as FormulaParser } from 'hot-formula-parser';
 import { uniq } from "lodash";
 import { camelCase } from "../constants/helpers";
 

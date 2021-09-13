@@ -8,7 +8,7 @@ import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
-import * as Yup from "yup";
+import { object, string } from "yup";
 import FormTypes from "../Helpers/FormTypes";
 import { downloadExcel } from "../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -18,8 +18,8 @@ import CreateProductCategory from "../../pages/ProductCategory/CreateProductCate
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from "@material-ui/icons/AddCircle";
 
-const ProductBuilderSchema = Yup.object().shape({
-    productTemplate: Yup.string()
+const ProductBuilderSchema = object().shape({
+    productTemplate: string()
         .required("please select product template"),
 });
 
@@ -47,7 +47,7 @@ const SelectionDialog = (props) => {
             }));
             setProductCategory(data.data)
         });
-        axiosInstance().get(`/product-template/template/standard`).then(({ data: { data } }) => {
+        axiosInstance().post(`/product-template/template/standard`, { entity: null }).then(({ data: { data } }) => {
             setProductTemplate(data.data)
             if (data.data.length) {
                 let defaultproductTemplate: any = data.data[0].optionValue
@@ -65,7 +65,7 @@ const SelectionDialog = (props) => {
 
     const handleChangeCategory = (value, label) => {
         if (value && value !== "") {
-            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
+            axiosInstance().post(`/product-template/template/` + value, { entity: null }).then(({ data: { data } }) => {
                 setProductTemplate(data.data)
                 if (data.data.length) {
                     var defaultproductTemplate = data.data[0].optionValue
@@ -308,7 +308,7 @@ const SelectionDialog = (props) => {
         {
             showAddProductCategoryDialog && <CreateProductCategory
                 productCategoryId={null}
-                onClose = {() => setShowAddProductCategoryDialog(false)}
+                onClose={() => setShowAddProductCategoryDialog(false)}
                 onSuccess={(data) => {
 
                     if (data?._id) {

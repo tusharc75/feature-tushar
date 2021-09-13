@@ -7,7 +7,7 @@ import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { camelCase } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -26,8 +26,8 @@ import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const ProductTemplateSchema = Yup.object().shape({
-    name: Yup.string()
+const ProductTemplateSchema = object().shape({
+    name: string()
         .min(3, "Too Short!")
         .max(50, "Too Long")
         .required("Template name is required"),
@@ -171,9 +171,9 @@ const ProductTemplate = () => {
         if (data.isStandard) {
             data.productCategory = null;
             data.unit = null;
-            data.entity = null;
-            data.owner = null;
-            data.collaborator = null;
+            data.entity = values?.entity;
+            data.owner = values?.owner;
+            data.collaborator = values?.collaborator;
         }
         else {
             data.productCategory = values.productCategory;

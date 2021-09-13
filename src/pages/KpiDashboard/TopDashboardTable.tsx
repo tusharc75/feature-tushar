@@ -5,8 +5,8 @@ import { startCase } from 'lodash';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
+import { saveAs } from "file-saver";
+import { utils, write } from "xlsx";
 
 import axiosInstance from '../../axios/axiosInstance';
 import { formatAmountWithCurrency } from '../../constants/helpers';
@@ -119,22 +119,22 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
       case 'excel': {
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = XLSX.utils.json_to_sheet(regionSales);
+        const ws = utils.json_to_sheet(regionSales);
         const wb = {
           Sheets: {
             data: ws
           },
           SheetNames: ['data']
         };
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs(data, 'Regional Sales' + fileExtension);
+        saveAs(data, 'Regional Sales' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(regionSales)], { type: 'text/plain;charset=utf-8' });
-        FileSaver.saveAs(blob, 'Regional Sales.json');
+        saveAs(blob, 'Regional Sales.json');
         break;
       }
       default:
@@ -180,16 +180,16 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
                   </TableRow>
                 ))
               ) : (
-                  <Box component="span" p={2} width="100%">
-                    {loading ?
-                      [...Array(10).keys()].map((_, i) => (
-                        <Box component="span" m={1} key={i} width="100%">
-                          <Skeleton variant='text' width="100%"  />
+                <Box component="span" p={2} width="100%">
+                  {loading ?
+                    [...Array(10).keys()].map((_, i) => (
+                      <Box component="span" m={1} key={i} width="100%">
+                        <Skeleton variant='text' width="100%" />
 
-                        </Box>
-                       ))
-                      : <Typography>No Data for regional sales</Typography>}
-                  </Box>
+                      </Box>
+                    ))
+                    : <Typography>No Data for regional sales</Typography>}
+                </Box>
               )}
             </TableBody>
           </Table>

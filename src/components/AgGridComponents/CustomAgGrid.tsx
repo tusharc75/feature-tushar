@@ -127,7 +127,8 @@ export default function CustomAgGrid({
   allowPagination = true,
   selectedRecords = [],
   onSelection = null,
-  renderedFrom = null
+  renderedFrom = null,
+  customGridOptions = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -155,14 +156,14 @@ export default function CustomAgGrid({
 
   useEffect(() => {
     if (clientSideGridApi && selectedRecords.length) {
-          clientSideGridApi.forEachNode(function (node) {
-            node.setSelected(
-              selectedRecords.some((o) => o._id === node.data._id)
-            );
-        });
+      clientSideGridApi.forEachNode(function (node) {
+        node.setSelected(
+          selectedRecords.some((o) => o._id === node.data._id)
+        );
+      });
     }
-    
-  },[clientSideGridApi, selectedRecords])
+
+  }, [clientSideGridApi, selectedRecords])
 
   var customFilterParams = {
     filterOptions: ['contains'],
@@ -185,10 +186,10 @@ export default function CustomAgGrid({
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -204,10 +205,10 @@ export default function CustomAgGrid({
         comparator={() => {
           return 0;
         }}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });
@@ -234,6 +235,7 @@ export default function CustomAgGrid({
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
+              gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
               onGridReady={onGridReady}
@@ -249,6 +251,12 @@ export default function CustomAgGrid({
                 customFloatingFilter: CustomFloatingFilter
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
+              }}
+              isRowSelectable={(rowNode) => {
+                if (allowSelection) {
+                  return rowNode.data && rowNode.data.hideSelection === true ? false : true;
+                }
+                return false;
               }}
               enableCellChangeFlash={false}
               defaultColDef={{
@@ -287,7 +295,8 @@ export default function CustomAgGrid({
               // loadingOverlayComponentParams={{
               //     loadingMessage: 'Loading...',
               // }}
-              animateRows={enableRowDrag ?? false}
+              animateRows={enableRowDrag ?? false
+              }
               suppressAnimationFrame={!enableRowDrag}
               suppressMaintainUnsortedOrder={true}
               rowBuffer={limit}
@@ -320,6 +329,7 @@ export default function CustomAgGrid({
               suppressPaginationPanel={true}
               paginationPageSize={limit}
               rowDragManaged={enableRowDrag}
+
             >
               {allowSelection && (
                 <AgGridColumn
@@ -348,6 +358,7 @@ export default function CustomAgGrid({
                   sortable={false}
                   filter={false}
                   cellRenderer="actionsRenderer"
+
                 ></AgGridColumn>
               )}
             </AgGridReact>

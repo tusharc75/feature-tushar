@@ -20,8 +20,8 @@ import Chart from 'react-chartjs-2';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
+import { saveAs } from "file-saver";
+import { utils, write } from "xlsx";
 import { SVG } from "../../assets";
 import styles from './dashboard.module.scss';
 import { formatAmountWithCurrency } from '../../constants/helpers';
@@ -205,22 +205,22 @@ const TopDashboard = (props) => {
         // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = XLSX.utils.json_to_sheet(tableDataRaw);
+        const ws = utils.json_to_sheet(tableDataRaw);
         const wb = {
           Sheets: {
             data: ws
           },
           SheetNames: ['data']
         };
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs(data, 'Entity Sales Chart' + fileExtension);
+        saveAs(data, 'Entity Sales Chart' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
-        FileSaver.saveAs(blob, 'Entity Sales Chart.json');
+        saveAs(blob, 'Entity Sales Chart.json');
         break;
       }
       default:

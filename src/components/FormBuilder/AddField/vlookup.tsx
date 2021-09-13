@@ -8,7 +8,7 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import * as XLSX from 'xlsx';
+import { read, utils, writeFile } from "xlsx";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -80,10 +80,10 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     const reader = new FileReader();
     reader.onload = function (e) {
       const data = e.target.result;
-      let readedData = XLSX.read(data, { type: 'binary' });
+      let readedData = read(data, { type: 'binary' });
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
-      const dataParse = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const dataParse = utils.sheet_to_json(ws, { header: 1 });
       if (dataParse.length) {
         dataParse.splice(0, 1);
         let option = [];
@@ -108,10 +108,10 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     export_json.forEach((_d) => {
       delete _d?.optionValue;
     });
-    const ws = XLSX.utils.json_to_sheet(export_json);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    XLSX.writeFile(wb, 'vlookup dropdown options.xlsx');
+    const ws = utils.json_to_sheet(export_json);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Sheet1');
+    writeFile(wb, 'vlookup dropdown options.xlsx');
   };
 
   const convertLabelToValue = (value) => {
@@ -228,7 +228,6 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     ));
   }, [isUpdate]);
 
-  console.log(lookupOptions)
   return (
     <Box marginTop={2}>
       <Autocomplete
@@ -250,7 +249,8 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
         }
         onChange={(e, value) => {
           setFieldValue('vlookupInputFields', convertLabelToValue(value));
-          GetLookupOption([...values['vlookupInputFields'], ...convertLabelToValue(value)])
+          const vlookupInputFields = values['vlookupInputFields'] ? values['vlookupInputFields'] : []
+          GetLookupOption([...vlookupInputFields, ...convertLabelToValue(value)])
           setUpdate(!isUpdate);
         }}
         renderInput={(params) => (

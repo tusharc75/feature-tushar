@@ -135,6 +135,7 @@ export default function CustomAgGridEditable({
   forProductBuilder = false,
   fromProductGrid = false,
   currency = null,
+  renderedFrom = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -148,6 +149,17 @@ export default function CustomAgGridEditable({
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
+
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+    if (columnState) {
+      params.columnApi.setColumnState(columnState);
+    }
+  };
+
+  const onColumnMoved = (params) => {
+    const columnState = JSON.stringify(params.columnApi.getColumnState());
+    localStorage.setItem(renderedFrom, columnState);
   };
 
   let customFilterParams = {
@@ -256,6 +268,7 @@ export default function CustomAgGridEditable({
             setColumns={setColumns}
             columnApi={columnApi}
             refreshGrid={refreshGrid}
+            renderedFrom={renderedFrom}
           />
 
           <div
@@ -264,6 +277,7 @@ export default function CustomAgGridEditable({
           >
             <AgGridReact
               rowData={dataRows}
+              onColumnMoved={onColumnMoved}
               rowClassRules={{
                 "red-data-row":
                   forProductBuilder &&
@@ -288,6 +302,12 @@ export default function CustomAgGridEditable({
                 numericCellEditor: NumericEditor,
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
+              }}
+              isRowSelectable={(rowNode) => {
+                if (allowSelection) {
+                  return rowNode.data && rowNode.data.hideSelection === true ? false : true;
+                }
+                return false;
               }}
               pinnedBottomRowData={fromProductGrid || forProductBuilder ? createdPinnedData() : []}
               enableCellChangeFlash={false}

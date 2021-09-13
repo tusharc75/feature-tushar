@@ -16,7 +16,6 @@ import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
-import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import {
@@ -25,13 +24,13 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
-import CreateProductInventory from "./CreateProductInventory";
+import ManageProductInventory from "./ManageProductInventory";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 const ProductInventory = () => {
 
     const toastConfig = useContext(CustomToastContext)
-    const [open, setOpen] = useState(false);
-    const [productInventoryId, setProductInventoryId] = useState(null);
+    const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -48,16 +47,18 @@ const ProductInventory = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "CommonRenderer" },
-        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "CommonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "commonRenderer" },
+        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "commonRenderer" },
+        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -71,15 +72,17 @@ const ProductInventory = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
+            data.data = data.data?.map((u, i) => ({
                 ...u,
                 id: u._id,
+                serialNumber: u.serialNumber,
                 inServiceDate: u.inServiceDate,
                 bornInDate: u.bornInDate,
-                status: u.status?.optionLabel,
+                status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 productCategory: u.productCategory?.optionLabel,
-                productName: u.product?.optionLabel,
+                product: u.product?.optionLabel,
+                productId: u.product?.optionValue,
                 createdBy: u.createdBy?.user?.concatedName,
                 createdByDate: u.createdBy?.date,
                 updatedBy: u.updatedBy?.user?.concatedName,
@@ -143,24 +146,32 @@ const ProductInventory = () => {
 
     const NameRenderer = (params) => (
         <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-          {params.value}
+            {params.value}
         </Link>
-      );
+    );
 
+    const ProductRenderer = (params) => (
+        <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
+            {params.value}
+        </Link>
+    );
 
     const ActionsRenderer = params => (
         <>
-            {/* {permissions?.productInventory?.isCreate &&
+            {
+                permissions?.productInventory?.isCreate &&
                 <Tooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
-                        onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
+                        onClick={() => {
+                            setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: params.data._id });
+                        }}
                     >
                         <FileCopyIcon color="primary" />
                     </IconButton>
                 </Tooltip>
-            } */}
+            }
             {permissions?.productInventory?.isDelete &&
                 <Tooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
@@ -180,17 +191,6 @@ const ProductInventory = () => {
         dispatch({ type: "search", search: e.target.value });
     };
 
-    const OpenProduct = (_id) => {
-        setProductInventoryId(_id)
-        setOpen(true)
-    }
-
-    const handleClose = () => {
-        setProductInventoryId(null)
-        setOpen(false)
-        fetchProductInventory();
-    }
-
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -201,6 +201,7 @@ const ProductInventory = () => {
 
     const frameworkComponents = {
         createdByRenderer: CreatedByRenderer,
+        productRenderer: ProductRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         nameRenderer: NameRenderer,
@@ -219,30 +220,31 @@ const ProductInventory = () => {
         }
     };
 
+    const getRowStyleScheduled = (params) => {
+        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
+            return {
+                'background-color': "#d3ffe0",
+            }
+        } else {
+            return {
+                'background-color': '#ffe7e7',
+            };
+        }
+        return null;
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[{ title: routes.productInventory.title }]} />
-            </Grid>
-            <Grid item md={8} sm={1} xs={2}>
-                <ImportExportLinks
-                    permissions={permissions.product}
-                    module="product(s)"
-                    api={"product"}
-                    refrenceId={null}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                        if (isImportedSuccessfully) {
-                            fetchProductInventory();
-                        }
-                    }}
-                />
+                <CustomBreadCrumbs routes={[routes.productInventory]} />
             </Grid>
         </Grid>
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.productInventory.title} </span>
+                        <GiAbstract055 className="headerLogo" />
+                        <span className="listingHeader">{routes.productInventory?.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
@@ -255,7 +257,9 @@ const ProductInventory = () => {
                                 value={search}
                             />
                             {permissions?.productInventory?.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                <Button className={styles.add_submit_btn} onClick={() => {
+                                    setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
+                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
                             {permissions?.productInventory?.isDelete &&
                                 <Button
@@ -301,20 +305,24 @@ const ProductInventory = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productInventoryPage"
+                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {open &&
-            <CreateProductInventory
-                productInventoryId={productInventoryId}
-                onClose={() => setOpen(false)}
+        {
+            showManageProductInventoryDialog.open &&
+            <ManageProductInventory
+                isClone={showManageProductInventoryDialog.isClone}
+                productInventoryId={showManageProductInventoryDialog.idToClone}
+                onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
-                    setOpen(false);
+                    setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
                     fetchProductInventory()
                 }}
             />
         }
-        {showDeleteConfirmBox &&
+        {
+            showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
@@ -322,7 +330,7 @@ const ProductInventory = () => {
                 onOk={handleDelete}
             />
         }
-    </Fragment>
+    </Fragment >
     );
 }
 

@@ -4,6 +4,9 @@
   left: 70px;
   z-index: 1001;
 
+ .chat_box_text{
+   word-break: break-all;
+ }
   @media screen and (max-width: 960px) {
     left: 15px;
   }

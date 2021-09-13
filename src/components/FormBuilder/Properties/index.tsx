@@ -15,7 +15,7 @@ import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import * as Yup from 'yup';
+import { object, string } from "yup";
 import { Formik, Form } from 'formik';
 import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
@@ -32,9 +32,10 @@ import FormTypes from '../../Helpers/FormTypes';
 import { startCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import styles from "../Form.module.scss";
 
-const FieldSchema = Yup.object().shape({
-  fieldLabel: Yup.string().required('please enter field label')
+const FieldSchema = object().shape({
+  fieldLabel: string().required('please enter field label')
 });
 
 const LookupResource = [
@@ -62,7 +63,7 @@ const LookupResource = [
   { name: 'Market Segment', value: 'Market Segment' },
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Loading Ticket', value: 'Loading Ticket' },
-].sort((a,b) =>  a.name.localeCompare(b.name));
+].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
@@ -112,11 +113,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.hiddenField = false;
       }
 
-      if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup) {
+      if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addAdditionalOption = false;
       }
 
-      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup) {
+      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addManualOptionInExcel = false;
       }
 
@@ -219,6 +220,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.unique = values.unique;
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
+            ele.lookup = values.lookup || false;
+            ele.lookupResource = values.lookup ? values.lookupResource : "" ;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
@@ -257,10 +260,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
             }
-            if (values.lookup) {
-              ele.lookup = values.lookup;
-              ele.lookupResource = values.lookupResource;
-            }
+           
             if (fieldData.type === 'formula' || values.isFormula === true) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
@@ -374,6 +374,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
+      className="properties_dialog_height"
       open={true}
       fullWidth
       onClose={(e, reason) => {
@@ -382,13 +383,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         }
       }}
     >
+      <CustomDialogHeader
+        title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
+        onClose={() => setShowConfirmDialog(true)}
+      ></CustomDialogHeader>
+
+
       <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <Fragment>
-            <CustomDialogHeader
-              title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
-              onClose={() => setShowConfirmDialog(true)}
-            ></CustomDialogHeader>
+          <>
             <CustomDialogContent>
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
@@ -439,36 +442,36 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                    <Grid spacing={3} container>
-                      {values['type'] === 'formula' && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <FormControl fullWidth margin="dense" variant="outlined">
-                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={values['returnType']}
-                              onChange={(e) => setFieldValue('returnType', e.target.value)}
-                              label="Return Type"
-                              name="returnType"
-                            >
-                              <MenuItem value="decimal">Decimal</MenuItem>
-                              <MenuItem value="string">String</MenuItem>
-                              <MenuItem value="boolean">Boolean</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      )}
-                      {(values['type'] === 'decimal' ||
-                        values['type'] === 'converter' ||
-                        values['type'] === 'currencyAmount' ||
-                        values['returnType'] === 'decimal') && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <DecimalPlaces values={values} setFieldValue={setFieldValue} />
-                        </Grid>
-                      )}
-                    </Grid>
-                  )}
+                      <Grid spacing={3} container>
+                        {values['type'] === 'formula' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values['returnType']}
+                                onChange={(e) => setFieldValue('returnType', e.target.value)}
+                                label="Return Type"
+                                name="returnType"
+                              >
+                                <MenuItem value="decimal">Decimal</MenuItem>
+                                <MenuItem value="string">String</MenuItem>
+                                <MenuItem value="boolean">Boolean</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                        {(values['type'] === 'decimal' ||
+                          values['type'] === 'converter' ||
+                          values['type'] === 'currencyAmount' ||
+                          values['returnType'] === 'decimal') && (
+                            <Grid item xs={12} sm={6} md={6}>
+                              <DecimalPlaces values={values} setFieldValue={setFieldValue} />
+                            </Grid>
+                          )}
+                      </Grid>
+                    )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -514,7 +517,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'multiSelect' ||
                     values['type'] === 'radio' ||
                     values['type'] === 'process') &&
-                    !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
+                    !values['lookup'] &&
+                    <Option
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    fields={fields}
+                    _id={fieldData._id} />
+                  }
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
@@ -540,7 +549,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       </>
                     )}
                   {(values['type'] === 'formula' || values['isFormula']) && (
-                    <Formula fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} touched={touched} errors={errors} />
+                    <Formula
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      _id={fieldData._id}
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
                     <Fragment>
@@ -564,7 +580,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     </Fragment>
                   )}
                   {(values['type'] === 'converter' || values['isConverter']) && (
-                    <Converter fields={fields} values={values} setFieldValue={setFieldValue} touched={touched} errors={errors} />
+                    <Converter
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
@@ -851,7 +873,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup ? (
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -865,7 +887,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Add Additional Option"
                       />
                     ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup ? (
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -910,6 +932,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 </Form>
               </Box>
             </CustomDialogContent>
+
             <CustomDialogFooter>
               <Button
                 size="small"
@@ -924,6 +947,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 Save
               </Button>
             </CustomDialogFooter>
+
             {showConfirmDialog ? (
               <ConfirmCancelDialog
                 open={showConfirmDialog}
@@ -937,9 +961,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 }}
               />
             ) : null}
-          </Fragment>
+          </>
         )}
+
       </Formik>
+
     </Dialog>
   );
 };

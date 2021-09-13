@@ -19,7 +19,6 @@ import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constant
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
-import { Skeleton } from "@material-ui/lab";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
 
@@ -65,7 +64,7 @@ interface DetailProps {
   fields: any[];
 }
 
-const unlinkFields = [sidebarResource.marketSegment,sidebarResource.budget,sidebarResource.productCategory];
+const unlinkFields = [sidebarResource.marketSegment, sidebarResource.budget, sidebarResource.productCategory, sidebarResource.productTemplate, sidebarResource.priceTemplate];
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
@@ -77,10 +76,6 @@ const Details = (props: DetailProps) => {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
-  const [popoverData, setPopoverData] = useState(null);
-  const [loadingPopoverData, setLoadingPopoverData] = useState(true);
-  const [lookupResource, setLookupResource] = useState(null);
-  const cancelTokenSource = axios.CancelToken.source();
 
   useEffect(() => {
     sortArray();
@@ -155,6 +150,11 @@ const Details = (props: DetailProps) => {
         ? filterOptions.map((d) => d.optionLabel).join(", ")
         : "";
       text = value ? value : "-";
+    } else if (input.type === "freeStyleMultiSelect") {
+      const value = values[input.fieldName].length
+        ? values[input.fieldName].map((d) => d).join(", ")
+        : "";
+      text = value ? value : "-";
     } else if (input.type === "dropDown") {
       const opt = input.option?.find(
         (o) => o.optionValue === values[input.fieldName]
@@ -215,6 +215,7 @@ const Details = (props: DetailProps) => {
    * Render Link  or Typography component
    */
   const renderData = (val: any, fieldData: any) => {
+
     const value = normalizeValues(val, fieldData);
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && permissions[camelCase(fieldData.lookupResource)]?.isRead && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
@@ -225,16 +226,15 @@ const Details = (props: DetailProps) => {
                 data[fieldData.fieldName].map((_val: any, i) => (
                   <React.Fragment key={_val.optionValue}>
                     <Link
-                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${
-                        _val.optionValue
-                      }`}
-                      // onMouseEnter={(e) =>
-                      //   getPopoverData(
-                      //     e,
-                      //     fieldData.lookupResource,
-                      //     _val.optionValue
-                      //   )
-                      // }
+                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue
+                        }`}
+                    // onMouseEnter={(e) =>
+                    //   getPopoverData(
+                    //     e,
+                    //     fieldData.lookupResource,
+                    //     _val.optionValue
+                    //   )
+                    // }
                     >
                       <span className={`text-truncate ${classes.dataValue}`}>
                         {_val.optionLabel}
@@ -248,21 +248,20 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <Link
-                to={`/${kebabCase(fieldData.lookupResource)}/detail/${
-                  val[fieldData.fieldName]
-                }`}
-                // onMouseEnter={(e) =>
-                //   getPopoverData(
-                //     e,
-                //     fieldData.lookupResource,
-                //     val[fieldData.fieldName]
-                //   )
-                // }
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]
+                  }`}
+              // onMouseEnter={(e) =>
+              //   getPopoverData(
+              //     e,
+              //     fieldData.lookupResource,
+              //     val[fieldData.fieldName]
+              //   )
+              // }
               >
                 <span className={`text-truncate ${classes.dataValue}`}>
                   {data[fieldData.fieldName].optionLabel}
                   {data[fieldData.fieldName]?.staticData?.approved &&
-                  data[fieldData.fieldName]?.staticData?.approved === true ? (
+                    data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval
                       className={classes.approvalIcon}
                       title="Approved"
@@ -370,65 +369,64 @@ const Details = (props: DetailProps) => {
                           ) : (
                             <Box display="flex" alignItems="center">
                               {field.fieldData.type === "fileUpload" &&
-                              initialVals[field.fieldData.fieldName] ? (
+                                initialVals[field.fieldData.fieldName] ? (
                                 <InsertDriveFile />
                               ) : null}{" "}
                               {renderData(initialVals, field.fieldData)}
                               {field.fieldData.type === "fileUpload"
                                 ? initialVals[field.fieldData.fieldName] &&
-                                  (isDownloading ? (
-                                    <Box display="flex" alignItems="center">
-                                      {downloadProgress === 100
-                                        ? "Downloaded"
-                                        : "Downloading"}
+                                (isDownloading ? (
+                                  <Box display="flex" alignItems="center">
+                                    {downloadProgress === 100
+                                      ? "Downloaded"
+                                      : "Downloading"}
 
+                                    <Box
+                                      marginLeft={1}
+                                      position="relative"
+                                      display="inline-flex"
+                                    >
+                                      <CircularProgress
+                                        size={30}
+                                        variant="determinate"
+                                        value={downloadProgress}
+                                      />
                                       <Box
-                                        marginLeft={1}
-                                        position="relative"
-                                        display="inline-flex"
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        right={0}
+                                        position="absolute"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
                                       >
-                                        <CircularProgress
-                                          size={30}
-                                          variant="determinate"
-                                          value={downloadProgress}
-                                        />
-                                        <Box
-                                          top={0}
-                                          left={0}
-                                          bottom={0}
-                                          right={0}
-                                          position="absolute"
-                                          display="flex"
-                                          alignItems="center"
-                                          justifyContent="center"
-                                        >
-                                          <Typography
-                                            variant="caption"
-                                            component="div"
-                                            color="textSecondary"
-                                          >{`${downloadProgress}%`}</Typography>
-                                        </Box>
+                                        <Typography
+                                          variant="caption"
+                                          component="div"
+                                          color="textSecondary"
+                                        >{`${downloadProgress}%`}</Typography>
                                       </Box>
                                     </Box>
-                                  ) : (
-                                    <IconButton
-                                      title={`Download ${
-                                        initialVals[field.fieldData.fieldName]
+                                  </Box>
+                                ) : (
+                                  <IconButton
+                                    title={`Download ${initialVals[field.fieldData.fieldName]
                                       }`}
-                                      disabled={isDownloading}
-                                      size="small"
-                                      onClick={() =>
-                                        downloadFile(
-                                          normalizeValues(
-                                            initialVals,
-                                            field.fieldData
-                                          )
+                                    disabled={isDownloading}
+                                    size="small"
+                                    onClick={() =>
+                                      downloadFile(
+                                        normalizeValues(
+                                          initialVals,
+                                          field.fieldData
                                         )
-                                      }
-                                    >
-                                      <GetApp />
-                                    </IconButton>
-                                  ))
+                                      )
+                                    }
+                                  >
+                                    <GetApp />
+                                  </IconButton>
+                                ))
                                 : null}{" "}
                             </Box>
                           )}

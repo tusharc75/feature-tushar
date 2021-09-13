@@ -6,7 +6,7 @@ import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import { makeStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -82,9 +82,9 @@ const TermsAndCondition = ({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
 
-  const termsAndConditionSchema = Yup.object().shape({
-    TACName: Yup.string().required(`please add ${displayTitle.toLowerCase()} name`),
-    owner: Yup.string().required(`Owner is required`),
+  const termsAndConditionSchema = object().shape({
+    TACName: string().required(`please add ${displayTitle.toLowerCase()} name`),
+    owner: string().required(`Owner is required`),
   });
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);

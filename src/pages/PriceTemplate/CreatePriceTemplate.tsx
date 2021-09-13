@@ -7,7 +7,7 @@ import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
-import * as Yup from "yup";
+import { object, string } from "yup";
 import TextField from "@material-ui/core/TextField";
 import { camelCase } from "../../constants/helpers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
@@ -26,13 +26,13 @@ import HistoryDialog from "../../components/Activity/History"
 import { priceTemplate } from "../../constants/helpers"
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const PriceTemplateSchema = Yup.object().shape({
-  name: Yup.string()
+const PriceTemplateSchema = object().shape({
+  name: string()
     .min(3, "Too Short!")
     .max(50, "Too Long")
     .required("name is required"),
-  productTemplate: Yup.string().required("product template is required"),
-  owner: Yup.string().required('Owner is required'),
+  productTemplate: string().required("product template is required"),
+  owner: string().required('Owner is required'),
 });
 
 const PriceTemplate = () => {
@@ -114,6 +114,7 @@ const PriceTemplate = () => {
   const fetchOnePriceTemplate = () => {
     if (id === "0") {
       setInitialValues({ name: "", productTemplate: "", entity: [], owner: user.user._id, collaborator: [] });
+      setHasPermissionToUpdate(true)
       axiosInstance()
         .get(`/price-template/default-field`)
         .then(({ data: { data } }) => {
