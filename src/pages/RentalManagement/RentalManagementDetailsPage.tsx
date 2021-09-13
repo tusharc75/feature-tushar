@@ -30,6 +30,7 @@ import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
+import ManageProductInventory from '../ProductInventory/ManageProductInventory'
 import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
 
@@ -59,6 +60,7 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(true);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
@@ -425,14 +427,25 @@ const RentalManagementDetailsPage = () => {
               />
               {(currentStep === 0) && (
                 <>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => { setAddExistingProductDialog(true) }}
-                  >
-                    Add Serialized Assets
-                  </Button>
+                  <Box display="flex" mb={1}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => { setAddExistingProductDialog(true) }}
+                    >
+                       Add Existing Serialized Assets
+                    </Button>
+                    <Box mx={1} />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => { setShowManageProductInventoryDialog(true) }}
+                    >
+                     Add New Serialized Assets
+                    </Button>
+                  </Box>
                   {columns ?
                     <CustomAgGrid
                       columns={columns}
@@ -469,7 +482,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 2) && (
                 <Formik
-                  initialValues={{ additionalCost: additionalCost }}
+                  initialValues={{ additionalCost: additionalCost || [{"id": "", "type": "", "amount": 0}] }}
                   enableReinitialize={true}
                   onSubmit={() => { }}>
                   {({ values }) => (
@@ -697,7 +710,11 @@ const RentalManagementDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
-      {addExistingProductDialog && <AddExistingProductInventory addProductInventory={handleAddProductInventory} handleProductInventoryClose={() => { setAddExistingProductDialog(false) }} />}
+      {addExistingProductDialog &&
+        <AddExistingProductInventory
+          addProductInventory={handleAddProductInventory}
+          handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+      />}
       {openUpdateDialog && (
         <ManageRentalManagementDialog
           isClone={false}
@@ -722,6 +739,16 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
+      {showManageProductInventoryDialog &&
+        <ManageProductInventory
+            isClone={null}
+            productInventoryId={null}
+            onClose={() => setShowManageProductInventoryDialog(false)}
+            onSuccess={(data) => {
+                setShowManageProductInventoryDialog(false);
+                handleAddProductInventory([data])
+            }}
+      />}
     </>
   );
 };

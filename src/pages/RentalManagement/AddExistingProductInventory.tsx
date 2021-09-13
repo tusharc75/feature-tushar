@@ -34,12 +34,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "CommonRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+        { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ];
 
     const fetchProductInventory = () => {

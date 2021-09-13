@@ -80,9 +80,6 @@ const ProductBuilder = (props) => {
     page,
     limit,
     pageSizes,
-    search,
-    filters,
-    sorting,
     selectedRecords,
   } = state;
 
