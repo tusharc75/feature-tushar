@@ -1,15 +1,11 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import styles from './my-cart.module.scss';
 import ManageQuoteDialog from '../../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { Button, Box, Grid } from '@material-ui/core';
-import Product from '../ProductCard/ProductCard';
-import { product } from '../../../constants/helpers';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import Skeleton from '@material-ui/lab/Skeleton';
 import { currencyCodeToSymbol } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
@@ -18,7 +14,6 @@ import { SET_CART_COUNT } from '../../../StateProvider/actionTypes';
 
 function MyOwnCart() {
   const { dispatch }: any = useData();
-  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchCart();
@@ -37,29 +32,6 @@ function MyOwnCart() {
   const [cartProductsLoading, setCartProductsLoading] = useState(false);
 
   const FracImage = 'https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png';
-
-  const onAddToCartItem = (item) => {
-    let tempQuantity = 1;
-    cartProducts.some((o) => {
-      if (o.productId === item._id) {
-        tempQuantity = tempQuantity + 1;
-        return true;
-      }
-    });
-
-    axiosInstance()
-      .post(`/user/cart`, {
-        products: [
-          {
-            quantity: `${tempQuantity}`,
-            productId: item._id
-          }
-        ]
-      })
-      .then(() => {
-        fetchCart();
-      });
-  };
 
   const deleteCartItem = (cartId) => {
     if (cartId) {
@@ -83,7 +55,6 @@ function MyOwnCart() {
   };
 
   const fetchCart = () => {
-    let numOr0 = (n) => (isNaN(n) ? 0 : n);
     let tempTotalPrice = 0;
     setCartProductsLoading(true);
     axiosInstance()
