@@ -5,14 +5,16 @@ import moment from 'moment'
 
 import axiosInstance from '../../axios/axiosInstance';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import styles from "./Chat.module.scss";
 
 const ChatBox = (props) => {
+    const {setToastConfig} = useContext(CustomToastContext)
     const {selectedChat, socket} = useContext(GlobalChatContext)
     const [messageValue, setMessageValue] = useState("");
     const [messages, setMessages] = useState([]);
     const [currentUser, setCurrentUser] = useState("")
-    // const [loading, setLoading] = useState(false)
+    const [isMsgSending, setIsMsgSending] = useState(false)
     const [chatUsers, setChatUsers] = useState([]);
 
     useEffect(() => {
@@ -48,14 +50,21 @@ const ChatBox = (props) => {
 
     const sendMessage = async (e) => {
         e.preventDefault()
+        setMessageValue("")
+        setIsMsgSending(true)
         try {
-            await axiosInstance()
+            const {data} =  await axiosInstance()
                 .put(`/chatter/${selectedChat.id}`, { message: messageValue });
             
-        } catch (err) {
+            if (data) {
+                setIsMsgSending(false)
+            }
             
+        } catch (err) {
+            setIsMsgSending(false)
+            setToastConfig(err)
         }
-        setMessageValue("")
+       
     };
 
     const formatTime = (time) => moment(time).fromNow(true);
@@ -103,13 +112,18 @@ const ChatBox = (props) => {
             
             <form onSubmit={sendMessage} className="chatbox-input">
                 <input
-                    disabled={selectedChat.chatTitle==="eQuip-t User"}
+                    disabled={selectedChat.chatTitle==="eQuip-t User" || isMsgSending}
                     placeholder="Start Typing..."
                     value={messageValue}
                     onChange={(e) => setMessageValue(e.target.value)}
                 />
                 <Box mr={1}>
-                <IconButton color="primary" disabled={!messageValue || selectedChat.chatTitle==="eQuip-t User"} type="submit" size="small">
+                <IconButton 
+                    color="primary" 
+                    disabled={!messageValue || selectedChat.chatTitle==="eQuip-t User" || isMsgSending} 
+                    type="submit"
+                    size="small"
+                    >
                     <SendOutlined/>
                 </IconButton>
                 </Box>
