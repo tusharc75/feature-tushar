@@ -897,7 +897,7 @@ export default function ManageQuoteDialog({
                                               );
                                               setFieldValue(
                                                 "projectSales",
-                                                []
+                                                ""
                                               );
                                               setFieldValue("opportunity", "");
                                             }}
