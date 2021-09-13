@@ -64,7 +64,7 @@ export const SearchFilter = ({
       SearchActivity(inputValue)
         .then(({ data }) => {
           setLoading(false);
-          setOptions(data);
+          setOptions(data.filter(d => allSearch.some(obj => obj.type === d.type) || d.type === activityName));
         })
         .catch((err) => {
           setLoading(false);
