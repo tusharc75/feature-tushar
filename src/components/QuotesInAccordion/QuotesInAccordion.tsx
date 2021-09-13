@@ -235,9 +235,6 @@ export default function QuotesInAccordion({
                                 </Menu>
                             </>
                         }
-
-
-
                     </Grid>
                 </Grid>
             </AccordionSummary>
@@ -249,16 +246,15 @@ export default function QuotesInAccordion({
                             {
                                 quotes && quotes?.length ? (
                                     <Grid container spacing={1}>
-                                        {quotes.map((obj, i) => (
-                                            <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
+                                        {quotes.map((obj, index) => (
+                                            <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
                                                 <Card className="detailCard">
                                                     <CardContent className="detailListing">
                                                         <Grid container className="detailCardHeader">
                                                             <Grid item xs={7} sm={8}>
-
                                                                 {
                                                                     !isQuotePrivate(obj) ?
-                                                                        quoteNameWithRedirect(obj)                                                                      
+                                                                        quoteNameWithRedirect(obj)
                                                                         :
                                                                         obj?.privateAccess === true ?
                                                                             [...obj.collaborator, obj.owner].includes(user.user?._id) ?
@@ -284,17 +280,17 @@ export default function QuotesInAccordion({
 
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 {
-                                                                    obj.expiryDate ? <DisplayData key={i} label='Expiry Date' value={displayDate(obj.expiryDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                                    obj.expiryDate ? <DisplayData key={index} label='Expiry Date' value={displayDate(obj.expiryDate)} icon={< IoCalendarOutline size={15} />} /> : ''
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 {
-                                                                    obj.incoTerms ? <DisplayData key={i} label='Inco Terms' value={obj.incoTerms} icon={< BusinessOutlinedIcon />} /> : ''
+                                                                    obj.incoTerms ? <DisplayData key={index} label='Inco Terms' value={obj.incoTerms} icon={< BusinessOutlinedIcon />} /> : ''
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={12} sm={6} md={6}>
                                                                 {
-                                                                    obj.probability ? <DisplayData key={i} label='Probability' value={`${obj.probability} %`} icon={< TrendingUpOutlinedIcon />} /> : ''
+                                                                    obj.probability ? <DisplayData key={index} label='Probability' value={`${obj.probability} %`} icon={< TrendingUpOutlinedIcon />} /> : ''
                                                                 }
                                                             </Grid>
 
@@ -303,18 +299,19 @@ export default function QuotesInAccordion({
                                                 </Card>
                                             </Grid>
                                         ))}
-
-
-                                    </Grid>) : null
+                                    </Grid>
+                                ) : null
                             }
                         </>
                     }
                 </>
             </AccordionDetails>
+
             {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
                 <FaEye /> View All &#8599;
             </Box>
             <Box margin={1} /> */}
+
             <Box margin={1} className="btn-view gap-1" onClick={() =>
                 history.push(routes.quoteBuilder.path)}
 

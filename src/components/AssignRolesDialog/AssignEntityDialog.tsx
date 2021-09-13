@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Button,
   Checkbox,
   CircularProgress,
-  Dialog,
   FormControl,
   FormControlLabel,
   Grid,
@@ -12,7 +11,6 @@ import {
   ListItemIcon,
   ListItemText,
   makeStyles,
-  TextField,
   Typography,
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
@@ -63,7 +61,7 @@ const AssignEntityDialog = ({
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const [checkAll, setCheckAll] = useState(false);
+  const [, setCheckAll] = useState(false);
   const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
   const [search, setSearch] = useState("");
   const classes = useStyles();
@@ -76,7 +74,6 @@ const AssignEntityDialog = ({
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
-
 
   useEffect(() => {
     setLoadingData(true);
@@ -124,7 +121,7 @@ const AssignEntityDialog = ({
     if (selectedData.length) {
       setAssigning(true);
       let dataObj: any;
-      let entityArray = []
+      
       if (type === "entity") {
         dataObj = {
           users: ids,
@@ -181,9 +178,7 @@ const AssignEntityDialog = ({
       });
       setRole(resultRole)
     }
-
   };
-
 
   function getStepContent(step: number) {
     switch (step) {

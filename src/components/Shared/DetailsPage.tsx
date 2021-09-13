@@ -19,7 +19,6 @@ import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constant
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
-import { Skeleton } from "@material-ui/lab";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
 
@@ -77,10 +76,6 @@ const Details = (props: DetailProps) => {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
-  const [popoverData, setPopoverData] = useState(null);
-  const [loadingPopoverData, setLoadingPopoverData] = useState(true);
-  const [lookupResource, setLookupResource] = useState(null);
-  const cancelTokenSource = axios.CancelToken.source();
 
   useEffect(() => {
     sortArray();
@@ -314,11 +309,6 @@ const Details = (props: DetailProps) => {
       );
     }
   };
-
-  console.log(initialVals)
-  console.log(formsData)
-  console.log(permissions)
-
 
   return (
     <div>

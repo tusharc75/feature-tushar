@@ -40,12 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CustomSteps({ steps, active }) {
     const classes = useStyles();
-    const [activeStep, setActiveStep] = useState(0);
-    const [skipped, setSkipped] = useState(new Set());
-
-    const isStepOptional = (step) => {
-        return step === 1;
-    };
+    const [skipped, ] = useState(new Set());
 
     const isStepSkipped = (step) => {
         return skipped.has(step);
