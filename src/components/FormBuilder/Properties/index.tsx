@@ -113,11 +113,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.hiddenField = false;
       }
 
-      if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup) {
+      if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addAdditionalOption = false;
       }
 
-      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup) {
+      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addManualOptionInExcel = false;
       }
 
@@ -220,6 +220,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.unique = values.unique;
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
+            ele.lookup = values.lookup || false;
+            ele.lookupResource = values.lookup ? values.lookupResource : "" ;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
@@ -258,10 +260,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
             }
-            if (values.lookup) {
-              ele.lookup = values.lookup;
-              ele.lookupResource = values.lookupResource;
-            }
+           
             if (fieldData.type === 'formula' || values.isFormula === true) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
@@ -518,7 +517,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'multiSelect' ||
                     values['type'] === 'radio' ||
                     values['type'] === 'process') &&
-                    !values['lookup'] && <Option values={values} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />}
+                    !values['lookup'] &&
+                    <Option
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    fields={fields}
+                    _id={fieldData._id} />
+                  }
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
@@ -544,7 +549,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       </>
                     )}
                   {(values['type'] === 'formula' || values['isFormula']) && (
-                    <Formula fields={fields} values={values} setFieldValue={setFieldValue} _id={fieldData._id} touched={touched} errors={errors} />
+                    <Formula
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      _id={fieldData._id}
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
                     <Fragment>
@@ -568,7 +580,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     </Fragment>
                   )}
                   {(values['type'] === 'converter' || values['isConverter']) && (
-                    <Converter fields={fields} values={values} setFieldValue={setFieldValue} touched={touched} errors={errors} />
+                    <Converter
+                      fields={fields}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
@@ -855,7 +873,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup ? (
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -869,7 +887,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Add Additional Option"
                       />
                     ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && !fieldData.lookup ? (
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
                       <FormControlLabel
                         control={
                           <Checkbox

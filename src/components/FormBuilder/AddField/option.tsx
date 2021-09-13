@@ -21,7 +21,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
 
-  const [options, setOptions] = useState(values.option || []);
+  const [options, setOptions] = useState(values.option || [{"optionLabel":"Option 1","optionValue":"Option 1"}]);
 
   const onChangeValue = (index, field, value) => {
     let data = [...values["option"]];
