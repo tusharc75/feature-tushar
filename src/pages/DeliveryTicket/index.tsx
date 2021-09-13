@@ -1,14 +1,9 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Button from "@material-ui/core/Button";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -20,7 +15,6 @@ import {
   deliveryTicket,
 } from "../../constants/helpers";
 import CustomContainer from "../../components/CustomContainer";
-import { useHistory } from "react-router-dom";
 import {
   CommonRenderer,
   CreatedByRenderer,
@@ -37,7 +31,6 @@ import styles from "../Leads/Header.module.scss";
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
-import AddIcon from "@material-ui/icons/AddCircle";
 
 let deliveryTicketTimeout;
 
@@ -48,7 +41,6 @@ const DeliveryTicket = () => {
     state: { user, selectedEntity, permissions },
   }: any = useData();
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -60,8 +52,7 @@ const DeliveryTicket = () => {
     isDelete: permissions?.deliveryTicket?.isDelete,
   });
 
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-    useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
 
   const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
@@ -82,7 +73,6 @@ const DeliveryTicket = () => {
     selectedRecords,
   } = state;
 
-
   const columns = [
     {
       field: "deliveryJobName",
@@ -92,10 +82,22 @@ const DeliveryTicket = () => {
       cellRenderer: "deliveryJobNameRenderer",
     },
     {
-      field: "deliveryJobID",
-      headerName: "Delivery Job ID",
+      field: "customerAccount",
+      headerName: "Customer Account",
       show: true,
-      cellRenderer: "CommonRenderer",
+      cellRenderer: "customerAccountNameRenderer",
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      show: true,
+      cellRenderer: "commonRenderer",
+    },
+    {
+      field: "rentalName",
+      headerName: "Rental",
+      show: true,
+      cellRenderer: "rentalRenderer",
     },
     {
       field: "deliveryDate",
@@ -110,6 +112,12 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "commonRenderer",
     },
+    {
+      field: "deliveryJobID",
+      headerName: "Delivery Job ID",
+      show: true,
+      cellRenderer: "commonRenderer",
+    },
     // {
     //   field: "productInventory",
     //   headerName: "Product Inventory",
@@ -117,12 +125,6 @@ const DeliveryTicket = () => {
     //   filter: false,
     //   cellRenderer: "productInventoryRenderer",
     // },
-    {
-      field: "rentalName",
-      headerName: "Rental",
-      show: true,
-      cellRenderer: "rentalRenderer",
-    },
     {
       field: "shippingAddress",
       headerName: "Shipping Address",
@@ -135,12 +137,7 @@ const DeliveryTicket = () => {
       show: true,
       cellRenderer: "commonRenderer",
     },
-    {
-      field: "customerAccount",
-      headerName: "Customer Account",
-      show: true,
-      cellRenderer: "customerAccountNameRenderer",
-    },
+
     {
       field: "pick-UpDate",
       headerName: "Pick-UpDate",
@@ -162,6 +159,7 @@ const DeliveryTicket = () => {
       });
     });
   }
+  
   useEffect(() => {
     if (permissions && permissions.deliveryTicket) {
       setdeliveryPermissions(permissions.deliveryTicket);
@@ -206,14 +204,16 @@ const DeliveryTicket = () => {
     </>
   );
 
-  const CustomerAccountNameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
-      {params.value}
-    </Link>
-  );
+  const CustomerAccountNameRenderer = (params) => <>
+    {
+      params.value ? <Link
+        className="link"
+        title={params.value}
+        to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
+        {params.value}
+      </Link> : <NoDataCell />
+    }
+  </>
 
   // const ProductInventoryRenderer = params => <>
   //   {
@@ -284,8 +284,8 @@ const DeliveryTicket = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "customerAccountName":
-        return "customerAccountName.optionLabel";
+      case "customerAccount":
+        return "customerAccount.optionLabel";
 
       default:
         return field;
@@ -362,7 +362,8 @@ const DeliveryTicket = () => {
               canDelete: u?.createdBy?.user?._id === user?.user._id,
               expiryDate: u.deliveryDate || "",
 
-              customerAccountName: u?.customerAccount?.optionLabel,
+              status: u?.status,
+              customerAccount: u?.customerAccount?.optionLabel,
               customerAccountId: u?.customerAccount?.optionValue,
 
               deliveryPersonName: u?.deliveryPerson?.optionLabel,
@@ -443,13 +444,6 @@ const DeliveryTicket = () => {
         });
 
     }
-  };
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   return (

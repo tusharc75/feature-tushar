@@ -1,3 +1,4 @@
+import { useState, useCallback, useRef, useEffect } from "react";
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
@@ -25,16 +26,27 @@ const useStyles = makeStyles(() => ({
   tdWidth: {
     maxWidth: 100,
     minWidth: 100
-  }
+  },
+  headerHeight: {
+    maxWidth: 100,
+    minWidth: 100,
+    height: 40,
+  },
 }));
 
 export const Converter = ({ fields, values, setFieldValue, touched, errors }) => {
+
+
+  const [isEditUnitName, setEditUnitName] = useState(null);
+  const [newUnitName, setNewUnitName] = useState(null);
+
 
   const onChangeValue = (index, fieldName, value) => {
     let data = values['unitoption'] ? [...values['unitoption']] : [];
     data[index][fieldName] = value;
     setFieldValue('unitoption', data);
   };
+
 
   const handleChangeUnit = (value) => {
     setFieldValue(
@@ -83,6 +95,51 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
     }
   };
 
+  const handleChangeUnitName = () => {
+    if (isEditUnitName === newUnitName) {
+      setEditUnitName(null);
+    }
+    else if (newUnitName.trim() === "") {
+      setEditUnitName(null);
+      return;
+    }
+    else if (values['units'].includes(newUnitName)) {
+      setEditUnitName(null);
+      return;
+    }
+    else {
+      const unitName = newUnitName.trim().replace(/[^a-zA-Z0-9/]/g, '')
+      if (values['units'] && values['units'].includes(isEditUnitName)) {
+        const units = values['units'];
+        units[units.indexOf(isEditUnitName)] = unitName;
+        setFieldValue('units', units);
+      }
+      if (values['displayUnits'] && values['displayUnits'].includes(isEditUnitName)) {
+        const displayUnits = values['displayUnits'];
+        displayUnits[displayUnits.indexOf(isEditUnitName)] = unitName;
+        setFieldValue('displayUnits', displayUnits);
+      }
+      if (values['formulaUnits'] && values['formulaUnits'].includes(isEditUnitName)) {
+        const formulaUnits = values['formulaUnits'];
+        formulaUnits[formulaUnits.indexOf(isEditUnitName)] = unitName;
+        setFieldValue('formulaUnits', formulaUnits);
+      }
+      if (values['unitoption']) {
+        const unitoption = values['unitoption'];
+        unitoption.forEach(element => {
+          for (let row in element) {
+            if (row === isEditUnitName) {
+              element[unitName] = element[row];
+              delete element[row];
+            }
+          }
+        });
+        setFieldValue('unitoption', unitoption);
+      }
+      setEditUnitName(null);
+    }
+  }
+
   const classes = useStyles();
   return (
     <Box marginTop={2}>
@@ -117,8 +174,31 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                 <th></th>
                 {values['units'] &&
                   values['units'].map((_unit, index) => (
-                    <th key={index} className={classes.tdWidth}>
-                      {_unit}
+                    <th key={index} className={classes.headerHeight}
+                      onClick={() => {
+                        setEditUnitName(_unit)
+                        setNewUnitName(_unit)
+                      }}  >
+                      {isEditUnitName === _unit ?
+                        <TextField
+                          id="unitNameChangeField"
+                          name={_unit}
+                          variant="outlined"
+                          margin="dense"
+                          fullWidth
+                          autoFocus
+                          style={{ margin: 0 }}
+                          value={newUnitName}
+                          onKeyDown={(e: any) => {
+                            if (e.keyCode == 13) {
+                              handleChangeUnitName()
+                            }
+                          }}
+                          onBlur={handleChangeUnitName}
+                          onChange={(event) => setNewUnitName(event.target.value)}
+                        />
+                        : _unit
+                      }
                     </th>
                   ))}
               </tr>
@@ -127,7 +207,9 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
               {values['units'] &&
                 values['units'].map((_unit, i) => (
                   <tr key={i}>
-                    <th style={{ paddingRight: 10 }}>{_unit}</th>
+                    <th style={{ paddingRight: 10, minWidth: 50 }}>
+                      {_unit}
+                    </th>
                     {values['units'] &&
                       values['units'].map((_unit, index) => (
                         <td className={classes.tdWidth} key={index}>

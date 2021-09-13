@@ -51,13 +51,14 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
-                ...u,
-                id: u._id,
-                productName: u.product?.optionLabel,
-                productCategory: u.productCategory?.optionLabel,
-                warehouse: u.warehouse?.optionLabel,
-            }));
+            data.data = data.data?.filter(u => u?.status === "Available")
+                .map((u) => ({
+                    ...u,
+                    id: u._id,
+                    productName: u.product?.optionLabel,
+                    productCategory: u.productCategory?.optionLabel,
+                    warehouse: u.warehouse?.optionLabel,
+                }));
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
@@ -69,6 +70,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             dispatch({ type: "loading", loading: false });
         });
     };
+
+
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
@@ -127,6 +130,15 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }
     };
 
+    const getRowStyleScheduled = (params) => {
+        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
+            return {
+                'background-color': "#d3ffe0",
+            }
+        }
+        return null;
+    };
+
     return (<Fragment>
         {(<Dialog
             fullScreen={true}
@@ -169,6 +181,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         page={page}
                         allowAction={false}
                         loading={loading}
+                        customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>

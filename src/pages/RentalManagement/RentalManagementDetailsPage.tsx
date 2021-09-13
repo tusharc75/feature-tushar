@@ -30,6 +30,7 @@ import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
+import ManageProductInventory from '../ProductInventory/ManageProductInventory'
 import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
 
@@ -59,6 +60,7 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(true);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
@@ -97,38 +99,38 @@ const RentalManagementDetailsPage = () => {
   const updateStatus = () => {
     if (productInventory.length > 0 && rentalManagementData) {
       const leftItems = [];
-    for (const product of productInventory) {
-      if (!product.deliveryTicket) {
-        leftItems.push(product.id)
-      }
-    }
-
-    if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-      if (rentalManagementData.status === "New") {
-        const tempUpdateData = {
-          "_id": rentalManagementData._id,
-          "rentalJobName": rentalManagementData.rentalJobName,
-          "rentalJobID":rentalManagementData.rentalJobID,
-          "customerAccount": rentalManagementData.customerAccount.optionValue,
-          "customerContact": rentalManagementData.customerContact.optionValue,
-          "shippingAddress": rentalManagementData.shippingAddress,
-          "currency": rentalManagementData.currency,
-          "rentalStartDate": rentalManagementData.rentalStartDate,
-          "rentalEndDate": rentalManagementData.rentalEndDate,
-          "jobDescription": rentalManagementData.jobDescription,
-          "status": "Ready to Ship",
-          "owner": rentalManagementData.owner.optionValue,
-          // "collaborator": rentalManagementData.collaborator,
-
+      for (const product of productInventory) {
+        if (!product.deliveryTicket) {
+          leftItems.push(product.id)
         }
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-          .then(() => {
-            fetchRentalManagementData()
-          }).catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
       }
-    }
+
+      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+        if (rentalManagementData.status === "New") {
+          const tempUpdateData = {
+            "_id": rentalManagementData._id,
+            "rentalJobName": rentalManagementData.rentalJobName,
+            "rentalJobID": rentalManagementData.rentalJobID,
+            "customerAccount": rentalManagementData.customerAccount.optionValue,
+            "customerContact": rentalManagementData.customerContact.optionValue,
+            "shippingAddress": rentalManagementData.shippingAddress,
+            "currency": rentalManagementData.currency,
+            "rentalStartDate": rentalManagementData.rentalStartDate,
+            "rentalEndDate": rentalManagementData.rentalEndDate,
+            "jobDescription": rentalManagementData.jobDescription,
+            "status": "Ready to Ship",
+            "owner": rentalManagementData.owner.optionValue,
+            // "collaborator": rentalManagementData.collaborator,
+
+          }
+          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+            .then(() => {
+              fetchRentalManagementData()
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+        }
+      }
     }
   }
 
@@ -272,8 +274,6 @@ const RentalManagementDetailsPage = () => {
     </Link>
   );
 
-
-
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -296,14 +296,14 @@ const RentalManagementDetailsPage = () => {
   };
   const columns = [
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "CommonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "CommonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "CommonRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "CommonRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
 
- 
+
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
     axiosInstance()
@@ -427,14 +427,25 @@ const RentalManagementDetailsPage = () => {
               />
               {(currentStep === 0) && (
                 <>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => { setAddExistingProductDialog(true) }}
-                  >
-                    Add Serialized Assets
-                  </Button>
+                  <Box display="flex" mb={1}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => { setAddExistingProductDialog(true) }}
+                    >
+                       Add Existing Serialized Assets
+                    </Button>
+                    <Box mx={1} />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => { setShowManageProductInventoryDialog(true) }}
+                    >
+                     Add New Serialized Assets
+                    </Button>
+                  </Box>
                   {columns ?
                     <CustomAgGrid
                       columns={columns}
@@ -448,6 +459,7 @@ const RentalManagementDetailsPage = () => {
                       page={page}
                       allowAction={true}
                       loading={loading}
+                      renderedFrom="rentalManagementInDetail"
                     />
                     : <Box
                       p={2}
@@ -470,7 +482,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 2) && (
                 <Formik
-                  initialValues={{ additionalCost: additionalCost }}
+                  initialValues={{ additionalCost: additionalCost || [{"id": "", "type": "", "amount": 0}] }}
                   enableReinitialize={true}
                   onSubmit={() => { }}>
                   {({ values }) => (
@@ -636,6 +648,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 3 || currentStep === 4) && (
                 <DeliveryTicket
+                  rentalManagementId={id}
                   warehouselist={warehouseList}
                   productInventory={productInventory}
                   currentStep={currentStep}
@@ -697,7 +710,11 @@ const RentalManagementDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
-      {addExistingProductDialog && <AddExistingProductInventory addProductInventory={handleAddProductInventory} handleProductInventoryClose={() => { setAddExistingProductDialog(false) }} />}
+      {addExistingProductDialog &&
+        <AddExistingProductInventory
+          addProductInventory={handleAddProductInventory}
+          handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+      />}
       {openUpdateDialog && (
         <ManageRentalManagementDialog
           isClone={false}
@@ -722,6 +739,16 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
+      {showManageProductInventoryDialog &&
+        <ManageProductInventory
+            isClone={null}
+            productInventoryId={null}
+            onClose={() => setShowManageProductInventoryDialog(false)}
+            onSuccess={(data) => {
+                setShowManageProductInventoryDialog(false);
+                handleAddProductInventory([data])
+            }}
+      />}
     </>
   );
 };

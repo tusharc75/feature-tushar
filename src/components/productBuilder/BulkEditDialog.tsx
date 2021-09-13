@@ -1,23 +1,20 @@
-import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
+import { useRef, useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@material-ui/core/Dialog'
 import FormTypes from "../Helpers/FormTypes";
-import axiosInstance from '../../axios/axiosInstance'
 import { sortBy, orderBy, uniq, map } from 'lodash';
-import { getObjKeys, getObjKeysWithValues, simplifyValues, yupSchema } from '../../constants/helpers';
+import { getObjKeys, yupSchema } from '../../constants/helpers';
 import CustomButton from '../Helpers/CustomButton'
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
-import TextField from '@material-ui/core/TextField';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -37,11 +34,10 @@ var levalOrderBy = [
 
 const BulkEditDialog = (props) => {
 
-    const toastConfig = useContext(CustomToastContext)
     const { productDataList, handleClose, handleSaveProduct, stage, loading } = props;
     const [productFields, setProductFields] = useState([]);
-    const [initialData, setInitialData] = useState({ fields: [], values: { } });
-    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [, setUploadingImageOrFileProgress] = useState(0)
 
     const [isAddField, setIsAddField] = useState(false);
     const [fields, setFields] = useState([]);
@@ -50,7 +46,6 @@ const BulkEditDialog = (props) => {
 
     const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
     const [fieldChanges, setFieldChanges] = useState([]);
-
 
     useEffect(() => {
 

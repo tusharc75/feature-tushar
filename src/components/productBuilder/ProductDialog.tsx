@@ -1,14 +1,13 @@
-import React, {
+import {
   useRef,
   useState,
   useEffect,
   Fragment,
-  useContext,
 } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
@@ -16,18 +15,14 @@ import Dialog from "@material-ui/core/Dialog";
 import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from "../../axios/axiosInstance";
 import { orderBy, sortBy, uniq, map } from "lodash";
-import { getObjKeys, simplifyValues, yupSchema } from "../../constants/helpers";
+import { getObjKeys, yupSchema } from "../../constants/helpers";
 import CustomButton from "../Helpers/CustomButton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import IconButton from "@material-ui/core/IconButton";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { AddField } from "../FormBuilder/AddField";
-import TextField from "@material-ui/core/TextField";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Tooltip from "@material-ui/core/Tooltip";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
@@ -42,14 +37,12 @@ var levalOrderBy = [
 ];
 
 const CreateProduct = (props) => {
-  const toastConfig = useContext(CustomToastContext);
   const { productData, handleClose, handleSaveProduct, stage } = props;
   const [masterFields, setMasterFields] = useState([]);
   const [productFields, setProductFields] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading,] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
-    useState(0);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   const [isAddField, setIsAddField] = useState(false);
   const [fields, setFields] = useState([]);
@@ -132,24 +125,6 @@ const CreateProduct = (props) => {
       return { name, sectionFields };
     });
     setProductFields(customData);
-  };
-
-  const handleChangeProductCost = (value) => {
-    if (value && value !== "") {
-      axiosInstance()
-        .get(`/productcost/fields/` + value)
-        .then(({ data: { data } }) => {
-          let newField = [...masterFields];
-          data.forEach((_f) => {
-            newField.push(_f);
-          });
-          setInitialData({
-            fields: newField,
-            values: { ...getObjKeys("", newField), ...ref.current.values },
-          });
-          EvaluteproductFields(newField);
-        });
-    }
   };
 
   const handleOpenAddField = (name) => {

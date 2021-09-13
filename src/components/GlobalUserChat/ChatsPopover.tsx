@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     inline: {
       display: 'inline'
-    }
+    },
   })
 );
 
@@ -135,7 +135,7 @@ const ChatsPopover = (props) => {
 
         <Divider orientation="horizontal" />
 
-        <Box height={400} style={{ overflowY: 'auto' }}>
+        <Box height={400} style={{ overflowY: 'auto'}}>
           {newChat ? (
             <NewChat userId={user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} users={users} />
           ) : selectedChat ? (

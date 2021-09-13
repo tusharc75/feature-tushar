@@ -127,7 +127,8 @@ export default function CustomAgGrid({
   allowPagination = true,
   selectedRecords = [],
   onSelection = null,
-  renderedFrom = null
+  renderedFrom = null,
+  customGridOptions = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -234,6 +235,7 @@ export default function CustomAgGrid({
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
+              gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
               onGridReady={onGridReady}
@@ -293,7 +295,8 @@ export default function CustomAgGrid({
               // loadingOverlayComponentParams={{
               //     loadingMessage: 'Loading...',
               // }}
-              animateRows={enableRowDrag ?? false}
+              animateRows={enableRowDrag ?? false
+              }
               suppressAnimationFrame={!enableRowDrag}
               suppressMaintainUnsortedOrder={true}
               rowBuffer={limit}
@@ -326,6 +329,7 @@ export default function CustomAgGrid({
               suppressPaginationPanel={true}
               paginationPageSize={limit}
               rowDragManaged={enableRowDrag}
+
             >
               {allowSelection && (
                 <AgGridColumn
@@ -354,6 +358,7 @@ export default function CustomAgGrid({
                   sortable={false}
                   filter={false}
                   cellRenderer="actionsRenderer"
+
                 ></AgGridColumn>
               )}
             </AgGridReact>
