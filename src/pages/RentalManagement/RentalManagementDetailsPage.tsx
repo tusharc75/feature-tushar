@@ -482,7 +482,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 2) && (
                 <Formik
-                  initialValues={{ additionalCost: additionalCost }}
+                  initialValues={{ additionalCost: additionalCost || [{"id": "", "type": "", "amount": 0}] }}
                   enableReinitialize={true}
                   onSubmit={() => { }}>
                   {({ values }) => (
