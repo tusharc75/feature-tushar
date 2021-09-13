@@ -24,7 +24,6 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { FaUser } from "react-icons/fa";
-import { utils, writeFile } from 'xlsx';
 
 let entityTimeout;
 
@@ -33,7 +32,7 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions },
+    state: { permissions },
   }: any = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
@@ -49,7 +48,7 @@ const Entity: FC = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem("entityPage"));
-  const [columns, setColumns] = useState([
+  const [columns,] = useState([
     { field: "entityName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "address", headerName: "Address", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },

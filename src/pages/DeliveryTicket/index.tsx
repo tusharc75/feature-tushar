@@ -1,14 +1,9 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Button from "@material-ui/core/Button";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -20,7 +15,6 @@ import {
   deliveryTicket,
 } from "../../constants/helpers";
 import CustomContainer from "../../components/CustomContainer";
-import { useHistory } from "react-router-dom";
 import {
   CommonRenderer,
   CreatedByRenderer,
@@ -37,7 +31,6 @@ import styles from "../Leads/Header.module.scss";
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
-import AddIcon from "@material-ui/icons/AddCircle";
 
 let deliveryTicketTimeout;
 
@@ -48,7 +41,6 @@ const DeliveryTicket = () => {
     state: { user, selectedEntity, permissions },
   }: any = useData();
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -60,8 +52,7 @@ const DeliveryTicket = () => {
     isDelete: permissions?.deliveryTicket?.isDelete,
   });
 
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-    useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
 
   const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
@@ -81,7 +72,6 @@ const DeliveryTicket = () => {
     sorting,
     selectedRecords,
   } = state;
-
 
   const columns = [
     {
@@ -169,6 +159,7 @@ const DeliveryTicket = () => {
       });
     });
   }
+  
   useEffect(() => {
     if (permissions && permissions.deliveryTicket) {
       setdeliveryPermissions(permissions.deliveryTicket);
@@ -453,13 +444,6 @@ const DeliveryTicket = () => {
         });
 
     }
-  };
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   return (

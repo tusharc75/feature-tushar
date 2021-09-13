@@ -15,7 +15,6 @@ import {
   SaveAlt,
   Search,
   ViewColumn,
-  List,
 } from "@material-ui/icons";
 import { object, string, array, boolean } from "yup";
 import moment from "moment";
