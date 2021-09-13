@@ -65,7 +65,7 @@ interface DetailProps {
   fields: any[];
 }
 
-const unlinkFields = [sidebarResource.marketSegment, sidebarResource.budget, sidebarResource.productCategory];
+const unlinkFields = [sidebarResource.marketSegment, sidebarResource.budget, sidebarResource.productCategory, sidebarResource.productTemplate, sidebarResource.priceTemplate];
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
@@ -314,6 +314,11 @@ const Details = (props: DetailProps) => {
       );
     }
   };
+
+  console.log(initialVals)
+  console.log(formsData)
+  console.log(permissions)
+
 
   return (
     <div>
