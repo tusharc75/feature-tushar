@@ -146,58 +146,59 @@ const GreenSwitch = withStyles({
 })(Switch);
 
 const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
-  const [values, setValues] = React.useState([]);
+  //const [values, setValues] = React.useState([]);
   const [inputVal, setInputVal] = React.useState("")
+  const [error, setError] = React.useState(null)
 
   const handleChange = (val) => {
-    setValues(val)
-
+    val = val.trimStart()
+    setInputVal(val)
+   
+    if(error) {
+      setError(null)
+    }
   }
 
   const onSave = () => {
-    const order = options.length
-    const filteredArr = values.filter(val => options.filter(op => op.optionValue === val).length === 0)
-    const newOptions = filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val }))
-    addFieldOption(filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val })))
-    setOptions([...options, ...newOptions])
-    setOpen(false)
+    const val = inputVal.trimEnd().toLowerCase()
 
+    const foundSame = options.find(o => o.optionLabel.toLowerCase() === val) || null;
+    if (foundSame) {
+      setError(`"${val}" already exists in the options`)
+    } else {
+      setError(null)
+      const order = options.length
+      const newOption = { order: order, default: false, optionLabel: inputVal, optionValue: inputVal }
+      addFieldOption([newOption])
+      setOptions([...options, newOption])
+      setOpen(false)
+    }
   }
 
   return (
     <div>
       <Dialog fullWidth maxWidth="sm" open keepMounted onClose={() => setOpen(false)}>
-        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Options" />
+        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Option" />
         <CustomDialogContent>
-          <Autocomplete
-            multiple
-            disableCloseOnSelect={true}
+          <TextField
             size="small"
             fullWidth
-            freeSolo
-            value={values}
-            options={[]}
-            renderTags={(value: string[], getTagProps) =>
-              value.map((option: string, index: number) =>
-                <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-            }
-            onChange={(_, val) => handleChange(val)}
-            onInputChange={((_, val) => setInputVal(val))}
-            renderInput={(params) => <TextField {...params}
-              variant="outlined"
-              label="Options"
-              style={{ whiteSpace: 'nowrap' }}
-              margin="dense"
-              placeholder="New Option" />
-            }
+            value={inputVal}
+            onChange={(event) => handleChange(event.target.value)}
+            variant="outlined"
+            label="Options"
+            style={{ whiteSpace: 'nowrap' }}
+            margin="dense"
+            placeholder="New Option"
+            error={Boolean(error)}
+            helperText={error}
           />
-          <Typography variant="caption" color="textSecondary">Press "Enter" to save an option</Typography>
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button variant="outlined" color="primary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="contained" disabled={!Boolean(values.length)} color="primary" onClick={onSave}>
+          <Button variant="contained" disabled={!Boolean(inputVal)} color="primary" onClick={onSave}>
             Save
           </Button>
         </CustomDialogFooter>
