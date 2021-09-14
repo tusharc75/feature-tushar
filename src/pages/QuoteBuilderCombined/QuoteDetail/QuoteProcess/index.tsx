@@ -253,10 +253,10 @@ export default function QuoteProcess(props) {
         const tempProcessStatus = quoteData?.versions[currentVersion]?.processStatus;
         const tempOverallStatus = quoteData?.versions[currentVersion]?.status;
 
-        if (tempProcessStatus === "DOA Process" && !tempOverallStatus.includes("Accepted")) {
+        if (tempProcessStatus === "DOA Process" && !tempOverallStatus.includes("Accepted") && DOAneeded) {
             setNextStep(false);
         }
-        if (tempProcessStatus === "DOA Process" && tempOverallStatus.includes("Accepted")) {
+        if (tempProcessStatus === "DOA Process" && tempOverallStatus.includes("Accepted") && DOAneeded) {
             setNextStep(true);
         }
         if (tempProcessStatus === "Customer Process") {
@@ -375,7 +375,7 @@ export default function QuoteProcess(props) {
     }, [DOAsetup])
 
     const fetchDOAData = () => {
-        if (ProcessStatus === "DOA Process") {
+        if (ProcessStatus === "DOA Process" && DOAneeded) {
             axiosInstance()
                 .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
                 .then(({ data: { data } }) => {
@@ -1337,7 +1337,7 @@ export default function QuoteProcess(props) {
                 <div>
                     <Steps
                         steps={DOAneeded ? DOASteps : OtherSteps}
-                        currentStep={DOAneeded ? DOASteps.indexOf(ProcessStatus) : OtherSteps.indexOf(ProcessStatus)}
+                        currentStep={DOAneeded ? DOASteps.indexOf(ProcessStatus) : ProcessStatus === "DOA Process" ? OtherSteps.indexOf("Quote Builder") : OtherSteps.indexOf(ProcessStatus)}
                         id={quoteData._id}
                         version={currentVersion}
                         Refresh={fetchQuoteData}
@@ -1348,7 +1348,7 @@ export default function QuoteProcess(props) {
                         handleVersionUpdate={() => {
                             handleVersionUpdate(
                                 visibleColumns,
-                                versionStatus,
+                                versionStatus === "Sent for DOA" && !DOAneeded ? "Sent to Customer" : versionStatus,
                                 state?.selectedRecords
                             );
                         }}
@@ -1463,7 +1463,7 @@ export default function QuoteProcess(props) {
                                 </Grid>
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
-                                versionStatus === "Building Quote") ||
+                                versionStatus === "Building Quote" && DOAneeded) ||
                                 (ProcessStatus === "Send To Customer" &&
                                     versionStatus !== "Sent to Customer") ? (
                                 <div className="w-100 d-flex align-items-center justify-content-end doaAction">

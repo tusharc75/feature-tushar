@@ -134,6 +134,11 @@ const FieldList = {
     type: "freeStyleMultiSelect",
     icon: "far fa-calendar-check",
   },
+  COLORPICKER: {
+    label: "Color Picker",
+    type: "colorPicker",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

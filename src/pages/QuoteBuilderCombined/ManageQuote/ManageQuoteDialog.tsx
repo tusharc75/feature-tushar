@@ -71,14 +71,14 @@ export default function ManageQuoteDialog({
   currency = null,
   estimatedAmount = null,
   doaCollaboratorResources = null,
-  disableCurrency = false,
+  editCurrency = false,
   quoteApproved = false,
   isRenderedFromProjectSales = false,
   cloneQuoteWithVersionNumber = 0,
   isCreateQuoteFromCart = false,
   onHandleSubmit = null,
   isFromProjectSales = false,
-  projectSalesTeam = []
+  projectSalesTeam = [],
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -1339,7 +1339,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={!isClone ? (disableCurrency || (!isNew && field.disableOnEdit)) : false}
+                                        disabled={!isClone ? (!editCurrency || (!isNew && field.disableOnEdit)) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
