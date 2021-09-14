@@ -52,6 +52,8 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { Color, ColorPicker, createColor } from 'material-ui-color';
+
 
 const filter = createFilterOptions();
 
@@ -1883,7 +1885,33 @@ const FormTypes = (props) => {
         />
       </MuiPickersUtilsProvider>
     </InfoLabel>
-  ) : null;
+  ) : type === 'colorPicker' ? (
+        <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+            <ColorPicker
+              value={createColor(values[name])}
+              onChange={(newColor: Color) => setFieldValue(name, `#${newColor.hex}`)}
+              palette={{
+                red: '#ff0000',
+                blue: '#0000ff',
+                green: '#00ff00',
+                yellow: 'yellow',
+                cyan: 'cyan',
+                lime: 'lime',
+                gray: 'gray',
+                orange: 'orange',
+                purple: 'purple',
+                black: 'black',
+                white: 'white',
+                pink: 'pink',
+                darkblue: 'darkblue',
+              }}
+            />
+            <input style={{display: "none"}} name={name} />
+            { touched[name] && Boolean(errors[name]) &&
+              <Typography variant="caption" color='error'>{errors[name]}</Typography>
+            }
+        </InfoLabel>
+       ) : null;
 };
 
 export default FormTypes;
