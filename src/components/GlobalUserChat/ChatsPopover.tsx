@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import { createStyles, Theme, makeStyles, withStyles } from '@material-ui/core/styles';
-import { Popover, Box, Typography, Divider, IconButton, Tooltip, List } from '@material-ui/core';
+import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { Popover, Box, Typography, Divider, IconButton, List } from '@material-ui/core';
 import { Create, Clear, ArrowBack, Group } from '@material-ui/icons';
 
 import ChatList from './ChatList';
@@ -9,6 +9,8 @@ import NewChat from './NewChat';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import HtmlTooltip from '../CustomTooltipTitle';
+
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -21,16 +23,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
   })
 );
-
-const HtmlTooltip = withStyles((theme) => ({
-  tooltip: {
-    backgroundColor: '#f5f5f9',
-    color: 'rgba(0, 0, 0, 0.87)',
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(12),
-    border: '1px solid #dadde9'
-  }
-}))(Tooltip);
 
 const ChatsPopover = (props) => {
   const classes = useStyles();
@@ -80,7 +72,7 @@ const ChatsPopover = (props) => {
       <Box width={350} height={450} overflow="hidden">
         <Box mx={1} height={50} display="flex" justifyContent="space-between" alignItems="center">
           {selectedChat || newChat ? (
-            <Tooltip title="Go Back">
+            <HtmlTooltip title="Go Back">
               <IconButton
                 onClick={() => {
                   setSelectedChat(null);
@@ -90,9 +82,9 @@ const ChatsPopover = (props) => {
               >
                 <ArrowBack color="action" />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
           ) : (
-            <Tooltip title="New chat">
+            <HtmlTooltip title="New chat">
               <IconButton
                 onClick={() => {
                   if (selectedChat) setSelectedChat(null);
@@ -102,7 +94,7 @@ const ChatsPopover = (props) => {
               >
                 <Create color="action" />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
           )}
 
           <Box display="flex" alignItems="center">
@@ -126,11 +118,11 @@ const ChatsPopover = (props) => {
             )}
           </Box>
 
-          <Tooltip title="Close chat">
+          <HtmlTooltip title="Close chat">
             <IconButton onClick={onClose} size="small">
               <Clear color="action" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         </Box>
 
         <Divider orientation="horizontal" />
