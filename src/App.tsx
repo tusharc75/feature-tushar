@@ -95,12 +95,13 @@ import RentalManagement from "./pages/RentalManagement";
 import RentalManagementDetailsPage from "./pages/RentalManagement/RentalManagementDetailsPage";
 import DeliveryTicket from "./pages/DeliveryTicket/index"
 import DeliveryTicketDetailsPage from "./pages/DeliveryTicket/DeliveryTicketDetailPage"
+import RecordDeletedDialog from "./components/Helpers/RecordDeletedDialog";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
-  const [isOffline, setIsOffline] = useState(false)
+  const [isOffline, setIsOffline] = useState(false);
 
   const {
     state: { user },
@@ -569,7 +570,7 @@ function App() {
       </AnimatePresence>
       {
         toast?.toastConfig?.open && (
-          <CustomToaster
+          ["notFoundError"].some(s => s !== toast?.toastConfig?.type) ? <CustomToaster
             type={toast.toastConfig.type}
             message={toast.toastConfig.message}
             anchorOrigin={toast.toastConfig?.anchorOrigin || null}
@@ -577,14 +578,15 @@ function App() {
             close={() => {
               toast.setToastConfig({ open: false });
             }}
-          />
+          /> : (toast.toastConfig.type === "notFoundError" ? <RecordDeletedDialog /> : "")
         )
       }
+      
       {
         isOffline ?
           <OfflineStatusDialog /> : null
       }
-    </ThemeProvider >
+    </ThemeProvider>
   );
 }
 
