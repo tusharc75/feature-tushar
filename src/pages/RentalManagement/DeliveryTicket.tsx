@@ -10,6 +10,7 @@ import { Button } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog, rentalManagementId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,9 +73,13 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   );
 
   const TicketRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
-      {params.value}
-    </Link>
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
   );
 
   const frameworkComponents = {
