@@ -22,6 +22,7 @@ export const BoardList = ({
   fetchBoard,
   handleChangeStatus,
   loading,
+  selectedActivityId = null
 }) => {
   const {
     state: {
@@ -38,6 +39,10 @@ export const BoardList = ({
     setSubActivity(activity);
   }, [activity]);
 
+  useEffect(() => {
+    if (selectedActivityId) setSelectedId(selectedActivityId);
+  }, [selectedActivityId]);
+
   const moveCard = useCallback(
     (dragIndex, hoverIndex) => {
       const dragCard = subActivity[dragIndex];
@@ -53,7 +58,7 @@ export const BoardList = ({
     [subActivity]
   );
 
-  const [{}, drop] = useDrop({
+  const [{ }, drop] = useDrop({
     accept: "move",
     drop: (data: any) => {
       handleChangeStatus(data.id, status, data.index);

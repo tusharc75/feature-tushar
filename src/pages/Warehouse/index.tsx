@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Layout from '../../components/Layout';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import AddIcon from '@material-ui/icons/Add';
@@ -145,16 +144,16 @@ const AddressResource = () => {
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
   const columns = [
     { field: 'warehouseName', headerName: 'Warehouse Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'warehousID', headerName: 'Warehouse ID', show: true, disabled: true },
-    { field: 'storageType', headerName: 'Storage Type', show: true, disabled: true },
-    { field: 'address', headerName: 'Address', show: true, disabled: true },
+    { field: 'warehouseID', headerName: 'Warehouse ID', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'storageType', headerName: 'Storage Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'address', headerName: 'Address', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
   ];
   if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
           item.show = !d.hide;
         }
       });
@@ -168,8 +167,48 @@ const AddressResource = () => {
     }
   }, [permissions]);
 
+
+  const fetchWarehouses = () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+
+    axiosInstance()
+      .get(`/warehouse${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const { createdBy, updatedBy, ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+
+            createdBy: u.createdBy?.user?.concatedName,
+            createdById: u.createdBy?.user?._id,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date
+          };
+
+          return res;
+        });
+
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: 'loading', loading: false });
+      });
+  };
+
   useEffect(() => {
-    fetchAddress();
+    fetchWarehouses();
   }, [page, limit, filters, sorting, search]);
 
   const NameRenderer = (params) => (
@@ -188,7 +227,7 @@ const AddressResource = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {warehousePermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {warehousePermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -256,45 +295,6 @@ const AddressResource = () => {
     return deepFilter;
   };
 
-  const fetchAddress = () => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
-    axiosInstance()
-      .get(`/warehouse${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { createdBy, updatedBy, ...restProperties } = u;
-
-          let res = {
-            ...restProperties,
-            id: u._id,
-
-            createdBy: u.createdBy?.user?.concatedName,
-            createdById: u.createdBy?.user?._id,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
-          };
-
-          return res;
-        });
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
-  };
-
   const handleDelete = () => {
     let ids = [];
     if (deleteRecord) {
@@ -305,7 +305,7 @@ const AddressResource = () => {
     axiosInstance()
       .put(`/warehouse/remove`, { ids: ids })
       .then(() => {
-        fetchAddress();
+        fetchWarehouses();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         // setSelectedCategory([])
@@ -340,7 +340,7 @@ const AddressResource = () => {
             module="warehouse"
             api={'warehouse'}
             afterImportCompleted={() => {
-              fetchAddress();
+              fetchWarehouses();
             }}
           />
         </Grid>
@@ -431,7 +431,7 @@ const AddressResource = () => {
             onClose={() => setOpen(false)}
             onSuccess={() => {
               setOpen(false);
-              fetchAddress();
+              fetchWarehouses();
             }}
           />
         )}

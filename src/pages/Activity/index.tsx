@@ -36,6 +36,7 @@ const Activity = ({ type }) => {
 
   const [viewType, setViewType] = useState(0);
   const [filter, setFilter] = useState([]);
+  const [selectedActivityId, setSelectedActivityId] = useState(null);
 
   useEffect(() => {
     if (referenceType) {
@@ -52,6 +53,13 @@ const Activity = ({ type }) => {
   const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
     setFilter(value);
+    let tempActivity = value.filter(d => d.type === type && d._id !== undefined)
+    if (tempActivity.length === 1) {
+      setSelectedActivityId(tempActivity[0]._id)
+    }
+    else{
+      setSelectedActivityId(null)
+    }
     history.replace({
       search: "",
     });
@@ -88,7 +96,7 @@ const Activity = ({ type }) => {
           </Paper>
         </Box>
         <Box className={classes.activityContainer}>
-          {viewType === 0 && <Board type={type} filter={filter} />}
+          {viewType === 0 && <Board type={type} filter={filter} selectedActivityId={selectedActivityId}/>}
           {viewType === 1 && <Roadmap type={type} filter={filter} />}
         </Box>
       </CustomContainer>

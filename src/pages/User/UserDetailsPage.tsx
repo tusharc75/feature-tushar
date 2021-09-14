@@ -767,7 +767,7 @@ const UserDetailsPage = () => {
                 </Grid>
               </Box>
               {
-                user?.user?.permissions?.doaSetup && <>
+                <>
                   <Box>
                     <Box
                       width="100%"
@@ -790,7 +790,7 @@ const UserDetailsPage = () => {
                           </Box>
                         </Grid>
                         <Grid item container xs={4} justify="flex-end">
-                          {permissions.user.isUpdate && (
+                          {permissions.user.isUpdate && user?.user?.permissions?.doaSetup && (
                             <Button
                               variant="contained"
                               color="primary"
