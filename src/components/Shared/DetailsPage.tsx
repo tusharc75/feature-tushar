@@ -4,6 +4,7 @@ import {
   makeStyles,
   Typography,
   Box,
+  Tooltip,
   Avatar,
   IconButton,
   CircularProgress,
@@ -20,7 +21,6 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { useData } from "../../StateProvider/Provider";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
-import HtmlTooltip from "../CustomTooltipTitle";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -345,12 +345,12 @@ const Details = (props: DetailProps) => {
                             </h4>
                             <Box marginX="2px" />
                             {field.fieldData.isTooltip && (
-                              <HtmlTooltip title={<Typography>{field.fieldData.tooltipMessage}</Typography>}>
+                              <Tooltip title={field.fieldData.tooltipMessage}>
                                 <InfoOutlined
                                   style={{ width: 18, height: 18 }}
                                   color="disabled"
                                 />
-                              </HtmlTooltip>
+                              </Tooltip>
                             )}
                           </Box>
                         </Grid>
