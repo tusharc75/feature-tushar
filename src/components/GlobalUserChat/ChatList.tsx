@@ -1,19 +1,10 @@
 import { Fragment } from 'react';
-import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, withStyles, Tooltip, Typography } from '@material-ui/core';
+import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@material-ui/core';
 import { Group } from '@material-ui/icons';
 import moment from 'moment';
 
 import axiosInstance from '../../axios/axiosInstance';
-
-const HtmlTooltip = withStyles((theme) => ({
-  tooltip: {
-    backgroundColor: '#f5f5f9',
-    color: 'rgba(0, 0, 0, 0.87)',
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(12),
-    border: '1px solid #dadde9'
-  }
-}))(Tooltip);
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const ChatList = (props) => {
   const { chat, setSelectedChat, userId } = props;

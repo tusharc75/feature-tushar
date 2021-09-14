@@ -204,20 +204,20 @@ export default function Account(props) {
       <NoDataCell />
     );
 
-    const EntityRenderer = (params) => (
-      <h5 className="createBy d-flex">
-        {params.value ?
-          <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-            {params.value}
-          </Link>
-          :
-          <NoDataCell />
-        }
-        {params.data?.restEntity?.length > 0 && (
-          <span className="createdAtTime badge-date">{`+${params.data?.restEntity.length} more..`}</span>
-        )}
-      </h5>
-    )
+  const EntityRenderer = (params) => (
+    <h5 className="createBy d-flex">
+      {params.value ?
+        <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+          {params.value}
+        </Link>
+        :
+        <NoDataCell />
+      }
+      {params.data?.restEntity?.length > 0 && (
+        <span className="createdAtTime badge-date">{`+${params.data?.restEntity.length} more..`}</span>
+      )}
+    </h5>
+  )
 
 
   const ParentAccountRenderer = (params) =>

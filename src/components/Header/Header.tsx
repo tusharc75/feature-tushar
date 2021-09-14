@@ -462,7 +462,9 @@ const Header = ({ toggleDrawer }) => {
   };
 
   const handleEntityChange = async (id) => {
-    dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    if (!Array.isArray(id)) {
+      dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    }
   };
 
   const handleRedirect = (id, resourceId, resourcePath) =>
@@ -862,13 +864,13 @@ const Header = ({ toggleDrawer }) => {
       history.push({ pathname: routes.product.path });
     }
     if (history.location.pathname.includes(`${routes.productTemplate.path}/`)) {
-      history.push({ pathname: routes.productTemplate.path})
+      history.push({ pathname: routes.productTemplate.path })
     }
     if (history.location.pathname.includes(`${routes.priceTemplate.path}/`)) {
-      history.push({ pathname: routes.priceTemplate.path})
+      history.push({ pathname: routes.priceTemplate.path })
     }
     if (history.location.pathname.includes(routes.quotePdfTemplateDetail.path)) {
-      history.push({ pathname: routes.quotePdfTemplate.path})
+      history.push({ pathname: routes.quotePdfTemplate.path })
     }
   }
 
