@@ -117,7 +117,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.addAdditionalOption = false;
       }
 
-      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
+      if (!values.addManualOptionInExcel && fieldData.type === 'dropDown') {
         values.addManualOptionInExcel = false;
       }
 
@@ -873,7 +873,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -886,8 +886,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }
                         label="Add Additional Option"
                       />
-                    ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
+                    )}
+                    {fieldData.type === 'dropDown' && (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -900,7 +900,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }
                         label="Add Manual Option In Excel"
                       />
-                    ) : null}
+                    )}
                     {fieldData.type === 'process' && (
                       <FormControlLabel
                         control={
