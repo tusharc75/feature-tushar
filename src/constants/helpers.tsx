@@ -530,7 +530,11 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? array().required(`${input.fieldLabel} is required`)
         : array();
-    } else {
+    } else if (input.type === "colorPicker") {
+      schema[input.fieldName] = input.required
+        ? string().required(`${input.fieldLabel} is required`).nullable()
+        : string().nullable()
+           } else {
       schema[input.fieldName] = input.required
         ? string().required(`${input.fieldLabel} is required`)
         : string();
