@@ -40,7 +40,6 @@
     "jspdf-autotable": "^3.5.20",
     "lodash": "^4.17.20",
     "material-table": "^1.69.2",
-    "material-ui-color": "^1.2.0",
     "material-ui-phone-number": "^2.2.6",
     "moment": "^2.29.1",
     "node-sass": "4.14.1",
