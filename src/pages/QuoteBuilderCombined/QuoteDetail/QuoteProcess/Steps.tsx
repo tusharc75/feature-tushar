@@ -227,7 +227,7 @@ const Steps = (props) => {
       <div
         className={clsx(classes.root, {
           [classes.active]: active,
-          [classes.completed]: completed ,
+          [classes.completed]: completed,
           [classes.rejected]: rejected,
         })}
       >
@@ -263,7 +263,7 @@ const Steps = (props) => {
       let dataObj = {
         status: selectedOption + " by Customer",
         manual: true,
-        comment:tempComment
+        comment: tempComment
       };
       if (selectedOption === "Invalid") {
         dataObj.comment.push(comment);
@@ -323,12 +323,15 @@ const Steps = (props) => {
             )} */}
           {versionStatus === "Sent for DOA" && (
             <>
-              {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
-
-              <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <FcClock size={30} />
-                <Typography className={classes.sent}>DOA Sent</Typography>
-              </div>
+              {DOAData &&
+                <>
+                  <NewStepper heading={" "} quoteDOA={DOAData} />
+                  <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                    <FcClock size={30} />
+                    <Typography className={classes.sent}>DOA Sent</Typography>
+                  </div>
+                </>
+              }
             </>
           )}
           {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
