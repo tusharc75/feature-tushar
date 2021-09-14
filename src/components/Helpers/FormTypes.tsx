@@ -15,7 +15,6 @@ import {
   RadioGroup,
   Switch,
   TextField,
-  Tooltip,
   Typography,
   useTheme,
   Dialog,
@@ -52,6 +51,7 @@ import CreditCardIcon from '@material-ui/icons/CreditCard';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const filter = createFilterOptions();
 
@@ -89,9 +89,9 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
         </Box>}
       </Grid>
       <Grid item xs={1} sm={1} md={1}>
-        <Tooltip title={info}>
+        <HtmlTooltip title={<Typography>{info}</Typography>}>
           <InfoIcon color="disabled" />
-        </Tooltip>
+        </HtmlTooltip>
       </Grid>
     </Grid>
   ) : doNotShowInfoTooltip ? (
@@ -146,58 +146,59 @@ const GreenSwitch = withStyles({
 })(Switch);
 
 const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
-  const [values, setValues] = React.useState([]);
+  //const [values, setValues] = React.useState([]);
   const [inputVal, setInputVal] = React.useState("")
+  const [error, setError] = React.useState(null)
 
   const handleChange = (val) => {
-    setValues(val)
-
+    val = val.trimStart()
+    setInputVal(val)
+   
+    if(error) {
+      setError(null)
+    }
   }
 
   const onSave = () => {
-    const order = options.length
-    const filteredArr = values.filter(val => options.filter(op => op.optionValue === val).length === 0)
-    const newOptions = filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val }))
-    addFieldOption(filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val })))
-    setOptions([...options, ...newOptions])
-    setOpen(false)
+    const val = inputVal.trimEnd().toLowerCase()
 
+    const foundSame = options.find(o => o.optionLabel.toLowerCase() === val) || null;
+    if (foundSame) {
+      setError(`"${val}" already exists in the options`)
+    } else {
+      setError(null)
+      const order = options.length
+      const newOption = { order: order, default: false, optionLabel: inputVal, optionValue: inputVal }
+      addFieldOption([newOption])
+      setOptions([...options, newOption])
+      setOpen(false)
+    }
   }
 
   return (
     <div>
       <Dialog fullWidth maxWidth="sm" open keepMounted onClose={() => setOpen(false)}>
-        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Options" />
+        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Option" />
         <CustomDialogContent>
-          <Autocomplete
-            multiple
-            disableCloseOnSelect={true}
+          <TextField
             size="small"
             fullWidth
-            freeSolo
-            value={values}
-            options={[]}
-            renderTags={(value: string[], getTagProps) =>
-              value.map((option: string, index: number) =>
-                <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-            }
-            onChange={(_, val) => handleChange(val)}
-            onInputChange={((_, val) => setInputVal(val))}
-            renderInput={(params) => <TextField {...params}
-              variant="outlined"
-              label="Options"
-              style={{ whiteSpace: 'nowrap' }}
-              margin="dense"
-              placeholder="New Option" />
-            }
+            value={inputVal}
+            onChange={(event) => handleChange(event.target.value)}
+            variant="outlined"
+            label="Options"
+            style={{ whiteSpace: 'nowrap' }}
+            margin="dense"
+            placeholder="New Option"
+            error={Boolean(error)}
+            helperText={error}
           />
-          <Typography variant="caption" color="textSecondary">Press "Enter" to save an option</Typography>
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button variant="outlined" color="primary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="contained" disabled={!Boolean(values.length)} color="primary" onClick={onSave}>
+          <Button variant="contained" disabled={!Boolean(inputVal)} color="primary" onClick={onSave}>
             Save
           </Button>
         </CustomDialogFooter>
@@ -1040,7 +1041,7 @@ const FormTypes = (props) => {
           </Box>
           {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (
             <Box>
-              <Tooltip title="Add Converter" className="formActionButton">
+              <HtmlTooltip title="Add Converter" className="formActionButton">
                 <IconButton
                   onClick={() => {
                     setIsExtraDispayType(true);
@@ -1050,15 +1051,15 @@ const FormTypes = (props) => {
                 >
                   <SwapHorizIcon />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
               {(fieldData.leval === 'product-custom' ||
                 fieldData.leval === 'product-builder-custom' ||
                 fieldData.leval === 'price-builder-custom') && (
-                  <Tooltip title="Remove">
+                  <HtmlTooltip title="Remove">
                     <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                       <HighlightOffIcon color="error" />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                 )}
               {isExtraDispayType && (
                 <AddDisplayTypeDialog
@@ -1072,11 +1073,11 @@ const FormTypes = (props) => {
           )}
           {fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
             <Box>
-              <Tooltip title="Remove" className="formActionButton">
+              <HtmlTooltip title="Remove" className="formActionButton">
                 <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
                   <HighlightOffIcon color="error" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             </Box>
           )}
         </Box>
@@ -1150,7 +1151,7 @@ const FormTypes = (props) => {
               </Box>
               {i === 0 && j === 0 && (
                 <Box>
-                  <Tooltip title="Add Currency" className="formActionButton">
+                  <HtmlTooltip title="Add Currency" className="formActionButton">
                     <IconButton
                       onClick={() => {
                         setIsExtraDispayType(true);
@@ -1161,18 +1162,18 @@ const FormTypes = (props) => {
                     >
                       <CreditCardIcon />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                   {(fieldData.leval === 'product-custom' ||
                     fieldData.leval === 'product-builder-custom' ||
                     fieldData.leval === 'price-builder-custom') && (
-                      <Tooltip title="Remove">
+                      <HtmlTooltip title="Remove">
                         <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                           <HighlightOffIcon color="error" />
                         </IconButton>
-                      </Tooltip>
+                      </HtmlTooltip>
                     )}
                   {fieldData.displayUnits.length !== fieldData.units.length && (
-                    <Tooltip title="Add Converter" className="formActionButton">
+                    <HtmlTooltip title="Add Converter" className="formActionButton">
                       <IconButton
                         onClick={() => {
                           setIsExtraDispayType(true);
@@ -1183,7 +1184,7 @@ const FormTypes = (props) => {
                       >
                         <SwapHorizIcon />
                       </IconButton>
-                    </Tooltip>
+                    </HtmlTooltip>
                   )}
                   {isExtraDispayType && (
                     <AddDisplayTypeDialog
@@ -1200,11 +1201,11 @@ const FormTypes = (props) => {
               )}
               {i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
                 <Box>
-                  <Tooltip title="Remove" className="formActionButton">
+                  <HtmlTooltip title="Remove" className="formActionButton">
                     <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
                       <HighlightOffIcon color="error" />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                 </Box>
               )}
               {j === 0 &&
@@ -1212,11 +1213,11 @@ const FormTypes = (props) => {
                 fieldData.fieldChanges.displayCurrency &&
                 fieldData.fieldChanges.displayCurrency.includes(_currency) && (
                   <Box>
-                    <Tooltip title="Remove" className="formActionButton">
+                    <HtmlTooltip title="Remove" className="formActionButton">
                       <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
                         <HighlightOffIcon color="error" />
                       </IconButton>
-                    </Tooltip>
+                    </HtmlTooltip>
                   </Box>
                 )}
             </Box>
@@ -1289,7 +1290,7 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 && (
               <Box>
-                <Tooltip title="Add Currency" className="formActionButton">
+                <HtmlTooltip title="Add Currency" className="formActionButton">
                   <IconButton
                     onClick={() => {
                       setIsExtraDispayType(true);
@@ -1299,15 +1300,15 @@ const FormTypes = (props) => {
                   >
                     <CreditCardIcon />
                   </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
-                    <Tooltip title="Remove">
+                    <HtmlTooltip title="Remove">
                       <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                         <HighlightOffIcon color="error" />
                       </IconButton>
-                    </Tooltip>
+                    </HtmlTooltip>
                   )}
                 {isExtraDispayType && (
                   <AddDisplayTypeDialog
@@ -1321,11 +1322,11 @@ const FormTypes = (props) => {
             )}
             {fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency) && (
               <Box>
-                <Tooltip title="Remove" className="formActionButton">
+                <HtmlTooltip title="Remove" className="formActionButton">
                   <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
                     <HighlightOffIcon color="error" />
                   </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
               </Box>
             )}
           </Box>
@@ -1697,9 +1698,9 @@ const FormTypes = (props) => {
           </IconButton>
           {isTooltip && Boolean(tooltipMessage) && (
             <IconButton size="small">
-              <Tooltip title={tooltipMessage}>
+              <HtmlTooltip title={tooltipMessage}>
                 <InfoIcon color="disabled" />
-              </Tooltip>
+              </HtmlTooltip>
             </IconButton>
           )}
           <Box flex="1">
@@ -1724,9 +1725,9 @@ const FormTypes = (props) => {
         {/* <Typography color="textSecondary">{label}</Typography> */}
         {isTooltip && Boolean(tooltipMessage) && (
           <IconButton size="small">
-            <Tooltip title={tooltipMessage}>
+            <HtmlTooltip title={tooltipMessage}>
               <InfoIcon color="disabled" />
-            </Tooltip>
+            </HtmlTooltip>
           </IconButton>
         )}
         <Box mr={1} />
