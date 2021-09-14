@@ -375,8 +375,9 @@ export default function AccountDetailPage(props) {
         setLoading(false);
         initializeGraphData();
       })
-      .catch(() => {
+      .catch((error) => {
         setLoading(false);
+        toastConfig.setToastConfig(error);
       });
   };
 
