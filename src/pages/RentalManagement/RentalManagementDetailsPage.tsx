@@ -303,6 +303,17 @@ const RentalManagementDetailsPage = () => {
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
 
+  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
 
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
@@ -459,7 +470,7 @@ const RentalManagementDetailsPage = () => {
                       page={page}
                       allowAction={true}
                       loading={loading}
-                      renderedFrom="rentalManagementInDetail"
+                      renderedFrom="rentalManagementDetailsPageInventory"
                     />
                     : <Box
                       p={2}

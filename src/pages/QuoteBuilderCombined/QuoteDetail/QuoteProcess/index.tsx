@@ -209,7 +209,7 @@ export default function QuoteProcess(props) {
             fetchDOAData();
         }
 
-    }, [currentVersion, DOAreq]);
+    }, [currentVersion, DOAreq, DOAneeded]);
 
     useEffect(() => {
         dispatch({ type: "selection", selectedRecords: quoteData?.versions[currentVersion]?.TNC });
