@@ -20,10 +20,12 @@ import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
+import styles from "./Retal.module.scss";
 
 import { isMobile } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
+
     backButton: {
         marginRight: theme.spacing(1),
     },
@@ -39,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
     },
     pbStepper: {
         overflow: "none",
+        justifyContent:"space-evenly",
         [theme.breakpoints.down("xs")]: {
             overflow: "auto"
         },
@@ -52,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        margin: "1px",
+        margin: "2px",
         borderRadius: "4px",
         border: "1px solid #d6d5d5",
         [theme.breakpoints.down("xs")]: {
@@ -61,12 +64,16 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     inActive: {
+        flex: "1",
         background: "#ebebeb",
     },
     currentStep: {
+        flex: "1",
         background: "#ffffff",
+
     },
     active: {
+        flex: "1",
         background: "#53ac65",
     },
     sent: {
@@ -85,6 +92,7 @@ const useStyles = makeStyles((theme) => ({
 
 const useColorlibStepIconStyles = makeStyles((theme) => ({
     root: {
+
         color: "#d1c4c4",
         width: 30,
         height: 30,
@@ -93,6 +101,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
         alignItems: "center",
     },
     active: {
+
         color: "#047d1c !important",
     },
     completed: {
@@ -168,7 +177,7 @@ const Steps = (props) => {
                             </Typography>
                         </div>
                     )} */}
-                <Grid container>
+                <Grid container className={styles.main_step_box} xs={10}>
                     <Grid
                         item
                         xs={12}
@@ -182,16 +191,13 @@ const Steps = (props) => {
                                     {(
                                         <div>
                                             <Button
-                                                variant="contained"
-                                                color="primary"
                                                 disabled={currentStep === 4 || currentStep === 0}
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
-                                                size="small"
+                                                size="large"
                                                 startIcon={<IoIosArrowDropleftCircle />}
                                             >
-                                                Back
                                             </Button>
                                         </div>
                                     )}
@@ -205,7 +211,7 @@ const Steps = (props) => {
                                 <Grid
                                     item
                                     xs={6}
-                                    className="d-flex align-items-center justify-content-start mt-1 mb-1"
+                                    // className="d-flex align-items-center justify-content-start "
                                 >
                                     {isMobile && (
                                         <>
@@ -286,7 +292,7 @@ const Steps = (props) => {
                         xs={12}
                         sm={2}
                         md={1}
-                        className="d-flex align-items-center justify-content-center"
+                        className="d-flex align-items-center justify-content-center mt-2 "
                     >
                         {!isMobile && (
                           <>
@@ -295,16 +301,14 @@ const Steps = (props) => {
                                 <div>
                                   {(
                                     <Button
-                                        variant="contained"
-                                        color="primary"
+
                                         onClick={() => {
                                             setCurrentStep(currentStep + 1)
                                         }}
-                                        size="small"
+                                        size="large"
                                         disabled={currentStep >=3 || (currentStep === 0 && isNextStep)}
                                         endIcon={<IoIosArrowDroprightCircle />}
                                     >
-                                        Next
                                     </Button>
                                   )}
                                 </div>
