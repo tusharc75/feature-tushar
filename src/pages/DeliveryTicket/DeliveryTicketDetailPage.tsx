@@ -73,6 +73,17 @@ export default function DeliveryTicketDetail(props) {
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
 
+  const columnState = JSON.parse(localStorage.getItem("deliveryTicketDetailInventoryPage"));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   const getDeliveryTicketFields = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource["deliveryTicket"]}`)
@@ -337,7 +348,7 @@ export default function DeliveryTicketDetail(props) {
                               page={page}
                               actionWidth={150}
                               loading={false}
-                              renderedFrom="deliveryDetailPage"
+                              renderedFrom="deliveryTicketDetailInventoryPage"
                             />
                           </Grid>
                         </Grid>
