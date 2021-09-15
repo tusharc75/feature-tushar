@@ -18,6 +18,9 @@ import {
   Typography,
   useTheme,
   Dialog,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
@@ -52,7 +55,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { Color, ColorPicker, createColor } from 'material-ui-color';
+import ImageCropTool from '../ImageCropTool';
 
 
 const filter = createFilterOptions();
@@ -254,6 +257,9 @@ const FormTypes = (props) => {
     ...rest
   } = props;
 
+  const [image, setImage] = React.useState<any>("");
+  const [readingImage, setReadingImage] = React.useState<any>(false);
+  const [images, setImages] = React.useState([]);
   const [optionsList, setOptions] = React.useState([]);
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
@@ -478,6 +484,28 @@ const FormTypes = (props) => {
 
     axiosInstance().post('field/add-field-option', data);
   };
+
+  const readImageFile = (e) => {
+    setReadingImage(true)
+    const file = e.target.files[0];
+    let reader = new FileReader();
+
+    
+    reader.onload = async (e) => {
+      const result = await e.target?.result
+      setImage(result);
+      setReadingImage(false)
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  } 
+
+    const removeImage = (img) => {
+      const updatedArr = images.filter((i) => i !== img);
+      setImages(updatedArr);
+    };
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -1913,31 +1941,62 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'colorPicker' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-      <ColorPicker
-        value={createColor(values[name])}
-        onChange={(newColor: Color) => setFieldValue(name, `#${newColor.hex}`)}
-        palette={{
-          red: '#ff0000',
-          blue: '#0000ff',
-          green: '#00ff00',
-          yellow: 'yellow',
-          cyan: 'cyan',
-          lime: 'lime',
-          gray: 'gray',
-          orange: 'orange',
-          purple: 'purple',
-          black: 'black',
-          white: 'white',
-          pink: 'pink',
-          darkblue: 'darkblue',
-        }}
-      />
-      <input style={{ display: "none" }} name={name} />
-      {touched[name] && Boolean(errors[name]) &&
-        <Typography variant="caption" color='error'>{errors[name]}</Typography>
-      }
-    </InfoLabel>
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+        <Box display="flex" alignItems="center">
+          <Typography color="textSecondary">{label}</Typography>
+          <Box ml={2} display='flex' alignContent="center">
+            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
+          </Box>
+        </Box>
+        { touched[name] && Boolean(errors[name]) && (
+          <Typography variant="caption" color='error'>
+            {errors[name]}
+          </Typography>)
+        }
+      </InfoLabel>
+  ) : type === 'multiImageUpload' ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+        <Typography color="textSecondary">{label}</Typography>
+        <input
+          accept="image/*"
+          style={{display: "none"}}
+          id="multiple-images-button"
+          multiple
+          type="file"
+          onChange={readImageFile}
+        />
+        <label htmlFor="multiple-images-button">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+            Upload
+          </Button>
+        </label>
+        <Box mt={1}>
+          <Typography color="textSecondary">{images.length > 0 ? "Images Preview" : "No Images"}</Typography>
+          <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
+          <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
+            {images.map((item, i) => (
+              <ImageListItem style={{height: '100px', width: "33.3%"}} key={item}> 
+                <img src={item} alt={`demo ${i + 1}`} />
+                <ImageListItemBar
+                  title={''}
+                  actionIcon={
+                    <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  }
+                />
+              </ImageListItem>
+            ))}
+          </ImageList>
+          </Box>
+        </Box>
+        <Dialog fullWidth maxWidth="md" open={Boolean(image)} onClose={() => setImage("")}>
+         <CustomDialogHeader onClose={() => setImage('')} title="Edit Image"/>
+         <CustomDialogContent>
+           <ImageCropTool image={image} setImage={setImage} setImages={setImages} />
+         </CustomDialogContent>
+        </Dialog>
+      </InfoLabel>
   ) : null;
 };
 

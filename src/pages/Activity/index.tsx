@@ -12,6 +12,7 @@ import CustomContainer from "../../components/CustomContainer";
 
 import routes from "../../components/Helpers/Routes";
 import "./style.scss";
+import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 
 const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -57,13 +58,15 @@ const Activity = ({ type }) => {
     if (tempActivity.length === 1) {
       setSelectedActivityId(tempActivity[0]._id)
     }
-    else{
+    else {
       setSelectedActivityId(null)
     }
     history.replace({
       search: "",
     });
   };
+
+
 
   return (
     <Fragment>
@@ -96,11 +99,18 @@ const Activity = ({ type }) => {
           </Paper>
         </Box>
         <Box className={classes.activityContainer}>
-          {viewType === 0 && <Board type={type} filter={filter} selectedActivityId={selectedActivityId}/>}
+          {viewType === 0 && <Board type={type} filter={filter} />}
           {viewType === 1 && <Roadmap type={type} filter={filter} />}
         </Box>
       </CustomContainer>
-
+      {selectedActivityId && (
+        <ActivityModelHandler
+          setActivityData={setSelectedActivityId}
+          activityType={type}
+          fetchBoard={() => { }}
+          activityId={selectedActivityId}
+        />
+      )}
     </Fragment>
   );
 };

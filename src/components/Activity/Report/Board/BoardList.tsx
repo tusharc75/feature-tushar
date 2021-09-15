@@ -22,7 +22,6 @@ export const BoardList = ({
   fetchBoard,
   handleChangeStatus,
   loading,
-  selectedActivityId = null
 }) => {
   const {
     state: {
@@ -38,10 +37,6 @@ export const BoardList = ({
   useEffect(() => {
     setSubActivity(activity);
   }, [activity]);
-
-  useEffect(() => {
-    if (selectedActivityId) setSelectedId(selectedActivityId);
-  }, [selectedActivityId]);
 
   const moveCard = useCallback(
     (dragIndex, hoverIndex) => {

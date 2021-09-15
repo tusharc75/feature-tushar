@@ -42,13 +42,6 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const mappedProductCategoryColor = {
-    Iron: "#D9E1C1",
-    Block: "#F2EAE0",
-    Paloma: "#EDE0E7",
-    FB: "#EDE0E7",
-    Valves: "#BED8E2"
-}
 const Product = () => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -66,15 +59,6 @@ const Product = () => {
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
-
-    const getRowStyleScheduled = (params) => {
-        if (params?.data?.productCategory && mappedProductCategoryColor[params?.data?.productCategory]) {
-            return {
-                'background-color': `${mappedProductCategoryColor[params?.data?.productCategory]}`,
-            }
-        }
-        return null;
-    };
 
     useEffect(() => {
         fetchProduct()
@@ -453,7 +437,6 @@ const Product = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productPage"
-                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
