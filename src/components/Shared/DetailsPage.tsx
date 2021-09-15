@@ -277,7 +277,13 @@ const Details = (props: DetailProps) => {
         );
       }
     } else {
-      return (
+      return fieldData.type === "colorPicker" ?
+        <Box display="flex" alignItems="center">
+          <Box width={16} height={16} borderRadius={"50%"} bgcolor={value} />
+          <Typography variant="body2" className={classes.fieldText}>{value}</Typography>
+        </Box>
+      
+      : (
         <Typography
           title={value === "-" ? "" : value}
           className={classes.fieldText}
