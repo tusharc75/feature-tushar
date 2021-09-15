@@ -33,6 +33,7 @@ import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import ManageProductInventory from '../ProductInventory/ManageProductInventory'
 import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
+import styles from "./Retal.module.scss";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
 
@@ -431,6 +432,7 @@ const RentalManagementDetailsPage = () => {
             </div>
             <div>
               <Steps
+                  className={styles.steps_box}
                 isNextStep={!Boolean(productInventory.length)}
                 steps={rentalProcessSteps.slice(0, 4)}
                 currentStep={currentStep}
