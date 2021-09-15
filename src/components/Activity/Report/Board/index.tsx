@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Board = ({ type, filter, selectedActivityId = null }) => {
+const Board = ({ type, filter }) => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const classes = useStyles();
@@ -226,7 +226,6 @@ const Board = ({ type, filter, selectedActivityId = null }) => {
                   fetchBoard={fetchBoard}
                   type={type}
                   handleChangeStatus={handleChangeStatus}
-                  selectedActivityId={selectedActivityId}
                 />
               </div>
             </Grid>
