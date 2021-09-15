@@ -337,7 +337,16 @@ export default function NewCreateQuotePdfTemplate() {
                                             size="small"
                                             color="primary"
                                             variant="contained"
-                                            onClick={()=>history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path })}
+                                            onClick={() => {
+                                                if (history.location?.state?.quoteId) {
+                                                    history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
+                                                        versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                                                    })
+                                                }
+                                                else {
+                                                    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+                                                }
+                                            }}
                                         >
                                             Close
                                         </Button>
