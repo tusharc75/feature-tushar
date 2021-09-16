@@ -29,8 +29,9 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
-import { Box, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -179,13 +180,15 @@ const ProductCategory = () => {
     }, [page, limit, filters, sorting, search, selectedEntity])
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <span className="link" onClick={() => {
-            setProductCategoryId(params.data.id);
-            setOpen(true);
-        }}>
-            <CustomRenderCell value={params.value} />
-        </span>
-
+        <Chip
+            className="ml-3"
+            style={{ backgroundColor: `${params.data.chipColour}` }}
+            label={`${params.value}`}
+            onClick={() => {
+                setProductCategoryId(params.data.id);
+                setOpen(true);
+            }}
+        />
     </span>
 
     const ActionsRenderer = params => <Fragment>
@@ -207,9 +210,24 @@ const ProductCategory = () => {
         }
     </Fragment >
 
+    const ProductCategoryRenderer = (params) => (
+        <> {params.data.parentCategory?.optionLabel !== undefined && params.data.parentCategory?.optionLabel !== null ?
+            (
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.parentCategory?.chipColour}` }}
+                    label={`${params.data.parentCategory?.optionLabel}`}
+                />
+            )
+            : (
+                <NoDataCell />
+            )}
+        </>
+    );
+
     const frameworkComponents = {
         nameRenderer: NameRenderer,
-        parentCategoryRenderer: CommonRenderer,
+        parentCategoryRenderer: ProductCategoryRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer
@@ -269,13 +287,11 @@ const ProductCategory = () => {
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, parentCategory, ...restProperties } = u;
+                const { createdBy, updatedBy, ...restProperties } = u;
 
                 let res = {
                     ...restProperties,
                     id: u._id,
-
-                    parentCategory: u.parentCategory?.optionLabel,
                     createdBy: u.createdBy?.user?.concatedName,
                     createdById: u.createdBy?.user?._id,
                     createdByDate: u.createdBy?.date,
