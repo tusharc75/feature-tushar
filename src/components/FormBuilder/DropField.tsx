@@ -143,7 +143,7 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
     };
 
     const deleteField = (fieldId) => {
-        onAddRemoveField()
+        if (onAddRemoveField) onAddRemoveField()
         let data = [...section]
         var result = checkFieldDependency(fieldId, sectionId, data)
         if (result.error) {

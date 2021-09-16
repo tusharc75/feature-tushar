@@ -34,7 +34,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
     const ref = useRef(null);
 
     const addField = (sectionId, type, index) => {
-        onAddRemoveField()
+        if (onAddRemoveField) onAddRemoveField()
         let data = [...section];
         data.forEach((row) => {
             row.field = row.field.filter(i => i._id)
@@ -81,7 +81,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
     };
 
     const addCustomField = (sectionId, fieldData, index) => {
-        onAddRemoveField()
+        if (onAddRemoveField) onAddRemoveField()
         let data = [...section];
         data.forEach((row) => {
             row.field = row.field.filter(i => i._id)
@@ -241,7 +241,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
     };
 
     const deleteSection = (sectionId) => {
-        onAddRemoveField()
+        if (onAddRemoveField) onAddRemoveField()
         setSection(section.filter(i => i.sectionId.toString() !== sectionId.toString()))
         handleClose()
     };

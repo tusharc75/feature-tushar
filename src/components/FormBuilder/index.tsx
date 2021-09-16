@@ -31,7 +31,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
 }) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
-    onAddRemoveField()
+    if (onAddRemoveField) onAddRemoveField()
     if (sectionHoverIndex !== null) {
       const obj = {
         sectionId: parseInt((Math.random() * 100000).toString()),
