@@ -18,6 +18,9 @@ import {
   Typography,
   useTheme,
   Dialog,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
@@ -31,7 +34,7 @@ import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
 import { green, red } from '@material-ui/core/colors';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { handleAutoCalculation } from '../../constants/formulaUtility';
+import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import NumberFormat from 'react-number-format';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -52,7 +55,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { Color, ColorPicker, createColor } from 'material-ui-color';
+import ImageCropTool from '../ImageCropTool';
 
 
 const filter = createFilterOptions();
@@ -155,8 +158,8 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
   const handleChange = (val) => {
     val = val.trimStart()
     setInputVal(val)
-   
-    if(error) {
+
+    if (error) {
       setError(null)
     }
   }
@@ -254,6 +257,9 @@ const FormTypes = (props) => {
     ...rest
   } = props;
 
+  const [image, setImage] = React.useState<any>("");
+  const [imageFileName, setImageFileName] = React.useState<any>("");
+  const [readingImage, setReadingImage] = React.useState<any>(false);
   const [optionsList, setOptions] = React.useState([]);
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
@@ -375,7 +381,7 @@ const FormTypes = (props) => {
   };
 
   // For public upload
-  const getImageUrl = (file) => {
+  const getImageUrl = (file, multiple=null) => {
     setImageUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -403,10 +409,20 @@ const FormTypes = (props) => {
         }
       })
       .then(({ data }) => {
-        setFieldValue(name, data.fileUrl);
+        if (!multiple) {
+          setFieldValue(name, data.fileUrl);
+        } else {
+          setImage("")
+          setFieldValue(name, [...values[name], data.fileUrl]);
+          setImageFileName("")
+        }
         setImgUploading(false);
       })
       .catch((err) => {
+        if (multiple) {
+          setImage("")
+          setImageFileName("")
+        }
         setImgUploading(false);
         setToastConfig(err);
         setImageUploadProgress(0);
@@ -478,6 +494,29 @@ const FormTypes = (props) => {
 
     axiosInstance().post('field/add-field-option', data);
   };
+
+  const readImageFile = (e) => {
+    setReadingImage(true)
+    const file = e.target.files[0];
+    setImageFileName(file.name.toString().split('.')[0])
+    let reader = new FileReader();
+
+    
+    reader.onload = async (e) => {
+      const result = await e.target?.result
+      setImage(result);
+      setReadingImage(false)
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  } 
+
+    const removeImage = (img) => {
+      const updatedArr = values[name].filter((i) => i !== img);
+      setFieldValue(name, updatedArr);
+    };
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -1022,23 +1061,50 @@ const FormTypes = (props) => {
         <Box display="flex">
           <Box flexGrow={1}>
             <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-              <TextField
-                {...rest}
-                variant="outlined"
-                type="number"
-                label={label + ' ' + _unit}
-                name={name + '_' + _unit.toLowerCase()}
-                required={required}
-                value={values[name + '_' + _unit.toLowerCase()]}
-                error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
-                helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
-                ref={inputNumberRef}
-                onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
-                InputProps={{
-                  inputProps: { min: 0 },
-                  readOnly: fieldData && fieldData.isUneditable ? true : false
-                }}
-              />
+              {fieldData.isDropdown ?
+                <Autocomplete
+                  {...rest}
+                  options={optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                      .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
+                      ? optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                        .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0] : ''
+                  }
+                  onChange={onChange ? onChange : (e, val) =>
+                    handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      name={name + '_' + _unit.toLowerCase()}
+                      label={label + ' ' + _unit}
+                      variant="outlined"
+                      error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                      helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                      required={required}
+                    />
+                  )}
+                />
+                : <TextField
+                  {...rest}
+                  variant="outlined"
+                  type="number"
+                  label={label + ' ' + _unit}
+                  name={name + '_' + _unit.toLowerCase()}
+                  required={required}
+                  value={values[name + '_' + _unit.toLowerCase()]}
+                  error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                  helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                  ref={inputNumberRef}
+                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
+                  InputProps={{
+                    inputProps: { min: 0 },
+                    readOnly: fieldData && fieldData.isUneditable ? true : false
+                  }}
+                />
+              }
             </InfoLabel>
           </Box>
           {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (
@@ -1886,32 +1952,78 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'colorPicker' ? (
-        <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-            <ColorPicker
-              value={createColor(values[name])}
-              onChange={(newColor: Color) => setFieldValue(name, `#${newColor.hex}`)}
-              palette={{
-                red: '#ff0000',
-                blue: '#0000ff',
-                green: '#00ff00',
-                yellow: 'yellow',
-                cyan: 'cyan',
-                lime: 'lime',
-                gray: 'gray',
-                orange: 'orange',
-                purple: 'purple',
-                black: 'black',
-                white: 'white',
-                pink: 'pink',
-                darkblue: 'darkblue',
-              }}
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+        <Box display="flex" alignItems="center">
+          <Typography color="textSecondary">{label}</Typography>
+          <Box ml={2} display='flex' alignContent="center">
+            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
+          </Box>
+        </Box>
+        { touched[name] && Boolean(errors[name]) && (
+          <Typography variant="caption" color='error'>
+            {errors[name]}
+          </Typography>)
+        }
+      </InfoLabel>
+  ) : type === 'multiImageUpload' ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+        <Typography color="textSecondary">{label}</Typography>
+        <input
+          accept="image/*"
+          style={{display: "none"}}
+          id="multiple-images-button"
+          multiple
+          type="file"
+          onChange={readImageFile}
+        />
+        <label htmlFor="multiple-images-button">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+            Upload
+          </Button>
+        </label>
+        <Box mt={1}>
+          <Typography color="textSecondary">{values[name].length > 0 ? "Images Preview" : "No Images"}</Typography>
+          <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
+          <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
+            {values[name]? values[name].map((item, i) => (
+              <ImageListItem style={{height: '100px', width: "33.3%"}} key={item}> 
+                <img src={item} alt={`demo ${i + 1}`} />
+                <ImageListItemBar
+                  title={''}
+                  actionIcon={
+                    <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  }
+                />
+              </ImageListItem>
+            )) : null}
+          </ImageList>
+          </Box>
+        </Box>
+        <Dialog fullWidth maxWidth="md" open={Boolean(image) || isImgUploading} onClose={() => {
+           if(!isImgUploading) {
+             setImage("")
+           }
+          }}>
+         <CustomDialogHeader onClose={() => {
+           if(!isImgUploading) {
+            setImage("")
+          }
+         }} title="Edit Image"/>
+         <CustomDialogContent>
+           <ImageCropTool 
+              image={image} 
+              setImage={setImage} 
+              getImageUrl={getImageUrl} 
+              isImgUploading={isImgUploading} 
+              imageUploadProgress={imageUploadProgress}
+              imageFileName={imageFileName}
             />
-            <input style={{display: "none"}} name={name} />
-            { touched[name] && Boolean(errors[name]) &&
-              <Typography variant="caption" color='error'>{errors[name]}</Typography>
-            }
-        </InfoLabel>
-       ) : null;
+         </CustomDialogContent>
+        </Dialog>
+      </InfoLabel>
+  ) : null;
 };
 
 export default FormTypes;

@@ -33,6 +33,7 @@ import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import ManageProductInventory from '../ProductInventory/ManageProductInventory'
 import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
+import styles from "./Retal.module.scss";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
 
@@ -303,6 +304,17 @@ const RentalManagementDetailsPage = () => {
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
 
+  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
 
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
@@ -420,6 +432,7 @@ const RentalManagementDetailsPage = () => {
             </div>
             <div>
               <Steps
+                  className={styles.steps_box}
                 isNextStep={!Boolean(productInventory.length)}
                 steps={rentalProcessSteps.slice(0, 4)}
                 currentStep={currentStep}
@@ -459,7 +472,7 @@ const RentalManagementDetailsPage = () => {
                       page={page}
                       allowAction={true}
                       loading={loading}
-                      renderedFrom="rentalManagementInDetail"
+                      renderedFrom="rentalManagementDetailsPageInventory"
                     />
                     : <Box
                       p={2}

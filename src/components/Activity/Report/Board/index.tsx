@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Board = ({ type, filter, selectedActivityId = null }) => {
+const Board = ({ type, filter }) => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const classes = useStyles();
@@ -56,7 +56,7 @@ const Board = ({ type, filter, selectedActivityId = null }) => {
     if (!resource) return;
     setLoadingResources(true);
     axiosInstance()
-      .get(`${kebabCase(resource)}?limit=100`)
+      .get(`${getApi(resource)}?limit=100`)
       .then(({ data: { data } }) => {
         if (data.length) {
           const mappedData = data.map((_d) => getData(resource, _d));
@@ -118,7 +118,22 @@ const Board = ({ type, filter, selectedActivityId = null }) => {
     "Supplier Contact",
     "Lead",
     "Opportunity",
+    "Quotes",
+    "Rental Management",
+    "Loading Ticket",
+    "Project Sales",
   ];
+
+  const getApi = (resource: string) => {
+    switch (kebabCase(resource)) {
+      case "loading-ticket":
+        return "delivery-ticket";
+        case "quotes":
+          return "quote-builder";
+      default:
+        return kebabCase(resource);
+    }
+  };
 
   const getData = (resource: string, data: any) => {
     switch (kebabCase(resource)) {
@@ -150,6 +165,26 @@ const Board = ({ type, filter, selectedActivityId = null }) => {
       case "supplier-contact":
         return {
           name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+          id: data._id,
+        };
+      case "loading-ticket":
+        return {
+          name: `${data.deliveryJobName}`,
+          id: data._id,
+        };
+      case "quotes":
+        return {
+          name: `${data.quoteName}`,
+          id: data._id,
+        };
+      case "rental-management":
+        return {
+          name: `${data.rentalJobName}`,
+          id: data._id,
+        };
+      case "project-sales":
+        return {
+          name: `${data.projectName}`,
           id: data._id,
         };
       default:
@@ -226,7 +261,6 @@ const Board = ({ type, filter, selectedActivityId = null }) => {
                   fetchBoard={fetchBoard}
                   type={type}
                   handleChangeStatus={handleChangeStatus}
-                  selectedActivityId={selectedActivityId}
                 />
               </div>
             </Grid>

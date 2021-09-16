@@ -27,7 +27,7 @@ import {
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
-import { GiAbstract055 } from 'react-icons/gi';
+import { ImInsertTemplate } from 'react-icons/im';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -279,7 +279,7 @@ const ProductTemplate: FC = () => {
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
                         <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                            <GiAbstract055 /> <span className="listingHeader">{routes.productTemplate.title}</span>
+                            <ImInsertTemplate size={20} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.productTemplate.title}</span>
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >

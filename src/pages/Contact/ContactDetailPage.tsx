@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import contactClass from './contact.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from '../../StateProvider/Provider';
-import { contactPage } from '../../routes/Contacts';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
 import Activity from '../../components/Activity';
@@ -327,10 +326,9 @@ const ContactDetailsPage = (props) => {
       setShowConfirmBox(false);
     }
   };
+
   const goBackToListing = () => {
-    history.push({
-      pathname: routes.customerContact.path
-    });
+    history.push(`/${contactRoute}`);
   };
 
   const handleAllowToEditList = (contactDetails) => {
