@@ -9,7 +9,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { GiAbstract055 } from 'react-icons/gi';
+import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
 import { Box, Menu, MenuItem } from "@material-ui/core";
@@ -243,7 +243,7 @@ const ProductInventory = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 className="headerLogo" />
+                        <GiStockpiles size={20} style={{paddingBottom: "3px"}} className="headerLogo" />
                         <span className="listingHeader">{routes.productInventory?.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
