@@ -9,6 +9,8 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
+import { FaRegistered } from "react-icons/fa";
+
 import {
   isObjectEmpty,
   customerAccount,
@@ -542,7 +544,7 @@ const RentalManagement = () => {
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
-              icon={<GiHiveMind className="headerLogo" />}
+              icon={<FaRegistered className="headerLogo" />}
               heading={routes.rentalManagement.title}
               showTransferEntityDialog={handleTransferEntityDialog}
             // showCloneRentalManagementDialog={() => {
