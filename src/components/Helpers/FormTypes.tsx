@@ -258,8 +258,8 @@ const FormTypes = (props) => {
   } = props;
 
   const [image, setImage] = React.useState<any>("");
+  const [imageFileName, setImageFileName] = React.useState<any>("");
   const [readingImage, setReadingImage] = React.useState<any>(false);
-  const [images, setImages] = React.useState([]);
   const [optionsList, setOptions] = React.useState([]);
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
@@ -381,7 +381,7 @@ const FormTypes = (props) => {
   };
 
   // For public upload
-  const getImageUrl = (file) => {
+  const getImageUrl = (file, multiple=null) => {
     setImageUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -409,10 +409,20 @@ const FormTypes = (props) => {
         }
       })
       .then(({ data }) => {
-        setFieldValue(name, data.fileUrl);
+        if (!multiple) {
+          setFieldValue(name, data.fileUrl);
+        } else {
+          setImage("")
+          setFieldValue(name, [...values[name], data.fileUrl]);
+          setImageFileName("")
+        }
         setImgUploading(false);
       })
       .catch((err) => {
+        if (multiple) {
+          setImage("")
+          setImageFileName("")
+        }
         setImgUploading(false);
         setToastConfig(err);
         setImageUploadProgress(0);
@@ -488,6 +498,7 @@ const FormTypes = (props) => {
   const readImageFile = (e) => {
     setReadingImage(true)
     const file = e.target.files[0];
+    setImageFileName(file.name.toString().split('.')[0])
     let reader = new FileReader();
 
     
@@ -503,8 +514,8 @@ const FormTypes = (props) => {
   } 
 
     const removeImage = (img) => {
-      const updatedArr = images.filter((i) => i !== img);
-      setImages(updatedArr);
+      const updatedArr = values[name].filter((i) => i !== img);
+      setFieldValue(name, updatedArr);
     };
 
   const handleChange = (name, value) => {
@@ -1944,10 +1955,10 @@ const FormTypes = (props) => {
           </Button>
         </label>
         <Box mt={1}>
-          <Typography color="textSecondary">{images.length > 0 ? "Images Preview" : "No Images"}</Typography>
+          <Typography color="textSecondary">{values[name].length > 0 ? "Images Preview" : "No Images"}</Typography>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
           <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
-            {images.map((item, i) => (
+            {values[name].map((item, i) => (
               <ImageListItem style={{height: '100px', width: "33.3%"}} key={item}> 
                 <img src={item} alt={`demo ${i + 1}`} />
                 <ImageListItemBar
@@ -1963,10 +1974,25 @@ const FormTypes = (props) => {
           </ImageList>
           </Box>
         </Box>
-        <Dialog fullWidth maxWidth="md" open={Boolean(image)} onClose={() => setImage("")}>
-         <CustomDialogHeader onClose={() => setImage('')} title="Edit Image"/>
+        <Dialog fullWidth maxWidth="md" open={Boolean(image) || isImgUploading} onClose={() => {
+           if(!isImgUploading) {
+             setImage("")
+           }
+          }}>
+         <CustomDialogHeader onClose={() => {
+           if(!isImgUploading) {
+            setImage("")
+          }
+         }} title="Edit Image"/>
          <CustomDialogContent>
-           <ImageCropTool image={image} setImage={setImage} setImages={setImages} />
+           <ImageCropTool 
+              image={image} 
+              setImage={setImage} 
+              getImageUrl={getImageUrl} 
+              isImgUploading={isImgUploading} 
+              imageUploadProgress={imageUploadProgress}
+              imageFileName={imageFileName}
+            />
          </CustomDialogContent>
         </Dialog>
       </InfoLabel>

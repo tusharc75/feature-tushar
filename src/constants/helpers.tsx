@@ -534,7 +534,11 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? string().required(`${input.fieldLabel} is required`).nullable()
         : string().nullable()
-           } else {
+    } else if (input.type === "multiImageUpload") {
+      schema[input.fieldName] = input.required
+        ? array().required(`${input.fieldLabel} is required`).nullable()
+        : array().nullable()
+    } else {
       schema[input.fieldName] = input.required
         ? string().required(`${input.fieldLabel} is required`)
         : string();
