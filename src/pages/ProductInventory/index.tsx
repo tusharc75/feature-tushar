@@ -12,7 +12,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
-import { Box, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -26,6 +26,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageProductInventory from "./ManageProductInventory";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const ProductInventory = () => {
 
@@ -49,7 +50,7 @@ const ProductInventory = () => {
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
         { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "commonRenderer" },
         { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "commonRenderer" },
@@ -80,7 +81,6 @@ const ProductInventory = () => {
                 bornInDate: u.bornInDate,
                 status: u.status,
                 warehouse: u.warehouse?.optionLabel,
-                productCategory: u.productCategory?.optionLabel,
                 product: u.product?.optionLabel,
                 productId: u.product?.optionValue,
                 createdBy: u.createdBy?.user?.concatedName,
@@ -156,6 +156,21 @@ const ProductInventory = () => {
         </Link>
     );
 
+    const ProductCategoryRenderer = (params) => (
+        <> {params.data.productCategory.optionLabel !== undefined && params.data.productCategory.optionLabel !== null ?
+            (
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.productCategory?.chipColour}` }}
+                    label={`${params.data.productCategory?.optionLabel}`}
+                />
+            )
+            : (
+                <NoDataCell />
+            )}
+        </>
+    );
+
     const ActionsRenderer = params => (
         <>
             {
@@ -205,6 +220,7 @@ const ProductInventory = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         nameRenderer: NameRenderer,
+        productCategoryRenderer: ProductCategoryRenderer
     };
 
     const replaceFieldName = (field) => {
@@ -218,19 +234,6 @@ const ProductInventory = () => {
             default:
                 return field;
         }
-    };
-
-    const getRowStyleScheduled = (params) => {
-        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
-            return {
-                'background-color': "#d3ffe0",
-            }
-        } else {
-            return {
-                'background-color': '#ffe7e7',
-            };
-        }
-        return null;
     };
 
     return (<Fragment>
@@ -305,7 +308,6 @@ const ProductInventory = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productInventoryPage"
-                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
