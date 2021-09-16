@@ -35,6 +35,7 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import routes from '../../components/Helpers/Routes';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -328,7 +329,7 @@ const ContactDetailsPage = (props) => {
   };
   const goBackToListing = () => {
     history.push({
-      pathname: contactPage.path
+      pathname: routes.customerContact.path
     });
   };
 
