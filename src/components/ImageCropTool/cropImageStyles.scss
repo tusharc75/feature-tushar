@@ -1,3 +1,64 @@
+.cropperImageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  .containerOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    background-color: rgba($color: #000000, $alpha: 0.6);
+    display: grid;
+    place-items: center;
+
+    p {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .lds-dual-ring {
+      display: inline-block;
+      width: 80px;
+      height: 80px;
+      position: relative;
+
+      p {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 16px;
+        font-weight: normal;
+      }
+    }
+    .lds-dual-ring:after {
+      content: ' ';
+      display: block;
+      width: 64px;
+      height: 64px;
+      margin: 8px;
+      border-radius: 50%;
+      border: 6px solid #fff;
+      border-color: #fff transparent #fff transparent;
+      animation: lds-dual-ring 1.2s linear infinite;
+    }
+
+    @keyframes lds-dual-ring {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
+}
+
 .cropContainer {
   position: relative;
   width: 100%;
@@ -26,4 +87,9 @@
 
 .sliderPadding {
   padding: 0 2rem 0 2rem;
+}
+
+.buttonPadding {
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
