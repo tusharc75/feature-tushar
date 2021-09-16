@@ -46,6 +46,8 @@ export default function ManageContact(props) {
     accountSource,
     contactId = null,
     accountId = null,
+    formValues = {},
+    handleValuesChange = null
   } = props;
 
   const classes = useStyles();
@@ -97,7 +99,7 @@ export default function ManageContact(props) {
         );
 
         if (ownerCollaboratorDropdownData.length > 0) {
-          setOwnerCollaboratorCommonDataSource( ownerCollaboratorDropdownData[0].option);
+          setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
           setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
           setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
         }
@@ -254,7 +256,13 @@ export default function ManageContact(props) {
         TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
-          onClose={() => setShowConfirmDialog(true)}
+          onClose={() => {
+            if (isFieldNotTouched(contactData, formValues)) {
+              onClose()
+            } else {
+              setShowConfirmDialog(true)
+            }
+          }}
           title={
             isNew
               ? "Add Contact"
@@ -309,6 +317,7 @@ export default function ManageContact(props) {
                                         type={field.type}
                                         options={ownerDataSource}
                                         onChange={(e, val) => {
+                                          handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                           setFieldValue(
                                             field.fieldName,
                                             val && val.optionValue
@@ -338,6 +347,11 @@ export default function ManageContact(props) {
                                                   )
                                                   : collaboratorDataSource;
 
+                                              handleValuesChange("collaborator", newCollaboratorDataSource.find(
+                                                (d) =>
+                                                  d?.optionValue ===
+                                                  user?.user?._id
+                                              ).optionValue)
                                               setFieldValue("collaborator", [
                                                 ...values["collaborator"],
                                                 newCollaboratorDataSource.find(
@@ -375,7 +389,10 @@ export default function ManageContact(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={collaboratorDataSource}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -441,12 +458,14 @@ export default function ManageContact(props) {
                                             size="small"
                                             doNotShowInfoTooltip={true}
                                             onChange={(e, value) => {
+                                              handleValuesChange(field.fieldName, value && value.optionValue ? value.optionValue : "")
                                               setFieldValue(
                                                 field.fieldName,
                                                 value && value.optionValue
                                                   ? value.optionValue
                                                   : ""
                                               );
+                                              handleValuesChange("reportsTo", "")
                                               setFieldValue("reportsTo", "");
                                             }}
                                           />
@@ -492,7 +511,10 @@ export default function ManageContact(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={reportsToDataSource}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -522,11 +544,14 @@ export default function ManageContact(props) {
                                         size="small"
                                         onChange={(e, value) => {
 
+                                          handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
                                           setFieldValue(
                                             field.fieldName,
                                             value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                           );
 
+                                          handleValuesChange("owner", "")
+                                          handleValuesChange("collaborator", [])
                                           setFieldValue("owner", "");
                                           setFieldValue("collaborator", []);
                                         }}
@@ -543,7 +568,10 @@ export default function ManageContact(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}

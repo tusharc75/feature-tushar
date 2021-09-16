@@ -25,13 +25,16 @@ const dropstyle = {
 }
 
 export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionHoverIndex, sectionHoverIndex, section,
-    setSection, sectionId, id, index, moveSection, data, addDeleteField, extraFields }) => {
+    setSection, sectionId, id, index, moveSection, data, addDeleteField, extraFields,
+    onAddRemoveField = null
+}) => {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const ref = useRef(null);
 
     const addField = (sectionId, type, index) => {
+        onAddRemoveField()
         let data = [...section];
         data.forEach((row) => {
             row.field = row.field.filter(i => i._id)
@@ -78,6 +81,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
     };
 
     const addCustomField = (sectionId, fieldData, index) => {
+        onAddRemoveField()
         let data = [...section];
         data.forEach((row) => {
             row.field = row.field.filter(i => i._id)
@@ -237,6 +241,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
     };
 
     const deleteSection = (sectionId) => {
+        onAddRemoveField()
         setSection(section.filter(i => i.sectionId.toString() !== sectionId.toString()))
         handleClose()
     };
@@ -296,6 +301,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                                     addDeleteField={addDeleteField}
                                     module={module}
                                     extraFields={extraFields}
+                                    onAddRemoveField={onAddRemoveField}
                                 />
                             )) : <Box m={5} width="100%">
                                 <Typography variant="body2" align="center">Drag and drop your fields here</Typography>

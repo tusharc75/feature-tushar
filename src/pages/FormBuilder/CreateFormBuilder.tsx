@@ -33,6 +33,8 @@ const CreateFormBuilder = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
+    const [isFormModified, setIsFormModified] = useState(false);
+
 
     useEffect(() => {
         if (permissions && permissions.formBuilder) {
@@ -129,8 +131,12 @@ const CreateFormBuilder = () => {
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
                 isConfirmBeforeClick={true}
                 onBreadCrumbClick={(path) => {
-                    setIsBreakCrumbPath(path)
-                    setShowConfirmDialog(true)
+                    if (isFormModified) {
+                        setIsBreakCrumbPath(path)
+                        setShowConfirmDialog(true)
+                    }
+                    else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" })
+
                 }}
             />
         </Grid>
@@ -158,7 +164,15 @@ const CreateFormBuilder = () => {
                                 </Box>
                                 <Box ml={1} >
                                     <Button color="primary" variant="contained" size="small"
-                                        onClick={() => setShowConfirmDialog(true)} > Close</Button>
+                                        onClick={() => {
+                                            console.log('isFormModified', isFormModified)
+                                            if (isFormModified) {
+                                                setShowConfirmDialog(true)
+                                            }
+                                            else {
+                                                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" })
+                                            }
+                                        }} > Close</Button>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -172,6 +186,7 @@ const CreateFormBuilder = () => {
                             isCustomField={false}
                             extraFields={[]}
                             module="form-builder"
+                            onAddRemoveField={() => setIsFormModified(true)}
                         />
                     </Box>
                     {

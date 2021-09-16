@@ -19,7 +19,6 @@ import {
     setFieldsInAscendingOrder,
     getUniqueCurrencies,
     formFieldNames,
-    isFieldNotTouched
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -32,7 +31,7 @@ import PropTypes from "prop-types";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched } from "../../constants/helpers";
 import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import { useData } from "../../StateProvider/Provider";
@@ -50,6 +49,7 @@ export default function ManageBudgetDialog({
 }) {
     const { budgetApi } = budget;
     const toastConfig = useContext(CustomToastContext);
+
 
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -78,6 +78,7 @@ export default function ManageBudgetDialog({
     const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
     const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
         getBudgetFields();
@@ -167,6 +168,7 @@ export default function ManageBudgetDialog({
                             fields: newFields,
                             initialValues: getObjKeysWithValues(data, newFields)
                         });
+                        setFormValues(getObjKeysWithValues(data, newFields))
                     }).catch((error) => {
                         toastConfig.setToastConfig(error);
                     });
@@ -176,6 +178,7 @@ export default function ManageBudgetDialog({
                         fields: filterData.map(m => m.fieldData),
                         initialValues: getObjKeys("", filterData.map(m => m.fieldData)),
                     });
+                    setFormValues(getObjKeys("", filterData.map(m => m.fieldData)))
                 }
 
                 if (filterData.length > 0) {
@@ -283,6 +286,12 @@ export default function ManageBudgetDialog({
             });
         }
     }
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
 
     return (
         <>
@@ -303,9 +312,17 @@ export default function ManageBudgetDialog({
                     title={
                         budgetId
                             ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
-                            : "Create Budget"
+                            : "Createe Budget"
                     }
-                    onClose={() => setShowConfirmDialog(true)}
+                    // onClose={() => () => {
+                    //     console.log('***', isFieldNotTouched(entityData, formValues))
+                    //     if (isFieldNotTouched(entityData, formValues)) onClose()
+                    //     else setShowConfirmDialog(true)
+                    // }}
+                    onClose={(e, reason) => {
+                        if (isFieldNotTouched(entityData, formValues)) onClose()
+                        else setShowConfirmDialog(true)
+                    }}
                 />
 
                 {entityData.fields.length === 0 && (
@@ -363,6 +380,10 @@ export default function ManageBudgetDialog({
                                                                                             value ? value.optionValue : ""
                                                                                         );
                                                                                         setFieldValue("salesRep", "");
+                                                                                        handleValuesChange({
+                                                                                            [field.fieldName]: value ? value.optionValue : "",
+                                                                                            salesRep: ""
+                                                                                        })
                                                                                     }}
                                                                                 />
                                                                             ) : field.fieldName === "currency" ? (
@@ -375,7 +396,10 @@ export default function ManageBudgetDialog({
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}
-                                                                                    setFieldValue={setFieldValue}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
@@ -387,9 +411,11 @@ export default function ManageBudgetDialog({
                                                                                                 field.fieldName,
                                                                                                 val.currencyCode
                                                                                             );
+                                                                                            handleValuesChange({ [field.fieldName]: val.currencyCode })
                                                                                             setCurrencySymbol(val.symbolNative);
                                                                                         } else {
                                                                                             setFieldValue(field.fieldName, "");
+                                                                                            handleValuesChange({ [field.fieldName]: "" })
                                                                                             setCurrencySymbol(null);
                                                                                         }
                                                                                     }}
@@ -414,7 +440,10 @@ export default function ManageBudgetDialog({
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}
-                                                                                    setFieldValue={setFieldValue}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
@@ -448,7 +477,10 @@ export default function ManageBudgetDialog({
                                                                                             label={field.fieldLabel}
                                                                                             name={field.fieldName}
                                                                                             type={field.type}
-                                                                                            setFieldValue={setFieldValue}
+                                                                                            setFieldValue={(name, value) => {
+                                                                                                handleValuesChange({ [name]: value })
+                                                                                                setFieldValue(name, value)
+                                                                                            }}
                                                                                             required={field.required}
                                                                                             fullWidth
                                                                                             isTooltip={field.isTooltip}
@@ -456,6 +488,7 @@ export default function ManageBudgetDialog({
                                                                                             onChange={(e, val) => {
                                                                                                 setNewProductCategoryId(null);
                                                                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                                                 // handleChangeCategory(val && val.optionValue ? val.optionValue : "",
                                                                                                 //     val && val.optionLabel ? val.optionLabel : "", true)
                                                                                             }}
@@ -529,7 +562,10 @@ export default function ManageBudgetDialog({
                                                                                                 label={field.fieldLabel}
                                                                                                 name={field.fieldName}
                                                                                                 type={field.type}
-                                                                                                setFieldValue={setFieldValue}
+                                                                                                setFieldValue={(name, value) => {
+                                                                                                    handleValuesChange({ [name]: value })
+                                                                                                    setFieldValue(name, value)
+                                                                                                }}
                                                                                                 required={field.required}
                                                                                                 fullWidth
                                                                                                 isTooltip={field.isTooltip}
@@ -539,6 +575,10 @@ export default function ManageBudgetDialog({
                                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                                                                     setNewSubMarketSegmentId(null);
                                                                                                     setFieldValue(formFieldNames.subMarketSegment, "")
+                                                                                                    handleValuesChange({
+                                                                                                        [field.fieldName]: val && val.optionValue ? val.optionValue : "",
+                                                                                                        [formFieldNames.subMarketSegment]: ""
+                                                                                                    })
                                                                                                     marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                                                                                 }}
                                                                                                 size="small"
@@ -612,7 +652,10 @@ export default function ManageBudgetDialog({
                                                                                                 label={field.fieldLabel}
                                                                                                 name={field.fieldName}
                                                                                                 type={field.type}
-                                                                                                setFieldValue={setFieldValue}
+                                                                                                setFieldValue={(name, value) => {
+                                                                                                    handleValuesChange({ [name]: value })
+                                                                                                    setFieldValue(name, value)
+                                                                                                }}
                                                                                                 required={field.required}
                                                                                                 fullWidth
                                                                                                 isTooltip={field.isTooltip}
@@ -620,6 +663,7 @@ export default function ManageBudgetDialog({
                                                                                                 onChange={(e, val) => {
                                                                                                     setNewSubMarketSegmentId(null);
                                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                    handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                                                 }}
                                                                                                 size="small"
                                                                                                 values={
@@ -682,13 +726,17 @@ export default function ManageBudgetDialog({
                                                                                                 label={field.fieldLabel}
                                                                                                 name={field.fieldName}
                                                                                                 type={field.type}
-                                                                                                // setFieldValue={setFieldValue}
+                                                                                                // setFieldValue={(name, value) => {
+                                                                                                //     handleValuesChange({[name]: value })
+                                                                                                // setFieldValue(name, value)
+                                                                                                //             }}
                                                                                                 required={field.required}
                                                                                                 fullWidth
                                                                                                 isTooltip={field.isTooltip}
                                                                                                 tooltipMessage={field.tooltipMessage}
                                                                                                 onChange={(e, val) => {
                                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                                    handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                                                 }}
                                                                                                 size="small"
                                                                                                 values={values}
@@ -719,7 +767,10 @@ export default function ManageBudgetDialog({
                                                                                         name={field.fieldName}
                                                                                         type={field.type}
                                                                                         options={field.option}
-                                                                                        setFieldValue={setFieldValue}
+                                                                                        setFieldValue={(name, value) => {
+                                                                                            handleValuesChange({ [name]: value })
+                                                                                            setFieldValue(name, value)
+                                                                                        }}
                                                                                         required={field.required}
                                                                                         fullWidth
                                                                                         isTooltip={field?.isTooltip || false}
@@ -744,7 +795,10 @@ export default function ManageBudgetDialog({
                                                             name={field.fieldName}
                                                             type={field.type}
                                                             options={field.option}
-                                                            setFieldValue={setFieldValue}
+                                                            setFieldValue={(name, value) => {
+                                                                handleValuesChange({ [name]: value })
+                                                                setFieldValue(name, value)
+                                                            }}
                                                             required={field.required}
                                                             fullWidth
                                                             isTooltip={field?.isTooltip || false}

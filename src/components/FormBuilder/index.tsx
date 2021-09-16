@@ -10,7 +10,7 @@ import FieldList from './FieldList';
 import { DragBox } from './DragBox';
 import { DropMaster } from './DropMaster';
 import { CustomField } from './CustomField/index';
-import  styles  from './Form.module.scss';
+import styles from './Form.module.scss';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -26,9 +26,12 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module, extraFields }) => {
+export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module, extraFields
+  , onAddRemoveField = null
+}) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
+    onAddRemoveField()
     if (sectionHoverIndex !== null) {
       const obj = {
         sectionId: parseInt((Math.random() * 100000).toString()),
@@ -81,27 +84,27 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
               <Grid container spacing={1} className={styles.form_grid_box}>
                 {module !== 'pdf-template'
                   ? Object.keys(FieldList).map((type, index) => {
-                      return !filterFieldType.includes(type) ? (
-                        <DragBox
-                          key={index}
-                          type="field"
-                          label={FieldList[type].label}
-                          name={FieldList[type].type}
-                          removeExtraField={removeExtraField}
-                        />
-                      ) : null;
-                    })
+                    return !filterFieldType.includes(type) ? (
+                      <DragBox
+                        key={index}
+                        type="field"
+                        label={FieldList[type].label}
+                        name={FieldList[type].type}
+                        removeExtraField={removeExtraField}
+                      />
+                    ) : null;
+                  })
                   : Object.keys(FieldList).map((type, index) => {
-                      return filterFieldType.includes(type) ? (
-                        <DragBox
-                          key={index}
-                          type="field"
-                          label={FieldList[type].label}
-                          name={FieldList[type].type}
-                          removeExtraField={removeExtraField}
-                        />
-                      ) : null;
-                    })}
+                    return filterFieldType.includes(type) ? (
+                      <DragBox
+                        key={index}
+                        type="field"
+                        label={FieldList[type].label}
+                        name={FieldList[type].type}
+                        removeExtraField={removeExtraField}
+                      />
+                    ) : null;
+                  })}
               </Grid>
               {module !== 'pdf-template' && (
                 <>
@@ -128,6 +131,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
                 screenHeight={classes.screenHeight}
                 module={module}
                 extraFields={extraFields}
+                onAddRemoveField={onAddRemoveField}
               />
             </Box>
           </Grid>
