@@ -7,14 +7,12 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter'
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
-    width: "100%",
-    maxHeight: "500px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
   },
   img: {
-    height: "100%",
+    maxWidth: "500px",
   }
 }));
 
