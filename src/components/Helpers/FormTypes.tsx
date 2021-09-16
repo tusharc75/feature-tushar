@@ -34,7 +34,7 @@ import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
 import { green, red } from '@material-ui/core/colors';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { handleAutoCalculation } from '../../constants/formulaUtility';
+import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import NumberFormat from 'react-number-format';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -158,8 +158,8 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
   const handleChange = (val) => {
     val = val.trimStart()
     setInputVal(val)
-   
-    if(error) {
+
+    if (error) {
       setError(null)
     }
   }
@@ -1061,23 +1061,50 @@ const FormTypes = (props) => {
         <Box display="flex">
           <Box flexGrow={1}>
             <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-              <TextField
-                {...rest}
-                variant="outlined"
-                type="number"
-                label={label + ' ' + _unit}
-                name={name + '_' + _unit.toLowerCase()}
-                required={required}
-                value={values[name + '_' + _unit.toLowerCase()]}
-                error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
-                helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
-                ref={inputNumberRef}
-                onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
-                InputProps={{
-                  inputProps: { min: 0 },
-                  readOnly: fieldData && fieldData.isUneditable ? true : false
-                }}
-              />
+              {fieldData.isDropdown ?
+                <Autocomplete
+                  {...rest}
+                  options={optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                      .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
+                      ? optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                        .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0] : ''
+                  }
+                  onChange={onChange ? onChange : (e, val) =>
+                    handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      name={name + '_' + _unit.toLowerCase()}
+                      label={label + ' ' + _unit}
+                      variant="outlined"
+                      error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                      helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                      required={required}
+                    />
+                  )}
+                />
+                : <TextField
+                  {...rest}
+                  variant="outlined"
+                  type="number"
+                  label={label + ' ' + _unit}
+                  name={name + '_' + _unit.toLowerCase()}
+                  required={required}
+                  value={values[name + '_' + _unit.toLowerCase()]}
+                  error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                  helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                  ref={inputNumberRef}
+                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
+                  InputProps={{
+                    inputProps: { min: 0 },
+                    readOnly: fieldData && fieldData.isUneditable ? true : false
+                  }}
+                />
+              }
             </InfoLabel>
           </Box>
           {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (

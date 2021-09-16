@@ -171,6 +171,7 @@ const Product = () => {
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
+                            col.cellRenderer = "commonRenderer"
                             if (ele.fieldName === "productName") {
                                 col.cellRenderer = "productNameRenderer"
                             }
@@ -193,9 +194,7 @@ const Product = () => {
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
                 )
             }
-
             const columnState = JSON.parse(localStorage.getItem("productPage"));
-
             if (columnState) {
                 column.forEach((item) => {
                     columnState.forEach((d) => {
@@ -205,14 +204,11 @@ const Product = () => {
                     });
                 });
             }
-
             setColumns(column);
-
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
