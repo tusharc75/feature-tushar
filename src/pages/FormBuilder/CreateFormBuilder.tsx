@@ -165,7 +165,6 @@ const CreateFormBuilder = () => {
                                 <Box ml={1} >
                                     <Button color="primary" variant="contained" size="small"
                                         onClick={() => {
-                                            console.log('isFormModified', isFormModified)
                                             if (isFormModified) {
                                                 setShowConfirmDialog(true)
                                             }

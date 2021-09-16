@@ -281,6 +281,9 @@ const PriceTemplate = () => {
     }
   };
   const isFieldNotTouched = (data, values) => {
+    if (isFormModified) {
+      return false
+    }
     let isModified = Object.values(
       simplifyValues(
         data.initialValues,
@@ -297,9 +300,6 @@ const PriceTemplate = () => {
       if (values?.collaborator.toString() === data?.initialValues?.collaborator.toString()) {
         return false
       }
-    }
-    if (isFormModified) {
-      return false
     }
     return isModified
   }
@@ -463,14 +463,8 @@ const PriceTemplate = () => {
                           onClick={() => {
 
                             if (hasPermissionToUpdate) {
-                              let clonedValue = { ...values }
-
-                              if (clonedValue?.collaborator) {
-                                clonedValue.collaborator = clonedValue.collaborator.toString()
-                              }
                               setShowConfirmDialog(true)
-                              let ans = isFieldNotTouched({ initialValues: initialValues, fields: productField }, clonedValue)
-                              if (ans) {
+                              if (isFieldNotTouched({ initialValues: initialValues, fields: productField }, values)) {
                                 history.push(routes.priceTemplate.path)
                               }
                               else setShowConfirmDialog(true)

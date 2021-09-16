@@ -312,14 +312,9 @@ export default function ManageBudgetDialog({
                     title={
                         budgetId
                             ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
-                            : "Createe Budget"
+                            : "Create Budget"
                     }
-                    // onClose={() => () => {
-                    //     console.log('***', isFieldNotTouched(entityData, formValues))
-                    //     if (isFieldNotTouched(entityData, formValues)) onClose()
-                    //     else setShowConfirmDialog(true)
-                    // }}
-                    onClose={(e, reason) => {
+                    onClose={() => {
                         if (isFieldNotTouched(entityData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}

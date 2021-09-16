@@ -260,7 +260,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
             <>
                 <CustomDialogHeader
                     onClose={() => {
-                        console.log('here', isFieldNotTouched(initialValues, formValues))
                         if (isFieldNotTouched(initialValues, formValues)) handleClose()
                         else setShowConfirmDialog(true)
                     }}
