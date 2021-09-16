@@ -1985,7 +1985,7 @@ const FormTypes = (props) => {
           <Typography color="textSecondary">{values[name].length > 0 ? "Images Preview" : "No Images"}</Typography>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
           <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
-            {values[name].map((item, i) => (
+            {values[name]? values[name].map((item, i) => (
               <ImageListItem style={{height: '100px', width: "33.3%"}} key={item}> 
                 <img src={item} alt={`demo ${i + 1}`} />
                 <ImageListItemBar
@@ -1997,7 +1997,7 @@ const FormTypes = (props) => {
                   }
                 />
               </ImageListItem>
-            ))}
+            )) : null}
           </ImageList>
           </Box>
         </Box>
