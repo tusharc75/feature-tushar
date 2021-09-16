@@ -14,7 +14,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { GiAbstract055 } from "react-icons/gi";
+import { RiPriceTag2Fill } from "react-icons/ri";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomContainer from "../../components/CustomContainer";
@@ -225,7 +225,7 @@ const ProductBuilder = () => {
         <div className="header-panel">
           <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
-              <GiAbstract055 />{" "}
+              <RiPriceTag2Fill  size={22} style={{paddingBottom: "3px"}}/>{" "}
               <span className="listingHeader">
                 {routes.productBuilder.title}
               </span>
