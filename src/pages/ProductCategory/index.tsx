@@ -5,7 +5,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { GiAbstract055 } from 'react-icons/gi';
+import { FaThemeisle } from 'react-icons/fa';
 import styles from "../Leads/Header.module.scss";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
@@ -348,7 +348,7 @@ const ProductCategory = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">{routes.productCategory.title}</span>
+                        <FaThemeisle size={20} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                         <Box className={styles.filter_side_header} component="div" >
