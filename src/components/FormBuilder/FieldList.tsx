@@ -139,6 +139,11 @@ const FieldList = {
     type: "colorPicker",
     icon: "far fa-calendar-check",
   },
+  MULTIIMAGEUPLOAD: {
+    label: "Multi Image Upload",
+    type: "multiImageUpload",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

@@ -18,10 +18,13 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
 
-  const [options, setOptions] = useState(values.option || [{"optionLabel":"Option 1","optionValue":"Option 1"}]);
+  const defaultOption = [{ "optionLabel": "Option 1", "optionValue": "Option 1" }];
+  const [options, setOptions] = useState(values.option ? values.option.length == 0 ? defaultOption : values.option : defaultOption);
 
   const onChangeValue = (index, field, value) => {
     let data = [...values["option"]];
@@ -282,6 +285,23 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             )}
           />
         </Box>
+      )}
+      {values['isConverter'] || values['type'] === "converter" && (
+        <Grid item xs={12} sm={4} md={4}>
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel id="dropdownOnConverter">Dropdown applied on converter</InputLabel>
+            <Select
+              labelId="dropdownOnConverter"
+              id="dropdownOnConverter"
+              value={values['dropdownOnConverter']}
+              onChange={(e) => setFieldValue('dropdownOnConverter', e.target.value)}
+              label="Dropdown applied on converter"
+              name="dropdownOnConverter"
+            >
+              {values['formulaUnits'] && values['formulaUnits'].map((_unit) => <MenuItem value={_unit}>{_unit}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Grid>
       )}
     </Box>
   </DndProvider>

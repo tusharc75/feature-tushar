@@ -184,6 +184,7 @@ const AddExistingProduct = (props) => {
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
+                            col.cellRenderer = "commonRenderer"
                             if (ele.fieldName === "entity") {
                                 col.cellRenderer = "entityRenderer"
                             }

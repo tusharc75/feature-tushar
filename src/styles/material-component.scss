@@ -161,6 +161,9 @@ Button.MuiButtonBase-root {
 .MuiToggleButton-root {
   text-transform: capitalize !important;
 }
+.MuiStepConnector-root{
+  flex: 0 !important;
+}
 
 // .MuiCardContent-root:last-child {
 //   padding: 0 10px !important;

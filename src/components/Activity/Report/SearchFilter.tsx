@@ -50,7 +50,7 @@ export const SearchFilter = ({
   ];
 
   useEffect(() => {
-    setValue(filter);
+    setValue(filter.filter(d => allSearch.some(obj => obj.type === d.type)));
   }, [filter]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export const SearchFilter = ({
   }, [inputValue]);
 
   const handleChangeValue = (newValue) => {
-    setValue(newValue);
+    setValue(newValue.filter(d => allSearch.some(obj => obj.type === d.type)));
     handleChangeFilter(newValue);
   };
 

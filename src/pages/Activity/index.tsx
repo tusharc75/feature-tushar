@@ -53,7 +53,7 @@ const Activity = ({ type }) => {
 
   const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
-    setFilter(value);
+    setFilter(value.filter(d => d.type !== type));
     let tempActivity = value.filter(d => d.type === type && d._id !== undefined)
     if (tempActivity.length === 1) {
       setSelectedActivityId(tempActivity[0]._id)

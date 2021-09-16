@@ -727,6 +727,7 @@ export default function QuoteDetail() {
               setIsQuoteClone(false)
               setOpenUpdateDialog(false);
               fetchQuoteData(currentVersion);
+              fetchRelatedTo()
             }}
             onClose={() => {
               setOpenUpdateDialog(false);
