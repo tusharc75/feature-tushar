@@ -294,12 +294,12 @@ const PriceTemplate = () => {
         simplifyValues(values, data.fields)
       ).toString()
     if (isModified) {
-      if (values?.collaborator && !data?.initialValues?.collaborator) {
-        return false
-      }
-      if (values?.collaborator.toString() === data?.initialValues?.collaborator.toString()) {
-        return false
-      }
+      // if (values?.collaborator && !data?.initialValues?.collaborator) {
+      //   return false
+      // }
+      // if (values?.collaborator.toString() === data?.initialValues?.collaborator.toString()) {
+      //   return false
+      // }
     }
     return isModified
   }
