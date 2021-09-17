@@ -89,6 +89,8 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
+                localStorage.removeItem("selectedEntity");
+
                 if (window.confirm((`${error.response.data.error}\n\nPress Ok to redirect to home\nPress Cancel to stay here`))) {
                     //@ts-ignore
                     window.location = "/";
