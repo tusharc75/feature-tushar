@@ -10,11 +10,12 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "./../../constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched } from "./../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box } from '@material-ui/core';
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const CreateProductCategory = (props) => {
 
@@ -22,6 +23,8 @@ const CreateProductCategory = (props) => {
     const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [formValues, setFormValues] = useState({})
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
@@ -36,6 +39,7 @@ const CreateProductCategory = (props) => {
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
                     });
+                    setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -45,6 +49,7 @@ const CreateProductCategory = (props) => {
                     fields: fieldsDataForCreate,
                     values: getObjKeys("", fieldsDataForCreate),
                 });
+                setFormValues(getObjKeys("", fieldsDataForCreate))
             }
         })
             .catch((error) => {
@@ -75,12 +80,24 @@ const CreateProductCategory = (props) => {
         }
     };
 
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                setShowConfirmDialog(true)
+            }
+        }}
         fullWidth
     >
         {initialData && initialData.fields.length ?
@@ -97,7 +114,14 @@ const CreateProductCategory = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={productCategoryId ? !isUpdateDisabled ? "Update " + routes.productCategory.title : values["name"] : "Create " + routes.productCategory.title} onClose={onClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={productCategoryId ? !isUpdateDisabled ? "Update " + routes.productCategory.title : values["name"] : "Create " + routes.productCategory.title}
+                            onClose={() => {
+                                if (isFieldNotTouched({
+                                    initialValues: initialData.values,
+                                    fields: initialData.fields
+                                }, values)) onClose()
+                                else setShowConfirmDialog(true)
+                            }}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
@@ -106,7 +130,10 @@ const CreateProductCategory = (props) => {
                                     disabled={isUpdateDisabled}
                                     errors={errors}
                                     values={values}
-                                    setFieldValue={setFieldValue}
+                                    setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value })
+                                        setFieldValue(name, value)
+                                    }}
                                     touched={touched}
                                     fieldsData={initialData.fields}
                                     size="small"
@@ -115,7 +142,16 @@ const CreateProductCategory = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={onClose}>{isUpdateDisabled ? "Close" : "Cancel"}</Button>
+                            <Button size="small" color="primary"
+                                onClick={() => {
+                                    if (isFieldNotTouched({
+                                        initialValues: initialData.values,
+                                        fields: initialData.fields
+                                    }, values)) onClose()
+                                    else setShowConfirmDialog(true)
+                                }}
+
+                            >{isUpdateDisabled ? "Close" : "Cancel"}</Button>
                             {!isUpdateDisabled &&
                                 <CustomButton
                                     loading={loading}
@@ -127,6 +163,20 @@ const CreateProductCategory = (props) => {
                                 </CustomButton>
                             }
                         </CustomDialogFooter>
+                        {
+                            showConfirmDialog ?
+                                <ConfirmCancelDialog
+                                    open={showConfirmDialog}
+                                    onSave={() => {
+                                        setShowConfirmDialog(false)
+                                        submitForm();
+                                    }}
+                                    onClose={() => {
+                                        setShowConfirmDialog(false)
+                                        onClose()
+                                    }}
+                                /> : null
+                        }
                     </Fragment>
                 )}
             </Formik>
@@ -134,7 +184,7 @@ const CreateProductCategory = (props) => {
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
-    </Dialog>
+    </Dialog >
     );
 }
 

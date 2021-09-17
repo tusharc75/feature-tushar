@@ -95,6 +95,7 @@ export default function ManageOpportunityDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [formValues, setFormValues] = useState({})
 
   useEffect(() => {
     if (isNew) {
@@ -251,6 +252,7 @@ export default function ManageOpportunityDialog({
             ? initialData
             : getObjKeysWithValues(dataToUpdate, newFields),
         });
+        setFormValues(isNew ? initialData : getObjKeysWithValues(dataToUpdate, newFields))
       });
   };
 
@@ -384,6 +386,13 @@ export default function ManageOpportunityDialog({
     }
   }
 
+  const handleValuesChange = (name, value) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: value
+    }))
+  }
+
   return (
     <>
       <Dialog
@@ -406,7 +415,8 @@ export default function ManageOpportunityDialog({
               : `Editing ${dataToUpdate.opportunityName}`
           }
           onClose={(e, reason) => {
-            setShowConfirmDialog(true)
+            if (isFieldNotTouched(entityData, formValues)) onClose()
+            else setShowConfirmDialog(true)
           }}
         />
 
@@ -477,7 +487,10 @@ export default function ManageOpportunityDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange(name, value)
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -541,6 +554,7 @@ export default function ManageOpportunityDialog({
                                               ? val.optionValue
                                               : ""
                                           );
+                                          handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "")
 
                                           if (
                                             val &&
@@ -563,6 +577,14 @@ export default function ManageOpportunityDialog({
                                                     user?.user?._id
                                                 ).optionValue,
                                               ]);
+                                              handleValuesChange("collaborator", [
+                                                ...values["collaborator"],
+                                                collaboratorData.find(
+                                                  (d) =>
+                                                    d?.optionValue ===
+                                                    user?.user?._id
+                                                ).optionValue,
+                                              ])
                                             }
                                           }
                                         }}
@@ -590,7 +612,10 @@ export default function ManageOpportunityDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={collaboratorData}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -615,7 +640,11 @@ export default function ManageOpportunityDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
+
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -627,11 +656,13 @@ export default function ManageOpportunityDialog({
                                             parseFloat(e.target.value) > 100
                                           ) {
                                             setFieldValue("probability", "100");
+                                            handleValuesChange("probability", "100")
                                           } else {
                                             setFieldValue(
                                               "probability",
                                               e.target.value
                                             );
+                                            handleValuesChange("probability", e.target.value)
                                           }
                                         }}
                                       />
@@ -649,7 +680,10 @@ export default function ManageOpportunityDialog({
                                           name={field.fieldName}
                                           type={field.type}
                                           options={field.option}
-                                          setFieldValue={setFieldValue}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange(name, value)
+                                            setFieldValue(name, value)
+                                          }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
@@ -670,7 +704,10 @@ export default function ManageOpportunityDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -713,7 +750,10 @@ export default function ManageOpportunityDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange(name, value)
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -748,7 +788,10 @@ export default function ManageOpportunityDialog({
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange(name, value)
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field.isTooltip}
@@ -834,7 +877,10 @@ export default function ManageOpportunityDialog({
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              setFieldValue={setFieldValue}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange(name, value)
+                                                setFieldValue(name, value)
+                                              }}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={field.isTooltip}
@@ -901,7 +947,10 @@ export default function ManageOpportunityDialog({
                                           name={field.fieldName}
                                           type={field.type}
                                           options={field.option}
-                                          setFieldValue={setFieldValue}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange(name, value)
+                                            setFieldValue(name, value)
+                                          }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
@@ -939,7 +988,10 @@ export default function ManageOpportunityDialog({
                               name={field.fieldName}
                               type={field.type}
                               options={field.option}
-                              setFieldValue={setFieldValue}
+                              setFieldValue={(name, value) => {
+                                handleValuesChange(name, value)
+                                setFieldValue(name, value)
+                              }}
                               required={field.required}
                               fullWidth
                               isTooltip={field?.isTooltip || false}
@@ -966,6 +1018,7 @@ export default function ManageOpportunityDialog({
                         updateAccountDropdown(data);
 
                         setFieldValue("customerAccountName", data._id);
+                        handleValuesChange("customerAccountName", data._id)
                       }}
                       isRedirectToDetailPage={false}
                     />

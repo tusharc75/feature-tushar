@@ -26,7 +26,8 @@ const dropstyle = {
     height: "54px"
 }
 
-export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data, addDeleteField, extraFields }) => {
+export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, section, setSection, fieldId, id, index, movefield, data,
+    addDeleteField, extraFields, onAddRemoveField }) => {
 
     const ref = useRef(null);
     const toastConfig = useContext(CustomToastContext)
@@ -142,6 +143,7 @@ export const DropField = ({ module, fieldHoverId, setFieldHoverId, sectionId, se
     };
 
     const deleteField = (fieldId) => {
+        if (onAddRemoveField) onAddRemoveField()
         let data = [...section]
         var result = checkFieldDependency(fieldId, sectionId, data)
         if (result.error) {

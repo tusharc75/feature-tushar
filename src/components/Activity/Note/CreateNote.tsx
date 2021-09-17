@@ -69,6 +69,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
         fetchNoteDetail();
@@ -96,12 +97,15 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                         setOtherAttachments([...otherAttachments])
                     }
                     setInitialValues(data)
+                    setFormValues(data)
                 })
                 .catch(() => {
                 });
         }
         else {
-            setInitialValues({ name: "", description: "", fileUrl: '' })
+            let initialData = { name: "", description: "", fileUrl: '' }
+            setInitialValues(initialData)
+            setFormValues(initialData)
         }
     };
 
@@ -179,6 +183,19 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         if (data && data?.source) return data.source
     }
 
+    const isFieldNotTouched = (initialValues, values) => {
+        let initialData = { ...initialValues, description: initialValues?.description.toString("html") ?? "" }
+        let dataValues = { ...values, description: values?.description.toString("html") ?? "" }
+        return (Object.values(initialData).toString() === Object.values(dataValues).toString())
+
+    }
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
+
     const renderFileThumbnails = (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
             {
@@ -237,12 +254,14 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         </Grid >
     )
 
+
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
             <>
-                <CustomDialogHeader 
+                <CustomDialogHeader
                     onClose={() => {
-                        setShowConfirmDialog(true)
+                        if (isFieldNotTouched(initialValues, formValues)) handleClose()
+                        else setShowConfirmDialog(true)
                     }}
                     title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
@@ -263,7 +282,10 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             value={values["name"]}
                                             error={touched["name"] && Boolean(errors["name"])}
                                             helperText={touched["name"] && errors["name"]}
-                                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
+                                            onChange={(e) => {
+                                                setFieldValue("name", e.target.value.trimStart())
+                                                handleValuesChange({ name: e.target.value.trimStart() })
+                                            }}
                                         />
                                         {renderFileThumbnails}
                                         <ImageAttachments
@@ -290,6 +312,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                             <TinyMce
                                                 onChange={(value) => {
                                                     setFieldValue("description", value)
+                                                    handleValuesChange({ description: value })
                                                 }}
                                                 initialValue={initialValues?.description}
                                                 imageOrFileUploadCompletePercentage={(
@@ -330,7 +353,8 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                 <CustomDialogFooter>
                     <Button size="small" type="button" color="primary"
                         onClick={() => {
-                            setShowConfirmDialog(true)
+                            if (isFieldNotTouched(initialValues, values)) handleClose()
+                            else setShowConfirmDialog(true)
                         }}>Cancel</Button>
                     <Button size="small" type="button" color="primary" variant="contained"
                         onClick={() => {

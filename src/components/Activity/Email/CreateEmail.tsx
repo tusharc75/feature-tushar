@@ -45,6 +45,7 @@ import { fileIcons } from "./FileIcons";
 import { useData } from "../../../StateProvider/Provider";
 import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import { values } from "lodash";
 
 // const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
@@ -121,6 +122,7 @@ export const CreateEmail = ({
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [quoteBuilderOtherAttachments, setQuoteBuilderOtherAttachments] = useState([])
+  const [formValues, setFormValues] = useState({})
 
   useEffect(() => {
     fetchEmailDetail();
@@ -165,18 +167,21 @@ export const CreateEmail = ({
           }
           setLoading(false);
           setInitialValues(data);
+          setFormValues(data)
         })
         .catch((err) => {
           setLoading(false);
         });
     } else {
-      setInitialValues({
+      let initialData = {
         name: subject ?? "",
         file: "",
         content: RichTextEditor.createEmptyValue(),
         to: isQuoteBuilder && options.length ? [options[0]] : [],
         cc: isQuoteBuilder ? [...cc] : [],
-      });
+      }
+      setInitialValues(initialData);
+      setFormValues(initialData)
     }
   };
 
@@ -458,11 +463,27 @@ export const CreateEmail = ({
     setQuoteBuilderOtherAttachments((prevState) => ([...prevState, attachment]))
   }
 
+  const isFieldNotTouched = (initialValues, values) => {
+    let initialData = { ...initialValues, content: initialValues?.content.toString("html") ?? "" }
+    let dataValues = { ...values, content: values?.content.toString("html") ?? "" }
+    return (Object.values(initialData).toString() === Object.values(dataValues).toString())
+
+  }
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }))
+  }
+
   return (
     <>
       <CustomDialogHeader
         title={`${emailId ? "View" : "New"} Email`}
-        onClose={() => { setShowConfirmDialog(true) }}
+        onClose={() => {
+          if (isFieldNotTouched(initialValues, formValues)) handleClose()
+          else setShowConfirmDialog(true)
+        }}
       ></CustomDialogHeader>
       {loading ? (
         <div className={classes.root}>
@@ -581,12 +602,13 @@ export const CreateEmail = ({
                                   touched["name"] && Boolean(errors["name"])
                                 }
                                 helperText={touched["name"] && errors["name"]}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   setFieldValue(
                                     "name",
                                     e.target.value.trimStart()
                                   )
-                                }
+                                  handleValuesChange({ name: e.target.value.trimStart() })
+                                }}
                               />
                               <Autocomplete
                                 multiple
@@ -631,6 +653,11 @@ export const CreateEmail = ({
                                         ? [e.target.value]
                                         : [...values["to"], e.target.value]
                                     );
+                                    handleValuesChange({
+                                      to: isQuoteBuilder
+                                        ? [e.target.value]
+                                        : [...values["to"], e.target.value]
+                                    })
                                   }
                                 }}
                                 onChange={(e, value) => {
@@ -646,6 +673,7 @@ export const CreateEmail = ({
                                     }
                                   }
                                   setFieldValue("to", emails);
+                                  handleValuesChange({ to: emails })
                                 }}
                               />
                               <Autocomplete
@@ -695,6 +723,7 @@ export const CreateEmail = ({
                                       ...values["cc"],
                                       e.target.value,
                                     ]);
+                                    handleValuesChange({ cc: e.target.value })
                                   }
                                 }}
                                 onChange={(e, value) => {
@@ -705,6 +734,7 @@ export const CreateEmail = ({
                                     }
                                   }
                                   setFieldValue("cc", val);
+                                  handleValuesChange({ cc: val })
                                 }}
                               />
 
@@ -740,6 +770,7 @@ export const CreateEmail = ({
                                 <TinyMce
                                   onChange={(value) => {
                                     setFieldValue("content", value)
+                                    handleValuesChange({ content: value })
                                   }}
                                   initialValue={initialValues?.content}
                                   imageOrFileUploadCompletePercentage={(
@@ -768,7 +799,8 @@ export const CreateEmail = ({
                   {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                   <Button color="primary" size="small"
                     onClick={() => {
-                      setShowConfirmDialog(true)
+                      if (isFieldNotTouched(initialValues, values)) handleClose()
+                      else setShowConfirmDialog(true)
                     }}>
                     Cancel
                   </Button>
