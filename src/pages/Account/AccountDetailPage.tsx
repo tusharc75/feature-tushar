@@ -142,6 +142,7 @@ export default function AccountDetailPage(props) {
     nodes: [],
     colorPalette: null,
   });
+  const [formValues, setFormValues] = useState({})
 
   let { id } = useParams();
 
@@ -151,6 +152,7 @@ export default function AccountDetailPage(props) {
       type: accountResource,
     },
   ];
+  let filteredAccountFields = accountFields.filter(item => item.fieldData.sectionName != additionalFieldName)
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
@@ -211,9 +213,21 @@ export default function AccountDetailPage(props) {
         if (currentStepToShow >= 0) setActiveStep(currentStepToShow);
         if (currentStepToShow == steps.length - 1) {
           setShowAtLast(true)
+          setFormValues(getObjKeysWithValues(
+            accountData,
+            filteredAccountFields.map((f) => {
+              return f.fieldData;
+            })
+          ))
         }
         else {
           setShowAtLast(false)
+          setFormValues(getObjKeysWithValues(
+            accountData,
+            filteredAccountFields.map((f) => {
+              return f.fieldData;
+            })
+          ))
         }
       }
     }
@@ -371,7 +385,7 @@ export default function AccountDetailPage(props) {
         // } else {
         //   setLoading(false);
         // }
-        getAccountFields();
+        getAccountFields(data);
         setLoading(false);
         initializeGraphData();
       })
@@ -394,12 +408,19 @@ export default function AccountDetailPage(props) {
     setMainPoints(mainPoints);
   };
 
-  const getAccountFields = () => {
+  const getAccountFields = (accountData = {}) => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource[accountResource]}`)
       .then(({ data: { data } }) => {
 
         setAccountFields(data.filter((d) => d.isUpdate || d.isRead));
+        setFormValues(getObjKeysWithValues(
+          accountData,
+          data.map((f) => {
+            return f.fieldData;
+          })
+        ))
+
         setLoading(false);
 
         const processSteps = data.find(
@@ -577,6 +598,7 @@ export default function AccountDetailPage(props) {
   const handleOpneUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
       setShowAtLast(true)
+
     }
     setOpenUpdateDialog(true);
   };
@@ -684,8 +706,12 @@ export default function AccountDetailPage(props) {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
   }
-
-  let filteredAccountFields = accountFields.filter(item => item.fieldData.sectionName != additionalFieldName)
+  const handleValuesChange = (name, value) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: value
+    }))
+  }
 
   return (
     <>
@@ -1131,6 +1157,8 @@ export default function AccountDetailPage(props) {
             loading={loading}
             handleSubmit={onUpdateAccount}
             accountId={accountData?._id}
+            formValues={formValues}
+            handleValuesChange={handleValuesChange}
           />
         ) : openUpdateDialog ? (
           <ManageAccount
@@ -1151,6 +1179,8 @@ export default function AccountDetailPage(props) {
             loading={loading}
             handleSubmit={onUpdateAccount}
             accountId={accountData?._id}
+            formValues={formValues}
+            handleValuesChange={handleValuesChange}
           />
         ) : null}
 
