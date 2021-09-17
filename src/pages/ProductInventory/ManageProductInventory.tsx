@@ -11,7 +11,7 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, productInventory, setFieldsInAscendingOrder } from "../../constants/helpers";
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -24,6 +24,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [productCategoryOptions, setProductCategoryOptions] = useState([])
+    const [formValues, setFormValues] = useState({})
     // const desc = {
     //     productCategory: "",
     //     product: "",
@@ -48,6 +49,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
+                        setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
 
                         setLoading(false)
                     } else {
@@ -55,6 +57,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                             fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
+                        setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
                     }
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -72,6 +75,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                     fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                     values: createValues
                 });
+                setFormValues(createValues)
             }
         })
             .catch((error) => {
@@ -107,6 +111,24 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
     //     const value = Object.values(desc).join(" - ")
     //     setValue("description", value);
     // }
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
+
+    const isFieldNotTouched = (initialData, values) => {
+        return Object.values(
+            simplifyValues(
+                initialData.values,
+                initialData.fields
+            )
+        ).toString() ===
+            Object.values(
+                simplifyValues(values, initialData.fields)
+            ).toString()
+    }
 
     return (<Dialog
         maxWidth="md"
@@ -136,7 +158,8 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                     <Fragment>
                         <CustomDialogHeader title={productInventoryId ? (isClone ? "Clone" : "Update " + routes.productInventory.title) : "Create " + routes.productInventory.title}
                             onClose={() => {
-                                setShowConfirmDialog(true)
+                                if (isFieldNotTouched(initialData, formValues)) onClose()
+                                else setShowConfirmDialog(true)
                             }}
                         ></CustomDialogHeader>
                         <CustomDialogContent>
@@ -166,7 +189,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                             ? field?.option.filter((opt) => opt?.productCategory === values?.productCategory)
                                                                             : field?.option
                                                                     }
-                                                                    setFieldValue={setFieldValue}
+                                                                    setFieldValue={(name, value) => {
+                                                                        handleValuesChange({ [name]: value })
+                                                                        setFieldValue(name, value)
+                                                                    }}
                                                                     required={field.required}
                                                                     fullWidth
                                                                     isTooltip={field?.isTooltip || false}
@@ -178,6 +204,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                         const productCategory = val && val?.productCategory ? val?.productCategory : ''
                                                                         setFieldValue(field.fieldName, value);
                                                                         setFieldValue("productCategory", productCategory);
+                                                                        handleValuesChange({
+                                                                            [field.fieldName]: value,
+                                                                            productCategory: productCategory
+                                                                        })
                                                                         const productLabel = productCategory ? productCategoryOptions.find(obj => obj.optionValue === productCategory).optionLabel : ""
                                                                         // desc.product = label
                                                                         // desc.productCategory = productLabel
@@ -197,7 +227,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                         name={field.fieldName}
                                                                         type={field.type}
                                                                         options={field.option}
-                                                                        // setFieldValue={setFieldValue}
+                                                                        // setFieldValue={(name, value) => {
+                                                                        //             handleValuesChange({[name]: value })
+                                                                        // setFieldValue(name, value)
+                                                                        // }}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
@@ -208,6 +241,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                             const label = val && val.optionLabel ? val.optionLabel : ''
                                                                             // desc.productCategory = label
                                                                             setFieldValue(field.fieldName, value);
+                                                                            handleValuesChange({ [field.fieldName]: value })
                                                                             // setDescription(setFieldValue)
                                                                         }}
                                                                     />
@@ -231,6 +265,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                             onChange={(e) => {
                                                                                 const val = (e.target.value.trim())
                                                                                 setFieldValue(field.fieldName, val)
+                                                                                handleValuesChange({ [field.fieldName]: val })
                                                                                 // desc.serialNumber = val
                                                                                 // setDescription(setFieldValue)
                                                                             }}
@@ -264,7 +299,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
                                                                                 options={field.option}
-                                                                                setFieldValue={setFieldValue}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={field?.isTooltip || false}
@@ -283,7 +321,8 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    setShowConfirmDialog(true)
+                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
                             <CustomButton

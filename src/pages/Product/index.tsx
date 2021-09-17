@@ -14,7 +14,7 @@ import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
-import { Box, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -98,6 +98,7 @@ const Product = () => {
                     updatedByDate: u.updatedBy?.date,
                     entity: firstEntity?.optionLabel,
                     entityId: firstEntity?.optionValue,
+                    productCategoryChipColor: u.productCategory.chipColour,
                     restEntity: restEntity,
                 }
                 for (let col in res) {
@@ -177,6 +178,9 @@ const Product = () => {
                             }
                             if (ele.fieldName === "entity") {
                                 col.cellRenderer = "entityRenderer"
+                            }
+                            if (ele.fieldName === "productCategory") {
+                                col.cellRenderer = "productCategoryRenderer"
                             }
                             col.order = ele.order;
                             col.leval = ele.leval;
@@ -284,6 +288,21 @@ const Product = () => {
             <NoDataCell />
         );
 
+    const ProductCategoryRenderer = (params) => (
+        <> {params.data.productCategory !== undefined && params.data.productCategoryChipColor !== null ?
+            (
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.productCategoryChipColor}` }}
+                    label={`${params.data.productCategory}`}
+                />
+            )
+            : (
+                <NoDataCell />
+            )}
+        </>
+    );
+
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
@@ -339,6 +358,7 @@ const Product = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         entityRenderer: EntityNameRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
         commonRenderer: CommonRenderer,
     };
 
@@ -378,7 +398,7 @@ const Product = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <RiShoppingBag3Fill size={22} style={{paddingBottom: "3px"}} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
+                        <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >

@@ -35,6 +35,7 @@ export default function ManageAccountDialog(props) {
     initialValues: {},
   });
   const [loading, setLoading] = useState(false);
+  const [formValues, setFormValues] = useState({})
   const history = useHistory();
 
   useEffect(() => {
@@ -57,6 +58,9 @@ export default function ManageAccountDialog(props) {
                   ? dataToClone.data
                   : getObjKeys("", newFields),
               });
+              setFormValues(dataToClone.data
+                ? dataToClone.data
+                : getObjKeys("", newFields))
               setTimeout(() => setLoading(false), 500);
             })
             .catch((error) => {
@@ -69,6 +73,7 @@ export default function ManageAccountDialog(props) {
 
     return () => {
       setLoading(false);
+      setFormValues({})
       setAccountData({
         fields: [],
         initialValues: {},
@@ -96,6 +101,7 @@ export default function ManageAccountDialog(props) {
           fields: newFields,
           initialValues: getObjKeys("", newFields),
         });
+        setFormValues(getObjKeys("", newFields))
         setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => setLoading(false));
@@ -125,6 +131,13 @@ export default function ManageAccountDialog(props) {
       });
   };
 
+  const handleValuesChange = (name, value) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: value
+    }))
+  }
+
   return (
     <ManageAccount
       open={open}
@@ -136,6 +149,8 @@ export default function ManageAccountDialog(props) {
       owners={owners}
       collaborators={collaborators}
       fromProject={fromProject}
+      formValues={formValues}
+      handleValuesChange={handleValuesChange}
     />
   );
 }

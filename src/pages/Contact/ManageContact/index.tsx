@@ -38,6 +38,7 @@ export default function ManageContactDialog(props) {
     fields: [],
     initialValues: {},
   });
+  const [formValues, setFormValues] = useState({})
   const [loading, setLoading] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const [accountSource, setAccountSource] = useState([]);
@@ -52,6 +53,7 @@ export default function ManageContactDialog(props) {
         fields: contactData.fields,
         initialValues: contactData.initialValues,
       });
+      setFormValues(contactData.initialValues)
       contactData.fields.some((currentField) => {
         if (currentField.fieldName === "accountName") {
           setAccountSource(currentField.option);
@@ -95,6 +97,7 @@ export default function ManageContactDialog(props) {
           fields: newFields,
           initialValues: getObjKeys("", newFields),
         });
+        setFormValues(getObjKeys("", newFields))
         setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => setLoading(false));
@@ -160,6 +163,13 @@ export default function ManageContactDialog(props) {
     }
   };
 
+  const handleValuesChange = (name, value) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: value
+    }))
+  }
+
   return (
     <>
       <ManageContact
@@ -178,6 +188,8 @@ export default function ManageContactDialog(props) {
         collaborators={collaborators}
         owners={owners}
         fromProject={fromProject}
+        formValues={formValues}
+        handleValuesChange={handleValuesChange}
       />
       {showAccountDialog ? (
         <ManageAccountDialog

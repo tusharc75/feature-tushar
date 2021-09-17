@@ -32,6 +32,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
     const {
         state: { user },
     }: any = useData();
+    const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
 
@@ -74,12 +75,14 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
+                        setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)
                     } else {
                         setRentalData({
                             fields: fieldsDataForUpdate,
                             initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
+                        setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
                         setLoading(false)
                     }
                 }).catch((error) => {
@@ -93,6 +96,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
                 });
+                setFormValues(initialData)
                 setLoading(false)
             }
         })
@@ -169,6 +173,12 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
         }
     }
 
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
     return (
         <>
             <Dialog
@@ -191,7 +201,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                             : `${isClone ? "Clone" : "Editing"}`
                     }
                     onClose={(e, reason) => {
-                        setShowConfirmDialog(true)
+                        if (isFieldNotTouched(rentalData, formValues)) onClose()
+                        else setShowConfirmDialog(true)
                     }}
                 />
                 {loading || !rentalData.fields.length ? (
@@ -270,6 +281,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                                                                                                 ? val.optionValue
                                                                                                 : ""
                                                                                         );
+                                                                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
 
                                                                                         if (
                                                                                             val &&
@@ -292,6 +304,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                                                                                                             user?.user?._id
                                                                                                     ).optionValue,
                                                                                                 ]);
+                                                                                                handleValuesChange({
+                                                                                                    collaborator: collaboratorData.find(
+                                                                                                        (d) =>
+                                                                                                            d?.optionValue ===
+                                                                                                            user?.user?._id
+                                                                                                    ).optionValue
+                                                                                                })
                                                                                             }
                                                                                         }
                                                                                     }}
@@ -319,7 +338,11 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={collaboratorData}
-                                                                                    setFieldValue={setFieldValue}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
@@ -343,7 +366,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}
-                                                                                    setFieldValue={setFieldValue}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
