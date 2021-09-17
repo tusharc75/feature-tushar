@@ -19,6 +19,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       )}
       <div className={styles.title}>
         <h4
+            className={"cursor-pointer"}
           onClick={() => {
             history.push(`product/details/${product._id}`);
           }}
@@ -33,7 +34,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
           history.push(`product/details/${product._id}`);
         }}
       >
-        {product.productImage ? <img src={product.productImage} alt={product.productName} /> : <BsImage className={styles.no_image} />}
+        {product.productImage ? <img src={product.productImage} alt={product.productName} /> : <BsImage className={`${styles.no_image} cursor-pointer`} />}
       </Box>
 
       <div className={styles.text}>
@@ -59,7 +60,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
           </div>
           <div >
 
-              <Avatar className={styles.cart_icon} onClick={() => onAddItem(product)}>
+              <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => onAddItem(product)}>
                   <MdAddShoppingCart size={18} />
               </Avatar>
           </div>
