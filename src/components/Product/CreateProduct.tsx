@@ -159,6 +159,7 @@ const CreateProduct = (props) => {
                     delete data.fields
                     data.productId = data._id
                     delete data._id
+                    data.isEditable = true
                     addProductInBuilder([data])
                 }
             }).catch((error) => {
