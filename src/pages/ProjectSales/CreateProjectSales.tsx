@@ -63,6 +63,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [formValues, setFormValues] = useState({})
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -125,6 +126,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
               fields: newFields,
               values: getObjKeysWithValues(data, newFields),
             });
+            setFormValues(getObjKeysWithValues(data, newFields))
             setProductSalesName(data.projectName)
 
             if (marketSegmentDropdownData && data.marketSegment) {
@@ -141,6 +143,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
             fields: createFields,
             values: getObjKeys("", createFields),
           });
+          setFormValues(getObjKeys("", createFields))
         }
 
         setTimeout(() => setLoading(false), 500);
@@ -240,13 +243,19 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   const isFieldNotTouched = (initialData, values) => {
     return Object.values(
       simplifyValues(
-        initialData.initialValues,
+        initialData.values,
         initialData.fields
       )
     ).toString() ===
       Object.values(
         simplifyValues(values, initialData.fields)
       ).toString()
+  }
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }))
   }
   return (
     <Dialog
@@ -261,7 +270,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
       fullScreen={isMobile}
     >
       <CustomDialogHeader
-        onClose={() => setShowConfirmDialog(true)}
+        onClose={() => {
+          if (isFieldNotTouched(initialData, formValues)) close()
+          else setShowConfirmDialog(true)
+        }}
         title={`${projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
 
       {loading || !initialData.fields.length ? (
@@ -336,7 +348,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              setFieldValue={setFieldValue}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange({ [name]: value })
+                                                setFieldValue(name, value)
+                                              }}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={field.isTooltip}
@@ -346,6 +361,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                 setNewSubMarketSegmentId(null);
                                                 setFieldValue(formFieldNames.subMarketSegment, "")
+                                                handleValuesChange({
+                                                  [field.fieldName]: val && val.optionValue ? val.optionValue : "",
+                                                  [formFieldNames.subMarketSegment]: ""
+                                                })
                                                 marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"
@@ -421,13 +440,17 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
-                                                setFieldValue={setFieldValue}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange({ [name]: value })
+                                                  setFieldValue(name, value)
+                                                }}
                                                 required={field.required}
                                                 fullWidth
                                                 isTooltip={field.isTooltip}
                                                 tooltipMessage={field.tooltipMessage}
                                                 onChange={(e, val) => {
                                                   setNewSubMarketSegmentId(null);
+                                                  handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                   setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                 }}
                                                 size="small"
@@ -487,7 +510,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -516,6 +542,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                 value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                               );
                                               setFieldValue("projectManager", "");
+                                              handleValuesChange({
+                                                [field.fieldName]: value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [],
+                                                "projectManager": ""
+                                              })
                                             }}
                                           />
                                         ) : field.fieldName === "projectManager" ? (
@@ -542,6 +572,9 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                   ? value.optionValue
                                                   : ""
                                               );
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : ""
+                                              })
                                             }}
                                           />
                                         ) : field.fieldName === "currency" ? (
@@ -556,7 +589,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -568,8 +604,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                                   field.fieldName,
                                                   val.currencyCode
                                                 );
+                                                handleValuesChange({ [field.fieldName]: val.currencyCode })
                                                 setCurrencySymbol(val.symbolNative);
                                               } else {
+                                                handleValuesChange({ [field.fieldName]: "" })
                                                 setFieldValue(field.fieldName, "");
                                                 setCurrencySymbol(null);
                                               }
@@ -599,7 +637,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -616,7 +657,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                                           name={field.fieldName}
                                           type={field.type}
                                           options={field.option}
-                                          setFieldValue={setFieldValue}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
@@ -644,7 +688,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
                             name={field.fieldName}
                             type={field.type}
                             options={field.option}
-                            setFieldValue={setFieldValue}
+                            setFieldValue={(name, value) => {
+                              handleValuesChange({ [name]: value })
+                              setFieldValue(name, value)
+                            }}
                             required={field.required}
                             fullWidth
                             isTooltip={field?.isTooltip || false}

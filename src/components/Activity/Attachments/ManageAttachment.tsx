@@ -75,6 +75,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
     const [attachmentToDelete, setAttachemnetToDelete] = useState("");
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
         fetchAttachmentDetail();
@@ -109,6 +110,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         setOtherAttachments([...otherAttachments, ...filteredAttachments])
                     }
                     setInitialValues(data)
+                    setFormValues(data)
                     setLoading(false);
                     // setInitialValues({ name: data?.name ?? '', fileUrl: data?.fileUrl ?? '' })
                 })
@@ -120,6 +122,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         }
         else {
             setInitialValues({ name: "", fileUrl: "" })
+            setFormValues({ name: "", fileUrl: "" })
         }
     };
 
@@ -303,6 +306,16 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
             }
         </Grid >
     )
+    const isFieldNotTouched = (initialValues, values) => {
+        return (Object.values(initialValues).toString() === Object.values(values).toString())
+
+    }
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
 
     return (initialValues && <Formik initialValues={initialValues}
         validationSchema={AttachmentSchema}
@@ -311,7 +324,8 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
             <>
                 <CustomDialogHeader
                     onClose={() => {
-                        setShowConfirmDialog(true)
+                        if (isFieldNotTouched(initialValues, formValues)) handleClose()
+                        else setShowConfirmDialog(true)
                     }}
                     title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
                 <CustomDialogContent>
@@ -332,7 +346,10 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                         value={values["name"]}
                                         error={touched["name"] && Boolean(errors["name"])}
                                         helperText={touched["name"] && errors["name"]}
-                                        onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
+                                        onChange={(e) => {
+                                            setFieldValue("name", e.target.value.trimStart())
+                                            handleValuesChange({ name: e.target.value.trimStart() })
+                                        }}
                                     />
                                 </Grid>
                                 <Grid container item xs={12}>
@@ -349,6 +366,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                             size="small"
                                             setFieldValue={(fname, file) => {
                                                 setFieldValue("fileUrl", file)
+                                                handleValuesChange({ fileUrl: file })
                                                 onUploadFile(file)
                                             }}
                                             doNotShowUploadedFile={true}
@@ -437,10 +455,12 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 <CustomDialogFooter>
                     <Button color="primary" size="small"
                         onClick={() => {
-                            setShowConfirmDialog(true)
+                            if (isFieldNotTouched(initialValues, values)) handleClose()
+                            else setShowConfirmDialog(true)
                         }}>Cancel</Button>
                     <CustomButton
                         type="button"
+
                         color="primary"
                         disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
                         loading={loading}

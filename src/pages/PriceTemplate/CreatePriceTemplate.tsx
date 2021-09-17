@@ -9,7 +9,7 @@ import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import { object, string } from "yup";
 import TextField from "@material-ui/core/TextField";
-import { camelCase } from "../../constants/helpers";
+import { camelCase, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
@@ -54,6 +54,7 @@ const PriceTemplate = () => {
   const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(null)
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [isFormModified, setIsFormModified] = useState(false)
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
 
   const {
@@ -279,6 +280,29 @@ const PriceTemplate = () => {
       setTemplateField([]);
     }
   };
+  const isFieldNotTouched = (data, values) => {
+    if (isFormModified) {
+      return false
+    }
+    let isModified = Object.values(
+      simplifyValues(
+        data.initialValues,
+        data.fields
+      )
+    ).toString() ===
+      Object.values(
+        simplifyValues(values, data.fields)
+      ).toString()
+    if (isModified) {
+      if (values?.collaborator && !data?.initialValues?.collaborator) {
+        return false
+      }
+      if (values?.collaborator.toString() === data?.initialValues?.collaborator.toString()) {
+        return false
+      }
+    }
+    return isModified
+  }
 
   return (
     <Fragment>
@@ -437,8 +461,13 @@ const PriceTemplate = () => {
                           size="small"
                           variant="contained"
                           onClick={() => {
+
                             if (hasPermissionToUpdate) {
                               setShowConfirmDialog(true)
+                              if (isFieldNotTouched({ initialValues: initialValues, fields: productField }, values)) {
+                                history.push(routes.priceTemplate.path)
+                              }
+                              else setShowConfirmDialog(true)
                             } else {
                               history.push(routes.priceTemplate.path)
                             }
@@ -552,6 +581,7 @@ const PriceTemplate = () => {
                     setDeleteField={setDeleteField}
                     isCustomField={true}
                     extraFields={templateField}
+                    onAddRemoveField={() => setIsFormModified(true)}
                     module="price-template"
                   />
                 </Box>

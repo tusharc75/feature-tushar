@@ -58,6 +58,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [formValues, setFormValues] = useState({})
 
   useEffect(() => {
     fetchTaskDetail();
@@ -69,10 +70,11 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
         .then(({ data }) => {
           setInitialValues(null);
           setInitialValues(data);
+          setFormValues(data)
         })
         .catch((err) => { });
     } else {
-      setInitialValues({
+      let initialData = {
         name: "",
         description: "",
         status: status || "To Do",
@@ -80,7 +82,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
         reporter: user._id,
         startDate: new Date(),
         dueDate: new Date(),
-      });
+      }
+      setInitialValues(initialData);
+      setFormValues(initialData)
     }
   };
 
@@ -116,13 +120,24 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
     }
     return errors;
   }
+  const isFieldNotTouched = (initialValues, values) => {
+    return (Object.values(initialValues).toString() === Object.values(values).toString())
+
+  }
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }))
+  }
 
   return (
     <>
       <CustomDialogHeader
         title={`${id ? "Edit" : "New"} Task`}
         onClose={() => {
-          setShowConfirmDialog(true)
+          if (isFieldNotTouched(initialValues, formValues)) handleClose()
+          else setShowConfirmDialog(true)
         }}
       ></CustomDialogHeader>
       {initialValues ? (
@@ -170,9 +185,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             value={values["name"]}
                             error={touched["name"] && Boolean(errors["name"])}
                             helperText={touched["name"] && errors["name"]}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setFieldValue("name", e.target.value.trimStart())
-                            }
+                              handleValuesChange({ name: e.target.value.trimStart() })
+                            }}
                           />
                           <Box pt={1}>
                             <Field
@@ -185,6 +201,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                               label="Description"
                               name="description"
                               variant="outlined"
+                              onChange={(e) => {
+                                setFieldValue("description", e.target.value)
+                                handleValuesChange({ description: e.target.value })
+                              }}
                             />
                           </Box>
                           <Box pt={1}>
@@ -217,7 +237,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                   errors={errors}
                                   touched={touched}
                                   required={true}
-                                  setFieldValue={setFieldValue}
+                                  setFieldValue={(name, value) => {
+                                    handleValuesChange({ [name]: value })
+                                    setFieldValue(name, value)
+                                  }}
                                   multiple={false}
                                   value={values["assignee"]}
                                 />
@@ -229,7 +252,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                   errors={errors}
                                   touched={touched}
                                   required={true}
-                                  setFieldValue={setFieldValue}
+                                  setFieldValue={(name, value) => {
+                                    handleValuesChange({ [name]: value })
+                                    setFieldValue(name, value)
+                                  }}
                                   multiple={false}
                                   value={values["reporter"]}
                                 />
@@ -355,7 +381,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                   color="primary"
                   size="small"
                   onClick={() => {
-                    setShowConfirmDialog(true)
+                    if (isFieldNotTouched(initialValues, values)) handleClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel
