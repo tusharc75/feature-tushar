@@ -222,12 +222,6 @@ export default function AccountDetailPage(props) {
         }
         else {
           setShowAtLast(false)
-          setFormValues(getObjKeysWithValues(
-            accountData,
-            filteredAccountFields.map((f) => {
-              return f.fieldData;
-            })
-          ))
         }
       }
     }
