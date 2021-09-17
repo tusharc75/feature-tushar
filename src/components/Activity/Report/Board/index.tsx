@@ -118,7 +118,7 @@ const Board = ({ type, filter }) => {
     "Supplier Contact",
     "Lead",
     "Opportunity",
-    "Quotes",
+    "Quote",
     "Rental Management",
     "Loading Ticket",
     "Project Sales",
@@ -128,7 +128,7 @@ const Board = ({ type, filter }) => {
     switch (kebabCase(resource)) {
       case "loading-ticket":
         return "delivery-ticket";
-        case "quotes":
+        case "quote":
           return "quote-builder";
       default:
         return kebabCase(resource);
@@ -172,7 +172,7 @@ const Board = ({ type, filter }) => {
           name: `${data.deliveryJobName}`,
           id: data._id,
         };
-      case "quotes":
+      case "quote":
         return {
           name: `${data.quoteName}`,
           id: data._id,
