@@ -25,7 +25,7 @@ import {
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory, Link } from "react-router-dom";
+import { useParams, useHistory, useLocation, Link } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
@@ -56,6 +56,7 @@ import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityD
 import AssignedEntities from "./AssignedEntities";
 import { isMobile, isTablet } from "react-device-detect";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import UserSetupDialog from "./UserSetupDialog";
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -74,6 +75,9 @@ const UserDetailsPage = () => {
   const classes = useStyles();
   const { id } = useParams();
   const history = useHistory();
+  const location = useLocation();
+  const queryParameter = useLocation().search;
+  const userSetup = new URLSearchParams(queryParameter).get('userSetup');
   const {
     state: { user, permissions },
   }: any = useData();
@@ -114,6 +118,7 @@ const UserDetailsPage = () => {
   const [entities, setEntities] = useState<any[]>([])
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [showActivity, setActivityShow] = useState(true);
+  const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -125,6 +130,7 @@ const UserDetailsPage = () => {
       fetchUserRelatedDetail()
       setCurrentTabIndex(0);
     }
+    userSetup === "true" && setShowSetupUserDialog(true);
     // eslint-disable-next-line
   }, [id]);
 
@@ -452,8 +458,8 @@ const UserDetailsPage = () => {
   return (
     <>
       {openUpdateDialog && (
-        <ManageUserDialog open={openUpdateDialog} close={closeUpdateDialog} onSuccess={(permissions) => {
-          setUserPermissions(permissions);
+        <ManageUserDialog open={openUpdateDialog} close={closeUpdateDialog} onSuccess={(obj) => {
+          setUserPermissions(obj?.permissions);
           setOpenUpdateDialog(false);
           fetchUserData();
         }} userId={userData._id} dataToUpdate={userData} isNew={false} />
@@ -1099,6 +1105,32 @@ const UserDetailsPage = () => {
             history.push(`${routes.userDetail.path}/${id}`)
           }} />
         </FullScreenDialog>
+      }
+      {
+        showSetupUserDialog && 
+        <UserSetupDialog 
+            open = {showSetupUserDialog}
+            close = {() => {
+              history.push({
+                pathname: `/user/detail/${id}`,
+                search:'',
+              });
+              setShowSetupUserDialog(false)
+              
+            }}
+            userIds = {[id]}
+            onSuccess={() => {
+              setShowSetupUserDialog(false)
+              history.push({
+                pathname: `/user/detail/${id}`,
+                search:'',
+              });
+              fetchUserData()
+            }}
+            fetchUsers = {() => fetchUsers()}
+            userList = {userList}
+            selectedRecords={[{...userData}]}
+        />
       }
     </>
   );

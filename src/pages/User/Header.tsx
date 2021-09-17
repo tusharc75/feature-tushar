@@ -26,7 +26,8 @@ const Header = (props) => {
     onEntityRoleRedirectDetailRemove,
     unAssignUsersFromEntity,
     openUserSetupDialog,
-    assignDoaDisabled
+    assignDoaDisabled,
+    userSetupDisabled
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -176,7 +177,7 @@ const Header = (props) => {
 
                 {
                   userPermissions.isUpdate && <MenuItem
-                    disabled={approvalProcessActionDisabled || rolesActionDisabled || assignDoaDisabled}
+                    disabled={userSetupDisabled}
                     onClick={() => {
                       openUserSetupDialog();
                       closeActions();
