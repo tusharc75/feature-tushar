@@ -46,7 +46,6 @@ import { useData } from "../../../StateProvider/Provider";
 import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import { values } from "lodash";
-import { FaLastfmSquare } from "react-icons/fa";
 
 // const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
@@ -333,11 +332,11 @@ export const CreateEmail = ({
 
   const handleDeleteQuoteBuilderAttachment = (data) => {
     let file1 = `${data?.name}-${data?.contentType}`
-    let ans = stateQuoteBuilderAttachments.filter((o) => {
+    let result = stateQuoteBuilderAttachments.filter((o) => {
       let file2 = `${o?.name}-${o?.contentType}`
       return (file1 !== file2)
     })
-    setStateQuoteBuilderAttachments(ans);
+    setStateQuoteBuilderAttachments(result);
   };
 
   const handleDeleteQuoteBuilderOtherAttachment = (name) => {
