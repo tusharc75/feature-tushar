@@ -123,6 +123,11 @@ export const CreateEmail = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [quoteBuilderOtherAttachments, setQuoteBuilderOtherAttachments] = useState([])
   const [formValues, setFormValues] = useState({})
+  const [stateQuoteBuilderAttachments, setStateQuoteBuilderAttachments] = useState([])
+
+  useEffect(() => {
+    setStateQuoteBuilderAttachments(qouteBuilderAttachments)
+  }, [qouteBuilderAttachments])
 
   useEffect(() => {
     fetchEmailDetail();
@@ -242,7 +247,7 @@ export const CreateEmail = ({
       emailSubject: values.name,
       cc: values.cc,
       id: id,
-      attachments: [...qouteBuilderAttachments, ...quoteBuilderOtherAttachments],
+      attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
       eSign: toogle["E-Sign"],
     };
     axiosInstance()
@@ -325,6 +330,21 @@ export const CreateEmail = ({
     );
   };
 
+  const handleDeleteQuoteBuilderAttachment = (data) => {
+    let file1 = `${data?.name}-${data?.contentType}`
+    let result = stateQuoteBuilderAttachments.filter((o) => {
+      let file2 = `${o?.name}-${o?.contentType}`
+      return (file1 !== file2)
+    })
+    setStateQuoteBuilderAttachments(result);
+  };
+
+  const handleDeleteQuoteBuilderOtherAttachment = (name) => {
+    setQuoteBuilderOtherAttachments(
+      quoteBuilderOtherAttachments.filter((o) => o?.name !== name)
+    );
+  };
+
   const getFileIconSrc = (file) => {
     let extension = isQuoteBuilder
       ? file
@@ -354,6 +374,19 @@ export const CreateEmail = ({
                         ? attachment?.name
                         : "Quotation"}
                     </Typography>
+                    <div className={emailStyles.fileOverlay}>
+                      <Typography variant="subtitle2">
+                        {attachment && attachment?.name
+                          ? attachment?.name
+                          : "Quotation"}
+                      </Typography>
+                      <IconButton className={emailStyles.text}>
+                        <DeleteIcon
+                          className={emailStyles.deleteIcon}
+                          onClick={() => handleDeleteQuoteBuilderOtherAttachment(attachment?.name)}
+                        />
+                      </IconButton>
+                    </div>
                   </Paper>
                 </Grid>
               </>
@@ -367,9 +400,9 @@ export const CreateEmail = ({
 
   const renderQuotesFileThumbnails = (
     <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-      {qouteBuilderAttachments && qouteBuilderAttachments.length > 0 ? (
+      {stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
         <>
-          {qouteBuilderAttachments.map((attachment, i) => {
+          {stateQuoteBuilderAttachments.map((attachment, i) => {
             return (
               <>
                 <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
@@ -384,6 +417,19 @@ export const CreateEmail = ({
                         ? attachment?.name
                         : "Quotation"}
                     </Typography>
+                    <div className={emailStyles.fileOverlay}>
+                      <Typography variant="subtitle2">
+                        {attachment && attachment?.name
+                          ? attachment?.name
+                          : "Quotation"}
+                      </Typography>
+                      <IconButton className={emailStyles.text}>
+                        <DeleteIcon
+                          className={emailStyles.deleteIcon}
+                          onClick={() => handleDeleteQuoteBuilderAttachment(attachment)}
+                        />
+                      </IconButton>
+                    </div>
                   </Paper>
                 </Grid>
               </>
@@ -423,7 +469,7 @@ export const CreateEmail = ({
                       </Typography>
                       <IconButton className={emailStyles.text}>
                         {emailId ? (
-                          <a href={`${attachment}`} download={true}>
+                          <a href={`${attachment} `} download={true}>
                             <GoArrowDown color="white" size={21} />
                           </a>
                         ) : (
@@ -434,6 +480,7 @@ export const CreateEmail = ({
                         )}
                       </IconButton>
                     </div>
+
                   </Paper>
                 </Grid>
               </>
@@ -490,7 +537,7 @@ export const CreateEmail = ({
           {[...Array(10).keys()].map((i) => (
             <Typography
               style={{ marginLeft: "20px" }}
-              key={`skeleton${i}`}
+              key={`skeleton${i} `}
               variant="subtitle1"
             >
               <Skeleton animation="wave" />
