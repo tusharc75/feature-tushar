@@ -49,14 +49,10 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                     <ApprovalProcessDialog
                         openApprovalProcessDialog={open}
                         hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
-                        onSuccess={(obj) =>{
-                            
-                            if(obj?.doaSetup){
-                                setActiveStep((prevStep) => prevStep + 1)
-                            }else{
-                                setActiveStep((prevStep) => prevStep + 2)
+                        onSuccess={() =>{
+                                setActiveStep((prevStep) => prevStep + 1)                           
                             }
-                        }}
+                        }
                         handleCloseDialog={close}
                         userIds={userIds}
                         isRenderedFromUserSetUp={true}
