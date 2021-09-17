@@ -435,8 +435,7 @@ const ProjectSalesDetails = () => {
                           onClick={(node) => {
                             if (node && routes[node.route]) {
                               history.push({
-                                pathname: `${routes[node.route].path}/${node.id
-                                  }`,
+                                pathname: `${routes[node.route].path}/${node.redirectId}`,
                               });
                             }
                           }}
