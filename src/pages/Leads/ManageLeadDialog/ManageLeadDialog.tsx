@@ -74,6 +74,7 @@ export default function ManageLeadDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [formValues, setFormValues] = useState({})
 
   useEffect(() => {
     if (isNew) {
@@ -214,6 +215,7 @@ export default function ManageLeadDialog({
               fields: newFields,
               initialValues: getObjKeys("", newFields),
             });
+            setFormValues(getObjKeys("", newFields))
             setTimeout(() => setLoadingData(false), 500);
           } else {
             if (marketSegmentDropdownData) {
@@ -225,6 +227,7 @@ export default function ManageLeadDialog({
               fields: newFields,
               initialValues: getObjKeysWithValues(dataToUpdate, newFields),
             });
+            setFormValues(getObjKeysWithValues(dataToUpdate, newFields))
             setTimeout(() => setLoadingData(false), 500);
           }
         });
@@ -320,6 +323,13 @@ export default function ManageLeadDialog({
     }
   }
 
+  const handleValuesChange = (name, value) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: value
+    }))
+  }
+
   return (
     <>
       <Dialog
@@ -344,7 +354,8 @@ export default function ManageLeadDialog({
                 .join(" ")}`
           }
           onClose={(e, reason) => {
-            setShowConfirmDialog(true)
+            if (isFieldNotTouched(leadData, formValues)) onClose()
+            else setShowConfirmDialog(true)
           }}
         />
 
@@ -401,6 +412,7 @@ export default function ManageLeadDialog({
                                           type={field.type}
                                           options={ownerData}
                                           onChange={(e, val) => {
+                                            handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                             setFieldValue(
                                               field.fieldName,
                                               val && val.optionValue
@@ -429,6 +441,11 @@ export default function ManageLeadDialog({
                                                       user?.user?._id
                                                   ).optionValue,
                                                 ]);
+                                                handleValuesChange("collaborator", collaboratorData.find(
+                                                  (d) =>
+                                                    d?.optionValue ===
+                                                    user?.user?._id
+                                                ).optionValue)
                                               }
                                             }
                                           }}
@@ -456,7 +473,10 @@ export default function ManageLeadDialog({
                                           name={field.fieldName}
                                           type={field.type}
                                           options={collaboratorData}
-                                          setFieldValue={setFieldValue}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange(name, value);
+                                            setFieldValue(name, value)
+                                          }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
@@ -496,15 +516,20 @@ export default function ManageLeadDialog({
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              setFieldValue={setFieldValue}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange(name, value);
+                                                setFieldValue(name, value)
+                                              }}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={field.isTooltip}
                                               tooltipMessage={field.tooltipMessage}
                                               onChange={(e, val) => {
                                                 setNewMarketSegmentId(null);
+                                                handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                 setNewSubMarketSegmentId(null);
+                                                handleValuesChange(formFieldNames.subMarketSegment, "")
                                                 setFieldValue(formFieldNames.subMarketSegment, "")
                                                 marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
@@ -582,7 +607,10 @@ export default function ManageLeadDialog({
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
-                                                setFieldValue={setFieldValue}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange(name, value);
+                                                  setFieldValue(name, value)
+                                                }}
                                                 required={field.required}
                                                 fullWidth
                                                 isTooltip={field.isTooltip}
@@ -590,6 +618,7 @@ export default function ManageLeadDialog({
                                                 onChange={(e, val) => {
                                                   setNewSubMarketSegmentId(null);
                                                   setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                  handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                 }}
                                                 size="small"
                                                 values={
@@ -648,7 +677,10 @@ export default function ManageLeadDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange(name, value);
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}

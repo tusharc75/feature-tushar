@@ -56,6 +56,7 @@ export default function ManageUserDialog({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
+  const [formValues, setFormValues] = useState(dataToUpdate ? dataToUpdate : {})
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -74,6 +75,7 @@ export default function ManageUserDialog({
             ? getObjKeys("", newFields)
             : getObjKeysWithValues(dataToUpdate, newFields),
         });
+        setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields))
 
         setLoading(false);
       })
@@ -172,6 +174,13 @@ export default function ManageUserDialog({
     }
   }
 
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }))
+  }
+
   return (
     <Dialog
       open={open}
@@ -192,7 +201,13 @@ export default function ManageUserDialog({
               .filter((f) => f)
               .join(" ")}`
         }
-        onClose={() => setShowConfirmDialog(true)}
+        onClose={() => {
+          if (isFieldNotTouched({
+            initialValues: initialData.values,
+            fields: initialData.fields
+          }, formValues)) close()
+          else setShowConfirmDialog(true)
+        }}
       />
 
       {loading || !initialData.fields.length ? (
@@ -261,7 +276,10 @@ export default function ManageUserDialog({
                                     name={field.fieldName}
                                     type={field.type}
                                     options={reportsToDataSource}
-                                    setFieldValue={setFieldValue}
+                                    setFieldValue={(name, value) => {
+                                      handleValuesChange({ [name]: value })
+                                      setFieldValue(name, value)
+                                    }}
                                     onChange={(e, val) => {
                                       setFieldValue(
                                         field.fieldName,
@@ -285,7 +303,10 @@ export default function ManageUserDialog({
                                     name={field.fieldName}
                                     type={field.type}
                                     options={field.option}
-                                    setFieldValue={setFieldValue}
+                                    setFieldValue={(name, value) => {
+                                      handleValuesChange({ [name]: value })
+                                      setFieldValue(name, value)
+                                    }}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
@@ -319,7 +340,10 @@ export default function ManageUserDialog({
                   size="small"
                   disabled={isSubmitting || loading}
                   onClick={() => {
-                    if (isFieldNotTouched(initialData, values)) close()
+                    if (isFieldNotTouched({
+                      initialValues: initialData.values,
+                      fields: initialData.fields
+                    }, values)) close()
                     else setShowConfirmDialog(true)
                   }}
                 >
