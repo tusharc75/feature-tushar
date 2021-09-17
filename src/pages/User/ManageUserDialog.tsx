@@ -20,11 +20,13 @@ import {
   yupSchema,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
-  isFieldNotTouched
+  isFieldNotTouched,
+  userType
 } from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { useData } from "../../StateProvider/Provider";
 
 interface InitialData {
   fields: any[];
@@ -40,6 +42,9 @@ export default function ManageUserDialog({
   dataToUpdate,
   redirectToDetailsScreen = true,
 }) {
+  const {
+    state: { user, permissions },
+  }: any = useData();
   const { setToastConfig } = useContext(CustomToastContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
@@ -128,6 +133,7 @@ export default function ManageUserDialog({
           // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
+            search:user?.user?.userType === userType.brandAdmin ? '?userSetup=true':'',
             state: { location: location },
           });
           close();
@@ -150,7 +156,7 @@ export default function ManageUserDialog({
             message: data.message,
           });
           setSubmitting(false);
-          onSuccess(data.permissions);
+          onSuccess(data);
         })
         .catch((error) => {
           setToastConfig(error);

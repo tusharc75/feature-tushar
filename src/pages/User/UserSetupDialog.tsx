@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     Dialog,
     Stepper,
@@ -33,13 +33,14 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const stepsLabel = ["Set Approval Process", "Assign Company Wide Role", "Assign Regional Roles", "Assign DOA"]
+const stepsLabel = ["Set Approval Process", "Assign DOA", "Assign Regional Roles", "Assign Company Wide Role"]
 
 const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
-    const [activeStep, setActiveStep] = useState(0)
-    
     const { state: { user, permissions }, } = useData();
+    const [activeStep, setActiveStep] = useState(0)
     const classes = useStyles();
+
+    
 
     const getStepContent = (step: Number) => {
         switch (step) {
@@ -48,9 +49,9 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                     <ApprovalProcessDialog
                         openApprovalProcessDialog={open}
                         hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
-                        onSuccess={() =>
-                            setActiveStep((prevStep) => prevStep + 1)
-                            
+                        onSuccess={() =>{
+                                setActiveStep((prevStep) => prevStep + 1)                           
+                            }
                         }
                         handleCloseDialog={close}
                         userIds={userIds}
@@ -60,17 +61,20 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
 
             case 1:
                 return (
-                    <AssignRolesDialog
-                        rolesDialogOpen={open}
-                        handleCloseDialog={close}
-                        userIds={userIds}
-                        assignedRoles={null}
+                    <DoaDialog
+                        userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
+                        doa={[]}
+                        doaCurrency={null}
+                        userSelected={userIds}
+                        open={open}
+                        from={"UserListPage"}
                         onSuccess={() => {
                             setActiveStep((prevStep) => prevStep + 1)
-                            
                         }}
+                        onClose={close}
                         isRenderedFromUserSetUp={true}
                     />
+                    
                 )
             case 2:
                 return (
@@ -90,18 +94,16 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                 )
             case 3:
                 return (
-                    <DoaDialog
-                        userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
-                        doa={[]}
-                        doaCurrency={null}
-                        userSelected={userIds}
-                        open={open}
-                        from={"UserListPage"}
+                    <AssignRolesDialog
+                        rolesDialogOpen={open}
+                        handleCloseDialog={close}
+                        userIds={userIds}
+                        assignedRoles={null}
                         onSuccess={() => {
-                            close();
-                            fetchUsers();
+                            close()
+                            fetchUsers()
+
                         }}
-                        onClose={close}
                         isRenderedFromUserSetUp={true}
                     />
                 )
@@ -135,7 +137,6 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         ) : (
                             <div>
                                 <Typography className={classes.instructions}>{getStepContent(activeStep)}</Typography>
-                                
                             </div>
                         )}
                     </div>
