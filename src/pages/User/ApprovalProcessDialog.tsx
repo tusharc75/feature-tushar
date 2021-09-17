@@ -57,7 +57,7 @@ const ApprovalProcessDialog = ({
                     type: "success",
                     message: data.message,
                 });
-                onSuccess()
+                onSuccess(newData)
 
             })
             .catch((err) => {
