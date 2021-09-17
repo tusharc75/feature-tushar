@@ -1116,6 +1116,8 @@ const UserDetailsPage = () => {
                 search:'',
               });
               setShowSetupUserDialog(false)
+              fetchUserData()
+              fetchDoa()
               
             }}
             userIds = {[id]}
@@ -1126,6 +1128,7 @@ const UserDetailsPage = () => {
                 search:'',
               });
               fetchUserData()
+              fetchDoa()
             }}
             fetchUsers = {() => fetchUsers()}
             userList = {userList}
