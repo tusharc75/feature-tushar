@@ -45,11 +45,16 @@
   }
 
   .no_image{
+    transform: scale(1);
+    -webkit-transition: .3s ease-in-out;
+    transition: .3s ease-in-out;
     font-size: 200px;
     padding: 40px;
     color: #d3d6d3;
   }
-  
+  .no_image:hover{
+    transform: scale(1.3);
+  }
   .text {
     //display: flex;
     justify-content: space-between;
@@ -117,5 +122,8 @@
     height: 30px;
     font-size: 10px;
     
+  }
+  .cart_icon:hover{
+    transform: scale(1.1)
   }
 }
