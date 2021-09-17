@@ -431,7 +431,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                 }
                                             }}
                                         >
-                                            {isRenderedFromUserSetUp ? "Save & Finish" : "Save"}
+                                            {isRenderedFromUserSetUp ? "Save & Continue" : "Save"}
                                         </Button>
                                     </CustomDialogFooter>
                                 </>

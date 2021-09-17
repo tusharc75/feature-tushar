@@ -473,12 +473,11 @@ const User: FC = () => {
         });
     }
   }
-
   return (
     <>
       {
         isOpen && (
-          <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { setUserList([]); fetchUsers() }}
+          <ManageUserDialog open={isOpen} close={handleClose} onSuccess={(obj) => { setUserList([]);fetchUsers() }}
             userId={null} dataToUpdate={null} isNew={true} />
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
@@ -629,6 +628,7 @@ const User: FC = () => {
                 setOpenUserSetupDialog(true);
               }}
               assignDoaDisabled={selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
+              userSetupDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
             />
           </div>
 

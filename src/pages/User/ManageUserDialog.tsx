@@ -126,6 +126,7 @@ export default function ManageUserDialog({
           // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
+            search:'?userSetup=true',
             state: { location: location },
           });
           close();
@@ -148,7 +149,7 @@ export default function ManageUserDialog({
             message: data.message,
           });
           setSubmitting(false);
-          onSuccess(data.permissions);
+          onSuccess(data);
         })
         .catch((error) => {
           setToastConfig(error);
