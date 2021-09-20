@@ -177,7 +177,7 @@ export const DropField = ({
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.splice(index + 1, 0, {
           ...fieldData,
-          editable: false,
+          editable: true,
           _id: parseInt((Math.random() * 100000).toString()),
           fieldLabel: fieldData.type,
           fieldName: fieldData.type
